@@ -106,7 +106,7 @@
 
 ## Phase 5: Master Admin Module
 
-- [ ] 5.1. Create Master Admin API routes
+- [x] 5.1. Create Master Admin API routes
   - Files: src/app/api/master/planners/route.ts, src/app/api/master/planners/[id]/route.ts, src/app/api/master/weddings/route.ts, src/app/api/master/analytics/route.ts
   - Implement GET /api/master/planners (list all planners)
   - Implement POST /api/master/planners (create planner)
@@ -118,7 +118,7 @@
   - _Requirements: Requirement 1 (Master Admin Platform Management), Master Admin APIs (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend API Developer with expertise in Next.js App Router and RESTful APIs | Task: Create master admin API routes following RESTful conventions. Implement planner CRUD operations with proper validation (require name, logo_url, email). Implement wedding read-only listing. Add analytics endpoint returning total planners, active planners, total weddings, total guests. Use consistent APIResponse format. Protect all routes with master_admin role check. | Restrictions: Must validate master admin access on every request, implement input validation with Zod, return proper HTTP status codes, never allow master admin to modify weddings directly, implement pagination for list endpoints (50 per page) | Success: All endpoints work correctly with proper authentication, planner enable/disable immediately affects access, weddings display correctly in read-only mode, analytics return accurate counts, proper error handling | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool including all API endpoints created with full specifications, then mark as [x] when complete_
 
-- [ ] 5.2. Create Master Admin UI components and pages
+- [x] 5.2. Create Master Admin UI components and pages
   - Files: src/app/master/page.tsx, src/app/master/planners/page.tsx, src/components/master/PlannerList.tsx, src/components/master/PlannerForm.tsx, src/components/master/WeddingList.tsx, src/components/master/AnalyticsCard.tsx
   - Create master admin dashboard page with analytics
   - Create planner management page with list and form

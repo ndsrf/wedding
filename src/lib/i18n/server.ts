@@ -123,9 +123,10 @@ export async function getLanguageFromRequest(): Promise<Language> {
  * This is used by next-intl to determine the locale for each request
  */
 export default getRequestConfig(async ({ locale }) => {
-  const language = isValidLanguage(locale) ? (locale as Language) : DEFAULT_LANGUAGE;
+  const language = locale && isValidLanguage(locale) ? (locale as Language) : DEFAULT_LANGUAGE;
 
   return {
+    locale: language,
     messages: await loadTranslations(language),
   };
 });
