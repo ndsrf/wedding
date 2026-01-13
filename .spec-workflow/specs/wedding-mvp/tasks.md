@@ -154,7 +154,7 @@
 
 ## Phase 7: Wedding Planner Module
 
-- [ ] 7.1. Create Wedding Planner API routes
+- [x] 7.1. Create Wedding Planner API routes
   - Files: src/app/api/planner/weddings/route.ts, src/app/api/planner/weddings/[id]/route.ts, src/app/api/planner/weddings/[id]/admins/route.ts, src/app/api/planner/stats/route.ts
   - Implement GET /api/planner/weddings (list planner's weddings)
   - Implement POST /api/planner/weddings (create wedding)
@@ -168,7 +168,7 @@
   - _Requirements: Requirement 2 (Wedding Planner Multi-Wedding Management), Planner APIs (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend API Developer with expertise in multi-tenancy and REST APIs | Task: Create planner API routes with proper planner_id filtering. Implement wedding CRUD requiring couple_names, wedding_date, wedding_time, location, rsvp_cutoff_date, default_language, payment_tracking_mode, allow_guest_additions. Implement wedding admin invitation that sends email with OAuth sign-in link and grants access to specific wedding only. Add stats endpoint returning wedding count, total guests, RSVP completion %, upcoming weddings. Ensure all operations filter by session planner_id. | Restrictions: Must filter all queries by planner_id for data isolation, validate required wedding fields, send invitation emails asynchronously, check wedding_id access for admin operations, implement pagination (50 per page), use Zod validation | Success: Planners can only access their own weddings, wedding creation requires all fields, admin invitations send emails correctly, admin access is wedding-specific, stats calculate correctly, proper multi-tenancy isolation | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting all planner APIs with full endpoint specifications, then mark as [x] when complete_
 
-- [ ] 7.2. Create Wedding Planner UI components and pages
+- [x] 7.2. Create Wedding Planner UI components and pages
   - Files: src/app/planner/page.tsx, src/app/planner/weddings/page.tsx, src/app/planner/weddings/[id]/page.tsx, src/components/planner/WeddingCard.tsx, src/components/planner/WeddingForm.tsx, src/components/planner/StatsCard.tsx, src/components/planner/AdminInviteForm.tsx
   - Create planner dashboard with stats and wedding list
   - Create wedding creation/edit form with theme selection

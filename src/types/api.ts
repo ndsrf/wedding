@@ -146,7 +146,7 @@ export interface CreateWeddingRequest {
   rsvp_cutoff_date: string; // ISO date string
   dress_code?: string;
   additional_info?: string;
-  theme_id?: string;
+  theme_id?: string | null;
   payment_tracking_mode: PaymentMode;
   allow_guest_additions: boolean;
   default_language: Language;

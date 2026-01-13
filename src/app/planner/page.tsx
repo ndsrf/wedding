@@ -1,0 +1,202 @@
+/**
+ * Wedding Planner Dashboard Page
+ *
+ * Main dashboard for wedding planners showing statistics and wedding list
+ * Displays wedding count, total guests, RSVP completion, and upcoming weddings
+ */
+
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { requireRole } from '@/src/lib/auth/middleware';
+import { StatsCard } from '@/src/components/planner/StatsCard';
+import { WeddingCard } from '@/src/components/planner/WeddingCard';
+import type { PlannerStats } from '@/src/types/api';
+
+/**
+ * Fetch planner statistics from API
+ */
+async function getStats(): Promise<PlannerStats | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  try {
+    const response = await fetch(`${baseUrl}/api/planner/stats`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    return null;
+  }
+}
+
+export default async function PlannerDashboardPage() {
+  // Check authentication - redirect if not planner
+  try {
+    await requireRole('planner');
+  } catch {
+    redirect('/api/auth/signin');
+  }
+
+  // Fetch stats data
+  const stats = await getStats();
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Planner Dashboard</h1>
+              <p className="mt-1 text-sm text-gray-500">Manage your weddings and view statistics</p>
+            </div>
+            <Link
+              href="/planner/weddings?action=create"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Create Wedding
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Statistics Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+            <StatsCard
+              title="Total Weddings"
+              value={stats.wedding_count}
+              colorClass="bg-purple-50 border-purple-200"
+            />
+            <StatsCard
+              title="Total Guests"
+              value={stats.total_guests}
+              colorClass="bg-blue-50 border-blue-200"
+            />
+            <StatsCard
+              title="RSVP Completion"
+              value={stats.rsvp_completion_percentage}
+              suffix="%"
+              colorClass="bg-green-50 border-green-200"
+            />
+          </div>
+        )}
+
+        {/* Upcoming Weddings */}
+        {stats && stats.upcoming_weddings.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Weddings</h2>
+            <div className="grid grid-cols-1 gap-6">
+              {stats.upcoming_weddings.map((wedding) => (
+                <WeddingCard
+                  key={wedding.id}
+                  wedding={{
+                    ...wedding,
+                    guest_count: 0,
+                    rsvp_count: 0,
+                    rsvp_completion_percentage: 0,
+                    attending_count: 0,
+                    payment_received_count: 0,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Links */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Link
+              href="/planner/weddings"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+            >
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-purple-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-sm font-medium text-gray-900">All Weddings</h3>
+                <p className="mt-1 text-sm text-gray-500">View and manage all your weddings</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/planner/weddings?action=create"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+            >
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-sm font-medium text-gray-900">Create Wedding</h3>
+                <p className="mt-1 text-sm text-gray-500">Set up a new wedding event</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Empty State */}
+        {stats && stats.wedding_count === 0 && (
+          <div className="bg-white shadow rounded-lg p-12 text-center mt-8">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"
+              />
+            </svg>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No weddings yet</h3>
+            <p className="mt-1 text-sm text-gray-500">Get started by creating your first wedding.</p>
+            <div className="mt-6">
+              <Link
+                href="/planner/weddings?action=create"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Create Wedding
+              </Link>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

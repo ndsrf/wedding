@@ -1,0 +1,393 @@
+/**
+ * Wedding Planner - Single Wedding API Routes
+ *
+ * GET /api/planner/weddings/:id - Get wedding details
+ * PATCH /api/planner/weddings/:id - Update wedding
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { prisma } from '@/lib/db/prisma';
+import { requireRole } from '@/src/lib/auth/middleware';
+import type {
+  APIResponse,
+  GetWeddingResponse,
+  UpdateWeddingResponse,
+  UpdateWeddingRequest,
+} from '@/src/types/api';
+import { API_ERROR_CODES } from '@/src/types/api';
+import { Language, PaymentMode } from '@prisma/client';
+
+// Validation schema for updating a wedding
+const updateWeddingSchema = z
+  .object({
+    couple_names: z.string().min(1, 'Couple names are required').optional(),
+    wedding_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional(),
+    wedding_time: z.string().min(1, 'Wedding time is required').optional(),
+    location: z.string().min(1, 'Location is required').optional(),
+    rsvp_cutoff_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional(),
+    dress_code: z.string().optional(),
+    additional_info: z.string().optional(),
+    theme_id: z.string().uuid('Invalid theme ID').nullable().optional(),
+    payment_tracking_mode: z.nativeEnum(PaymentMode).optional(),
+    allow_guest_additions: z.boolean().optional(),
+    default_language: z.nativeEnum(Language).optional(),
+  })
+  .partial();
+
+/**
+ * GET /api/planner/weddings/:id
+ * Get details for a specific wedding
+ */
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Check authentication and require planner role
+    const user = await requireRole('planner');
+
+    if (!user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner ID not found in session',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    const { id: weddingId } = await params;
+
+    // Fetch wedding with relations
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        theme: true,
+        planner: true,
+        wedding_admins: true,
+        _count: {
+          select: {
+            families: true,
+          },
+        },
+      },
+    });
+
+    if (!wedding) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.NOT_FOUND,
+          message: 'Wedding not found',
+        },
+      };
+      return NextResponse.json(response, { status: 404 });
+    }
+
+    // Check if wedding belongs to this planner
+    if (wedding.planner_id !== user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'You do not have access to this wedding',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Calculate stats
+    const families = await prisma.family.findMany({
+      where: { wedding_id: wedding.id },
+      include: {
+        members: true,
+        gifts: true,
+      },
+    });
+
+    const guest_count = families.reduce((sum, family) => sum + family.members.length, 0);
+    const rsvp_count = families.filter((family) =>
+      family.members.some((member) => member.attending !== null)
+    ).length;
+    const rsvp_completion_percentage =
+      families.length > 0 ? Math.round((rsvp_count / families.length) * 100) : 0;
+    const attending_count = families.reduce(
+      (sum, family) => sum + family.members.filter((member) => member.attending === true).length,
+      0
+    );
+    const payment_received_count = families.filter((family) =>
+      family.gifts.some((gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED')
+    ).length;
+
+    const weddingWithStats = {
+      id: wedding.id,
+      planner_id: wedding.planner_id,
+      theme_id: wedding.theme_id,
+      couple_names: wedding.couple_names,
+      wedding_date: wedding.wedding_date,
+      wedding_time: wedding.wedding_time,
+      location: wedding.location,
+      rsvp_cutoff_date: wedding.rsvp_cutoff_date,
+      dress_code: wedding.dress_code,
+      additional_info: wedding.additional_info,
+      payment_tracking_mode: wedding.payment_tracking_mode,
+      allow_guest_additions: wedding.allow_guest_additions,
+      default_language: wedding.default_language,
+      status: wedding.status,
+      created_at: wedding.created_at,
+      created_by: wedding.created_by,
+      updated_at: wedding.updated_at,
+      updated_by: wedding.updated_by,
+      guest_count,
+      rsvp_count,
+      rsvp_completion_percentage,
+      attending_count,
+      payment_received_count,
+    };
+
+    const response: GetWeddingResponse = {
+      success: true,
+      data: weddingWithStats,
+    };
+
+    return NextResponse.json(response, { status: 200 });
+  } catch (error: unknown) {
+    // Handle authentication errors
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage.includes('UNAUTHORIZED')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.UNAUTHORIZED,
+          message: 'Authentication required',
+        },
+      };
+      return NextResponse.json(response, { status: 401 });
+    }
+
+    if (errorMessage.includes('FORBIDDEN')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner role required',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Handle unexpected errors
+    console.error('Error fetching wedding:', error);
+    const response: APIResponse = {
+      success: false,
+      error: {
+        code: API_ERROR_CODES.INTERNAL_ERROR,
+        message: 'Failed to fetch wedding',
+      },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/planner/weddings/:id
+ * Update a wedding
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Check authentication and require planner role
+    const user = await requireRole('planner');
+
+    if (!user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner ID not found in session',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    const { id: weddingId } = await params;
+
+    // Check if wedding exists and belongs to this planner
+    const existingWedding = await prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!existingWedding) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.NOT_FOUND,
+          message: 'Wedding not found',
+        },
+      };
+      return NextResponse.json(response, { status: 404 });
+    }
+
+    if (existingWedding.planner_id !== user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'You do not have access to this wedding',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validatedData: UpdateWeddingRequest = updateWeddingSchema.parse(body);
+
+    // Validate theme_id if provided
+    if (validatedData.theme_id !== undefined) {
+      if (validatedData.theme_id !== null) {
+        const theme = await prisma.theme.findUnique({
+          where: { id: validatedData.theme_id },
+        });
+
+        if (!theme) {
+          const response: APIResponse = {
+            success: false,
+            error: {
+              code: API_ERROR_CODES.NOT_FOUND,
+              message: 'Theme not found',
+            },
+          };
+          return NextResponse.json(response, { status: 404 });
+        }
+
+        // Check if theme belongs to this planner or is a system theme
+        if (!theme.is_system_theme && theme.planner_id !== user.planner_id) {
+          const response: APIResponse = {
+            success: false,
+            error: {
+              code: API_ERROR_CODES.FORBIDDEN,
+              message: 'You do not have access to this theme',
+            },
+          };
+          return NextResponse.json(response, { status: 403 });
+        }
+      }
+    }
+
+    // Validate dates if provided
+    if (validatedData.wedding_date || validatedData.rsvp_cutoff_date) {
+      const weddingDate = validatedData.wedding_date
+        ? new Date(validatedData.wedding_date)
+        : existingWedding.wedding_date;
+      const rsvpCutoffDate = validatedData.rsvp_cutoff_date
+        ? new Date(validatedData.rsvp_cutoff_date)
+        : existingWedding.rsvp_cutoff_date;
+
+      if (rsvpCutoffDate >= weddingDate) {
+        const response: APIResponse = {
+          success: false,
+          error: {
+            code: API_ERROR_CODES.VALIDATION_ERROR,
+            message: 'RSVP cutoff date must be before the wedding date',
+          },
+        };
+        return NextResponse.json(response, { status: 400 });
+      }
+    }
+
+    // Build update data - Convert date strings to Date objects for Prisma
+    const { wedding_date, rsvp_cutoff_date, ...restData } = validatedData;
+
+    const updateData: Partial<{
+      couple_names: string;
+      wedding_date: Date;
+      wedding_time: string;
+      location: string;
+      rsvp_cutoff_date: Date;
+      dress_code: string;
+      additional_info: string;
+      theme_id: string | null;
+      payment_tracking_mode: PaymentMode;
+      allow_guest_additions: boolean;
+      default_language: Language;
+      updated_by: string;
+    }> = {
+      ...restData,
+      updated_by: user.id,
+    };
+
+    // Convert date strings to Date objects
+    if (wedding_date) {
+      updateData.wedding_date = new Date(wedding_date);
+    }
+    if (rsvp_cutoff_date) {
+      updateData.rsvp_cutoff_date = new Date(rsvp_cutoff_date);
+    }
+
+    // Update the wedding
+    const wedding = await prisma.wedding.update({
+      where: { id: weddingId },
+      data: updateData,
+    });
+
+    const response: UpdateWeddingResponse = {
+      success: true,
+      data: wedding,
+    };
+
+    return NextResponse.json(response, { status: 200 });
+  } catch (error: unknown) {
+    // Handle authentication errors
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage.includes('UNAUTHORIZED')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.UNAUTHORIZED,
+          message: 'Authentication required',
+        },
+      };
+      return NextResponse.json(response, { status: 401 });
+    }
+
+    if (errorMessage.includes('FORBIDDEN')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner role required',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.VALIDATION_ERROR,
+          message: 'Invalid request data',
+          details: error.errors,
+        },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // Handle unexpected errors
+    console.error('Error updating wedding:', error);
+    const response: APIResponse = {
+      success: false,
+      error: {
+        code: API_ERROR_CODES.INTERNAL_ERROR,
+        message: 'Failed to update wedding',
+      },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}

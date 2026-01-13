@@ -1,0 +1,369 @@
+/**
+ * Wedding Planner - Weddings API Routes
+ *
+ * GET /api/planner/weddings - List planner's weddings (paginated)
+ * POST /api/planner/weddings - Create a new wedding
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { prisma } from '@/lib/db/prisma';
+import { requireRole } from '@/src/lib/auth/middleware';
+import type {
+  APIResponse,
+  ListPlannerWeddingsResponse,
+  CreateWeddingResponse,
+  CreateWeddingRequest,
+} from '@/src/types/api';
+import { API_ERROR_CODES } from '@/src/types/api';
+import { Language, PaymentMode, WeddingStatus } from '@prisma/client';
+
+// Validation schema for creating a wedding
+const createWeddingSchema = z.object({
+  couple_names: z.string().min(1, 'Couple names are required'),
+  wedding_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+  wedding_time: z.string().min(1, 'Wedding time is required'),
+  location: z.string().min(1, 'Location is required'),
+  rsvp_cutoff_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+  dress_code: z.string().optional(),
+  additional_info: z.string().optional(),
+  theme_id: z.string().uuid('Invalid theme ID').optional(),
+  payment_tracking_mode: z.nativeEnum(PaymentMode),
+  allow_guest_additions: z.boolean(),
+  default_language: z.nativeEnum(Language),
+});
+
+// Validation schema for query parameters
+const listWeddingsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(50),
+  status: z.string().optional(),
+});
+
+/**
+ * GET /api/planner/weddings
+ * List all weddings for the authenticated planner
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Check authentication and require planner role
+    const user = await requireRole('planner');
+
+    if (!user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner ID not found in session',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Parse and validate query parameters
+    const { searchParams } = new URL(request.url);
+    const queryParams = listWeddingsQuerySchema.parse({
+      page: searchParams.get('page') || 1,
+      limit: searchParams.get('limit') || 50,
+      status: searchParams.get('status') || undefined,
+    });
+
+    const { page, limit, status } = queryParams;
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where: { planner_id: string; status?: WeddingStatus } = {
+      planner_id: user.planner_id,
+    };
+
+    if (status) {
+      where.status = status.toUpperCase() as WeddingStatus;
+    }
+
+    // Get total count for pagination
+    const total = await prisma.wedding.count({ where });
+
+    // Fetch weddings with pagination and include stats
+    const weddings = await prisma.wedding.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        wedding_date: 'asc',
+      },
+      include: {
+        theme: true,
+        planner: true,
+        _count: {
+          select: {
+            families: true,
+            wedding_admins: true,
+          },
+        },
+      },
+    });
+
+    // Calculate stats for each wedding
+    const weddingsWithStats = await Promise.all(
+      weddings.map(async (wedding) => {
+        // Get RSVP stats
+        const families = await prisma.family.findMany({
+          where: { wedding_id: wedding.id },
+          include: {
+            members: true,
+            gifts: true,
+          },
+        });
+
+        const guest_count = families.reduce((sum, family) => sum + family.members.length, 0);
+        const rsvp_count = families.filter((family) =>
+          family.members.some((member) => member.attending !== null)
+        ).length;
+        const rsvp_completion_percentage =
+          families.length > 0 ? Math.round((rsvp_count / families.length) * 100) : 0;
+        const attending_count = families.reduce(
+          (sum, family) => sum + family.members.filter((member) => member.attending === true).length,
+          0
+        );
+        const payment_received_count = families.filter((family) =>
+          family.gifts.some((gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED')
+        ).length;
+
+        return {
+          id: wedding.id,
+          planner_id: wedding.planner_id,
+          theme_id: wedding.theme_id,
+          couple_names: wedding.couple_names,
+          wedding_date: wedding.wedding_date,
+          wedding_time: wedding.wedding_time,
+          location: wedding.location,
+          rsvp_cutoff_date: wedding.rsvp_cutoff_date,
+          dress_code: wedding.dress_code,
+          additional_info: wedding.additional_info,
+          payment_tracking_mode: wedding.payment_tracking_mode,
+          allow_guest_additions: wedding.allow_guest_additions,
+          default_language: wedding.default_language,
+          status: wedding.status,
+          created_at: wedding.created_at,
+          created_by: wedding.created_by,
+          updated_at: wedding.updated_at,
+          updated_by: wedding.updated_by,
+          guest_count,
+          rsvp_count,
+          rsvp_completion_percentage,
+          attending_count,
+          payment_received_count,
+        };
+      })
+    );
+
+    const response: ListPlannerWeddingsResponse = {
+      success: true,
+      data: {
+        items: weddingsWithStats,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+    };
+
+    return NextResponse.json(response, { status: 200 });
+  } catch (error: unknown) {
+    // Handle authentication errors
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage.includes('UNAUTHORIZED')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.UNAUTHORIZED,
+          message: 'Authentication required',
+        },
+      };
+      return NextResponse.json(response, { status: 401 });
+    }
+
+    if (errorMessage.includes('FORBIDDEN')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner role required',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.VALIDATION_ERROR,
+          message: 'Invalid query parameters',
+          details: error.errors,
+        },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // Handle unexpected errors
+    console.error('Error fetching weddings:', error);
+    const response: APIResponse = {
+      success: false,
+      error: {
+        code: API_ERROR_CODES.INTERNAL_ERROR,
+        message: 'Failed to fetch weddings',
+      },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/planner/weddings
+ * Create a new wedding
+ */
+export async function POST(request: NextRequest) {
+  try {
+    // Check authentication and require planner role
+    const user = await requireRole('planner');
+
+    if (!user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner ID not found in session',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validatedData: CreateWeddingRequest = createWeddingSchema.parse(body);
+
+    // Validate theme_id if provided
+    if (validatedData.theme_id) {
+      const theme = await prisma.theme.findUnique({
+        where: { id: validatedData.theme_id },
+      });
+
+      if (!theme) {
+        const response: APIResponse = {
+          success: false,
+          error: {
+            code: API_ERROR_CODES.NOT_FOUND,
+            message: 'Theme not found',
+          },
+        };
+        return NextResponse.json(response, { status: 404 });
+      }
+
+      // Check if theme belongs to this planner or is a system theme
+      if (!theme.is_system_theme && theme.planner_id !== user.planner_id) {
+        const response: APIResponse = {
+          success: false,
+          error: {
+            code: API_ERROR_CODES.FORBIDDEN,
+            message: 'You do not have access to this theme',
+          },
+        };
+        return NextResponse.json(response, { status: 403 });
+      }
+    }
+
+    // Validate dates
+    const weddingDate = new Date(validatedData.wedding_date);
+    const rsvpCutoffDate = new Date(validatedData.rsvp_cutoff_date);
+
+    if (rsvpCutoffDate >= weddingDate) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.VALIDATION_ERROR,
+          message: 'RSVP cutoff date must be before the wedding date',
+        },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // Create the wedding
+    const wedding = await prisma.wedding.create({
+      data: {
+        planner_id: user.planner_id,
+        couple_names: validatedData.couple_names,
+        wedding_date: weddingDate,
+        wedding_time: validatedData.wedding_time,
+        location: validatedData.location,
+        rsvp_cutoff_date: rsvpCutoffDate,
+        dress_code: validatedData.dress_code,
+        additional_info: validatedData.additional_info,
+        theme_id: validatedData.theme_id,
+        payment_tracking_mode: validatedData.payment_tracking_mode,
+        allow_guest_additions: validatedData.allow_guest_additions,
+        default_language: validatedData.default_language,
+        status: 'ACTIVE',
+        created_by: user.id,
+      },
+    });
+
+    const response: CreateWeddingResponse = {
+      success: true,
+      data: wedding,
+    };
+
+    return NextResponse.json(response, { status: 201 });
+  } catch (error: unknown) {
+    // Handle authentication errors
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage.includes('UNAUTHORIZED')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.UNAUTHORIZED,
+          message: 'Authentication required',
+        },
+      };
+      return NextResponse.json(response, { status: 401 });
+    }
+
+    if (errorMessage.includes('FORBIDDEN')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner role required',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.VALIDATION_ERROR,
+          message: 'Invalid request data',
+          details: error.errors,
+        },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // Handle unexpected errors
+    console.error('Error creating wedding:', error);
+    const response: APIResponse = {
+      success: false,
+      error: {
+        code: API_ERROR_CODES.INTERNAL_ERROR,
+        message: 'Failed to create wedding',
+      },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}
