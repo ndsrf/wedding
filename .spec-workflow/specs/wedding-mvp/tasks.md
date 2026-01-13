@@ -52,7 +52,7 @@
 
 ## Phase 3: Authentication System
 
-- [ ] 3.1. Configure NextAuth.js for OAuth providers
+- [x] 3.1. Configure NextAuth.js for OAuth providers
   - Files: src/app/api/auth/[...nextauth]/route.ts, src/lib/auth/oauth.ts, config/master-admin.json
   - Set up NextAuth.js with Google, Facebook, Apple providers
   - Configure callbacks for user session management
@@ -62,7 +62,7 @@
   - _Requirements: Requirement 1 (Master Admin), Requirement 2 (Planner), Requirement 3 (Wedding Admin), Authentication Flows (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Security Engineer with expertise in OAuth and NextAuth.js | Task: Configure NextAuth.js with Google, Facebook/Instagram, and Apple OAuth providers. Implement signin, jwt, and session callbacks to create AuthenticatedUser objects with proper role detection (master_admin checks config/master-admin.json, wedding_admin checks database invitation). Store preferred_language and last_login_provider in user records. | Restrictions: Must use state parameter for CSRF protection, implement provider verification for master admin email, never cache master admin verification (check every login), handle OAuth errors gracefully | Success: All three OAuth providers work correctly, proper user role assignment, session includes user context (role, wedding_id, planner_id), master admin access controlled by config file | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool including authentication endpoints and integration patterns, then mark as [x] when complete_
 
-- [ ] 3.2. Implement magic link generation and validation
+- [x] 3.2. Implement magic link generation and validation
   - Files: src/lib/auth/magic-link.ts
   - Create functions to generate secure magic tokens
   - Implement token validation logic
@@ -72,7 +72,7 @@
   - _Requirements: Requirement 4 (Magic Link Authentication), Magic Link Security (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Security Developer specializing in authentication and cryptography | Task: Create magic link utilities including generateMagicLink(family_id: string) that creates cryptographically secure UUID v4 tokens, and validateMagicLink(token: string) that returns Family data if valid. Tokens should be stored in family.magic_token field and remain valid until wedding date. Support channel parameter (whatsapp/email/sms) in magic link URLs. | Restrictions: Must use crypto.randomUUID() for secure tokens, never use sequential IDs or timestamps, tokens must be unique and unpredictable, validate token format before database query | Success: Tokens are cryptographically secure UUIDs, validation correctly returns family or null, channel tracking works via URL parameters, tokens persist until wedding date | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool including function signatures and security measures, then mark as [x] when complete_
 
-- [ ] 3.3. Create authentication middleware
+- [x] 3.3. Create authentication middleware
   - Files: src/middleware.ts, src/lib/auth/middleware.ts
   - Implement Next.js middleware for route protection
   - Create role-based access control helpers
