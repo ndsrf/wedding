@@ -2,7 +2,7 @@
 
 ## Phase 1: Project Setup & Infrastructure
 
-- [-] 1.1. Initialize Next.js 14+ project with TypeScript and App Router
+- [x] 1.1. Initialize Next.js 14+ project with TypeScript and App Router
   - Files: package.json, tsconfig.json, next.config.js, .env.example
   - Initialize Next.js project with TypeScript, configure App Router
   - Set up environment variables structure
@@ -11,7 +11,7 @@
   - _Requirements: Technical Standards (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Senior Full-stack Developer with expertise in Next.js and TypeScript | Task: Initialize a Next.js 14+ project with TypeScript and App Router, following the project structure defined in the design document. Set up environment variables for database, OAuth providers, and external services. | Restrictions: Must use Next.js App Router (not Pages Router), TypeScript strict mode enabled, create comprehensive .env.example with all required variables | Success: Next.js project initializes without errors, App Router configured correctly, TypeScript compiles successfully, environment variables documented in .env.example | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool including all artifacts (files created, configuration details), then mark as [x] when complete_
 
-- [ ] 1.2. Set up Prisma ORM with PostgreSQL schema
+- [x] 1.2. Set up Prisma ORM with PostgreSQL schema
   - Files: prisma/schema.prisma, .env
   - Create complete database schema with all models, enums, and relationships
   - Configure Prisma client generation
@@ -20,7 +20,7 @@
   - _Requirements: Data Models section (Design doc), Requirements 1-12_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Database Architect with expertise in PostgreSQL and Prisma ORM | Task: Create comprehensive Prisma schema including all models (MasterAdmin, WeddingPlanner, Wedding, WeddingAdmin, Family, FamilyMember, TrackingEvent, Gift, Notification, Translation, Theme) with proper relationships, indexes, and constraints as defined in the design document. | Restrictions: Must include all enums (Language, AuthProvider, PaymentMode, etc.), add proper indexes for performance, ensure cascade deletes are configured correctly for multi-tenancy | Success: Prisma schema compiles without errors, all relationships defined correctly, indexes on foreign keys and frequently queried fields, migrations can be generated | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool including database schema artifacts, then mark as [x] when complete_
 
-- [ ] 1.3. Create project directory structure
+- [x] 1.3. Create project directory structure
   - Files: src/app/, src/components/, src/lib/, src/types/, prisma/, public/locales/, config/, tests/
   - Set up complete directory structure following design document
   - Create placeholder index files in each directory
@@ -29,7 +29,7 @@
   - _Requirements: Technical Standards (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Software Architect specializing in project organization and code structure | Task: Create the complete directory structure as specified in the design document, including app/, components/, lib/, types/, prisma/, public/locales/, config/, and tests/ directories with appropriate subdirectories. Create placeholder README.md or index.ts files in each directory to document its purpose. | Restrictions: Must follow exact structure from design document, create subdirectories for master/, planner/, admin/, guest/ in both app/ and components/, ensure proper separation between API routes and UI | Success: All directories created with clear organization, placeholder files help developers understand structure, follows design document exactly | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting directory structure, then mark as [x] when complete_
 
-- [ ] 1.4. Set up Prisma client singleton and database utilities
+- [x] 1.4. Set up Prisma client singleton and database utilities
   - Files: src/lib/db/prisma.ts, src/lib/db/middleware.ts
   - Create Prisma client singleton with connection pooling
   - Implement Prisma middleware for multi-tenancy (wedding_id filtering)

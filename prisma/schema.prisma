@@ -1,0 +1,340 @@
+// Wedding Management Platform - Database Schema
+// Multi-tenant architecture with data isolation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum Language {
+  ES // Spanish (default)
+  EN // English
+  FR // French
+  IT // Italian
+  DE // German
+}
+
+enum AuthProvider {
+  GOOGLE
+  FACEBOOK
+  INSTAGRAM
+  APPLE
+  MICROSOFT
+}
+
+enum PaymentMode {
+  AUTOMATED // Auto-match payments with reference codes
+  MANUAL // Manual payment tracking
+}
+
+enum WeddingStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum MemberType {
+  ADULT
+  CHILD
+  INFANT
+}
+
+enum EventType {
+  LINK_OPENED
+  RSVP_STARTED
+  RSVP_SUBMITTED
+  RSVP_UPDATED
+  GUEST_ADDED
+  PAYMENT_RECEIVED
+  REMINDER_SENT
+}
+
+enum Channel {
+  WHATSAPP
+  EMAIL
+  SMS
+}
+
+enum GiftStatus {
+  PENDING // Payment pending
+  RECEIVED // Payment received, not confirmed
+  CONFIRMED // Payment confirmed by admin
+}
+
+enum TranslationContext {
+  ADMIN
+  GUEST
+  PLANNER
+  MASTER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ============================================================================
+// PLATFORM MANAGEMENT
+// ============================================================================
+
+model MasterAdmin {
+  id                 String   @id @default(uuid())
+  email              String   @unique
+  name               String
+  preferred_language Language @default(EN)
+  created_at         DateTime @default(now())
+
+  @@map("master_admins")
+}
+
+model WeddingPlanner {
+  id                  String             @id @default(uuid())
+  email               String             @unique
+  name                String
+  google_id           String?            @unique
+  auth_provider       AuthProvider
+  last_login_provider AuthProvider?
+  preferred_language  Language           @default(EN)
+  logo_url            String?
+  enabled             Boolean            @default(true)
+  subscription_status SubscriptionStatus @default(ACTIVE)
+  created_at          DateTime           @default(now())
+  created_by          String
+  last_login_at       DateTime?
+
+  weddings Wedding[]
+  themes   Theme[]
+
+  @@index([enabled])
+  @@map("wedding_planners")
+}
+
+// ============================================================================
+// THEME SYSTEM
+// ============================================================================
+
+model Theme {
+  id                String   @id @default(uuid())
+  planner_id        String?
+  name              String
+  description       String
+  is_default        Boolean  @default(false)
+  is_system_theme   Boolean  @default(false)
+  config            Json // ThemeConfig JSON object
+  preview_image_url String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  planner  WeddingPlanner? @relation(fields: [planner_id], references: [id], onDelete: SetNull)
+  weddings Wedding[]
+
+  @@index([planner_id])
+  @@index([is_system_theme])
+  @@map("themes")
+}
+
+// ============================================================================
+// WEDDING MANAGEMENT
+// ============================================================================
+
+model Wedding {
+  id                    String        @id @default(uuid())
+  planner_id            String
+  theme_id              String?
+  couple_names          String
+  wedding_date          DateTime
+  wedding_time          String
+  location              String
+  rsvp_cutoff_date      DateTime
+  dress_code            String?
+  additional_info       String?
+  payment_tracking_mode PaymentMode   @default(MANUAL)
+  allow_guest_additions Boolean       @default(true)
+  default_language      Language      @default(ES)
+  status                WeddingStatus @default(ACTIVE)
+  created_at            DateTime      @default(now())
+  created_by            String
+  updated_at            DateTime      @updatedAt
+  updated_by            String?
+
+  planner         WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  theme           Theme?          @relation(fields: [theme_id], references: [id], onDelete: SetNull)
+  wedding_admins  WeddingAdmin[]
+  families        Family[]
+  tracking_events TrackingEvent[]
+  notifications   Notification[]
+
+  @@index([planner_id])
+  @@index([theme_id])
+  @@index([status])
+  @@index([wedding_date])
+  @@map("weddings")
+}
+
+model WeddingAdmin {
+  id                  String        @id @default(uuid())
+  email               String
+  name                String
+  google_id           String?
+  auth_provider       AuthProvider
+  last_login_provider AuthProvider?
+  preferred_language  Language      @default(EN)
+  wedding_id          String
+  invited_by          String
+  invited_at          DateTime      @default(now())
+  accepted_at         DateTime?
+  last_login_at       DateTime?
+  created_at          DateTime      @default(now())
+
+  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@unique([email, wedding_id])
+  @@index([wedding_id])
+  @@index([email])
+  @@map("wedding_admins")
+}
+
+// ============================================================================
+// GUEST MANAGEMENT
+// ============================================================================
+
+model Family {
+  id                 String   @id @default(uuid())
+  wedding_id         String
+  name               String
+  email              String?
+  phone              String?
+  whatsapp_number    String?
+  magic_token        String   @unique @default(uuid())
+  reference_code     String?  @unique
+  channel_preference Channel?
+  preferred_language Language @default(ES)
+  created_at         DateTime @default(now())
+
+  wedding         Wedding         @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  members         FamilyMember[]
+  tracking_events TrackingEvent[]
+  gifts           Gift[]
+  notifications   Notification[]
+
+  @@index([wedding_id])
+  @@index([magic_token])
+  @@index([reference_code])
+  @@index([email])
+  @@map("families")
+}
+
+model FamilyMember {
+  id                   String     @id @default(uuid())
+  family_id            String
+  name                 String
+  type                 MemberType
+  attending            Boolean?
+  age                  Int?
+  dietary_restrictions String?
+  accessibility_needs  String?
+  added_by_guest       Boolean    @default(false)
+  created_at           DateTime   @default(now())
+
+  family Family @relation(fields: [family_id], references: [id], onDelete: Cascade)
+
+  @@index([family_id])
+  @@index([added_by_guest])
+  @@map("family_members")
+}
+
+// ============================================================================
+// TRACKING & NOTIFICATIONS
+// ============================================================================
+
+model TrackingEvent {
+  id              String    @id @default(uuid())
+  family_id       String
+  wedding_id      String
+  event_type      EventType
+  channel         Channel?
+  metadata        Json?
+  admin_triggered Boolean   @default(false)
+  timestamp       DateTime  @default(now())
+
+  family  Family  @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@index([family_id])
+  @@index([wedding_id])
+  @@index([event_type])
+  @@index([timestamp])
+  @@map("tracking_events")
+}
+
+model Notification {
+  id         String    @id @default(uuid())
+  wedding_id String
+  family_id  String?
+  event_type EventType
+  channel    Channel?
+  details    Json
+  read       Boolean   @default(false)
+  read_at    DateTime?
+  admin_id   String
+  created_at DateTime  @default(now())
+
+  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  family  Family? @relation(fields: [family_id], references: [id], onDelete: Cascade)
+
+  @@index([wedding_id])
+  @@index([admin_id])
+  @@index([read])
+  @@index([created_at])
+  @@map("notifications")
+}
+
+// ============================================================================
+// PAYMENT TRACKING
+// ============================================================================
+
+model Gift {
+  id                  String     @id @default(uuid())
+  family_id           String
+  wedding_id          String
+  amount              Decimal    @db.Decimal(10, 2)
+  reference_code_used String?
+  auto_matched        Boolean    @default(false)
+  status              GiftStatus @default(PENDING)
+  transaction_date    DateTime
+  created_at          DateTime   @default(now())
+
+  family Family @relation(fields: [family_id], references: [id], onDelete: Cascade)
+
+  @@index([family_id])
+  @@index([wedding_id])
+  @@index([status])
+  @@index([reference_code_used])
+  @@map("gifts")
+}
+
+// ============================================================================
+// INTERNATIONALIZATION
+// ============================================================================
+
+model Translation {
+  id         String             @id @default(uuid())
+  key        String
+  language   Language
+  value      String             @db.Text
+  context    TranslationContext
+  updated_at DateTime           @updatedAt
+
+  @@unique([key, language])
+  @@index([context])
+  @@index([language])
+  @@map("translations")
+}
