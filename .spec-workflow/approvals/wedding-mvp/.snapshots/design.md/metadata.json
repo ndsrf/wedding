@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/wedding-mvp/design.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-01-13T10:33:25.083Z",
+      "trigger": "initial",
+      "approvalId": "approval_1768300405078_9k8rkeuyl",
+      "approvalTitle": "Design Document - Wedding App MVP"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2026-01-13T10:45:05.322Z",
+      "trigger": "approved",
+      "approvalId": "approval_1768300405078_9k8rkeuyl",
+      "approvalTitle": "Design Document - Wedding App MVP"
+    }
+  ]
+}
