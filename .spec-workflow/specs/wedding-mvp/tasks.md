@@ -131,7 +131,7 @@
 
 ## Phase 6: Theme System
 
-- [ ] 6.1. Create theme engine and pre-built themes
+- [x] 6.1. Create theme engine and pre-built themes
   - Files: src/lib/theme/engine.ts, src/lib/theme/presets.ts
   - Implement theme CSS generation from ThemeConfig
   - Create 5 pre-built system themes (Classic Elegance, Garden Romance, Modern Minimal, Rustic Charm, Beach Breeze)
@@ -141,7 +141,7 @@
   - _Requirements: Requirement 10 (Theme System), Theme Service (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Frontend Engineer specializing in CSS-in-JS and theming systems | Task: Create theme engine that generates CSS from ThemeConfig JSONB (colors, fonts, button styles, spacing, images). Implement generateThemeCSS(theme: Theme) that returns CSS string with CSS custom properties. Create 5 pre-built themes as system_themes with distinct visual styles: Classic (elegant traditional), Garden (romantic florals), Modern (minimal clean), Rustic (warm natural), Beach (light airy). Include theme caching in memory for performance. | Restrictions: Must generate valid CSS custom properties, support all ThemeConfig fields, ensure themes are mobile-friendly and accessible, cache themes for 1 hour, validate theme config before applying | Success: Theme engine generates valid CSS from config, all 5 pre-built themes have distinct visual styles, themes apply correctly to guest pages, caching improves performance, themes are accessible and mobile-friendly | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting theme engine functions and all 5 preset themes with their configurations, then mark as [x] when complete_
 
-- [ ] 6.2. Create theme management API routes
+- [x] 6.2. Create theme management API routes
   - Files: src/app/api/planner/themes/route.ts, src/app/api/planner/themes/[id]/route.ts
   - Implement GET /api/planner/themes (list system + planner themes)
   - Implement POST /api/planner/themes (create custom theme)
