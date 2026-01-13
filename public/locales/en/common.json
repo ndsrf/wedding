@@ -1,0 +1,315 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "add": "Add",
+      "create": "Create",
+      "update": "Update",
+      "submit": "Submit",
+      "confirm": "Confirm",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "close": "Close",
+      "search": "Search",
+      "filter": "Filter",
+      "export": "Export",
+      "import": "Import",
+      "download": "Download",
+      "upload": "Upload",
+      "send": "Send"
+    },
+    "navigation": {
+      "home": "Home",
+      "dashboard": "Dashboard",
+      "settings": "Settings",
+      "logout": "Logout",
+      "profile": "Profile"
+    },
+    "forms": {
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email address",
+      "invalidPhone": "Please enter a valid phone number",
+      "minLength": "Must be at least {min} characters",
+      "maxLength": "Cannot exceed {max} characters"
+    },
+    "validation": {
+      "required": "Required field",
+      "email": "Invalid email",
+      "phone": "Invalid phone",
+      "date": "Invalid date",
+      "number": "Invalid number"
+    },
+    "errors": {
+      "generic": "An error occurred. Please try again.",
+      "network": "Connection error. Please check your internet connection.",
+      "unauthorized": "You are not authorized to perform this action.",
+      "notFound": "The requested resource was not found.",
+      "serverError": "Server error. Please try again later."
+    },
+    "success": {
+      "saved": "Successfully saved",
+      "updated": "Successfully updated",
+      "deleted": "Successfully deleted",
+      "created": "Successfully created",
+      "sent": "Successfully sent"
+    },
+    "loading": "Loading...",
+    "noData": "No data available",
+    "confirmDelete": "Are you sure you want to delete this?",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "master": {
+    "dashboard": {
+      "title": "Master Admin Dashboard",
+      "welcome": "Welcome, Administrator",
+      "overview": "Platform Overview"
+    },
+    "analytics": {
+      "totalPlanners": "Total Planners",
+      "activePlanners": "Active Planners",
+      "totalWeddings": "Total Weddings",
+      "totalGuests": "Total Guests"
+    },
+    "planners": {
+      "title": "Planner Management",
+      "list": "Planner List",
+      "add": "Add Planner",
+      "edit": "Edit Planner",
+      "name": "Name",
+      "email": "Email",
+      "logo": "Logo",
+      "status": "Status",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "weddingCount": "Wedding Count",
+      "lastLogin": "Last Login",
+      "enable": "Enable",
+      "disable": "Disable",
+      "confirmDisable": "Are you sure you want to disable this planner?",
+      "logoUrl": "Logo URL"
+    },
+    "weddings": {
+      "title": "Wedding Overview",
+      "list": "Wedding List",
+      "coupleName": "Couple Name",
+      "date": "Date",
+      "location": "Location",
+      "planner": "Planner",
+      "guestCount": "Guest Count"
+    }
+  },
+  "planner": {
+    "dashboard": {
+      "title": "Planner Dashboard",
+      "welcome": "Welcome, {name}",
+      "myWeddings": "My Weddings"
+    },
+    "stats": {
+      "totalWeddings": "Total Weddings",
+      "totalGuests": "Total Guests",
+      "rsvpCompletion": "RSVP Completion",
+      "upcomingWeddings": "Upcoming Weddings"
+    },
+    "weddings": {
+      "title": "Wedding Management",
+      "create": "Create New Wedding",
+      "edit": "Edit Wedding",
+      "coupleNames": "Couple Names",
+      "weddingDate": "Wedding Date",
+      "weddingTime": "Wedding Time",
+      "location": "Location",
+      "rsvpCutoff": "RSVP Cutoff Date",
+      "defaultLanguage": "Default Language",
+      "theme": "Theme",
+      "paymentMode": "Payment Mode",
+      "automated": "Automated",
+      "manual": "Manual",
+      "allowGuestAdditions": "Allow Guest Additions",
+      "overview": "Overview",
+      "guests": "Guests",
+      "admins": "Admins"
+    },
+    "admins": {
+      "invite": "Invite Admin",
+      "email": "Admin Email",
+      "inviteSent": "Invitation sent successfully",
+      "remove": "Remove Admin",
+      "confirmRemove": "Are you sure you want to remove this admin?"
+    },
+    "themes": {
+      "title": "Theme Management",
+      "system": "System Themes",
+      "custom": "Custom Themes",
+      "create": "Create Custom Theme",
+      "edit": "Edit Theme",
+      "name": "Theme Name",
+      "inUse": "In Use",
+      "cannotDelete": "Cannot delete. Theme is in use by {count} wedding(s)."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Wedding Admin Dashboard",
+      "welcome": "Welcome",
+      "weddingDetails": "Wedding Details",
+      "metrics": "Metrics"
+    },
+    "wedding": {
+      "details": "Details",
+      "configuration": "Configuration",
+      "updateSuccess": "Configuration updated successfully"
+    },
+    "guests": {
+      "title": "Guest Management",
+      "list": "Guest List",
+      "import": "Import from Excel",
+      "export": "Export to Excel",
+      "template": "Download Template",
+      "familyName": "Family Name",
+      "contactPerson": "Contact Person",
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "language": "Language",
+      "members": "Members",
+      "rsvpStatus": "RSVP Status",
+      "attendance": "Attendance",
+      "channel": "Channel",
+      "paymentStatus": "Payment Status",
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "notAttending": "Not Attending",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "sms": "SMS",
+        "paid": "Paid",
+        "unpaid": "Unpaid"
+      },
+      "importSuccess": "Guest list imported successfully",
+      "importError": "Import error. Please check the file."
+    },
+    "notifications": {
+      "title": "Notifications and Activity",
+      "filters": {
+        "dateRange": "Date Range",
+        "eventType": "Event Type",
+        "family": "Family",
+        "channel": "Channel",
+        "unread": "Unread",
+        "read": "Read"
+      },
+      "markAsRead": "Mark as Read",
+      "export": "Export Notifications",
+      "events": {
+        "linkOpened": "Link Opened",
+        "rsvpSubmitted": "RSVP Submitted",
+        "rsvpEdited": "RSVP Edited",
+        "guestAdded": "Guest Added",
+        "paymentReceived": "Payment Received",
+        "reminderSent": "Reminder Sent"
+      }
+    },
+    "reminders": {
+      "title": "Reminder System",
+      "send": "Send Reminders",
+      "preview": "Preview Recipients",
+      "channel": "Send Channel",
+      "recipients": "Recipients: {count} family(ies)",
+      "sent": "Reminders sent successfully to {count} family(ies)",
+      "noRecipients": "No families pending RSVP"
+    },
+    "payments": {
+      "title": "Payment Management",
+      "list": "Payment List",
+      "record": "Record Manual Payment",
+      "family": "Family",
+      "amount": "Amount",
+      "referenceCode": "Reference Code",
+      "transactionDate": "Transaction Date",
+      "status": "Status",
+      "statuses": {
+        "pending": "Pending",
+        "received": "Received",
+        "confirmed": "Confirmed"
+      },
+      "recordSuccess": "Payment recorded successfully",
+      "updateSuccess": "Payment status updated"
+    },
+    "guestAdditions": {
+      "title": "Guest Additions Review",
+      "newBadge": "NEW",
+      "addedBy": "Added by guest",
+      "addedAt": "Added on {date}",
+      "approve": "Approve",
+      "edit": "Edit",
+      "noAdditions": "No guest additions pending review"
+    }
+  },
+  "guest": {
+    "welcome": {
+      "title": "Hello, {familyName} Family!",
+      "subtitle": "Please confirm your attendance to the wedding",
+      "coupleNames": "{coupleNames}",
+      "date": "Date: {date}",
+      "time": "Time: {time}",
+      "location": "Location: {location}"
+    },
+    "rsvp": {
+      "title": "RSVP",
+      "instructions": "Please select who from your family will attend the wedding.",
+      "attending": "Will Attend",
+      "notAttending": "Will Not Attend",
+      "dietaryRestrictions": "Dietary Restrictions",
+      "accessibilityNeeds": "Accessibility Needs",
+      "dietaryPlaceholder": "E.g., vegetarian, allergies, etc.",
+      "accessibilityPlaceholder": "E.g., wheelchair, special needs, etc.",
+      "submit": "Confirm Attendance",
+      "submitted": "Thank you for your RSVP!",
+      "confirmationMessage": "We have received your confirmation. We look forward to seeing you at the wedding!",
+      "cutoffPassed": "The RSVP deadline has passed. Please contact the organizers."
+    },
+    "members": {
+      "title": "Family Members",
+      "addMember": "Add Family Member",
+      "name": "Name",
+      "type": "Type",
+      "age": "Age",
+      "types": {
+        "adult": "Adult",
+        "child": "Child",
+        "infant": "Infant"
+      },
+      "addSuccess": "Member added successfully"
+    },
+    "payment": {
+      "title": "Payment Information",
+      "subtitle": "Wedding gift details",
+      "iban": "IBAN for transfer:",
+      "referenceCode": "Reference code:",
+      "referenceInstructions": "Please include this reference code in your transfer.",
+      "status": "Payment status:",
+      "statuses": {
+        "pending": "Pending",
+        "received": "Received",
+        "confirmed": "Confirmed"
+      },
+      "manualMode": "Please use the following IBAN for your gift.",
+      "thankYou": "Thank you for your generosity!"
+    },
+    "language": {
+      "select": "Select Language",
+      "updated": "Language updated"
+    },
+    "edit": {
+      "title": "Edit RSVP",
+      "canEdit": "You can edit your RSVP until {date}."
+    }
+  }
+}

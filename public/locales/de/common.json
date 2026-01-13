@@ -1,0 +1,315 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen",
+      "edit": "Bearbeiten",
+      "add": "Hinzufügen",
+      "create": "Erstellen",
+      "update": "Aktualisieren",
+      "submit": "Absenden",
+      "confirm": "Bestätigen",
+      "back": "Zurück",
+      "next": "Weiter",
+      "previous": "Vorherige",
+      "close": "Schließen",
+      "search": "Suchen",
+      "filter": "Filtern",
+      "export": "Exportieren",
+      "import": "Importieren",
+      "download": "Herunterladen",
+      "upload": "Hochladen",
+      "send": "Senden"
+    },
+    "navigation": {
+      "home": "Startseite",
+      "dashboard": "Dashboard",
+      "settings": "Einstellungen",
+      "logout": "Abmelden",
+      "profile": "Profil"
+    },
+    "forms": {
+      "required": "Dieses Feld ist erforderlich",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein",
+      "minLength": "Muss mindestens {min} Zeichen enthalten",
+      "maxLength": "Darf {max} Zeichen nicht überschreiten"
+    },
+    "validation": {
+      "required": "Pflichtfeld",
+      "email": "Ungültige E-Mail",
+      "phone": "Ungültiges Telefon",
+      "date": "Ungültiges Datum",
+      "number": "Ungültige Nummer"
+    },
+    "errors": {
+      "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "network": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
+      "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen.",
+      "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+      "serverError": "Serverfehler. Bitte versuchen Sie es später erneut."
+    },
+    "success": {
+      "saved": "Erfolgreich gespeichert",
+      "updated": "Erfolgreich aktualisiert",
+      "deleted": "Erfolgreich gelöscht",
+      "created": "Erfolgreich erstellt",
+      "sent": "Erfolgreich gesendet"
+    },
+    "loading": "Lädt...",
+    "noData": "Keine Daten verfügbar",
+    "confirmDelete": "Sind Sie sicher, dass Sie dies löschen möchten?",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "master": {
+    "dashboard": {
+      "title": "Hauptadministrator-Dashboard",
+      "welcome": "Willkommen, Administrator",
+      "overview": "Plattformübersicht"
+    },
+    "analytics": {
+      "totalPlanners": "Gesamtzahl der Planer",
+      "activePlanners": "Aktive Planer",
+      "totalWeddings": "Gesamtzahl der Hochzeiten",
+      "totalGuests": "Gesamtzahl der Gäste"
+    },
+    "planners": {
+      "title": "Planerverwaltung",
+      "list": "Planerliste",
+      "add": "Planer hinzufügen",
+      "edit": "Planer bearbeiten",
+      "name": "Name",
+      "email": "E-Mail",
+      "logo": "Logo",
+      "status": "Status",
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert",
+      "weddingCount": "Anzahl der Hochzeiten",
+      "lastLogin": "Letzte Anmeldung",
+      "enable": "Aktivieren",
+      "disable": "Deaktivieren",
+      "confirmDisable": "Sind Sie sicher, dass Sie diesen Planer deaktivieren möchten?",
+      "logoUrl": "Logo-URL"
+    },
+    "weddings": {
+      "title": "Hochzeitsübersicht",
+      "list": "Hochzeitsliste",
+      "coupleName": "Name des Paares",
+      "date": "Datum",
+      "location": "Ort",
+      "planner": "Planer",
+      "guestCount": "Anzahl der Gäste"
+    }
+  },
+  "planner": {
+    "dashboard": {
+      "title": "Planer-Dashboard",
+      "welcome": "Willkommen, {name}",
+      "myWeddings": "Meine Hochzeiten"
+    },
+    "stats": {
+      "totalWeddings": "Gesamtzahl der Hochzeiten",
+      "totalGuests": "Gesamtzahl der Gäste",
+      "rsvpCompletion": "Bestätigungen abgeschlossen",
+      "upcomingWeddings": "Bevorstehende Hochzeiten"
+    },
+    "weddings": {
+      "title": "Hochzeitsverwaltung",
+      "create": "Neue Hochzeit erstellen",
+      "edit": "Hochzeit bearbeiten",
+      "coupleNames": "Namen des Paares",
+      "weddingDate": "Hochzeitsdatum",
+      "weddingTime": "Hochzeitszeit",
+      "location": "Ort",
+      "rsvpCutoff": "Bestätigungsfrist",
+      "defaultLanguage": "Standardsprache",
+      "theme": "Thema",
+      "paymentMode": "Zahlungsmodus",
+      "automated": "Automatisch",
+      "manual": "Manuell",
+      "allowGuestAdditions": "Zusätzliche Gäste erlauben",
+      "overview": "Übersicht",
+      "guests": "Gäste",
+      "admins": "Administratoren"
+    },
+    "admins": {
+      "invite": "Administrator einladen",
+      "email": "Administrator-E-Mail",
+      "inviteSent": "Einladung erfolgreich gesendet",
+      "remove": "Administrator entfernen",
+      "confirmRemove": "Sind Sie sicher, dass Sie diesen Administrator entfernen möchten?"
+    },
+    "themes": {
+      "title": "Themenverwaltung",
+      "system": "Systemthemen",
+      "custom": "Benutzerdefinierte Themen",
+      "create": "Benutzerdefiniertes Thema erstellen",
+      "edit": "Thema bearbeiten",
+      "name": "Themenname",
+      "inUse": "In Verwendung",
+      "cannotDelete": "Kann nicht gelöscht werden. Das Thema wird von {count} Hochzeit(en) verwendet."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Hochzeitsadministrator-Dashboard",
+      "welcome": "Willkommen",
+      "weddingDetails": "Hochzeitsdetails",
+      "metrics": "Metriken"
+    },
+    "wedding": {
+      "details": "Details",
+      "configuration": "Konfiguration",
+      "updateSuccess": "Konfiguration erfolgreich aktualisiert"
+    },
+    "guests": {
+      "title": "Gästeverwaltung",
+      "list": "Gästeliste",
+      "import": "Aus Excel importieren",
+      "export": "Nach Excel exportieren",
+      "template": "Vorlage herunterladen",
+      "familyName": "Familienname",
+      "contactPerson": "Kontaktperson",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "whatsapp": "WhatsApp",
+      "language": "Sprache",
+      "members": "Mitglieder",
+      "rsvpStatus": "Bestätigungsstatus",
+      "attendance": "Teilnahme",
+      "channel": "Kanal",
+      "paymentStatus": "Zahlungsstatus",
+      "filters": {
+        "all": "Alle",
+        "pending": "Ausstehend",
+        "confirmed": "Bestätigt",
+        "notAttending": "Nimmt nicht teil",
+        "whatsapp": "WhatsApp",
+        "email": "E-Mail",
+        "sms": "SMS",
+        "paid": "Bezahlt",
+        "unpaid": "Unbezahlt"
+      },
+      "importSuccess": "Gästeliste erfolgreich importiert",
+      "importError": "Importfehler. Bitte überprüfen Sie die Datei."
+    },
+    "notifications": {
+      "title": "Benachrichtigungen und Aktivität",
+      "filters": {
+        "dateRange": "Datumsbereich",
+        "eventType": "Ereignistyp",
+        "family": "Familie",
+        "channel": "Kanal",
+        "unread": "Ungelesen",
+        "read": "Gelesen"
+      },
+      "markAsRead": "Als gelesen markieren",
+      "export": "Benachrichtigungen exportieren",
+      "events": {
+        "linkOpened": "Link geöffnet",
+        "rsvpSubmitted": "Bestätigung gesendet",
+        "rsvpEdited": "Bestätigung bearbeitet",
+        "guestAdded": "Gast hinzugefügt",
+        "paymentReceived": "Zahlung erhalten",
+        "reminderSent": "Erinnerung gesendet"
+      }
+    },
+    "reminders": {
+      "title": "Erinnerungssystem",
+      "send": "Erinnerungen senden",
+      "preview": "Empfängervorschau",
+      "channel": "Sendekanal",
+      "recipients": "Empfänger: {count} Familie(n)",
+      "sent": "Erinnerungen erfolgreich an {count} Familie(n) gesendet",
+      "noRecipients": "Keine Familien warten auf Bestätigung"
+    },
+    "payments": {
+      "title": "Zahlungsverwaltung",
+      "list": "Zahlungsliste",
+      "record": "Manuelle Zahlung erfassen",
+      "family": "Familie",
+      "amount": "Betrag",
+      "referenceCode": "Referenzcode",
+      "transactionDate": "Transaktionsdatum",
+      "status": "Status",
+      "statuses": {
+        "pending": "Ausstehend",
+        "received": "Erhalten",
+        "confirmed": "Bestätigt"
+      },
+      "recordSuccess": "Zahlung erfolgreich erfasst",
+      "updateSuccess": "Zahlungsstatus aktualisiert"
+    },
+    "guestAdditions": {
+      "title": "Überprüfung zusätzlicher Gäste",
+      "newBadge": "NEU",
+      "addedBy": "Vom Gast hinzugefügt",
+      "addedAt": "Hinzugefügt am {date}",
+      "approve": "Genehmigen",
+      "edit": "Bearbeiten",
+      "noAdditions": "Keine zusätzlichen Gäste zur Überprüfung"
+    }
+  },
+  "guest": {
+    "welcome": {
+      "title": "Hallo, Familie {familyName}!",
+      "subtitle": "Bitte bestätigen Sie Ihre Teilnahme an der Hochzeit",
+      "coupleNames": "{coupleNames}",
+      "date": "Datum: {date}",
+      "time": "Uhrzeit: {time}",
+      "location": "Ort: {location}"
+    },
+    "rsvp": {
+      "title": "Teilnahmebestätigung",
+      "instructions": "Bitte wählen Sie aus, wer aus Ihrer Familie an der Hochzeit teilnehmen wird.",
+      "attending": "Nimmt teil",
+      "notAttending": "Nimmt nicht teil",
+      "dietaryRestrictions": "Ernährungseinschränkungen",
+      "accessibilityNeeds": "Barrierefreiheitsbedürfnisse",
+      "dietaryPlaceholder": "Z.B.: vegetarisch, Allergien, usw.",
+      "accessibilityPlaceholder": "Z.B.: Rollstuhl, besondere Bedürfnisse, usw.",
+      "submit": "Teilnahme bestätigen",
+      "submitted": "Vielen Dank für Ihre Bestätigung!",
+      "confirmationMessage": "Wir haben Ihre Bestätigung erhalten. Wir freuen uns darauf, Sie bei der Hochzeit zu sehen!",
+      "cutoffPassed": "Die Bestätigungsfrist ist abgelaufen. Bitte kontaktieren Sie die Organisatoren."
+    },
+    "members": {
+      "title": "Familienmitglieder",
+      "addMember": "Familienmitglied hinzufügen",
+      "name": "Name",
+      "type": "Typ",
+      "age": "Alter",
+      "types": {
+        "adult": "Erwachsener",
+        "child": "Kind",
+        "infant": "Säugling"
+      },
+      "addSuccess": "Mitglied erfolgreich hinzugefügt"
+    },
+    "payment": {
+      "title": "Zahlungsinformationen",
+      "subtitle": "Hochzeitsgeschenk-Details",
+      "iban": "IBAN für Überweisung:",
+      "referenceCode": "Referenzcode:",
+      "referenceInstructions": "Bitte geben Sie diesen Referenzcode in Ihrer Überweisung an.",
+      "status": "Zahlungsstatus:",
+      "statuses": {
+        "pending": "Ausstehend",
+        "received": "Erhalten",
+        "confirmed": "Bestätigt"
+      },
+      "manualMode": "Bitte verwenden Sie die folgende IBAN für Ihr Geschenk.",
+      "thankYou": "Vielen Dank für Ihre Großzügigkeit!"
+    },
+    "language": {
+      "select": "Sprache auswählen",
+      "updated": "Sprache aktualisiert"
+    },
+    "edit": {
+      "title": "Bestätigung bearbeiten",
+      "canEdit": "Sie können Ihre Bestätigung bis zum {date} bearbeiten."
+    }
+  }
+}

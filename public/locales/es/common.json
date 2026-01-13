@@ -1,0 +1,315 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "add": "Agregar",
+      "create": "Crear",
+      "update": "Actualizar",
+      "submit": "Enviar",
+      "confirm": "Confirmar",
+      "back": "Volver",
+      "next": "Siguiente",
+      "previous": "Anterior",
+      "close": "Cerrar",
+      "search": "Buscar",
+      "filter": "Filtrar",
+      "export": "Exportar",
+      "import": "Importar",
+      "download": "Descargar",
+      "upload": "Subir",
+      "send": "Enviar"
+    },
+    "navigation": {
+      "home": "Inicio",
+      "dashboard": "Panel de Control",
+      "settings": "Configuración",
+      "logout": "Cerrar Sesión",
+      "profile": "Perfil"
+    },
+    "forms": {
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Por favor, ingrese un correo electrónico válido",
+      "invalidPhone": "Por favor, ingrese un número de teléfono válido",
+      "minLength": "Debe tener al menos {min} caracteres",
+      "maxLength": "No puede exceder {max} caracteres"
+    },
+    "validation": {
+      "required": "Campo obligatorio",
+      "email": "Correo electrónico inválido",
+      "phone": "Teléfono inválido",
+      "date": "Fecha inválida",
+      "number": "Número inválido"
+    },
+    "errors": {
+      "generic": "Ha ocurrido un error. Por favor, inténtelo de nuevo.",
+      "network": "Error de conexión. Verifique su conexión a Internet.",
+      "unauthorized": "No tiene autorización para realizar esta acción.",
+      "notFound": "El recurso solicitado no fue encontrado.",
+      "serverError": "Error del servidor. Por favor, inténtelo más tarde."
+    },
+    "success": {
+      "saved": "Guardado exitosamente",
+      "updated": "Actualizado exitosamente",
+      "deleted": "Eliminado exitosamente",
+      "created": "Creado exitosamente",
+      "sent": "Enviado exitosamente"
+    },
+    "loading": "Cargando...",
+    "noData": "No hay datos disponibles",
+    "confirmDelete": "¿Está seguro de que desea eliminar esto?",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "master": {
+    "dashboard": {
+      "title": "Panel de Administración Principal",
+      "welcome": "Bienvenido, Administrador",
+      "overview": "Resumen de la Plataforma"
+    },
+    "analytics": {
+      "totalPlanners": "Total de Planificadores",
+      "activePlanners": "Planificadores Activos",
+      "totalWeddings": "Total de Bodas",
+      "totalGuests": "Total de Invitados"
+    },
+    "planners": {
+      "title": "Gestión de Planificadores",
+      "list": "Lista de Planificadores",
+      "add": "Agregar Planificador",
+      "edit": "Editar Planificador",
+      "name": "Nombre",
+      "email": "Correo Electrónico",
+      "logo": "Logo",
+      "status": "Estado",
+      "enabled": "Habilitado",
+      "disabled": "Deshabilitado",
+      "weddingCount": "Número de Bodas",
+      "lastLogin": "Último Acceso",
+      "enable": "Habilitar",
+      "disable": "Deshabilitar",
+      "confirmDisable": "¿Está seguro de que desea deshabilitar este planificador?",
+      "logoUrl": "URL del Logo"
+    },
+    "weddings": {
+      "title": "Vista General de Bodas",
+      "list": "Lista de Bodas",
+      "coupleName": "Nombre de la Pareja",
+      "date": "Fecha",
+      "location": "Ubicación",
+      "planner": "Planificador",
+      "guestCount": "Número de Invitados"
+    }
+  },
+  "planner": {
+    "dashboard": {
+      "title": "Panel del Planificador",
+      "welcome": "Bienvenido, {name}",
+      "myWeddings": "Mis Bodas"
+    },
+    "stats": {
+      "totalWeddings": "Total de Bodas",
+      "totalGuests": "Total de Invitados",
+      "rsvpCompletion": "Confirmaciones Completadas",
+      "upcomingWeddings": "Próximas Bodas"
+    },
+    "weddings": {
+      "title": "Gestión de Bodas",
+      "create": "Crear Nueva Boda",
+      "edit": "Editar Boda",
+      "coupleNames": "Nombres de la Pareja",
+      "weddingDate": "Fecha de la Boda",
+      "weddingTime": "Hora de la Boda",
+      "location": "Ubicación",
+      "rsvpCutoff": "Fecha Límite de Confirmación",
+      "defaultLanguage": "Idioma Predeterminado",
+      "theme": "Tema",
+      "paymentMode": "Modo de Pago",
+      "automated": "Automático",
+      "manual": "Manual",
+      "allowGuestAdditions": "Permitir Invitados Adicionales",
+      "overview": "Resumen",
+      "guests": "Invitados",
+      "admins": "Administradores"
+    },
+    "admins": {
+      "invite": "Invitar Administrador",
+      "email": "Correo Electrónico del Administrador",
+      "inviteSent": "Invitación enviada exitosamente",
+      "remove": "Remover Administrador",
+      "confirmRemove": "¿Está seguro de que desea remover este administrador?"
+    },
+    "themes": {
+      "title": "Gestión de Temas",
+      "system": "Temas del Sistema",
+      "custom": "Temas Personalizados",
+      "create": "Crear Tema Personalizado",
+      "edit": "Editar Tema",
+      "name": "Nombre del Tema",
+      "inUse": "En Uso",
+      "cannotDelete": "No se puede eliminar. El tema está en uso por {count} boda(s)."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Panel de Administración de Boda",
+      "welcome": "Bienvenido",
+      "weddingDetails": "Detalles de la Boda",
+      "metrics": "Métricas"
+    },
+    "wedding": {
+      "details": "Detalles",
+      "configuration": "Configuración",
+      "updateSuccess": "Configuración actualizada exitosamente"
+    },
+    "guests": {
+      "title": "Gestión de Invitados",
+      "list": "Lista de Invitados",
+      "import": "Importar desde Excel",
+      "export": "Exportar a Excel",
+      "template": "Descargar Plantilla",
+      "familyName": "Nombre de la Familia",
+      "contactPerson": "Persona de Contacto",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "whatsapp": "WhatsApp",
+      "language": "Idioma",
+      "members": "Miembros",
+      "rsvpStatus": "Estado de Confirmación",
+      "attendance": "Asistencia",
+      "channel": "Canal",
+      "paymentStatus": "Estado de Pago",
+      "filters": {
+        "all": "Todos",
+        "pending": "Pendiente",
+        "confirmed": "Confirmado",
+        "notAttending": "No Asistirá",
+        "whatsapp": "WhatsApp",
+        "email": "Correo",
+        "sms": "SMS",
+        "paid": "Pagado",
+        "unpaid": "No Pagado"
+      },
+      "importSuccess": "Lista de invitados importada exitosamente",
+      "importError": "Error al importar. Por favor, revise el archivo."
+    },
+    "notifications": {
+      "title": "Notificaciones y Actividad",
+      "filters": {
+        "dateRange": "Rango de Fechas",
+        "eventType": "Tipo de Evento",
+        "family": "Familia",
+        "channel": "Canal",
+        "unread": "No Leídos",
+        "read": "Leídos"
+      },
+      "markAsRead": "Marcar como Leído",
+      "export": "Exportar Notificaciones",
+      "events": {
+        "linkOpened": "Enlace Abierto",
+        "rsvpSubmitted": "Confirmación Enviada",
+        "rsvpEdited": "Confirmación Editada",
+        "guestAdded": "Invitado Agregado",
+        "paymentReceived": "Pago Recibido",
+        "reminderSent": "Recordatorio Enviado"
+      }
+    },
+    "reminders": {
+      "title": "Sistema de Recordatorios",
+      "send": "Enviar Recordatorios",
+      "preview": "Vista Previa de Destinatarios",
+      "channel": "Canal de Envío",
+      "recipients": "Destinatarios: {count} familia(s)",
+      "sent": "Recordatorios enviados exitosamente a {count} familia(s)",
+      "noRecipients": "No hay familias pendientes de confirmación"
+    },
+    "payments": {
+      "title": "Gestión de Pagos",
+      "list": "Lista de Pagos",
+      "record": "Registrar Pago Manual",
+      "family": "Familia",
+      "amount": "Monto",
+      "referenceCode": "Código de Referencia",
+      "transactionDate": "Fecha de Transacción",
+      "status": "Estado",
+      "statuses": {
+        "pending": "Pendiente",
+        "received": "Recibido",
+        "confirmed": "Confirmado"
+      },
+      "recordSuccess": "Pago registrado exitosamente",
+      "updateSuccess": "Estado de pago actualizado"
+    },
+    "guestAdditions": {
+      "title": "Revisión de Invitados Adicionales",
+      "newBadge": "NUEVO",
+      "addedBy": "Agregado por el invitado",
+      "addedAt": "Agregado el {date}",
+      "approve": "Aprobar",
+      "edit": "Editar",
+      "noAdditions": "No hay invitados adicionales pendientes de revisión"
+    }
+  },
+  "guest": {
+    "welcome": {
+      "title": "¡Hola, Familia {familyName}!",
+      "subtitle": "Por favor, confirme su asistencia a la boda",
+      "coupleNames": "{coupleNames}",
+      "date": "Fecha: {date}",
+      "time": "Hora: {time}",
+      "location": "Lugar: {location}"
+    },
+    "rsvp": {
+      "title": "Confirmación de Asistencia",
+      "instructions": "Por favor, seleccione quiénes de su familia asistirán a la boda.",
+      "attending": "Asistirá",
+      "notAttending": "No Asistirá",
+      "dietaryRestrictions": "Restricciones Alimentarias",
+      "accessibilityNeeds": "Necesidades de Accesibilidad",
+      "dietaryPlaceholder": "Ej: vegetariano, alergias, etc.",
+      "accessibilityPlaceholder": "Ej: silla de ruedas, necesidades especiales, etc.",
+      "submit": "Confirmar Asistencia",
+      "submitted": "¡Gracias por confirmar su asistencia!",
+      "confirmationMessage": "Hemos recibido su confirmación. ¡Esperamos verles en la boda!",
+      "cutoffPassed": "La fecha límite para confirmar asistencia ha pasado. Por favor, contacte a los organizadores."
+    },
+    "members": {
+      "title": "Miembros de la Familia",
+      "addMember": "Agregar Miembro de la Familia",
+      "name": "Nombre",
+      "type": "Tipo",
+      "age": "Edad",
+      "types": {
+        "adult": "Adulto",
+        "child": "Niño",
+        "infant": "Bebé"
+      },
+      "addSuccess": "Miembro agregado exitosamente"
+    },
+    "payment": {
+      "title": "Información de Pago",
+      "subtitle": "Detalles para el regalo de boda",
+      "iban": "IBAN para transferencia:",
+      "referenceCode": "Código de referencia:",
+      "referenceInstructions": "Por favor, incluya este código de referencia en su transferencia.",
+      "status": "Estado del pago:",
+      "statuses": {
+        "pending": "Pendiente",
+        "received": "Recibido",
+        "confirmed": "Confirmado"
+      },
+      "manualMode": "Por favor, utilice el siguiente IBAN para su regalo.",
+      "thankYou": "¡Gracias por su generosidad!"
+    },
+    "language": {
+      "select": "Seleccionar Idioma",
+      "updated": "Idioma actualizado"
+    },
+    "edit": {
+      "title": "Editar Confirmación",
+      "canEdit": "Puede editar su confirmación hasta el {date}."
+    }
+  }
+}

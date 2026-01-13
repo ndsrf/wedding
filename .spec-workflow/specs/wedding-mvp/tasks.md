@@ -84,7 +84,7 @@
 
 ## Phase 4: Internationalization (i18n)
 
-- [ ] 4.1. Set up next-intl configuration
+- [x] 4.1. Set up next-intl configuration
   - Files: src/lib/i18n/config.ts, src/lib/i18n/server.ts, src/lib/i18n/client.ts
   - Configure next-intl for 5 languages (es, en, fr, it, de)
   - Create server-side translation utilities
@@ -94,7 +94,7 @@
   - _Requirements: Requirement 9 (Multi-Language Support), Internationalization section (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: i18n Specialist with expertise in next-intl and React | Task: Configure next-intl for Spanish, English, French, Italian, and German. Create config.ts with supported languages and fallback logic. Implement server.ts with getTranslations(language) and t(key, language, variables) functions. Create client.ts with useTranslations() hook. Set up language detection priority: user preference → URL parameter → browser language → wedding default → platform default (en). | Restrictions: Must support both server and client components, ensure proper fallback to English for missing translations, maintain type safety with translation keys, cache translations for performance | Success: All 5 languages configured, server and client translation utilities work correctly, language detection follows specified priority, fallback to English works gracefully | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool including i18n configuration and utility functions, then mark as [x] when complete_
 
-- [ ] 4.2. Create translation JSON files for all languages
+- [x] 4.2. Create translation JSON files for all languages
   - Files: public/locales/es/common.json, public/locales/en/common.json, public/locales/fr/common.json, public/locales/it/common.json, public/locales/de/common.json
   - Create initial translation keys for common UI elements
   - Translate master admin, planner, and wedding admin interfaces
