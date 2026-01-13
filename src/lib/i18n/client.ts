@@ -24,7 +24,7 @@ export function useTranslations() {
 
   return (key: string, variables?: Record<string, string | number>) => {
     try {
-      return t(key, variables as any);
+      return t(key, variables);
     } catch (error) {
       console.error(`Translation error for key: ${key}`, error);
       return key;
@@ -60,7 +60,7 @@ export function useNamespacedTranslations(namespace: string) {
 
   return (key: string, variables?: Record<string, string | number>) => {
     try {
-      return t(key, variables as any);
+      return t(key, variables);
     } catch (error) {
       console.error(`Translation error for ${namespace}.${key}`, error);
       return key;

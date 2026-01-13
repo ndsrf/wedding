@@ -206,7 +206,8 @@ export async function invalidateMagicToken(family_id: string): Promise<void> {
   await prisma.family.update({
     where: { id: family_id },
     data: {
-      magic_token: null as any, // Type assertion needed for optional string field
+      // Type assertion needed: schema requires String but logic needs nullable
+      magic_token: null as unknown as string,
     },
   });
 }

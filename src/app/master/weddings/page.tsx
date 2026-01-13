@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { WeddingList } from '@/src/components/master/WeddingList';
 import { useNamespacedTranslations } from '@/src/lib/i18n/client';
@@ -36,7 +36,7 @@ export default function WeddingsPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   // Fetch weddings from API
-  const fetchWeddings = async (page: number = 1) => {
+  const fetchWeddings = useCallback(async (page: number = 1) => {
     setIsLoading(true);
     setError(null);
 
@@ -60,18 +60,18 @@ export default function WeddingsPage() {
       } else {
         throw new Error(data.error?.message || 'Failed to fetch weddings');
       }
-    } catch (err: any) {
-      setError(err.message || tCommon('errors.generic'));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : tCommon('errors.generic'));
       console.error('Error fetching weddings:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router, tCommon]);
 
   // Load weddings on mount
   useEffect(() => {
     fetchWeddings(1);
-  }, []);
+  }, [fetchWeddings]);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { PlannerList } from '@/src/components/master/PlannerList';
 import { PlannerForm } from '@/src/components/master/PlannerForm';
@@ -43,7 +43,7 @@ export default function PlannersPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   // Fetch planners from API
-  const fetchPlanners = async (page: number = 1) => {
+  const fetchPlanners = useCallback(async (page: number = 1) => {
     setIsLoading(true);
     setError(null);
 
@@ -67,13 +67,13 @@ export default function PlannersPage() {
       } else {
         throw new Error(data.error?.message || 'Failed to fetch planners');
       }
-    } catch (err: any) {
-      setError(err.message || tCommon('errors.generic'));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : tCommon('errors.generic'));
       console.error('Error fetching planners:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router, tCommon]);
 
   // Create new planner
   const handleCreatePlanner = async (formData: PlannerFormData) => {
@@ -100,8 +100,8 @@ export default function PlannersPage() {
       alert(tCommon('success.created'));
       setShowForm(false);
       fetchPlanners(currentPage);
-    } catch (err: any) {
-      alert(err.message || tCommon('errors.generic'));
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
       throw err;
     }
   };
@@ -128,8 +128,8 @@ export default function PlannersPage() {
       // Success - refresh planner list
       alert(tCommon('success.updated'));
       fetchPlanners(currentPage);
-    } catch (err: any) {
-      alert(err.message || tCommon('errors.generic'));
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
       throw err;
     }
   };
@@ -137,7 +137,7 @@ export default function PlannersPage() {
   // Load planners on mount
   useEffect(() => {
     fetchPlanners(1);
-  }, []);
+  }, [fetchPlanners]);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -10,7 +10,9 @@ import type { AuthenticatedUser } from './api';
 
 declare module 'next-auth' {
   interface Session {
-    user: AuthenticatedUser;
+    user: AuthenticatedUser & {
+      emailVerified?: Date | null;
+    };
   }
 
   interface User {

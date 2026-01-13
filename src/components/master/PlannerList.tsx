@@ -8,6 +8,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useNamespacedTranslations, useFormatDate } from '@/src/lib/i18n/client';
 
 interface Planner {
@@ -94,9 +95,11 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     {planner.logo_url && (
-                      <img
+                      <Image
                         src={planner.logo_url}
                         alt={planner.name}
+                        width={32}
+                        height={32}
                         className="h-8 w-8 rounded-full mr-3 object-cover"
                       />
                     )}
@@ -155,9 +158,11 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center">
                 {planner.logo_url && (
-                  <img
+                  <Image
                     src={planner.logo_url}
                     alt={planner.name}
+                    width={40}
+                    height={40}
                     className="h-10 w-10 rounded-full mr-3 object-cover"
                   />
                 )}

@@ -118,9 +118,10 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(response, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle authentication errors
-    if (error.message?.includes('UNAUTHORIZED')) {
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage.includes('UNAUTHORIZED')) {
       const response: APIResponse = {
         success: false,
         error: {
@@ -131,7 +132,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(response, { status: 401 });
     }
 
-    if (error.message?.includes('FORBIDDEN')) {
+    if (errorMessage.includes('FORBIDDEN')) {
       const response: APIResponse = {
         success: false,
         error: {

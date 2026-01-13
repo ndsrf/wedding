@@ -33,7 +33,7 @@ import type { ThemeConfig } from './theme';
 // GENERIC API RESPONSE WRAPPER
 // ============================================================================
 
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: APIError;
@@ -43,14 +43,14 @@ export interface APIResponse<T = any> {
 export interface APIError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface APIMeta {
   page?: number;
   limit?: number;
   total?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Helper type for paginated responses
@@ -471,7 +471,7 @@ export interface CreateTrackingEventRequest {
   wedding_id: string;
   event_type: EventType;
   channel?: Channel;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   admin_triggered?: boolean;
 }
 

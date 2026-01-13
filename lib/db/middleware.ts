@@ -74,7 +74,7 @@ export function getTenantClient(context: TenantContext) {
         }),
       create: (args: Parameters<typeof prisma.family.create>[0]) => {
         // TypeScript workaround: spread data and add wedding_id
-        const data: any = { ...args.data, wedding_id }
+        const data = { ...args.data, wedding_id } as typeof args.data
         return prisma.family.create({ ...args, data })
       },
       update: (args: Parameters<typeof prisma.family.update>[0]) =>
@@ -108,9 +108,9 @@ export function getTenantClient(context: TenantContext) {
           ...args,
           where: { ...args?.where, wedding_id },
         }),
-      create: (args: any) => {
+      create: (args: Parameters<typeof prisma.trackingEvent.create>[0]) => {
         // TypeScript workaround: spread data and add wedding_id
-        const data: any = { ...args.data, wedding_id }
+        const data = { ...args.data, wedding_id } as typeof args.data
         return prisma.trackingEvent.create({ ...args, data })
       },
     },
@@ -122,9 +122,9 @@ export function getTenantClient(context: TenantContext) {
           ...args,
           where: { ...args?.where, wedding_id },
         }),
-      create: (args: any) => {
+      create: (args: Parameters<typeof prisma.notification.create>[0]) => {
         // TypeScript workaround: spread data and add wedding_id
-        const data: any = { ...args.data, wedding_id }
+        const data = { ...args.data, wedding_id } as typeof args.data
         return prisma.notification.create({ ...args, data })
       },
       update: (args: Parameters<typeof prisma.notification.update>[0]) =>
@@ -138,9 +138,9 @@ export function getTenantClient(context: TenantContext) {
           ...args,
           where: { ...args?.where, wedding_id },
         }),
-      create: (args: any) => {
+      create: (args: Parameters<typeof prisma.gift.create>[0]) => {
         // TypeScript workaround: spread data and add wedding_id
-        const data: any = { ...args.data, wedding_id }
+        const data = { ...args.data, wedding_id } as typeof args.data
         return prisma.gift.create({ ...args, data })
       },
       update: (args: Parameters<typeof prisma.gift.update>[0]) =>

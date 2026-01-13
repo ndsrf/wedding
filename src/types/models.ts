@@ -168,7 +168,7 @@ export interface TrackingEvent {
   wedding_id: string;
   event_type: EventType;
   channel: Channel | null;
-  metadata: Record<string, any> | null; // JSONB field
+  metadata: Record<string, unknown> | null; // JSONB field
   admin_triggered: boolean;
   timestamp: Date;
 }
@@ -179,7 +179,7 @@ export interface Notification {
   family_id: string | null;
   event_type: EventType;
   channel: Channel | null;
-  details: Record<string, any>; // JSONB field
+  details: Record<string, unknown>; // JSONB field
   read: boolean;
   read_at: Date | null;
   admin_id: string;

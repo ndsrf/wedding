@@ -147,7 +147,10 @@ export const authOptions: NextAuthConfig = {
      */
     async session({ session, token }) {
       if (token && 'user' in token && token.user) {
-        (session as any).user = token.user;
+        session.user = {
+          ...token.user,
+          emailVerified: null,
+        };
       }
 
       return session;
@@ -159,9 +162,9 @@ export const authOptions: NextAuthConfig = {
     async signIn({ user }) {
       console.log(`User signed in: ${user.email}`);
     },
-    async signOut({ token }: any) {
-      if (token && 'user' in token && token.user) {
-        console.log(`User signed out: ${token.user.email}`);
+    async signOut(message) {
+      if ('token' in message && message.token && 'user' in message.token && message.token.user) {
+        console.log(`User signed out: ${message.token.user.email}`);
       }
     },
   },

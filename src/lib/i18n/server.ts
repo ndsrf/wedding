@@ -11,12 +11,12 @@ import { Language, DEFAULT_LANGUAGE, isValidLanguage } from './config';
  * Cache for loaded translations
  * Prevents loading the same translation file multiple times
  */
-const translationCache = new Map<string, Record<string, any>>();
+const translationCache = new Map<string, Record<string, unknown>>();
 
 /**
  * Load translations from JSON file with caching
  */
-async function loadTranslations(language: Language): Promise<Record<string, any>> {
+async function loadTranslations(language: Language): Promise<Record<string, unknown>> {
   const cacheKey = language;
 
   if (translationCache.has(cacheKey)) {
@@ -53,17 +53,17 @@ export async function getTranslations(language: Language) {
      * @param key - Translation key (supports nested keys with dot notation)
      * @param variables - Variables to interpolate in the translation
      */
-    t: (key: string, variables?: Record<string, string | number>) => {
-      let translation = getNestedValue(messages, key);
+    t: (key: string, variables?: Record<string, string | number>): string => {
+      const translationValue = getNestedValue(messages, key);
 
       // Fallback to key if translation not found
-      if (translation === undefined || translation === null) {
+      if (translationValue === undefined || translationValue === null) {
         console.warn(`Translation not found for key: ${key} in language: ${language}`);
         return key;
       }
 
       // Convert to string
-      translation = String(translation);
+      let translation = String(translationValue);
 
       // Interpolate variables
       if (variables) {
@@ -96,8 +96,12 @@ export async function t(
  * Get nested value from object using dot notation
  * Example: getNestedValue(obj, 'user.profile.name')
  */
-function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+function getNestedValue(obj: unknown, path: string): unknown {
+  return path.split('.').reduce((current: unknown, key: string) => {
+    return current && typeof current === 'object' && key in current
+      ? (current as Record<string, unknown>)[key]
+      : undefined;
+  }, obj);
 }
 
 /**
