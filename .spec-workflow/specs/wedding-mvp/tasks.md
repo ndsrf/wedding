@@ -181,7 +181,7 @@
 
 ## Phase 8: Excel Import/Export System
 
-- [ ] 8.1. Create Excel service utilities
+- [x] 8.1. Create Excel service utilities
   - Files: src/lib/excel/import.ts, src/lib/excel/export.ts, src/lib/excel/templates.ts
   - Implement importGuestList(wedding_id, file) with validation
   - Implement exportGuestData(wedding_id, format) for xlsx/csv
@@ -191,7 +191,7 @@
   - _Requirements: Requirement 11 (Excel Import/Export), Requirement 3 (Wedding Admin Guest Management), Excel Service (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend Developer with expertise in file processing and data validation | Task: Create Excel import service that validates required columns (Family Name, Contact Person, Email, Phone, WhatsApp, Language, Member 1-10 Name/Type/Age), parses family and member data, validates language codes (es/en/fr/it/de), generates magic tokens and reference codes (if automated mode), and performs atomic database inserts. Create export service that generates Excel with all family data including RSVP status, attendance, dietary info, payment status. Create template generator with pre-filled headers and example data. Use xlsx library. | Restrictions: Must validate all data before any database operations (atomic transactions), flag duplicate emails/phones as warnings, validate language codes with fallback to wedding default, generate unique reference codes for automated payment mode, handle Excel parsing errors gracefully, support up to 500 families | Success: Import validates correctly and provides detailed error reports, successful imports are atomic (all-or-nothing), magic tokens and reference codes generated correctly, export includes all current data, template is clear and user-friendly, handles large files (500 families) in under 10 seconds | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting Excel functions with their signatures and validation logic, then mark as [x] when complete_
 
-- [ ] 8.2. Create Excel import/export API routes
+- [x] 8.2. Create Excel import/export API routes
   - Files: src/app/api/admin/guests/import/route.ts, src/app/api/admin/guests/export/route.ts, src/app/api/admin/guests/template/route.ts
   - Implement POST /api/admin/guests/import (upload and import Excel)
   - Implement GET /api/admin/guests/export (export guest data)
