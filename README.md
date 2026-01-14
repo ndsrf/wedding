@@ -45,13 +45,20 @@ npm install
 
 # Set up environment variables
 cp .env.example .env
+# Edit .env and configure DATABASE_URL
 
-# Run database migrations
-npm run migrate
+# Create database
+createdb wedding_db
 
 # Start development server
 npm run dev
 ```
+
+**That's it!** The application will automatically:
+1. Detect that no migrations exist
+2. Create the initial migration from the Prisma schema
+3. Apply all migrations to set up database tables
+4. Start the server
 
 Visit [http://localhost:3000](http://localhost:3000) to view the application.
 
@@ -70,6 +77,190 @@ npm run format
 # Build for production
 npm run build
 ```
+
+## Database Migrations
+
+The application uses **fully automatic database migrations** that run on startup to keep your database in sync with the application version.
+
+### How It Works
+
+**On first startup:**
+1. App detects no migration files exist
+2. Automatically creates initial migration from Prisma schema
+3. Applies migration to create all database tables
+4. Creates `_prisma_migrations` version tracking table
+
+**On subsequent startups:**
+1. App scans `prisma/migrations/` folder
+2. Compares with `_prisma_migrations` table in database
+3. Applies any pending migrations
+4. Logs results
+
+### Key Features
+
+- **Fully Automatic**: No manual intervention required
+- **Smart Detection**: Creates initial migration if none exists
+- **Version Tracking**: All migrations tracked in `_prisma_migrations` table
+- **Safe**: Idempotent - can run multiple times without issues
+- **Production Ready**: Enabled by default in all environments
+
+### Environment Configuration
+
+Add to your `.env` file:
+
+```bash
+# Database connection (required)
+DATABASE_URL="postgresql://user:password@localhost:5432/wedding_db"
+
+# Disable auto-migrations (default: enabled)
+# AUTO_MIGRATE="false"
+
+# Continue on migration failure (default: exit in production)
+# FAIL_ON_MIGRATION_ERROR="false"
+```
+
+**Migrations are enabled by default.** Set `AUTO_MIGRATE="false"` to disable them.
+
+### Common Commands
+
+```bash
+# Create and apply a new migration (development)
+npm run migrate:dev -- --name add_feature_name
+
+# Apply pending migrations (production-safe)
+npm run migrate:deploy
+
+# Check migration status
+npm run migrate:status
+
+# Open Prisma Studio (database GUI)
+npm run db:studio
+
+# Regenerate Prisma Client
+npm run db:generate
+
+# Reset database (WARNING: deletes all data)
+npm run migrate:reset
+```
+
+### Creating Migrations Manually (Optional)
+
+While the app creates migrations automatically on startup, you can also create them manually for better control:
+
+1. **Modify schema**: Edit `prisma/schema.prisma`
+   ```prisma
+   model User {
+     id    String @id @default(uuid())
+     email String @unique
+     phone String?  // New field added
+   }
+   ```
+
+2. **Generate migration** (optional - app will do this automatically):
+   ```bash
+   npm run migrate:dev -- --name add_user_phone
+   ```
+
+3. **Review generated SQL**: Check `prisma/migrations/[timestamp]_add_user_phone/migration.sql`
+
+4. **Commit to git**: Commit both schema and migration files
+
+**Or simply:** Edit the schema, commit it, and let the app create the migration on next startup!
+
+### Production Deployment
+
+Migrations run **fully automatically** on every deployment:
+
+```bash
+# Deploy code
+git pull origin main
+npm install
+
+# Start app - migrations run automatically!
+npm run start
+```
+
+**First deployment (no tables):**
+```
+[Server] Initializing application...
+[Migration] Automatic migrations enabled
+[Migration] Starting database migration check...
+[Migration] No migrations found - creating initial migration from schema...
+[Migration] Creating initial migration with prisma migrate dev...
+[Migration] ✓ Initial migration created and applied
+[Migration] ⚠️  Remember to commit these files to git!
+[Server] ✓ Application initialization complete
+```
+
+**Subsequent deployments (with pending migrations):**
+```
+[Migration] Starting database migration check...
+[Migration] Applying pending migrations...
+[Migration] ✓ Migrations applied successfully
+[Migration] Applied 2 migration(s):
+[Migration]   - 20240115120000_add_user_phone
+[Migration]   - 20240116080000_add_notifications
+```
+
+**No pending migrations:**
+```
+[Migration] Starting database migration check...
+[Migration] ✓ Database is up to date
+```
+
+### Troubleshooting
+
+**Check migration status:**
+```bash
+npm run migrate:status
+```
+
+**Migration failed on startup:**
+```bash
+# View logs for error details
+# Check database migration history
+psql $DATABASE_URL -c "SELECT migration_name, finished_at, logs FROM _prisma_migrations ORDER BY finished_at DESC;"
+
+# Manually apply migrations
+npm run migrate:deploy
+```
+
+**Database doesn't exist:**
+```bash
+# Create the database
+createdb wedding_db
+
+# Start the app - it will create migrations automatically
+npm run dev
+```
+
+**App won't start due to migration error:**
+```bash
+# Temporarily disable auto-migrations to investigate
+AUTO_MIGRATE="false" npm run dev
+
+# Check what's wrong
+npm run migrate:status
+
+# Fix the issue and re-enable
+unset AUTO_MIGRATE
+npm run dev
+```
+
+**Want to review migrations before they run:**
+```bash
+# Generate migrations manually for review
+npm run migrate:dev -- --name descriptive_name
+
+# Review the generated SQL
+cat prisma/migrations/[timestamp]_descriptive_name/migration.sql
+
+# Commit and deploy
+git add prisma/
+git commit -m "Add migration"
+```
+
+For more details, see [`prisma/migrations/README.md`](./prisma/migrations/README.md).
 
 ## Deployment
 

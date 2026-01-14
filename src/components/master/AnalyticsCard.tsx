@@ -24,15 +24,15 @@ export function AnalyticsCard({
 }: AnalyticsCardProps) {
   return (
     <div
-      className={`${colorClass} border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow`}
+      className={`${colorClass} border-2 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover:scale-105 transform duration-200`}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
+          <p className="text-base font-semibold text-gray-700 mb-2">{title}</p>
+          <p className="text-4xl font-bold text-gray-900">{value.toLocaleString()}</p>
         </div>
         {icon && (
-          <div className="ml-4 p-3 bg-white rounded-full shadow-sm">{icon}</div>
+          <div className="ml-4 p-3 bg-white rounded-xl shadow-sm">{icon}</div>
         )}
       </div>
     </div>

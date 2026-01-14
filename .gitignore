@@ -59,3 +59,4 @@ docker-compose.override.yml
 tmp/
 temp/
 *.tmp
+config/master-admin.json

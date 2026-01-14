@@ -61,12 +61,12 @@ export default function WeddingsPage() {
         throw new Error(data.error?.message || 'Failed to fetch weddings');
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : tCommon('errors.generic'));
+      setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Error fetching weddings:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [router, tCommon]);
+  }, [router]);
 
   // Load weddings on mount
   useEffect(() => {
@@ -74,20 +74,22 @@ export default function WeddingsPage() {
   }, [fetchWeddings]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-pink-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{t('weddings.title')}</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                {t('weddings.title')}
+              </h1>
+              <p className="mt-2 text-base text-gray-600">
                 {t('weddings.list')} (Read-only)
               </p>
             </div>
             <a
               href="/master"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-5 py-2.5 border-2 border-gray-300 rounded-xl shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
             >
               {tCommon('buttons.back')}
             </a>
@@ -99,16 +101,16 @@ export default function WeddingsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 text-base">
             {error}
           </div>
         )}
 
         {/* Wedding List */}
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-8 border border-pink-100">
           {isLoading && !weddings.length ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">{tCommon('loading')}</p>
+              <p className="text-base text-gray-500">{tCommon('loading')}</p>
             </div>
           ) : (
             <>
@@ -116,21 +118,21 @@ export default function WeddingsPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-between mt-6 pt-6 border-t border-pink-100">
                   <button
                     onClick={() => fetchWeddings(currentPage - 1)}
                     disabled={currentPage === 1 || isLoading}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-2.5 border-2 border-purple-300 rounded-xl text-base font-medium text-gray-700 bg-white hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {tCommon('buttons.previous')}
                   </button>
-                  <span className="text-sm text-gray-700">
+                  <span className="text-base font-medium text-gray-700">
                     Page {currentPage} of {totalPages}
                   </span>
                   <button
                     onClick={() => fetchWeddings(currentPage + 1)}
                     disabled={currentPage === totalPages || isLoading}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-2.5 border-2 border-purple-300 rounded-xl text-base font-medium text-gray-700 bg-white hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {tCommon('buttons.next')}
                   </button>

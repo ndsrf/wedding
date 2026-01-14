@@ -27,7 +27,18 @@ const createWeddingSchema = z.object({
   rsvp_cutoff_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
   dress_code: z.string().optional(),
   additional_info: z.string().optional(),
-  theme_id: z.string().uuid('Invalid theme ID').optional(),
+  // Accept any value for theme_id - can be UUID (custom themes), slug (system themes), or empty
+  theme_id: z.any()
+    .transform(val => (val === '' || val === null || val === undefined) ? undefined : val)
+    .refine(
+      (val) => {
+        if (val === undefined) return true;
+        if (typeof val !== 'string') return false;
+        // Accept either UUID format OR any non-empty string (for system theme slugs)
+        return val.length > 0;
+      },
+      { message: 'Invalid theme ID' }
+    ),
   payment_tracking_mode: z.nativeEnum(PaymentMode),
   allow_guest_additions: z.boolean(),
   default_language: z.nativeEnum(Language),

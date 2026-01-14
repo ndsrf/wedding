@@ -68,12 +68,22 @@ function PlannerWeddingsContent() {
 
   const handleCreateWedding = async (formData: CreateWeddingRequest) => {
     try {
+      // Clean up the form data before sending
+      const cleanedData = {
+        ...formData,
+        // Convert empty string or null theme_id to undefined so it's omitted from JSON
+        theme_id: formData.theme_id || undefined,
+        // Ensure optional strings are either undefined or have content
+        dress_code: formData.dress_code || undefined,
+        additional_info: formData.additional_info || undefined,
+      };
+
       const response = await fetch('/api/planner/weddings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cleanedData),
       });
 
       if (!response.ok) {

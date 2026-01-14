@@ -56,8 +56,8 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
 
   if (planners.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-        <p className="text-gray-500">{tCommon('noData')}</p>
+      <div className="text-center py-12 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl border-2 border-dashed border-purple-300">
+        <p className="text-base text-gray-600">{tCommon('noData')}</p>
       </div>
     );
   }
@@ -66,52 +66,52 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
     <div className="overflow-x-auto">
       {/* Desktop Table View */}
       <div className="hidden md:block">
-        <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-pink-200 border-2 border-pink-200 rounded-2xl overflow-hidden">
+          <thead className="bg-gradient-to-r from-pink-50 to-purple-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 {t('planners.name')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 {t('planners.email')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 {t('planners.status')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 {t('planners.weddingCount')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 {t('planners.lastLogin')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-pink-100">
             {planners.map((planner) => (
-              <tr key={planner.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={planner.id} className="hover:bg-pink-50/50 transition-colors">
+                <td className="px-6 py-5 whitespace-nowrap">
                   <div className="flex items-center">
                     {planner.logo_url && (
                       <Image
                         src={planner.logo_url}
                         alt={planner.name}
-                        width={32}
-                        height={32}
-                        className="h-8 w-8 rounded-full mr-3 object-cover"
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-xl mr-3 object-cover border-2 border-pink-200"
                       />
                     )}
-                    <span className="text-sm font-medium text-gray-900">{planner.name}</span>
+                    <span className="text-base font-semibold text-gray-900">{planner.name}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-5 whitespace-nowrap text-base text-gray-600">
                   {planner.email}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-5 whitespace-nowrap">
                   <span
-                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    className={`px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full ${
                       planner.enabled
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
@@ -120,23 +120,23 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
                     {planner.enabled ? t('planners.enabled') : t('planners.disabled')}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-5 whitespace-nowrap text-base text-gray-600">
                   {planner.wedding_count}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-5 whitespace-nowrap text-base text-gray-600">
                   {planner.last_login_at
                     ? formatDate(planner.last_login_at, { dateStyle: 'short' })
                     : 'Never'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-5 whitespace-nowrap text-base">
                   <button
                     onClick={() => handleToggleStatus(planner.id, planner.enabled)}
                     disabled={actioningId === planner.id}
-                    className={`font-medium ${
+                    className={`font-semibold ${
                       planner.enabled
-                        ? 'text-red-600 hover:text-red-900'
-                        : 'text-green-600 hover:text-green-900'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        ? 'text-red-600 hover:text-red-800'
+                        : 'text-green-600 hover:text-green-800'
+                    } disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
                   >
                     {actioningId === planner.id
                       ? tCommon('loading')
@@ -154,25 +154,25 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
         {planners.map((planner) => (
-          <div key={planner.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-            <div className="flex items-start justify-between mb-3">
+          <div key={planner.id} className="bg-white border-2 border-pink-200 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex items-start justify-between mb-4">
               <div className="flex items-center">
                 {planner.logo_url && (
                   <Image
                     src={planner.logo_url}
                     alt={planner.name}
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 rounded-full mr-3 object-cover"
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 rounded-xl mr-3 object-cover border-2 border-pink-200"
                   />
                 )}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900">{planner.name}</h3>
-                  <p className="text-sm text-gray-500">{planner.email}</p>
+                  <h3 className="text-base font-semibold text-gray-900">{planner.name}</h3>
+                  <p className="text-base text-gray-600">{planner.email}</p>
                 </div>
               </div>
               <span
-                className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                className={`px-3 py-1.5 text-sm font-semibold rounded-full ${
                   planner.enabled
                     ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
@@ -182,13 +182,13 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
               </span>
             </div>
 
-            <div className="space-y-2 text-sm mb-3">
+            <div className="space-y-2 text-base mb-4">
               <div className="flex justify-between">
-                <span className="text-gray-500">{t('planners.weddingCount')}:</span>
-                <span className="font-medium text-gray-900">{planner.wedding_count}</span>
+                <span className="text-gray-600">{t('planners.weddingCount')}:</span>
+                <span className="font-semibold text-gray-900">{planner.wedding_count}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">{t('planners.lastLogin')}:</span>
+                <span className="text-gray-600">{t('planners.lastLogin')}:</span>
                 <span className="text-gray-900">
                   {planner.last_login_at
                     ? formatDate(planner.last_login_at, { dateStyle: 'short' })
@@ -200,11 +200,11 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
             <button
               onClick={() => handleToggleStatus(planner.id, planner.enabled)}
               disabled={actioningId === planner.id}
-              className={`w-full py-2 px-4 rounded-md font-medium text-sm ${
+              className={`w-full py-2.5 px-4 rounded-xl font-semibold text-base ${
                 planner.enabled
                   ? 'bg-red-50 text-red-700 hover:bg-red-100'
                   : 'bg-green-50 text-green-700 hover:bg-green-100'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              } disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
             >
               {actioningId === planner.id
                 ? tCommon('loading')

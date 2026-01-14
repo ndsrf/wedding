@@ -8,24 +8,27 @@
 import { redirect } from 'next/navigation';
 import { requireRole } from '@/src/lib/auth/middleware';
 import { AnalyticsCard } from '@/src/components/master/AnalyticsCard';
+import { prisma } from '@/lib/db/prisma';
 import type { MasterAnalytics } from '@/src/types/api';
 
 /**
- * Fetch platform analytics from API
+ * Fetch platform analytics directly from database
+ * Server Components can access the database directly without going through API routes
  */
 async function getAnalytics(): Promise<MasterAnalytics> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const [totalPlanners, activePlanners, totalWeddings, totalGuests] = await Promise.all([
+    prisma.weddingPlanner.count(),
+    prisma.weddingPlanner.count({ where: { enabled: true } }),
+    prisma.wedding.count(),
+    prisma.family.count(),
+  ]);
 
-  const response = await fetch(`${baseUrl}/api/master/analytics`, {
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch analytics');
-  }
-
-  const data = await response.json();
-  return data.data;
+  return {
+    total_planners: totalPlanners,
+    active_planners: activePlanners,
+    total_weddings: totalWeddings,
+    total_guests: totalGuests,
+  };
 }
 
 export default async function MasterDashboardPage() {
@@ -48,12 +51,24 @@ export default async function MasterDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Master Admin Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">Platform Overview and Analytics</p>
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-pink-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                Master Admin Dashboard
+              </h1>
+              <p className="mt-2 text-base text-gray-600">Platform Overview and Analytics</p>
+            </div>
+            <a
+              href="/api/auth/signout"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
+            >
+              Sign Out
+            </a>
+          </div>
         </div>
       </header>
 
@@ -61,7 +76,7 @@ export default async function MasterDashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 text-base">
             {error}
           </div>
         )}
@@ -72,37 +87,37 @@ export default async function MasterDashboardPage() {
             <AnalyticsCard
               title="Total Planners"
               value={analytics.total_planners}
-              colorClass="bg-blue-50 border-blue-200"
+              colorClass="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300"
             />
             <AnalyticsCard
               title="Active Planners"
               value={analytics.active_planners}
-              colorClass="bg-green-50 border-green-200"
+              colorClass="bg-gradient-to-br from-green-50 to-emerald-100 border-green-300"
             />
             <AnalyticsCard
               title="Total Weddings"
               value={analytics.total_weddings}
-              colorClass="bg-purple-50 border-purple-200"
+              colorClass="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-300"
             />
             <AnalyticsCard
               title="Total Guests"
               value={analytics.total_guests}
-              colorClass="bg-pink-50 border-pink-200"
+              colorClass="bg-gradient-to-br from-pink-50 to-rose-100 border-pink-300"
             />
           </div>
         )}
 
         {/* Quick Links */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-8 border border-pink-100">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <a
               href="/master/planners"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              className="flex items-center p-6 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50/50 transition-all hover:shadow-md group"
             >
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
                 <svg
-                  className="h-6 w-6 text-blue-600"
+                  className="h-5 w-5 text-blue-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -116,8 +131,8 @@ export default async function MasterDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">Manage Planners</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="text-lg font-semibold text-gray-900">Manage Planners</h3>
+                <p className="mt-1 text-base text-gray-600">
                   View, create, and manage wedding planners
                 </p>
               </div>
@@ -125,11 +140,11 @@ export default async function MasterDashboardPage() {
 
             <a
               href="/master/weddings"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+              className="flex items-center p-6 border-2 border-purple-200 rounded-xl hover:border-purple-400 hover:bg-purple-50/50 transition-all hover:shadow-md group"
             >
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
                 <svg
-                  className="h-6 w-6 text-purple-600"
+                  className="h-5 w-5 text-purple-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -143,8 +158,8 @@ export default async function MasterDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">View Weddings</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="text-lg font-semibold text-gray-900">View Weddings</h3>
+                <p className="mt-1 text-base text-gray-600">
                   Browse all weddings across the platform
                 </p>
               </div>

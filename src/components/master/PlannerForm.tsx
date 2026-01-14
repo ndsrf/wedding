@@ -84,10 +84,10 @@ export function PlannerForm({ onSubmit, onCancel }: PlannerFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name Field */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="name" className="block text-base font-semibold text-gray-700 mb-2">
           {t('planners.name')} *
         </label>
         <input
@@ -95,17 +95,17 @@ export function PlannerForm({ onSubmit, onCancel }: PlannerFormProps) {
           type="text"
           value={formData.name}
           onChange={(e) => handleChange('name', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${
+            errors.name ? 'border-red-400 bg-red-50' : 'border-gray-300 hover:border-purple-300'
           }`}
           placeholder="Enter planner name"
         />
-        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+        {errors.name && <p className="mt-2 text-sm text-red-600 font-medium">{errors.name}</p>}
       </div>
 
       {/* Email Field */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="email" className="block text-base font-semibold text-gray-700 mb-2">
           {t('planners.email')} *
         </label>
         <input
@@ -113,17 +113,17 @@ export function PlannerForm({ onSubmit, onCancel }: PlannerFormProps) {
           type="email"
           value={formData.email}
           onChange={(e) => handleChange('email', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.email ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${
+            errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300 hover:border-purple-300'
           }`}
           placeholder="planner@example.com"
         />
-        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+        {errors.email && <p className="mt-2 text-sm text-red-600 font-medium">{errors.email}</p>}
       </div>
 
       {/* Logo URL Field */}
       <div>
-        <label htmlFor="logo_url" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="logo_url" className="block text-base font-semibold text-gray-700 mb-2">
           {t('planners.logoUrl')} (optional)
         </label>
         <input
@@ -131,12 +131,12 @@ export function PlannerForm({ onSubmit, onCancel }: PlannerFormProps) {
           type="url"
           value={formData.logo_url}
           onChange={(e) => handleChange('logo_url', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.logo_url ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-3 border-2 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${
+            errors.logo_url ? 'border-red-400 bg-red-50' : 'border-gray-300 hover:border-purple-300'
           }`}
           placeholder="https://example.com/logo.png"
         />
-        {errors.logo_url && <p className="mt-1 text-sm text-red-600">{errors.logo_url}</p>}
+        {errors.logo_url && <p className="mt-2 text-sm text-red-600 font-medium">{errors.logo_url}</p>}
       </div>
 
       {/* Form Actions */}
@@ -145,14 +145,14 @@ export function PlannerForm({ onSubmit, onCancel }: PlannerFormProps) {
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 text-base font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {tCommon('buttons.cancel')}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-pink-500 to-purple-600 border-2 border-transparent rounded-xl hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {isSubmitting ? tCommon('loading') : tCommon('buttons.create')}
         </button>
