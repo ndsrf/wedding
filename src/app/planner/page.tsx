@@ -8,27 +8,81 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireRole } from '@/src/lib/auth/middleware';
+import { prisma } from '@/lib/db/prisma';
 import { StatsCard } from '@/src/components/planner/StatsCard';
 import { WeddingCard } from '@/src/components/planner/WeddingCard';
 import type { PlannerStats } from '@/src/types/api';
+import type { AuthenticatedUser } from '@/src/types/api';
 
 /**
- * Fetch planner statistics from API
+ * Get planner statistics directly from database
  */
-async function getStats(): Promise<PlannerStats | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
+async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
   try {
-    const response = await fetch(`${baseUrl}/api/planner/stats`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
+    if (!user.planner_id) {
       return null;
     }
 
-    const data = await response.json();
-    return data.data;
+    // Get total wedding count
+    const wedding_count = await prisma.wedding.count({
+      where: { planner_id: user.planner_id },
+    });
+
+    // Get all weddings for the planner
+    const weddings = await prisma.wedding.findMany({
+      where: { planner_id: user.planner_id },
+      include: {
+        families: {
+          include: {
+            members: true,
+          },
+        },
+      },
+    });
+
+    // Calculate total guests across all weddings
+    const total_guests = weddings.reduce(
+      (sum, wedding) =>
+        sum + wedding.families.reduce((familySum, family) => familySum + family.members.length, 0),
+      0
+    );
+
+    // Calculate RSVP completion percentage
+    let totalFamilies = 0;
+    let familiesWithRSVP = 0;
+
+    weddings.forEach((wedding) => {
+      totalFamilies += wedding.families.length;
+      familiesWithRSVP += wedding.families.filter((family) =>
+        family.members.some((member) => member.attending !== null)
+      ).length;
+    });
+
+    const rsvp_completion_percentage =
+      totalFamilies > 0 ? Math.round((familiesWithRSVP / totalFamilies) * 100) : 0;
+
+    // Get upcoming weddings (future weddings, sorted by date)
+    const today = new Date();
+    const upcoming_weddings = await prisma.wedding.findMany({
+      where: {
+        planner_id: user.planner_id,
+        wedding_date: {
+          gte: today,
+        },
+        status: 'ACTIVE',
+      },
+      orderBy: {
+        wedding_date: 'asc',
+      },
+      take: 5,
+    });
+
+    return {
+      wedding_count,
+      total_guests,
+      rsvp_completion_percentage,
+      upcoming_weddings,
+    };
   } catch (error) {
     console.error('Error fetching stats:', error);
     return null;
@@ -37,14 +91,15 @@ async function getStats(): Promise<PlannerStats | null> {
 
 export default async function PlannerDashboardPage() {
   // Check authentication - redirect if not planner
+  let user;
   try {
-    await requireRole('planner');
+    user = await requireRole('planner');
   } catch {
     redirect('/api/auth/signin');
   }
 
-  // Fetch stats data
-  const stats = await getStats();
+  // Fetch stats data directly from database
+  const stats = await getStats(user);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -56,12 +111,20 @@ export default async function PlannerDashboardPage() {
               <h1 className="text-2xl font-bold text-gray-900">Planner Dashboard</h1>
               <p className="mt-1 text-sm text-gray-500">Manage your weddings and view statistics</p>
             </div>
-            <Link
-              href="/planner/weddings?action=create"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Create Wedding
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/planner/weddings?action=create"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Create Wedding
+              </Link>
+              <Link
+                href="/api/auth/signout"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              >
+                Logout
+              </Link>
+            </div>
           </div>
         </div>
       </header>

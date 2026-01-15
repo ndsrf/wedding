@@ -13,6 +13,13 @@ import { detectUserRole, mapAuthProvider } from '@/src/lib/auth/oauth';
 import type { AuthenticatedUser } from '@/src/types/api';
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+// How often to re-validate user role (in milliseconds)
+const ROLE_REVALIDATION_INTERVAL = 60 * 1000; // 1 minute
+
+// ============================================================================
 // NEXTAUTH CONFIGURATION
 // ============================================================================
 
@@ -94,6 +101,7 @@ export const authOptions: NextAuthConfig = {
     /**
      * JWT callback
      * Adds user role and context to JWT token
+     * Periodically revalidates role to detect changes (e.g., master admin config updates)
      */
     async jwt({ token, user, account, trigger }) {
       // Initial sign-in
@@ -112,6 +120,7 @@ export const authOptions: NextAuthConfig = {
             preferred_language: roleInfo.preferred_language,
             last_login_provider: authProvider,
           } as AuthenticatedUser;
+          token.lastRoleCheck = Date.now();
         } catch (error) {
           console.error('JWT callback error:', error);
           // Token will not have user info, which will fail session callback
@@ -133,8 +142,39 @@ export const authOptions: NextAuthConfig = {
             planner_id: roleInfo.planner_id,
             preferred_language: roleInfo.preferred_language,
           } as AuthenticatedUser;
+          token.lastRoleCheck = Date.now();
         } catch (error) {
           console.error('JWT update error:', error);
+        }
+      }
+
+      // Periodic role revalidation - detect config/database changes
+      const lastCheck = (token.lastRoleCheck as number) || 0;
+      const now = Date.now();
+      if (token.user?.email && now - lastCheck > ROLE_REVALIDATION_INTERVAL) {
+        try {
+          const authProvider = mapAuthProvider(token.user.last_login_provider);
+          const roleInfo = await detectUserRole(token.user.email, authProvider);
+
+          // Check if role has changed
+          if (roleInfo.role !== token.user.role) {
+            console.log(
+              `Role changed for ${token.user.email}: ${token.user.role} -> ${roleInfo.role}`
+            );
+            token.user = {
+              ...token.user,
+              id: roleInfo.id,
+              name: roleInfo.name,
+              role: roleInfo.role,
+              wedding_id: roleInfo.wedding_id,
+              planner_id: roleInfo.planner_id,
+              preferred_language: roleInfo.preferred_language,
+            } as AuthenticatedUser;
+          }
+          token.lastRoleCheck = now;
+        } catch (error) {
+          console.error('Role revalidation error:', error);
+          // Keep existing token on error - don't break existing sessions
         }
       }
 

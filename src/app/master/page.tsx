@@ -62,6 +62,7 @@ export default async function MasterDashboardPage() {
               </h1>
               <p className="mt-2 text-base text-gray-600">Platform Overview and Analytics</p>
             </div>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
               href="/api/auth/signout"
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
