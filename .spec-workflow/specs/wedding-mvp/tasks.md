@@ -203,7 +203,7 @@
 
 ## Phase 9: Wedding Admin Module
 
-- [ ] 9.1. Create Wedding Admin guest management API routes
+- [x] 9.1. Create Wedding Admin guest management API routes
   - Files: src/app/api/admin/wedding/route.ts, src/app/api/admin/guests/route.ts, src/app/api/admin/guests/[id]/route.ts
   - Implement GET /api/admin/wedding (get wedding details for admin)
   - Implement PATCH /api/admin/wedding (update wedding config)
@@ -214,7 +214,7 @@
   - _Requirements: Requirement 3 (Wedding Admin Guest Management), Wedding Admin APIs (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend API Developer with expertise in filtering and data management | Task: Create wedding admin API routes with automatic wedding_id filtering from session. GET /wedding returns wedding details including config, guest count, RSVP stats. PATCH /wedding allows updating RSVP cutoff date, payment mode, guest additions. GET /guests lists all families with optional filters (RSVP status, attendance, channel, payment status) and includes family members, RSVP status, payment status. PATCH /guests/:id allows updating family contact info. Implement pagination (50 per page). | Restrictions: Must automatically filter by wedding_id from session, validate wedding_id matches for all operations, implement proper filtering with query parameters, return aggregated RSVP stats, use pagination for guests list, validate update permissions | Success: Wedding admins can only access their assigned wedding, guest list displays correctly with filters working, RSVP stats calculate accurately, updates work correctly with validation, pagination works smoothly, proper multi-tenancy isolation | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting all wedding admin guest management APIs with full specifications, then mark as [x] when complete_
 
-- [ ] 9.2. Create Wedding Admin notifications and reminders API routes
+- [x] 9.2. Create Wedding Admin notifications and reminders API routes
   - Files: src/app/api/admin/notifications/route.ts, src/app/api/admin/notifications/[id]/read/route.ts, src/app/api/admin/notifications/export/route.ts, src/app/api/admin/reminders/route.ts, src/app/api/admin/reminders/preview/route.ts
   - Implement GET /api/admin/notifications (get filtered notifications)
   - Implement PATCH /api/admin/notifications/:id/read (mark as read)
@@ -226,7 +226,7 @@
   - _Requirements: Requirement 7 (Wedding Admin Activity Tracking), Requirement 8 (Manual Reminder System), Wedding Admin APIs (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend API Developer with expertise in notifications and messaging systems | Task: Create notification API routes returning TrackingEvents with unread badges. Implement filters (date range, event type, family, channel, read/unread). Add export generating Excel/CSV with filtered events. Create reminder endpoints: preview identifies families with no RSVP response and returns count/list, send prepares personalized messages with magic links in family's preferred language, creates tracking events with event_type='reminder_sent' and admin_triggered=true. Filter by wedding_id from session. | Restrictions: Must filter by wedding_id automatically, implement date range filtering, sort notifications by timestamp desc, mark read with timestamp, export respects filters, reminders only to families without RSVP, personalize message language per family, validate channel selection | Success: Notifications display correctly with filters, unread badges accurate, mark as read works, export includes filtered data, reminder preview shows correct families, reminders send with personalized languages, tracking events created correctly | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting notification and reminder APIs with specifications, then mark as [x] when complete_
 
-- [ ] 9.3. Create Wedding Admin payment management API routes
+- [x] 9.3. Create Wedding Admin payment management API routes
   - Files: src/app/api/admin/payments/route.ts, src/app/api/admin/payments/[id]/route.ts
   - Implement GET /api/admin/payments (list all payments for wedding)
   - Implement POST /api/admin/payments (manually record payment)
@@ -236,7 +236,7 @@
   - _Requirements: Requirement 6 (Payment Information Display), Wedding Admin APIs (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend API Developer with expertise in payment tracking and financial data | Task: Create payment management API routes filtered by wedding_id. GET /payments lists all Gift records with family info, amount, reference code, status, transaction date. POST /payments allows manual recording with family_id, amount, transaction_date (sets auto_matched=false). PATCH /:id updates gift status (PENDING → RECEIVED → CONFIRMED). Create tracking event for payment_received when status changes to RECEIVED. | Restrictions: Must filter by wedding_id automatically, validate family_id belongs to wedding, ensure amounts are positive decimals, validate transaction dates are reasonable, update family payment status when gift is confirmed, create tracking events for payment state changes | Success: Payments list displays correctly for wedding, manual recording works with validation, status updates work correctly, tracking events created appropriately, family payment status updates when gift confirmed, proper multi-tenancy isolation | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting payment APIs with request/response formats, then mark as [x] when complete_
 
-- [ ] 9.4. Create Wedding Admin guest additions review API routes (conditional)
+- [x] 9.4. Create Wedding Admin guest additions review API routes (conditional)
   - Files: src/app/api/admin/guest-additions/route.ts, src/app/api/admin/guest-additions/[id]/route.ts
   - Implement GET /api/admin/guest-additions (list guest-added members)
   - Implement PATCH /api/admin/guest-additions/:id (approve/edit addition)
@@ -245,7 +245,7 @@
   - _Requirements: Requirement 12 (Guest Addition Review), Wedding Admin APIs (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Backend API Developer with expertise in approval workflows | Task: Create guest additions API routes filtered by wedding_id. GET /guest-additions lists all FamilyMember records with added_by_guest=true, including family info, member details, and tracking event details (who added, when). PATCH /:id allows updating member details or marking as reviewed. Only return data if wedding.allow_guest_additions=true. | Restrictions: Must filter by wedding_id automatically, only show members with added_by_guest=true, include "NEW" badge for unreviewed additions, check allow_guest_additions setting before returning data, validate member updates | Success: Guest additions display correctly when feature enabled, "NEW" badges show for unreviewed members, editing works with validation, returns empty/disabled when allow_guest_additions=false, proper multi-tenancy isolation | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting guest additions APIs with conditional logic, then mark as [x] when complete_
 
-- [ ] 9.5. Create Wedding Admin UI components and pages
+- [x] 9.5. Create Wedding Admin UI components and pages
   - Files: src/app/admin/page.tsx, src/app/admin/guests/page.tsx, src/app/admin/notifications/page.tsx, src/app/admin/payments/page.tsx, src/components/admin/GuestTable.tsx, src/components/admin/GuestFilters.tsx, src/components/admin/NotificationList.tsx, src/components/admin/ReminderModal.tsx, src/components/admin/PaymentList.tsx, src/components/admin/PaymentForm.tsx, src/components/admin/GuestAdditionsReview.tsx
   - Create wedding admin dashboard with key metrics
   - Create guest management page with table, filters, import/export
