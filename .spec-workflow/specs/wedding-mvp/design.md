@@ -560,6 +560,101 @@ function getTranslations(language: Language): Promise<Record<string, string>>
 
 **Dependencies**: next-intl
 
+### 9. Guest Management Service (`lib/guests/`)
+
+**Purpose**: Handle CRUD operations for guest families and members with validation and audit logging
+
+**Modules**:
+- `crud.ts`: Create, read, update, delete operations for families and members
+- `validation.ts`: Validate family and member data
+- `audit.ts`: Log guest management actions for tracking
+
+**Interfaces**:
+```typescript
+interface CreateFamilyInput {
+  wedding_id: string
+  name: string
+  email?: string
+  phone?: string
+  whatsapp_number?: string
+  channel_preference?: Channel
+  preferred_language: Language
+  members: CreateMemberInput[]
+}
+
+interface CreateMemberInput {
+  name: string
+  type: MemberType
+  age?: number
+  dietary_restrictions?: string
+  accessibility_needs?: string
+}
+
+interface UpdateFamilyInput {
+  name?: string
+  email?: string | null
+  phone?: string | null
+  whatsapp_number?: string | null
+  channel_preference?: Channel | null
+  preferred_language?: Language
+  members?: UpdateMemberInput[]
+}
+
+interface UpdateMemberInput {
+  id?: string // If present, update existing; if absent, create new
+  name?: string
+  type?: MemberType
+  age?: number | null
+  dietary_restrictions?: string | null
+  accessibility_needs?: string | null
+  _delete?: boolean // If true, delete this member
+}
+
+interface DeleteFamilyResult {
+  success: boolean
+  had_rsvp: boolean
+  deleted_members_count: number
+  deleted_events_count: number
+  deleted_gifts_count: number
+}
+
+// Create new family with members
+function createFamily(input: CreateFamilyInput): Promise<Family>
+
+// Get family with all members
+function getFamilyWithMembers(family_id: string, wedding_id: string): Promise<FamilyWithMembers>
+
+// Update family and members
+function updateFamily(
+  family_id: string,
+  wedding_id: string,
+  input: UpdateFamilyInput
+): Promise<FamilyWithMembers>
+
+// Delete family and all related data
+function deleteFamily(
+  family_id: string,
+  wedding_id: string,
+  admin_id: string
+): Promise<DeleteFamilyResult>
+
+// Validate family data
+function validateFamilyData(input: CreateFamilyInput | UpdateFamilyInput): ValidationResult
+
+// Log audit event
+function logAuditEvent(
+  action: 'create' | 'update' | 'delete',
+  family_id: string,
+  wedding_id: string,
+  admin_id: string,
+  details: Record<string, any>
+): Promise<void>
+```
+
+**Dependencies**: Prisma, Magic link generator, Tracking service
+
+**Reuses**: Database client, Magic link generation, Tracking service
+
 ## Data Models
 
 All models are defined in Prisma schema. Key relationships:
@@ -919,7 +1014,10 @@ POST   /api/admin/guests/import          # Import Excel guest list
 GET    /api/admin/guests/export          # Export guest data
 GET    /api/admin/guests/template        # Download Excel template
 GET    /api/admin/guests                 # List all families
-PATCH  /api/admin/guests/:id             # Update family
+POST   /api/admin/guests                 # Create new family
+GET    /api/admin/guests/:id             # Get family details with members
+PATCH  /api/admin/guests/:id             # Update family and members
+DELETE /api/admin/guests/:id             # Delete family
 
 GET    /api/admin/notifications          # Get filtered notifications
 PATCH  /api/admin/notifications/:id/read # Mark notification as read
@@ -1016,6 +1114,40 @@ interface APIResponse<T> {
 }
 ```
 
+## Correctness Properties
+
+A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.
+
+### Guest Management CRUD Properties
+
+Property 1: Family creation requires name
+*For any* family creation attempt, if the family name is empty or missing, the creation should be rejected with a validation error
+**Validates: Requirements 13.2**
+
+Property 2: Family creation generates unique tokens
+*For any* newly created family, the system should generate a unique magic token, and if the wedding is in automated payment mode, a unique reference code
+**Validates: Requirements 13.4**
+
+Property 3: Family update preserves data integrity
+*For any* family update operation, updating contact information, language preference, or channel preference should persist the changes without affecting other family data or members
+**Validates: Requirements 13.6**
+
+Property 4: Member management during family edit
+*For any* family with members, editing should allow adding new members, updating existing member details (name, type, age, dietary restrictions, accessibility needs), and removing members, with all changes persisting correctly
+**Validates: Requirements 13.7, 13.8**
+
+Property 5: Family deletion cascades to related data
+*For any* family with associated members, tracking events, and gifts, deleting the family should remove all related data and return counts of deleted records
+**Validates: Requirements 13.10**
+
+Property 6: RSVP families trigger deletion warning
+*For any* family, if the family has submitted an RSVP (has tracking event with type 'rsvp_submitted'), attempting deletion should trigger a warning flag in the response
+**Validates: Requirements 13.11**
+
+Property 7: Family deletion creates audit log
+*For any* deleted family, the system should create an audit log entry containing the action type, family ID, wedding ID, admin ID, and deletion timestamp
+**Validates: Requirements 13.12**
+
 ## Error Handling
 
 ### Error Scenarios
@@ -1048,6 +1180,27 @@ interface APIResponse<T> {
 #### 6. Payment Matching Ambiguity
 - **Handling**: Flag as "requires manual review" with suggestions
 - **User Impact**: Admin sees unmatched payments list with potential matches
+- **Recovery**: Admin manually assigns payment to correct family
+
+#### 7. Family Creation Validation Failure
+- **Handling**: Return 400 with detailed validation errors (missing name, invalid email format, etc.)
+- **User Impact**: Admin sees form errors highlighting which fields need correction
+- **Recovery**: Admin corrects the invalid fields and resubmits
+
+#### 8. Family Update Conflict
+- **Handling**: Return 409 if family was modified by another admin since form was loaded
+- **User Impact**: Admin sees message that data has changed and form is refreshed with latest data
+- **Recovery**: Admin reviews changes and resubmits with updated data
+
+#### 9. Family Deletion with Active RSVP
+- **Handling**: Return warning flag in response, require explicit confirmation
+- **User Impact**: Admin sees warning dialog explaining family has submitted RSVP
+- **Recovery**: Admin can cancel or confirm deletion with understanding of impact
+
+#### 10. Family Not Found or Access Denied
+- **Handling**: Return 404 if family doesn't exist or doesn't belong to admin's wedding
+- **User Impact**: Admin sees "Family not found" error message
+- **Recovery**: Admin returns to guest list and selects valid family
 - **Recovery**: Admin manually assigns payment to correct family
 
 #### 7. Theme Deletion with Active Usage
@@ -1114,6 +1267,169 @@ describe('trackEvent', () => {
     const events = await getEvents({ wedding_id: 'wed-1' })
     expect(events).toHaveLength(1)
     expect(events[0].family_id).toBe('fam-1')
+  })
+})
+
+// lib/guests/crud.test.ts
+describe('createFamily', () => {
+  it('should reject family creation without name', async () => {
+    await expect(createFamily({
+      wedding_id: 'wed-1',
+      name: '',
+      preferred_language: 'ES',
+      members: []
+    })).rejects.toThrow('Family name is required')
+  })
+
+  it('should generate unique magic token for new family', async () => {
+    const family1 = await createFamily({
+      wedding_id: 'wed-1',
+      name: 'García Family',
+      preferred_language: 'ES',
+      members: []
+    })
+    const family2 = await createFamily({
+      wedding_id: 'wed-1',
+      name: 'López Family',
+      preferred_language: 'ES',
+      members: []
+    })
+    expect(family1.magic_token).toBeTruthy()
+    expect(family2.magic_token).toBeTruthy()
+    expect(family1.magic_token).not.toEqual(family2.magic_token)
+  })
+})
+
+describe('deleteFamily', () => {
+  it('should cascade delete all related data', async () => {
+    const family = await createTestFamily()
+    await createTestMembers(family.id, 3)
+    await createTestTrackingEvents(family.id, 2)
+    
+    const result = await deleteFamily(family.id, family.wedding_id, 'admin-1')
+    
+    expect(result.success).toBe(true)
+    expect(result.deleted_members_count).toBe(3)
+    expect(result.deleted_events_count).toBe(2)
+    
+    const deletedFamily = await prisma.family.findUnique({ where: { id: family.id }})
+    expect(deletedFamily).toBeNull()
+  })
+
+  it('should flag families with RSVP submissions', async () => {
+    const family = await createTestFamily()
+    await trackEvent({
+      family_id: family.id,
+      wedding_id: family.wedding_id,
+      event_type: EventType.RSVP_SUBMITTED,
+      admin_triggered: false
+    })
+    
+    const result = await deleteFamily(family.id, family.wedding_id, 'admin-1')
+    
+    expect(result.had_rsvp).toBe(true)
+  })
+})
+```
+
+### Property-Based Testing
+
+**Tools**: fast-check (for TypeScript/JavaScript)
+
+**Configuration**: Minimum 100 iterations per property test
+
+**Focus Areas**:
+- **Guest CRUD Operations**: Validate properties hold for all valid inputs
+- **Data Integrity**: Ensure operations maintain database consistency
+- **Token Generation**: Verify uniqueness across large sample sizes
+
+**Property Tests for Guest Management**:
+```typescript
+// __tests__/properties/guest-crud.test.ts
+import fc from 'fast-check'
+
+describe('Property: Family creation requires name', () => {
+  it('should reject any family creation without a name', () => {
+    // Feature: wedding-mvp-guest-crud, Property 1: Family creation requires name
+    fc.assert(
+      fc.property(
+        fc.record({
+          wedding_id: fc.uuid(),
+          name: fc.constant(''), // Empty name
+          email: fc.option(fc.emailAddress()),
+          preferred_language: fc.constantFrom('ES', 'EN', 'FR', 'IT', 'DE'),
+          members: fc.array(fc.record({
+            name: fc.string({ minLength: 1 }),
+            type: fc.constantFrom('ADULT', 'CHILD', 'INFANT'),
+            age: fc.option(fc.nat(100))
+          }))
+        }),
+        async (input) => {
+          await expect(createFamily(input)).rejects.toThrow()
+        }
+      ),
+      { numRuns: 100 }
+    )
+  })
+})
+
+describe('Property: Family creation generates unique tokens', () => {
+  it('should generate unique magic tokens for all families', async () => {
+    // Feature: wedding-mvp-guest-crud, Property 2: Family creation generates unique tokens
+    const tokens = new Set<string>()
+    
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          wedding_id: fc.uuid(),
+          name: fc.string({ minLength: 1 }),
+          preferred_language: fc.constantFrom('ES', 'EN', 'FR', 'IT', 'DE'),
+          members: fc.array(fc.record({
+            name: fc.string({ minLength: 1 }),
+            type: fc.constantFrom('ADULT', 'CHILD', 'INFANT')
+          }))
+        }),
+        async (input) => {
+          const family = await createFamily(input)
+          expect(family.magic_token).toBeTruthy()
+          expect(tokens.has(family.magic_token)).toBe(false)
+          tokens.add(family.magic_token)
+        }
+      ),
+      { numRuns: 100 }
+    )
+  })
+})
+
+describe('Property: Family deletion cascades to related data', () => {
+  it('should delete all related data for any family', async () => {
+    // Feature: wedding-mvp-guest-crud, Property 5: Family deletion cascades to related data
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          memberCount: fc.nat(10),
+          eventCount: fc.nat(10),
+          giftCount: fc.nat(5)
+        }),
+        async ({ memberCount, eventCount, giftCount }) => {
+          const family = await createTestFamily()
+          await createTestMembers(family.id, memberCount)
+          await createTestTrackingEvents(family.id, eventCount)
+          await createTestGifts(family.id, giftCount)
+          
+          const result = await deleteFamily(family.id, family.wedding_id, 'admin-1')
+          
+          expect(result.success).toBe(true)
+          expect(result.deleted_members_count).toBe(memberCount)
+          expect(result.deleted_events_count).toBe(eventCount)
+          expect(result.deleted_gifts_count).toBe(giftCount)
+          
+          const deletedFamily = await prisma.family.findUnique({ where: { id: family.id }})
+          expect(deletedFamily).toBeNull()
+        }
+      ),
+      { numRuns: 100 }
+    )
   })
 })
 ```

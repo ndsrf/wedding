@@ -2,6 +2,7 @@
  * Wedding Admin - Guests API Route
  *
  * GET /api/admin/guests - List all families with filters and pagination
+ * POST /api/admin/guests - Create new family
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,6 +12,8 @@ import { requireRole } from '@/lib/auth/middleware';
 import type { APIResponse, ListGuestsResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import type { Prisma } from '@prisma/client';
+import { createFamily } from '@/lib/guests/crud';
+import { createFamilySchema } from '@/lib/guests/validation';
 
 // Validation schema for query parameters
 const listGuestsQuerySchema = z.object({
@@ -264,6 +267,98 @@ export async function GET(request: NextRequest) {
       error: {
         code: API_ERROR_CODES.INTERNAL_ERROR,
         message: 'Failed to fetch guests',
+      },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/admin/guests
+ * Create a new family with members
+ */
+export async function POST(request: NextRequest) {
+  try {
+    // Check authentication and require wedding_admin role
+    const user = await requireRole('wedding_admin');
+
+    if (!user.wedding_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Wedding ID not found in session',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    
+    // Add wedding_id from session
+    const input = {
+      ...body,
+      wedding_id: user.wedding_id,
+    };
+
+    // Validate with schema
+    const validatedInput = createFamilySchema.parse(input);
+
+    // Create family using service
+    const family = await createFamily(validatedInput, user.id);
+
+    const response: APIResponse = {
+      success: true,
+      data: family,
+    };
+
+    return NextResponse.json(response, { status: 201 });
+  } catch (error: unknown) {
+    // Handle authentication errors
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage.includes('UNAUTHORIZED')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.UNAUTHORIZED,
+          message: 'Authentication required',
+        },
+      };
+      return NextResponse.json(response, { status: 401 });
+    }
+
+    if (errorMessage.includes('FORBIDDEN')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Wedding admin role required',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.VALIDATION_ERROR,
+          message: 'Invalid request data',
+          details: error.errors,
+        },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // Handle unexpected errors
+    console.error('Error creating family:', error);
+    const response: APIResponse = {
+      success: false,
+      error: {
+        code: API_ERROR_CODES.INTERNAL_ERROR,
+        message: 'Failed to create family',
       },
     };
     return NextResponse.json(response, { status: 500 });

@@ -11,7 +11,10 @@ import Link from 'next/link';
 import { GuestTable } from '@/components/admin/GuestTable';
 import { GuestFilters } from '@/components/admin/GuestFilters';
 import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
+import { GuestFormModal } from '@/components/admin/GuestFormModal';
+import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
 import type { FamilyWithMembers, GiftStatus } from '@/types/models';
+import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
 
 interface GuestWithStatus extends FamilyWithMembers {
   rsvp_status: string;
@@ -53,6 +56,18 @@ export default function GuestsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState<'guests' | 'additions'>('guests');
+
+  // Modal states
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
+  const [selectedGuest, setSelectedGuest] = useState<GuestWithStatus | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [guestToDelete, setGuestToDelete] = useState<GuestWithStatus | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const fetchGuests = useCallback(async () => {
     setLoading(true);
@@ -157,6 +172,116 @@ export default function GuestsPage() {
 
   const newAdditionsCount = guestAdditions.filter((a) => a.is_new).length;
 
+  // Show notification
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  // Handle add guest
+  const handleAddGuest = () => {
+    setFormMode('add');
+    setSelectedGuest(null);
+    setIsFormModalOpen(true);
+  };
+
+  // Handle edit guest
+  const handleEditGuest = async (guestId: string) => {
+    try {
+      // Fetch full guest details with members
+      const response = await fetch(`/api/admin/guests/${guestId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setFormMode('edit');
+        setSelectedGuest(data.data);
+        setIsFormModalOpen(true);
+      } else {
+        showNotification('error', 'Failed to load guest details');
+      }
+    } catch (error) {
+      console.error('Error loading guest:', error);
+      showNotification('error', 'Failed to load guest details');
+    }
+  };
+
+  // Handle delete guest
+  const handleDeleteGuest = (guestId: string) => {
+    const guest = guests.find((g) => g.id === guestId);
+    if (guest) {
+      setGuestToDelete(guest);
+      setIsDeleteDialogOpen(true);
+    }
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    if (!guestToDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      const response = await fetch(`/api/admin/guests/${guestToDelete.id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', 'Guest deleted successfully');
+        setIsDeleteDialogOpen(false);
+        setGuestToDelete(null);
+        fetchGuests();
+      } else {
+        showNotification('error', data.error?.message || 'Failed to delete guest');
+      }
+    } catch (error) {
+      console.error('Error deleting guest:', error);
+      showNotification('error', 'Failed to delete guest');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Handle form submit
+  const handleFormSubmit = async (formData: {
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    whatsapp_number?: string | null;
+    channel_preference?: string | null;
+    preferred_language: string;
+    members: FamilyMemberFormData[];
+  }) => {
+    try {
+      const url =
+        formMode === 'add'
+          ? '/api/admin/guests'
+          : `/api/admin/guests/${selectedGuest?.id}`;
+      const method = formMode === 'add' ? 'POST' : 'PATCH';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification(
+          'success',
+          formMode === 'add' ? 'Guest added successfully' : 'Guest updated successfully'
+        );
+        setIsFormModalOpen(false);
+        setSelectedGuest(null);
+        fetchGuests();
+      } else {
+        throw new Error(data.error?.message || 'Failed to save guest');
+      }
+    } catch (error) {
+      throw error; // Re-throw to let modal handle it
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -189,7 +314,7 @@ export default function GuestsPage() {
               >
                 Export
               </button>
-              <label className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 cursor-pointer">
+              <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Import
                 <input
                   type="file"
@@ -209,19 +334,28 @@ export default function GuestsPage() {
                       });
                       const data = await response.json();
                       if (data.success) {
-                        alert(`Imported successfully! ${data.data.familiesCreated} families created.`);
+                        showNotification(
+                          'success',
+                          `Imported successfully! ${data.data.familiesCreated} families created.`
+                        );
                         fetchGuests();
                       } else {
-                        alert(`Import failed: ${data.error?.message || 'Unknown error'}`);
+                        showNotification('error', data.error?.message || 'Import failed');
                       }
                     } catch (error) {
                       console.error('Import error:', error);
-                      alert('Import failed. Please try again.');
+                      showNotification('error', 'Import failed. Please try again.');
                     }
                     e.target.value = '';
                   }}
                 />
               </label>
+              <button
+                onClick={handleAddGuest}
+                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+              >
+                Add Guest
+              </button>
             </div>
           </div>
         </div>
@@ -266,7 +400,12 @@ export default function GuestsPage() {
             <GuestFilters filters={filters} onFilterChange={setFilters} />
 
             {/* Guest Table */}
-            <GuestTable guests={guests} loading={loading} />
+            <GuestTable
+              guests={guests}
+              loading={loading}
+              onEdit={handleEditGuest}
+              onDelete={handleDeleteGuest}
+            />
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -302,6 +441,103 @@ export default function GuestsPage() {
           />
         )}
       </main>
+
+      {/* Guest Form Modal */}
+      <GuestFormModal
+        isOpen={isFormModalOpen}
+        mode={formMode}
+        initialData={
+          selectedGuest
+            ? {
+                name: selectedGuest.name,
+                email: selectedGuest.email,
+                phone: selectedGuest.phone,
+                whatsapp_number: selectedGuest.whatsapp_number,
+                channel_preference: selectedGuest.channel_preference,
+                preferred_language: selectedGuest.preferred_language,
+                members: selectedGuest.members.map((m) => ({
+                  id: m.id,
+                  name: m.name,
+                  type: m.type,
+                  age: m.age,
+                  dietary_restrictions: m.dietary_restrictions,
+                  accessibility_needs: m.accessibility_needs,
+                })),
+              }
+            : undefined
+        }
+        onSubmit={handleFormSubmit}
+        onCancel={() => {
+          setIsFormModalOpen(false);
+          setSelectedGuest(null);
+        }}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <GuestDeleteDialog
+        isOpen={isDeleteDialogOpen}
+        familyName={guestToDelete?.name || ''}
+        memberCount={guestToDelete?.total_members || 0}
+        hasRsvp={guestToDelete?.rsvp_status === 'submitted'}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setIsDeleteDialogOpen(false);
+          setGuestToDelete(null);
+        }}
+        loading={deleteLoading}
+      />
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+          <div
+            className={`rounded-lg shadow-lg p-4 ${
+              notification.type === 'success'
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}
+          >
+            <div className="flex items-start">
+              {notification.type === 'success' ? (
+                <svg
+                  className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+              <p
+                className={`text-sm ${
+                  notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+                }`}
+              >
+                {notification.message}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

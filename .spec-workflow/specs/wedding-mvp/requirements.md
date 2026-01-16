@@ -68,6 +68,25 @@ This MVP establishes the foundation for a wedding management platform that:
 9. WHEN a wedding admin adds additional admins THEN the system SHALL send invitation emails and grant them access to this wedding only
 10. WHEN a wedding admin sets an RSVP cutoff date THEN the system SHALL enforce read-only access for guests after that date
 
+### Requirement 13: Manual Guest Family Management
+
+**User Story:** As a wedding admin, I want to manually add, edit, and delete guest families from the admin interface, so that I can manage my guest list without requiring Excel imports.
+
+#### Acceptance Criteria
+
+1. WHEN a wedding admin clicks "Add Guest" THEN the system SHALL display a form to create a new guest family
+2. WHEN creating a new family THEN the system SHALL require family name and allow optional contact information (email, phone, WhatsApp)
+3. WHEN creating a new family THEN the system SHALL allow adding multiple family members with name, type (adult/child/infant), and optional age
+4. WHEN a new family is created THEN the system SHALL generate a unique magic token and reference code (if automated payment mode)
+5. WHEN a wedding admin clicks "Edit" on a guest family THEN the system SHALL display a form with current family and member information
+6. WHEN editing a family THEN the system SHALL allow updating family contact information, language preference, and channel preference
+7. WHEN editing a family THEN the system SHALL allow adding, editing, or removing family members
+8. WHEN editing family members THEN the system SHALL allow updating name, type, age, dietary restrictions, and accessibility needs
+9. WHEN a wedding admin clicks "Delete" on a guest family THEN the system SHALL display a confirmation dialog
+10. WHEN a family deletion is confirmed THEN the system SHALL remove the family and all associated members, tracking events, and gifts
+11. IF a family has submitted an RSVP THEN the system SHALL warn the admin before deletion
+12. WHEN a family is deleted THEN the system SHALL create an audit log entry for tracking purposes
+
 ### Requirement 4: Magic Link Guest Authentication
 
 **User Story:** As a guest family, I want to access my RSVP page without creating an account, so that I can respond quickly without authentication barriers.

@@ -1,0 +1,258 @@
+/**
+ * Guest Form Modal Component
+ *
+ * Modal for adding/editing guest families with members
+ */
+
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { FamilyMemberForm, type FamilyMemberFormData } from './FamilyMemberForm';
+import type { Language, Channel } from '@/types/models';
+
+interface GuestFormData {
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  whatsapp_number?: string | null;
+  channel_preference?: Channel | null;
+  preferred_language: Language;
+  members: FamilyMemberFormData[];
+}
+
+interface GuestFormModalProps {
+  isOpen: boolean;
+  mode: 'add' | 'edit';
+  initialData?: GuestFormData;
+  onSubmit: (data: GuestFormData) => Promise<void>;
+  onCancel: () => void;
+}
+
+const defaultFormData: GuestFormData = {
+  name: '',
+  email: null,
+  phone: null,
+  whatsapp_number: null,
+  channel_preference: null,
+  preferred_language: 'ES',
+  members: [],
+};
+
+export function GuestFormModal({
+  isOpen,
+  mode,
+  initialData,
+  onSubmit,
+  onCancel,
+}: GuestFormModalProps) {
+  const [formData, setFormData] = useState<GuestFormData>(defaultFormData);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Reset form when modal opens/closes or initialData changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialData || defaultFormData);
+      setError(null);
+    }
+  }, [isOpen, initialData]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // Validate required fields
+    if (!formData.name.trim()) {
+      setError('Family name is required');
+      return;
+    }
+
+    // Validate members
+    const activeMembers = formData.members.filter((m) => !m._delete);
+    for (const member of activeMembers) {
+      if (!member.name.trim()) {
+        setError('All members must have a name');
+        return;
+      }
+    }
+
+    setLoading(true);
+    try {
+      await onSubmit(formData);
+      // Success - parent will close modal
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save guest');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onCancel} />
+
+      {/* Modal */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {mode === 'add' ? 'Add Guest Family' : 'Edit Guest Family'}
+              </h2>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            {/* Form Fields */}
+            <div className="space-y-4">
+              {/* Family Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Family Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={formData.email || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value || null })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={formData.phone || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value || null })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                  <input
+                    type="tel"
+                    value={formData.whatsapp_number || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, whatsapp_number: e.target.value || null })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Preferred Channel
+                  </label>
+                  <select
+                    value={formData.channel_preference || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        channel_preference: (e.target.value as Channel) || null,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="">None</option>
+                    <option value="WHATSAPP">WhatsApp</option>
+                    <option value="EMAIL">Email</option>
+                    <option value="SMS">SMS</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Language Preference */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Language Preference
+                </label>
+                <select
+                  value={formData.preferred_language}
+                  onChange={(e) =>
+                    setFormData({ ...formData, preferred_language: e.target.value as Language })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                >
+                  <option value="ES">Spanish</option>
+                  <option value="EN">English</option>
+                  <option value="FR">French</option>
+                  <option value="IT">Italian</option>
+                  <option value="DE">German</option>
+                </select>
+              </div>
+
+              {/* Family Members */}
+              <div className="border-t border-gray-200 pt-4">
+                <FamilyMemberForm
+                  members={formData.members}
+                  onChange={(members) => setFormData({ ...formData, members })}
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={loading}
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+              >
+                {loading ? 'Saving...' : mode === 'add' ? 'Add Guest' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

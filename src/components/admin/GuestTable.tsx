@@ -20,6 +20,7 @@ interface GuestWithStatus extends FamilyWithMembers {
 interface GuestTableProps {
   guests: GuestWithStatus[];
   onEdit?: (guestId: string) => void;
+  onDelete?: (guestId: string) => void;
   loading?: boolean;
 }
 
@@ -60,7 +61,7 @@ const getPaymentBadgeClass = (status: GiftStatus | null): string => {
   return classes[status] || 'bg-gray-100 text-gray-800';
 };
 
-export function GuestTable({ guests, onEdit, loading }: GuestTableProps) {
+export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProps) {
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
@@ -124,6 +125,11 @@ export function GuestTable({ guests, onEdit, loading }: GuestTableProps) {
                   Actions
                 </th>
               )}
+              {onDelete && !onEdit && (
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -163,14 +169,26 @@ export function GuestTable({ guests, onEdit, loading }: GuestTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {getLanguageLabel(guest.preferred_language)}
                 </td>
-                {onEdit && (
+                {(onEdit || onDelete) && (
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => onEdit(guest.id)}
-                      className="text-purple-600 hover:text-purple-900"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      {onEdit && (
+                        <button
+                          onClick={() => onEdit(guest.id)}
+                          className="text-purple-600 hover:text-purple-900"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(guest.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </td>
                 )}
               </tr>
@@ -190,13 +208,25 @@ export function GuestTable({ guests, onEdit, loading }: GuestTableProps) {
                   <p className="text-sm text-gray-500">{guest.email}</p>
                 )}
               </div>
-              {onEdit && (
-                <button
-                  onClick={() => onEdit(guest.id)}
-                  className="text-purple-600 hover:text-purple-900 text-sm"
-                >
-                  Edit
-                </button>
+              {(onEdit || onDelete) && (
+                <div className="flex gap-2">
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(guest.id)}
+                      className="text-purple-600 hover:text-purple-900 text-sm"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(guest.id)}
+                      className="text-red-600 hover:text-red-900 text-sm"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
