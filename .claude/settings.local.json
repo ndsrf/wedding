@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill:*)",
+      "Bash(npm install)",
+      "Bash(npm view:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run build:*)",
+      "mcp__spec-workflow__log-implementation",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma format:*)",
+      "Bash(npx prisma validate:*)",
+      "Bash(tree:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run lint:*)",
+      "mcp__spec-workflow__spec-status",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "mcp__spec-workflow__spec-workflow-guide"
+    ]
+  }
+}

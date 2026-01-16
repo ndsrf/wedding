@@ -410,6 +410,7 @@ export interface GuestRSVPPageData {
     additional_info: string | null;
     allow_guest_additions: boolean;
     default_language: Language;
+    payment_tracking_mode: PaymentMode;
   };
   theme: Theme;
   rsvp_cutoff_passed: boolean;
