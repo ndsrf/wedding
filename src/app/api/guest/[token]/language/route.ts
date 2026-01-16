@@ -15,8 +15,9 @@ const VALID_LANGUAGES: Language[] = ['ES', 'EN', 'FR', 'IT', 'DE'];
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  context: { params: Promise<{ token: string }> }
 ) {
+  const params = await context.params;
   try {
     const token = params.token;
 

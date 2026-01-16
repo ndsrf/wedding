@@ -9,8 +9,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { AdminInviteForm } from '@/src/components/planner/AdminInviteForm';
-import type { WeddingWithStats } from '@/src/types/models';
+import { AdminInviteForm } from '@/components/planner/AdminInviteForm';
+import type { WeddingWithStats } from '@/types/models';
 import type { WeddingAdmin } from '@prisma/client';
 
 interface WeddingDetailPageProps {

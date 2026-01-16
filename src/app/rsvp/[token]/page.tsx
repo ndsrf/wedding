@@ -10,11 +10,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import RSVPForm from '@/src/components/guest/RSVPForm';
-import PaymentInfo from '@/src/components/guest/PaymentInfo';
-import LanguageSelector from '@/src/components/guest/LanguageSelector';
-import ConfirmationMessage from '@/src/components/guest/ConfirmationMessage';
-import type { GuestRSVPPageData } from '@/src/types/api';
+import RSVPForm from '@/components/guest/RSVPForm';
+import PaymentInfo from '@/components/guest/PaymentInfo';
+import LanguageSelector from '@/components/guest/LanguageSelector';
+import ConfirmationMessage from '@/components/guest/ConfirmationMessage';
+import type { GuestRSVPPageData } from '@/types/api';
 
 export default function GuestRSVPPage() {
   const params = useParams();
@@ -28,37 +28,46 @@ export default function GuestRSVPPage() {
   const [rsvpSubmitted, setRsvpSubmitted] = useState(false);
 
   useEffect(() => {
+    async function loadRSVPData() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const url = `/api/guest/${token}${channel ? `?channel=${channel}` : ''}`;
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (!result.success) {
+          setError(result.error?.message || 'Failed to load RSVP page');
+          return;
+        }
+
+        setData(result.data);
+        setRsvpSubmitted(result.data.has_submitted_rsvp);
+      } catch (err) {
+        console.error('Load RSVP data error:', err);
+        setError('Unable to load RSVP page. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadRSVPData();
-  }, [token]);
+  }, [token, channel]);
 
-  async function loadRSVPData() {
+  async function handleRSVPSuccess() {
+    setRsvpSubmitted(true);
+    // Reload data to get updated status
     try {
-      setLoading(true);
-      setError(null);
-
       const url = `/api/guest/${token}${channel ? `?channel=${channel}` : ''}`;
       const response = await fetch(url);
       const result = await response.json();
-
-      if (!result.success) {
-        setError(result.error?.message || 'Failed to load RSVP page');
-        return;
+      if (result.success) {
+        setData(result.data);
       }
-
-      setData(result.data);
-      setRsvpSubmitted(result.data.has_submitted_rsvp);
     } catch (err) {
-      console.error('Load RSVP data error:', err);
-      setError('Unable to load RSVP page. Please try again.');
-    } finally {
-      setLoading(false);
+      console.error('Reload RSVP data error:', err);
     }
-  }
-
-  function handleRSVPSuccess() {
-    setRsvpSubmitted(true);
-    // Reload data to get updated status
-    loadRSVPData();
   }
 
   if (loading) {
@@ -82,7 +91,7 @@ export default function GuestRSVPPage() {
           </h1>
           <p className="text-lg text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => loadRSVPData()}
+            onClick={() => window.location.reload()}
             className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
           >
             Try Again
@@ -121,7 +130,7 @@ export default function GuestRSVPPage() {
           <LanguageSelector
             token={token}
             currentLanguage={family.preferred_language}
-            onLanguageChange={loadRSVPData}
+            onLanguageChange={() => window.location.reload()}
           />
         </div>
       </div>

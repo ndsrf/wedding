@@ -5,7 +5,7 @@
 
 import { Prisma } from '@prisma/client';
 import { prisma } from './prisma';
-import { getAllSystemThemes } from '@/src/lib/theme/presets';
+import { getAllSystemThemes } from '@/lib/theme/presets';
 
 /**
  * Seed all system themes into the database

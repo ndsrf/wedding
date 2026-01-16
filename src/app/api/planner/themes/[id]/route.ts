@@ -9,16 +9,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
-import { validateThemeConfig } from '@/src/lib/theme/engine';
-import { isSystemTheme } from '@/src/lib/theme/presets';
+import { requireRole } from '@/lib/auth/middleware';
+import { validateThemeConfig } from '@/lib/theme/engine';
+import { isSystemTheme } from '@/lib/theme/presets';
 import type {
   APIResponse,
   UpdateThemeResponse,
   DeleteThemeResponse,
-} from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
-import type { ThemeConfig } from '@/src/types/theme';
+} from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
+import type { ThemeConfig } from '@/types/theme';
 
 // ============================================================================
 // VALIDATION SCHEMAS

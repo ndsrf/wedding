@@ -5,8 +5,8 @@
  * Used by Next.js middleware and API routes to enforce authorization.
  */
 
-import { auth } from '@/src/lib/auth/config';
-import type { AuthenticatedUser } from '@/src/types/api';
+import { auth } from '@/lib/auth/config';
+import type { AuthenticatedUser } from '@/types/api';
 
 // ============================================================================
 // SESSION AND USER CONTEXT

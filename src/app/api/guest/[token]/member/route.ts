@@ -14,8 +14,9 @@ import type { AddFamilyMemberRequest, AddFamilyMemberResponse } from '@/types/ap
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  context: { params: Promise<{ token: string }> }
 ) {
+  const params = await context.params;
   try {
     const token = params.token;
 

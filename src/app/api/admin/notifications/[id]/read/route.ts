@@ -12,9 +12,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
-import type { APIResponse, MarkNotificationReadResponse } from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import type { APIResponse, MarkNotificationReadResponse } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 
 interface RouteParams {
   params: Promise<{ id: string }>;

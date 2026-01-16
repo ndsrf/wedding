@@ -6,9 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
-import type { APIResponse, PlannerStatsResponse, PlannerStats } from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import type { APIResponse, PlannerStatsResponse, PlannerStats } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 
 /**
  * GET /api/planner/stats

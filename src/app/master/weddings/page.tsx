@@ -9,8 +9,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { WeddingList } from '@/src/components/master/WeddingList';
-import { useNamespacedTranslations } from '@/src/lib/i18n/client';
+import { WeddingList } from '@/components/master/WeddingList';
+import { useNamespacedTranslations } from '@/lib/i18n/client';
 
 interface Wedding {
   id: string;

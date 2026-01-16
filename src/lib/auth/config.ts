@@ -9,8 +9,8 @@ import NextAuth, { type NextAuthConfig } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 import AppleProvider from 'next-auth/providers/apple';
-import { detectUserRole, mapAuthProvider } from '@/src/lib/auth/oauth';
-import type { AuthenticatedUser } from '@/src/types/api';
+import { detectUserRole, mapAuthProvider } from '@/lib/auth/oauth';
+import type { AuthenticatedUser } from '@/types/api';
 
 // ============================================================================
 // CONSTANTS

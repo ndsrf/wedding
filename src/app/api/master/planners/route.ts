@@ -8,14 +8,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
+import { requireRole } from '@/lib/auth/middleware';
 import type {
   APIResponse,
   ListPlannersResponse,
   CreatePlannerResponse,
   CreatePlannerRequest,
-} from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+} from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 
 // Validation schema for creating a planner
 const createPlannerSchema = z.object({

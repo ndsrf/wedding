@@ -5,11 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole } from '@/src/lib/auth/middleware';
-import { exportGuestData, exportGuestDataSimplified } from '@/src/lib/excel/export';
-import type { ExportFormat } from '@/src/lib/excel/export';
-import type { APIResponse } from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import { exportGuestData, exportGuestDataSimplified } from '@/lib/excel/export';
+import type { ExportFormat } from '@/lib/excel/export';
+import type { APIResponse } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 
 /**
  * GET /api/admin/guests/export

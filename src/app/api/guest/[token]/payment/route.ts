@@ -15,9 +15,10 @@ import type { GetPaymentInfoResponse, PaymentInfo } from '@/types/api';
 const WEDDING_IBAN = process.env.WEDDING_IBAN || 'ES91 2100 0418 4502 0005 1332';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { token: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ token: string }> }
 ) {
+  const params = await context.params;
   try {
     const token = params.token;
 

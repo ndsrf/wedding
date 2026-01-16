@@ -6,10 +6,10 @@
  */
 
 import { redirect } from 'next/navigation';
-import { requireRole } from '@/src/lib/auth/middleware';
-import { AnalyticsCard } from '@/src/components/master/AnalyticsCard';
+import { requireRole } from '@/lib/auth/middleware';
+import { AnalyticsCard } from '@/components/master/AnalyticsCard';
 import { prisma } from '@/lib/db/prisma';
-import type { MasterAnalytics } from '@/src/types/api';
+import type { MasterAnalytics } from '@/types/api';
 
 /**
  * Fetch platform analytics directly from database

@@ -12,7 +12,7 @@ import {
   ThemeCacheEntry,
   DEFAULT_THEME_CONFIG,
   ThemeConfigWithDefaults,
-} from '@/src/types/theme';
+} from '@/types/theme';
 
 // ============================================================================
 // THEME CACHE

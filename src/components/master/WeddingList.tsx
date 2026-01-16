@@ -8,7 +8,7 @@
 'use client';
 
 import React from 'react';
-import { useNamespacedTranslations, useFormatDate } from '@/src/lib/i18n/client';
+import { useNamespacedTranslations, useFormatDate } from '@/lib/i18n/client';
 
 interface Wedding {
   id: string;

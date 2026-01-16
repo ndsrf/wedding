@@ -7,9 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
-import type { APIResponse, UpdatePlannerResponse, UpdatePlannerRequest } from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import type { APIResponse, UpdatePlannerResponse, UpdatePlannerRequest } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 
 // Validation schema for updating a planner
 const updatePlannerSchema = z.object({

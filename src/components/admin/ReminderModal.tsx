@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { Language, Channel } from '@/src/types/models';
+import type { Language, Channel } from '@/types/models';
 
 interface ReminderFamily {
   id: string;

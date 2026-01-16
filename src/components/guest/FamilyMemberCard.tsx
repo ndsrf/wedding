@@ -7,7 +7,7 @@
 
 'use client';
 
-import type { FamilyMember } from '@/src/types/models';
+import type { FamilyMember } from '@/types/models';
 
 interface FamilyMemberCardProps {
   member: FamilyMember;

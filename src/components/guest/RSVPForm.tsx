@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import FamilyMemberCard from './FamilyMemberCard';
-import type { FamilyWithMembers } from '@/src/types/models';
+import type { FamilyWithMembers } from '@/types/models';
 
 interface RSVPFormProps {
   token: string;

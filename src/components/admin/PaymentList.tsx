@@ -7,7 +7,7 @@
 'use client';
 
 import React from 'react';
-import type { GiftStatus } from '@/src/types/models';
+import type { GiftStatus } from '@/types/models';
 
 interface PaymentItem {
   id: string;

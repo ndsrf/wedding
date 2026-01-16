@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateMagicLink, extractChannelFromUrl } from '@/lib/auth/magic-link';
+import { validateMagicLink } from '@/lib/auth/magic-link';
 import { trackRSVPSubmitted } from '@/lib/tracking/events';
 import { prisma } from '@/lib/db/prisma';
 import type { SubmitRSVPRequest, SubmitRSVPResponse } from '@/types/api';
@@ -15,8 +15,9 @@ import type { Channel } from '@prisma/client';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  context: { params: Promise<{ token: string }> }
 ) {
+  const params = await context.params;
   try {
     const token = params.token;
 

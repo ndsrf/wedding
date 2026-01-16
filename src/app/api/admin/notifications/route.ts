@@ -14,10 +14,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
-import type { APIResponse, PaginatedResponse } from '@/src/types/api';
-import type { Notification } from '@/src/types/models';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import type { APIResponse, PaginatedResponse } from '@/types/api';
+import type { Notification } from '@/types/models';
+import { API_ERROR_CODES } from '@/types/api';
 import type { Prisma } from '@prisma/client';
 
 // Validation schema for query parameters

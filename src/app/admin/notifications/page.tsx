@@ -8,9 +8,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { NotificationList } from '@/src/components/admin/NotificationList';
-import { ReminderModal } from '@/src/components/admin/ReminderModal';
-import type { EventType, Channel, Language } from '@/src/types/models';
+import { NotificationList } from '@/components/admin/NotificationList';
+import { ReminderModal } from '@/components/admin/ReminderModal';
+import type { EventType, Channel, Language } from '@/types/models';
 
 interface NotificationItem {
   id: string;

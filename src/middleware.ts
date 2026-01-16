@@ -9,7 +9,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import type { AuthenticatedUser } from '@/src/types/api';
+import type { AuthenticatedUser } from '@/types/api';
 
 // ============================================================================
 // ROUTE CONFIGURATION

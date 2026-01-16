@@ -8,7 +8,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { PaymentInfo as PaymentInfoType } from '@/src/types/api';
+import type { PaymentInfo as PaymentInfoType } from '../../types/api';
 
 interface PaymentInfoProps {
   token: string;
@@ -21,23 +21,23 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
   const [copied, setCopied] = useState<'iban' | 'reference' | null>(null);
 
   useEffect(() => {
+    async function loadPaymentInfo() {
+      try {
+        const response = await fetch(`/api/guest/${token}/payment`);
+        const result = await response.json();
+
+        if (result.success) {
+          setPaymentInfo(result.data);
+        }
+      } catch (error) {
+        console.error('Load payment info error:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadPaymentInfo();
   }, [token]);
-
-  async function loadPaymentInfo() {
-    try {
-      const response = await fetch(`/api/guest/${token}/payment`);
-      const result = await response.json();
-
-      if (result.success) {
-        setPaymentInfo(result.data);
-      }
-    } catch (error) {
-      console.error('Load payment info error:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function copyToClipboard(text: string, type: 'iban' | 'reference') {
     try {

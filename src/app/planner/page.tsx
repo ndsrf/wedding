@@ -7,12 +7,12 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { requireRole } from '@/src/lib/auth/middleware';
+import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
-import { StatsCard } from '@/src/components/planner/StatsCard';
-import { WeddingCard } from '@/src/components/planner/WeddingCard';
-import type { PlannerStats } from '@/src/types/api';
-import type { AuthenticatedUser } from '@/src/types/api';
+import { StatsCard } from '@/components/planner/StatsCard';
+import { WeddingCard } from '@/components/planner/WeddingCard';
+import type { PlannerStats } from '@/types/api';
+import type { AuthenticatedUser } from '@/types/api';
 
 /**
  * Get planner statistics directly from database

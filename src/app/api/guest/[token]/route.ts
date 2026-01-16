@@ -7,15 +7,17 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateMagicLink, extractChannelFromUrl } from '@/lib/auth/magic-link';
+import { validateMagicLink } from '@/lib/auth/magic-link';
 import { trackLinkOpened } from '@/lib/tracking/events';
 import type { GetGuestRSVPPageResponse, GuestRSVPPageData } from '@/types/api';
 import type { Channel } from '@prisma/client';
+import type { ThemeConfig } from '@/types/theme';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  context: { params: Promise<{ token: string }> }
 ) {
+  const params = await context.params;
   try {
     const token = params.token;
 
@@ -57,6 +59,48 @@ export async function GET(
       (member) => member.attending !== null
     );
 
+    // Prepare theme with proper typing
+    const themeData = theme ? {
+      id: theme.id,
+      planner_id: theme.planner_id,
+      name: theme.name,
+      description: theme.description,
+      is_default: theme.is_default,
+      is_system_theme: theme.is_system_theme,
+      config: theme.config as unknown as ThemeConfig,
+      preview_image_url: theme.preview_image_url,
+      created_at: theme.created_at,
+      updated_at: theme.updated_at,
+    } : {
+      id: 'default',
+      planner_id: null,
+      name: 'Default Theme',
+      description: 'Default system theme',
+      is_default: true,
+      is_system_theme: true,
+      config: {
+        colors: {
+          primary: '#4F46E5',
+          secondary: '#EC4899',
+          accent: '#F59E0B',
+          background: '#FFFFFF',
+          text: '#1F2937',
+        },
+        fonts: {
+          heading: 'Georgia, serif',
+          body: 'system-ui, sans-serif',
+        },
+        styles: {
+          buttonRadius: '0.5rem',
+          cardShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          spacing: '1rem',
+        },
+      } as ThemeConfig,
+      preview_image_url: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
     // Prepare response data
     const responseData: GuestRSVPPageData = {
       family: {
@@ -80,35 +124,7 @@ export async function GET(
         default_language: wedding.default_language,
         payment_tracking_mode: wedding.payment_tracking_mode,
       },
-      theme: theme || {
-        id: 'default',
-        planner_id: null,
-        name: 'Default Theme',
-        description: 'Default system theme',
-        is_default: true,
-        is_system_theme: true,
-        config: {
-          colors: {
-            primary: '#4F46E5',
-            secondary: '#EC4899',
-            accent: '#F59E0B',
-            background: '#FFFFFF',
-            text: '#1F2937',
-          },
-          fonts: {
-            heading: 'Georgia, serif',
-            body: 'system-ui, sans-serif',
-          },
-          styles: {
-            buttonRadius: '0.5rem',
-            cardShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            spacing: '1rem',
-          },
-        },
-        preview_image_url: null,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
+      theme: themeData,
       rsvp_cutoff_passed,
       has_submitted_rsvp,
     };

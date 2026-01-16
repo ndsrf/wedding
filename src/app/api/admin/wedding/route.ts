@@ -8,13 +8,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
+import { requireRole } from '@/lib/auth/middleware';
 import type {
   APIResponse,
   GetWeddingDetailsResponse,
   UpdateWeddingConfigResponse,
-} from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+} from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 
 // Validation schema for updating wedding config
 const updateWeddingConfigSchema = z.object({

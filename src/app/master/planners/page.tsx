@@ -9,9 +9,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { PlannerList } from '@/src/components/master/PlannerList';
-import { PlannerForm } from '@/src/components/master/PlannerForm';
-import { useNamespacedTranslations } from '@/src/lib/i18n/client';
+import { PlannerList } from '@/components/master/PlannerList';
+import { PlannerForm } from '@/components/master/PlannerForm';
+import { useNamespacedTranslations } from '@/lib/i18n/client';
 
 interface Planner {
   id: string;

@@ -9,10 +9,10 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { WeddingCard } from '@/src/components/planner/WeddingCard';
-import { WeddingForm } from '@/src/components/planner/WeddingForm';
-import type { WeddingWithStats, Theme } from '@/src/types/models';
-import type { CreateWeddingRequest } from '@/src/types/api';
+import { WeddingCard } from '@/components/planner/WeddingCard';
+import { WeddingForm } from '@/components/planner/WeddingForm';
+import type { WeddingWithStats, Theme } from '@/types/models';
+import type { CreateWeddingRequest } from '@/types/api';
 
 function PlannerWeddingsContent() {
   const router = useRouter();

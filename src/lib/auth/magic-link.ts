@@ -8,7 +8,7 @@
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
 import type { Family, FamilyMember, Wedding, Theme } from '@prisma/client';
-import type { Channel } from '@/src/types/models';
+import type { Channel } from '@/types/models';
 
 // ============================================================================
 // TYPE DEFINITIONS

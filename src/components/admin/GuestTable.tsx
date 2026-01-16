@@ -8,7 +8,7 @@
 'use client';
 
 import React from 'react';
-import type { FamilyWithMembers, Language, Channel, GiftStatus } from '@/src/types/models';
+import type { FamilyWithMembers, Language, Channel, GiftStatus } from '@/types/models';
 
 interface GuestWithStatus extends FamilyWithMembers {
   rsvp_status: string;

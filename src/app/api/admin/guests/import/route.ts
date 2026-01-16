@@ -5,10 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole } from '@/src/lib/auth/middleware';
-import { importGuestList } from '@/src/lib/excel/import';
-import type { APIResponse } from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import { importGuestList } from '@/lib/excel/import';
+import type { APIResponse } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 import { prisma } from '@/lib/db/prisma';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB

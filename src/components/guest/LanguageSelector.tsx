@@ -56,8 +56,6 @@ export default function LanguageSelector({
     }
   }
 
-  const currentLang = LANGUAGES.find((l) => l.code === currentLanguage);
-
   return (
     <div className="relative">
       <select

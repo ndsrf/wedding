@@ -14,9 +14,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
-import type { APIResponse, SendRemindersResponse } from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import type { APIResponse, SendRemindersResponse } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 import type { Language } from '@prisma/client';
 
 // Validation schema for send reminders request

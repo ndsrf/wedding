@@ -8,7 +8,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useNamespacedTranslations } from '@/src/lib/i18n/client';
+import { useNamespacedTranslations } from '@/lib/i18n/client';
 
 interface PlannerFormData {
   name: string;

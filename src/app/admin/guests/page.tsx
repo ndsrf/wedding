@@ -8,10 +8,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { GuestTable } from '@/src/components/admin/GuestTable';
-import { GuestFilters } from '@/src/components/admin/GuestFilters';
-import { GuestAdditionsReview } from '@/src/components/admin/GuestAdditionsReview';
-import type { FamilyWithMembers, GiftStatus } from '@/src/types/models';
+import { GuestTable } from '@/components/admin/GuestTable';
+import { GuestFilters } from '@/components/admin/GuestFilters';
+import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
+import type { FamilyWithMembers, GiftStatus } from '@/types/models';
 
 interface GuestWithStatus extends FamilyWithMembers {
   rsvp_status: string;

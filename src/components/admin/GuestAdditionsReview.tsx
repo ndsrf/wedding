@@ -7,7 +7,7 @@
 'use client';
 
 import React from 'react';
-import type { MemberType } from '@/src/types/models';
+import type { MemberType } from '@/types/models';
 
 interface GuestAddition {
   id: string;

@@ -8,7 +8,7 @@
 'use client';
 
 import React from 'react';
-import type { EventType, Channel } from '@/src/types/models';
+import type { EventType, Channel } from '@/types/models';
 
 interface NotificationItem {
   id: string;

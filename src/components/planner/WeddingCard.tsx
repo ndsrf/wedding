@@ -9,7 +9,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import type { WeddingWithStats } from '@/src/types/models';
+import type { WeddingWithStats } from '@/types/models';
 
 interface WeddingCardProps {
   wedding: WeddingWithStats;

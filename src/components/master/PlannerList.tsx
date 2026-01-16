@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { useNamespacedTranslations, useFormatDate } from '@/src/lib/i18n/client';
+import { useNamespacedTranslations, useFormatDate } from '@/lib/i18n/client';
 
 interface Planner {
   id: string;

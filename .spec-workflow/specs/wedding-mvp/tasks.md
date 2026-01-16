@@ -286,7 +286,7 @@
 
 ## Phase 11: Tracking & Notifications System
 
-- [ ] 11.1. Create tracking service
+- [x] 11.1. Create tracking service
   - Files: src/lib/tracking/events.ts
   - Implement trackEvent(event) to create TrackingEvent records
   - Implement getEvents(filter) to query events with filters
@@ -298,7 +298,7 @@
 
 ## Phase 12: Email Service
 
-- [ ] 12.1. Create Resend email service
+- [x] 12.1. Create Resend email service
   - Files: src/lib/email/resend.ts, src/lib/email/templates/planner-invitation.tsx, src/lib/email/templates/admin-invitation.tsx, src/lib/email/templates/rsvp-reminder.tsx, src/lib/email/templates/rsvp-confirmation.tsx, src/lib/email/templates/payment-confirmation.tsx
   - Set up Resend API client
   - Create sendEmail function with template support

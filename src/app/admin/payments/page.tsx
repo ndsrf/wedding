@@ -8,9 +8,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { PaymentList } from '@/src/components/admin/PaymentList';
-import { PaymentForm } from '@/src/components/admin/PaymentForm';
-import type { GiftStatus } from '@/src/types/models';
+import { PaymentList } from '@/components/admin/PaymentList';
+import { PaymentForm } from '@/components/admin/PaymentForm';
+import type { GiftStatus } from '@/types/models';
 
 interface PaymentItem {
   id: string;

@@ -6,7 +6,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import type { EventType, Channel } from '@prisma/client';
+import type { EventType, Channel, Prisma } from '@prisma/client';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -49,7 +49,7 @@ export async function trackEvent(options: TrackEventOptions) {
         wedding_id,
         event_type,
         channel: channel || null,
-        metadata: metadata || null,
+        metadata: metadata ? (metadata as Prisma.InputJsonValue) : undefined,
         admin_triggered,
       },
     });
@@ -113,4 +113,108 @@ export async function trackGuestAdded(
     event_type: 'GUEST_ADDED',
     metadata: { member_name },
   });
+}
+
+/**
+ * Track payment received event
+ * Helper for tracking when a payment is received from a family
+ */
+export async function trackPaymentReceived(
+  family_id: string,
+  wedding_id: string,
+  amount: number,
+  metadata?: Record<string, unknown>
+) {
+  return trackEvent({
+    family_id,
+    wedding_id,
+    event_type: 'PAYMENT_RECEIVED',
+    metadata: { amount, ...metadata },
+  });
+}
+
+/**
+ * Track reminder sent event
+ * Helper for tracking when a reminder is sent to a family
+ */
+export async function trackReminderSent(
+  family_id: string,
+  wedding_id: string,
+  channel: Channel,
+  admin_id?: string
+) {
+  return trackEvent({
+    family_id,
+    wedding_id,
+    event_type: 'REMINDER_SENT',
+    channel,
+    metadata: admin_id ? { admin_id } : undefined,
+    admin_triggered: true,
+  });
+}
+
+// ============================================================================
+// QUERY FUNCTIONS
+// ============================================================================
+
+export interface EventFilter {
+  wedding_id: string; // Required for multi-tenancy
+  family_id?: string;
+  event_type?: EventType[];
+  channel?: Channel;
+  date_from?: Date;
+  date_to?: Date;
+}
+
+/**
+ * Get events with filtering
+ * Query TrackingEvent records with various filters
+ *
+ * @param filter - Event filter options (wedding_id is required)
+ * @returns Array of tracking events sorted by timestamp descending
+ */
+export async function getEvents(filter: EventFilter) {
+  const {
+    wedding_id,
+    family_id,
+    event_type,
+    channel,
+    date_from,
+    date_to,
+  } = filter;
+
+  try {
+    const events = await prisma.trackingEvent.findMany({
+      where: {
+        wedding_id,
+        ...(family_id && { family_id }),
+        ...(event_type && event_type.length > 0 && { event_type: { in: event_type } }),
+        ...(channel && { channel }),
+        ...(date_from || date_to
+          ? {
+              timestamp: {
+                ...(date_from && { gte: date_from }),
+                ...(date_to && { lte: date_to }),
+              },
+            }
+          : {}),
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+      include: {
+        family: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return events;
+  } catch (error) {
+    console.error('Failed to get events:', error);
+    throw error;
+  }
 }

@@ -7,9 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/src/lib/auth/middleware';
-import type { APIResponse, ListMasterWeddingsResponse } from '@/src/types/api';
-import { API_ERROR_CODES } from '@/src/types/api';
+import { requireRole } from '@/lib/auth/middleware';
+import type { APIResponse, ListMasterWeddingsResponse } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
 
 // Validation schema for query parameters
 const listWeddingsQuerySchema = z.object({

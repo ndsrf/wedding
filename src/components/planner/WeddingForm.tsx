@@ -8,8 +8,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { CreateWeddingRequest } from '@/src/types/api';
-import type { Theme, Wedding } from '@/src/types/models';
+import type { CreateWeddingRequest } from '@/types/api';
+import type { Theme, Wedding } from '@/types/models';
 import { Language, PaymentMode } from '@prisma/client';
 
 interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'rsvp_cutoff_date'> {

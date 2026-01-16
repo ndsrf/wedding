@@ -18,7 +18,7 @@ import {
   ThemePresetInfo,
   PRESET_THEMES,
   THEME_PRESET_INFO,
-} from '@/src/types/theme';
+} from '@/types/theme';
 
 // ============================================================================
 // SYSTEM THEMES EXPORT
