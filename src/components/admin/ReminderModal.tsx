@@ -7,6 +7,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Language, Channel } from '@/types/models';
 
 interface ReminderFamily {
@@ -24,17 +25,6 @@ interface ReminderModalProps {
   loading?: boolean;
 }
 
-const getLanguageLabel = (lang: Language): string => {
-  const labels: Record<Language, string> = {
-    ES: 'Spanish',
-    EN: 'English',
-    FR: 'French',
-    IT: 'Italian',
-    DE: 'German',
-  };
-  return labels[lang] || lang;
-};
-
 export function ReminderModal({
   isOpen,
   onClose,
@@ -42,6 +32,7 @@ export function ReminderModal({
   onSendReminders,
   loading,
 }: ReminderModalProps) {
+  const t = useTranslations();
   const [selectedChannel, setSelectedChannel] = useState<Channel>('EMAIL');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +51,7 @@ export function ReminderModal({
         setSuccess(false);
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send reminders');
+      setError(err instanceof Error ? err.message : t('common.errors.generic'));
     } finally {
       setSending(false);
     }
@@ -90,7 +81,7 @@ export function ReminderModal({
         <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Send Reminders</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('admin.reminders.send')}</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500"
@@ -104,16 +95,16 @@ export function ReminderModal({
           {loading ? (
             <div className="py-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-              <p className="mt-4 text-gray-500">Loading preview...</p>
+              <p className="mt-4 text-gray-500">{t('admin.reminders.loadingPreview')}</p>
             </div>
           ) : success ? (
             <div className="py-8 text-center">
               <svg className="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Reminders sent!</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.reminders.sendSuccess')}</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {eligibleFamilies.length} families will receive reminders.
+                {t('admin.reminders.sendSuccessDesc', { count: eligibleFamilies.length })}
               </p>
             </div>
           ) : eligibleFamilies.length === 0 ? (
@@ -121,9 +112,9 @@ export function ReminderModal({
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">All caught up!</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.reminders.allCaughtUp')}</h3>
               <p className="mt-1 text-sm text-gray-500">
-                All families have already submitted their RSVP.
+                {t('admin.reminders.allCaughtUpDesc')}
               </p>
             </div>
           ) : (
@@ -131,19 +122,21 @@ export function ReminderModal({
               {/* Preview Summary */}
               <div className="mb-6">
                 <p className="text-sm text-gray-600 mb-4">
-                  <span className="font-medium text-purple-600">{eligibleFamilies.length}</span>{' '}
-                  families have not yet responded to the RSVP.
+                  {t.rich('admin.reminders.summary', {
+                    count: eligibleFamilies.length,
+                    strong: (chunks) => <span className="font-medium text-purple-600">{chunks}</span>
+                  })}
                 </p>
 
                 {/* Language breakdown */}
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs font-medium text-gray-500 uppercase mb-2">
-                    By Language
+                    {t('admin.reminders.byLanguage')}
                   </p>
                   <div className="space-y-1">
                     {Object.entries(familiesByLanguage).map(([lang, families]) => (
                       <div key={lang} className="flex justify-between text-sm">
-                        <span className="text-gray-600">{getLanguageLabel(lang as Language)}</span>
+                        <span className="text-gray-600">{t(`common.languages.${lang}`)}</span>
                         <span className="font-medium text-gray-900">{families.length}</span>
                       </div>
                     ))}
@@ -154,7 +147,7 @@ export function ReminderModal({
               {/* Channel Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Send via
+                  {t('admin.reminders.sendVia')}
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {(['EMAIL', 'WHATSAPP', 'SMS'] as Channel[]).map((channel) => (
@@ -167,7 +160,7 @@ export function ReminderModal({
                           : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      {channel === 'WHATSAPP' ? 'WhatsApp' : channel}
+                      {t(`common.channels.${channel}`)}
                     </button>
                   ))}
                 </div>
@@ -176,7 +169,7 @@ export function ReminderModal({
               {/* Family Preview (collapsible) */}
               <details className="mb-6">
                 <summary className="text-sm text-purple-600 cursor-pointer hover:text-purple-800">
-                  View all {eligibleFamilies.length} families
+                  {t('admin.reminders.viewAll', { count: eligibleFamilies.length })}
                 </summary>
                 <div className="mt-2 max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-3">
                   <ul className="space-y-1">
@@ -184,7 +177,7 @@ export function ReminderModal({
                       <li key={family.id} className="text-sm text-gray-600">
                         {family.name}
                         <span className="text-gray-400 ml-2">
-                          ({getLanguageLabel(family.preferred_language)})
+                          ({t(`common.languages.${family.preferred_language}`)})
                         </span>
                       </li>
                     ))}
@@ -206,14 +199,14 @@ export function ReminderModal({
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                   disabled={sending}
                 >
-                  Cancel
+                  {t('common.buttons.cancel')}
                 </button>
                 <button
                   onClick={handleSend}
                   disabled={sending}
                   className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {sending ? 'Sending...' : `Send ${eligibleFamilies.length} Reminders`}
+                  {sending ? t('admin.reminders.sending') : t('admin.reminders.sendAction', { count: eligibleFamilies.length })}
                 </button>
               </div>
             </>

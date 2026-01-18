@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { PaymentList } from '@/components/admin/PaymentList';
 import { PaymentForm } from '@/components/admin/PaymentForm';
 import type { GiftStatus } from '@/types/models';
@@ -41,6 +42,7 @@ interface Filters {
 type GuestStatusFilter = 'all' | 'attending' | 'not_attending';
 
 export default function PaymentsPage() {
+  const t = useTranslations();
   const [payments, setPayments] = useState<PaymentItem[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
   const [filters, setFilters] = useState<Filters>({});
@@ -169,7 +171,7 @@ export default function PaymentsPage() {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.error?.message || 'Failed to record payment');
+      throw new Error(result.error?.message || t('common.errors.generic'));
     }
 
     setShowForm(false);
@@ -196,7 +198,7 @@ export default function PaymentsPage() {
                 </svg>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Payment Tracking</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('admin.payments.tracking')}</h1>
                 <p className="mt-1 text-sm text-gray-500">
                   {stats.total} payments • {formatCurrency(stats.totalAmount)} total
                 </p>
@@ -207,7 +209,7 @@ export default function PaymentsPage() {
                 onClick={() => setShowForm(!showForm)}
                 className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
               >
-                {showForm ? 'Cancel' : 'Record Payment'}
+                {showForm ? t('common.buttons.cancel') : t('admin.payments.record')}
               </button>
             </div>
           </div>
@@ -219,19 +221,19 @@ export default function PaymentsPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <p className="text-sm font-medium text-gray-600">Total Payments</p>
+            <p className="text-sm font-medium text-gray-600">{t('admin.payments.stats.totalPayments')}</p>
             <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
           </div>
           <div className="bg-yellow-50 p-4 rounded-lg shadow-sm border border-yellow-200">
-            <p className="text-sm font-medium text-yellow-800">Pending</p>
+            <p className="text-sm font-medium text-yellow-800">{t('admin.payments.statuses.pending')}</p>
             <p className="text-2xl font-bold text-yellow-900">{stats.pending}</p>
           </div>
           <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200">
-            <p className="text-sm font-medium text-blue-800">Received</p>
+            <p className="text-sm font-medium text-blue-800">{t('admin.payments.statuses.received')}</p>
             <p className="text-2xl font-bold text-blue-900">{stats.received}</p>
           </div>
           <div className="bg-green-50 p-4 rounded-lg shadow-sm border border-green-200">
-            <p className="text-sm font-medium text-green-800">Confirmed</p>
+            <p className="text-sm font-medium text-green-800">{t('admin.payments.statuses.confirmed')}</p>
             <p className="text-2xl font-bold text-green-900">{stats.confirmed}</p>
           </div>
         </div>
@@ -242,7 +244,7 @@ export default function PaymentsPage() {
             {/* Guest Status Filter for Family Dropdown */}
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
               <label htmlFor="guestStatusFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Show Families
+                {t('admin.payments.showFamilies')}
               </label>
               <select
                 id="guestStatusFilter"
@@ -250,12 +252,12 @@ export default function PaymentsPage() {
                 onChange={(e) => setGuestStatusFilter(e.target.value as GuestStatusFilter)}
                 className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
-                <option value="all">All Families</option>
-                <option value="attending">Attending Only</option>
-                <option value="not_attending">Not Attending Only</option>
+                <option value="all">{t('admin.payments.filterFamilies.all')}</option>
+                <option value="attending">{t('admin.payments.filterFamilies.attending')}</option>
+                <option value="not_attending">{t('admin.payments.filterFamilies.notAttending')}</option>
               </select>
               <p className="mt-1 text-xs text-gray-500">
-                Filter which families appear in the dropdown below
+                {t('admin.payments.filterFamiliesDesc')}
               </p>
             </div>
             <PaymentForm
@@ -271,7 +273,7 @@ export default function PaymentsPage() {
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Status
+                {t('admin.payments.status')}
               </label>
               <select
                 id="status"
@@ -281,10 +283,10 @@ export default function PaymentsPage() {
                 }
                 className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
-                <option value="">All Statuses</option>
-                <option value="PENDING">Pending</option>
-                <option value="RECEIVED">Received</option>
-                <option value="CONFIRMED">Confirmed</option>
+                <option value="">{t('admin.guests.filters.all')}</option>
+                <option value="PENDING">{t('admin.payments.statuses.pending')}</option>
+                <option value="RECEIVED">{t('admin.payments.statuses.received')}</option>
+                <option value="CONFIRMED">{t('admin.payments.statuses.confirmed')}</option>
               </select>
             </div>
             {filters.status && (
@@ -292,7 +294,7 @@ export default function PaymentsPage() {
                 onClick={() => setFilters({})}
                 className="text-sm text-purple-600 hover:text-purple-800 self-end pb-2"
               >
-                Clear filter
+                {t('common.buttons.clearFilters')}
               </button>
             )}
           </div>
@@ -314,17 +316,17 @@ export default function PaymentsPage() {
                 disabled={page === 1}
                 className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
               >
-                Previous
+                {t('common.buttons.previous')}
               </button>
               <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                Page {page} of {totalPages}
+                {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
               </span>
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
                 className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
               >
-                Next
+                {t('common.buttons.next')}
               </button>
             </nav>
           </div>

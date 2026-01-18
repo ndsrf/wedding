@@ -6,9 +6,11 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { StatsCard } from '@/components/planner/StatsCard';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface WeddingStats {
@@ -103,14 +105,15 @@ export default async function AdminDashboardPage() {
     redirect('/api/auth/signin');
   }
 
+  const t = await getTranslations();
   const stats = await getWeddingStats(user);
 
   if (!stats) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-bold text-gray-900">Wedding not found</h1>
-          <p className="mt-2 text-gray-500">Please contact your wedding planner.</p>
+          <h1 className="text-xl font-bold text-gray-900">{t('admin.dashboard.weddingNotFound')}</h1>
+          <p className="mt-2 text-gray-500">{t('admin.dashboard.contactPlanner')}</p>
         </div>
       </div>
     );
@@ -138,11 +141,12 @@ export default async function AdminDashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <LanguageSwitcher />
               <Link
                 href="/api/auth/signout"
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                Logout
+                {t('common.navigation.logout')}
               </Link>
             </div>
           </div>
@@ -155,30 +159,30 @@ export default async function AdminDashboardPage() {
         {stats.days_until_wedding > 0 && (
           <div className="bg-purple-600 text-white rounded-lg p-6 mb-8 text-center">
             <p className="text-4xl font-bold">{stats.days_until_wedding}</p>
-            <p className="text-purple-200 mt-1">days until the wedding</p>
+            <p className="text-purple-200 mt-1">{t('admin.dashboard.daysUntilWedding')}</p>
           </div>
         )}
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatsCard
-            title="Total Guests"
+            title={t('admin.dashboard.metricTitles.totalGuests')}
             value={stats.guest_count}
             colorClass="bg-blue-50 border-blue-200"
           />
           <StatsCard
-            title="RSVP Completion"
+            title={t('admin.dashboard.metricTitles.rsvpCompletion')}
             value={stats.rsvp_completion_percentage}
             suffix="%"
             colorClass="bg-green-50 border-green-200"
           />
           <StatsCard
-            title="Attending"
+            title={t('admin.dashboard.metricTitles.attending')}
             value={stats.attending_count}
             colorClass="bg-purple-50 border-purple-200"
           />
           <StatsCard
-            title="Payments Received"
+            title={t('admin.dashboard.metricTitles.paymentsReceived')}
             value={stats.payment_received_count}
             colorClass="bg-yellow-50 border-yellow-200"
           />
@@ -186,7 +190,7 @@ export default async function AdminDashboardPage() {
 
         {/* Quick Actions */}
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Manage Wedding</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('admin.dashboard.manageWedding')}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Link
               href="/admin/guests"
@@ -208,8 +212,8 @@ export default async function AdminDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">Guest List</h3>
-                <p className="mt-1 text-sm text-gray-500">View and manage guests</p>
+                <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.guestList')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('admin.dashboard.guestListSubtitle')}</p>
               </div>
             </Link>
 
@@ -233,8 +237,8 @@ export default async function AdminDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">Activity</h3>
-                <p className="mt-1 text-sm text-gray-500">Track guest activity</p>
+                <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.activity')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('admin.dashboard.activitySubtitle')}</p>
               </div>
             </Link>
 
@@ -258,8 +262,8 @@ export default async function AdminDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">Payments</h3>
-                <p className="mt-1 text-sm text-gray-500">Track gifts and payments</p>
+                <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.payments')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('admin.dashboard.paymentsSubtitle')}</p>
               </div>
             </Link>
 
@@ -283,8 +287,8 @@ export default async function AdminDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">Import Guests</h3>
-                <p className="mt-1 text-sm text-gray-500">Upload Excel file</p>
+                <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.importGuests')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('admin.dashboard.importGuestsSubtitle')}</p>
               </div>
             </Link>
           </div>
@@ -292,7 +296,7 @@ export default async function AdminDashboardPage() {
 
         {/* RSVP Progress */}
         <div className="mt-8 bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">RSVP Progress</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('admin.dashboard.rsvpProgress')}</h2>
           <div className="relative pt-1">
             <div className="overflow-hidden h-4 text-xs flex rounded-full bg-gray-200">
               <div
@@ -301,8 +305,8 @@ export default async function AdminDashboardPage() {
               />
             </div>
             <div className="flex justify-between text-sm text-gray-600 mt-2">
-              <span>{stats.rsvp_count} responded</span>
-              <span>{stats.rsvp_completion_percentage}% complete</span>
+              <span>{stats.rsvp_count} {t('admin.dashboard.responded')}</span>
+              <span>{stats.rsvp_completion_percentage}% {t('admin.dashboard.complete')}</span>
             </div>
           </div>
         </div>

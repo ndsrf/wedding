@@ -33,20 +33,20 @@
       "required": "Dieses Feld ist erforderlich",
       "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
       "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein",
-      "minLength": "Muss mindestens {min} Zeichen enthalten",
-      "maxLength": "Darf {max} Zeichen nicht überschreiten"
+      "minLength": "Muss mindestens {min} Zeichen lang sein",
+      "maxLength": "Darf nicht länger als {max} Zeichen sein"
     },
     "validation": {
       "required": "Pflichtfeld",
       "email": "Ungültige E-Mail",
-      "phone": "Ungültiges Telefon",
+      "phone": "Ungültige Telefonnummer",
       "date": "Ungültiges Datum",
-      "number": "Ungültige Nummer"
+      "number": "Ungültige Zahl"
     },
     "errors": {
       "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
       "network": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
-      "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen.",
+      "unauthorized": "Sie sind nicht berechtigt, diese Aktion durchzuführen.",
       "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
       "serverError": "Serverfehler. Bitte versuchen Sie es später erneut."
     },
@@ -57,23 +57,45 @@
       "created": "Erfolgreich erstellt",
       "sent": "Erfolgreich gesendet"
     },
-    "loading": "Lädt...",
+    "pagination": {
+      "page": "Seite",
+      "of": "von"
+    },
+    "optional": "Optional",
+    "languages": {
+      "ES": "Spanisch",
+      "EN": "Englisch",
+      "FR": "Französisch",
+      "IT": "Italienisch",
+      "DE": "Deutsch"
+    },
+    "channels": {
+      "WHATSAPP": "WhatsApp",
+      "EMAIL": "E-Mail",
+      "SMS": "SMS",
+      "none": "-"
+    },
+    "loading": "Laden...",
     "noData": "Keine Daten verfügbar",
     "confirmDelete": "Sind Sie sicher, dass Sie dies löschen möchten?",
     "yes": "Ja",
     "no": "Nein"
   },
+  "metadata": {
+    "title": "Hochzeitsmanagementsystem",
+    "description": "Mandantenfähige Hochzeitsmanagement-Plattform mit RSVP-Verfolgung und Zahlungsverwaltung"
+  },
   "master": {
     "dashboard": {
-      "title": "Hauptadministrator-Dashboard",
+      "title": "Haupt-Admin-Dashboard",
       "welcome": "Willkommen, Administrator",
       "overview": "Plattformübersicht"
     },
     "analytics": {
-      "totalPlanners": "Gesamtzahl der Planer",
+      "totalPlanners": "Gesamtzahl Planer",
       "activePlanners": "Aktive Planer",
-      "totalWeddings": "Gesamtzahl der Hochzeiten",
-      "totalGuests": "Gesamtzahl der Gäste"
+      "totalWeddings": "Gesamtzahl Hochzeiten",
+      "totalGuests": "Gesamtzahl Gäste"
     },
     "planners": {
       "title": "Planerverwaltung",
@@ -86,8 +108,8 @@
       "status": "Status",
       "enabled": "Aktiviert",
       "disabled": "Deaktiviert",
-      "weddingCount": "Anzahl der Hochzeiten",
-      "lastLogin": "Letzte Anmeldung",
+      "weddingCount": "Anzahl Hochzeiten",
+      "lastLogin": "Letzter Login",
       "enable": "Aktivieren",
       "disable": "Deaktivieren",
       "confirmDisable": "Sind Sie sicher, dass Sie diesen Planer deaktivieren möchten?",
@@ -96,47 +118,78 @@
     "weddings": {
       "title": "Hochzeitsübersicht",
       "list": "Hochzeitsliste",
-      "coupleName": "Name des Paares",
+      "coupleName": "Namen des Paares",
       "date": "Datum",
       "location": "Ort",
       "planner": "Planer",
-      "guestCount": "Anzahl der Gäste"
+      "guestCount": "Gästezahl"
     }
   },
   "planner": {
     "dashboard": {
       "title": "Planer-Dashboard",
       "welcome": "Willkommen, {name}",
-      "myWeddings": "Meine Hochzeiten"
+      "myWeddings": "Meine Hochzeiten",
+      "subtitle": "Verwalten Sie Ihre Hochzeiten und sehen Sie Statistiken",
+      "createWedding": "Hochzeit erstellen",
+      "upcomingWeddings": "Anstehende Hochzeiten",
+      "quickActions": "Schnellaktionen",
+      "allWeddings": "Alle Hochzeiten",
+      "allWeddingsSubtitle": "Alle Ihre Hochzeiten anzeigen und verwalten",
+      "createWeddingSubtitle": "Ein neues Hochzeitsereignis einrichten",
+      "noWeddings": "Noch keine Hochzeiten",
+      "noWeddingsSubtitle": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit."
     },
     "stats": {
-      "totalWeddings": "Gesamtzahl der Hochzeiten",
-      "totalGuests": "Gesamtzahl der Gäste",
-      "rsvpCompletion": "Bestätigungen abgeschlossen",
-      "upcomingWeddings": "Bevorstehende Hochzeiten"
+      "totalWeddings": "Gesamtzahl Hochzeiten",
+      "totalGuests": "Gesamtzahl Gäste",
+      "rsvpCompletion": "RSVP-Abschluss",
+      "upcomingWeddings": "Anstehende Hochzeiten"
     },
     "weddings": {
       "title": "Hochzeitsverwaltung",
+      "loading": "Lade Hochzeiten...",
+      "loadingDetails": "Lade Hochzeitsdetails...",
+      "noWeddings": "Noch keine Hochzeiten",
+      "getStarted": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit.",
+      "backToWeddings": "Zurück zu Hochzeiten",
+      "notFound": "Hochzeit nicht gefunden",
+      "totalGuests": "Gesamtzahl Gäste",
+      "rsvpCompletion": "RSVP-Abschluss",
+      "attending": "Teilnehmend",
+      "paymentsReceived": "Erhaltene Zahlungen",
+      "weddingInfo": "Hochzeitsinformationen",
+      "status": "Status",
+      "guestAdditions": "Gastzusätze",
+      "allowed": "Erlaubt",
+      "notAllowed": "Nicht erlaubt",
+      "dressCode": "Kleiderordnung",
+      "additionalInfo": "Zusätzliche Informationen",
+      "weddingAdmins": "Hochzeitsadministratoren",
+      "noAdmins": "Noch keine Administratoren eingeladen",
+      "accepted": "Akzeptiert",
+      "pending": "Einladung ausstehend",
+      "inviteAdmin": "Hochzeitsadministrator einladen",
       "create": "Neue Hochzeit erstellen",
       "edit": "Hochzeit bearbeiten",
       "coupleNames": "Namen des Paares",
       "weddingDate": "Hochzeitsdatum",
       "weddingTime": "Hochzeitszeit",
       "location": "Ort",
-      "rsvpCutoff": "Bestätigungsfrist",
+      "rsvpCutoff": "RSVP-Frist",
       "defaultLanguage": "Standardsprache",
       "theme": "Thema",
       "paymentMode": "Zahlungsmodus",
-      "automated": "Automatisch",
+      "automated": "Automatisiert",
       "manual": "Manuell",
-      "allowGuestAdditions": "Zusätzliche Gäste erlauben",
+      "allowGuestAdditions": "Gäste hinzufügen erlauben",
       "overview": "Übersicht",
       "guests": "Gäste",
       "admins": "Administratoren"
     },
     "admins": {
       "invite": "Administrator einladen",
-      "email": "Administrator-E-Mail",
+      "email": "Admin-E-Mail",
       "inviteSent": "Einladung erfolgreich gesendet",
       "remove": "Administrator entfernen",
       "confirmRemove": "Sind Sie sicher, dass Sie diesen Administrator entfernen möchten?"
@@ -149,15 +202,36 @@
       "edit": "Thema bearbeiten",
       "name": "Themenname",
       "inUse": "In Verwendung",
-      "cannotDelete": "Kann nicht gelöscht werden. Das Thema wird von {count} Hochzeit(en) verwendet."
+      "cannotDelete": "Kann nicht gelöscht werden. Thema wird von {count} Hochzeit(en) verwendet."
     }
   },
   "admin": {
     "dashboard": {
-      "title": "Hochzeitsadministrator-Dashboard",
+      "title": "Hochzeits-Admin-Dashboard",
       "welcome": "Willkommen",
       "weddingDetails": "Hochzeitsdetails",
-      "metrics": "Metriken"
+      "metrics": "Kennzahlen",
+      "metricTitles": {
+        "totalGuests": "Gesamtzahl Gäste",
+        "rsvpCompletion": "RSVP-Abschluss",
+        "attending": "Teilnehmend",
+        "paymentsReceived": "Erhaltene Zahlungen"
+      },
+      "manageWedding": "Hochzeit verwalten",
+      "guestList": "Gästeliste",
+      "guestListSubtitle": "Gäste anzeigen und verwalten",
+      "activity": "Aktivität",
+      "activitySubtitle": "Gästeaktivität verfolgen",
+      "payments": "Zahlungen",
+      "paymentsSubtitle": "Geschenke und Zahlungen verfolgen",
+      "importGuests": "Gäste importieren",
+      "importGuestsSubtitle": "Excel-Datei hochladen",
+      "rsvpProgress": "RSVP-Fortschritt",
+      "daysUntilWedding": "Tage bis zur Hochzeit",
+      "responded": "geantwortet",
+      "complete": "abgeschlossen",
+      "weddingNotFound": "Hochzeit nicht gefunden",
+      "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner."
     },
     "wedding": {
       "details": "Details",
@@ -167,6 +241,20 @@
     "guests": {
       "title": "Gästeverwaltung",
       "list": "Gästeliste",
+      "add": "Gast hinzufügen",
+      "table": {
+        "family": "Familie",
+        "members": "Mitglieder",
+        "rsvp": "RSVP",
+        "channel": "Kanal",
+        "payment": "Zahlung",
+        "language": "Sprache",
+        "actions": "Aktionen",
+        "loading": "Lade Gäste...",
+        "emptyTitle": "Keine Gäste gefunden",
+        "emptyDesc": "Versuchen Sie, Ihre Filter anzupassen oder eine Gästeliste zu importieren.",
+        "noPayment": "Keine Zahlung"
+      },
       "import": "Aus Excel importieren",
       "export": "Nach Excel exportieren",
       "template": "Vorlage herunterladen",
@@ -177,26 +265,48 @@
       "whatsapp": "WhatsApp",
       "language": "Sprache",
       "members": "Mitglieder",
-      "rsvpStatus": "Bestätigungsstatus",
+      "rsvpStatus": "RSVP-Status",
       "attendance": "Teilnahme",
       "channel": "Kanal",
       "paymentStatus": "Zahlungsstatus",
       "filters": {
         "all": "Alle",
         "pending": "Ausstehend",
+        "submitted": "Eingereicht",
         "confirmed": "Bestätigt",
+        "attending": "Nimmt teil",
         "notAttending": "Nimmt nicht teil",
+        "partial": "Teilweise",
         "whatsapp": "WhatsApp",
         "email": "E-Mail",
         "sms": "SMS",
         "paid": "Bezahlt",
-        "unpaid": "Unbezahlt"
+        "unpaid": "Unbezahlt",
+        "received": "Erhalten",
+        "searchPlaceholder": "Name oder E-Mail...",
+        "clearAll": "Filter löschen"
+      },
+      "form": {
+        "addTitle": "Gastfamilie hinzufügen",
+        "editTitle": "Gastfamilie bearbeiten",
+        "familyNameRequired": "Familienname ist erforderlich",
+        "memberNameRequired": "Alle Mitglieder müssen einen Namen haben",
+        "saveFailed": "Speichern des Gastes fehlgeschlagen",
+        "preferredChannel": "Bevorzugter Kanal",
+        "languagePreference": "Sprachpräferenz",
+        "saving": "Speichern...",
+        "addGuest": "Gast hinzufügen",
+        "saveChanges": "Änderungen speichern"
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei."
     },
     "notifications": {
       "title": "Benachrichtigungen und Aktivität",
+      "newActivities": "{count, plural, =0 {Keine neuen Aktivitäten} one {# neue Aktivität} other {# neue Aktivitäten}}",
+      "loading": "Lade Benachrichtigungen...",
+      "emptyTitle": "Keine Benachrichtigungen",
+      "emptyDesc": "Aktivitäten Ihrer Gäste werden hier angezeigt.",
       "filters": {
         "dateRange": "Datumsbereich",
         "eventType": "Ereignistyp",
@@ -209,8 +319,8 @@
       "export": "Benachrichtigungen exportieren",
       "events": {
         "linkOpened": "Link geöffnet",
-        "rsvpSubmitted": "Bestätigung gesendet",
-        "rsvpEdited": "Bestätigung bearbeitet",
+        "rsvpSubmitted": "RSVP eingereicht",
+        "rsvpEdited": "RSVP bearbeitet",
         "guestAdded": "Gast hinzugefügt",
         "paymentReceived": "Zahlung erhalten",
         "reminderSent": "Erinnerung gesendet"
@@ -220,14 +330,34 @@
       "title": "Erinnerungssystem",
       "send": "Erinnerungen senden",
       "preview": "Empfängervorschau",
-      "channel": "Sendekanal",
+      "channel": "Versandkanal",
       "recipients": "Empfänger: {count} Familie(n)",
       "sent": "Erinnerungen erfolgreich an {count} Familie(n) gesendet",
-      "noRecipients": "Keine Familien warten auf Bestätigung"
+      "noRecipients": "Keine Familien warten auf RSVP",
+      "loadingPreview": "Lade Vorschau...",
+      "sendSuccess": "Erinnerungen gesendet!",
+      "sendSuccessDesc": "{count} Familien erhalten Erinnerungen.",
+      "allCaughtUp": "Alles erledigt!",
+      "allCaughtUpDesc": "Alle Familien haben bereits ihre RSVP eingereicht.",
+      "summary": "{count} Familien haben noch nicht auf die RSVP geantwortet.",
+      "byLanguage": "Nach Sprache",
+      "sendVia": "Senden via",
+      "viewAll": "Alle {count} Familien anzeigen",
+      "sending": "Senden...",
+      "sendAction": "{count} Erinnerungen senden"
     },
     "payments": {
       "title": "Zahlungsverwaltung",
       "list": "Zahlungsliste",
+      "loading": "Lade Zahlungen...",
+      "emptyTitle": "Keine Zahlungen aufgezeichnet",
+      "emptyDesc": "Zahlungen erscheinen hier, wenn sie aufgezeichnet werden.",
+      "recordTitle": "Zahlung aufzeichnen",
+      "selectFamily": "Familie auswählen",
+      "currencyAmount": "Betrag ({currency})",
+      "recording": "Aufzeichnen...",
+      "markReceived": "Als erhalten markieren",
+      "auto": "Auto",
       "record": "Manuelle Zahlung erfassen",
       "family": "Familie",
       "amount": "Betrag",
@@ -242,14 +372,36 @@
       "recordSuccess": "Zahlung erfolgreich erfasst",
       "updateSuccess": "Zahlungsstatus aktualisiert"
     },
+    "deleteDialog": {
+      "title": "Gastfamilie löschen",
+      "confirmTitle": "Sind Sie sicher, dass Sie {name} löschen möchten?",
+      "confirmDesc": "Dies wird {count} Mitglied(er) und alle zugehörigen Daten dauerhaft entfernen.",
+      "rsvpWarning": "Warnung",
+      "rsvpWarningDesc": "Diese Familie hat bereits ihre RSVP eingereicht. Das Löschen entfernt ihre Antwort.",
+      "deleting": "Löschen..."
+    },
     "guestAdditions": {
-      "title": "Überprüfung zusätzlicher Gäste",
+      "title": "Überprüfung von Gastzusätzen",
+      "loading": "Lade Gastzusätze...",
+      "featureDisabled": "Funktion Deaktiviert",
+      "featureDisabledDesc": "Gastzusätze sind für diese Hochzeit deaktiviert.",
+      "noAdditionsTitle": "Keine Gastzusätze",
+      "noAdditionsDesc": "Wenn Gäste Familienmitglieder hinzufügen, erscheinen sie hier zur Überprüfung.",
+      "totalAdditions": "Zusätze insgesamt",
+      "new": "neu",
       "newBadge": "NEU",
-      "addedBy": "Vom Gast hinzugefügt",
+      "pendingReview": "Ausstehende Überprüfung",
+      "addedTo": "Hinzugefügt zu",
+      "addedBy": "Von Gast hinzugefügt",
       "addedAt": "Hinzugefügt am {date}",
+      "diet": "Diät",
+      "accessibility": "Barrierefreiheit",
       "approve": "Genehmigen",
       "edit": "Bearbeiten",
-      "noAdditions": "Keine zusätzlichen Gäste zur Überprüfung"
+      "markReviewed": "Als überprüft markieren",
+      "previouslyReviewed": "Bereits überprüft",
+      "family": "Familie",
+      "noAdditions": "Keine Gastzusätze zur Überprüfung ausstehend"
     }
   },
   "guest": {
@@ -258,22 +410,23 @@
       "subtitle": "Bitte bestätigen Sie Ihre Teilnahme an der Hochzeit",
       "coupleNames": "{coupleNames}",
       "date": "Datum: {date}",
-      "time": "Uhrzeit: {time}",
+      "time": "Zeit: {time}",
       "location": "Ort: {location}"
     },
     "rsvp": {
-      "title": "Teilnahmebestätigung",
+      "title": "RSVP",
       "instructions": "Bitte wählen Sie aus, wer aus Ihrer Familie an der Hochzeit teilnehmen wird.",
-      "attending": "Nimmt teil",
-      "notAttending": "Nimmt nicht teil",
-      "dietaryRestrictions": "Ernährungseinschränkungen",
-      "accessibilityNeeds": "Barrierefreiheitsbedürfnisse",
-      "dietaryPlaceholder": "Z.B.: vegetarisch, Allergien, usw.",
-      "accessibilityPlaceholder": "Z.B.: Rollstuhl, besondere Bedürfnisse, usw.",
+      "attending": "Wird teilnehmen",
+      "notAttending": "Wird nicht teilnehmen",
+      "attendingSummary": "{count, plural, =0 {Niemand nimmt teil} one {1 Person nimmt teil} other {# Personen nehmen teil}}",
+      "dietaryRestrictions": "Diätetische Einschränkungen",
+      "accessibilityNeeds": "Bedürfnisse bezüglich Barrierefreiheit",
+      "dietaryPlaceholder": "Z.B. vegetarisch, Allergien, etc.",
+      "accessibilityPlaceholder": "Z.B. Rollstuhl, besondere Bedürfnisse, etc.",
       "submit": "Teilnahme bestätigen",
-      "submitted": "Vielen Dank für Ihre Bestätigung!",
+      "submitted": "Danke für Ihre Rückmeldung!",
       "confirmationMessage": "Wir haben Ihre Bestätigung erhalten. Wir freuen uns darauf, Sie bei der Hochzeit zu sehen!",
-      "cutoffPassed": "Die Bestätigungsfrist ist abgelaufen. Bitte kontaktieren Sie die Organisatoren."
+      "cutoffPassed": "Die RSVP-Frist ist abgelaufen. Bitte kontaktieren Sie die Organisatoren."
     },
     "members": {
       "title": "Familienmitglieder",
@@ -281,19 +434,22 @@
       "name": "Name",
       "type": "Typ",
       "age": "Alter",
+      "yearsOld": "{count} Jahre alt",
+      "addedByYou": "Von Ihnen hinzugefügt",
       "types": {
         "adult": "Erwachsener",
         "child": "Kind",
-        "infant": "Säugling"
+        "infant": "Kleinkind"
       },
-      "addSuccess": "Mitglied erfolgreich hinzugefügt"
+      "addSuccess": "Mitglied erfolgreich hinzugefügt",
+      "noMembers": "Noch keine Mitglieder hinzugefügt"
     },
     "payment": {
       "title": "Zahlungsinformationen",
-      "subtitle": "Hochzeitsgeschenk-Details",
+      "subtitle": "Details zum Hochzeitsgeschenk",
       "iban": "IBAN für Überweisung:",
       "referenceCode": "Referenzcode:",
-      "referenceInstructions": "Bitte geben Sie diesen Referenzcode in Ihrer Überweisung an.",
+      "referenceInstructions": "Bitte geben Sie diesen Referenzcode bei Ihrer Überweisung an.",
       "status": "Zahlungsstatus:",
       "statuses": {
         "pending": "Ausstehend",
@@ -304,12 +460,12 @@
       "thankYou": "Vielen Dank für Ihre Großzügigkeit!"
     },
     "language": {
-      "select": "Sprache auswählen",
+      "select": "Sprache wählen",
       "updated": "Sprache aktualisiert"
     },
     "edit": {
-      "title": "Bestätigung bearbeiten",
-      "canEdit": "Sie können Ihre Bestätigung bis zum {date} bearbeiten."
+      "title": "RSVP bearbeiten",
+      "canEdit": "Sie können Ihre RSVP bis zum {date} bearbeiten."
     }
   }
 }

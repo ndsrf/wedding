@@ -8,6 +8,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import FamilyMemberCard from './FamilyMemberCard';
 import type { FamilyWithMembers } from '@/types/models';
 
@@ -36,6 +37,7 @@ export default function RSVPForm({
   rsvpCutoffPassed,
   onSuccess,
 }: RSVPFormProps) {
+  const t = useTranslations();
   const [members, setMembers] = useState<MemberUpdate[]>(
     family.members.map((m) => ({
       id: m.id,
@@ -76,7 +78,7 @@ export default function RSVPForm({
 
   async function handleAddMember() {
     if (!newMember.name.trim()) {
-      setError('Please enter a name for the new member');
+      setError(t('common.forms.required'));
       return;
     }
 
@@ -94,7 +96,7 @@ export default function RSVPForm({
       const result = await response.json();
 
       if (!result.success) {
-        setError(result.error?.message || 'Failed to add member');
+        setError(result.error?.message || t('common.errors.generic'));
         return;
       }
 
@@ -115,7 +117,7 @@ export default function RSVPForm({
       setError(null);
     } catch (err) {
       console.error('Add member error:', err);
-      setError('Failed to add member. Please try again.');
+      setError(t('common.errors.generic'));
     }
   }
 
@@ -134,14 +136,14 @@ export default function RSVPForm({
       const result = await response.json();
 
       if (!result.success) {
-        setError(result.error?.message || 'Failed to submit RSVP');
+        setError(result.error?.message || t('common.errors.generic'));
         return;
       }
 
       onSuccess();
     } catch (err) {
       console.error('RSVP submission error:', err);
-      setError('Failed to submit RSVP. Please try again.');
+      setError(t('common.errors.generic'));
     } finally {
       setSubmitting(false);
     }
@@ -151,11 +153,10 @@ export default function RSVPForm({
     return (
       <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6">
         <h3 className="text-2xl font-bold text-yellow-900 mb-2">
-          RSVP Deadline Passed
+          {t('guest.rsvp.cutoffPassed')}
         </h3>
         <p className="text-lg text-yellow-800">
-          The RSVP deadline has passed. Please contact the couple directly to
-          confirm your attendance.
+          {t('guest.rsvp.cutoffPassed')}
         </p>
       </div>
     );
@@ -166,10 +167,10 @@ export default function RSVPForm({
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-2xl font-bold text-gray-900 mb-4">
-        Confirm Attendance
+        {t('guest.rsvp.title')}
       </h3>
       <p className="text-lg text-gray-600 mb-6">
-        Please select who from your family will attend the wedding.
+        {t('guest.rsvp.instructions')}
       </p>
 
       {/* Error Message */}
@@ -215,16 +216,16 @@ export default function RSVPForm({
               onClick={() => setShowAddMember(true)}
               className="w-full py-4 px-6 bg-white border-2 border-gray-300 rounded-lg text-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              + Add Family Member
+              + {t('guest.members.addMember')}
             </button>
           ) : (
             <div className="space-y-4">
               <h4 className="text-xl font-bold text-gray-900">
-                Add Family Member
+                {t('guest.members.addMember')}
               </h4>
               <input
                 type="text"
-                placeholder="Name"
+                placeholder={t('guest.members.name')}
                 value={newMember.name}
                 onChange={(e) =>
                   setNewMember({ ...newMember, name: e.target.value })
@@ -241,13 +242,13 @@ export default function RSVPForm({
                 }
                 className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
               >
-                <option value="ADULT">Adult</option>
-                <option value="CHILD">Child</option>
-                <option value="INFANT">Infant</option>
+                <option value="ADULT">{t('guest.members.types.adult')}</option>
+                <option value="CHILD">{t('guest.members.types.child')}</option>
+                <option value="INFANT">{t('guest.members.types.infant')}</option>
               </select>
               <input
                 type="number"
-                placeholder="Age (optional)"
+                placeholder={`${t('guest.members.age')} (optional)`}
                 value={newMember.age}
                 onChange={(e) =>
                   setNewMember({ ...newMember, age: e.target.value })
@@ -260,7 +261,7 @@ export default function RSVPForm({
                   onClick={handleAddMember}
                   className="flex-1 py-3 px-6 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  Add
+                  {t('common.buttons.add')}
                 </button>
                 <button
                   type="button"
@@ -271,7 +272,7 @@ export default function RSVPForm({
                   }}
                   className="flex-1 py-3 px-6 bg-gray-300 text-gray-700 rounded-lg text-lg font-semibold hover:bg-gray-400 transition-colors"
                 >
-                  Cancel
+                  {t('common.buttons.cancel')}
                 </button>
               </div>
             </div>
@@ -282,9 +283,7 @@ export default function RSVPForm({
       {/* Summary */}
       <div className="mb-6 p-4 bg-blue-50 rounded-lg">
         <p className="text-xl font-semibold text-blue-900">
-          {attendingCount === 0
-            ? 'No one attending'
-            : `${attendingCount} ${attendingCount === 1 ? 'person' : 'people'} attending`}
+          {t('guest.rsvp.attendingSummary', { count: attendingCount })}
         </p>
       </div>
 
@@ -294,12 +293,11 @@ export default function RSVPForm({
         disabled={submitting}
         className="w-full py-5 px-6 bg-green-600 text-white rounded-lg text-xl font-bold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-lg"
       >
-        {submitting ? 'Submitting...' : 'Confirm Attendance'}
+        {submitting ? t('common.loading') : t('guest.rsvp.submit')}
       </button>
 
       <p className="mt-4 text-center text-base text-gray-500">
-        You can edit your RSVP until{' '}
-        {new Date(wedding.rsvp_cutoff_date).toLocaleDateString()}
+        {t('guest.edit.canEdit', { date: new Date(wedding.rsvp_cutoff_date).toLocaleDateString() })}
       </p>
     </form>
   );

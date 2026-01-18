@@ -7,6 +7,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface Family {
   id: string;
@@ -25,6 +26,7 @@ interface PaymentFormProps {
 }
 
 export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) {
+  const t = useTranslations();
   const [familyId, setFamilyId] = useState('');
   const [amount, setAmount] = useState('');
   const [transactionDate, setTransactionDate] = useState(
@@ -39,13 +41,13 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
     setError(null);
 
     if (!familyId) {
-      setError('Please select a family');
+      setError(t('common.forms.required'));
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
-      setError('Please enter a valid amount');
+      setError(t('common.validation.number'));
       return;
     }
 
@@ -58,7 +60,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
         reference_code_used: referenceCode || undefined,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to record payment');
+      setError(err instanceof Error ? err.message : t('common.errors.generic'));
     } finally {
       setSubmitting(false);
     }
@@ -66,13 +68,13 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Record Payment</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">{t('admin.payments.recordTitle')}</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Family Selection */}
         <div>
           <label htmlFor="family" className="block text-sm font-medium text-gray-700 mb-1">
-            Family *
+            {t('admin.payments.family')} *
           </label>
           <select
             id="family"
@@ -81,7 +83,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             required
           >
-            <option value="">Select a family</option>
+            <option value="">{t('admin.payments.selectFamily')}</option>
             {families.map((family) => (
               <option key={family.id} value={family.id}>
                 {family.name}
@@ -93,7 +95,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
         {/* Amount */}
         <div>
           <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-            Amount (EUR) *
+            {t('admin.payments.currencyAmount', { currency: 'EUR' })} *
           </label>
           <div className="relative">
             <span className="absolute left-3 top-2 text-gray-500">€</span>
@@ -117,7 +119,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
             htmlFor="transaction_date"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Transaction Date *
+            {t('admin.payments.transactionDate')} *
           </label>
           <input
             type="date"
@@ -136,7 +138,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
             htmlFor="reference_code"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Reference Code (optional)
+            {t('admin.payments.referenceCode')}
           </label>
           <input
             type="text"
@@ -163,14 +165,14 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             disabled={submitting}
           >
-            Cancel
+            {t('common.buttons.cancel')}
           </button>
           <button
             type="submit"
             disabled={submitting}
             className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Recording...' : 'Record Payment'}
+            {submitting ? t('admin.payments.recording') : t('admin.payments.record')}
           </button>
         </div>
       </form>

@@ -7,6 +7,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { FamilyMemberForm, type FamilyMemberFormData } from './FamilyMemberForm';
 import type { Language, Channel } from '@/types/models';
 
@@ -45,6 +46,7 @@ export function GuestFormModal({
   onSubmit,
   onCancel,
 }: GuestFormModalProps) {
+  const t = useTranslations();
   const [formData, setFormData] = useState<GuestFormData>(defaultFormData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export function GuestFormModal({
 
     // Validate required fields
     if (!formData.name.trim()) {
-      setError('Family name is required');
+      setError(t('admin.guests.form.familyNameRequired'));
       return;
     }
 
@@ -71,7 +73,7 @@ export function GuestFormModal({
     const activeMembers = formData.members.filter((m) => !m._delete);
     for (const member of activeMembers) {
       if (!member.name.trim()) {
-        setError('All members must have a name');
+        setError(t('admin.guests.form.memberNameRequired'));
         return;
       }
     }
@@ -81,7 +83,7 @@ export function GuestFormModal({
       await onSubmit(formData);
       // Success - parent will close modal
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save guest');
+      setError(err instanceof Error ? err.message : t('admin.guests.form.saveFailed'));
     } finally {
       setLoading(false);
     }
@@ -101,7 +103,7 @@ export function GuestFormModal({
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
-                {mode === 'add' ? 'Add Guest Family' : 'Edit Guest Family'}
+                {mode === 'add' ? t('admin.guests.form.addTitle') : t('admin.guests.form.editTitle')}
               </h2>
               <button
                 type="button"
@@ -131,7 +133,7 @@ export function GuestFormModal({
               {/* Family Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Family Name <span className="text-red-500">*</span>
+                  {t('admin.guests.familyName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -145,7 +147,7 @@ export function GuestFormModal({
               {/* Contact Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.email')}</label>
                   <input
                     type="email"
                     value={formData.email || ''}
@@ -157,7 +159,7 @@ export function GuestFormModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.phone')}</label>
                   <input
                     type="tel"
                     value={formData.phone || ''}
@@ -169,7 +171,7 @@ export function GuestFormModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.whatsapp')}</label>
                   <input
                     type="tel"
                     value={formData.whatsapp_number || ''}
@@ -182,7 +184,7 @@ export function GuestFormModal({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Preferred Channel
+                    {t('admin.guests.form.preferredChannel')}
                   </label>
                   <select
                     value={formData.channel_preference || ''}
@@ -194,10 +196,10 @@ export function GuestFormModal({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    <option value="">None</option>
-                    <option value="WHATSAPP">WhatsApp</option>
-                    <option value="EMAIL">Email</option>
-                    <option value="SMS">SMS</option>
+                    <option value="">{t('common.channels.none')}</option>
+                    <option value="WHATSAPP">{t('common.channels.WHATSAPP')}</option>
+                    <option value="EMAIL">{t('common.channels.EMAIL')}</option>
+                    <option value="SMS">{t('common.channels.SMS')}</option>
                   </select>
                 </div>
               </div>
@@ -205,7 +207,7 @@ export function GuestFormModal({
               {/* Language Preference */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Language Preference
+                  {t('admin.guests.form.languagePreference')}
                 </label>
                 <select
                   value={formData.preferred_language}
@@ -215,11 +217,11 @@ export function GuestFormModal({
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 >
-                  <option value="ES">Spanish</option>
-                  <option value="EN">English</option>
-                  <option value="FR">French</option>
-                  <option value="IT">Italian</option>
-                  <option value="DE">German</option>
+                  <option value="ES">{t('common.languages.ES')}</option>
+                  <option value="EN">{t('common.languages.EN')}</option>
+                  <option value="FR">{t('common.languages.FR')}</option>
+                  <option value="IT">{t('common.languages.IT')}</option>
+                  <option value="DE">{t('common.languages.DE')}</option>
                 </select>
               </div>
 
@@ -240,14 +242,14 @@ export function GuestFormModal({
                 disabled={loading}
                 className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
               >
-                Cancel
+                {t('common.buttons.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
               >
-                {loading ? 'Saving...' : mode === 'add' ? 'Add Guest' : 'Save Changes'}
+                {loading ? t('admin.guests.form.saving') : mode === 'add' ? t('admin.guests.form.addGuest') : t('admin.guests.form.saveChanges')}
               </button>
             </div>
           </form>

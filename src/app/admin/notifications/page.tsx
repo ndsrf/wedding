@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { NotificationList } from '@/components/admin/NotificationList';
 import { ReminderModal } from '@/components/admin/ReminderModal';
 import type { EventType, Channel, Language } from '@/types/models';
@@ -45,6 +46,7 @@ interface Filters {
 }
 
 export default function NotificationsPage() {
+  const t = useTranslations();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [reminderFamilies, setReminderFamilies] = useState<ReminderFamily[]>([]);
   const [filters, setFilters] = useState<Filters>({});
@@ -114,7 +116,7 @@ export default function NotificationsPage() {
     const data = await response.json();
 
     if (!data.success) {
-      throw new Error(data.error?.message || 'Failed to send reminders');
+      throw new Error(data.error?.message || t('common.errors.generic'));
     }
 
     // Refresh notifications after sending
@@ -169,9 +171,9 @@ export default function NotificationsPage() {
                 </svg>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Activity & Notifications</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('admin.notifications.title')}</h1>
                 <p className="mt-1 text-sm text-gray-500">
-                  {unreadCount > 0 ? `${unreadCount} new activities` : 'No new activities'}
+                  {t('admin.notifications.newActivities', {count: unreadCount})}
                 </p>
               </div>
             </div>
@@ -180,13 +182,13 @@ export default function NotificationsPage() {
                 onClick={handleExport}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                Export
+                {t('common.buttons.export')}
               </button>
               <button
                 onClick={handleOpenReminderModal}
                 className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
               >
-                Send Reminders
+                {t('admin.reminders.send')}
               </button>
             </div>
           </div>
@@ -201,7 +203,7 @@ export default function NotificationsPage() {
             {/* Event Type */}
             <div>
               <label htmlFor="event_type" className="block text-sm font-medium text-gray-700 mb-1">
-                Event Type
+                {t('admin.notifications.filters.eventType')}
               </label>
               <select
                 id="event_type"
@@ -211,20 +213,20 @@ export default function NotificationsPage() {
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
-                <option value="">All</option>
-                <option value="LINK_OPENED">Link Opened</option>
-                <option value="RSVP_SUBMITTED">RSVP Submitted</option>
-                <option value="RSVP_UPDATED">RSVP Updated</option>
-                <option value="GUEST_ADDED">Guest Added</option>
-                <option value="PAYMENT_RECEIVED">Payment Received</option>
-                <option value="REMINDER_SENT">Reminder Sent</option>
+                <option value="">{t('admin.guests.filters.all')}</option>
+                <option value="LINK_OPENED">{t('admin.notifications.events.linkOpened')}</option>
+                <option value="RSVP_SUBMITTED">{t('admin.notifications.events.rsvpSubmitted')}</option>
+                <option value="RSVP_UPDATED">{t('admin.notifications.events.rsvpEdited')}</option>
+                <option value="GUEST_ADDED">{t('admin.notifications.events.guestAdded')}</option>
+                <option value="PAYMENT_RECEIVED">{t('admin.notifications.events.paymentReceived')}</option>
+                <option value="REMINDER_SENT">{t('admin.notifications.events.reminderSent')}</option>
               </select>
             </div>
 
             {/* Channel */}
             <div>
               <label htmlFor="channel" className="block text-sm font-medium text-gray-700 mb-1">
-                Channel
+                {t('admin.notifications.filters.channel')}
               </label>
               <select
                 id="channel"
@@ -234,17 +236,17 @@ export default function NotificationsPage() {
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
-                <option value="">All</option>
-                <option value="WHATSAPP">WhatsApp</option>
-                <option value="EMAIL">Email</option>
-                <option value="SMS">SMS</option>
+                <option value="">{t('admin.guests.filters.all')}</option>
+                <option value="WHATSAPP">{t('admin.guests.filters.whatsapp')}</option>
+                <option value="EMAIL">{t('admin.guests.filters.email')}</option>
+                <option value="SMS">{t('admin.guests.filters.sms')}</option>
               </select>
             </div>
 
             {/* Date From */}
             <div>
               <label htmlFor="date_from" className="block text-sm font-medium text-gray-700 mb-1">
-                From Date
+                {t('common.forms.fromDate')}
               </label>
               <input
                 type="date"
@@ -263,7 +265,7 @@ export default function NotificationsPage() {
             {/* Date To */}
             <div>
               <label htmlFor="date_to" className="block text-sm font-medium text-gray-700 mb-1">
-                To Date
+                {t('common.forms.toDate')}
               </label>
               <input
                 type="date"
@@ -287,7 +289,7 @@ export default function NotificationsPage() {
                 onClick={() => setFilters({})}
                 className="text-sm text-purple-600 hover:text-purple-800"
               >
-                Clear all filters
+                {t('common.buttons.clearFilters')}
               </button>
             </div>
           )}
@@ -309,17 +311,17 @@ export default function NotificationsPage() {
                 disabled={page === 1}
                 className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
               >
-                Previous
+                {t('common.buttons.previous')}
               </button>
               <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                Page {page} of {totalPages}
+                {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
               </span>
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
                 className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
               >
-                Next
+                {t('common.buttons.next')}
               </button>
             </nav>
           </div>

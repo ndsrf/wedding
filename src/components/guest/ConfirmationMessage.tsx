@@ -7,6 +7,8 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface ConfirmationMessageProps {
   familyName: string;
   canEdit: boolean;
@@ -20,6 +22,8 @@ export default function ConfirmationMessage({
   cutoffDate,
   onEdit,
 }: ConfirmationMessageProps) {
+  const t = useTranslations();
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       {/* Success Icon */}
@@ -40,17 +44,17 @@ export default function ConfirmationMessage({
           </svg>
         </div>
         <h3 className="text-3xl font-bold text-gray-900 mb-2">
-          Thank You, {familyName} Family! 🎉
+          {t('guest.rsvp.submitted')} {familyName} 🎉
         </h3>
         <p className="text-xl text-gray-600">
-          We have received your RSVP confirmation.
+          {t('guest.rsvp.confirmationMessage')}
         </p>
       </div>
 
       {/* Confirmation Details */}
       <div className="bg-green-50 border-2 border-green-400 rounded-lg p-6 mb-6">
         <p className="text-lg text-green-900 text-center">
-          We look forward to celebrating with you at the wedding!
+          {t('guest.rsvp.confirmationMessage')}
         </p>
       </div>
 
@@ -58,14 +62,13 @@ export default function ConfirmationMessage({
       {canEdit && (
         <div className="text-center">
           <p className="text-base text-gray-600 mb-4">
-            You can edit your RSVP until{' '}
-            {new Date(cutoffDate).toLocaleDateString()}
+            {t('guest.edit.canEdit', { date: new Date(cutoffDate).toLocaleDateString() })}
           </p>
           <button
             onClick={onEdit}
             className="px-8 py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
           >
-            Edit RSVP
+            {t('guest.edit.title')}
           </button>
         </div>
       )}
@@ -74,8 +77,7 @@ export default function ConfirmationMessage({
       {!canEdit && (
         <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
           <p className="text-base text-yellow-900 text-center">
-            The RSVP deadline has passed. If you need to make changes, please
-            contact the couple directly.
+            {t('guest.rsvp.cutoffPassed')}
           </p>
         </div>
       )}

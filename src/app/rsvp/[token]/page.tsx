@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import RSVPForm from '@/components/guest/RSVPForm';
 import PaymentInfo from '@/components/guest/PaymentInfo';
 import LanguageSelector from '@/components/guest/LanguageSelector';
@@ -21,6 +22,8 @@ export default function GuestRSVPPage() {
   const searchParams = useSearchParams();
   const token = params.token as string;
   const channel = searchParams.get('channel');
+  const t = useTranslations();
+  const locale = useLocale();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,22 +41,36 @@ export default function GuestRSVPPage() {
         const result = await response.json();
 
         if (!result.success) {
-          setError(result.error?.message || 'Failed to load RSVP page');
+          setError(result.error?.message || t('common.errors.generic'));
           return;
         }
 
-        setData(result.data);
-        setRsvpSubmitted(result.data.has_submitted_rsvp);
+        const responseData = result.data as GuestRSVPPageData;
+        
+        // Language synchronization:
+        // If the family's preferred language in DB is different from current locale,
+        // update the cookie and reload the page to switch language.
+        // We only do this check if we have data.
+        const familyLang = responseData.family.preferred_language.toLowerCase();
+        if (familyLang !== locale.toLowerCase()) {
+           // Set cookie and reload
+           document.cookie = `NEXT_LOCALE=${responseData.family.preferred_language}; path=/; max-age=31536000; SameSite=Lax`;
+           window.location.reload();
+           return; // Stop processing to avoid flash of wrong content
+        }
+
+        setData(responseData);
+        setRsvpSubmitted(responseData.has_submitted_rsvp);
       } catch (err) {
         console.error('Load RSVP data error:', err);
-        setError('Unable to load RSVP page. Please try again.');
+        setError(t('common.errors.network'));
       } finally {
         setLoading(false);
       }
     }
 
     loadRSVPData();
-  }, [token, channel]);
+  }, [token, channel, locale, t]);
 
   async function handleRSVPSuccess() {
     setRsvpSubmitted(true);
@@ -75,7 +92,7 @@ export default function GuestRSVPPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-xl text-gray-600">Loading...</p>
+          <p className="text-xl text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -87,14 +104,14 @@ export default function GuestRSVPPage() {
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
           <div className="text-red-600 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Unable to Load RSVP
+             {t('common.errors.generic')}
           </h1>
           <p className="text-lg text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
           >
-            Try Again
+             {t('common.buttons.retry')}
           </button>
         </div>
       </div>
@@ -140,28 +157,27 @@ export default function GuestRSVPPage() {
         {/* Welcome Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Hello, {family.name} Family! 👋
+            {t('guest.welcome.title', { familyName: family.name })} 👋
           </h2>
           <p className="text-xl text-gray-600 mb-4">
-            Please confirm your attendance to the wedding
+            {t('guest.welcome.subtitle')}
           </p>
           <div className="space-y-2 text-lg text-gray-700">
             <p>
-              <strong>Couple:</strong> {wedding.couple_names}
+              <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
             </p>
             <p>
-              <strong>Date:</strong>{' '}
-              {new Date(wedding.wedding_date).toLocaleDateString()}
+              <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString() })}</strong>
             </p>
             <p>
-              <strong>Time:</strong> {wedding.wedding_time}
+              <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
             </p>
             <p>
-              <strong>Location:</strong> {wedding.location}
+              <strong>{t('guest.welcome.location', { location: wedding.location })}</strong>
             </p>
             {wedding.dress_code && (
               <p>
-                <strong>Dress Code:</strong> {wedding.dress_code}
+                <strong>{t('guest.welcome.dressCode')}</strong> {wedding.dress_code}
               </p>
             )}
           </div>
@@ -202,7 +218,7 @@ export default function GuestRSVPPage() {
       {/* Footer */}
       <div className="max-w-4xl mx-auto px-4 py-8 text-center text-gray-500">
         <p className="text-base">
-          If you have any questions, please contact the couple directly.
+          {t('guest.footer.contactCouple')}
         </p>
       </div>
     </div>

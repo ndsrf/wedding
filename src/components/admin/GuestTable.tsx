@@ -8,7 +8,8 @@
 'use client';
 
 import React from 'react';
-import type { FamilyWithMembers, Language, Channel, GiftStatus } from '@/types/models';
+import { useTranslations } from 'next-intl';
+import type { FamilyWithMembers, GiftStatus } from '@/types/models';
 
 interface GuestWithStatus extends FamilyWithMembers {
   rsvp_status: string;
@@ -23,27 +24,6 @@ interface GuestTableProps {
   onDelete?: (guestId: string) => void;
   loading?: boolean;
 }
-
-const getLanguageLabel = (lang: Language): string => {
-  const labels: Record<Language, string> = {
-    ES: 'Spanish',
-    EN: 'English',
-    FR: 'French',
-    IT: 'Italian',
-    DE: 'German',
-  };
-  return labels[lang] || lang;
-};
-
-const getChannelLabel = (channel: Channel | null): string => {
-  if (!channel) return '-';
-  const labels: Record<Channel, string> = {
-    WHATSAPP: 'WhatsApp',
-    EMAIL: 'Email',
-    SMS: 'SMS',
-  };
-  return labels[channel] || channel;
-};
 
 const getRsvpBadgeClass = (status: string): string => {
   return status === 'submitted'
@@ -62,11 +42,13 @@ const getPaymentBadgeClass = (status: GiftStatus | null): string => {
 };
 
 export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProps) {
+  const t = useTranslations();
+
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-        <p className="mt-4 text-gray-500">Loading guests...</p>
+        <p className="mt-4 text-gray-500">{t('admin.guests.table.loading')}</p>
       </div>
     );
   }
@@ -87,9 +69,9 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
           />
         </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No guests found</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.guests.table.emptyTitle')}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Try adjusting your filters or import a guest list.
+          {t('admin.guests.table.emptyDesc')}
         </p>
       </div>
     );
@@ -103,31 +85,31 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Family
+                {t('admin.guests.table.family')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Members
+                {t('admin.guests.table.members')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                RSVP
+                {t('admin.guests.table.rsvp')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Channel
+                {t('admin.guests.table.channel')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Payment
+                {t('admin.guests.table.payment')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Language
+                {t('admin.guests.table.language')}
               </th>
               {onEdit && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('admin.guests.table.actions')}
                 </th>
               )}
               {onDelete && !onEdit && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('admin.guests.table.actions')}
                 </th>
               )}
             </tr>
@@ -147,27 +129,27 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
                   <span className="text-sm text-gray-900">
                     {guest.attending_count} / {guest.total_members}
                   </span>
-                  <span className="text-sm text-gray-500 ml-1">attending</span>
+                  <span className="text-sm text-gray-500 ml-1">{t('admin.dashboard.metricTitles.attending').toLowerCase()}</span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRsvpBadgeClass(guest.rsvp_status)}`}
                   >
-                    {guest.rsvp_status === 'submitted' ? 'Submitted' : 'Pending'}
+                    {guest.rsvp_status === 'submitted' ? t('admin.guests.filters.confirmed') : t('admin.guests.filters.pending')}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {getChannelLabel(guest.channel_preference)}
+                  {guest.channel_preference ? t(`common.channels.${guest.channel_preference}`) : t('common.channels.none')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentBadgeClass(guest.payment_status)}`}
                   >
-                    {guest.payment_status || 'None'}
+                    {guest.payment_status ? t(`admin.payments.statuses.${guest.payment_status.toLowerCase()}`) : 'None'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {getLanguageLabel(guest.preferred_language)}
+                  {t(`common.languages.${guest.preferred_language}`)}
                 </td>
                 {(onEdit || onDelete) && (
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -177,7 +159,7 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
                           onClick={() => onEdit(guest.id)}
                           className="text-purple-600 hover:text-purple-900"
                         >
-                          Edit
+                          {t('common.buttons.edit')}
                         </button>
                       )}
                       {onDelete && (
@@ -185,7 +167,7 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
                           onClick={() => onDelete(guest.id)}
                           className="text-red-600 hover:text-red-900"
                         >
-                          Delete
+                          {t('common.buttons.delete')}
                         </button>
                       )}
                     </div>
@@ -215,7 +197,7 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
                       onClick={() => onEdit(guest.id)}
                       className="text-purple-600 hover:text-purple-900 text-sm"
                     >
-                      Edit
+                      {t('common.buttons.edit')}
                     </button>
                   )}
                   {onDelete && (
@@ -223,7 +205,7 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
                       onClick={() => onDelete(guest.id)}
                       className="text-red-600 hover:text-red-900 text-sm"
                     >
-                      Delete
+                      {t('common.buttons.delete')}
                     </button>
                   )}
                 </div>
@@ -233,15 +215,15 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRsvpBadgeClass(guest.rsvp_status)}`}
               >
-                {guest.rsvp_status === 'submitted' ? 'Submitted' : 'Pending'}
+                {guest.rsvp_status === 'submitted' ? t('admin.guests.filters.confirmed') : t('admin.guests.filters.pending')}
               </span>
               <span className="text-xs text-gray-500">
-                {guest.attending_count}/{guest.total_members} attending
+                {guest.attending_count}/{guest.total_members} {t('admin.dashboard.metricTitles.attending').toLowerCase()}
               </span>
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentBadgeClass(guest.payment_status)}`}
               >
-                {guest.payment_status || 'No payment'}
+                {guest.payment_status ? t(`admin.payments.statuses.${guest.payment_status.toLowerCase()}`) : t('admin.guests.table.noPayment')}
               </span>
             </div>
           </div>

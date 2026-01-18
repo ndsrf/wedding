@@ -7,6 +7,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface GuestDeleteDialogProps {
   isOpen: boolean;
@@ -27,6 +28,8 @@ export function GuestDeleteDialog({
   onCancel,
   loading = false,
 }: GuestDeleteDialogProps) {
+  const t = useTranslations();
+
   if (!isOpen) return null;
 
   return (
@@ -56,14 +59,16 @@ export function GuestDeleteDialog({
 
           {/* Content */}
           <div className="mt-4 text-center">
-            <h3 className="text-lg font-medium text-gray-900">Delete Guest Family</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('admin.deleteDialog.title')}</h3>
             <div className="mt-2 space-y-2">
               <p className="text-sm text-gray-500">
-                Are you sure you want to delete <strong>{familyName}</strong>?
+                {t.rich('admin.deleteDialog.confirmTitle', {
+                  name: familyName,
+                  strong: (chunks) => <strong>{chunks}</strong>
+                })}
               </p>
               <p className="text-sm text-gray-500">
-                This will permanently remove {memberCount} member{memberCount !== 1 ? 's' : ''} and
-                all associated data.
+                {t('admin.deleteDialog.confirmDesc', { count: memberCount, plural: memberCount !== 1 ? 's' : '' })}
               </p>
 
               {/* RSVP Warning */}
@@ -84,10 +89,9 @@ export function GuestDeleteDialog({
                       />
                     </svg>
                     <div className="text-left">
-                      <p className="text-sm font-medium text-yellow-800">Warning</p>
+                      <p className="text-sm font-medium text-yellow-800">{t('admin.deleteDialog.rsvpWarning')}</p>
                       <p className="text-sm text-yellow-700 mt-1">
-                        This family has already submitted their RSVP. Deleting them will remove
-                        their response.
+                        {t('admin.deleteDialog.rsvpWarningDesc')}
                       </p>
                     </div>
                   </div>
@@ -104,7 +108,7 @@ export function GuestDeleteDialog({
               disabled={loading}
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
             >
-              Cancel
+              {t('common.buttons.cancel')}
             </button>
             <button
               type="button"
@@ -112,7 +116,7 @@ export function GuestDeleteDialog({
               disabled={loading}
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
             >
-              {loading ? 'Deleting...' : 'Delete'}
+              {loading ? t('admin.deleteDialog.deleting') : t('common.buttons.delete')}
             </button>
           </div>
         </div>

@@ -9,7 +9,7 @@ import {
   Container,
   Head,
   Heading,
-  Html,
+  Html as EmailHtml,
   Link,
   Preview,
   Section,
@@ -139,7 +139,7 @@ export const AdminInvitationEmail = ({
   const t = translations[language];
 
   return (
-    <Html>
+    <EmailHtml>
       <Head />
       <Preview>{t.preview}</Preview>
       <Body style={main}>
@@ -191,7 +191,7 @@ export const AdminInvitationEmail = ({
           </Section>
         </Container>
       </Body>
-    </Html>
+    </EmailHtml>
   );
 };
 

@@ -7,6 +7,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { FamilyMember } from '@/types/models';
 
 interface FamilyMemberCardProps {
@@ -28,13 +29,11 @@ export default function FamilyMemberCard({
   onDietaryChange,
   onAccessibilityChange,
 }: FamilyMemberCardProps) {
+  const t = useTranslations();
+
   const getMemberTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      ADULT: 'Adult',
-      CHILD: 'Child',
-      INFANT: 'Infant',
-    };
-    return labels[type] || type;
+    const key = type.toLowerCase() as 'adult' | 'child' | 'infant';
+    return t(`guest.members.types.${key}`);
   };
 
   return (
@@ -45,10 +44,10 @@ export default function FamilyMemberCard({
           <h4 className="text-xl font-bold text-gray-900">{member.name}</h4>
           <p className="text-base text-gray-600">
             {getMemberTypeLabel(member.type)}
-            {member.age && ` • ${member.age} years old`}
+            {member.age && ` • ${t('guest.members.yearsOld', { count: member.age })}`}
             {member.added_by_guest && (
               <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                Added by you
+                {t('guest.members.addedByYou')}
               </span>
             )}
           </p>
@@ -65,7 +64,7 @@ export default function FamilyMemberCard({
             className="w-7 h-7 rounded border-2 border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 cursor-pointer"
           />
           <span className="text-lg font-semibold text-gray-900">
-            {attending ? '✓ Will Attend' : 'Will Not Attend'}
+            {attending ? `✓ ${t('guest.rsvp.attending')}` : t('guest.rsvp.notAttending')}
           </span>
         </label>
       </div>
@@ -75,26 +74,26 @@ export default function FamilyMemberCard({
         <div className="space-y-4">
           <div>
             <label className="block text-base font-semibold text-gray-700 mb-2">
-              Dietary Restrictions (optional)
+              {t('guest.rsvp.dietaryRestrictions')} ({t('common.optional', { defaultValue: 'optional' })})
             </label>
             <input
               type="text"
               value={dietaryRestrictions}
               onChange={(e) => onDietaryChange(e.target.value)}
-              placeholder="E.g., vegetarian, allergies, etc."
+              placeholder={t('guest.rsvp.dietaryPlaceholder')}
               className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
             />
           </div>
 
           <div>
             <label className="block text-base font-semibold text-gray-700 mb-2">
-              Accessibility Needs (optional)
+              {t('guest.rsvp.accessibilityNeeds')} ({t('common.optional', { defaultValue: 'optional' })})
             </label>
             <input
               type="text"
               value={accessibilityNeeds}
               onChange={(e) => onAccessibilityChange(e.target.value)}
-              placeholder="E.g., wheelchair, special needs, etc."
+              placeholder={t('guest.rsvp.accessibilityPlaceholder')}
               className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
             />
           </div>

@@ -2,8 +2,11 @@
 
 import { signOut } from 'next-auth/react';
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function SignOutPage() {
+  const t = useTranslations();
+
   useEffect(() => {
     signOut({ callbackUrl: '/auth/signin' });
   }, []);
@@ -15,10 +18,10 @@ export default function SignOutPage() {
           <div className="w-6 h-6 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" />
         </div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Signing out...
+          {t('auth.signout.title')}
         </h1>
         <p className="text-gray-600">
-          Please wait while we sign you out.
+          {t('auth.signout.subtitle')}
         </p>
       </div>
     </div>

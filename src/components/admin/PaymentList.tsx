@@ -7,6 +7,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import type { GiftStatus } from '@/types/models';
 
 interface PaymentItem {
@@ -41,27 +42,15 @@ const getStatusBadgeClass = (status: GiftStatus): string => {
   return classes[status] || 'bg-gray-100 text-gray-800';
 };
 
-const formatDate = (date: Date): string => {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
-
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(amount);
-};
-
 export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListProps) {
+  const t = useTranslations();
+  const format = useFormatter();
+
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-        <p className="mt-4 text-gray-500">Loading payments...</p>
+        <p className="mt-4 text-gray-500">{t('admin.payments.loading')}</p>
       </div>
     );
   }
@@ -82,9 +71,9 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No payments recorded</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.payments.emptyTitle')}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Payments will appear here when recorded.
+          {t('admin.payments.emptyDesc')}
         </p>
       </div>
     );
@@ -98,23 +87,23 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Family
+                {t('admin.payments.family')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Amount
+                {t('admin.payments.amount')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
+                {t('admin.payments.transactionDate')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Reference
+                {t('admin.payments.referenceCode')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {t('admin.payments.status')}
               </th>
               {onUpdateStatus && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('admin.guests.table.actions')}
                 </th>
               )}
             </tr>
@@ -134,11 +123,15 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-sm font-medium text-gray-900">
-                    {formatCurrency(payment.amount)}
+                    {format.number(payment.amount, { style: 'currency', currency: 'EUR' })}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(payment.transaction_date)}
+                  {format.dateTime(new Date(payment.transaction_date), {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {payment.reference_code_used ? (
@@ -150,7 +143,7 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
                   )}
                   {payment.auto_matched && (
                     <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                      Auto
+                      {t('admin.payments.auto')}
                     </span>
                   )}
                 </td>
@@ -158,7 +151,7 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(payment.status)}`}
                   >
-                    {payment.status}
+                    {t(`admin.payments.statuses.${payment.status.toLowerCase()}`)}
                   </span>
                 </td>
                 {onUpdateStatus && (
@@ -168,7 +161,7 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
                         onClick={() => onUpdateStatus(payment.id, 'RECEIVED')}
                         className="text-blue-600 hover:text-blue-900 mr-3"
                       >
-                        Mark Received
+                        {t('admin.payments.markReceived')}
                       </button>
                     )}
                     {payment.status === 'RECEIVED' && (
@@ -176,7 +169,7 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
                         onClick={() => onUpdateStatus(payment.id, 'CONFIRMED')}
                         className="text-green-600 hover:text-green-900"
                       >
-                        Confirm
+                         {t('common.buttons.confirm')}
                       </button>
                     )}
                   </td>
@@ -195,16 +188,22 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
               <div>
                 <h3 className="text-sm font-medium text-gray-900">{payment.family.name}</h3>
                 <p className="text-lg font-bold text-gray-900 mt-1">
-                  {formatCurrency(payment.amount)}
+                  {format.number(payment.amount, { style: 'currency', currency: 'EUR' })}
                 </p>
               </div>
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(payment.status)}`}
               >
-                {payment.status}
+                {t(`admin.payments.statuses.${payment.status.toLowerCase()}`)}
               </span>
             </div>
-            <p className="text-sm text-gray-500">{formatDate(payment.transaction_date)}</p>
+            <p className="text-sm text-gray-500">
+              {format.dateTime(new Date(payment.transaction_date), {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+            </p>
             {onUpdateStatus && payment.status !== 'CONFIRMED' && (
               <div className="mt-3 flex space-x-3">
                 {payment.status === 'PENDING' && (
@@ -212,7 +211,7 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
                     onClick={() => onUpdateStatus(payment.id, 'RECEIVED')}
                     className="text-sm text-blue-600 hover:text-blue-900"
                   >
-                    Mark Received
+                    {t('admin.payments.markReceived')}
                   </button>
                 )}
                 {payment.status === 'RECEIVED' && (
@@ -220,7 +219,7 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
                     onClick={() => onUpdateStatus(payment.id, 'CONFIRMED')}
                     className="text-sm text-green-600 hover:text-green-900"
                   >
-                    Confirm
+                    {t('common.buttons.confirm')}
                   </button>
                 )}
               </div>

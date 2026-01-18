@@ -7,6 +7,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import type { MemberType } from '@/types/models';
 
 interface GuestAddition {
@@ -32,24 +33,6 @@ interface GuestAdditionsReviewProps {
   loading?: boolean;
 }
 
-const getMemberTypeLabel = (type: MemberType): string => {
-  const labels: Record<MemberType, string> = {
-    ADULT: 'Adult',
-    CHILD: 'Child',
-    INFANT: 'Infant',
-  };
-  return labels[type] || type;
-};
-
-const formatDate = (date: Date): string => {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
 export function GuestAdditionsReview({
   additions,
   featureEnabled,
@@ -57,11 +40,22 @@ export function GuestAdditionsReview({
   onEdit,
   loading,
 }: GuestAdditionsReviewProps) {
+  const t = useTranslations();
+
+  const getMemberTypeLabel = (type: MemberType): string => {
+    const labels: Record<MemberType, string> = {
+      ADULT: t('guest.members.types.adult'),
+      CHILD: t('guest.members.types.child'),
+      INFANT: t('guest.members.types.infant'),
+    };
+    return labels[type] || type;
+  };
+
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-        <p className="mt-4 text-gray-500">Loading guest additions...</p>
+        <p className="mt-4 text-gray-500">{t('admin.guestAdditions.loading')}</p>
       </div>
     );
   }
@@ -82,9 +76,9 @@ export function GuestAdditionsReview({
             d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
           />
         </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">Feature Disabled</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.guestAdditions.featureDisabled')}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Guest additions are disabled for this wedding.
+          {t('admin.guestAdditions.featureDisabledDesc')}
         </p>
       </div>
     );
@@ -106,9 +100,9 @@ export function GuestAdditionsReview({
             d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
           />
         </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No guest additions</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.guestAdditions.noAdditionsTitle')}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          When guests add family members, they will appear here for review.
+          {t('admin.guestAdditions.noAdditionsDesc')}
         </p>
       </div>
     );
@@ -117,6 +111,15 @@ export function GuestAdditionsReview({
   const newAdditions = additions.filter((a) => a.is_new);
   const reviewedAdditions = additions.filter((a) => !a.is_new);
 
+  const formatDate = (date: Date): string => {
+    return new Date(date).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary */}
@@ -124,10 +127,10 @@ export function GuestAdditionsReview({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">
-              <span className="font-medium text-gray-900">{additions.length}</span> total additions
+              <span className="font-medium text-gray-900">{additions.length}</span> {t('admin.guestAdditions.totalAdditions')}
               {newAdditions.length > 0 && (
                 <span className="ml-2">
-                  (<span className="text-purple-600 font-medium">{newAdditions.length}</span> new)
+                  (<span className="text-purple-600 font-medium">{newAdditions.length}</span> {t('admin.guestAdditions.new')})
                 </span>
               )}
             </p>
@@ -140,9 +143,9 @@ export function GuestAdditionsReview({
         <div>
           <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
             <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs mr-2">
-              NEW
+              {t('admin.guestAdditions.newBadge')}
             </span>
-            Pending Review
+            {t('admin.guestAdditions.pendingReview')}
           </h3>
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <ul className="divide-y divide-gray-200">
@@ -154,11 +157,11 @@ export function GuestAdditionsReview({
                         <h4 className="text-sm font-medium text-gray-900">{addition.name}</h4>
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                           {getMemberTypeLabel(addition.type)}
-                          {addition.age && ` (${addition.age}y)`}
+                          {addition.age && ` (${addition.age})`}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
-                        Added to: <span className="font-medium">{addition.family_name}</span>
+                        {t('admin.guestAdditions.addedTo')}: <span className="font-medium">{addition.family_name}</span>
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
                         {formatDate(addition.created_at)}
@@ -166,10 +169,10 @@ export function GuestAdditionsReview({
                       {(addition.dietary_restrictions || addition.accessibility_needs) && (
                         <div className="mt-2 text-xs text-gray-500">
                           {addition.dietary_restrictions && (
-                            <p>Diet: {addition.dietary_restrictions}</p>
+                            <p>{t('admin.guestAdditions.diet')}: {addition.dietary_restrictions}</p>
                           )}
                           {addition.accessibility_needs && (
-                            <p>Accessibility: {addition.accessibility_needs}</p>
+                            <p>{t('admin.guestAdditions.accessibility')}: {addition.accessibility_needs}</p>
                           )}
                         </div>
                       )}
@@ -180,7 +183,7 @@ export function GuestAdditionsReview({
                           onClick={() => onEdit(addition.id)}
                           className="text-sm text-gray-600 hover:text-gray-900"
                         >
-                          Edit
+                          {t('admin.guestAdditions.edit')}
                         </button>
                       )}
                       {onMarkReviewed && (
@@ -188,7 +191,7 @@ export function GuestAdditionsReview({
                           onClick={() => onMarkReviewed(addition.id)}
                           className="text-sm text-purple-600 hover:text-purple-900"
                         >
-                          Mark Reviewed
+                          {t('admin.guestAdditions.markReviewed')}
                         </button>
                       )}
                     </div>
@@ -203,7 +206,7 @@ export function GuestAdditionsReview({
       {/* Reviewed Additions */}
       {reviewedAdditions.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Previously Reviewed</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-3">{t('admin.guestAdditions.previouslyReviewed')}</h3>
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <ul className="divide-y divide-gray-200">
               {reviewedAdditions.map((addition) => (
@@ -217,7 +220,7 @@ export function GuestAdditionsReview({
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
-                        Family: {addition.family_name}
+                        {t('admin.guestAdditions.family')}: {addition.family_name}
                       </p>
                     </div>
                     {onEdit && (
@@ -225,7 +228,7 @@ export function GuestAdditionsReview({
                         onClick={() => onEdit(addition.id)}
                         className="text-sm text-gray-600 hover:text-gray-900"
                       >
-                        Edit
+                        {t('admin.guestAdditions.edit')}
                       </button>
                     )}
                   </div>

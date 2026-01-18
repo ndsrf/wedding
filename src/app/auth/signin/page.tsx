@@ -3,11 +3,13 @@
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
+import { useTranslations } from 'next-intl';
 
 function SignInContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const t = useTranslations();
 
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider);
@@ -24,10 +26,10 @@ function SignInContent() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Wedding Management System
+            {t('landing.title')}
           </h1>
           <p className="text-gray-600">
-            Sign in to access your account
+            {t('auth.signin.subtitle')}
           </p>
         </div>
 
@@ -60,7 +62,7 @@ function SignInContent() {
               </svg>
             )}
             <span className="text-gray-700 font-medium">
-              Continue with Google
+              {t('auth.signin.google')}
             </span>
           </button>
 
@@ -77,7 +79,7 @@ function SignInContent() {
               </svg>
             )}
             <span className="text-gray-700 font-medium">
-              Continue with Facebook
+              {t('auth.signin.facebook')}
             </span>
           </button>
 
@@ -94,13 +96,13 @@ function SignInContent() {
               </svg>
             )}
             <span className="text-gray-700 font-medium">
-              Continue with Apple
+              {t('auth.signin.apple')}
             </span>
           </button>
         </div>
 
         <div className="text-center text-sm text-gray-500">
-          <p>Sign in with your authorized account</p>
+          <p>{t('auth.signin.footer')}</p>
         </div>
       </div>
     </div>
@@ -108,10 +110,12 @@ function SignInContent() {
 }
 
 export default function SignInPage() {
+  const t = useTranslations();
+  
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-gray-600">Loading...</div>
+        <div className="text-gray-600">{t('common.loading')}</div>
       </div>
     }>
       <SignInContent />
