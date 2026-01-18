@@ -22,7 +22,7 @@ interface RouteParams {
  * GET /api/admin/guests/:id
  * Get family details with all members
  */
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(_request: NextRequest, context: RouteParams) {
   try {
     // Check authentication and require wedding_admin role
     const user = await requireRole('wedding_admin');
@@ -200,7 +200,7 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
  * DELETE /api/admin/guests/:id
  * Delete family and all related data
  */
-export async function DELETE(request: NextRequest, context: RouteParams) {
+export async function DELETE(_request: NextRequest, context: RouteParams) {
   try {
     // Check authentication and require wedding_admin role
     const user = await requireRole('wedding_admin');

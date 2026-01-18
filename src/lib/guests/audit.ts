@@ -5,6 +5,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 
 export type AuditAction = 'create' | 'update' | 'delete';
 
@@ -31,7 +32,7 @@ export async function logAuditEvent(entry: AuditLogEntry): Promise<void> {
         metadata: {
           audit_action: entry.action,
           admin_id: entry.admin_id,
-          details: entry.details,
+          details: entry.details as Prisma.JsonValue,
           timestamp: new Date().toISOString(),
         },
       },
