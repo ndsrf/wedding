@@ -475,5 +475,18 @@
       "title": "Editar RSVP",
       "canEdit": "Puedes editar tu RSVP hasta el {date}."
     }
+  },
+  "auth": {
+    "signin": {
+      "subtitle": "Inicia sesión para acceder a tu cuenta",
+      "google": "Continuar con Google",
+      "facebook": "Continuar con Facebook",
+      "apple": "Continuar con Apple",
+      "footer": "Inicia sesión con tu cuenta autorizada"
+    },
+    "signout": {
+      "title": "Cerrando sesión...",
+      "subtitle": "Por favor espera mientras cerramos tu sesión."
+    }
   }
 }

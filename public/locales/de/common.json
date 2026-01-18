@@ -467,5 +467,18 @@
       "title": "RSVP bearbeiten",
       "canEdit": "Sie können Ihre RSVP bis zum {date} bearbeiten."
     }
+  },
+  "auth": {
+    "signin": {
+      "subtitle": "Melden Sie sich an, um auf Ihr Konto zuzugreifen",
+      "google": "Weiter mit Google",
+      "facebook": "Weiter mit Facebook",
+      "apple": "Weiter mit Apple",
+      "footer": "Melden Sie sich mit Ihrem autorisierten Konto an"
+    },
+    "signout": {
+      "title": "Abmelden...",
+      "subtitle": "Bitte warten Sie, während wir Sie abmelden."
+    }
   }
 }

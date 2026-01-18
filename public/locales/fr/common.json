@@ -467,5 +467,18 @@
       "title": "Modifier RSVP",
       "canEdit": "Vous pouvez modifier votre réponse jusqu'au {date}."
     }
+  },
+  "auth": {
+    "signin": {
+      "subtitle": "Connectez-vous pour accéder à votre compte",
+      "google": "Continuer avec Google",
+      "facebook": "Continuer avec Facebook",
+      "apple": "Continuer avec Apple",
+      "footer": "Connectez-vous avec votre compte autorisé"
+    },
+    "signout": {
+      "title": "Déconnexion...",
+      "subtitle": "Veuillez patienter pendant que nous vous déconnectons."
+    }
   }
 }
