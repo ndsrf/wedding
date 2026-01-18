@@ -153,6 +153,12 @@
       "noWeddings": "Noch keine Hochzeiten",
       "getStarted": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit.",
       "backToWeddings": "Zurück zu Hochzeiten",
+      "backToDashboard": "Zurück zum Dashboard",
+      "manageEvents": "Verwalten Sie alle Ihre Hochzeitsereignisse",
+      "createError": "Fehler beim Erstellen der Hochzeit",
+      "loadError": "Fehler beim Laden der Hochzeiten",
+      "updateDetails": "Details für {coupleNames} aktualisieren",
+      "updateError": "Fehler beim Aktualisieren der Hochzeit",
       "notFound": "Hochzeit nicht gefunden",
       "totalGuests": "Gesamtzahl Gäste",
       "rsvpCompletion": "RSVP-Abschluss",
@@ -160,6 +166,12 @@
       "paymentsReceived": "Erhaltene Zahlungen",
       "weddingInfo": "Hochzeitsinformationen",
       "status": "Status",
+      "at": "um",
+      "statusLabels": {
+        "ACTIVE": "Aktiv",
+        "ARCHIVED": "Archiviert",
+        "COMPLETED": "Abgeschlossen"
+      },
       "guestAdditions": "Gastzusätze",
       "allowed": "Erlaubt",
       "notAllowed": "Nicht erlaubt",
@@ -179,20 +191,54 @@
       "rsvpCutoff": "RSVP-Frist",
       "defaultLanguage": "Standardsprache",
       "theme": "Thema",
+      "noTheme": "Kein Thema",
       "paymentMode": "Zahlungsmodus",
       "automated": "Automatisiert",
       "manual": "Manuell",
       "allowGuestAdditions": "Gäste hinzufügen erlauben",
       "overview": "Übersicht",
       "guests": "Gäste",
-      "admins": "Administratoren"
+      "admins": "Administratoren",
+      "placeholders": {
+        "coupleNames": "Max & Maria",
+        "location": "Name des Veranstaltungsortes und Adresse"
+      },
+      "validation": {
+        "coupleNamesRequired": "Namen des Paares sind erforderlich",
+        "weddingDateRequired": "Hochzeitsdatum ist erforderlich",
+        "weddingTimeRequired": "Hochzeitszeit ist erforderlich",
+        "locationRequired": "Ort ist erforderlich",
+        "rsvpCutoffRequired": "RSVP-Frist ist erforderlich",
+        "rsvpCutoffInvalid": "RSVP-Frist muss vor dem Hochzeitsdatum liegen"
+      },
+      "note": {
+        "title": "Hinweis:",
+        "content": "Zusätzliche Einstellungen wie Zahlungsmodus, Gastzusätze, Kleiderordnung und RSVP-Fragen können vom Hochzeitsadmin im Hochzeits-Dashboard nach der Erstellung konfiguriert werden."
+      },
+      "buttons": {
+        "saving": "Speichern...",
+        "update": "Hochzeit aktualisieren",
+        "create": "Hochzeit erstellen"
+      }
     },
     "admins": {
       "invite": "Administrator einladen",
+      "name": "Admin-Name",
+      "namePlaceholder": "Admin-Namen eingeben",
       "email": "Admin-E-Mail",
+      "emailPlaceholder": "admin@beispiel.de",
       "inviteSent": "Einladung erfolgreich gesendet",
+      "inviteError": "Fehler beim Einladen des Administrators",
       "remove": "Administrator entfernen",
-      "confirmRemove": "Sind Sie sicher, dass Sie diesen Administrator entfernen möchten?"
+      "confirmRemove": "Sind Sie sicher, dass Sie diesen Administrator entfernen möchten?",
+      "invitationNote": "Der Administrator erhält eine Einladungs-E-Mail mit Anweisungen zur Anmeldung und zum Zugriff auf diese Hochzeit.",
+      "sending": "Einladung wird gesendet...",
+      "send": "Einladung senden",
+      "validation": {
+        "nameRequired": "Name ist erforderlich",
+        "emailRequired": "E-Mail ist erforderlich",
+        "invalidEmail": "Ungültige E-Mail-Adresse"
+      }
     },
     "themes": {
       "title": "Themenverwaltung",
@@ -329,10 +375,11 @@
     "reminders": {
       "title": "Erinnerungssystem",
       "send": "Erinnerungen senden",
+      "sendReminder": "Erinnerung senden",
       "preview": "Empfängervorschau",
       "channel": "Versandkanal",
       "recipients": "Empfänger: {count} Familie(n)",
-      "sent": "Erinnerungen erfolgreich an {count} Familie(n) gesendet",
+      "sent": "Erinnerung erfolgreich an {count} Familie(n) gesendet",
       "noRecipients": "Keine Familien warten auf RSVP",
       "loadingPreview": "Lade Vorschau...",
       "sendSuccess": "Erinnerungen gesendet!",

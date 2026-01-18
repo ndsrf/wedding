@@ -8,6 +8,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { CreateWeddingRequest } from '@/types/api';
 import type { Theme, Wedding } from '@/types/models';
 import { Language, PaymentMode } from '@prisma/client';
@@ -25,6 +26,7 @@ interface WeddingFormProps {
 }
 
 export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: WeddingFormProps) {
+  const t = useTranslations();
   // Note: payment_tracking_mode, allow_guest_additions, dress_code, and additional_info
   // are now managed by the wedding admin in /admin/configure. Default values are set here
   // for wedding creation, but the wedding admin can change them later.
@@ -53,28 +55,28 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
     const newErrors: Partial<Record<keyof WeddingFormData, string>> = {};
 
     if (!formData.couple_names.trim()) {
-      newErrors.couple_names = 'Couple names are required';
+      newErrors.couple_names = t('planner.weddings.validation.coupleNamesRequired');
     }
 
     if (!formData.wedding_date) {
-      newErrors.wedding_date = 'Wedding date is required';
+      newErrors.wedding_date = t('planner.weddings.validation.weddingDateRequired');
     }
 
     if (!formData.wedding_time.trim()) {
-      newErrors.wedding_time = 'Wedding time is required';
+      newErrors.wedding_time = t('planner.weddings.validation.weddingTimeRequired');
     }
 
     if (!formData.location.trim()) {
-      newErrors.location = 'Location is required';
+      newErrors.location = t('planner.weddings.validation.locationRequired');
     }
 
     if (!formData.rsvp_cutoff_date) {
-      newErrors.rsvp_cutoff_date = 'RSVP cutoff date is required';
+      newErrors.rsvp_cutoff_date = t('planner.weddings.validation.rsvpCutoffRequired');
     } else if (
       formData.wedding_date &&
       new Date(formData.rsvp_cutoff_date) >= new Date(formData.wedding_date)
     ) {
-      newErrors.rsvp_cutoff_date = 'RSVP cutoff must be before the wedding date';
+      newErrors.rsvp_cutoff_date = t('planner.weddings.validation.rsvpCutoffInvalid');
     }
 
     setErrors(newErrors);
@@ -114,7 +116,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       {/* Couple Names */}
       <div>
         <label htmlFor="couple_names" className="block text-sm font-medium text-gray-700 mb-1">
-          Couple Names *
+          {t('planner.weddings.coupleNames')} *
         </label>
         <input
           id="couple_names"
@@ -124,7 +126,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.couple_names ? 'border-red-500' : 'border-gray-300'
           }`}
-          placeholder="John & Jane"
+          placeholder={t('planner.weddings.placeholders.coupleNames')}
         />
         {errors.couple_names && <p className="mt-1 text-sm text-red-600">{errors.couple_names}</p>}
       </div>
@@ -133,7 +135,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
           <label htmlFor="wedding_date" className="block text-sm font-medium text-gray-700 mb-1">
-            Wedding Date *
+            {t('planner.weddings.weddingDate')} *
           </label>
           <input
             id="wedding_date"
@@ -149,7 +151,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
 
         <div>
           <label htmlFor="wedding_time" className="block text-sm font-medium text-gray-700 mb-1">
-            Wedding Time *
+            {t('planner.weddings.weddingTime')} *
           </label>
           <input
             id="wedding_time"
@@ -167,7 +169,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       {/* Location */}
       <div>
         <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-          Location *
+          {t('planner.weddings.location')} *
         </label>
         <input
           id="location"
@@ -177,7 +179,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.location ? 'border-red-500' : 'border-gray-300'
           }`}
-          placeholder="Venue name and address"
+          placeholder={t('planner.weddings.placeholders.location')}
         />
         {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location}</p>}
       </div>
@@ -185,7 +187,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       {/* RSVP Cutoff Date */}
       <div>
         <label htmlFor="rsvp_cutoff_date" className="block text-sm font-medium text-gray-700 mb-1">
-          RSVP Cutoff Date *
+          {t('planner.weddings.rsvpCutoff')} *
         </label>
         <input
           id="rsvp_cutoff_date"
@@ -205,7 +207,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       {themes.length > 0 && (
         <div>
           <label htmlFor="theme_id" className="block text-sm font-medium text-gray-700 mb-1">
-            Theme (optional)
+            {t('planner.weddings.theme')} ({t('common.optional')})
           </label>
           <select
             id="theme_id"
@@ -213,10 +215,10 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
             onChange={(e) => handleChange('theme_id', e.target.value || undefined)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">No theme</option>
+            <option value="">{t('planner.weddings.noTheme')}</option>
             {themes.map((theme) => (
               <option key={theme.id} value={theme.id}>
-                {theme.name} {theme.is_system_theme ? '(System)' : ''}
+                {theme.name} {theme.is_system_theme ? `(${t('planner.themes.system')})` : ''}
               </option>
             ))}
           </select>
@@ -226,7 +228,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       {/* Default Language */}
       <div>
         <label htmlFor="default_language" className="block text-sm font-medium text-gray-700 mb-1">
-          Default Language *
+          {t('planner.weddings.defaultLanguage')} *
         </label>
         <select
           id="default_language"
@@ -234,20 +236,18 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           onChange={(e) => handleChange('default_language', e.target.value as Language)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value={Language.ES}>Spanish (Español)</option>
-          <option value={Language.EN}>English</option>
-          <option value={Language.FR}>French (Français)</option>
-          <option value={Language.IT}>Italian (Italiano)</option>
-          <option value={Language.DE}>German (Deutsch)</option>
+          <option value={Language.ES}>{t('common.languages.ES')} (Español)</option>
+          <option value={Language.EN}>{t('common.languages.EN')}</option>
+          <option value={Language.FR}>{t('common.languages.FR')} (Français)</option>
+          <option value={Language.IT}>{t('common.languages.IT')} (Italiano)</option>
+          <option value={Language.DE}>{t('common.languages.DE')} (Deutsch)</option>
         </select>
       </div>
 
       {/* Note about additional settings */}
       <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
         <p className="text-sm text-blue-700">
-          <strong>Note:</strong> Additional settings like payment mode, guest additions, dress code,
-          and RSVP questions can be configured by the wedding admin in the wedding dashboard
-          after the wedding is created.
+          <strong>{t('planner.weddings.note.title')}</strong> {t('planner.weddings.note.content')}
         </p>
       </div>
 
@@ -259,14 +259,18 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           disabled={isSubmitting}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Cancel
+          {t('common.buttons.cancel')}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? 'Saving...' : initialData ? 'Update Wedding' : 'Create Wedding'}
+          {isSubmitting 
+            ? t('planner.weddings.buttons.saving') 
+            : initialData 
+              ? t('planner.weddings.buttons.update') 
+              : t('planner.weddings.buttons.create')}
         </button>
       </div>
     </form>

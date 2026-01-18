@@ -15,6 +15,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { sendRSVPReminder } from '@/lib/email/resend';
+import type { Language as I18nLanguage } from '@/lib/i18n/config';
 import type { APIResponse, SendRemindersResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import type { Language } from '@prisma/client';
@@ -23,6 +25,7 @@ import type { Language } from '@prisma/client';
 const sendRemindersSchema = z.object({
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']),
   message_template: z.string().optional(),
+  family_ids: z.array(z.string()).optional(),
 });
 
 // Personalized reminder messages in all supported languages
@@ -108,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
-    const { channel, message_template } = sendRemindersSchema.parse(body);
+    const { channel, message_template, family_ids } = sendRemindersSchema.parse(body);
 
     // Get wedding details for magic link generation and message content
     const wedding = await prisma.wedding.findUnique({
@@ -145,10 +148,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 });
     }
 
-    // Find families without RSVP response (no member has attending set)
+    // Find families - filter by family_ids if provided, otherwise get all without RSVP response
     const familiesWithoutRsvp = await prisma.family.findMany({
       where: {
         wedding_id: user.wedding_id,
+        ...(family_ids && family_ids.length > 0 ? { id: { in: family_ids } } : {}),
       },
       include: {
         members: {
@@ -159,10 +163,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Filter families where no member has responded
-    const eligibleFamilies = familiesWithoutRsvp.filter(
-      (family) => family.members.every((member) => member.attending === null)
-    );
+    // Filter families where no member has responded (skip this check if specific family_ids are provided)
+    const eligibleFamilies = family_ids && family_ids.length > 0
+      ? familiesWithoutRsvp // When specific families are requested, send to them regardless
+      : familiesWithoutRsvp.filter(
+          (family) => family.members.every((member) => member.attending === null)
+        );
 
     if (eligibleFamilies.length === 0) {
       const response: SendRemindersResponse = {
@@ -220,19 +226,56 @@ export async function POST(request: NextRequest) {
       data: trackingEventsData,
     });
 
-    // In a production implementation, the actual sending would be handled by:
-    // - Email: Resend API with React Email templates (src/lib/email/resend.ts)
-    // - WhatsApp: WhatsApp Business API or Twilio
-    // - SMS: Twilio or similar SMS provider
-    //
-    // The personalized message data is stored in the tracking event metadata
-    // and can be used by the email/messaging service to send the actual messages.
+    // Send emails if channel is EMAIL
+    let sentCount = 0;
+    let failedCount = 0;
+
+    if (channel === 'EMAIL') {
+      console.log('[REMINDER DEBUG] Sending email reminders to', eligibleFamilies.length, 'families');
+
+      for (const family of eligibleFamilies) {
+        // Only send if family has an email
+        if (!family.email) {
+          console.log('[REMINDER DEBUG] Family', family.name, 'has no email, skipping');
+          failedCount++;
+          continue;
+        }
+
+        const language = (family.preferred_language || wedding.default_language).toLowerCase() as I18nLanguage;
+        const weddingDate = formatDate(wedding.wedding_date, family.preferred_language || wedding.default_language);
+        const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
+
+        console.log('[REMINDER DEBUG] Sending email to', family.email, 'for family', family.name);
+
+        const result = await sendRSVPReminder(
+          family.email,
+          language,
+          family.name,
+          wedding.couple_names,
+          weddingDate,
+          magicLink
+        );
+
+        if (result.success) {
+          sentCount++;
+          console.log('[REMINDER DEBUG] Email sent successfully to', family.email);
+        } else {
+          failedCount++;
+          console.error('[REMINDER DEBUG] Failed to send email to', family.email, ':', result.error);
+        }
+      }
+    } else {
+      // For WhatsApp and SMS, we only create tracking events for now
+      // Actual sending would require integration with WhatsApp Business API or Twilio
+      console.log('[REMINDER DEBUG] Channel is', channel, '- only tracking events created (sending not implemented)');
+      sentCount = eligibleFamilies.length;
+    }
 
     const response: SendRemindersResponse = {
       success: true,
       data: {
-        sent_count: eligibleFamilies.length,
-        failed_count: 0,
+        sent_count: sentCount,
+        failed_count: failedCount,
         recipient_families: eligibleFamilies.map((f) => f.id),
       },
     };

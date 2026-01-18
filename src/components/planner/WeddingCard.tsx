@@ -9,6 +9,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
 import type { WeddingWithStats } from '@/types/models';
 
 interface WeddingCardProps {
@@ -16,8 +17,10 @@ interface WeddingCardProps {
 }
 
 export function WeddingCard({ wedding }: WeddingCardProps) {
+  const t = useTranslations();
+  const locale = useLocale();
   const weddingDate = new Date(wedding.wedding_date);
-  const formattedDate = weddingDate.toLocaleDateString('en-US', {
+  const formattedDate = weddingDate.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -53,7 +56,7 @@ export function WeddingCard({ wedding }: WeddingCardProps) {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {formattedDate} at {wedding.wedding_time}
+              {formattedDate} {t('planner.weddings.at')} {wedding.wedding_time}
             </div>
             <div className="flex items-center text-sm text-gray-500 mt-1">
               <svg
@@ -84,7 +87,7 @@ export function WeddingCard({ wedding }: WeddingCardProps) {
                 statusColors[wedding.status]
               }`}
             >
-              {wedding.status}
+              {t(`planner.weddings.statusLabels.${wedding.status}`)}
             </span>
           </div>
         </div>
@@ -92,21 +95,21 @@ export function WeddingCard({ wedding }: WeddingCardProps) {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-100">
           <div>
-            <p className="text-xs text-gray-500 mb-1">Guests</p>
+            <p className="text-xs text-gray-500 mb-1">{t('planner.weddings.guests')}</p>
             <p className="text-lg font-semibold text-gray-900">{wedding.guest_count}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 mb-1">RSVP</p>
+            <p className="text-xs text-gray-500 mb-1">{t('planner.weddings.rsvpCompletion')}</p>
             <p className="text-lg font-semibold text-gray-900">
               {wedding.rsvp_completion_percentage}%
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 mb-1">Attending</p>
+            <p className="text-xs text-gray-500 mb-1">{t('planner.weddings.attending')}</p>
             <p className="text-lg font-semibold text-gray-900">{wedding.attending_count}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 mb-1">Payments</p>
+            <p className="text-xs text-gray-500 mb-1">{t('planner.weddings.paymentsReceived')}</p>
             <p className="text-lg font-semibold text-gray-900">
               {wedding.payment_received_count}
             </p>

@@ -153,6 +153,12 @@
       "noWeddings": "Pas encore de mariages",
       "getStarted": "Commencez par créer votre premier mariage.",
       "backToWeddings": "Retour aux mariages",
+      "backToDashboard": "Retour au tableau de bord",
+      "manageEvents": "Gérez tous vos événements de mariage",
+      "createError": "Échec de la création du mariage",
+      "loadError": "Échec du chargement des mariages",
+      "updateDetails": "Mettre à jour les détails pour {coupleNames}",
+      "updateError": "Échec de la mise à jour du mariage",
       "notFound": "Mariage introuvable",
       "totalGuests": "Total Invités",
       "rsvpCompletion": "Taux de Réponse RSVP",
@@ -160,6 +166,12 @@
       "paymentsReceived": "Paiements Reçus",
       "weddingInfo": "Informations sur le Mariage",
       "status": "Statut",
+      "at": "à",
+      "statusLabels": {
+        "ACTIVE": "Actif",
+        "ARCHIVED": "Archivé",
+        "COMPLETED": "Terminé"
+      },
       "guestAdditions": "Ajouts d'Invités",
       "allowed": "Autorisé",
       "notAllowed": "Non autorisé",
@@ -179,20 +191,54 @@
       "rsvpCutoff": "Date Limite RSVP",
       "defaultLanguage": "Langue par Défaut",
       "theme": "Thème",
+      "noTheme": "Aucun thème",
       "paymentMode": "Mode de Paiement",
       "automated": "Automatisé",
       "manual": "Manuel",
       "allowGuestAdditions": "Autoriser l'Ajout d'Invités",
       "overview": "Aperçu",
       "guests": "Invités",
-      "admins": "Administrateurs"
+      "admins": "Administrateurs",
+      "placeholders": {
+        "coupleNames": "Jean & Jeanne",
+        "location": "Nom du lieu et adresse"
+      },
+      "validation": {
+        "coupleNamesRequired": "Les noms du couple sont obligatoires",
+        "weddingDateRequired": "La date du mariage est obligatoire",
+        "weddingTimeRequired": "L'heure du mariage est obligatoire",
+        "locationRequired": "Le lieu est obligatoire",
+        "rsvpCutoffRequired": "La date limite RSVP est obligatoire",
+        "rsvpCutoffInvalid": "La date limite RSVP doit être antérieure à la date du mariage"
+      },
+      "note": {
+        "title": "Note:",
+        "content": "Des paramètres supplémentaires tels que le mode de paiement, l'ajout d'invités, le code vestimentaire et les questions RSVP peuvent être configurés par l'administrateur du mariage dans le tableau de bord du mariage après sa création."
+      },
+      "buttons": {
+        "saving": "Enregistrement...",
+        "update": "Mettre à jour le mariage",
+        "create": "Créer le mariage"
+      }
     },
     "admins": {
       "invite": "Inviter un Administrateur",
+      "name": "Nom de l'Administrateur",
+      "namePlaceholder": "Entrez le nom de l'administrateur",
       "email": "Email de l'Administrateur",
+      "emailPlaceholder": "admin@exemple.com",
       "inviteSent": "Invitation envoyée avec succès",
+      "inviteError": "Échec de l'invitation de l'administrateur",
       "remove": "Supprimer l'Administrateur",
-      "confirmRemove": "Êtes-vous sûr de vouloir supprimer cet administrateur ?"
+      "confirmRemove": "Êtes-vous sûr de vouloir supprimer cet administrateur ?",
+      "invitationNote": "L'administrateur recevra un email d'invitation avec des instructions pour se connecter et accéder à ce mariage.",
+      "sending": "Envoi de l'invitation...",
+      "send": "Envoyer l'invitation",
+      "validation": {
+        "nameRequired": "Le nom est obligatoire",
+        "emailRequired": "L'email est obligatoire",
+        "invalidEmail": "Adresse email invalide"
+      }
     },
     "themes": {
       "title": "Gestion des Thèmes",
@@ -329,10 +375,11 @@
     "reminders": {
       "title": "Système de Rappels",
       "send": "Envoyer Rappels",
+      "sendReminder": "Envoyer Rappel",
       "preview": "Aperçu Destinataires",
       "channel": "Canal d'Envoi",
       "recipients": "Destinataires : {count} famille(s)",
-      "sent": "Rappels envoyés avec succès à {count} famille(s)",
+      "sent": "Rappel envoyé avec succès à {count} famille(s)",
       "noRecipients": "Aucune famille en attente de RSVP",
       "loadingPreview": "Chargement de l'aperçu...",
       "sendSuccess": "Rappels envoyés !",

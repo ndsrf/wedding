@@ -5,11 +5,11 @@
 
 import { Resend } from 'resend';
 import { Language } from '../i18n/config';
-import { PlannerInvitationEmail } from './templates/planner-invitation.js';
-import { AdminInvitationEmail } from './templates/admin-invitation.js';
-import { RSVPReminderEmail } from './templates/rsvp-reminder.js';
-import { RSVPConfirmationEmail } from './templates/rsvp-confirmation.js';
-import { PaymentConfirmationEmail } from './templates/payment-confirmation.js';
+import { PlannerInvitationEmail } from './templates/planner-invitation';
+import { AdminInvitationEmail } from './templates/admin-invitation';
+import { RSVPReminderEmail } from './templates/rsvp-reminder';
+import { RSVPConfirmationEmail } from './templates/rsvp-confirmation';
+import { PaymentConfirmationEmail } from './templates/payment-confirmation';
 
 // Initialize Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -127,6 +127,8 @@ export async function sendEmail(
 ): Promise<EmailResult> {
   const { to, template, language, variables } = options;
 
+  console.log('[RESEND DEBUG] sendEmail called with:', { to, template, language, variables });
+
   // Validate email address
   if (!isValidEmail(to)) {
     console.error(`Invalid email address: ${to}`);
@@ -145,13 +147,18 @@ export async function sendEmail(
     };
   }
 
+  console.log('[RESEND DEBUG] API key present, FROM:', `${FROM_NAME} <${FROM_EMAIL}>`);
+
   let lastError: Error | null = null;
 
   // Retry logic
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const subject = getEmailSubject(template, language);
+      console.log('[RESEND DEBUG] Subject:', subject);
+
       const react = getTemplateComponent(template, language, variables);
+      console.log('[RESEND DEBUG] React component created, attempting to send...');
 
       const { data, error } = await resend.emails.send({
         from: `${FROM_NAME} <${FROM_EMAIL}>`,
@@ -159,6 +166,8 @@ export async function sendEmail(
         subject,
         react,
       });
+
+      console.log('[RESEND DEBUG] Resend API response:', { data, error });
 
       if (error) {
         throw new Error(error.message);

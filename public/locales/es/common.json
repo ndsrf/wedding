@@ -161,6 +161,12 @@
       "noWeddings": "Aún no hay bodas",
       "getStarted": "Empieza creando tu primera boda.",
       "backToWeddings": "Volver a bodas",
+      "backToDashboard": "Volver al panel",
+      "manageEvents": "Gestiona todos tus eventos de boda",
+      "createError": "Error al crear la boda",
+      "loadError": "Error al cargar las bodas",
+      "updateDetails": "Actualizar detalles para {coupleNames}",
+      "updateError": "Error al actualizar la boda",
       "notFound": "Boda no encontrada",
       "totalGuests": "Total de Invitados",
       "rsvpCompletion": "Completado de RSVP",
@@ -187,20 +193,60 @@
       "rsvpCutoff": "Fecha Límite de RSVP",
       "defaultLanguage": "Idioma Predeterminado",
       "theme": "Tema",
+      "noTheme": "Sin tema",
       "paymentMode": "Modo de Pago",
       "automated": "Automatizado",
       "manual": "Manual",
       "allowGuestAdditions": "Permitir Añadir Invitados",
       "overview": "Resumen",
+      "at": "a las",
+      "statusLabels": {
+        "ACTIVE": "Activa",
+        "ARCHIVED": "Archivada",
+        "COMPLETED": "Completada"
+      },
       "guests": "Invitados",
-      "admins": "Administradores"
+      "admins": "Administradores",
+      "placeholders": {
+        "coupleNames": "Juan & María",
+        "location": "Nombre del lugar y dirección"
+      },
+      "validation": {
+        "coupleNamesRequired": "Los nombres de la pareja son obligatorios",
+        "weddingDateRequired": "La fecha de la boda es obligatoria",
+        "weddingTimeRequired": "La hora de la boda es obligatoria",
+        "locationRequired": "La ubicación es obligatoria",
+        "rsvpCutoffRequired": "La fecha límite de RSVP es obligatoria",
+        "rsvpCutoffInvalid": "La fecha límite de RSVP debe ser anterior a la fecha de la boda"
+      },
+      "note": {
+        "title": "Nota:",
+        "content": "Ajustes adicionales como el modo de pago, adiciones de invitados, código de vestimenta y preguntas de RSVP pueden ser configurados por el administrador de la boda en el panel de la boda después de crearla."
+      },
+      "buttons": {
+        "saving": "Guardando...",
+        "update": "Actualizar Boda",
+        "create": "Crear Boda"
+      }
     },
     "admins": {
       "invite": "Invitar Administrador",
+      "name": "Nombre del Administrador",
+      "namePlaceholder": "Introduce el nombre del administrador",
       "email": "Correo del Administrador",
+      "emailPlaceholder": "admin@ejemplo.com",
       "inviteSent": "Invitación enviada exitosamente",
+      "inviteError": "Error al invitar al administrador",
       "remove": "Eliminar Administrador",
-      "confirmRemove": "¿Estás seguro de que quieres eliminar a este administrador?"
+      "confirmRemove": "¿Estás seguro de que quieres eliminar a este administrador?",
+      "invitationNote": "El administrador recibirá un correo de invitación con instrucciones para iniciar sesión y acceder a esta boda.",
+      "sending": "Enviando Invitación...",
+      "send": "Enviar Invitación",
+      "validation": {
+        "nameRequired": "El nombre es obligatorio",
+        "emailRequired": "El correo es obligatorio",
+        "invalidEmail": "Correo electrónico inválido"
+      }
     },
     "themes": {
       "title": "Gestión de Temas",
@@ -337,10 +383,11 @@
     "reminders": {
       "title": "Sistema de Recordatorios",
       "send": "Enviar Recordatorios",
+      "sendReminder": "Enviar Recordatorio",
       "preview": "Vista Previa de Destinatarios",
       "channel": "Canal de Envío",
       "recipients": "Destinatarios: {count} familia(s)",
-      "sent": "Recordatorios enviados exitosamente a {count} familia(s)",
+      "sent": "Recordatorio enviado exitosamente a {count} familia(s)",
       "noRecipients": "No hay familias pendientes de RSVP",
       "loadingPreview": "Cargando vista previa...",
       "sendSuccess": "¡Recordatorios enviados!",

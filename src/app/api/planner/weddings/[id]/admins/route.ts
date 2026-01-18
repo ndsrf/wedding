@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { sendAdminInvitation } from '@/lib/email/resend';
+import type { Language } from '@/lib/i18n/config';
 import type {
   APIResponse,
   InviteWeddingAdminResponse,
@@ -112,13 +114,39 @@ export async function POST(
       },
     });
 
-    // TODO: Send invitation email (will be implemented in Phase 12)
-    // await sendAdminInvitationEmail({
-    //   to: validatedData.email,
-    //   name: validatedData.name,
-    //   wedding: wedding,
-    //   invitedBy: user.name,
-    // });
+    // Send invitation email
+    const language = wedding.default_language.toLowerCase() as Language;
+    const weddingDateFormatted = wedding.wedding_date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const oauthLink = `${process.env.APP_URL || 'http://localhost:3000'}/auth/signin?callbackUrl=/admin/weddings/${weddingId}`;
+
+    console.log('[EMAIL DEBUG] Attempting to send admin invitation email:', {
+      to: validatedData.email,
+      language,
+      adminName: validatedData.name,
+      coupleNames: wedding.couple_names,
+      weddingDate: weddingDateFormatted,
+      oauthLink,
+    });
+
+    const emailResult = await sendAdminInvitation(
+      validatedData.email,
+      language,
+      validatedData.name,
+      wedding.couple_names,
+      weddingDateFormatted,
+      oauthLink
+    );
+
+    console.log('[EMAIL DEBUG] Email result:', emailResult);
+
+    if (!emailResult.success) {
+      console.error('Failed to send admin invitation email:', emailResult.error);
+      // Note: We don't fail the request if email fails - admin is still created
+    }
 
     const response: InviteWeddingAdminResponse = {
       success: true,

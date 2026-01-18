@@ -53,8 +53,8 @@ export default function GuestRSVPPage() {
         // We only do this check if we have data.
         const familyLang = responseData.family.preferred_language.toLowerCase();
         if (familyLang !== locale.toLowerCase()) {
-           // Set cookie and reload
-           document.cookie = `NEXT_LOCALE=${responseData.family.preferred_language}; path=/; max-age=31536000; SameSite=Lax`;
+           // Set cookie with lowercase value (SUPPORTED_LANGUAGES are lowercase)
+           document.cookie = `NEXT_LOCALE=${familyLang}; path=/; max-age=31536000; SameSite=Lax`;
            window.location.reload();
            return; // Stop processing to avoid flash of wrong content
         }

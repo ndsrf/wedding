@@ -153,6 +153,12 @@
       "noWeddings": "Ancora nessun matrimonio",
       "getStarted": "Inizia creando il tuo primo matrimonio.",
       "backToWeddings": "Torna ai matrimoni",
+      "backToDashboard": "Torna alla dashboard",
+      "manageEvents": "Gestisci tutti i tuoi eventi di matrimonio",
+      "createError": "Errore durante la creazione del matrimonio",
+      "loadError": "Errore durante il caricamento dei matrimoni",
+      "updateDetails": "Aggiorna i dettagli per {coupleNames}",
+      "updateError": "Errore durante l'aggiornamento del matrimonio",
       "notFound": "Matrimonio non trovato",
       "totalGuests": "Totale Ospiti",
       "rsvpCompletion": "Completamento RSVP",
@@ -160,6 +166,12 @@
       "paymentsReceived": "Pagamenti Ricevuti",
       "weddingInfo": "Informazioni Matrimonio",
       "status": "Stato",
+      "at": "alle",
+      "statusLabels": {
+        "ACTIVE": "Attivo",
+        "ARCHIVED": "Archiviato",
+        "COMPLETED": "Completato"
+      },
       "guestAdditions": "Aggiunte Ospiti",
       "allowed": "Consentito",
       "notAllowed": "Non consentito",
@@ -179,20 +191,54 @@
       "rsvpCutoff": "Scadenza RSVP",
       "defaultLanguage": "Lingua Predefinita",
       "theme": "Tema",
+      "noTheme": "Nessun tema",
       "paymentMode": "Modalità Pagamento",
       "automated": "Automatizzato",
       "manual": "Manuale",
       "allowGuestAdditions": "Consenti Aggiunta Ospiti",
       "overview": "Panoramica",
       "guests": "Ospiti",
-      "admins": "Amministratori"
+      "admins": "Amministratori",
+      "placeholders": {
+        "coupleNames": "Giovanni & Giovanna",
+        "location": "Nome del luogo e indirizzo"
+      },
+      "validation": {
+        "coupleNamesRequired": "I nomi della coppia sono obbligatori",
+        "weddingDateRequired": "La data del matrimonio è obbligatoria",
+        "weddingTimeRequired": "L'ora del matrimonio è obbligatoria",
+        "locationRequired": "Il luogo è obbligatorio",
+        "rsvpCutoffRequired": "La scadenza RSVP è obbligatoria",
+        "rsvpCutoffInvalid": "La scadenza RSVP deve essere precedente alla data del matrimonio"
+      },
+      "note": {
+        "title": "Nota:",
+        "content": "Ulteriori impostazioni come la modalità di pagamento, l'aggiunta di ospiti, il codice di abbigliamento e le domande RSVP possono essere configurate dall'amministratore del matrimonio nella dashboard del matrimonio dopo la sua creazione."
+      },
+      "buttons": {
+        "saving": "Salvataggio in corso...",
+        "update": "Aggiorna Matrimonio",
+        "create": "Crea Matrimonio"
+      }
     },
     "admins": {
       "invite": "Invita Amministratore",
+      "name": "Nome Amministratore",
+      "namePlaceholder": "Inserisci il nome dell'amministratore",
       "email": "Email Amministratore",
+      "emailPlaceholder": "admin@esempio.com",
       "inviteSent": "Invito inviato con successo",
+      "inviteError": "Errore durante l'invito dell'amministratore",
       "remove": "Rimuovi Amministratore",
-      "confirmRemove": "Sei sicuro di voler rimuovere questo amministratore?"
+      "confirmRemove": "Sei sicuro di voler rimuovere questo amministratore?",
+      "invitationNote": "L'amministratore riceverà un'email di invito con le istruzioni per accedere a questo matrimonio.",
+      "sending": "Invio invito in corso...",
+      "send": "Invia Invito",
+      "validation": {
+        "nameRequired": "Il nome è obbligatorio",
+        "emailRequired": "L'email è obbligatoria",
+        "invalidEmail": "Indirizzo email non valido"
+      }
     },
     "themes": {
       "title": "Gestione Temi",
@@ -329,10 +375,11 @@
     "reminders": {
       "title": "Sistema Promemoria",
       "send": "Invia Promemoria",
+      "sendReminder": "Invia Promemoria",
       "preview": "Anteprima Destinatari",
       "channel": "Canale Invio",
       "recipients": "Destinatari: {count} famiglia/e",
-      "sent": "Promemoria inviati con successo a {count} famiglia/e",
+      "sent": "Promemoria inviato con successo a {count} famiglia/e",
       "noRecipients": "Nessuna famiglia in attesa di RSVP",
       "loadingPreview": "Caricamento anteprima...",
       "sendSuccess": "Promemoria inviati!",

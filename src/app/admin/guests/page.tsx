@@ -14,8 +14,16 @@ import { GuestFilters } from '@/components/admin/GuestFilters';
 import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
 import { GuestFormModal } from '@/components/admin/GuestFormModal';
 import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
-import type { FamilyWithMembers, GiftStatus } from '@/types/models';
+import { ReminderModal } from '@/components/admin/ReminderModal';
+import type { FamilyWithMembers, GiftStatus, Language, Channel } from '@/types/models';
 import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
+
+interface ReminderFamily {
+  id: string;
+  name: string;
+  preferred_language: Language;
+  channel_preference: Channel | null;
+}
 
 interface GuestWithStatus extends FamilyWithMembers {
   rsvp_status: string;
@@ -70,6 +78,11 @@ export default function GuestsPage() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+
+  // Reminder modal state
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [reminderFamily, setReminderFamily] = useState<ReminderFamily | null>(null);
+  const [reminderLoading, setReminderLoading] = useState(false);
 
   const fetchGuests = useCallback(async () => {
     setLoading(true);
@@ -243,6 +256,48 @@ export default function GuestsPage() {
     }
   };
 
+  // Handle send reminder for a specific family
+  const handleSendReminder = (guestId: string) => {
+    const guest = guests.find((g) => g.id === guestId);
+    if (guest) {
+      setReminderFamily({
+        id: guest.id,
+        name: guest.name,
+        preferred_language: guest.preferred_language,
+        channel_preference: guest.channel_preference,
+      });
+      setIsReminderModalOpen(true);
+    }
+  };
+
+  // Send reminders for the selected family
+  const handleSendReminders = async (channel: Channel) => {
+    if (!reminderFamily) return;
+
+    setReminderLoading(true);
+    try {
+      const response = await fetch('/api/admin/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel,
+          family_ids: [reminderFamily.id],
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('admin.reminders.sent', { count: 1 }));
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setReminderLoading(false);
+    }
+  };
+
   // Handle form submit
   const handleFormSubmit = async (formData: {
     name: string;
@@ -407,6 +462,7 @@ export default function GuestsPage() {
               loading={loading}
               onEdit={handleEditGuest}
               onDelete={handleDeleteGuest}
+              onSendReminder={handleSendReminder}
             />
 
             {/* Pagination */}
@@ -487,6 +543,18 @@ export default function GuestsPage() {
           setGuestToDelete(null);
         }}
         loading={deleteLoading}
+      />
+
+      {/* Reminder Modal */}
+      <ReminderModal
+        isOpen={isReminderModalOpen}
+        onClose={() => {
+          setIsReminderModalOpen(false);
+          setReminderFamily(null);
+        }}
+        eligibleFamilies={reminderFamily ? [reminderFamily] : []}
+        onSendReminders={handleSendReminders}
+        loading={reminderLoading}
       />
 
       {/* Notification Toast */}

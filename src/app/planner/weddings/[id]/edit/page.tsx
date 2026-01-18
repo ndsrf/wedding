@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { WeddingForm } from '@/components/planner/WeddingForm';
 import type { Wedding, Theme } from '@/types/models';
 import type { CreateWeddingRequest } from '@/types/api';
@@ -18,6 +19,7 @@ interface EditWeddingPageProps {
 }
 
 export default function EditWeddingPage({ params }: EditWeddingPageProps) {
+  const t = useTranslations();
   const { id: weddingId } = use(params);
   const router = useRouter();
 
@@ -33,7 +35,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
 
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Wedding not found');
+          throw new Error(t('planner.weddings.notFound'));
         }
         throw new Error('Failed to fetch wedding');
       }
@@ -41,12 +43,12 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
       const data = await response.json();
       setWedding(data.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load wedding');
+      setError(err instanceof Error ? err.message : t('common.errors.generic'));
       console.error('Error fetching wedding:', err);
     } finally {
       setLoading(false);
     }
-  }, [weddingId]);
+  }, [weddingId, t]);
 
   useEffect(() => {
     fetchWedding();
@@ -110,7 +112,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
         const errorData = await response.json();
         console.error('Update validation errors:', JSON.stringify(errorData.error?.details, null, 2));
         console.error('Sent data:', JSON.stringify(updateData, null, 2));
-        throw new Error(errorData.error?.message || 'Failed to update wedding');
+        throw new Error(errorData.error?.message || t('planner.weddings.updateError'));
       }
 
       router.push('/planner/weddings');
@@ -125,7 +127,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-sm text-gray-500">Loading wedding...</p>
+          <p className="mt-2 text-sm text-gray-500">{t('planner.weddings.loadingDetails')}</p>
         </div>
       </div>
     );
@@ -143,13 +145,13 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back to Weddings
+              {t('planner.weddings.backToWeddings')}
             </Link>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error || 'Wedding not found'}
+            {error || t('planner.weddings.notFound')}
           </div>
         </div>
       </div>
@@ -168,7 +170,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Weddings
+            {t('planner.weddings.backToWeddings')}
           </Link>
         </div>
       </div>
@@ -176,9 +178,9 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Edit Wedding</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('planner.weddings.edit')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Update the details for {wedding.couple_names}
+            {t('planner.weddings.updateDetails', { coupleNames: wedding.couple_names })}
           </p>
         </div>
       </header>

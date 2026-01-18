@@ -22,6 +22,7 @@ interface GuestTableProps {
   guests: GuestWithStatus[];
   onEdit?: (guestId: string) => void;
   onDelete?: (guestId: string) => void;
+  onSendReminder?: (guestId: string) => void;
   loading?: boolean;
 }
 
@@ -41,7 +42,7 @@ const getPaymentBadgeClass = (status: GiftStatus | null): string => {
   return classes[status] || 'bg-gray-100 text-gray-800';
 };
 
-export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProps) {
+export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }: GuestTableProps) {
   const t = useTranslations();
 
   if (loading) {
@@ -102,12 +103,7 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.language')}
               </th>
-              {onEdit && (
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.guests.table.actions')}
-                </th>
-              )}
-              {onDelete && !onEdit && (
+              {(onEdit || onDelete || onSendReminder) && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('admin.guests.table.actions')}
                 </th>
@@ -151,9 +147,17 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {t(`common.languages.${guest.preferred_language}`)}
                 </td>
-                {(onEdit || onDelete) && (
+                {(onEdit || onDelete || onSendReminder) && (
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
+                      {onSendReminder && guest.rsvp_status !== 'submitted' && (
+                        <button
+                          onClick={() => onSendReminder(guest.id)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          {t('admin.reminders.sendReminder')}
+                        </button>
+                      )}
                       {onEdit && (
                         <button
                           onClick={() => onEdit(guest.id)}
@@ -190,8 +194,16 @@ export function GuestTable({ guests, onEdit, onDelete, loading }: GuestTableProp
                   <p className="text-sm text-gray-500">{guest.email}</p>
                 )}
               </div>
-              {(onEdit || onDelete) && (
+              {(onEdit || onDelete || onSendReminder) && (
                 <div className="flex gap-2">
+                  {onSendReminder && guest.rsvp_status !== 'submitted' && (
+                    <button
+                      onClick={() => onSendReminder(guest.id)}
+                      className="text-blue-600 hover:text-blue-900 text-sm"
+                    >
+                      {t('admin.reminders.sendReminder')}
+                    </button>
+                  )}
                   {onEdit && (
                     <button
                       onClick={() => onEdit(guest.id)}

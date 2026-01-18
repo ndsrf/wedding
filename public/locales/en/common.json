@@ -168,6 +168,12 @@
       "noWeddings": "No weddings yet",
       "getStarted": "Get started by creating your first wedding.",
       "backToWeddings": "Back to weddings",
+      "backToDashboard": "Back to Dashboard",
+      "manageEvents": "Manage all your wedding events",
+      "createError": "Failed to create wedding",
+      "loadError": "Failed to load weddings",
+      "updateDetails": "Update the details for {coupleNames}",
+      "updateError": "Failed to update wedding",
       "notFound": "Wedding not found",
       "totalGuests": "Total Guests",
       "rsvpCompletion": "RSVP Completion",
@@ -194,20 +200,60 @@
       "rsvpCutoff": "RSVP Cutoff Date",
       "defaultLanguage": "Default Language",
       "theme": "Theme",
+      "noTheme": "No theme",
       "paymentMode": "Payment Mode",
       "automated": "Automated",
       "manual": "Manual",
       "allowGuestAdditions": "Allow Guest Additions",
       "overview": "Overview",
+      "at": "at",
+      "statusLabels": {
+        "ACTIVE": "Active",
+        "ARCHIVED": "Archived",
+        "COMPLETED": "Completed"
+      },
       "guests": "Guests",
-      "admins": "Admins"
+      "admins": "Admins",
+      "placeholders": {
+        "coupleNames": "John & Jane",
+        "location": "Venue name and address"
+      },
+      "validation": {
+        "coupleNamesRequired": "Couple names are required",
+        "weddingDateRequired": "Wedding date is required",
+        "weddingTimeRequired": "Wedding time is required",
+        "locationRequired": "Location is required",
+        "rsvpCutoffRequired": "RSVP cutoff date is required",
+        "rsvpCutoffInvalid": "RSVP cutoff must be before the wedding date"
+      },
+      "note": {
+        "title": "Note:",
+        "content": "Additional settings like payment mode, guest additions, dress code, and RSVP questions can be configured by the wedding admin in the wedding dashboard after the wedding is created."
+      },
+      "buttons": {
+        "saving": "Saving...",
+        "update": "Update Wedding",
+        "create": "Create Wedding"
+      }
     },
     "admins": {
       "invite": "Invite Admin",
+      "name": "Admin Name",
+      "namePlaceholder": "Enter admin name",
       "email": "Admin Email",
+      "emailPlaceholder": "admin@example.com",
       "inviteSent": "Invitation sent successfully",
+      "inviteError": "Failed to invite admin",
       "remove": "Remove Admin",
-      "confirmRemove": "Are you sure you want to remove this admin?"
+      "confirmRemove": "Are you sure you want to remove this admin?",
+      "invitationNote": "The admin will receive an invitation email with instructions to sign in and access this wedding.",
+      "sending": "Sending Invitation...",
+      "send": "Send Invitation",
+      "validation": {
+        "nameRequired": "Name is required",
+        "emailRequired": "Email is required",
+        "invalidEmail": "Invalid email address"
+      }
     },
     "themes": {
       "title": "Theme Management",
@@ -344,10 +390,11 @@
     "reminders": {
       "title": "Reminder System",
       "send": "Send Reminders",
+      "sendReminder": "Send Reminder",
       "preview": "Preview Recipients",
       "channel": "Send Channel",
       "recipients": "Recipients: {count} family(ies)",
-      "sent": "Reminders sent successfully to {count} family(ies)",
+      "sent": "Reminder sent successfully to {count} family(ies)",
       "noRecipients": "No families pending RSVP",
       "loadingPreview": "Loading preview...",
       "sendSuccess": "Reminders sent!",
