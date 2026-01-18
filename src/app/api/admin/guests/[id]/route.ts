@@ -8,7 +8,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import type { APIResponse, UpdateGuestResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';

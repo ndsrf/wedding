@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WeddingForm } from '@/components/planner/WeddingForm';
@@ -26,12 +26,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchWedding();
-    fetchThemes();
-  }, [weddingId]);
-
-  const fetchWedding = async () => {
+  const fetchWedding = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/planner/weddings/${weddingId}`);
@@ -51,7 +46,12 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [weddingId]);
+
+  useEffect(() => {
+    fetchWedding();
+    fetchThemes();
+  }, [fetchWedding]);
 
   const fetchThemes = async () => {
     try {
