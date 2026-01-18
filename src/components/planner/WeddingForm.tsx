@@ -25,6 +25,9 @@ interface WeddingFormProps {
 }
 
 export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: WeddingFormProps) {
+  // Note: payment_tracking_mode, allow_guest_additions, dress_code, and additional_info
+  // are now managed by the wedding admin in /admin/configure. Default values are set here
+  // for wedding creation, but the wedding admin can change them later.
   const [formData, setFormData] = useState<WeddingFormData>({
     couple_names: initialData?.couple_names || '',
     wedding_date: initialData?.wedding_date
@@ -239,76 +242,13 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
         </select>
       </div>
 
-      {/* Payment Tracking Mode */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Payment Tracking Mode *
-        </label>
-        <div className="space-y-2">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              checked={formData.payment_tracking_mode === PaymentMode.AUTOMATED}
-              onChange={() => handleChange('payment_tracking_mode', PaymentMode.AUTOMATED)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-            />
-            <span className="ml-2 text-sm text-gray-700">
-              Automated (with reference codes)
-            </span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              checked={formData.payment_tracking_mode === PaymentMode.MANUAL}
-              onChange={() => handleChange('payment_tracking_mode', PaymentMode.MANUAL)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-            />
-            <span className="ml-2 text-sm text-gray-700">Manual tracking</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Allow Guest Additions */}
-      <div>
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={formData.allow_guest_additions}
-            onChange={(e) => handleChange('allow_guest_additions', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <span className="ml-2 text-sm text-gray-700">Allow guests to add family members</span>
-        </label>
-      </div>
-
-      {/* Dress Code */}
-      <div>
-        <label htmlFor="dress_code" className="block text-sm font-medium text-gray-700 mb-1">
-          Dress Code (optional)
-        </label>
-        <input
-          id="dress_code"
-          type="text"
-          value={formData.dress_code || ''}
-          onChange={(e) => handleChange('dress_code', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="e.g., Formal, Semi-formal, Casual"
-        />
-      </div>
-
-      {/* Additional Info */}
-      <div>
-        <label htmlFor="additional_info" className="block text-sm font-medium text-gray-700 mb-1">
-          Additional Information (optional)
-        </label>
-        <textarea
-          id="additional_info"
-          value={formData.additional_info || ''}
-          onChange={(e) => handleChange('additional_info', e.target.value)}
-          rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Any additional details for guests..."
-        />
+      {/* Note about additional settings */}
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+        <p className="text-sm text-blue-700">
+          <strong>Note:</strong> Additional settings like payment mode, guest additions, dress code,
+          and RSVP questions can be configured by the wedding admin in the wedding dashboard
+          after the wedding is created.
+        </p>
       </div>
 
       {/* Form Actions */}

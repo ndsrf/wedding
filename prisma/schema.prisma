@@ -165,6 +165,29 @@ model Wedding {
   updated_at            DateTime      @updatedAt
   updated_by            String?
 
+  // RSVP Configuration - Transportation question
+  transportation_question_enabled Boolean @default(false)
+  transportation_question_text    String?
+
+  // RSVP Configuration - Dietary restrictions
+  dietary_restrictions_enabled Boolean @default(false)
+
+  // RSVP Configuration - Extra Yes/No questions (up to 3)
+  extra_question_1_enabled Boolean @default(false)
+  extra_question_1_text    String?
+  extra_question_2_enabled Boolean @default(false)
+  extra_question_2_text    String?
+  extra_question_3_enabled Boolean @default(false)
+  extra_question_3_text    String?
+
+  // RSVP Configuration - Extra mandatory info fields (up to 3)
+  extra_info_1_enabled Boolean @default(false)
+  extra_info_1_label   String?
+  extra_info_2_enabled Boolean @default(false)
+  extra_info_2_label   String?
+  extra_info_3_enabled Boolean @default(false)
+  extra_info_3_label   String?
+
   planner         WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   theme           Theme?          @relation(fields: [theme_id], references: [id], onDelete: SetNull)
   wedding_admins  WeddingAdmin[]

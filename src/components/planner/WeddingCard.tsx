@@ -78,13 +78,15 @@ export function WeddingCard({ wedding }: WeddingCardProps) {
               {wedding.location}
             </div>
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              statusColors[wedding.status]
-            }`}
-          >
-            {wedding.status}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                statusColors[wedding.status]
+              }`}
+            >
+              {wedding.status}
+            </span>
+          </div>
         </div>
 
         {/* Stats */}

@@ -21,6 +21,31 @@ const updateWeddingConfigSchema = z.object({
   rsvp_cutoff_date: z.string().datetime().optional(),
   payment_tracking_mode: z.enum(['AUTOMATED', 'MANUAL']).optional(),
   allow_guest_additions: z.boolean().optional(),
+  dress_code: z.string().nullable().optional(),
+  additional_info: z.string().nullable().optional(),
+
+  // RSVP Configuration - Transportation question
+  transportation_question_enabled: z.boolean().optional(),
+  transportation_question_text: z.string().nullable().optional(),
+
+  // RSVP Configuration - Dietary restrictions
+  dietary_restrictions_enabled: z.boolean().optional(),
+
+  // RSVP Configuration - Extra Yes/No questions (up to 3)
+  extra_question_1_enabled: z.boolean().optional(),
+  extra_question_1_text: z.string().nullable().optional(),
+  extra_question_2_enabled: z.boolean().optional(),
+  extra_question_2_text: z.string().nullable().optional(),
+  extra_question_3_enabled: z.boolean().optional(),
+  extra_question_3_text: z.string().nullable().optional(),
+
+  // RSVP Configuration - Extra mandatory info fields (up to 3)
+  extra_info_1_enabled: z.boolean().optional(),
+  extra_info_1_label: z.string().nullable().optional(),
+  extra_info_2_enabled: z.boolean().optional(),
+  extra_info_2_label: z.string().nullable().optional(),
+  extra_info_3_enabled: z.boolean().optional(),
+  extra_info_3_label: z.string().nullable().optional(),
 });
 
 /**
@@ -120,6 +145,22 @@ export async function GET() {
       created_by: wedding.created_by,
       updated_at: wedding.updated_at,
       updated_by: wedding.updated_by,
+      // RSVP Configuration fields
+      transportation_question_enabled: wedding.transportation_question_enabled,
+      transportation_question_text: wedding.transportation_question_text,
+      dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
+      extra_question_1_enabled: wedding.extra_question_1_enabled,
+      extra_question_1_text: wedding.extra_question_1_text,
+      extra_question_2_enabled: wedding.extra_question_2_enabled,
+      extra_question_2_text: wedding.extra_question_2_text,
+      extra_question_3_enabled: wedding.extra_question_3_enabled,
+      extra_question_3_text: wedding.extra_question_3_text,
+      extra_info_1_enabled: wedding.extra_info_1_enabled,
+      extra_info_1_label: wedding.extra_info_1_label,
+      extra_info_2_enabled: wedding.extra_info_2_enabled,
+      extra_info_2_label: wedding.extra_info_2_label,
+      extra_info_3_enabled: wedding.extra_info_3_enabled,
+      extra_info_3_label: wedding.extra_info_3_label,
       // Stats
       guest_count: totalGuests,
       rsvp_count: rsvpCount,
@@ -199,21 +240,85 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const validatedData = updateWeddingConfigSchema.parse(body);
 
+    // Build update data object
+    const updateData: Record<string, unknown> = {
+      updated_by: user.id,
+    };
+
+    // Basic config fields
+    if (validatedData.rsvp_cutoff_date) {
+      updateData.rsvp_cutoff_date = new Date(validatedData.rsvp_cutoff_date);
+    }
+    if (validatedData.payment_tracking_mode) {
+      updateData.payment_tracking_mode = validatedData.payment_tracking_mode;
+    }
+    if (validatedData.allow_guest_additions !== undefined) {
+      updateData.allow_guest_additions = validatedData.allow_guest_additions;
+    }
+    if (validatedData.dress_code !== undefined) {
+      updateData.dress_code = validatedData.dress_code;
+    }
+    if (validatedData.additional_info !== undefined) {
+      updateData.additional_info = validatedData.additional_info;
+    }
+
+    // Transportation question
+    if (validatedData.transportation_question_enabled !== undefined) {
+      updateData.transportation_question_enabled = validatedData.transportation_question_enabled;
+    }
+    if (validatedData.transportation_question_text !== undefined) {
+      updateData.transportation_question_text = validatedData.transportation_question_text;
+    }
+
+    // Dietary restrictions
+    if (validatedData.dietary_restrictions_enabled !== undefined) {
+      updateData.dietary_restrictions_enabled = validatedData.dietary_restrictions_enabled;
+    }
+
+    // Extra Yes/No questions
+    if (validatedData.extra_question_1_enabled !== undefined) {
+      updateData.extra_question_1_enabled = validatedData.extra_question_1_enabled;
+    }
+    if (validatedData.extra_question_1_text !== undefined) {
+      updateData.extra_question_1_text = validatedData.extra_question_1_text;
+    }
+    if (validatedData.extra_question_2_enabled !== undefined) {
+      updateData.extra_question_2_enabled = validatedData.extra_question_2_enabled;
+    }
+    if (validatedData.extra_question_2_text !== undefined) {
+      updateData.extra_question_2_text = validatedData.extra_question_2_text;
+    }
+    if (validatedData.extra_question_3_enabled !== undefined) {
+      updateData.extra_question_3_enabled = validatedData.extra_question_3_enabled;
+    }
+    if (validatedData.extra_question_3_text !== undefined) {
+      updateData.extra_question_3_text = validatedData.extra_question_3_text;
+    }
+
+    // Extra mandatory info fields
+    if (validatedData.extra_info_1_enabled !== undefined) {
+      updateData.extra_info_1_enabled = validatedData.extra_info_1_enabled;
+    }
+    if (validatedData.extra_info_1_label !== undefined) {
+      updateData.extra_info_1_label = validatedData.extra_info_1_label;
+    }
+    if (validatedData.extra_info_2_enabled !== undefined) {
+      updateData.extra_info_2_enabled = validatedData.extra_info_2_enabled;
+    }
+    if (validatedData.extra_info_2_label !== undefined) {
+      updateData.extra_info_2_label = validatedData.extra_info_2_label;
+    }
+    if (validatedData.extra_info_3_enabled !== undefined) {
+      updateData.extra_info_3_enabled = validatedData.extra_info_3_enabled;
+    }
+    if (validatedData.extra_info_3_label !== undefined) {
+      updateData.extra_info_3_label = validatedData.extra_info_3_label;
+    }
+
     // Update wedding
     const wedding = await prisma.wedding.update({
       where: { id: user.wedding_id },
-      data: {
-        ...(validatedData.rsvp_cutoff_date && {
-          rsvp_cutoff_date: new Date(validatedData.rsvp_cutoff_date),
-        }),
-        ...(validatedData.payment_tracking_mode && {
-          payment_tracking_mode: validatedData.payment_tracking_mode,
-        }),
-        ...(validatedData.allow_guest_additions !== undefined && {
-          allow_guest_additions: validatedData.allow_guest_additions,
-        }),
-        updated_by: user.id,
-      },
+      data: updateData,
     });
 
     const response: UpdateWeddingConfigResponse = {

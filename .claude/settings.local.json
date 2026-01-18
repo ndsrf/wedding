@@ -19,7 +19,10 @@
       "Bash(wc:*)",
       "Bash(grep:*)",
       "Bash(ls:*)",
-      "mcp__spec-workflow__spec-workflow-guide"
+      "mcp__spec-workflow__spec-workflow-guide",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(./node_modules/.bin/prisma migrate dev --name add_rsvp_config_fields)",
+      "Bash(npm run migrate:dev:*)"
     ]
   }
 }

@@ -121,7 +121,34 @@ export interface ListMasterWeddingsQuery {
   planner_id?: string;
 }
 
-export type ListMasterWeddingsResponse = APIResponse<PaginatedResponse<Wedding>>;
+// Extended wedding type for master admin view with planner info
+export interface MasterWeddingOverview {
+  id: string;
+  planner_id: string;
+  planner_name: string;
+  planner_email: string;
+  theme_id: string | null;
+  theme_name: string | null;
+  couple_names: string;
+  wedding_date: Date;
+  wedding_time: string;
+  location: string;
+  rsvp_cutoff_date: Date;
+  dress_code: string | null;
+  additional_info: string | null;
+  payment_tracking_mode: PaymentMode;
+  allow_guest_additions: boolean;
+  default_language: Language;
+  status: string;
+  created_at: Date;
+  created_by: string;
+  updated_at: Date;
+  updated_by: string | null;
+  family_count: number;
+  admin_count: number;
+}
+
+export type ListMasterWeddingsResponse = APIResponse<PaginatedResponse<MasterWeddingOverview>>;
 
 // GET /api/master/analytics
 export interface MasterAnalytics {
@@ -245,6 +272,31 @@ export interface UpdateWeddingConfigRequest {
   rsvp_cutoff_date?: string; // ISO date string
   payment_tracking_mode?: PaymentMode;
   allow_guest_additions?: boolean;
+  dress_code?: string | null;
+  additional_info?: string | null;
+
+  // RSVP Configuration - Transportation question
+  transportation_question_enabled?: boolean;
+  transportation_question_text?: string | null;
+
+  // RSVP Configuration - Dietary restrictions
+  dietary_restrictions_enabled?: boolean;
+
+  // RSVP Configuration - Extra Yes/No questions (up to 3)
+  extra_question_1_enabled?: boolean;
+  extra_question_1_text?: string | null;
+  extra_question_2_enabled?: boolean;
+  extra_question_2_text?: string | null;
+  extra_question_3_enabled?: boolean;
+  extra_question_3_text?: string | null;
+
+  // RSVP Configuration - Extra mandatory info fields (up to 3)
+  extra_info_1_enabled?: boolean;
+  extra_info_1_label?: string | null;
+  extra_info_2_enabled?: boolean;
+  extra_info_2_label?: string | null;
+  extra_info_3_enabled?: boolean;
+  extra_info_3_label?: string | null;
 }
 
 export type UpdateWeddingConfigResponse = APIResponse<Wedding>;
@@ -411,6 +463,29 @@ export interface GuestRSVPPageData {
     allow_guest_additions: boolean;
     default_language: Language;
     payment_tracking_mode: PaymentMode;
+
+    // RSVP Configuration - Transportation question
+    transportation_question_enabled: boolean;
+    transportation_question_text: string | null;
+
+    // RSVP Configuration - Dietary restrictions
+    dietary_restrictions_enabled: boolean;
+
+    // RSVP Configuration - Extra Yes/No questions (up to 3)
+    extra_question_1_enabled: boolean;
+    extra_question_1_text: string | null;
+    extra_question_2_enabled: boolean;
+    extra_question_2_text: string | null;
+    extra_question_3_enabled: boolean;
+    extra_question_3_text: string | null;
+
+    // RSVP Configuration - Extra mandatory info fields (up to 3)
+    extra_info_1_enabled: boolean;
+    extra_info_1_label: string | null;
+    extra_info_2_enabled: boolean;
+    extra_info_2_label: string | null;
+    extra_info_3_enabled: boolean;
+    extra_info_3_label: string | null;
   };
   theme: Theme;
   rsvp_cutoff_passed: boolean;

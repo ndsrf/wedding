@@ -8,6 +8,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { WeddingCard } from '@/components/planner/WeddingCard';
 import { WeddingForm } from '@/components/planner/WeddingForm';
@@ -105,6 +106,21 @@ function PlannerWeddingsContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Back to Dashboard Link */}
+      <div className="bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <Link
+            href="/planner"
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+          </Link>
+        </div>
+      </div>
+
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
