@@ -4,7 +4,7 @@
  */
 
 import { getRequestConfig } from 'next-intl/server';
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 import { Language, DEFAULT_LANGUAGE, isValidLanguage } from './config';
 
 /**
@@ -109,6 +109,12 @@ function getNestedValue(obj: unknown, path: string): unknown {
  * Used for detecting user language preference
  */
 export async function getLanguageFromRequest(): Promise<Language> {
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value;
+  if (cookieLocale && isValidLanguage(cookieLocale)) {
+    return cookieLocale as Language;
+  }
+
   const headersList = await headers();
   const acceptLanguage = headersList.get('accept-language');
 

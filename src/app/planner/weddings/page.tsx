@@ -10,6 +10,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { WeddingCard } from '@/components/planner/WeddingCard';
 import { WeddingForm } from '@/components/planner/WeddingForm';
 import type { WeddingWithStats, Theme } from '@/types/models';
@@ -126,6 +127,26 @@ function PlannerWeddingsContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
+              <Link
+                href="/planner"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center mb-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Dashboard
+              </Link>
               <h1 className="text-2xl font-bold text-gray-900">My Weddings</h1>
               <p className="mt-1 text-sm text-gray-500">Manage all your wedding events</p>
             </div>

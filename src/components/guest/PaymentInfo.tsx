@@ -8,6 +8,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { PaymentInfo as PaymentInfoType } from '../../types/api';
 
 interface PaymentInfoProps {
@@ -16,6 +17,7 @@ interface PaymentInfoProps {
 }
 
 export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
+  const t = useTranslations();
   const [loading, setLoading] = useState(true);
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfoType | null>(null);
   const [copied, setCopied] = useState<'iban' | 'reference' | null>(null);
@@ -52,7 +54,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
-        <p className="text-lg text-gray-600">Loading payment information...</p>
+        <p className="text-lg text-gray-600">{t('common.loading')}</p>
       </div>
     );
   }
@@ -64,9 +66,9 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
   const getStatusLabel = (status: string | null) => {
     if (!status) return null;
     const labels: Record<string, string> = {
-      PENDING: 'Pending',
-      RECEIVED: 'Received ✓',
-      CONFIRMED: 'Confirmed ✓',
+      PENDING: t('guest.payment.statuses.pending'),
+      RECEIVED: `${t('guest.payment.statuses.received')} ✓`,
+      CONFIRMED: `${t('guest.payment.statuses.confirmed')} ✓`,
     };
     return labels[status] || status;
   };
@@ -84,12 +86,12 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-2xl font-bold text-gray-900 mb-2">
-        Payment Information 💝
+        {t('guest.payment.title')} 💝
       </h3>
       <p className="text-lg text-gray-600 mb-6">
         {paymentMode === 'AUTOMATED'
-          ? 'Please use the following details for your wedding gift:'
-          : 'Thank you for your generosity! You can send your gift to:'}
+          ? t('guest.payment.subtitle')
+          : t('guest.payment.manualMode')}
       </p>
 
       {/* Payment Status */}
@@ -98,7 +100,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-lg font-semibold text-green-900">
-                Payment Status:{' '}
+                {t('guest.payment.status')}{' '}
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-base ${getStatusColor(paymentInfo.payment_status)}`}
                 >
@@ -107,7 +109,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
               </p>
               {paymentInfo.amount_paid && (
                 <p className="text-base text-green-800 mt-1">
-                  Amount: €{paymentInfo.amount_paid.toFixed(2)}
+                  {t('admin.payments.amount')}: €{paymentInfo.amount_paid.toFixed(2)}
                 </p>
               )}
             </div>
@@ -119,7 +121,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
       {/* IBAN */}
       <div className="mb-4">
         <label className="block text-base font-semibold text-gray-700 mb-2">
-          IBAN for transfer:
+          {t('guest.payment.iban')}
         </label>
         <div className="flex gap-2">
           <input
@@ -141,7 +143,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
       {paymentMode === 'AUTOMATED' && paymentInfo.reference_code && (
         <div className="mb-4">
           <label className="block text-base font-semibold text-gray-700 mb-2">
-            Reference code:
+            {t('guest.payment.referenceCode')}
           </label>
           <div className="flex gap-2">
             <input
@@ -160,8 +162,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
             </button>
           </div>
           <p className="mt-2 text-base text-gray-600">
-            ⚠️ Please include this reference code in your transfer so we can
-            identify your payment.
+            ⚠️ {t('guest.payment.referenceInstructions')}
           </p>
         </div>
       )}
@@ -169,7 +170,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
       {/* Thank You Message */}
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <p className="text-lg text-center text-gray-700">
-          Thank you for your generosity! 💕
+          {t('guest.payment.thankYou')} 💕
         </p>
       </div>
     </div>

@@ -3,12 +3,12 @@
  * Sent when a payment is received and confirmed
  */
 
+import * as ReactEmail from '@react-email/components';
 import {
   Body,
   Container,
   Head,
   Heading,
-  Html,
   Preview,
   Section,
   Text,
@@ -105,7 +105,7 @@ export const PaymentConfirmationEmail = ({
   const t = translations[language];
 
   return (
-    <Html>
+    <ReactEmail.Html>
       <Head />
       <Preview>{t.preview}</Preview>
       <Body style={main}>
@@ -146,7 +146,7 @@ export const PaymentConfirmationEmail = ({
           </Section>
         </Container>
       </Body>
-    </Html>
+    </ReactEmail.Html>
   );
 };
 

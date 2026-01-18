@@ -7,6 +7,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import type { MemberType } from '@/types/models';
 
 export interface FamilyMemberFormData {
@@ -25,6 +26,8 @@ interface FamilyMemberFormProps {
 }
 
 export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
+  const t = useTranslations();
+
   const addMember = () => {
     onChange([
       ...members,
@@ -60,18 +63,18 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-gray-700">Family Members</label>
+        <label className="block text-sm font-medium text-gray-700">{t('guest.members.title')}</label>
         <button
           type="button"
           onClick={addMember}
           className="text-sm text-purple-600 hover:text-purple-700 font-medium"
         >
-          + Add Member
+          + {t('guest.members.addMember')}
         </button>
       </div>
 
       {members.filter((m) => !m._delete).length === 0 && (
-        <p className="text-sm text-gray-500 italic">No members added yet</p>
+        <p className="text-sm text-gray-500 italic">{t('guest.members.noMembers')}</p>
       )}
 
       {members.map((member, index) => {
@@ -80,13 +83,13 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
         return (
           <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-3">
             <div className="flex items-start justify-between">
-              <h4 className="text-sm font-medium text-gray-900">Member {index + 1}</h4>
+              <h4 className="text-sm font-medium text-gray-900">{t('guest.members.title')} {index + 1}</h4>
               <button
                 type="button"
                 onClick={() => removeMember(index)}
                 className="text-red-600 hover:text-red-700 text-sm"
               >
-                Remove
+                {t('common.buttons.delete')}
               </button>
             </div>
 
@@ -94,7 +97,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name <span className="text-red-500">*</span>
+                  {t('guest.members.name')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -108,7 +111,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
               {/* Type */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Type <span className="text-red-500">*</span>
+                  {t('guest.members.type')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={member.type}
@@ -116,15 +119,15 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 >
-                  <option value="ADULT">Adult</option>
-                  <option value="CHILD">Child</option>
-                  <option value="INFANT">Infant</option>
+                  <option value="ADULT">{t('guest.members.types.adult')}</option>
+                  <option value="CHILD">{t('guest.members.types.child')}</option>
+                  <option value="INFANT">{t('guest.members.types.infant')}</option>
                 </select>
               </div>
 
               {/* Age */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('guest.members.age')}</label>
                 <input
                   type="number"
                   min="0"
@@ -140,7 +143,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
               {/* Dietary Restrictions */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Dietary Restrictions
+                  {t('guest.rsvp.dietaryRestrictions')}
                 </label>
                 <input
                   type="text"
@@ -149,7 +152,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                     updateMember(index, 'dietary_restrictions', e.target.value || null)
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="e.g., Vegetarian, Gluten-free"
+                  placeholder={t('guest.rsvp.dietaryPlaceholder')}
                 />
               </div>
             </div>
@@ -157,14 +160,14 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
             {/* Accessibility Needs */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Accessibility Needs
+                {t('guest.rsvp.accessibilityNeeds')}
               </label>
               <input
                 type="text"
                 value={member.accessibility_needs || ''}
                 onChange={(e) => updateMember(index, 'accessibility_needs', e.target.value || null)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="e.g., Wheelchair access, Hearing assistance"
+                placeholder={t('guest.rsvp.accessibilityPlaceholder')}
               />
             </div>
           </div>

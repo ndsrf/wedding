@@ -7,10 +7,12 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { WeddingCard } from '@/components/planner/WeddingCard';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import type { PlannerStats } from '@/types/api';
 import type { AuthenticatedUser } from '@/types/api';
 
@@ -98,6 +100,7 @@ export default async function PlannerDashboardPage() {
     redirect('/api/auth/signin');
   }
 
+  const t = await getTranslations();
   // Fetch stats data directly from database
   const stats = await getStats(user);
 
@@ -108,21 +111,22 @@ export default async function PlannerDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Planner Dashboard</h1>
-              <p className="mt-1 text-sm text-gray-500">Manage your weddings and view statistics</p>
+              <h1 className="text-2xl font-bold text-gray-900">{t('planner.dashboard.title')}</h1>
+              <p className="mt-1 text-sm text-gray-500">{t('planner.dashboard.subtitle')}</p>
             </div>
             <div className="flex items-center gap-3">
               <Link
                 href="/planner/weddings?action=create"
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Create Wedding
+                {t('planner.dashboard.createWedding')}
               </Link>
+              <LanguageSwitcher />
               <Link
                 href="/api/auth/signout"
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               >
-                Logout
+                {t('common.navigation.logout')}
               </Link>
             </div>
           </div>
@@ -135,17 +139,17 @@ export default async function PlannerDashboardPage() {
         {stats && (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
             <StatsCard
-              title="Total Weddings"
+              title={t('planner.stats.totalWeddings')}
               value={stats.wedding_count}
               colorClass="bg-purple-50 border-purple-200"
             />
             <StatsCard
-              title="Total Guests"
+              title={t('planner.stats.totalGuests')}
               value={stats.total_guests}
               colorClass="bg-blue-50 border-blue-200"
             />
             <StatsCard
-              title="RSVP Completion"
+              title={t('planner.stats.rsvpCompletion')}
               value={stats.rsvp_completion_percentage}
               suffix="%"
               colorClass="bg-green-50 border-green-200"
@@ -156,7 +160,7 @@ export default async function PlannerDashboardPage() {
         {/* Upcoming Weddings */}
         {stats && stats.upcoming_weddings.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Weddings</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.dashboard.upcomingWeddings')}</h2>
             <div className="grid grid-cols-1 gap-6">
               {stats.upcoming_weddings.map((wedding) => (
                 <WeddingCard
@@ -177,7 +181,7 @@ export default async function PlannerDashboardPage() {
 
         {/* Quick Links */}
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.dashboard.quickActions')}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Link
               href="/planner/weddings"
@@ -199,8 +203,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">All Weddings</h3>
-                <p className="mt-1 text-sm text-gray-500">View and manage all your weddings</p>
+                <h3 className="text-sm font-medium text-gray-900">{t('planner.dashboard.allWeddings')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('planner.dashboard.allWeddingsSubtitle')}</p>
               </div>
             </Link>
 
@@ -224,8 +228,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">Create Wedding</h3>
-                <p className="mt-1 text-sm text-gray-500">Set up a new wedding event</p>
+                <h3 className="text-sm font-medium text-gray-900">{t('planner.dashboard.createWedding')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('planner.dashboard.createWeddingSubtitle')}</p>
               </div>
             </Link>
           </div>
@@ -247,14 +251,14 @@ export default async function PlannerDashboardPage() {
                 d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"
               />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No weddings yet</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by creating your first wedding.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('planner.dashboard.noWeddings')}</h3>
+            <p className="mt-1 text-sm text-gray-500">{t('planner.dashboard.noWeddingsSubtitle')}</p>
             <div className="mt-6">
               <Link
                 href="/planner/weddings?action=create"
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Create Wedding
+                {t('planner.dashboard.createWedding')}
               </Link>
             </div>
           </div>

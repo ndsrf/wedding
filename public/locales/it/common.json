@@ -24,7 +24,7 @@
     },
     "navigation": {
       "home": "Home",
-      "dashboard": "Pannello di controllo",
+      "dashboard": "Dashboard",
       "settings": "Impostazioni",
       "logout": "Esci",
       "profile": "Profilo"
@@ -45,7 +45,7 @@
     },
     "errors": {
       "generic": "Si è verificato un errore. Riprova.",
-      "network": "Errore di connessione. Controlla la tua connessione Internet.",
+      "network": "Errore di connessione. Controlla la tua connessione internet.",
       "unauthorized": "Non sei autorizzato a eseguire questa azione.",
       "notFound": "La risorsa richiesta non è stata trovata.",
       "serverError": "Errore del server. Riprova più tardi."
@@ -57,107 +57,181 @@
       "created": "Creato con successo",
       "sent": "Inviato con successo"
     },
+    "pagination": {
+      "page": "Pagina",
+      "of": "di"
+    },
+    "optional": "Opzionale",
+    "languages": {
+      "ES": "Spagnolo",
+      "EN": "Inglese",
+      "FR": "Francese",
+      "IT": "Italiano",
+      "DE": "Tedesco"
+    },
+    "channels": {
+      "WHATSAPP": "WhatsApp",
+      "EMAIL": "Email",
+      "SMS": "SMS",
+      "none": "-"
+    },
     "loading": "Caricamento...",
     "noData": "Nessun dato disponibile",
-    "confirmDelete": "Sei sicuro di voler eliminare questo?",
+    "confirmDelete": "Sei sicuro di voler eliminare questo elemento?",
     "yes": "Sì",
     "no": "No"
   },
+  "metadata": {
+    "title": "Sistema di Gestione Matrimoni",
+    "description": "Piattaforma di gestione matrimoni multi-tenant con tracciamento RSVP e gestione pagamenti"
+  },
   "master": {
     "dashboard": {
-      "title": "Pannello amministratore principale",
+      "title": "Dashboard Amministratore Principale",
       "welcome": "Benvenuto, Amministratore",
-      "overview": "Panoramica della piattaforma"
+      "overview": "Panoramica Piattaforma"
     },
     "analytics": {
-      "totalPlanners": "Totale organizzatori",
-      "activePlanners": "Organizzatori attivi",
-      "totalWeddings": "Totale matrimoni",
-      "totalGuests": "Totale ospiti"
+      "totalPlanners": "Totale Organizzatori",
+      "activePlanners": "Organizzatori Attivi",
+      "totalWeddings": "Totale Matrimoni",
+      "totalGuests": "Totale Ospiti"
     },
     "planners": {
-      "title": "Gestione organizzatori",
-      "list": "Elenco organizzatori",
-      "add": "Aggiungi organizzatore",
-      "edit": "Modifica organizzatore",
+      "title": "Gestione Organizzatori",
+      "list": "Lista Organizzatori",
+      "add": "Aggiungi Organizzatore",
+      "edit": "Modifica Organizzatore",
       "name": "Nome",
       "email": "Email",
       "logo": "Logo",
       "status": "Stato",
       "enabled": "Abilitato",
       "disabled": "Disabilitato",
-      "weddingCount": "Numero di matrimoni",
-      "lastLogin": "Ultimo accesso",
+      "weddingCount": "Numero Matrimoni",
+      "lastLogin": "Ultimo Accesso",
       "enable": "Abilita",
       "disable": "Disabilita",
       "confirmDisable": "Sei sicuro di voler disabilitare questo organizzatore?",
-      "logoUrl": "URL del logo"
+      "logoUrl": "URL Logo"
     },
     "weddings": {
-      "title": "Panoramica matrimoni",
-      "list": "Elenco matrimoni",
-      "coupleName": "Nome della coppia",
+      "title": "Panoramica Matrimoni",
+      "list": "Lista Matrimoni",
+      "coupleName": "Nomi Coppia",
       "date": "Data",
       "location": "Luogo",
       "planner": "Organizzatore",
-      "guestCount": "Numero di ospiti"
+      "guestCount": "Numero Ospiti"
     }
   },
   "planner": {
     "dashboard": {
-      "title": "Pannello dell'organizzatore",
+      "title": "Dashboard Organizzatore",
       "welcome": "Benvenuto, {name}",
-      "myWeddings": "I miei matrimoni"
+      "myWeddings": "I Miei Matrimoni",
+      "subtitle": "Gestisci i tuoi matrimoni e visualizza le statistiche",
+      "createWedding": "Crea Matrimonio",
+      "upcomingWeddings": "Prossimi Matrimoni",
+      "quickActions": "Azioni Rapide",
+      "allWeddings": "Tutti i Matrimoni",
+      "allWeddingsSubtitle": "Visualizza e gestisci tutti i tuoi matrimoni",
+      "createWeddingSubtitle": "Imposta un nuovo evento matrimonio",
+      "noWeddings": "Ancora nessun matrimonio",
+      "noWeddingsSubtitle": "Inizia creando il tuo primo matrimonio."
     },
     "stats": {
-      "totalWeddings": "Totale matrimoni",
-      "totalGuests": "Totale ospiti",
-      "rsvpCompletion": "Conferme completate",
-      "upcomingWeddings": "Matrimoni in arrivo"
+      "totalWeddings": "Totale Matrimoni",
+      "totalGuests": "Totale Ospiti",
+      "rsvpCompletion": "Completamento RSVP",
+      "upcomingWeddings": "Prossimi Matrimoni"
     },
     "weddings": {
-      "title": "Gestione matrimoni",
-      "create": "Crea nuovo matrimonio",
-      "edit": "Modifica matrimonio",
-      "coupleNames": "Nomi della coppia",
-      "weddingDate": "Data del matrimonio",
-      "weddingTime": "Ora del matrimonio",
+      "title": "Gestione Matrimoni",
+      "loading": "Caricamento matrimoni...",
+      "loadingDetails": "Caricamento dettagli matrimonio...",
+      "noWeddings": "Ancora nessun matrimonio",
+      "getStarted": "Inizia creando il tuo primo matrimonio.",
+      "backToWeddings": "Torna ai matrimoni",
+      "notFound": "Matrimonio non trovato",
+      "totalGuests": "Totale Ospiti",
+      "rsvpCompletion": "Completamento RSVP",
+      "attending": "Presenti",
+      "paymentsReceived": "Pagamenti Ricevuti",
+      "weddingInfo": "Informazioni Matrimonio",
+      "status": "Stato",
+      "guestAdditions": "Aggiunte Ospiti",
+      "allowed": "Consentito",
+      "notAllowed": "Non consentito",
+      "dressCode": "Codice Abbigliamento",
+      "additionalInfo": "Informazioni Aggiuntive",
+      "weddingAdmins": "Amministratori Matrimonio",
+      "noAdmins": "Nessun amministratore invitato ancora",
+      "accepted": "Accettato",
+      "pending": "Invito in attesa",
+      "inviteAdmin": "Invita Amministratore Matrimonio",
+      "create": "Crea Nuovo Matrimonio",
+      "edit": "Modifica Matrimonio",
+      "coupleNames": "Nomi Coppia",
+      "weddingDate": "Data Matrimonio",
+      "weddingTime": "Ora Matrimonio",
       "location": "Luogo",
-      "rsvpCutoff": "Data limite per la conferma",
-      "defaultLanguage": "Lingua predefinita",
+      "rsvpCutoff": "Scadenza RSVP",
+      "defaultLanguage": "Lingua Predefinita",
       "theme": "Tema",
-      "paymentMode": "Modalità di pagamento",
-      "automated": "Automatico",
+      "paymentMode": "Modalità Pagamento",
+      "automated": "Automatizzato",
       "manual": "Manuale",
-      "allowGuestAdditions": "Consenti ospiti aggiuntivi",
+      "allowGuestAdditions": "Consenti Aggiunta Ospiti",
       "overview": "Panoramica",
       "guests": "Ospiti",
       "admins": "Amministratori"
     },
     "admins": {
-      "invite": "Invita amministratore",
-      "email": "Email amministratore",
+      "invite": "Invita Amministratore",
+      "email": "Email Amministratore",
       "inviteSent": "Invito inviato con successo",
-      "remove": "Rimuovi amministratore",
+      "remove": "Rimuovi Amministratore",
       "confirmRemove": "Sei sicuro di voler rimuovere questo amministratore?"
     },
     "themes": {
-      "title": "Gestione temi",
-      "system": "Temi di sistema",
-      "custom": "Temi personalizzati",
-      "create": "Crea tema personalizzato",
-      "edit": "Modifica tema",
-      "name": "Nome del tema",
-      "inUse": "In uso",
-      "cannotDelete": "Impossibile eliminare. Il tema è utilizzato da {count} matrimonio/i."
+      "title": "Gestione Temi",
+      "system": "Temi di Sistema",
+      "custom": "Temi Personalizzati",
+      "create": "Crea Tema Personalizzato",
+      "edit": "Modifica Tema",
+      "name": "Nome Tema",
+      "inUse": "In Uso",
+      "cannotDelete": "Impossibile eliminare. Il tema è in uso da {count} matrimonio/i."
     }
   },
   "admin": {
     "dashboard": {
-      "title": "Pannello amministratore matrimonio",
+      "title": "Dashboard Amministrazione Matrimonio",
       "welcome": "Benvenuto",
-      "weddingDetails": "Dettagli del matrimonio",
-      "metrics": "Metriche"
+      "weddingDetails": "Dettagli Matrimonio",
+      "metrics": "Metriche",
+      "metricTitles": {
+        "totalGuests": "Totale Ospiti",
+        "rsvpCompletion": "Completamento RSVP",
+        "attending": "Presenti",
+        "paymentsReceived": "Pagamenti Ricevuti"
+      },
+      "manageWedding": "Gestisci Matrimonio",
+      "guestList": "Lista Ospiti",
+      "guestListSubtitle": "Visualizza e gestisci ospiti",
+      "activity": "Attività",
+      "activitySubtitle": "Traccia attività ospiti",
+      "payments": "Pagamenti",
+      "paymentsSubtitle": "Traccia regali e pagamenti",
+      "importGuests": "Importa Ospiti",
+      "importGuestsSubtitle": "Carica file Excel",
+      "rsvpProgress": "Progresso RSVP",
+      "daysUntilWedding": "giorni al matrimonio",
+      "responded": "risposto",
+      "complete": "completo",
+      "weddingNotFound": "Matrimonio non trovato",
+      "contactPlanner": "Contatta il tuo organizzatore di matrimoni."
     },
     "wedding": {
       "details": "Dettagli",
@@ -165,91 +239,169 @@
       "updateSuccess": "Configurazione aggiornata con successo"
     },
     "guests": {
-      "title": "Gestione ospiti",
-      "list": "Elenco ospiti",
+      "title": "Gestione Ospiti",
+      "list": "Lista Ospiti",
+      "add": "Aggiungi Ospite",
+      "table": {
+        "family": "Famiglia",
+        "members": "Membri",
+        "rsvp": "RSVP",
+        "channel": "Canale",
+        "payment": "Pagamento",
+        "language": "Lingua",
+        "actions": "Azioni",
+        "loading": "Caricamento ospiti...",
+        "emptyTitle": "Nessun ospite trovato",
+        "emptyDesc": "Prova a regolare i filtri o importa una lista di ospiti.",
+        "noPayment": "Nessun pagamento"
+      },
       "import": "Importa da Excel",
       "export": "Esporta in Excel",
-      "template": "Scarica modello",
-      "familyName": "Nome famiglia",
-      "contactPerson": "Persona di contatto",
+      "template": "Scarica Modello",
+      "familyName": "Cognome Famiglia",
+      "contactPerson": "Persona di Contatto",
       "email": "Email",
       "phone": "Telefono",
       "whatsapp": "WhatsApp",
       "language": "Lingua",
       "members": "Membri",
-      "rsvpStatus": "Stato conferma",
+      "rsvpStatus": "Stato RSVP",
       "attendance": "Presenza",
       "channel": "Canale",
-      "paymentStatus": "Stato pagamento",
+      "paymentStatus": "Stato Pagamento",
       "filters": {
         "all": "Tutti",
-        "pending": "In attesa",
+        "pending": "In Attesa",
+        "submitted": "Inviato",
         "confirmed": "Confermato",
-        "notAttending": "Non parteciperà",
+        "attending": "Parteciperà",
+        "notAttending": "Non Parteciperà",
+        "partial": "Parziale",
         "whatsapp": "WhatsApp",
         "email": "Email",
         "sms": "SMS",
         "paid": "Pagato",
-        "unpaid": "Non pagato"
+        "unpaid": "Non Pagato",
+        "received": "Ricevuto",
+        "searchPlaceholder": "Nome o email...",
+        "clearAll": "Cancella filtri"
       },
-      "importSuccess": "Elenco ospiti importato con successo",
+      "form": {
+        "addTitle": "Aggiungi Famiglia Ospiti",
+        "editTitle": "Modifica Famiglia Ospiti",
+        "familyNameRequired": "Il cognome è obbligatorio",
+        "memberNameRequired": "Tutti i membri devono avere un nome",
+        "saveFailed": "Errore nel salvare l'ospite",
+        "preferredChannel": "Canale Preferito",
+        "languagePreference": "Preferenza Lingua",
+        "saving": "Salvataggio...",
+        "addGuest": "Aggiungi Ospite",
+        "saveChanges": "Salva Modifiche"
+      },
+      "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file."
     },
     "notifications": {
-      "title": "Notifiche e attività",
+      "title": "Notifiche e Attività",
+      "newActivities": "{count, plural, =0 {Nessuna nuova attività} one {# nuova attività} other {# nuove attività}}",
+      "loading": "Caricamento notifiche...",
+      "emptyTitle": "Nessuna notifica",
+      "emptyDesc": "L'attività dei tuoi ospiti apparirà qui.",
       "filters": {
-        "dateRange": "Intervallo di date",
-        "eventType": "Tipo di evento",
+        "dateRange": "Intervallo Date",
+        "eventType": "Tipo Evento",
         "family": "Famiglia",
         "channel": "Canale",
-        "unread": "Non letti",
-        "read": "Letti"
+        "unread": "Non Letto",
+        "read": "Letto"
       },
-      "markAsRead": "Segna come letto",
-      "export": "Esporta notifiche",
+      "markAsRead": "Segna come Letto",
+      "export": "Esporta Notifiche",
       "events": {
-        "linkOpened": "Link aperto",
-        "rsvpSubmitted": "Conferma inviata",
-        "rsvpEdited": "Conferma modificata",
-        "guestAdded": "Ospite aggiunto",
-        "paymentReceived": "Pagamento ricevuto",
-        "reminderSent": "Promemoria inviato"
+        "linkOpened": "Link Aperto",
+        "rsvpSubmitted": "RSVP Inviato",
+        "rsvpEdited": "RSVP Modificato",
+        "guestAdded": "Ospite Aggiunto",
+        "paymentReceived": "Pagamento Ricevuto",
+        "reminderSent": "Promemoria Inviato"
       }
     },
     "reminders": {
-      "title": "Sistema promemoria",
-      "send": "Invia promemoria",
-      "preview": "Anteprima destinatari",
-      "channel": "Canale di invio",
+      "title": "Sistema Promemoria",
+      "send": "Invia Promemoria",
+      "preview": "Anteprima Destinatari",
+      "channel": "Canale Invio",
       "recipients": "Destinatari: {count} famiglia/e",
       "sent": "Promemoria inviati con successo a {count} famiglia/e",
-      "noRecipients": "Nessuna famiglia in attesa di conferma"
+      "noRecipients": "Nessuna famiglia in attesa di RSVP",
+      "loadingPreview": "Caricamento anteprima...",
+      "sendSuccess": "Promemoria inviati!",
+      "sendSuccessDesc": "{count} famiglie riceveranno promemoria.",
+      "allCaughtUp": "Tutto aggiornato!",
+      "allCaughtUpDesc": "Tutte le famiglie hanno già inviato il loro RSVP.",
+      "summary": "{count} famiglie non hanno ancora risposto all'RSVP.",
+      "byLanguage": "Per Lingua",
+      "sendVia": "Invia tramite",
+      "viewAll": "Vedi tutte le {count} famiglie",
+      "sending": "Invio in corso...",
+      "sendAction": "Invia {count} Promemoria"
     },
     "payments": {
-      "title": "Gestione pagamenti",
-      "list": "Elenco pagamenti",
-      "record": "Registra pagamento manuale",
+      "title": "Gestione Pagamenti",
+      "list": "Lista Pagamenti",
+      "loading": "Caricamento pagamenti...",
+      "emptyTitle": "Nessun pagamento registrato",
+      "emptyDesc": "I pagamenti appariranno qui quando registrati.",
+      "recordTitle": "Registra Pagamento",
+      "selectFamily": "Seleziona una famiglia",
+      "currencyAmount": "Importo ({currency})",
+      "recording": "Registrazione...",
+      "markReceived": "Segna come Ricevuto",
+      "auto": "Auto",
+      "record": "Registra Pagamento Manuale",
       "family": "Famiglia",
       "amount": "Importo",
-      "referenceCode": "Codice di riferimento",
-      "transactionDate": "Data transazione",
+      "referenceCode": "Codice Riferimento",
+      "transactionDate": "Data Transazione",
       "status": "Stato",
       "statuses": {
-        "pending": "In attesa",
+        "pending": "In Attesa",
         "received": "Ricevuto",
         "confirmed": "Confermato"
       },
       "recordSuccess": "Pagamento registrato con successo",
       "updateSuccess": "Stato pagamento aggiornato"
     },
+    "deleteDialog": {
+      "title": "Elimina Famiglia Ospiti",
+      "confirmTitle": "Sei sicuro di voler eliminare {name}?",
+      "confirmDesc": "Questo rimuoverà permanentemente {count} membro/i e tutti i dati associati.",
+      "rsvpWarning": "Attenzione",
+      "rsvpWarningDesc": "Questa famiglia ha già inviato il proprio RSVP. Eliminandola rimuoverai la loro risposta.",
+      "deleting": "Eliminazione..."
+    },
     "guestAdditions": {
-      "title": "Revisione ospiti aggiuntivi",
+      "title": "Revisione Aggiunte Ospiti",
+      "loading": "Caricamento aggiunte ospiti...",
+      "featureDisabled": "Funzionalità Disabilitata",
+      "featureDisabledDesc": "Le aggiunte di ospiti sono disabilitate per questo matrimonio.",
+      "noAdditionsTitle": "Nessuna aggiunta ospite",
+      "noAdditionsDesc": "Quando gli ospiti aggiungono membri della famiglia, appariranno qui per la revisione.",
+      "totalAdditions": "aggiunte totali",
+      "new": "nuove",
       "newBadge": "NUOVO",
-      "addedBy": "Aggiunto dall'ospite",
+      "pendingReview": "In Attesa di Revisione",
+      "addedTo": "Aggiunto a",
+      "addedBy": "Aggiunto da ospite",
       "addedAt": "Aggiunto il {date}",
+      "diet": "Dieta",
+      "accessibility": "Accessibilità",
       "approve": "Approva",
       "edit": "Modifica",
-      "noAdditions": "Nessun ospite aggiuntivo in attesa di revisione"
+      "markReviewed": "Segna come Revisionato",
+      "previouslyReviewed": "Precedentemente Revisionato",
+      "family": "Famiglia",
+      "noAdditions": "Nessuna aggiunta ospite in attesa di revisione"
     }
   },
   "guest": {
@@ -262,54 +414,58 @@
       "location": "Luogo: {location}"
     },
     "rsvp": {
-      "title": "Conferma di presenza",
+      "title": "RSVP",
       "instructions": "Seleziona chi della tua famiglia parteciperà al matrimonio.",
       "attending": "Parteciperà",
-      "notAttending": "Non parteciperà",
-      "dietaryRestrictions": "Restrizioni alimentari",
-      "accessibilityNeeds": "Esigenze di accessibilità",
-      "dietaryPlaceholder": "Es: vegetariano, allergie, ecc.",
-      "accessibilityPlaceholder": "Es: sedia a rotelle, esigenze speciali, ecc.",
-      "submit": "Conferma presenza",
-      "submitted": "Grazie per aver confermato la tua presenza!",
-      "confirmationMessage": "Abbiamo ricevuto la tua conferma. Non vediamo l'ora di vedervi al matrimonio!",
-      "cutoffPassed": "La data limite per la conferma è scaduta. Contatta gli organizzatori."
+      "notAttending": "Non Parteciperà",
+      "attendingSummary": "{count, plural, =0 {Nessuno parteciperà} one {1 persona parteciperà} other {# persone parteciperanno}}",
+      "dietaryRestrictions": "Restrizioni Alimentari",
+      "accessibilityNeeds": "Esigenze di Accessibilità",
+      "dietaryPlaceholder": "Es. vegetariano, allergie, ecc.",
+      "accessibilityPlaceholder": "Es. sedia a rotelle, bisogni speciali, ecc.",
+      "submit": "Conferma Presenza",
+      "submitted": "Grazie per il tuo RSVP!",
+      "confirmationMessage": "Abbiamo ricevuto la tua conferma. Non vediamo l'ora di vederti al matrimonio!",
+      "cutoffPassed": "La scadenza per l'RSVP è passata. Contatta gli organizzatori."
     },
     "members": {
-      "title": "Membri della famiglia",
-      "addMember": "Aggiungi membro della famiglia",
+      "title": "Membri della Famiglia",
+      "addMember": "Aggiungi Membro Famiglia",
       "name": "Nome",
       "type": "Tipo",
       "age": "Età",
+      "yearsOld": "{count} anni",
+      "addedByYou": "Aggiunto da te",
       "types": {
         "adult": "Adulto",
         "child": "Bambino",
         "infant": "Neonato"
       },
-      "addSuccess": "Membro aggiunto con successo"
+      "addSuccess": "Membro aggiunto con successo",
+      "noMembers": "Nessun membro aggiunto ancora"
     },
     "payment": {
-      "title": "Informazioni sul pagamento",
+      "title": "Informazioni Pagamento",
       "subtitle": "Dettagli regalo matrimonio",
       "iban": "IBAN per bonifico:",
-      "referenceCode": "Codice di riferimento:",
-      "referenceInstructions": "Includi questo codice di riferimento nel tuo bonifico.",
-      "status": "Stato del pagamento:",
+      "referenceCode": "Codice riferimento:",
+      "referenceInstructions": "Includi questo codice di riferimento nel bonifico.",
+      "status": "Stato pagamento:",
       "statuses": {
-        "pending": "In attesa",
+        "pending": "In Attesa",
         "received": "Ricevuto",
         "confirmed": "Confermato"
       },
-      "manualMode": "Utilizza il seguente IBAN per il tuo regalo.",
+      "manualMode": "Usa il seguente IBAN per il tuo regalo.",
       "thankYou": "Grazie per la tua generosità!"
     },
     "language": {
-      "select": "Seleziona lingua",
+      "select": "Seleziona Lingua",
       "updated": "Lingua aggiornata"
     },
     "edit": {
-      "title": "Modifica conferma",
-      "canEdit": "Puoi modificare la tua conferma fino al {date}."
+      "title": "Modifica RSVP",
+      "canEdit": "Puoi modificare il tuo RSVP fino al {date}."
     }
   }
 }

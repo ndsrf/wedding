@@ -4,8 +4,8 @@
  * Functions for logging guest CRUD operations for audit trail
  */
 
-import { prisma } from '@/lib/db/prisma';
 import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/db/prisma';
 
 export type AuditAction = 'create' | 'update' | 'delete';
 
@@ -32,7 +32,7 @@ export async function logAuditEvent(entry: AuditLogEntry): Promise<void> {
         metadata: {
           audit_action: entry.action,
           admin_id: entry.admin_id,
-          details: entry.details as Prisma.JsonValue,
+          details: entry.details as Prisma.InputJsonValue,
           timestamp: new Date().toISOString(),
         },
       },

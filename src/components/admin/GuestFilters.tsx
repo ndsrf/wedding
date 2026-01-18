@@ -8,6 +8,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface GuestFiltersProps {
   filters: {
@@ -21,6 +22,8 @@ interface GuestFiltersProps {
 }
 
 export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
+  const t = useTranslations();
+
   const handleChange = (key: string, value: string) => {
     onFilterChange({
       ...filters,
@@ -34,12 +37,12 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
         {/* Search */}
         <div>
           <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-            Search
+            {t('common.buttons.search')}
           </label>
           <input
             type="text"
             id="search"
-            placeholder="Name or email..."
+            placeholder={t('admin.guests.filters.searchPlaceholder')}
             value={filters.search || ''}
             onChange={(e) => handleChange('search', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
@@ -49,7 +52,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
         {/* RSVP Status */}
         <div>
           <label htmlFor="rsvp_status" className="block text-sm font-medium text-gray-700 mb-1">
-            RSVP Status
+            {t('admin.guests.rsvpStatus')}
           </label>
           <select
             id="rsvp_status"
@@ -57,16 +60,16 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             onChange={(e) => handleChange('rsvp_status', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
           >
-            <option value="">All</option>
-            <option value="pending">Pending</option>
-            <option value="submitted">Submitted</option>
+            <option value="">{t('admin.guests.filters.all')}</option>
+            <option value="pending">{t('admin.guests.filters.pending')}</option>
+            <option value="submitted">{t('admin.guests.filters.submitted')}</option>
           </select>
         </div>
 
         {/* Attendance */}
         <div>
           <label htmlFor="attendance" className="block text-sm font-medium text-gray-700 mb-1">
-            Attendance
+            {t('admin.guests.attendance')}
           </label>
           <select
             id="attendance"
@@ -74,17 +77,17 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             onChange={(e) => handleChange('attendance', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
           >
-            <option value="">All</option>
-            <option value="yes">Attending</option>
-            <option value="no">Not Attending</option>
-            <option value="partial">Partial</option>
+            <option value="">{t('admin.guests.filters.all')}</option>
+            <option value="yes">{t('admin.guests.filters.attending')}</option>
+            <option value="no">{t('admin.guests.filters.notAttending')}</option>
+            <option value="partial">{t('admin.guests.filters.partial')}</option>
           </select>
         </div>
 
         {/* Channel */}
         <div>
           <label htmlFor="channel" className="block text-sm font-medium text-gray-700 mb-1">
-            Channel
+            {t('admin.guests.channel')}
           </label>
           <select
             id="channel"
@@ -92,17 +95,17 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             onChange={(e) => handleChange('channel', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
           >
-            <option value="">All</option>
-            <option value="WHATSAPP">WhatsApp</option>
-            <option value="EMAIL">Email</option>
-            <option value="SMS">SMS</option>
+            <option value="">{t('admin.guests.filters.all')}</option>
+            <option value="WHATSAPP">{t('admin.guests.filters.whatsapp')}</option>
+            <option value="EMAIL">{t('admin.guests.filters.email')}</option>
+            <option value="SMS">{t('admin.guests.filters.sms')}</option>
           </select>
         </div>
 
         {/* Payment Status */}
         <div>
           <label htmlFor="payment_status" className="block text-sm font-medium text-gray-700 mb-1">
-            Payment
+            {t('admin.guests.paymentStatus')}
           </label>
           <select
             id="payment_status"
@@ -110,10 +113,10 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             onChange={(e) => handleChange('payment_status', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
           >
-            <option value="">All</option>
-            <option value="PENDING">Pending</option>
-            <option value="RECEIVED">Received</option>
-            <option value="CONFIRMED">Confirmed</option>
+            <option value="">{t('admin.guests.filters.all')}</option>
+            <option value="PENDING">{t('admin.guests.filters.pending')}</option>
+            <option value="RECEIVED">{t('admin.guests.filters.received')}</option>
+            <option value="CONFIRMED">{t('admin.guests.filters.confirmed')}</option>
           </select>
         </div>
       </div>
@@ -125,7 +128,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             onClick={() => onFilterChange({})}
             className="text-sm text-purple-600 hover:text-purple-800"
           >
-            Clear all filters
+            {t('admin.guests.filters.clearAll')}
           </button>
         </div>
       )}

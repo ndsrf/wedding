@@ -64,12 +64,20 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json<UpdateLanguageResponse>({
+    const response = NextResponse.json<UpdateLanguageResponse>({
       success: true,
       data: {
         preferred_language: body.language,
       },
     });
+
+    response.cookies.set('NEXT_LOCALE', body.language, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      sameSite: 'lax',
+    });
+
+    return response;
   } catch (error) {
     console.error('Update language error:', error);
     return NextResponse.json<UpdateLanguageResponse>(

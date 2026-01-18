@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { GuestTable } from '@/components/admin/GuestTable';
 import { GuestFilters } from '@/components/admin/GuestFilters';
 import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
@@ -47,6 +48,7 @@ interface Filters {
 }
 
 export default function GuestsPage() {
+  const t = useTranslations();
   const [guests, setGuests] = useState<GuestWithStatus[]>([]);
   const [guestAdditions, setGuestAdditions] = useState<GuestAddition[]>([]);
   const [guestAdditionsEnabled, setGuestAdditionsEnabled] = useState(false);
@@ -197,11 +199,11 @@ export default function GuestsPage() {
         setSelectedGuest(data.data);
         setIsFormModalOpen(true);
       } else {
-        showNotification('error', 'Failed to load guest details');
+        showNotification('error', t('common.errors.generic'));
       }
     } catch (error) {
       console.error('Error loading guest:', error);
-      showNotification('error', 'Failed to load guest details');
+      showNotification('error', t('common.errors.generic'));
     }
   };
 
@@ -226,16 +228,16 @@ export default function GuestsPage() {
       const data = await response.json();
 
       if (data.success) {
-        showNotification('success', 'Guest deleted successfully');
+        showNotification('success', t('common.success.deleted'));
         setIsDeleteDialogOpen(false);
         setGuestToDelete(null);
         fetchGuests();
       } else {
-        showNotification('error', data.error?.message || 'Failed to delete guest');
+        showNotification('error', data.error?.message || t('common.errors.generic'));
       }
     } catch (error) {
       console.error('Error deleting guest:', error);
-      showNotification('error', 'Failed to delete guest');
+      showNotification('error', t('common.errors.generic'));
     } finally {
       setDeleteLoading(false);
     }
@@ -269,13 +271,13 @@ export default function GuestsPage() {
       if (data.success) {
         showNotification(
           'success',
-          formMode === 'add' ? 'Guest added successfully' : 'Guest updated successfully'
+          formMode === 'add' ? t('common.success.created') : t('common.success.updated')
         );
         setIsFormModalOpen(false);
         setSelectedGuest(null);
         fetchGuests();
       } else {
-        throw new Error(data.error?.message || 'Failed to save guest');
+        throw new Error(data.error?.message || t('common.errors.generic'));
       }
     } catch (error) {
       throw error; // Re-throw to let modal handle it
@@ -295,9 +297,9 @@ export default function GuestsPage() {
                 </svg>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Guest Management</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('admin.guests.title')}</h1>
                 <p className="mt-1 text-sm text-gray-500">
-                  {guests.length} guests • Page {page} of {totalPages}
+                  {guests.length} guests • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
                 </p>
               </div>
             </div>
@@ -306,16 +308,16 @@ export default function GuestsPage() {
                 onClick={handleDownloadTemplate}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                Template
+                {t('admin.guests.template')}
               </button>
               <button
                 onClick={handleExport}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                Export
+                {t('common.buttons.export')}
               </button>
               <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                Import
+                {t('common.buttons.import')}
                 <input
                   type="file"
                   accept=".xlsx"
@@ -336,15 +338,15 @@ export default function GuestsPage() {
                       if (data.success) {
                         showNotification(
                           'success',
-                          `Imported successfully! ${data.data.familiesCreated} families created.`
+                          t('admin.guests.importSuccess')
                         );
                         fetchGuests();
                       } else {
-                        showNotification('error', data.error?.message || 'Import failed');
+                        showNotification('error', data.error?.message || t('admin.guests.importError'));
                       }
                     } catch (error) {
                       console.error('Import error:', error);
-                      showNotification('error', 'Import failed. Please try again.');
+                      showNotification('error', t('admin.guests.importError'));
                     }
                     e.target.value = '';
                   }}
@@ -354,7 +356,7 @@ export default function GuestsPage() {
                 onClick={handleAddGuest}
                 className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
               >
-                Add Guest
+                {t('admin.guests.add')}
               </button>
             </div>
           </div>
@@ -374,7 +376,7 @@ export default function GuestsPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Guest List
+              {t('admin.guests.list')}
             </button>
             <button
               onClick={() => setActiveTab('additions')}
@@ -384,7 +386,7 @@ export default function GuestsPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Guest Additions
+              {t('admin.guestAdditions.title')}
               {newAdditionsCount > 0 && (
                 <span className="ml-2 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
                   {newAdditionsCount}
@@ -416,17 +418,17 @@ export default function GuestsPage() {
                     disabled={page === 1}
                     className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                   >
-                    Previous
+                    {t('common.buttons.previous')}
                   </button>
                   <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                    Page {page} of {totalPages}
+                    {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
                   </span>
                   <button
                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
                     className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                   >
-                    Next
+                    {t('common.buttons.next')}
                   </button>
                 </nav>
               </div>

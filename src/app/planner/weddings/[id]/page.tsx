@@ -159,6 +159,10 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center space-x-2 text-sm text-gray-500 mb-1">
+                <Link href="/planner" className="hover:text-gray-700">
+                  Dashboard
+                </Link>
+                <span>/</span>
                 <Link href="/planner/weddings" className="hover:text-gray-700">
                   Weddings
                 </Link>
