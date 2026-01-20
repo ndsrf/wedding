@@ -11,8 +11,19 @@ import { RSVPReminderEmail } from './templates/rsvp-reminder';
 import { RSVPConfirmationEmail } from './templates/rsvp-confirmation';
 import { PaymentConfirmationEmail } from './templates/payment-confirmation';
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend client lazily to avoid build-time API key requirement
+let resend: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resend) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY environment variable is not set');
+    }
+    resend = new Resend(apiKey);
+  }
+  return resend;
+}
 
 // Email sender configuration
 const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@weddingapp.com';
@@ -160,7 +171,8 @@ export async function sendEmail(
       const react = getTemplateComponent(template, language, variables);
       console.log('[RESEND DEBUG] React component created, attempting to send...');
 
-      const { data, error } = await resend.emails.send({
+      const client = getResendClient();
+      const { data, error } = await client.emails.send({
         from: `${FROM_NAME} <${FROM_EMAIL}>`,
         to: [to],
         subject,

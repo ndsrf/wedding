@@ -60,3 +60,4 @@ tmp/
 temp/
 *.tmp
 config/master-admin.json
+audit.log
