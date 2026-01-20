@@ -430,7 +430,7 @@
 
 ## Phase 15: Deployment Setup
 
-- [ ] 15.1. Create Docker configuration
+- [x] 15.1. Create Docker configuration
   - Files: Dockerfile, docker-compose.yml, .dockerignore, nginx.conf
   - Create production Dockerfile with multi-stage build
   - Create docker-compose.yml with app, db, nginx services
@@ -440,7 +440,7 @@
   - _Requirements: Deployment Architecture (Design doc)_
   - _Prompt: Implement the task for spec wedding-mvp, first run spec-workflow-guide to get the workflow guide then implement the task: Role: DevOps Engineer with expertise in Docker and containerization | Task: Create production-ready Docker setup. Dockerfile uses multi-stage build (build stage with dependencies, production stage with only runtime), optimizes layer caching, runs as non-root user. docker-compose.yml defines app (Next.js), db (PostgreSQL 15), and nginx services with proper networking, volumes for persistence, health checks, restart policies. nginx.conf configures reverse proxy with SSL termination, proper headers, gzip compression. Include .dockerignore to exclude node_modules, .git, etc. | Restrictions: Must use multi-stage Docker build for smaller images, run containers as non-root users, use environment variables for configuration, persist data with volumes, configure proper health checks, optimize for production (no dev dependencies), enable gzip in nginx | Success: Docker builds successfully, docker-compose orchestrates all services, nginx proxies to app correctly, SSL termination configured, volumes persist data, health checks work, containers restart on failure, production-optimized with small image size | After implementation: Mark task as [-] in tasks.md before starting, log implementation with log-implementation tool documenting Docker setup and deployment configuration, then mark as [x] when complete_
 
-- [ ] 15.2. Create CI/CD pipeline
+- [x] 15.2. Create CI/CD pipeline
   - Files: .github/workflows/ci.yml, .github/workflows/deploy.yml, scripts/deploy.sh
   - Create GitHub Actions workflow for CI (test, lint, type-check)
   - Create GitHub Actions workflow for deployment

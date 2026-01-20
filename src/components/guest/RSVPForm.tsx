@@ -18,6 +18,22 @@ interface RSVPFormProps {
   wedding: {
     allow_guest_additions: boolean;
     rsvp_cutoff_date: string;
+    // RSVP Question Configuration
+    transportation_question_enabled: boolean;
+    transportation_question_text: string | null;
+    dietary_restrictions_enabled: boolean;
+    extra_question_1_enabled: boolean;
+    extra_question_1_text: string | null;
+    extra_question_2_enabled: boolean;
+    extra_question_2_text: string | null;
+    extra_question_3_enabled: boolean;
+    extra_question_3_text: string | null;
+    extra_info_1_enabled: boolean;
+    extra_info_1_label: string | null;
+    extra_info_2_enabled: boolean;
+    extra_info_2_label: string | null;
+    extra_info_3_enabled: boolean;
+    extra_info_3_label: string | null;
   };
   rsvpCutoffPassed: boolean;
   onSuccess: () => void;
@@ -54,6 +70,29 @@ export default function RSVPForm({
     type: 'ADULT' as 'ADULT' | 'CHILD' | 'INFANT',
     age: '',
   });
+
+  // RSVP Question Answers (family-level)
+  const [transportationAnswer, setTransportationAnswer] = useState<boolean | null>(
+    family.transportation_answer ?? null
+  );
+  const [extraQuestion1Answer, setExtraQuestion1Answer] = useState<boolean | null>(
+    family.extra_question_1_answer ?? null
+  );
+  const [extraQuestion2Answer, setExtraQuestion2Answer] = useState<boolean | null>(
+    family.extra_question_2_answer ?? null
+  );
+  const [extraQuestion3Answer, setExtraQuestion3Answer] = useState<boolean | null>(
+    family.extra_question_3_answer ?? null
+  );
+  const [extraInfo1Value, setExtraInfo1Value] = useState<string>(
+    family.extra_info_1_value ?? ''
+  );
+  const [extraInfo2Value, setExtraInfo2Value] = useState<string>(
+    family.extra_info_2_value ?? ''
+  );
+  const [extraInfo3Value, setExtraInfo3Value] = useState<string>(
+    family.extra_info_3_value ?? ''
+  );
 
   function handleMemberChange(
     id: string,
@@ -130,7 +169,17 @@ export default function RSVPForm({
       const response = await fetch(`/api/guest/${token}/rsvp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ members }),
+        body: JSON.stringify({
+          members,
+          // Include question answers
+          transportation_answer: transportationAnswer,
+          extra_question_1_answer: extraQuestion1Answer,
+          extra_question_2_answer: extraQuestion2Answer,
+          extra_question_3_answer: extraQuestion3Answer,
+          extra_info_1_value: extraInfo1Value || null,
+          extra_info_2_value: extraInfo2Value || null,
+          extra_info_3_value: extraInfo3Value || null,
+        }),
       });
 
       const result = await response.json();
@@ -275,6 +324,192 @@ export default function RSVPForm({
                   {t('common.buttons.cancel')}
                 </button>
               </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* RSVP Questions Section */}
+      {(wedding.transportation_question_enabled ||
+        wedding.extra_question_1_enabled ||
+        wedding.extra_question_2_enabled ||
+        wedding.extra_question_3_enabled ||
+        wedding.extra_info_1_enabled ||
+        wedding.extra_info_2_enabled ||
+        wedding.extra_info_3_enabled) && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
+          <h4 className="text-xl font-bold text-gray-900">
+            {t('guest.rsvp.additionalQuestions')}
+          </h4>
+
+          {/* Transportation Question */}
+          {wedding.transportation_question_enabled && (
+            <div className="space-y-2">
+              <p className="text-lg text-gray-700">
+                {wedding.transportation_question_text || t('guest.rsvp.defaultTransportationQuestion')}
+              </p>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setTransportationAnswer(true)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    transportationAnswer === true
+                      ? 'bg-green-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.yes')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTransportationAnswer(false)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    transportationAnswer === false
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.no')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Extra Yes/No Question 1 */}
+          {wedding.extra_question_1_enabled && wedding.extra_question_1_text && (
+            <div className="space-y-2">
+              <p className="text-lg text-gray-700">{wedding.extra_question_1_text}</p>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setExtraQuestion1Answer(true)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    extraQuestion1Answer === true
+                      ? 'bg-green-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.yes')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExtraQuestion1Answer(false)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    extraQuestion1Answer === false
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.no')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Extra Yes/No Question 2 */}
+          {wedding.extra_question_2_enabled && wedding.extra_question_2_text && (
+            <div className="space-y-2">
+              <p className="text-lg text-gray-700">{wedding.extra_question_2_text}</p>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setExtraQuestion2Answer(true)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    extraQuestion2Answer === true
+                      ? 'bg-green-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.yes')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExtraQuestion2Answer(false)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    extraQuestion2Answer === false
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.no')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Extra Yes/No Question 3 */}
+          {wedding.extra_question_3_enabled && wedding.extra_question_3_text && (
+            <div className="space-y-2">
+              <p className="text-lg text-gray-700">{wedding.extra_question_3_text}</p>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setExtraQuestion3Answer(true)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    extraQuestion3Answer === true
+                      ? 'bg-green-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.yes')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExtraQuestion3Answer(false)}
+                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                    extraQuestion3Answer === false
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('common.no')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Extra Info Field 1 */}
+          {wedding.extra_info_1_enabled && wedding.extra_info_1_label && (
+            <div className="space-y-2">
+              <label className="text-lg text-gray-700 block">
+                {wedding.extra_info_1_label}
+              </label>
+              <input
+                type="text"
+                value={extraInfo1Value}
+                onChange={(e) => setExtraInfo1Value(e.target.value)}
+                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          )}
+
+          {/* Extra Info Field 2 */}
+          {wedding.extra_info_2_enabled && wedding.extra_info_2_label && (
+            <div className="space-y-2">
+              <label className="text-lg text-gray-700 block">
+                {wedding.extra_info_2_label}
+              </label>
+              <input
+                type="text"
+                value={extraInfo2Value}
+                onChange={(e) => setExtraInfo2Value(e.target.value)}
+                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          )}
+
+          {/* Extra Info Field 3 */}
+          {wedding.extra_info_3_enabled && wedding.extra_info_3_label && (
+            <div className="space-y-2">
+              <label className="text-lg text-gray-700 block">
+                {wedding.extra_info_3_label}
+              </label>
+              <input
+                type="text"
+                value={extraInfo3Value}
+                onChange={(e) => setExtraInfo3Value(e.target.value)}
+                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+              />
             </div>
           )}
         </div>

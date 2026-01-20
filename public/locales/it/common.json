@@ -313,6 +313,7 @@
       "members": "Membri",
       "rsvpStatus": "Stato RSVP",
       "attendance": "Presenza",
+      "notAnswered": "Non Risposto",
       "channel": "Canale",
       "paymentStatus": "Stato Pagamento",
       "filters": {
@@ -342,7 +343,8 @@
         "languagePreference": "Preferenza Lingua",
         "saving": "Salvataggio...",
         "addGuest": "Aggiungi Ospite",
-        "saveChanges": "Salva Modifiche"
+        "saveChanges": "Salva Modifiche",
+        "rsvpAnswers": "Risposte RSVP"
       },
       "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file."
@@ -473,7 +475,9 @@
       "submit": "Conferma Presenza",
       "submitted": "Grazie per il tuo RSVP!",
       "confirmationMessage": "Abbiamo ricevuto la tua conferma. Non vediamo l'ora di vederti al matrimonio!",
-      "cutoffPassed": "La scadenza per l'RSVP è passata. Contatta gli organizzatori."
+      "cutoffPassed": "La scadenza per l'RSVP è passata. Contatta gli organizzatori.",
+      "additionalQuestions": "Domande Aggiuntive",
+      "defaultTransportationQuestion": "Avrete bisogno di trasporto per raggiungere la location?"
     },
     "members": {
       "title": "Membri della Famiglia",

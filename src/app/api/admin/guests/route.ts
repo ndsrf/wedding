@@ -199,6 +199,14 @@ export async function GET(request: NextRequest) {
         channel_preference: family.channel_preference,
         preferred_language: family.preferred_language,
         created_at: family.created_at,
+        // RSVP Question Answers
+        transportation_answer: family.transportation_answer,
+        extra_question_1_answer: family.extra_question_1_answer,
+        extra_question_2_answer: family.extra_question_2_answer,
+        extra_question_3_answer: family.extra_question_3_answer,
+        extra_info_1_value: family.extra_info_1_value,
+        extra_info_2_value: family.extra_info_2_value,
+        extra_info_3_value: family.extra_info_3_value,
         members: family.members,
         // Computed fields
         rsvp_status: hasRsvp ? 'submitted' : 'pending',

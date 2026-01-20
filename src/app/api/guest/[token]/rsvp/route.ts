@@ -93,6 +93,20 @@ export async function POST(
 
     await Promise.all(updatePromises);
 
+    // Update family with question answers
+    await prisma.family.update({
+      where: { id: family.id },
+      data: {
+        transportation_answer: body.transportation_answer ?? null,
+        extra_question_1_answer: body.extra_question_1_answer ?? null,
+        extra_question_2_answer: body.extra_question_2_answer ?? null,
+        extra_question_3_answer: body.extra_question_3_answer ?? null,
+        extra_info_1_value: body.extra_info_1_value ?? null,
+        extra_info_2_value: body.extra_info_2_value ?? null,
+        extra_info_3_value: body.extra_info_3_value ?? null,
+      },
+    });
+
     // Extract channel from URL query parameter
     const channel = request.nextUrl.searchParams.get('channel')?.toUpperCase() as Channel | null;
 

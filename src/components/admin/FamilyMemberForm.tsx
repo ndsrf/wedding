@@ -15,6 +15,7 @@ export interface FamilyMemberFormData {
   name: string;
   type: MemberType;
   age?: number | null;
+  attending?: boolean | null; // null = not answered, true = attending, false = not attending
   dietary_restrictions?: string | null;
   accessibility_needs?: string | null;
   _delete?: boolean;
@@ -91,6 +92,46 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
               >
                 {t('common.buttons.delete')}
               </button>
+            </div>
+
+            {/* Attendance Status - Three-state selector */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">{t('admin.guests.attendance')}:</label>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => updateMember(index, 'attending', null)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-l-md border transition-colors ${
+                    member.attending === null || member.attending === undefined
+                      ? 'bg-gray-600 text-white border-gray-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('admin.guests.notAnswered')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateMember(index, 'attending', true)}
+                  className={`px-3 py-1.5 text-xs font-medium border-t border-b transition-colors ${
+                    member.attending === true
+                      ? 'bg-green-600 text-white border-green-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('guest.rsvp.attending')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateMember(index, 'attending', false)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-r-md border transition-colors ${
+                    member.attending === false
+                      ? 'bg-red-600 text-white border-red-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('guest.rsvp.notAttending')}
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

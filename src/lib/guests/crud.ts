@@ -190,6 +190,21 @@ export async function updateFamily(
       familyUpdateData.channel_preference = validatedInput.channel_preference;
     if (validatedInput.preferred_language !== undefined)
       familyUpdateData.preferred_language = validatedInput.preferred_language;
+    // RSVP Question Answers
+    if (validatedInput.transportation_answer !== undefined)
+      familyUpdateData.transportation_answer = validatedInput.transportation_answer;
+    if (validatedInput.extra_question_1_answer !== undefined)
+      familyUpdateData.extra_question_1_answer = validatedInput.extra_question_1_answer;
+    if (validatedInput.extra_question_2_answer !== undefined)
+      familyUpdateData.extra_question_2_answer = validatedInput.extra_question_2_answer;
+    if (validatedInput.extra_question_3_answer !== undefined)
+      familyUpdateData.extra_question_3_answer = validatedInput.extra_question_3_answer;
+    if (validatedInput.extra_info_1_value !== undefined)
+      familyUpdateData.extra_info_1_value = validatedInput.extra_info_1_value;
+    if (validatedInput.extra_info_2_value !== undefined)
+      familyUpdateData.extra_info_2_value = validatedInput.extra_info_2_value;
+    if (validatedInput.extra_info_3_value !== undefined)
+      familyUpdateData.extra_info_3_value = validatedInput.extra_info_3_value;
 
     await tx.family.update({
       where: { id: family_id },
@@ -210,6 +225,7 @@ export async function updateFamily(
           if (memberInput.name !== undefined) memberUpdateData.name = memberInput.name;
           if (memberInput.type !== undefined) memberUpdateData.type = memberInput.type;
           if (memberInput.age !== undefined) memberUpdateData.age = memberInput.age;
+          if (memberInput.attending !== undefined) memberUpdateData.attending = memberInput.attending;
           if (memberInput.dietary_restrictions !== undefined)
             memberUpdateData.dietary_restrictions = memberInput.dietary_restrictions;
           if (memberInput.accessibility_needs !== undefined)

@@ -1,0 +1,101 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Environment files (use docker secrets or env vars instead)
+.env
+.env.local
+.env.development
+.env.production
+.env*.local
+
+# Git
+.git
+.gitignore
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+tests
+test
+jest.config.js
+playwright.config.ts
+
+# Documentation
+docs
+*.md
+!README.md
+LICENSE
+
+# Development files
+.eslintrc*
+.prettierrc*
+tsconfig.tsbuildinfo
+
+# Docker files (don't include in context when not needed)
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Spec workflow files
+.spec-workflow
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp
+.tmp
+.temp
+
+# SSL certificates (mounted as volumes)
+nginx/ssl
+
+# Backup files
+*.bak
+*.backup
+
+# Database files
+*.sql
+*.dump
+prisma/migrations/*.sql
+
+# Performance reports
+performance-report.md
+audit.log
+
+# CI/CD
+.github
+.circleci
+.gitlab-ci.yml
+
+# Misc
+*.pid
+*.seed
+*.pid.lock

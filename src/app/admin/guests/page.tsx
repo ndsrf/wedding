@@ -55,6 +55,23 @@ interface Filters {
   search?: string;
 }
 
+interface WeddingQuestionConfig {
+  transportation_question_enabled: boolean;
+  transportation_question_text: string | null;
+  extra_question_1_enabled: boolean;
+  extra_question_1_text: string | null;
+  extra_question_2_enabled: boolean;
+  extra_question_2_text: string | null;
+  extra_question_3_enabled: boolean;
+  extra_question_3_text: string | null;
+  extra_info_1_enabled: boolean;
+  extra_info_1_label: string | null;
+  extra_info_2_enabled: boolean;
+  extra_info_2_label: string | null;
+  extra_info_3_enabled: boolean;
+  extra_info_3_label: string | null;
+}
+
 export default function GuestsPage() {
   const t = useTranslations();
   const [guests, setGuests] = useState<GuestWithStatus[]>([]);
@@ -66,6 +83,7 @@ export default function GuestsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState<'guests' | 'additions'>('guests');
+  const [weddingConfig, setWeddingConfig] = useState<WeddingQuestionConfig | null>(null);
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -126,6 +144,34 @@ export default function GuestsPage() {
     }
   }, []);
 
+  const fetchWeddingConfig = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/wedding');
+      const data = await response.json();
+
+      if (data.success) {
+        setWeddingConfig({
+          transportation_question_enabled: data.data.transportation_question_enabled,
+          transportation_question_text: data.data.transportation_question_text,
+          extra_question_1_enabled: data.data.extra_question_1_enabled,
+          extra_question_1_text: data.data.extra_question_1_text,
+          extra_question_2_enabled: data.data.extra_question_2_enabled,
+          extra_question_2_text: data.data.extra_question_2_text,
+          extra_question_3_enabled: data.data.extra_question_3_enabled,
+          extra_question_3_text: data.data.extra_question_3_text,
+          extra_info_1_enabled: data.data.extra_info_1_enabled,
+          extra_info_1_label: data.data.extra_info_1_label,
+          extra_info_2_enabled: data.data.extra_info_2_enabled,
+          extra_info_2_label: data.data.extra_info_2_label,
+          extra_info_3_enabled: data.data.extra_info_3_enabled,
+          extra_info_3_label: data.data.extra_info_3_label,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching wedding config:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchGuests();
   }, [fetchGuests]);
@@ -133,6 +179,10 @@ export default function GuestsPage() {
   useEffect(() => {
     fetchGuestAdditions();
   }, [fetchGuestAdditions]);
+
+  useEffect(() => {
+    fetchWeddingConfig();
+  }, [fetchWeddingConfig]);
 
   const handleExport = async () => {
     try {
@@ -518,12 +568,22 @@ export default function GuestsPage() {
                   name: m.name,
                   type: m.type,
                   age: m.age,
+                  attending: m.attending,
                   dietary_restrictions: m.dietary_restrictions,
                   accessibility_needs: m.accessibility_needs,
                 })),
+                // RSVP Question Answers
+                transportation_answer: selectedGuest.transportation_answer,
+                extra_question_1_answer: selectedGuest.extra_question_1_answer,
+                extra_question_2_answer: selectedGuest.extra_question_2_answer,
+                extra_question_3_answer: selectedGuest.extra_question_3_answer,
+                extra_info_1_value: selectedGuest.extra_info_1_value,
+                extra_info_2_value: selectedGuest.extra_info_2_value,
+                extra_info_3_value: selectedGuest.extra_info_3_value,
               }
             : undefined
         }
+        weddingConfig={weddingConfig || undefined}
         onSubmit={handleFormSubmit}
         onCancel={() => {
           setIsFormModalOpen(false);

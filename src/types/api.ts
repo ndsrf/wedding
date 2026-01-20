@@ -502,6 +502,14 @@ export interface SubmitRSVPRequest {
     dietary_restrictions?: string;
     accessibility_needs?: string;
   }>;
+  // RSVP Question Answers (family-level)
+  transportation_answer?: boolean;
+  extra_question_1_answer?: boolean;
+  extra_question_2_answer?: boolean;
+  extra_question_3_answer?: boolean;
+  extra_info_1_value?: string;
+  extra_info_2_value?: string;
+  extra_info_3_value?: string;
 }
 
 export interface SubmitRSVPResult {

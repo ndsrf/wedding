@@ -328,6 +328,7 @@
       "members": "Members",
       "rsvpStatus": "RSVP Status",
       "attendance": "Attendance",
+      "notAnswered": "Not Answered",
       "channel": "Channel",
       "paymentStatus": "Payment Status",
       "filters": {
@@ -357,7 +358,8 @@
         "languagePreference": "Language Preference",
         "saving": "Saving...",
         "addGuest": "Add Guest",
-        "saveChanges": "Save Changes"
+        "saveChanges": "Save Changes",
+        "rsvpAnswers": "RSVP Answers"
       },
       "importSuccess": "Guest list imported successfully",
       "importError": "Import error. Please check the file."
@@ -500,7 +502,9 @@
       "submit": "Confirm Attendance",
       "submitted": "Thank you for your RSVP!",
       "confirmationMessage": "We have received your confirmation. We look forward to seeing you at the wedding!",
-      "cutoffPassed": "The RSVP deadline has passed. Please contact the organizers."
+      "cutoffPassed": "The RSVP deadline has passed. Please contact the organizers.",
+      "additionalQuestions": "Additional Questions",
+      "defaultTransportationQuestion": "Will you need transportation to the venue?"
     },
     "members": {
       "title": "Family Members",

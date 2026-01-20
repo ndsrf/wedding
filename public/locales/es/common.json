@@ -321,6 +321,7 @@
       "members": "Miembros",
       "rsvpStatus": "Estado de RSVP",
       "attendance": "Asistencia",
+      "notAnswered": "Sin Respuesta",
       "channel": "Canal",
       "paymentStatus": "Estado de Pago",
       "filters": {
@@ -352,8 +353,11 @@
         "languagePreference": "Idioma Preferido",
         "saving": "Guardando...",
         "addGuest": "Añadir Invitado",
-        "saveChanges": "Guardar Cambios"
-      }
+        "saveChanges": "Guardar Cambios",
+        "rsvpAnswers": "Respuestas RSVP"
+      },
+      "importSuccess": "Lista de invitados importada exitosamente",
+      "importError": "Error de importación. Por favor verifica el archivo."
     },
     "notifications": {
       "title": "Notificaciones y Actividad",
@@ -481,7 +485,9 @@
       "submit": "Confirmar Asistencia",
       "submitted": "¡Gracias por tu RSVP!",
       "confirmationMessage": "Hemos recibido tu confirmación. ¡Esperamos verte en la boda!",
-      "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los organizadores."
+      "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los organizadores.",
+      "additionalQuestions": "Preguntas Adicionales",
+      "defaultTransportationQuestion": "¿Necesitarás transporte al lugar del evento?"
     },
     "members": {
       "title": "Miembros de la Familia",

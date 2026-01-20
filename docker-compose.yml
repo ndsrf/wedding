@@ -1,0 +1,148 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  db:
+    image: postgres:15-alpine
+    container_name: wedding-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-wedding}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password is required}
+      POSTGRES_DB: ${POSTGRES_DB:-wedding_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - wedding-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wedding} -d ${POSTGRES_DB:-wedding_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # Run as non-root user (postgres default is uid 70)
+    user: postgres
+    security_opt:
+      - no-new-privileges:true
+
+  # ============================================
+  # Next.js Application
+  # ============================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wedding-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-wedding}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-wedding_db}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?NextAuth URL is required}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NextAuth secret is required}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID:-}
+      FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET:-}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
+      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@example.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Wedding Platform}
+      APP_URL: ${APP_URL:?App URL is required}
+      REDIS_URL: ${REDIS_URL:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wedding-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Runs as non-root user (nextjs - uid 1001) defined in Dockerfile
+    security_opt:
+      - no-new-privileges:true
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # ============================================
+  # Nginx Reverse Proxy
+  # ============================================
+  # Note: SSL termination is optional. By default, nginx listens on port 80.
+  # If SSL is handled externally (load balancer, Cloudflare, etc.), use this as-is.
+  # For SSL termination within nginx:
+  # 1. Copy nginx/conf.d/ssl.conf.example to nginx/conf.d/ssl.conf
+  # 2. Place certificates in nginx/ssl/
+  # 3. Uncomment the port 443 mapping below
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: wedding-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # Uncomment for SSL termination within nginx:
+      # - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      # Uncomment for SSL termination within nginx:
+      # - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - wedding-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Run nginx as non-root
+    user: nginx
+    security_opt:
+      - no-new-privileges:true
+
+  # ============================================
+  # Database Migrations (run once)
+  # ============================================
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps
+    container_name: wedding-migrate
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-wedding}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-wedding_db}
+    command: npx prisma migrate deploy
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wedding-network
+    profiles:
+      - migrate
+    # Runs once and exits
+    restart: "no"
+
+networks:
+  wedding-network:
+    driver: bridge
+    name: wedding-network
+
+volumes:
+  postgres_data:
+    name: wedding-postgres-data
+  nginx_cache:
+    name: wedding-nginx-cache

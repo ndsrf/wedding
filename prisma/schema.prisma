@@ -242,6 +242,15 @@ model Family {
   preferred_language Language @default(ES)
   created_at         DateTime @default(now())
 
+  // RSVP Question Answers
+  transportation_answer   Boolean?
+  extra_question_1_answer Boolean?
+  extra_question_2_answer Boolean?
+  extra_question_3_answer Boolean?
+  extra_info_1_value      String?
+  extra_info_2_value      String?
+  extra_info_3_value      String?
+
   wedding         Wedding         @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
   members         FamilyMember[]
   tracking_events TrackingEvent[]

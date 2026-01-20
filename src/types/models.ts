@@ -166,6 +166,15 @@ export interface Family {
   channel_preference: Channel | null;
   preferred_language: Language;
   created_at: Date;
+
+  // RSVP Question Answers
+  transportation_answer: boolean | null;
+  extra_question_1_answer: boolean | null;
+  extra_question_2_answer: boolean | null;
+  extra_question_3_answer: boolean | null;
+  extra_info_1_value: string | null;
+  extra_info_2_value: string | null;
+  extra_info_3_value: string | null;
 }
 
 export interface FamilyMember {

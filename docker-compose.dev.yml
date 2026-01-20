@@ -1,0 +1,31 @@
+version: '3.8'
+
+# Development override - use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Database with exposed port for local development tools
+  db:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: devpassword
+
+  # App with development settings
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://wedding:devpassword@db:5432/wedding_db
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: dev-secret-not-for-production
+      APP_URL: http://localhost:3000
+      NODE_ENV: production
+      LOG_LEVEL: debug
+    ports:
+      - "3000:3000"
+
+  # Disable nginx in development (access app directly)
+  nginx:
+    profiles:
+      - disabled

@@ -313,6 +313,7 @@
       "members": "Mitglieder",
       "rsvpStatus": "RSVP-Status",
       "attendance": "Teilnahme",
+      "notAnswered": "Nicht Beantwortet",
       "channel": "Kanal",
       "paymentStatus": "Zahlungsstatus",
       "filters": {
@@ -342,7 +343,8 @@
         "languagePreference": "Sprachpräferenz",
         "saving": "Speichern...",
         "addGuest": "Gast hinzufügen",
-        "saveChanges": "Änderungen speichern"
+        "saveChanges": "Änderungen speichern",
+        "rsvpAnswers": "RSVP-Antworten"
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei."
@@ -473,7 +475,9 @@
       "submit": "Teilnahme bestätigen",
       "submitted": "Danke für Ihre Rückmeldung!",
       "confirmationMessage": "Wir haben Ihre Bestätigung erhalten. Wir freuen uns darauf, Sie bei der Hochzeit zu sehen!",
-      "cutoffPassed": "Die RSVP-Frist ist abgelaufen. Bitte kontaktieren Sie die Organisatoren."
+      "cutoffPassed": "Die RSVP-Frist ist abgelaufen. Bitte kontaktieren Sie die Organisatoren.",
+      "additionalQuestions": "Zusätzliche Fragen",
+      "defaultTransportationQuestion": "Benötigen Sie Transport zum Veranstaltungsort?"
     },
     "members": {
       "title": "Familienmitglieder",

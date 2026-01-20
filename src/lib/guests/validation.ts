@@ -30,6 +30,7 @@ export const updateMemberSchema = z.object({
   name: z.string().min(1, 'Member name is required').optional(),
   type: memberTypeSchema.optional(),
   age: z.number().int().min(0).max(150).nullable().optional(),
+  attending: z.boolean().nullable().optional(), // null = not answered, true = attending, false = not attending
   dietary_restrictions: z.string().nullable().optional(),
   accessibility_needs: z.string().nullable().optional(),
   _delete: z.boolean().optional(), // If true, delete this member
@@ -56,6 +57,14 @@ export const updateFamilySchema = z.object({
   channel_preference: channelSchema.nullable().optional(),
   preferred_language: languageSchema.optional(),
   members: z.array(updateMemberSchema).optional(),
+  // RSVP Question Answers
+  transportation_answer: z.boolean().nullable().optional(),
+  extra_question_1_answer: z.boolean().nullable().optional(),
+  extra_question_2_answer: z.boolean().nullable().optional(),
+  extra_question_3_answer: z.boolean().nullable().optional(),
+  extra_info_1_value: z.string().nullable().optional(),
+  extra_info_2_value: z.string().nullable().optional(),
+  extra_info_3_value: z.string().nullable().optional(),
 });
 
 // Export types
