@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -28,13 +28,7 @@ function PlannerWeddingsContent() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(showCreateForm);
 
-  // Fetch weddings
-  useEffect(() => {
-    fetchWeddings();
-    fetchThemes();
-  }, []);
-
-  const fetchWeddings = async () => {
+  const fetchWeddings = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/planner/weddings');
@@ -51,9 +45,9 @@ function PlannerWeddingsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
-  const fetchThemes = async () => {
+  const fetchThemes = useCallback(async () => {
     try {
       const response = await fetch('/api/planner/themes');
 
@@ -67,7 +61,13 @@ function PlannerWeddingsContent() {
     } catch (err) {
       console.error('Error fetching themes:', err);
     }
-  };
+  }, []);
+
+  // Fetch weddings and themes on mount
+  useEffect(() => {
+    fetchWeddings();
+    fetchThemes();
+  }, [fetchWeddings, fetchThemes]);
 
   const handleCreateWedding = async (formData: CreateWeddingRequest) => {
     try {

@@ -24,7 +24,6 @@ interface HealthStatus {
 }
 
 export async function GET(): Promise<NextResponse<HealthStatus>> {
-  const startTime = Date.now();
   const checks: HealthStatus['checks'] = {
     database: { status: 'down' },
     memory: { status: 'ok', used: 0, total: 0, percentage: 0 },
