@@ -1,3 +1,17 @@
+# 0.2.0 (2026-01-20)
+
+
+### Bug Fixes
+
+* **i18n:** add missing auth translation keys to all locales ([3563be8](https://github.com/ndsrf/wedding/commit/3563be8f97280dddfe77f1436fec38ff1de88879))
+
+
+### Features
+
+* extra fields for RVSP & edit guests ([24a7906](https://github.com/ndsrf/wedding/commit/24a7906c83bcdd67e66ea7e883b66bf390328a55))
+
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
