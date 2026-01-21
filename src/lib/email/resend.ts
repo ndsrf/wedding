@@ -10,6 +10,7 @@ import { AdminInvitationEmail } from './templates/admin-invitation';
 import { RSVPReminderEmail } from './templates/rsvp-reminder';
 import { RSVPConfirmationEmail } from './templates/rsvp-confirmation';
 import { PaymentConfirmationEmail } from './templates/payment-confirmation';
+import { DynamicMessageEmail } from './templates/dynamic-message';
 
 // Initialize Resend client lazily to avoid build-time API key requirement
 let resend: Resend | null = null;
@@ -376,4 +377,90 @@ export async function sendPaymentConfirmation(
       amount,
     },
   });
+}
+
+/**
+ * Send a dynamic email with custom subject and body from database templates
+ * Used for sending templated invitations and reminders
+ */
+export async function sendDynamicEmail(
+  to: string,
+  subject: string,
+  body: string,
+  language: Language = 'en',
+  coupleNames?: string,
+  retries = 3
+): Promise<EmailResult> {
+  console.log('[RESEND DEBUG] sendDynamicEmail called with:', { to, subject, language });
+
+  // Validate email address
+  if (!isValidEmail(to)) {
+    console.error(`Invalid email address: ${to}`);
+    return {
+      success: false,
+      error: 'Invalid email address',
+    };
+  }
+
+  // Validate Resend API key
+  if (!process.env.RESEND_API_KEY) {
+    console.error('RESEND_API_KEY is not configured');
+    return {
+      success: false,
+      error: 'Email service not configured',
+    };
+  }
+
+  let lastError: Error | null = null;
+
+  // Retry logic
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      console.log('[RESEND DEBUG] Subject:', subject);
+
+      const react = DynamicMessageEmail({
+        language,
+        subject,
+        body,
+        coupleNames,
+      });
+
+      console.log('[RESEND DEBUG] React component created, attempting to send...');
+
+      const client = getResendClient();
+      const { data, error } = await client.emails.send({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: [to],
+        subject,
+        react,
+      });
+
+      console.log('[RESEND DEBUG] Resend API response:', { data, error });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      console.log(`Dynamic email sent successfully to ${to}`);
+      return {
+        success: true,
+        messageId: data?.id,
+      };
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`Dynamic email send attempt ${attempt}/${retries} failed:`, error);
+
+      // Wait before retrying (exponential backoff)
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
+  }
+
+  // All retries failed
+  console.error(`Failed to send dynamic email to ${to} after ${retries} attempts:`, lastError);
+  return {
+    success: false,
+    error: lastError?.message || 'Unknown error',
+  };
 }

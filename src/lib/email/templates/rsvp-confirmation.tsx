@@ -8,7 +8,7 @@ import {
   Container,
   Head,
   Heading,
-  Html as EmailHtml,
+  Html as BaseEmailHtml,
   Preview,
   Section,
   Text,
@@ -130,7 +130,7 @@ export const RSVPConfirmationEmail = ({
   const t = translations[language];
 
   return (
-    <EmailHtml>
+    <BaseEmailHtml>
       <Head />
       <Preview>{t.preview}</Preview>
       <Body style={main}>
@@ -181,7 +181,7 @@ export const RSVPConfirmationEmail = ({
           </Section>
         </Container>
       </Body>
-    </EmailHtml>
+    </BaseEmailHtml>
   );
 };
 

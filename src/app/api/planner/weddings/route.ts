@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { seedTemplatesForWedding } from '@/lib/templates/seed';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -82,11 +83,13 @@ export async function GET(request: NextRequest) {
     const { page, limit, status } = queryParams;
     const skip = (page - 1) * limit;
 
-    // Build where clause
-    const where: { planner_id: string; status?: WeddingStatus } = {
+    // Build where clause - exclude deleted weddings by default
+    const where: { planner_id: string; status?: WeddingStatus | { not: WeddingStatus } } = {
       planner_id: user.planner_id,
+      status: { not: WeddingStatus.DELETED },
     };
 
+    // If status is explicitly provided, use that instead
     if (status) {
       where.status = status.toUpperCase() as WeddingStatus;
     }
@@ -155,6 +158,11 @@ export async function GET(request: NextRequest) {
           allow_guest_additions: wedding.allow_guest_additions,
           default_language: wedding.default_language,
           status: wedding.status,
+          is_disabled: wedding.is_disabled,
+          disabled_at: wedding.disabled_at,
+          disabled_by: wedding.disabled_by,
+          deleted_at: wedding.deleted_at,
+          deleted_by: wedding.deleted_by,
           created_at: wedding.created_at,
           created_by: wedding.created_by,
           updated_at: wedding.updated_at,
@@ -337,6 +345,14 @@ export async function POST(request: NextRequest) {
         created_by: user.id,
       },
     });
+
+    // Seed default message templates for the new wedding
+    try {
+      await seedTemplatesForWedding(wedding.id);
+    } catch (error) {
+      console.error('Failed to seed templates for wedding:', error);
+      // Don't fail the whole operation if template seeding fails
+    }
 
     const response: CreateWeddingResponse = {
       success: true,

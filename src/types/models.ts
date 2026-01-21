@@ -105,6 +105,11 @@ export interface Wedding {
   allow_guest_additions: boolean;
   default_language: Language;
   status: WeddingStatus;
+  is_disabled: boolean;
+  disabled_at: Date | null;
+  disabled_by: string | null;
+  deleted_at: Date | null;
+  deleted_by: string | null;
   created_at: Date;
   created_by: string;
   updated_at: Date;

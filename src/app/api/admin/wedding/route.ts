@@ -98,6 +98,18 @@ export async function GET() {
       return NextResponse.json(response, { status: 404 });
     }
 
+    // Check if wedding is deleted - treat as not found for admins
+    if (wedding.status === 'DELETED') {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.NOT_FOUND,
+          message: 'Wedding not found',
+        },
+      };
+      return NextResponse.json(response, { status: 404 });
+    }
+
     // Calculate stats
     const totalGuests = wedding.families.reduce(
       (sum, family) => sum + family.members.length,
@@ -141,6 +153,11 @@ export async function GET() {
       allow_guest_additions: wedding.allow_guest_additions,
       default_language: wedding.default_language,
       status: wedding.status,
+      is_disabled: wedding.is_disabled,
+      disabled_at: wedding.disabled_at,
+      disabled_by: wedding.disabled_by,
+      deleted_at: wedding.deleted_at,
+      deleted_by: wedding.deleted_by,
       created_at: wedding.created_at,
       created_by: wedding.created_by,
       updated_at: wedding.updated_at,

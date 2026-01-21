@@ -15,6 +15,7 @@ import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
 import { GuestFormModal } from '@/components/admin/GuestFormModal';
 import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
 import { ReminderModal } from '@/components/admin/ReminderModal';
+import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
 import type { FamilyWithMembers, GiftStatus, Language, Channel } from '@/types/models';
 import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
 
@@ -30,6 +31,7 @@ interface GuestWithStatus extends FamilyWithMembers {
   attending_count: number;
   total_members: number;
   payment_status: GiftStatus | null;
+  invitation_sent: boolean;
 }
 
 interface GuestAddition {
@@ -74,6 +76,7 @@ interface WeddingQuestionConfig {
 
 export default function GuestsPage() {
   const t = useTranslations();
+  const { isReadOnly } = useWeddingAccess();
   const [guests, setGuests] = useState<GuestWithStatus[]>([]);
   const [guestAdditions, setGuestAdditions] = useState<GuestAddition[]>([]);
   const [guestAdditionsEnabled, setGuestAdditionsEnabled] = useState(false);
@@ -101,6 +104,9 @@ export default function GuestsPage() {
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [reminderFamily, setReminderFamily] = useState<ReminderFamily | null>(null);
   const [reminderLoading, setReminderLoading] = useState(false);
+
+  // Bulk reminder state
+  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
 
   const fetchGuests = useCallback(async () => {
     setLoading(true);
@@ -348,6 +354,58 @@ export default function GuestsPage() {
     }
   };
 
+  // Handle bulk reminder sending
+  const handleBulkReminderSend = async (channel: Channel) => {
+    setReminderLoading(true);
+    try {
+      const response = await fetch('/api/admin/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel,
+          family_ids: selectedGuestIds,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('admin.reminders.sent', { count: selectedGuestIds.length }));
+        setSelectedGuestIds([]);
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setReminderLoading(false);
+    }
+  };
+
+  // Handle guest selection
+  const handleSelectGuest = (guestId: string, selected: boolean) => {
+    setSelectedGuestIds(prev =>
+      selected ? [...prev, guestId] : prev.filter(id => id !== guestId)
+    );
+  };
+
+  // Handle select all / unselect all
+  const handleSelectAll = (selected: boolean) => {
+    if (selected) {
+      const selectableIds = guests
+        .filter(g => g.rsvp_status !== 'submitted')
+        .map(g => g.id);
+      setSelectedGuestIds(selectableIds);
+    } else {
+      setSelectedGuestIds([]);
+    }
+  };
+
+  // Open bulk reminder modal
+  const handleOpenBulkReminderModal = () => {
+    setReminderFamily(null);
+    setIsReminderModalOpen(true);
+  };
+
   // Handle form submit
   const handleFormSubmit = async (formData: {
     name: string;
@@ -421,13 +479,14 @@ export default function GuestsPage() {
               >
                 {t('common.buttons.export')}
               </button>
-              <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                {t('common.buttons.import')}
-                <input
-                  type="file"
-                  accept=".xlsx"
-                  className="hidden"
-                  onChange={async (e) => {
+              {!isReadOnly && (
+                <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  {t('common.buttons.import')}
+                  <input
+                    type="file"
+                    accept=".xlsx"
+                    className="hidden"
+                    onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
 
@@ -457,12 +516,15 @@ export default function GuestsPage() {
                   }}
                 />
               </label>
-              <button
-                onClick={handleAddGuest}
-                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
-              >
-                {t('admin.guests.add')}
-              </button>
+              )}
+              {!isReadOnly && (
+                <button
+                  onClick={handleAddGuest}
+                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+                >
+                  {t('admin.guests.add')}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -506,6 +568,36 @@ export default function GuestsPage() {
             {/* Filters */}
             <GuestFilters filters={filters} onFilterChange={setFilters} />
 
+            {/* Bulk Reminder Section */}
+            {!isReadOnly && (
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-sm font-medium text-gray-900">
+                      {t('admin.reminders.bulkSend')}
+                    </h3>
+                    {selectedGuestIds.length > 0 && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {selectedGuestIds.length} {t('admin.guests.selected')}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleOpenBulkReminderModal}
+                    disabled={selectedGuestIds.length === 0}
+                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('admin.reminders.send')}
+                  </button>
+                </div>
+                {selectedGuestIds.length === 0 && (
+                  <p className="mt-2 text-xs text-gray-500">
+                    {t('admin.reminders.selectGuestsHint')}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Guest Table */}
             <GuestTable
               guests={guests}
@@ -513,6 +605,10 @@ export default function GuestsPage() {
               onEdit={handleEditGuest}
               onDelete={handleDeleteGuest}
               onSendReminder={handleSendReminder}
+              showCheckboxes={!isReadOnly}
+              selectedGuestIds={selectedGuestIds}
+              onSelectGuest={handleSelectGuest}
+              onSelectAll={handleSelectAll}
             />
 
             {/* Pagination */}
@@ -612,8 +708,19 @@ export default function GuestsPage() {
           setIsReminderModalOpen(false);
           setReminderFamily(null);
         }}
-        eligibleFamilies={reminderFamily ? [reminderFamily] : []}
-        onSendReminders={handleSendReminders}
+        eligibleFamilies={
+          reminderFamily
+            ? [reminderFamily]
+            : guests
+                .filter(g => selectedGuestIds.includes(g.id))
+                .map(g => ({
+                  id: g.id,
+                  name: g.name,
+                  preferred_language: g.preferred_language,
+                  channel_preference: g.channel_preference,
+                }))
+        }
+        onSendReminders={reminderFamily ? handleSendReminders : handleBulkReminderSend}
         loading={reminderLoading}
       />
 

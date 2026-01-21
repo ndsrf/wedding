@@ -215,6 +215,8 @@ export default function NotificationsPage() {
               >
                 <option value="">{t('admin.guests.filters.all')}</option>
                 <option value="LINK_OPENED">{t('admin.notifications.events.linkOpened')}</option>
+                <option value="INVITATION_SENT">{t('admin.notifications.events.invitationSent')}</option>
+                <option value="RSVP_STARTED">{t('admin.notifications.events.rsvpStarted')}</option>
                 <option value="RSVP_SUBMITTED">{t('admin.notifications.events.rsvpSubmitted')}</option>
                 <option value="RSVP_UPDATED">{t('admin.notifications.events.rsvpEdited')}</option>
                 <option value="GUEST_ADDED">{t('admin.notifications.events.guestAdded')}</option>

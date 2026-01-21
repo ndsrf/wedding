@@ -219,7 +219,26 @@
         "saving": "Speichern...",
         "update": "Hochzeit aktualisieren",
         "create": "Hochzeit erstellen"
-      }
+      },
+      "statusManagement": "Statusverwaltung",
+      "disableWedding": "Hochzeit deaktivieren",
+      "disableDescription": "Administratoren können anzeigen, aber nicht bearbeiten",
+      "disable": "Deaktivieren",
+      "enable": "Aktivieren",
+      "confirmDisable": "Sind Sie sicher, dass Sie diese Hochzeit deaktivieren möchten?",
+      "confirmEnable": "Sind Sie sicher, dass Sie diese Hochzeit aktivieren möchten?",
+      "disabledSince": "Deaktiviert seit {date}",
+      "deleteWedding": "Hochzeit löschen",
+      "deleteDescription": "Die Hochzeit wird vor Administratoren verborgen. Kann später wiederhergestellt werden.",
+      "delete": "Löschen",
+      "confirmDelete": "Diese Hochzeit löschen? Administratoren verlieren den Zugriff. Sie können sie später wiederherstellen.",
+      "deletedWeddings": "Gelöschte Hochzeiten",
+      "viewDeleted": "Gelöschte Hochzeiten anzeigen",
+      "backToActive": "Zurück zu aktiven Hochzeiten",
+      "deletedInfo": "Diese Hochzeiten wurden gelöscht. Administratoren können nicht darauf zugreifen.",
+      "noDeletedWeddings": "Keine gelöschten Hochzeiten",
+      "confirmRestore": "Diese Hochzeit wiederherstellen? Administratoren erhalten wieder Zugriff.",
+      "restoreSuccess": "Hochzeit erfolgreich wiederhergestellt"
     },
     "admins": {
       "invite": "Administrator einladen",
@@ -272,6 +291,8 @@
       "paymentsSubtitle": "Geschenke und Zahlungen verfolgen",
       "importGuests": "Gäste importieren",
       "importGuestsSubtitle": "Excel-Datei hochladen",
+      "templates": "Nachrichtenvorlagen",
+      "templatesSubtitle": "Einladungen und Erinnerungen verwalten",
       "rsvpProgress": "RSVP-Fortschritt",
       "daysUntilWedding": "Tage bis zur Hochzeit",
       "responded": "geantwortet",
@@ -282,12 +303,15 @@
     "wedding": {
       "details": "Details",
       "configuration": "Konfiguration",
-      "updateSuccess": "Konfiguration erfolgreich aktualisiert"
+      "updateSuccess": "Konfiguration erfolgreich aktualisiert",
+      "disabledBanner": "Diese Hochzeit wurde vom Hochzeitsplaner deaktiviert. Sie können Daten anzeigen, aber keine Änderungen vornehmen.",
+      "noAccess": "Sie haben keinen Zugriff auf aktive Hochzeiten. Bitte kontaktieren Sie Ihren Hochzeitsplaner."
     },
     "guests": {
       "title": "Gästeverwaltung",
       "list": "Gästeliste",
       "add": "Gast hinzufügen",
+      "selected": "ausgewählt",
       "table": {
         "family": "Familie",
         "members": "Mitglieder",
@@ -367,17 +391,20 @@
       "export": "Benachrichtigungen exportieren",
       "events": {
         "linkOpened": "Link geöffnet",
+        "rsvpStarted": "RSVP gestartet",
         "rsvpSubmitted": "RSVP eingereicht",
         "rsvpEdited": "RSVP bearbeitet",
         "guestAdded": "Gast hinzugefügt",
         "paymentReceived": "Zahlung erhalten",
-        "reminderSent": "Erinnerung gesendet"
+        "reminderSent": "Erinnerung gesendet",
+        "invitationSent": "Einladung gesendet"
       }
     },
     "reminders": {
       "title": "Erinnerungssystem",
       "send": "Erinnerungen senden",
       "sendReminder": "Erinnerung senden",
+      "sendInvite": "Einladung senden",
       "preview": "Empfängervorschau",
       "channel": "Versandkanal",
       "recipients": "Empfänger: {count} Familie(n)",
@@ -393,7 +420,9 @@
       "sendVia": "Senden via",
       "viewAll": "Alle {count} Familien anzeigen",
       "sending": "Senden...",
-      "sendAction": "{count} Erinnerungen senden"
+      "sendAction": "{count} Erinnerungen senden",
+      "bulkSend": "Massen-Erinnerungen senden",
+      "selectGuestsHint": "Wählen Sie Gäste aus der Tabelle unten aus, um Erinnerungen zu senden"
     },
     "payments": {
       "title": "Zahlungsverwaltung",
@@ -451,6 +480,95 @@
       "previouslyReviewed": "Bereits überprüft",
       "family": "Familie",
       "noAdditions": "Keine Gastzusätze zur Überprüfung ausstehend"
+    },
+    "configure": {
+      "title": "Hochzeit konfigurieren",
+      "saveSuccess": "Konfiguration erfolgreich gespeichert!",
+      "error": "Fehler beim Speichern der Konfiguration",
+      "loading": "Konfiguration wird geladen...",
+      "notFound": "Hochzeit nicht gefunden",
+      "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner.",
+      "backToDashboard": "Zurück zum Dashboard",
+      "form": {
+        "basicSettings": "Grundeinstellungen",
+        "paymentTrackingMode": "Zahlungsverfolgungsmodus",
+        "paymentTrackingModeDesc": "Der automatisierte Modus generiert eindeutige Referenzcodes für jede Familie, um Banküberweisungen zu verfolgen.",
+        "automated": "Automatisiert (mit Referenzcodes)",
+        "manual": "Manuelle Verfolgung",
+        "allowGuestAdditions": "Gästen erlauben, Familienmitglieder hinzuzufügen",
+        "allowGuestAdditionsDesc": "Wenn aktiviert, können Gäste während der RSVP weitere Familienmitglieder hinzufügen (vorbehaltlich Ihrer Überprüfung).",
+        "dressCode": "Kleiderordnung",
+        "dressCodePlaceholder": "z.B. Formell, Halbformell, Lässig",
+        "additionalInfo": "Zusätzliche Informationen für Gäste",
+        "additionalInfoPlaceholder": "Alle weiteren Details für Gäste (Parken, Unterkunft, etc.)...",
+        "rsvpQuestions": "RSVP-Fragen",
+        "rsvpQuestionsDesc": "Passen Sie die Fragen an, die Gästen beim Ausfüllen ihrer RSVP angezeigt werden.",
+        "transportation": "Transportfrage zur RSVP hinzufügen",
+        "transportationText": "Fragetext (Ja/Nein-Frage)",
+        "transportationPlaceholder": "z.B. Benötigen Sie einen Transport vom Hotel zum Veranstaltungsort?",
+        "dietary": "Frage zu diätetischen Einschränkungen zur RSVP hinzufügen",
+        "dietaryDesc": "Gäste können auswählen aus: Keine Einschränkungen, Vegetarisch, Vegan, Glutenfrei, Sonstiges und Allergien angeben.",
+        "extraQuestions": "Zusätzliche Ja/Nein-Fragen (bis zu 3)",
+        "enableQuestion": "Zusatzfrage {number} aktivieren",
+        "questionPlaceholder": "Geben Sie Ihre Ja/Nein-Frage ein...",
+        "extraInfo": "Zusätzliche Pflichtfelder (bis zu 3)",
+        "extraInfoDesc": "Fügen Sie benutzerdefinierte Textfelder hinzu, die Gäste während der RSVP ausfüllen müssen.",
+        "enableInfo": "Pflichtfeld {number} aktivieren",
+        "infoLabel": "Feldbezeichnung",
+        "infoPlaceholder": "z.B. Liedwunsch für die Party",
+        "cancel": "Abbrechen",
+        "save": "Konfiguration speichern",
+        "saving": "Speichern...",
+        "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut."
+      }
+    },
+    "templates": {
+      "title": "Nachrichtenvorlagen",
+      "description": "Verwalten Sie Einladungs- und Erinnerungsvorlagen für Ihre Hochzeit in allen unterstützten Sprachen.",
+      "loading": "Vorlagen werden geladen...",
+      "error": "Fehler beim Abrufen der Vorlagen",
+      "tryAgain": "Erneut versuchen",
+      "type": {
+        "title": "Vorlagentyp",
+        "invitation": "📩 Einladungen",
+        "reminder": "🔔 Erinnerungen"
+      },
+      "language": {
+        "title": "Sprache"
+      },
+      "channel": {
+        "title": "Kanal",
+        "email": "📧 E-Mail",
+        "whatsapp": "💬 WhatsApp",
+        "sms": "📱 SMS"
+      },
+      "placeholders": {
+        "title": "Verfügbare Platzhalter"
+      },
+      "editor": {
+        "channelInfo": "Bearbeite <strong>{channel}</strong>-Vorlage",
+        "subject": "E-Mail-Betreff",
+        "body": "{channel}-Nachricht",
+        "chars": "{current}/{max} Zeichen",
+        "save": "Vorlage speichern",
+        "saving": "Speichern...",
+        "preview": "Vorschau",
+        "reset": "Zurücksetzen",
+        "tip": "Tipp: Verwenden Sie Platzhalter wie <code>'{familyName}'</code>, <code>'{coupleNames}'</code> und <code>'{magicLink}'</code>, um Ihre Nachrichten zu personalisieren. Siehe Liste der verfügbaren Platzhalter links.",
+        "success": "Vorlage erfolgreich gespeichert!",
+        "error": "Fehler beim Speichern der Vorlage",
+        "notFound": "Keine Vorlage für {type} in {language} ({channel}) gefunden"
+      },
+      "preview": {
+        "title": "Vorlagenvorschau",
+        "loading": "Vorschau wird generiert...",
+        "subject": "Betreff",
+        "body": "Inhalt",
+        "variables": "Verwendete Variablen",
+        "emailClient": "E-Mail-Client-Vorschau",
+        "from": "Von: Hochzeitsmanagement-Plattform",
+        "close": "Schließen"
+      }
     }
   },
   "guest": {
@@ -465,7 +583,8 @@
     "rsvp": {
       "title": "RSVP",
       "instructions": "Bitte wählen Sie aus, wer aus Ihrer Familie an der Hochzeit teilnehmen wird.",
-      "attending": "Wird teilnehmen",
+      "attend": "Teilnehmen",
+      "attending": "Teilnehmend",
       "notAttending": "Wird nicht teilnehmen",
       "attendingSummary": "{count, plural, =0 {Niemand nimmt teil} one {1 Person nimmt teil} other {# Personen nehmen teil}}",
       "dietaryRestrictions": "Diätetische Einschränkungen",

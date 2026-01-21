@@ -197,6 +197,25 @@ export type GetWeddingResponse = APIResponse<WeddingWithStats>;
 export type UpdateWeddingRequest = Partial<CreateWeddingRequest>;
 export type UpdateWeddingResponse = APIResponse<Wedding>;
 
+// PATCH /api/planner/weddings/:id/status
+export interface UpdateWeddingStatusRequest {
+  action: 'disable' | 'enable' | 'delete' | 'undelete';
+}
+
+export interface UpdateWeddingStatusResponse extends APIResponse {
+  success: true;
+  data: {
+    id: string;
+    status: string;
+    is_disabled: boolean;
+    disabled_at: Date | null;
+    deleted_at: Date | null;
+  };
+}
+
+// GET /api/planner/weddings/deleted
+export type ListDeletedWeddingsResponse = APIResponse<PaginatedResponse<WeddingWithStats>>;
+
 // POST /api/planner/weddings/:id/admins
 export interface InviteWeddingAdminRequest {
   email: string;
@@ -560,6 +579,89 @@ export interface CreateTrackingEventRequest {
 }
 
 export type CreateTrackingEventResponse = APIResponse<TrackingEvent>;
+
+// ============================================================================
+// MESSAGE TEMPLATE API TYPES
+// ============================================================================
+
+import type { MessageTemplate, TemplateType } from '@prisma/client';
+
+// GET /api/admin/templates
+export interface ListTemplatesQuery {
+  type?: TemplateType;
+  language?: Language;
+  channel?: Channel;
+  page?: number;
+  limit?: number;
+}
+
+export type ListTemplatesResponse = APIResponse<PaginatedResponse<MessageTemplate>>;
+
+// GET /api/admin/templates/:id
+export type GetTemplateResponse = APIResponse<MessageTemplate>;
+
+// POST /api/admin/templates
+export interface CreateTemplateRequest {
+  type: TemplateType;
+  language: Language;
+  channel: Channel;
+  subject: string;
+  body: string;
+}
+
+export type CreateTemplateResponse = APIResponse<MessageTemplate>;
+
+// PATCH /api/admin/templates/:id
+export interface UpdateTemplateRequest {
+  subject?: string;
+  body?: string;
+}
+
+export type UpdateTemplateResponse = APIResponse<MessageTemplate>;
+
+// DELETE /api/admin/templates/:id
+export type DeleteTemplateResponse = APIResponse<{ id: string }>;
+
+// POST /api/admin/templates/preview
+export interface PreviewTemplateRequest {
+  template_id?: string;
+  type?: TemplateType;
+  language?: Language;
+  channel?: Channel;
+  subject?: string;
+  body?: string;
+  sampleData?: {
+    familyName?: string;
+    coupleNames?: string;
+    weddingDate?: string;
+    weddingTime?: string;
+    location?: string;
+    magicLink?: string;
+    rsvpCutoffDate?: string;
+    referenceCode?: string;
+  };
+}
+
+export interface PreviewTemplateResult {
+  subject: string;
+  body: string;
+  variables: {
+    familyName: string;
+    coupleNames: string;
+    weddingDate: string;
+    weddingTime: string;
+    location: string;
+    magicLink: string;
+    rsvpCutoffDate: string;
+    referenceCode: string;
+  };
+  raw: {
+    subject: string;
+    body: string;
+  };
+}
+
+export type PreviewTemplateResponse = APIResponse<PreviewTemplateResult>;
 
 // ============================================================================
 // ERROR CODES (for consistent error handling)

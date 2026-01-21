@@ -178,6 +178,15 @@ export async function GET(request: NextRequest) {
             amount: true,
           },
         },
+        tracking_events: {
+          where: {
+            event_type: 'INVITATION_SENT',
+          },
+          select: {
+            id: true,
+          },
+          take: 1,
+        },
       },
     });
 
@@ -186,6 +195,7 @@ export async function GET(request: NextRequest) {
       const hasRsvp = family.members.some((m) => m.attending !== null);
       const attendingMembers = family.members.filter((m) => m.attending === true);
       const latestGift = family.gifts[0];
+      const invitationSent = family.tracking_events.length > 0;
 
       return {
         id: family.id,
@@ -213,6 +223,7 @@ export async function GET(request: NextRequest) {
         attending_count: attendingMembers.length,
         total_members: family.members.length,
         payment_status: latestGift?.status || null,
+        invitation_sent: invitationSent,
       };
     });
 

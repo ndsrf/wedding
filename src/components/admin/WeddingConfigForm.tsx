@@ -8,6 +8,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { UpdateWeddingConfigRequest } from '@/types/api';
 import type { Wedding } from '@/types/models';
 import { PaymentMode } from '@prisma/client';
@@ -41,6 +42,7 @@ interface WeddingConfigFormProps {
 }
 
 export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfigFormProps) {
+  const t = useTranslations('admin.configure.form');
   const [formData, setFormData] = useState<WeddingConfigFormData>({
     payment_tracking_mode: wedding.payment_tracking_mode,
     allow_guest_additions: wedding.allow_guest_additions,
@@ -111,7 +113,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
       await onSubmit(updateData);
     } catch (err) {
       console.error('Form submission error:', err);
-      setError('Failed to save configuration. Please try again.');
+      setError(t('submitError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -134,12 +136,12 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
 
       {/* Section: Basic Settings */}
       <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Settings</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('basicSettings')}</h3>
 
         {/* Payment Tracking Mode */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Payment Tracking Mode
+            {t('paymentTrackingMode')}
           </label>
           <div className="space-y-2">
             <label className="flex items-center">
@@ -150,7 +152,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
               />
               <span className="ml-2 text-sm text-gray-700">
-                Automated (with reference codes)
+                {t('automated')}
               </span>
             </label>
             <label className="flex items-center">
@@ -160,11 +162,11 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 onChange={() => handleChange('payment_tracking_mode', PaymentMode.MANUAL)}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
               />
-              <span className="ml-2 text-sm text-gray-700">Manual tracking</span>
+              <span className="ml-2 text-sm text-gray-700">{t('manual')}</span>
             </label>
           </div>
           <p className="mt-1 text-sm text-gray-500">
-            Automated mode generates unique reference codes for each family to track bank transfers.
+            {t('paymentTrackingModeDesc')}
           </p>
         </div>
 
@@ -177,17 +179,17 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
               onChange={(e) => handleChange('allow_guest_additions', e.target.checked)}
               className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
             />
-            <span className="ml-2 text-sm text-gray-700">Allow guests to add family members</span>
+            <span className="ml-2 text-sm text-gray-700">{t('allowGuestAdditions')}</span>
           </label>
           <p className="mt-1 ml-6 text-sm text-gray-500">
-            When enabled, guests can add additional family members during RSVP (subject to your review).
+            {t('allowGuestAdditionsDesc')}
           </p>
         </div>
 
         {/* Dress Code */}
         <div className="mb-6">
           <label htmlFor="dress_code" className="block text-sm font-medium text-gray-700 mb-1">
-            Dress Code
+            {t('dressCode')}
           </label>
           <input
             id="dress_code"
@@ -195,14 +197,14 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
             value={formData.dress_code}
             onChange={(e) => handleChange('dress_code', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            placeholder="e.g., Formal, Semi-formal, Casual"
+            placeholder={t('dressCodePlaceholder')}
           />
         </div>
 
         {/* Additional Info */}
         <div>
           <label htmlFor="additional_info" className="block text-sm font-medium text-gray-700 mb-1">
-            Additional Information for Guests
+            {t('additionalInfo')}
           </label>
           <textarea
             id="additional_info"
@@ -210,16 +212,16 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
             onChange={(e) => handleChange('additional_info', e.target.value)}
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            placeholder="Any additional details for guests (parking, accommodation, etc.)..."
+            placeholder={t('additionalInfoPlaceholder')}
           />
         </div>
       </div>
 
       {/* Section: RSVP Questions */}
       <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">RSVP Questions</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('rsvpQuestions')}</h3>
         <p className="text-sm text-gray-500 mb-6">
-          Customize the questions shown to guests when they complete their RSVP.
+          {t('rsvpQuestionsDesc')}
         </p>
 
         {/* Transportation Question */}
@@ -232,20 +234,20 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
               className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
             />
             <span className="ml-2 text-sm font-medium text-gray-700">
-              Add transportation question to RSVP
+              {t('transportation')}
             </span>
           </label>
           {formData.transportation_question_enabled && (
             <div className="mt-3 ml-6">
               <label className="block text-sm text-gray-600 mb-1">
-                Question text (Yes/No question)
+                {t('transportationText')}
               </label>
               <input
                 type="text"
                 value={formData.transportation_question_text}
                 onChange={(e) => handleChange('transportation_question_text', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="e.g., Do you need transportation from the hotel to the venue?"
+                placeholder={t('transportationPlaceholder')}
               />
             </div>
           )}
@@ -261,17 +263,17 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
               className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
             />
             <span className="ml-2 text-sm font-medium text-gray-700">
-              Add dietary restrictions question to RSVP
+              {t('dietary')}
             </span>
           </label>
           <p className="mt-1 ml-6 text-sm text-gray-500">
-            Guests will be able to select from: No restrictions, Vegetarian, Vegan, Gluten-free, Other, and specify allergies.
+            {t('dietaryDesc')}
           </p>
         </div>
 
         {/* Extra Yes/No Questions */}
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Extra Yes/No Questions (up to 3)</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-3">{t('extraQuestions')}</h4>
 
           {/* Question 1 */}
           <div className="mb-4 p-4 border border-gray-200 rounded-lg">
@@ -282,7 +284,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 onChange={(e) => handleChange('extra_question_1_enabled', e.target.checked)}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">Enable extra question 1</span>
+              <span className="ml-2 text-sm text-gray-700">{t('enableQuestion', { number: 1 })}</span>
             </label>
             {formData.extra_question_1_enabled && (
               <div className="mt-3 ml-6">
@@ -291,7 +293,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                   value={formData.extra_question_1_text}
                   onChange={(e) => handleChange('extra_question_1_text', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Enter your Yes/No question..."
+                  placeholder={t('questionPlaceholder')}
                 />
               </div>
             )}
@@ -306,7 +308,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 onChange={(e) => handleChange('extra_question_2_enabled', e.target.checked)}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">Enable extra question 2</span>
+              <span className="ml-2 text-sm text-gray-700">{t('enableQuestion', { number: 2 })}</span>
             </label>
             {formData.extra_question_2_enabled && (
               <div className="mt-3 ml-6">
@@ -315,7 +317,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                   value={formData.extra_question_2_text}
                   onChange={(e) => handleChange('extra_question_2_text', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Enter your Yes/No question..."
+                  placeholder={t('questionPlaceholder')}
                 />
               </div>
             )}
@@ -330,7 +332,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 onChange={(e) => handleChange('extra_question_3_enabled', e.target.checked)}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">Enable extra question 3</span>
+              <span className="ml-2 text-sm text-gray-700">{t('enableQuestion', { number: 3 })}</span>
             </label>
             {formData.extra_question_3_enabled && (
               <div className="mt-3 ml-6">
@@ -339,7 +341,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                   value={formData.extra_question_3_text}
                   onChange={(e) => handleChange('extra_question_3_text', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Enter your Yes/No question..."
+                  placeholder={t('questionPlaceholder')}
                 />
               </div>
             )}
@@ -348,9 +350,9 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
 
         {/* Extra Mandatory Info Fields */}
         <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Extra Mandatory Information Fields (up to 3)</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-3">{t('extraInfo')}</h4>
           <p className="text-sm text-gray-500 mb-3">
-            Add custom text fields that guests must fill in during RSVP.
+            {t('extraInfoDesc')}
           </p>
 
           {/* Info Field 1 */}
@@ -362,17 +364,17 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 onChange={(e) => handleChange('extra_info_1_enabled', e.target.checked)}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">Enable mandatory field 1</span>
+              <span className="ml-2 text-sm text-gray-700">{t('enableInfo', { number: 1 })}</span>
             </label>
             {formData.extra_info_1_enabled && (
               <div className="mt-3 ml-6">
-                <label className="block text-sm text-gray-600 mb-1">Field label</label>
+                <label className="block text-sm text-gray-600 mb-1">{t('infoLabel')}</label>
                 <input
                   type="text"
                   value={formData.extra_info_1_label}
                   onChange={(e) => handleChange('extra_info_1_label', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="e.g., Song request for the party"
+                  placeholder={t('infoPlaceholder')}
                 />
               </div>
             )}
@@ -387,17 +389,17 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 onChange={(e) => handleChange('extra_info_2_enabled', e.target.checked)}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">Enable mandatory field 2</span>
+              <span className="ml-2 text-sm text-gray-700">{t('enableInfo', { number: 2 })}</span>
             </label>
             {formData.extra_info_2_enabled && (
               <div className="mt-3 ml-6">
-                <label className="block text-sm text-gray-600 mb-1">Field label</label>
+                <label className="block text-sm text-gray-600 mb-1">{t('infoLabel')}</label>
                 <input
                   type="text"
                   value={formData.extra_info_2_label}
                   onChange={(e) => handleChange('extra_info_2_label', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="e.g., Message for the couple"
+                  placeholder={t('infoPlaceholder')}
                 />
               </div>
             )}
@@ -412,17 +414,17 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
                 onChange={(e) => handleChange('extra_info_3_enabled', e.target.checked)}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">Enable mandatory field 3</span>
+              <span className="ml-2 text-sm text-gray-700">{t('enableInfo', { number: 3 })}</span>
             </label>
             {formData.extra_info_3_enabled && (
               <div className="mt-3 ml-6">
-                <label className="block text-sm text-gray-600 mb-1">Field label</label>
+                <label className="block text-sm text-gray-600 mb-1">{t('infoLabel')}</label>
                 <input
                   type="text"
                   value={formData.extra_info_3_label}
                   onChange={(e) => handleChange('extra_info_3_label', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="e.g., Special requests"
+                  placeholder={t('infoPlaceholder')}
                 />
               </div>
             )}
@@ -438,14 +440,14 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
           disabled={isSubmitting}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? 'Saving...' : 'Save Configuration'}
+          {isSubmitting ? t('saving') : t('save')}
         </button>
       </div>
     </form>

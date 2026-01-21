@@ -234,7 +234,26 @@
         "saving": "Saving...",
         "update": "Update Wedding",
         "create": "Create Wedding"
-      }
+      },
+      "statusManagement": "Status Management",
+      "disableWedding": "Disable Wedding",
+      "disableDescription": "Admins can view but not edit",
+      "disable": "Disable",
+      "enable": "Enable",
+      "confirmDisable": "Are you sure you want to disable this wedding?",
+      "confirmEnable": "Are you sure you want to enable this wedding?",
+      "disabledSince": "Disabled since {date}",
+      "deleteWedding": "Delete Wedding",
+      "deleteDescription": "Wedding will be hidden from admins. Can be restored later.",
+      "delete": "Delete",
+      "confirmDelete": "Delete this wedding? Admins will lose access. You can restore it later.",
+      "deletedWeddings": "Deleted Weddings",
+      "viewDeleted": "View Deleted Weddings",
+      "backToActive": "Back to Active Weddings",
+      "deletedInfo": "These weddings have been deleted. Admins cannot access them.",
+      "noDeletedWeddings": "No deleted weddings",
+      "confirmRestore": "Restore this wedding? Admins will regain access.",
+      "restoreSuccess": "Wedding restored successfully"
     },
     "admins": {
       "invite": "Invite Admin",
@@ -287,6 +306,8 @@
       "paymentsSubtitle": "Track gifts and payments",
       "importGuests": "Import Guests",
       "importGuestsSubtitle": "Upload Excel file",
+      "templates": "Message Templates",
+      "templatesSubtitle": "Manage invitations and reminders",
       "rsvpProgress": "RSVP Progress",
       "daysUntilWedding": "days until the wedding",
       "responded": "responded",
@@ -297,13 +318,16 @@
     "wedding": {
       "details": "Details",
       "configuration": "Configuration",
-      "updateSuccess": "Configuration updated successfully"
+      "updateSuccess": "Configuration updated successfully",
+      "disabledBanner": "This wedding has been disabled by the wedding planner. You can view data but cannot make changes.",
+      "noAccess": "You don't have access to any active weddings. Please contact your wedding planner."
     },
     "guests": {
       "title": "Guest Management",
       "list": "Guest List",
       "add": "Add Guest",
       "import": "Import from Excel",
+      "selected": "selected",
       "table": {
         "family": "Family",
         "members": "Members",
@@ -382,17 +406,20 @@
       "export": "Export Notifications",
       "events": {
         "linkOpened": "Link Opened",
+        "rsvpStarted": "RSVP Started",
         "rsvpSubmitted": "RSVP Submitted",
         "rsvpEdited": "RSVP Edited",
         "guestAdded": "Guest Added",
         "paymentReceived": "Payment Received",
-        "reminderSent": "Reminder Sent"
+        "reminderSent": "Reminder Sent",
+        "invitationSent": "Invitation Sent"
       }
     },
     "reminders": {
       "title": "Reminder System",
       "send": "Send Reminders",
       "sendReminder": "Send Reminder",
+      "sendInvite": "Send Invite",
       "preview": "Preview Recipients",
       "channel": "Send Channel",
       "recipients": "Recipients: {count} family(ies)",
@@ -408,7 +435,9 @@
       "sendVia": "Send via",
       "viewAll": "View all {count} families",
       "sending": "Sending...",
-      "sendAction": "Send {count} Reminders"
+      "sendAction": "Send {count} Reminders",
+      "bulkSend": "Send Bulk Reminders",
+      "selectGuestsHint": "Select guests from the table below to send reminders"
     },
     "payments": {
       "title": "Payment Management",
@@ -477,6 +506,95 @@
       "previouslyReviewed": "Previously Reviewed",
       "family": "Family",
       "noAdditions": "No guest additions pending review"
+    },
+    "configure": {
+      "title": "Configure Wedding",
+      "saveSuccess": "Configuration saved successfully!",
+      "error": "Failed to save configuration",
+      "loading": "Loading configuration...",
+      "notFound": "Wedding not found",
+      "contactPlanner": "Please contact your wedding planner.",
+      "backToDashboard": "Back to Dashboard",
+      "form": {
+        "basicSettings": "Basic Settings",
+        "paymentTrackingMode": "Payment Tracking Mode",
+        "paymentTrackingModeDesc": "Automated mode generates unique reference codes for each family to track bank transfers.",
+        "automated": "Automated (with reference codes)",
+        "manual": "Manual tracking",
+        "allowGuestAdditions": "Allow guests to add family members",
+        "allowGuestAdditionsDesc": "When enabled, guests can add additional family members during RSVP (subject to your review).",
+        "dressCode": "Dress Code",
+        "dressCodePlaceholder": "e.g., Formal, Semi-formal, Casual",
+        "additionalInfo": "Additional Information for Guests",
+        "additionalInfoPlaceholder": "Any additional details for guests (parking, accommodation, etc.)...",
+        "rsvpQuestions": "RSVP Questions",
+        "rsvpQuestionsDesc": "Customize the questions shown to guests when they complete their RSVP.",
+        "transportation": "Add transportation question to RSVP",
+        "transportationText": "Question text (Yes/No question)",
+        "transportationPlaceholder": "e.g., Do you need transportation from the hotel to the venue?",
+        "dietary": "Add dietary restrictions question to RSVP",
+        "dietaryDesc": "Guests will be able to select from: No restrictions, Vegetarian, Vegan, Gluten-free, Other, and specify allergies.",
+        "extraQuestions": "Extra Yes/No Questions (up to 3)",
+        "enableQuestion": "Enable extra question {number}",
+        "questionPlaceholder": "Enter your Yes/No question...",
+        "extraInfo": "Extra Mandatory Information Fields (up to 3)",
+        "extraInfoDesc": "Add custom text fields that guests must fill in during RSVP.",
+        "enableInfo": "Enable mandatory field {number}",
+        "infoLabel": "Field label",
+        "infoPlaceholder": "e.g., Song request for the party",
+        "cancel": "Cancel",
+        "save": "Save Configuration",
+        "saving": "Saving...",
+        "submitError": "Failed to save configuration. Please try again."
+      }
+    },
+    "templates": {
+      "title": "Message Templates",
+      "description": "Manage invitation and reminder templates for your wedding in all supported languages.",
+      "loading": "Loading templates...",
+      "error": "Failed to fetch templates",
+      "tryAgain": "Try Again",
+      "type": {
+        "title": "Template Type",
+        "invitation": "📩 Invitations",
+        "reminder": "🔔 Reminders"
+      },
+      "language": {
+        "title": "Language"
+      },
+      "channel": {
+        "title": "Channel",
+        "email": "📧 Email",
+        "whatsapp": "💬 WhatsApp",
+        "sms": "📱 SMS"
+      },
+      "placeholders": {
+        "title": "Available Placeholders"
+      },
+      "editor": {
+        "channelInfo": "Editing <strong>{channel}</strong> template",
+        "subject": "Email Subject",
+        "body": "{channel} Message",
+        "chars": "{current}/{max} characters",
+        "save": "Save Template",
+        "saving": "Saving...",
+        "preview": "Preview",
+        "reset": "Reset",
+        "tip": "Tip: Use placeholders like <code>'{familyName}'</code>, <code>'{coupleNames}'</code>, and <code>'{magicLink}'</code> to personalize your messages. See the list of available placeholders on the left.",
+        "success": "Template saved successfully!",
+        "error": "Failed to save template",
+        "notFound": "No template found for {type} in {language} ({channel})"
+      },
+      "preview": {
+        "title": "Template Preview",
+        "loading": "Generating preview...",
+        "subject": "Subject",
+        "body": "Body",
+        "variables": "Variables Used",
+        "emailClient": "Email Client Preview",
+        "from": "From: Wedding Management Platform",
+        "close": "Close"
+      }
     }
   },
   "guest": {
@@ -492,7 +610,8 @@
     "rsvp": {
       "title": "RSVP",
       "instructions": "Please select who from your family will attend the wedding.",
-      "attending": "Will Attend",
+      "attend": "Attend",
+      "attending": "Attending",
       "notAttending": "Will Not Attend",
       "attendingSummary": "{count, plural, =0 {No one attending} one {1 person attending} other {# people attending}}",
       "dietaryRestrictions": "Dietary Restrictions",

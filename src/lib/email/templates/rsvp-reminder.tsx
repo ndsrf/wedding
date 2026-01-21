@@ -9,7 +9,7 @@ import {
   Container,
   Head,
   Heading,
-  Html as EmailHtml,
+  Html as BaseEmailHtml,
   Link,
   Preview,
   Section,
@@ -129,7 +129,7 @@ export const RSVPReminderEmail = ({
   const t = translations[language];
 
   return (
-    <EmailHtml>
+    <BaseEmailHtml>
       <Head />
       <Preview>{t.preview}</Preview>
       <Body style={main}>
@@ -184,7 +184,7 @@ export const RSVPReminderEmail = ({
           </Section>
         </Container>
       </Body>
-    </EmailHtml>
+    </BaseEmailHtml>
   );
 };
 

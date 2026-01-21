@@ -43,6 +43,7 @@ const getEventTypeIcon = (type: EventType): React.ReactNode => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
         </svg>
       );
+    case 'RSVP_STARTED':
     case 'RSVP_SUBMITTED':
     case 'RSVP_UPDATED':
       return (
@@ -62,6 +63,12 @@ const getEventTypeIcon = (type: EventType): React.ReactNode => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       );
+    case 'INVITATION_SENT':
+      return (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      );
     case 'REMINDER_SENT':
       return (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,6 +86,8 @@ const getEventTypeIcon = (type: EventType): React.ReactNode => {
 
 const getEventTypeColor = (type: EventType): string => {
   switch (type) {
+    case 'RSVP_STARTED':
+      return 'text-amber-600 bg-amber-100';
     case 'RSVP_SUBMITTED':
     case 'RSVP_UPDATED':
       return 'text-green-600 bg-green-100';
@@ -86,6 +95,8 @@ const getEventTypeColor = (type: EventType): string => {
       return 'text-blue-600 bg-blue-100';
     case 'GUEST_ADDED':
       return 'text-purple-600 bg-purple-100';
+    case 'INVITATION_SENT':
+      return 'text-blue-600 bg-blue-100';
     case 'REMINDER_SENT':
       return 'text-orange-600 bg-orange-100';
     default:
@@ -100,7 +111,8 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
   const getEventTypeLabel = (type: EventType): string => {
     const keyMap: Record<EventType, string> = {
       LINK_OPENED: 'linkOpened',
-      RSVP_STARTED: 'rsvpEdited', // Fallback or new key needed? Using rsvpEdited as close approximation or need new key
+      INVITATION_SENT: 'invitationSent',
+      RSVP_STARTED: 'rsvpStarted',
       RSVP_SUBMITTED: 'rsvpSubmitted',
       RSVP_UPDATED: 'rsvpEdited',
       GUEST_ADDED: 'guestAdded',

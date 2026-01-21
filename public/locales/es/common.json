@@ -34,7 +34,9 @@
       "invalidEmail": "Por favor, introduce un correo electrónico válido",
       "invalidPhone": "Por favor, introduce un número de teléfono válido",
       "minLength": "Debe tener al menos {min} caracteres",
-      "maxLength": "No puede exceder {max} caracteres"
+      "maxLength": "No puede exceder {max} caracteres",
+      "fromDate": "Desde",
+      "toDate": "Hasta"
     },
     "validation": {
       "required": "Campo obligatorio",
@@ -227,7 +229,26 @@
         "saving": "Guardando...",
         "update": "Actualizar Boda",
         "create": "Crear Boda"
-      }
+      },
+      "statusManagement": "Gestión de Estado",
+      "disableWedding": "Deshabilitar Boda",
+      "disableDescription": "Los administradores pueden ver pero no editar",
+      "disable": "Deshabilitar",
+      "enable": "Habilitar",
+      "confirmDisable": "¿Estás seguro de que quieres deshabilitar esta boda?",
+      "confirmEnable": "¿Estás seguro de que quieres habilitar esta boda?",
+      "disabledSince": "Deshabilitada desde {date}",
+      "deleteWedding": "Eliminar Boda",
+      "deleteDescription": "La boda se ocultará de los administradores. Se puede restaurar más tarde.",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Eliminar esta boda? Los administradores perderán el acceso. Puedes restaurarla más tarde.",
+      "deletedWeddings": "Bodas Eliminadas",
+      "viewDeleted": "Ver Bodas Eliminadas",
+      "backToActive": "Volver a Bodas Activas",
+      "deletedInfo": "Estas bodas han sido eliminadas. Los administradores no pueden acceder a ellas.",
+      "noDeletedWeddings": "No hay bodas eliminadas",
+      "confirmRestore": "¿Restaurar esta boda? Los administradores recuperarán el acceso.",
+      "restoreSuccess": "Boda restaurada exitosamente"
     },
     "admins": {
       "invite": "Invitar Administrador",
@@ -280,6 +301,8 @@
       "paymentsSubtitle": "Rastrear regalos y pagos",
       "importGuests": "Importar Invitados",
       "importGuestsSubtitle": "Subir archivo Excel",
+      "templates": "Plantillas de Mensajes",
+      "templatesSubtitle": "Gestionar invitaciones y recordatorios",
       "rsvpProgress": "Progreso de RSVP",
       "daysUntilWedding": "días hasta la boda",
       "responded": "respondieron",
@@ -290,12 +313,15 @@
     "wedding": {
       "details": "Detalles",
       "configuration": "Configuración",
-      "updateSuccess": "Configuración actualizada exitosamente"
+      "updateSuccess": "Configuración actualizada exitosamente",
+      "disabledBanner": "Esta boda ha sido deshabilitada por el organizador. Puedes ver los datos pero no hacer cambios.",
+      "noAccess": "No tienes acceso a ninguna boda activa. Por favor contacta a tu organizador de bodas."
     },
     "guests": {
       "title": "Gestión de Invitados",
       "list": "Lista de Invitados",
       "add": "Añadir Invitado",
+      "selected": "seleccionados",
       "table": {
         "family": "Familia",
         "members": "Miembros",
@@ -377,17 +403,20 @@
       "export": "Exportar Notificaciones",
       "events": {
         "linkOpened": "Enlace Abierto",
+        "rsvpStarted": "RSVP Iniciado",
         "rsvpSubmitted": "RSVP Enviado",
         "rsvpEdited": "RSVP Editado",
         "guestAdded": "Invitado Añadido",
         "paymentReceived": "Pago Recibido",
-        "reminderSent": "Recordatorio Enviado"
+        "reminderSent": "Recordatorio Enviado",
+        "invitationSent": "Invitación Enviada"
       }
     },
     "reminders": {
       "title": "Sistema de Recordatorios",
       "send": "Enviar Recordatorios",
       "sendReminder": "Enviar Recordatorio",
+      "sendInvite": "Enviar Invitación",
       "preview": "Vista Previa de Destinatarios",
       "channel": "Canal de Envío",
       "recipients": "Destinatarios: {count} familia(s)",
@@ -403,7 +432,9 @@
       "sendVia": "Enviar vía",
       "viewAll": "Ver todas las {count} familias",
       "sending": "Enviando...",
-      "sendAction": "Enviar {count} Recordatorios"
+      "sendAction": "Enviar {count} Recordatorios",
+      "bulkSend": "Enviar Recordatorios Masivos",
+      "selectGuestsHint": "Selecciona invitados de la tabla a continuación para enviar recordatorios"
     },
     "payments": {
       "title": "Gestión de Pagos",
@@ -461,6 +492,95 @@
       "previouslyReviewed": "Revisados Anteriormente",
       "family": "Familia",
       "noAdditions": "No hay invitados adicionales pendientes de revisión"
+    },
+    "configure": {
+      "title": "Configurar Boda",
+      "saveSuccess": "¡Configuración guardada exitosamente!",
+      "error": "Error al guardar la configuración",
+      "loading": "Cargando configuración...",
+      "notFound": "Boda no encontrada",
+      "contactPlanner": "Por favor contacta a tu organizador de bodas.",
+      "backToDashboard": "Volver al Panel",
+      "form": {
+        "basicSettings": "Ajustes Básicos",
+        "paymentTrackingMode": "Modo de Seguimiento de Pagos",
+        "paymentTrackingModeDesc": "El modo automatizado genera códigos de referencia únicos para cada familia para rastrear transferencias bancarias.",
+        "automated": "Automatizado (con códigos de referencia)",
+        "manual": "Seguimiento manual",
+        "allowGuestAdditions": "Permitir a los invitados añadir familiares",
+        "allowGuestAdditionsDesc": "Cuando está habilitado, los invitados pueden añadir miembros adicionales de la familia durante el RSVP (sujeto a tu revisión).",
+        "dressCode": "Código de Vestimenta",
+        "dressCodePlaceholder": "ej. Formal, Semi-formal, Casual",
+        "additionalInfo": "Información Adicional para Invitados",
+        "additionalInfoPlaceholder": "Cualquier detalle adicional para los invitados (aparcamiento, alojamiento, etc.)...",
+        "rsvpQuestions": "Preguntas de RSVP",
+        "rsvpQuestionsDesc": "Personaliza las preguntas mostradas a los invitados cuando completan su RSVP.",
+        "transportation": "Añadir pregunta de transporte al RSVP",
+        "transportationText": "Texto de la pregunta (Pregunta Sí/No)",
+        "transportationPlaceholder": "ej. ¿Necesitas transporte desde el hotel al lugar del evento?",
+        "dietary": "Añadir pregunta de restricciones alimenticias al RSVP",
+        "dietaryDesc": "Los invitados podrán seleccionar entre: Sin restricciones, Vegetariano, Vegano, Sin gluten, Otro, y especificar alergias.",
+        "extraQuestions": "Preguntas Extra de Sí/No (hasta 3)",
+        "enableQuestion": "Habilitar pregunta extra {number}",
+        "questionPlaceholder": "Introduce tu pregunta de Sí/No...",
+        "extraInfo": "Campos de Información Obligatoria Extra (hasta 3)",
+        "extraInfoDesc": "Añade campos de texto personalizados que los invitados deben rellenar durante el RSVP.",
+        "enableInfo": "Habilitar campo obligatorio {number}",
+        "infoLabel": "Etiqueta del campo",
+        "infoPlaceholder": "ej. Canción solicitada para la fiesta",
+        "cancel": "Cancelar",
+        "save": "Guardar Configuración",
+        "saving": "Guardando...",
+        "submitError": "Error al guardar la configuración. Por favor inténtalo de nuevo."
+      }
+    },
+    "templates": {
+      "title": "Plantillas de Mensajes",
+      "description": "Gestiona plantillas de invitación y recordatorio para tu boda en todos los idiomas soportados.",
+      "loading": "Cargando plantillas...",
+      "error": "Error al obtener plantillas",
+      "tryAgain": "Intentar de Nuevo",
+      "type": {
+        "title": "Tipo de Plantilla",
+        "invitation": "📩 Invitaciones",
+        "reminder": "🔔 Recordatorios"
+      },
+      "language": {
+        "title": "Idioma"
+      },
+      "channel": {
+        "title": "Canal",
+        "email": "📧 Email",
+        "whatsapp": "💬 WhatsApp",
+        "sms": "📱 SMS"
+      },
+      "placeholders": {
+        "title": "Variables Disponibles"
+      },
+      "editor": {
+        "channelInfo": "Editando plantilla de <strong>{channel}</strong>",
+        "subject": "Asunto del Email",
+        "body": "Mensaje de {channel}",
+        "chars": "{current}/{max} caracteres",
+        "save": "Guardar Plantilla",
+        "saving": "Guardando...",
+        "preview": "Vista Previa",
+        "reset": "Restablecer",
+        "tip": "Consejo: Usa variables como <code>'{familyName}'</code>, <code>'{coupleNames}'</code>, y <code>'{magicLink}'</code> para personalizar tus mensajes. Mira la lista de variables disponibles a la izquierda.",
+        "success": "¡Plantilla guardada exitosamente!",
+        "error": "Error al guardar la plantilla",
+        "notFound": "No se encontró plantilla para {type} en {language} ({channel})"
+      },
+      "preview": {
+        "title": "Vista Previa de Plantilla",
+        "loading": "Generando vista previa...",
+        "subject": "Asunto",
+        "body": "Cuerpo",
+        "variables": "Variables Usadas",
+        "emailClient": "Vista Previa de Cliente de Email",
+        "from": "De: Plataforma de Gestión de Bodas",
+        "close": "Cerrar"
+      }
     }
   },
   "guest": {
@@ -475,7 +595,8 @@
     "rsvp": {
       "title": "RSVP",
       "instructions": "Por favor selecciona quién de tu familia asistirá a la boda.",
-      "attending": "Asistirá",
+      "attend": "Asistir",
+      "attending": "Asistiendo",
       "notAttending": "No Asistirá",
       "attendingSummary": "{count, plural, =0 {Nadie asistirá} one {1 persona asistirá} other {# personas asistirán}}",
       "dietaryRestrictions": "Restricciones Alimenticias",

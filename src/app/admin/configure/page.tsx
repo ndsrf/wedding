@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations, useFormatter } from 'next-intl';
 import { WeddingConfigForm } from '@/components/admin/WeddingConfigForm';
 import type { Wedding } from '@/types/models';
 import type { UpdateWeddingConfigRequest } from '@/types/api';
@@ -25,6 +26,8 @@ interface WeddingWithStats extends Wedding {
 
 export default function ConfigureWeddingPage() {
   const router = useRouter();
+  const t = useTranslations('admin.configure');
+  const format = useFormatter();
   const [wedding, setWedding] = useState<WeddingWithStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,15 +88,6 @@ export default function ConfigureWeddingPage() {
     router.push('/admin');
   };
 
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -120,14 +114,14 @@ export default function ConfigureWeddingPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-xl font-bold text-gray-900">
-            {error || 'Wedding not found'}
+            {error || t('notFound')}
           </h1>
-          <p className="mt-2 text-gray-500">Please contact your wedding planner.</p>
+          <p className="mt-2 text-gray-500">{t('contactPlanner')}</p>
           <Link
             href="/admin"
             className="mt-4 inline-block px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
           >
-            Back to Dashboard
+            {t('backToDashboard')}
           </Link>
         </div>
       </div>
@@ -160,15 +154,20 @@ export default function ConfigureWeddingPage() {
                     />
                   </svg>
                 </Link>
-                <h1 className="text-2xl font-bold text-gray-900">Configure Wedding</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                {wedding.couple_names} • {formatDate(wedding.wedding_date)}
+                {wedding.couple_names} • {format.dateTime(new Date(wedding.wedding_date), {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
               </p>
             </div>
             {saveSuccess && (
               <div className="bg-green-50 text-green-700 px-4 py-2 rounded-md text-sm font-medium">
-                Configuration saved successfully!
+                {t('saveSuccess')}
               </div>
             )}
           </div>

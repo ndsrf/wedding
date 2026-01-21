@@ -121,7 +121,7 @@ export async function POST(
       month: 'long',
       day: 'numeric',
     });
-    const oauthLink = `${process.env.APP_URL || 'http://localhost:3000'}/auth/signin?callbackUrl=/admin/weddings/${weddingId}`;
+    const oauthLink = `${process.env.APP_URL || 'http://localhost:3000'}/auth/signin?callbackUrl=/admin`;
 
     console.log('[EMAIL DEBUG] Attempting to send admin invitation email:', {
       to: validatedData.email,

@@ -39,6 +39,7 @@ enum WeddingStatus {
   ACTIVE
   ARCHIVED
   COMPLETED
+  DELETED
 }
 
 enum MemberType {
@@ -55,6 +56,12 @@ enum EventType {
   GUEST_ADDED
   PAYMENT_RECEIVED
   REMINDER_SENT
+  INVITATION_SENT
+}
+
+enum TemplateType {
+  INVITATION // First notification when guest is added
+  REMINDER // Subsequent reminders
 }
 
 enum Channel {
@@ -160,6 +167,11 @@ model Wedding {
   allow_guest_additions Boolean       @default(true)
   default_language      Language      @default(ES)
   status                WeddingStatus @default(ACTIVE)
+  is_disabled           Boolean       @default(false)
+  disabled_at           DateTime?
+  disabled_by           String?
+  deleted_at            DateTime?
+  deleted_by            String?
   created_at            DateTime      @default(now())
   created_by            String
   updated_at            DateTime      @updatedAt
@@ -188,17 +200,20 @@ model Wedding {
   extra_info_3_enabled Boolean @default(false)
   extra_info_3_label   String?
 
-  planner         WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
-  theme           Theme?          @relation(fields: [theme_id], references: [id], onDelete: SetNull)
-  wedding_admins  WeddingAdmin[]
-  families        Family[]
-  tracking_events TrackingEvent[]
-  notifications   Notification[]
+  planner            WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  theme              Theme?          @relation(fields: [theme_id], references: [id], onDelete: SetNull)
+  wedding_admins     WeddingAdmin[]
+  families           Family[]
+  tracking_events    TrackingEvent[]
+  notifications      Notification[]
+  message_templates  MessageTemplate[]
 
   @@index([planner_id])
   @@index([theme_id])
   @@index([status])
   @@index([wedding_date])
+  @@index([is_disabled])
+  @@index([status, is_disabled])
   @@map("weddings")
 }
 
@@ -223,6 +238,25 @@ model WeddingAdmin {
   @@index([wedding_id])
   @@index([email])
   @@map("wedding_admins")
+}
+
+model MessageTemplate {
+  id          String       @id @default(uuid())
+  wedding_id  String
+  type        TemplateType
+  language    Language
+  channel     Channel
+  subject     String
+  body        String       @db.Text
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@unique([wedding_id, type, language, channel])
+  @@index([wedding_id])
+  @@index([type])
+  @@map("message_templates")
 }
 
 // ============================================================================

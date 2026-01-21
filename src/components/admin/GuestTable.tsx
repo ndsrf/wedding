@@ -16,6 +16,7 @@ interface GuestWithStatus extends FamilyWithMembers {
   attending_count: number;
   total_members: number;
   payment_status: GiftStatus | null;
+  invitation_sent: boolean;
 }
 
 interface GuestTableProps {
@@ -24,6 +25,10 @@ interface GuestTableProps {
   onDelete?: (guestId: string) => void;
   onSendReminder?: (guestId: string) => void;
   loading?: boolean;
+  selectedGuestIds?: string[];
+  onSelectGuest?: (guestId: string, selected: boolean) => void;
+  onSelectAll?: (selected: boolean) => void;
+  showCheckboxes?: boolean;
 }
 
 const getRsvpBadgeClass = (status: string): string => {
@@ -42,8 +47,23 @@ const getPaymentBadgeClass = (status: GiftStatus | null): string => {
   return classes[status] || 'bg-gray-100 text-gray-800';
 };
 
-export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }: GuestTableProps) {
+export function GuestTable({
+  guests,
+  onEdit,
+  onDelete,
+  onSendReminder,
+  loading,
+  selectedGuestIds = [],
+  onSelectGuest,
+  onSelectAll,
+  showCheckboxes = false
+}: GuestTableProps) {
   const t = useTranslations();
+
+  // Only count guests who can be selected (not confirmed)
+  const selectableGuests = guests.filter(g => g.rsvp_status !== 'submitted');
+  const allSelectableSelected = selectableGuests.length > 0 &&
+    selectableGuests.every(g => selectedGuestIds.includes(g.id));
 
   if (loading) {
     return (
@@ -85,6 +105,17 @@ export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              {showCheckboxes && onSelectAll && (
+                <th className="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={allSelectableSelected}
+                    onChange={(e) => onSelectAll(e.target.checked)}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    disabled={selectableGuests.length === 0}
+                  />
+                </th>
+              )}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.family')}
               </th>
@@ -111,16 +142,34 @@ export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {guests.map((guest) => (
-              <tr key={guest.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-900">{guest.name}</span>
-                    {guest.email && (
-                      <span className="text-sm text-gray-500">{guest.email}</span>
-                    )}
-                  </div>
-                </td>
+            {guests.map((guest) => {
+              const isSelectable = guest.rsvp_status !== 'submitted';
+              const isSelected = selectedGuestIds.includes(guest.id);
+
+              return (
+                <tr key={guest.id} className="hover:bg-gray-50">
+                  {showCheckboxes && onSelectGuest && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {isSelectable ? (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => onSelectGuest(guest.id, e.target.checked)}
+                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                        />
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </td>
+                  )}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">{guest.name}</span>
+                      {guest.email && (
+                        <span className="text-sm text-gray-500">{guest.email}</span>
+                      )}
+                    </div>
+                  </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-sm text-gray-900">
                     {guest.attending_count} / {guest.total_members}
@@ -155,7 +204,7 @@ export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }
                           onClick={() => onSendReminder(guest.id)}
                           className="text-blue-600 hover:text-blue-900"
                         >
-                          {t('admin.reminders.sendReminder')}
+                          {guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
                         </button>
                       )}
                       {onEdit && (
@@ -177,23 +226,38 @@ export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }
                     </div>
                   </td>
                 )}
-              </tr>
-            ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       {/* Mobile Card View */}
       <div className="md:hidden divide-y divide-gray-200">
-        {guests.map((guest) => (
-          <div key={guest.id} className="p-4">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h3 className="text-sm font-medium text-gray-900">{guest.name}</h3>
-                {guest.email && (
-                  <p className="text-sm text-gray-500">{guest.email}</p>
-                )}
-              </div>
+        {guests.map((guest) => {
+          const isSelectable = guest.rsvp_status !== 'submitted';
+          const isSelected = selectedGuestIds.includes(guest.id);
+
+          return (
+            <div key={guest.id} className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-start gap-3 flex-1">
+                  {showCheckboxes && onSelectGuest && isSelectable && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => onSelectGuest(guest.id, e.target.checked)}
+                      className="h-4 w-4 mt-0.5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    />
+                  )}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900">{guest.name}</h3>
+                    {guest.email && (
+                      <p className="text-sm text-gray-500">{guest.email}</p>
+                    )}
+                  </div>
+                </div>
               {(onEdit || onDelete || onSendReminder) && (
                 <div className="flex gap-2">
                   {onSendReminder && guest.rsvp_status !== 'submitted' && (
@@ -201,7 +265,7 @@ export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }
                       onClick={() => onSendReminder(guest.id)}
                       className="text-blue-600 hover:text-blue-900 text-sm"
                     >
-                      {t('admin.reminders.sendReminder')}
+                      {guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
                     </button>
                   )}
                   {onEdit && (
@@ -238,8 +302,9 @@ export function GuestTable({ guests, onEdit, onDelete, onSendReminder, loading }
                 {guest.payment_status ? t(`admin.payments.statuses.${guest.payment_status.toLowerCase()}`) : t('admin.guests.table.noPayment')}
               </span>
             </div>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

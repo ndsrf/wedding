@@ -219,7 +219,26 @@
         "saving": "Enregistrement...",
         "update": "Mettre à jour le mariage",
         "create": "Créer le mariage"
-      }
+      },
+      "statusManagement": "Gestion du statut",
+      "disableWedding": "Désactiver le mariage",
+      "disableDescription": "Les administrateurs peuvent voir mais pas modifier",
+      "disable": "Désactiver",
+      "enable": "Activer",
+      "confirmDisable": "Êtes-vous sûr de vouloir désactiver ce mariage?",
+      "confirmEnable": "Êtes-vous sûr de vouloir activer ce mariage?",
+      "disabledSince": "Désactivé depuis {date}",
+      "deleteWedding": "Supprimer le mariage",
+      "deleteDescription": "Le mariage sera caché des administrateurs. Peut être restauré plus tard.",
+      "delete": "Supprimer",
+      "confirmDelete": "Supprimer ce mariage? Les administrateurs perdront l'accès. Vous pouvez le restaurer plus tard.",
+      "deletedWeddings": "Mariages supprimés",
+      "viewDeleted": "Voir les mariages supprimés",
+      "backToActive": "Retour aux mariages actifs",
+      "deletedInfo": "Ces mariages ont été supprimés. Les administrateurs ne peuvent pas y accéder.",
+      "noDeletedWeddings": "Aucun mariage supprimé",
+      "confirmRestore": "Restaurer ce mariage? Les administrateurs récupéreront l'accès.",
+      "restoreSuccess": "Mariage restauré avec succès"
     },
     "admins": {
       "invite": "Inviter un Administrateur",
@@ -272,6 +291,8 @@
       "paymentsSubtitle": "Suivre les cadeaux et paiements",
       "importGuests": "Importer Invités",
       "importGuestsSubtitle": "Mettre en ligne fichier Excel",
+      "templates": "Modèles de Messages",
+      "templatesSubtitle": "Gérer les invitations et les rappels",
       "rsvpProgress": "Progression RSVP",
       "daysUntilWedding": "jours avant le mariage",
       "responded": "répondu",
@@ -282,12 +303,15 @@
     "wedding": {
       "details": "Détails",
       "configuration": "Configuration",
-      "updateSuccess": "Configuration mise à jour avec succès"
+      "updateSuccess": "Configuration mise à jour avec succès",
+      "disabledBanner": "Ce mariage a été désactivé par l'organisateur. Vous pouvez voir les données mais ne pouvez pas les modifier.",
+      "noAccess": "Vous n'avez accès à aucun mariage actif. Veuillez contacter votre organisateur de mariage."
     },
     "guests": {
       "title": "Gestion des Invités",
       "list": "Liste des Invités",
       "add": "Ajouter Invité",
+      "selected": "sélectionnés",
       "table": {
         "family": "Famille",
         "members": "Membres",
@@ -367,17 +391,20 @@
       "export": "Exporter Notifications",
       "events": {
         "linkOpened": "Lien Ouvert",
+        "rsvpStarted": "RSVP Commencé",
         "rsvpSubmitted": "RSVP Soumis",
         "rsvpEdited": "RSVP Modifié",
         "guestAdded": "Invité Ajouté",
         "paymentReceived": "Paiement Reçu",
-        "reminderSent": "Rappel Envoyé"
+        "reminderSent": "Rappel Envoyé",
+        "invitationSent": "Invitation Envoyée"
       }
     },
     "reminders": {
       "title": "Système de Rappels",
       "send": "Envoyer Rappels",
       "sendReminder": "Envoyer Rappel",
+      "sendInvite": "Envoyer Invitation",
       "preview": "Aperçu Destinataires",
       "channel": "Canal d'Envoi",
       "recipients": "Destinataires : {count} famille(s)",
@@ -393,7 +420,9 @@
       "sendVia": "Envoyer via",
       "viewAll": "Voir toutes les {count} familles",
       "sending": "Envoi...",
-      "sendAction": "Envoyer {count} Rappels"
+      "sendAction": "Envoyer {count} Rappels",
+      "bulkSend": "Envoyer des Rappels en Masse",
+      "selectGuestsHint": "Sélectionnez les invités du tableau ci-dessous pour envoyer des rappels"
     },
     "payments": {
       "title": "Gestion des Paiements",
@@ -451,6 +480,95 @@
       "previouslyReviewed": "Précédemment Examiné",
       "family": "Famille",
       "noAdditions": "Aucun ajout d'invité en attente d'examen"
+    },
+    "configure": {
+      "title": "Configurer le Mariage",
+      "saveSuccess": "Configuration enregistrée avec succès !",
+      "error": "Échec de l'enregistrement de la configuration",
+      "loading": "Chargement de la configuration...",
+      "notFound": "Mariage introuvable",
+      "contactPlanner": "Veuillez contacter votre organisateur de mariage.",
+      "backToDashboard": "Retour au Tableau de Bord",
+      "form": {
+        "basicSettings": "Paramètres de Base",
+        "paymentTrackingMode": "Mode de Suivi des Paiements",
+        "paymentTrackingModeDesc": "Le mode automatisé génère des codes de référence uniques pour chaque famille afin de suivre les virements bancaires.",
+        "automated": "Automatisé (avec codes de référence)",
+        "manual": "Suivi manuel",
+        "allowGuestAdditions": "Autoriser les invités à ajouter des membres de la famille",
+        "allowGuestAdditionsDesc": "Lorsqu'activé, les invités peuvent ajouter des membres supplémentaires de la famille lors du RSVP (sous réserve de votre examen).",
+        "dressCode": "Code Vestimentaire",
+        "dressCodePlaceholder": "ex. Formel, Semi-formel, Décontracté",
+        "additionalInfo": "Informations Supplémentaires pour les Invités",
+        "additionalInfoPlaceholder": "Tout détail supplémentaire pour les invités (parking, hébergement, etc.)...",
+        "rsvpQuestions": "Questions RSVP",
+        "rsvpQuestionsDesc": "Personnalisez les questions posées aux invités lorsqu'ils complètent leur RSVP.",
+        "transportation": "Ajouter une question sur le transport au RSVP",
+        "transportationText": "Texte de la question (Question Oui/Non)",
+        "transportationPlaceholder": "ex. Avez-vous besoin d'un transport de l'hôtel au lieu de réception ?",
+        "dietary": "Ajouter une question sur les restrictions alimentaires au RSVP",
+        "dietaryDesc": "Les invités pourront choisir parmi : Aucune restriction, Végétarien, Végétalien, Sans gluten, Autre, et spécifier des allergies.",
+        "extraQuestions": "Questions Supplémentaires Oui/Non (jusqu'à 3)",
+        "enableQuestion": "Activer la question supplémentaire {number}",
+        "questionPlaceholder": "Entrez votre question Oui/Non...",
+        "extraInfo": "Champs d'Information Obligatoire Supplémentaires (jusqu'à 3)",
+        "extraInfoDesc": "Ajoutez des champs de texte personnalisés que les invités doivent remplir lors du RSVP.",
+        "enableInfo": "Activer le champ obligatoire {number}",
+        "infoLabel": "Étiquette du champ",
+        "infoPlaceholder": "ex. Chanson demandée pour la fête",
+        "cancel": "Annuler",
+        "save": "Enregistrer la Configuration",
+        "saving": "Enregistrement...",
+        "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer."
+      }
+    },
+    "templates": {
+      "title": "Modèles de Messages",
+      "description": "Gérez les modèles d'invitation et de rappel pour votre mariage dans toutes les langues prises en charge.",
+      "loading": "Chargement des modèles...",
+      "error": "Échec de la récupération des modèles",
+      "tryAgain": "Réessayer",
+      "type": {
+        "title": "Type de Modèle",
+        "invitation": "📩 Invitations",
+        "reminder": "🔔 Rappels"
+      },
+      "language": {
+        "title": "Langue"
+      },
+      "channel": {
+        "title": "Canal",
+        "email": "📧 Email",
+        "whatsapp": "💬 WhatsApp",
+        "sms": "📱 SMS"
+      },
+      "placeholders": {
+        "title": "Variables Disponibles"
+      },
+      "editor": {
+        "channelInfo": "Modification du modèle <strong>{channel}</strong>",
+        "subject": "Sujet de l'Email",
+        "body": "Message {channel}",
+        "chars": "{current}/{max} caractères",
+        "save": "Enregistrer le Modèle",
+        "saving": "Enregistrement...",
+        "preview": "Aperçu",
+        "reset": "Réinitialiser",
+        "tip": "Conseil : Utilisez des variables comme <code>'{familyName}'</code>, <code>'{coupleNames}'</code>, et <code>'{magicLink}'</code> pour personnaliser vos messages. Voir la liste des variables disponibles à gauche.",
+        "success": "Modèle enregistré avec succès !",
+        "error": "Échec de l'enregistrement du modèle",
+        "notFound": "Aucun modèle trouvé pour {type} en {language} ({channel})"
+      },
+      "preview": {
+        "title": "Aperçu du Modèle",
+        "loading": "Génération de l'aperçu...",
+        "subject": "Sujet",
+        "body": "Corps",
+        "variables": "Variables Utilisées",
+        "emailClient": "Aperçu Client Email",
+        "from": "De : Plateforme de Gestion de Mariages",
+        "close": "Fermer"
+      }
     }
   },
   "guest": {
@@ -465,7 +583,8 @@
     "rsvp": {
       "title": "RSVP",
       "instructions": "Veuillez sélectionner qui de votre famille assistera au mariage.",
-      "attending": "Sera Présent",
+      "attend": "Assister",
+      "attending": "Présent",
       "notAttending": "Ne Sera Pas Présent",
       "attendingSummary": "{count, plural, =0 {Personne ne sera présent} one {1 personne sera présente} other {# personnes seront présentes}}",
       "dietaryRestrictions": "Restrictions Alimentaires",

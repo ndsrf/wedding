@@ -64,7 +64,7 @@ export default function FamilyMemberCard({
             className="w-7 h-7 rounded border-2 border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 cursor-pointer"
           />
           <span className="text-lg font-semibold text-gray-900">
-            {attending ? `✓ ${t('guest.rsvp.attending')}` : t('guest.rsvp.notAttending')}
+            {attending ? `✓ ${t('guest.rsvp.attending')}` : t('guest.rsvp.attend')}
           </span>
         </label>
       </div>
