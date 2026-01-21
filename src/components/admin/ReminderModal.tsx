@@ -23,6 +23,7 @@ interface ReminderModalProps {
   eligibleFamilies: ReminderFamily[];
   onSendReminders: (channel: Channel) => Promise<void>;
   loading?: boolean;
+  weddingGiftIban?: string | null;
 }
 
 export function ReminderModal({
@@ -31,16 +32,24 @@ export function ReminderModal({
   eligibleFamilies,
   onSendReminders,
   loading,
+  weddingGiftIban,
 }: ReminderModalProps) {
   const t = useTranslations();
   const [selectedChannel, setSelectedChannel] = useState<Channel>('EMAIL');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showIbanWarning, setShowIbanWarning] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSend = async () => {
+    // Check if IBAN is empty and warning hasn't been shown yet
+    if (!weddingGiftIban && !showIbanWarning) {
+      setShowIbanWarning(true);
+      return;
+    }
+
     setSending(true);
     setError(null);
     try {
@@ -49,12 +58,24 @@ export function ReminderModal({
       setTimeout(() => {
         onClose();
         setSuccess(false);
+        setShowIbanWarning(false);
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
     } finally {
       setSending(false);
     }
+  };
+
+  const handleCancelWarning = () => {
+    setShowIbanWarning(false);
+    onClose();
+  };
+
+  const handleContinueWithoutIban = () => {
+    setShowIbanWarning(false);
+    // Proceed with sending
+    handleSend();
   };
 
   // Group families by language
@@ -117,6 +138,39 @@ export function ReminderModal({
                 {t('admin.reminders.allCaughtUpDesc')}
               </p>
             </div>
+          ) : showIbanWarning ? (
+            <>
+              {/* IBAN Warning */}
+              <div className="py-6">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                  <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="mt-4 text-center">
+                  <h3 className="text-lg font-medium text-gray-900">{t('admin.reminders.ibanWarning.title')}</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    {t('admin.reminders.ibanWarning.message')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Warning Actions */}
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={handleCancelWarning}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  {t('common.buttons.cancel')}
+                </button>
+                <button
+                  onClick={handleContinueWithoutIban}
+                  className="px-4 py-2 text-sm font-medium text-white bg-yellow-600 border border-transparent rounded-md hover:bg-yellow-700"
+                >
+                  {t('common.buttons.continue')}
+                </button>
+              </div>
+            </>
           ) : (
             <>
               {/* Preview Summary */}

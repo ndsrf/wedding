@@ -59,7 +59,8 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
     );
   }
 
-  if (!paymentInfo) {
+  // Don't render anything if IBAN is empty or no payment info
+  if (!paymentInfo || !paymentInfo.iban) {
     return null;
   }
 

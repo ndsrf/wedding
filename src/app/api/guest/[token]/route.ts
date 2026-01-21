@@ -123,6 +123,7 @@ export async function GET(
         allow_guest_additions: wedding.allow_guest_additions,
         default_language: wedding.default_language,
         payment_tracking_mode: wedding.payment_tracking_mode,
+        gift_iban: wedding.gift_iban,
         // RSVP Configuration fields
         transportation_question_enabled: wedding.transportation_question_enabled,
         transportation_question_text: wedding.transportation_question_text,

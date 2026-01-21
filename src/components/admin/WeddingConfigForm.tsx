@@ -15,6 +15,7 @@ import { PaymentMode } from '@prisma/client';
 
 interface WeddingConfigFormData {
   payment_tracking_mode: PaymentMode;
+  gift_iban: string;
   allow_guest_additions: boolean;
   dress_code: string;
   additional_info: string;
@@ -45,6 +46,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
   const t = useTranslations('admin.configure.form');
   const [formData, setFormData] = useState<WeddingConfigFormData>({
     payment_tracking_mode: wedding.payment_tracking_mode,
+    gift_iban: wedding.gift_iban || '',
     allow_guest_additions: wedding.allow_guest_additions,
     dress_code: wedding.dress_code || '',
     additional_info: wedding.additional_info || '',
@@ -76,6 +78,7 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
     try {
       const updateData: UpdateWeddingConfigRequest = {
         payment_tracking_mode: formData.payment_tracking_mode,
+        gift_iban: formData.gift_iban || null,
         allow_guest_additions: formData.allow_guest_additions,
         dress_code: formData.dress_code || null,
         additional_info: formData.additional_info || null,
@@ -167,6 +170,24 @@ export function WeddingConfigForm({ wedding, onSubmit, onCancel }: WeddingConfig
           </div>
           <p className="mt-1 text-sm text-gray-500">
             {t('paymentTrackingModeDesc')}
+          </p>
+        </div>
+
+        {/* Gift IBAN */}
+        <div className="mb-6">
+          <label htmlFor="gift_iban" className="block text-sm font-medium text-gray-700 mb-1">
+            {t('giftIban')}
+          </label>
+          <input
+            id="gift_iban"
+            type="text"
+            value={formData.gift_iban}
+            onChange={(e) => handleChange('gift_iban', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono"
+            placeholder="ES91 2100 0418 4502 0005 1332"
+          />
+          <p className="mt-1 text-sm text-gray-500">
+            {t('giftIbanDesc')}
           </p>
         </div>
 

@@ -87,6 +87,7 @@ export default function GuestsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState<'guests' | 'additions'>('guests');
   const [weddingConfig, setWeddingConfig] = useState<WeddingQuestionConfig | null>(null);
+  const [weddingGiftIban, setWeddingGiftIban] = useState<string | null>(null);
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -172,6 +173,7 @@ export default function GuestsPage() {
           extra_info_3_enabled: data.data.extra_info_3_enabled,
           extra_info_3_label: data.data.extra_info_3_label,
         });
+        setWeddingGiftIban(data.data.gift_iban || null);
       }
     } catch (error) {
       console.error('Error fetching wedding config:', error);
@@ -722,6 +724,7 @@ export default function GuestsPage() {
         }
         onSendReminders={reminderFamily ? handleSendReminders : handleBulkReminderSend}
         loading={reminderLoading}
+        weddingGiftIban={weddingGiftIban}
       />
 
       {/* Notification Toast */}

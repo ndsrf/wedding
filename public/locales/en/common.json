@@ -521,6 +521,8 @@
         "paymentTrackingModeDesc": "Automated mode generates unique reference codes for each family to track bank transfers.",
         "automated": "Automated (with reference codes)",
         "manual": "Manual tracking",
+        "giftIban": "Gift IBAN",
+        "giftIbanDesc": "Bank account number for receiving wedding gifts",
         "allowGuestAdditions": "Allow guests to add family members",
         "allowGuestAdditionsDesc": "When enabled, guests can add additional family members during RSVP (subject to your review).",
         "dressCode": "Dress Code",

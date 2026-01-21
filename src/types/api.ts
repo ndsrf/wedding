@@ -290,6 +290,7 @@ export type GetWeddingDetailsResponse = APIResponse<WeddingDetails>;
 export interface UpdateWeddingConfigRequest {
   rsvp_cutoff_date?: string; // ISO date string
   payment_tracking_mode?: PaymentMode;
+  gift_iban?: string | null;
   allow_guest_additions?: boolean;
   dress_code?: string | null;
   additional_info?: string | null;
@@ -482,6 +483,7 @@ export interface GuestRSVPPageData {
     allow_guest_additions: boolean;
     default_language: Language;
     payment_tracking_mode: PaymentMode;
+    gift_iban: string | null;
 
     // RSVP Configuration - Transportation question
     transportation_question_enabled: boolean;

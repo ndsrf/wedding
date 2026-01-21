@@ -164,6 +164,7 @@ model Wedding {
   dress_code            String?
   additional_info       String?
   payment_tracking_mode PaymentMode   @default(MANUAL)
+  gift_iban             String?
   allow_guest_additions Boolean       @default(true)
   default_language      Language      @default(ES)
   status                WeddingStatus @default(ACTIVE)

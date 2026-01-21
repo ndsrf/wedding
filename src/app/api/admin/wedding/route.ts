@@ -20,6 +20,7 @@ import { API_ERROR_CODES } from '@/types/api';
 const updateWeddingConfigSchema = z.object({
   rsvp_cutoff_date: z.string().datetime().optional(),
   payment_tracking_mode: z.enum(['AUTOMATED', 'MANUAL']).optional(),
+  gift_iban: z.string().nullable().optional(),
   allow_guest_additions: z.boolean().optional(),
   dress_code: z.string().nullable().optional(),
   additional_info: z.string().nullable().optional(),
@@ -150,6 +151,7 @@ export async function GET() {
       dress_code: wedding.dress_code,
       additional_info: wedding.additional_info,
       payment_tracking_mode: wedding.payment_tracking_mode,
+      gift_iban: wedding.gift_iban,
       allow_guest_additions: wedding.allow_guest_additions,
       default_language: wedding.default_language,
       status: wedding.status,
@@ -268,6 +270,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (validatedData.payment_tracking_mode) {
       updateData.payment_tracking_mode = validatedData.payment_tracking_mode;
+    }
+    if (validatedData.gift_iban !== undefined) {
+      updateData.gift_iban = validatedData.gift_iban;
     }
     if (validatedData.allow_guest_additions !== undefined) {
       updateData.allow_guest_additions = validatedData.allow_guest_additions;

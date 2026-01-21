@@ -11,9 +11,6 @@ import { validateMagicLink } from '@/lib/auth/magic-link';
 import { prisma } from '@/lib/db/prisma';
 import type { GetPaymentInfoResponse, PaymentInfo } from '@/types/api';
 
-// This would typically come from environment variables or wedding configuration
-const WEDDING_IBAN = process.env.WEDDING_IBAN || 'ES91 2100 0418 4502 0005 1332';
-
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ token: string }> }
@@ -54,7 +51,7 @@ export async function GET(
     // Prepare payment information
     const paymentInfo: PaymentInfo = {
       payment_mode: wedding.payment_tracking_mode,
-      iban: WEDDING_IBAN,
+      iban: wedding.gift_iban || '',
       reference_code:
         wedding.payment_tracking_mode === 'AUTOMATED'
           ? family.reference_code

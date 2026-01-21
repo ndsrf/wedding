@@ -507,6 +507,8 @@
         "paymentTrackingModeDesc": "El modo automatizado genera códigos de referencia únicos para cada familia para rastrear transferencias bancarias.",
         "automated": "Automatizado (con códigos de referencia)",
         "manual": "Seguimiento manual",
+        "giftIban": "IBAN para Regalos",
+        "giftIbanDesc": "Número de cuenta bancaria para recibir regalos de boda",
         "allowGuestAdditions": "Permitir a los invitados añadir familiares",
         "allowGuestAdditionsDesc": "Cuando está habilitado, los invitados pueden añadir miembros adicionales de la familia durante el RSVP (sujeto a tu revisión).",
         "dressCode": "Código de Vestimenta",

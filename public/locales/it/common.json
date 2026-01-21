@@ -495,6 +495,8 @@
         "paymentTrackingModeDesc": "La modalità automatizzata genera codici di riferimento unici per ogni famiglia per tracciare i bonifici bancari.",
         "automated": "Automatizzato (con codici di riferimento)",
         "manual": "Tracciamento manuale",
+        "giftIban": "IBAN per Regali",
+        "giftIbanDesc": "Numero di conto bancario per ricevere i regali di nozze",
         "allowGuestAdditions": "Consenti agli ospiti di aggiungere membri della famiglia",
         "allowGuestAdditionsDesc": "Se abilitato, gli ospiti possono aggiungere ulteriori membri della famiglia durante l'RSVP (soggetto alla tua revisione).",
         "dressCode": "Codice di Abbigliamento",
