@@ -30,7 +30,7 @@ export function SeatingConfig({ tables, onUpdate }: SeatingConfigProps) {
     setLocalTables(localTables.filter((_, i) => i !== index));
   };
 
-  const updateTable = (index: number, field: keyof Table, value: any) => {
+  const updateTable = (index: number, field: keyof Table, value: string | number | null | undefined) => {
     const updated = [...localTables];
     updated[index] = { ...updated[index], [field]: value };
     setLocalTables(updated);

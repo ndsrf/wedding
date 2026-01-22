@@ -104,15 +104,16 @@ export async function GET() {
     });
 
     // Map tables to include family_name and add couple members if assigned
+    type GuestWithFamilyName = typeof allConfirmedGuests[0] & { family_name: string };
     const formattedTables = tables.map((table) => {
-      const assignedGuests = table.assigned_guests.map((guest) => ({
+      const assignedGuests: GuestWithFamilyName[] = table.assigned_guests.map((guest) => ({
         ...guest,
         family_name: guest.family.name,
       }));
 
       // Add couple if assigned to this table
       if (wedding.couple_table_id === table.id) {
-        assignedGuests.push(...(coupleMembers as any));
+        assignedGuests.push(...coupleMembers as GuestWithFamilyName[]);
       }
 
       return {
@@ -122,7 +123,7 @@ export async function GET() {
     });
 
     // Find unassigned guests
-    const unassignedGuests = allConfirmedGuests
+    const unassignedGuests: GuestWithFamilyName[] = allConfirmedGuests
       .filter((guest) => !guest.table_id)
       .map((guest) => ({
         ...guest,
@@ -131,7 +132,7 @@ export async function GET() {
 
     // Add couple to unassigned if not assigned to any table
     if (!wedding.couple_table_id) {
-      unassignedGuests.push(...(coupleMembers as any));
+      unassignedGuests.push(...coupleMembers as GuestWithFamilyName[]);
     }
 
     // Calculate stats
@@ -145,8 +146,8 @@ export async function GET() {
     const response: GetSeatingPlanResponse = {
       success: true,
       data: {
-        tables: formattedTables as any,
-        unassigned_guests: unassignedGuests as any,
+        tables: formattedTables,
+        unassigned_guests: unassignedGuests,
         stats: {
           total_guests: totalGuestsCount + 2, // +2 for the couple
           confirmed_guests: confirmedGuestsCount,

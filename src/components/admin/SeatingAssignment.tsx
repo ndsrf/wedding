@@ -15,7 +15,7 @@ export function SeatingAssignment({ data, onUpdate }: SeatingAssignmentProps) {
   const [search, setSearch] = useState('');
   const [assigning, setAssigning] = useState(false);
   const [randomAssigning, setRandomAssigning] = useState(false);
-  const [splittingFamily, setSplittingFamily] = useState<{ id: string; name: string; members: any[] } | null>(null);
+  const [splittingFamily, setSplittingFamily] = useState<{ id: string; name: string; members: SeatingPlanData['unassigned_guests'] } | null>(null);
 
   // Group unassigned guests by family
   const unassignedByFamily = data.unassigned_guests.reduce((acc, guest) => {

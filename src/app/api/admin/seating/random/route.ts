@@ -67,7 +67,8 @@ export async function POST() {
     }
 
     // 2. Group guests by (family_id + seating_group)
-    const groupsMap = new Map<string, any[]>();
+    type GuestGroupMember = { id: string; isCouple?: boolean; family_id?: string; seating_group?: string | null };
+    const groupsMap = new Map<string, GuestGroupMember[]>();
     confirmedGuests.forEach((guest) => {
       const groupId = `${guest.family_id}_${guest.seating_group || 'default'}`;
       if (!groupsMap.has(groupId)) {
@@ -95,7 +96,7 @@ export async function POST() {
       coupleAssigned: wedding.couple_table_id === t.id,
     }));
 
-    const unassigned: any[] = [];
+    const unassigned: GuestGroupMember[] = [];
 
     for (const group of groups) {
       let assigned = false;
