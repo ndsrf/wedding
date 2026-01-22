@@ -365,8 +365,53 @@
       "daysUntilWedding": "giorni al matrimonio",
       "responded": "risposto",
       "complete": "completo",
+      "seatingPlan": "Piano dei Posti",
+      "seatingPlanSubtitle": "Assegna gli ospiti ai tavoli",
       "weddingNotFound": "Matrimonio non trovato",
       "contactPlanner": "Contatta il tuo organizzatore di matrimoni."
+    },
+    "seating": {
+      "title": "Piano dei Posti",
+      "subtitle": "Configura i tavoli e assegna gli ospiti confermati",
+      "loading": "Caricamento piano dei posti...",
+      "stats": {
+        "totalGuests": "Totale Ospiti",
+        "confirmedGuests": "Ospiti Confermati",
+        "totalSeats": "Totale Posti",
+        "assignedSeats": "Posti Assegnati"
+      },
+      "config": {
+        "title": "Configurazione Tavoli",
+        "addTable": "Aggiungi Tavolo",
+        "tableName": "Nome Tavolo",
+        "tableNumber": "N.",
+        "capacity": "Capacità",
+        "actions": "Azioni",
+        "save": "Salva Tavoli",
+        "saving": "Salvataggio..."
+      },
+      "assignment": {
+        "title": "Assegnazione Ospiti",
+        "unassigned": "Ospiti Non Assegnati",
+        "assigned": "Assegnato",
+        "randomAssign": "Assegna Casualmente",
+        "randomAssignConfirm": "Questo assegnerà casualmente tutti gli ospiti confermati non assegnati ai tavoli. Continuare?",
+        "splitting": "Dividere Famiglie",
+        "split": "Dividi Famiglia",
+        "noTables": "Si prega di configurare prima i tavoli.",
+        "unassignFamily": "Rimuovi famiglia dal tavolo",
+        "unassignGuest": "Rimuovi ospite dal tavolo",
+        "move": "Sposta"
+      },
+      "split": {
+        "title": "Dividi Famiglia",
+        "description": "Raggruppa i membri della famiglia per sedersi a tavoli diversi.",
+        "groupName": "Nome Gruppo",
+        "addGroup": "Aggiungi Gruppo",
+        "save": "Salva Gruppi",
+        "children": "Bambini",
+        "group": "Gruppo"
+      }
     },
     "wedding": {
       "details": "Dettagli",
@@ -465,7 +510,9 @@
         "guestAdded": "Ospite Aggiunto",
         "paymentReceived": "Pagamento Ricevuto",
         "reminderSent": "Promemoria Inviato",
-        "invitationSent": "Invito Inviato"
+        "invitationSent": "Invito Inviato",
+        "taskAssigned": "Compito Assegnato",
+        "taskCompleted": "Compito Completato"
       }
     },
     "reminders": {

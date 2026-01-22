@@ -102,6 +102,7 @@ export interface Wedding {
   dress_code: string | null;
   additional_info: string | null;
   payment_tracking_mode: PaymentMode;
+  gift_iban: string | null;
   allow_guest_additions: boolean;
   default_language: Language;
   status: WeddingStatus;
@@ -192,7 +193,19 @@ export interface FamilyMember {
   dietary_restrictions: string | null;
   accessibility_needs: string | null;
   added_by_guest: boolean;
+  table_id: string | null;
+  seating_group: string | null;
   created_at: Date;
+}
+
+export interface Table {
+  id: string;
+  wedding_id: string;
+  name: string | null;
+  number: number;
+  capacity: number;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // ============================================================================
@@ -296,12 +309,14 @@ export type CreateWedding = Omit<Wedding, 'id' | 'created_at' | 'updated_at'>;
 export type CreateWeddingAdmin = Omit<WeddingAdmin, 'id' | 'created_at' | 'invited_at' | 'accepted_at' | 'last_login_at'>;
 export type CreateGift = Omit<Gift, 'id' | 'created_at'>;
 export type CreateTrackingEvent = Omit<TrackingEvent, 'id' | 'timestamp'>;
+export type CreateTable = Omit<Table, 'id' | 'created_at' | 'updated_at'>;
 
 // Update types (partial updates, exclude immutable fields)
 export type UpdateFamily = Partial<Omit<Family, 'id' | 'wedding_id' | 'created_at' | 'magic_token'>>;
 export type UpdateFamilyMember = Partial<Omit<FamilyMember, 'id' | 'family_id' | 'created_at'>>;
 export type UpdateWedding = Partial<Omit<Wedding, 'id' | 'planner_id' | 'created_at' | 'created_by'>>;
 export type UpdateGift = Partial<Omit<Gift, 'id' | 'family_id' | 'wedding_id' | 'created_at'>>;
+export type UpdateTable = Partial<Omit<Table, 'id' | 'wedding_id' | 'created_at' | 'updated_at'>>;
 
 // Filter types for queries
 export interface FamilyFilter {

@@ -365,8 +365,53 @@
       "daysUntilWedding": "Tage bis zur Hochzeit",
       "responded": "geantwortet",
       "complete": "abgeschlossen",
+      "seatingPlan": "Sitzplan",
+      "seatingPlanSubtitle": "Gäste den Tischen zuweisen",
       "weddingNotFound": "Hochzeit nicht gefunden",
       "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner."
+    },
+    "seating": {
+      "title": "Sitzplan",
+      "subtitle": "Tische konfigurieren und bestätigte Gäste zuweisen",
+      "loading": "Lade Sitzplan...",
+      "stats": {
+        "totalGuests": "Gesamtzahl Gäste",
+        "confirmedGuests": "Bestätigte Gäste",
+        "totalSeats": "Gesamtzahl Plätze",
+        "assignedSeats": "Zugewiesene Plätze"
+      },
+      "config": {
+        "title": "Tischkonfiguration",
+        "addTable": "Tisch hinzufügen",
+        "tableName": "Tischname",
+        "tableNumber": "Nr.",
+        "capacity": "Kapazität",
+        "actions": "Aktionen",
+        "save": "Tische speichern",
+        "saving": "Speichern..."
+      },
+      "assignment": {
+        "title": "Gastzuweisung",
+        "unassigned": "Nicht zugewiesene Gäste",
+        "assigned": "Zugewiesen",
+        "randomAssign": "Zufällig zuweisen",
+        "randomAssignConfirm": "Dadurch werden alle nicht zugewiesenen bestätigten Gäste zufällig den Tischen zugewiesen. Fortfahren?",
+        "splitting": "Familien aufteilen",
+        "split": "Familie aufteilen",
+        "noTables": "Bitte konfigurieren Sie zuerst Tische.",
+        "unassignFamily": "Familie vom Tisch entfernen",
+        "unassignGuest": "Gast vom Tisch entfernen",
+        "move": "Verschieben"
+      },
+      "split": {
+        "title": "Familie aufteilen",
+        "description": "Familienmitglieder gruppieren, um an verschiedenen Tischen zu sitzen.",
+        "groupName": "Gruppenname",
+        "addGroup": "Gruppe hinzufügen",
+        "save": "Gruppen speichern",
+        "children": "Kinder",
+        "group": "Gruppe"
+      }
     },
     "wedding": {
       "details": "Details",
@@ -465,7 +510,9 @@
         "guestAdded": "Gast hinzugefügt",
         "paymentReceived": "Zahlung erhalten",
         "reminderSent": "Erinnerung gesendet",
-        "invitationSent": "Einladung gesendet"
+        "invitationSent": "Einladung gesendet",
+        "taskAssigned": "Aufgabe zugewiesen",
+        "taskCompleted": "Aufgabe abgeschlossen"
       }
     },
     "reminders": {

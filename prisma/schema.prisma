@@ -18,17 +18,17 @@ model MasterAdmin {
 }
 
 model WeddingPlanner {
-  id                  String             @id @default(uuid())
-  email               String             @unique
+  id                  String               @id @default(uuid())
+  email               String               @unique
   name                String
-  google_id           String?            @unique
+  google_id           String?              @unique
   auth_provider       AuthProvider
   last_login_provider AuthProvider?
-  preferred_language  Language           @default(EN)
+  preferred_language  Language             @default(EN)
   logo_url            String?
-  enabled             Boolean            @default(true)
-  subscription_status SubscriptionStatus @default(ACTIVE)
-  created_at          DateTime           @default(now())
+  enabled             Boolean              @default(true)
+  subscription_status SubscriptionStatus   @default(ACTIVE)
+  created_at          DateTime             @default(now())
   created_by          String
   last_login_at       DateTime?
   checklist_template  ChecklistTemplate?
@@ -104,7 +104,7 @@ model Wedding {
   families                        Family[]
   message_templates               MessageTemplate[]
   notifications                   Notification[]
-  tables                          tables[]
+  tables                          Table[]
   tracking_events                 TrackingEvent[]
   wedding_admins                  WeddingAdmin[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
@@ -201,17 +201,21 @@ model FamilyMember {
   dietary_restrictions String?
   accessibility_needs  String?
   added_by_guest       Boolean    @default(false)
-  created_at           DateTime   @default(now())
-  seating_group        String?
   table_id             String?
+  seating_group        String?
+  created_at           DateTime   @default(now())
   family               Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)
-  tables               tables?    @relation(fields: [table_id], references: [id])
+  table                Table?     @relation(fields: [table_id], references: [id], onDelete: SetNull)
 
   @@index([family_id])
-  @@index([added_by_guest])
   @@index([table_id])
+  @@index([added_by_guest])
   @@map("family_members")
 }
+
+// ============================================================================
+// TRACKING & NOTIFICATIONS
+// ============================================================================
 
 model TrackingEvent {
   id              String    @id @default(uuid())
@@ -286,28 +290,52 @@ model Translation {
   @@map("translations")
 }
 
+// -----------------------------------------------------------------------------
+// SEATING (ai-gemini) — Table management
+// -----------------------------------------------------------------------------
+
+model Table {
+  id              String         @id @default(uuid())
+  wedding_id      String
+  name            String?
+  number          Int
+  capacity        Int
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  assigned_guests FamilyMember[]
+  wedding         Wedding        @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@unique([wedding_id, number])
+  @@index([wedding_id])
+  @@map("tables")
+}
+
+// -----------------------------------------------------------------------------
+// CHECKLIST (main) — Template, sections, tasks
+// -----------------------------------------------------------------------------
+
 model ChecklistTemplate {
-  id         String             @id @default(uuid())
-  planner_id String             @unique
-  created_at DateTime           @default(now())
-  updated_at DateTime           @updatedAt
+  id         String               @id @default(uuid())
+  planner_id String               @unique
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
   sections   ChecklistSection[]
   tasks      ChecklistTask[]
-  planner    WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  planner    WeddingPlanner       @relation(fields: [planner_id], references: [id], onDelete: Cascade)
 
   @@index([planner_id])
   @@map("checklist_templates")
 }
 
 model ChecklistSection {
-  id          String             @id @default(uuid())
+  id          String               @id @default(uuid())
   template_id String?
   wedding_id  String?
   name        String
   order       Int
-  created_at  DateTime           @default(now())
-  template    ChecklistTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
-  wedding     Wedding?           @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  created_at  DateTime             @default(now())
+  template    ChecklistTemplate?   @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  wedding     Wedding?             @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
   tasks       ChecklistTask[]
 
   @@index([template_id])
@@ -317,25 +345,25 @@ model ChecklistSection {
 }
 
 model ChecklistTask {
-  id                String             @id @default(uuid())
+  id                String               @id @default(uuid())
   section_id        String?
-  wedding_id        String?            // Null if task belongs to template
-  template_id       String?            // Null if task belongs to wedding
+  wedding_id        String?
+  template_id       String?
   title             String
-  description       String?            @db.Text
-  assigned_to       TaskAssignment     @default(COUPLE)
-  due_date          DateTime?          // Absolute date for wedding tasks
-  due_date_relative String?            // Relative date for template tasks (e.g., "WEDDING_DATE-90")
-  status            TaskStatus         @default(PENDING)
-  completed         Boolean            @default(false)
+  description       String?              @db.Text
+  assigned_to       TaskAssignment       @default(COUPLE)
+  due_date          DateTime?
+  due_date_relative String?
+  status            TaskStatus           @default(PENDING)
+  completed         Boolean              @default(false)
   completed_at      DateTime?
-  completed_by      String?            // User ID who completed the task
+  completed_by      String?
   order             Int
-  created_at        DateTime           @default(now())
-  updated_at        DateTime           @updatedAt
-  section           ChecklistSection?  @relation(fields: [section_id], references: [id], onDelete: Cascade)
-  wedding           Wedding?           @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
-  template          ChecklistTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  created_at        DateTime             @default(now())
+  updated_at        DateTime             @updatedAt
+  section           ChecklistSection?    @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  wedding           Wedding?             @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  template          ChecklistTemplate?   @relation(fields: [template_id], references: [id], onDelete: Cascade)
 
   @@index([section_id])
   @@index([wedding_id])
@@ -348,20 +376,9 @@ model ChecklistTask {
   @@map("checklist_tasks")
 }
 
-model tables {
-  id             String         @id
-  wedding_id     String
-  name           String?
-  number         Int
-  capacity       Int
-  created_at     DateTime       @default(now())
-  updated_at     DateTime
-  family_members FamilyMember[]
-  weddings       Wedding        @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
-
-  @@unique([wedding_id, number])
-  @@index([wedding_id])
-}
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
 
 enum Language {
   ES

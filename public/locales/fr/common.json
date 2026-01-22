@@ -365,8 +365,53 @@
       "daysUntilWedding": "jours avant le mariage",
       "responded": "répondu",
       "complete": "complet",
+      "seatingPlan": "Plan de Table",
+      "seatingPlanSubtitle": "Assigner les invités aux tables",
       "weddingNotFound": "Mariage introuvable",
       "contactPlanner": "Veuillez contacter votre organisateur de mariage."
+    },
+    "seating": {
+      "title": "Plan de Table",
+      "subtitle": "Configurer les tables et assigner les invités confirmés",
+      "loading": "Chargement du plan de table...",
+      "stats": {
+        "totalGuests": "Total Invités",
+        "confirmedGuests": "Invités Confirmés",
+        "totalSeats": "Total Places",
+        "assignedSeats": "Places Assignées"
+      },
+      "config": {
+        "title": "Configuration des Tables",
+        "addTable": "Ajouter Table",
+        "tableName": "Nom de la Table",
+        "tableNumber": "N°",
+        "capacity": "Capacité",
+        "actions": "Actions",
+        "save": "Enregistrer Tables",
+        "saving": "Enregistrement..."
+      },
+      "assignment": {
+        "title": "Assignation des Invités",
+        "unassigned": "Invités Non Assignés",
+        "assigned": "Assigné",
+        "randomAssign": "Assigner Aléatoirement",
+        "randomAssignConfirm": "Ceci assignera aléatoirement tous les invités confirmés non assignés aux tables. Continuer ?",
+        "splitting": "Diviser les Familles",
+        "split": "Diviser Famille",
+        "noTables": "Veuillez d'abord configurer les tables.",
+        "unassignFamily": "Retirer la famille de la table",
+        "unassignGuest": "Retirer l'invité de la table",
+        "move": "Déplacer"
+      },
+      "split": {
+        "title": "Diviser Famille",
+        "description": "Grouper les membres de la famille pour qu'ils soient assis à des tables différentes.",
+        "groupName": "Nom du Groupe",
+        "addGroup": "Ajouter Groupe",
+        "save": "Enregistrer Groupes",
+        "children": "Enfants",
+        "group": "Groupe"
+      }
     },
     "wedding": {
       "details": "Détails",
@@ -465,7 +510,9 @@
         "guestAdded": "Invité Ajouté",
         "paymentReceived": "Paiement Reçu",
         "reminderSent": "Rappel Envoyé",
-        "invitationSent": "Invitation Envoyée"
+        "invitationSent": "Invitation Envoyée",
+        "taskAssigned": "Tâche Assignée",
+        "taskCompleted": "Tâche Terminée"
       }
     },
     "reminders": {
