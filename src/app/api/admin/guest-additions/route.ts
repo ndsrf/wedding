@@ -128,6 +128,8 @@ export async function GET() {
       dietary_restrictions: member.dietary_restrictions,
       accessibility_needs: member.accessibility_needs,
       added_by_guest: member.added_by_guest,
+      table_id: member.table_id,
+      seating_group: member.seating_group,
       created_at: member.created_at,
       // Extended fields
       family_name: member.family.name,

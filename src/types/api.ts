@@ -26,6 +26,7 @@ import type {
   UpdateFamily,
   FamilyFilter,
   NotificationFilter,
+  Table,
 } from './models';
 import type { ThemeConfig } from './theme';
 
@@ -464,10 +465,6 @@ export interface UpdateGuestAdditionRequest {
 
 export type UpdateGuestAdditionResponse = APIResponse<FamilyMember>;
 
-// ============================================================================
-// GUEST RSVP API TYPES
-// ============================================================================
-
 // GET /api/guest/:token
 export interface GuestRSVPPageData {
   family: FamilyWithMembers;
@@ -664,6 +661,58 @@ export interface PreviewTemplateResult {
 }
 
 export type PreviewTemplateResponse = APIResponse<PreviewTemplateResult>;
+
+// ============================================================================
+// SEATING PLAN API TYPES
+// ============================================================================
+
+export interface TableWithGuests extends Table {
+  assigned_guests: Array<FamilyMember & { family_name: string }>;
+}
+
+export interface SeatingPlanData {
+  tables: TableWithGuests[];
+  unassigned_guests: Array<FamilyMember & { family_name: string }>;
+  stats: {
+    total_guests: number;
+    confirmed_guests: number;
+    total_seats: number;
+    assigned_seats: number;
+  };
+}
+
+export type GetSeatingPlanResponse = APIResponse<SeatingPlanData>;
+
+export interface UpsertTablesRequest {
+  tables: Array<{
+    id?: string;
+    number: number;
+    name?: string | null;
+    capacity: number;
+  }>;
+  delete_ids?: string[];
+}
+
+export type UpsertTablesResponse = APIResponse<Table[]>;
+
+export interface AssignGuestsRequest {
+  assignments: Array<{
+    guest_id: string;
+    table_id: string | null;
+  }>;
+}
+
+export type AssignGuestsResponse = APIResponse<{ success: boolean }>;
+
+export interface SplitFamilyRequest {
+  family_id: string;
+  groups: Array<{
+    name: string;
+    guest_ids: string[];
+  }>;
+}
+
+export type SplitFamilyResponse = APIResponse<{ success: boolean }>;
 
 // ============================================================================
 // ERROR CODES (for consistent error handling)

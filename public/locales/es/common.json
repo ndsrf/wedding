@@ -303,15 +303,59 @@
       "importGuestsSubtitle": "Subir archivo Excel",
       "templates": "Plantillas de Mensajes",
       "templatesSubtitle": "Gestionar invitaciones y recordatorios",
-      "rsvpProgress": "Progreso de RSVP",
-      "daysUntilWedding": "días hasta la boda",
-      "responded": "respondieron",
-      "complete": "completo",
-      "weddingNotFound": "Boda no encontrada",
-      "contactPlanner": "Por favor, contacta a tu organizador de bodas."
-    },
-    "wedding": {
-      "details": "Detalles",
+            "rsvpProgress": "Progreso de RSVP",
+            "daysUntilWedding": "días hasta la boda",
+            "responded": "respondieron",
+            "complete": "completo",
+            "seatingPlan": "Plan de Asientos",
+            "seatingPlanSubtitle": "Asignar invitados a mesas",
+            "weddingNotFound": "Boda no encontrada",
+            "contactPlanner": "Por favor contacta a tu organizador de bodas."
+          },
+          "seating": {
+            "title": "Plan de Asientos",
+            "subtitle": "Configurar mesas y asignar invitados confirmados",
+            "loading": "Cargando plan de asientos...",
+            "stats": {
+              "totalGuests": "Total de Invitados",
+              "confirmedGuests": "Invitados Confirmados",
+              "totalSeats": "Total de Asientos",
+              "assignedSeats": "Asientos Asignados"
+            },
+            "config": {
+              "title": "Configuración de Mesas",
+              "addTable": "Añadir Mesa",
+              "tableName": "Nombre de la Mesa",
+              "tableNumber": "Nº",
+              "capacity": "Capacidad",
+              "actions": "Acciones",
+              "save": "Guardar Mesas",
+              "saving": "Guardando..."
+            },
+            "assignment": {
+              "title": "Asignación de Invitados",
+              "unassigned": "Invitados sin Asignar",
+              "assigned": "Asignado",
+              "randomAssign": "Asignar Aleatoriamente",
+              "randomAssignConfirm": "Esto asignará aleatoriamente a todos los invitados confirmados sin asignar a las mesas. ¿Continuar?",
+                      "splitting": "Dividir Familias",
+                      "split": "Dividir Familia",
+                      "noTables": "Por favor configura las mesas primero.",
+                              "unassignFamily": "Quitar familia de la mesa",
+                              "unassignGuest": "Quitar invitado de la mesa",
+                              "move": "Mover"
+                            },
+                            "split": {
+                              "title": "Dividir Familia",
+                              "description": "Agrupar miembros de la familia para sentarse en diferentes mesas.",
+                              "groupName": "Nombre del Grupo",
+                              "addGroup": "Añadir Grupo",
+                              "save": "Guardar Grupos",
+                              "children": "Niños",
+                              "group": "Grupo"
+                            }
+                          },
+          "wedding": {      "details": "Detalles",
       "configuration": "Configuración",
       "updateSuccess": "Configuración actualizada exitosamente",
       "disabledBanner": "Esta boda ha sido deshabilitada por el organizador. Puedes ver los datos pero no hacer cambios.",
@@ -409,7 +453,9 @@
         "guestAdded": "Invitado Añadido",
         "paymentReceived": "Pago Recibido",
         "reminderSent": "Recordatorio Enviado",
-        "invitationSent": "Invitación Enviada"
+        "invitationSent": "Invitación Enviada",
+        "taskAssigned": "Tarea Asignada",
+        "taskCompleted": "Tarea Completada"
       }
     },
     "reminders": {

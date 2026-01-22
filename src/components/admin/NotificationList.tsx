@@ -114,10 +114,12 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
       INVITATION_SENT: 'invitationSent',
       RSVP_STARTED: 'rsvpStarted',
       RSVP_SUBMITTED: 'rsvpSubmitted',
-      RSVP_UPDATED: 'rsvpEdited',
-      GUEST_ADDED: 'guestAdded',
-      PAYMENT_RECEIVED: 'paymentReceived',
-      REMINDER_SENT: 'reminderSent',
+      RSVP_UPDATED: 'admin.notifications.events.rsvpEdited',
+      GUEST_ADDED: 'admin.notifications.events.guestAdded',
+      PAYMENT_RECEIVED: 'admin.notifications.events.paymentReceived',
+      REMINDER_SENT: 'admin.notifications.events.reminderSent',
+      TASK_ASSIGNED: 'admin.notifications.events.taskAssigned',
+      TASK_COMPLETED: 'admin.notifications.events.taskCompleted',
     };
     
     // For RSVP_STARTED, which isn't in our map explicitly, we could add it or fallback

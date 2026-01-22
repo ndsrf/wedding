@@ -312,8 +312,53 @@
       "daysUntilWedding": "days until the wedding",
       "responded": "responded",
       "complete": "complete",
+      "seatingPlan": "Seating Plan",
+      "seatingPlanSubtitle": "Assign guests to tables",
       "weddingNotFound": "Wedding not found",
       "contactPlanner": "Please contact your wedding planner."
+    },
+    "seating": {
+      "title": "Seating Plan",
+      "subtitle": "Configure tables and assign confirmed guests",
+      "loading": "Loading seating plan...",
+      "stats": {
+        "totalGuests": "Total Guests",
+        "confirmedGuests": "Confirmed Guests",
+        "totalSeats": "Total Seats",
+        "assignedSeats": "Assigned Seats"
+      },
+      "config": {
+        "title": "Table Configuration",
+        "addTable": "Add Table",
+        "tableName": "Table Name",
+        "tableNumber": "No.",
+        "capacity": "Capacity",
+        "actions": "Actions",
+        "save": "Save Tables",
+        "saving": "Saving..."
+      },
+      "assignment": {
+        "title": "Guest Assignment",
+        "unassigned": "Unassigned Guests",
+        "assigned": "Assigned",
+        "randomAssign": "Randomly Assign",
+        "randomAssignConfirm": "This will randomly assign all unassigned confirmed guests to tables. Continue?",
+        "splitting": "Splitting Families",
+        "split": "Split Family",
+        "noTables": "Please configure tables first.",
+        "unassignFamily": "Remove family from table",
+        "unassignGuest": "Remove guest from table",
+        "move": "Move"
+      },
+      "split": {
+        "title": "Split Family",
+        "description": "Group family members to sit at different tables.",
+        "groupName": "Group Name",
+        "addGroup": "Add Group",
+        "save": "Save Groups",
+        "children": "Children",
+        "group": "Group"
+      }
     },
     "wedding": {
       "details": "Details",
@@ -412,7 +457,9 @@
         "guestAdded": "Guest Added",
         "paymentReceived": "Payment Received",
         "reminderSent": "Reminder Sent",
-        "invitationSent": "Invitation Sent"
+        "invitationSent": "Invitation Sent",
+        "taskAssigned": "Task Assigned",
+        "taskCompleted": "Task Completed"
       }
     },
     "reminders": {
