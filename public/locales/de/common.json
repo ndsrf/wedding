@@ -20,7 +20,14 @@
       "import": "Importieren",
       "download": "Herunterladen",
       "upload": "Hochladen",
-      "send": "Senden"
+      "send": "Senden",
+      "clearFilters": "Alle Filter löschen",
+      "retry": "Erneut versuchen"
+    },
+    "status": {
+      "pending": "Ausstehend",
+      "inProgress": "In Bearbeitung",
+      "completed": "Abgeschlossen"
     },
     "navigation": {
       "home": "Startseite",
@@ -137,8 +144,67 @@
       "allWeddings": "Alle Hochzeiten",
       "allWeddingsSubtitle": "Alle Ihre Hochzeiten anzeigen und verwalten",
       "createWeddingSubtitle": "Ein neues Hochzeitsereignis einrichten",
+      "checklistTemplate": "Checklisten-Vorlage",
+      "checklistTemplateSubtitle": "Aufgabenvorlagen für Ihre Hochzeiten verwalten",
       "noWeddings": "Noch keine Hochzeiten",
       "noWeddingsSubtitle": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit."
+    },
+    "checklistTemplate": {
+      "title": "Checklisten-Vorlage",
+      "subtitle": "Erstellen und verwalten Sie Aufgabenvorlagen für Ihre Hochzeiten",
+      "description": "Erstellen Sie Ihre Standard-Checklistenvorlage. Sie wird bei neuen Hochzeiten mit konvertierten Daten kopiert.",
+      "loadingTemplate": "Vorlage wird geladen...",
+      "noTemplateYet": "Noch keine Vorlage vorhanden",
+      "getStarted": "Beginnen Sie mit der Erstellung Ihres ersten Abschnitts.",
+      "addSection": "Abschnitt hinzufügen",
+      "addTask": "Aufgabe hinzufügen",
+      "sectionName": "Abschnittsname",
+      "newSection": "Neuer Abschnitt",
+      "newTask": "Neue Aufgabe",
+      "deleteSection": "Abschnitt löschen",
+      "deleteTask": "Aufgabe löschen",
+      "confirmDeleteSection": "Sind Sie sicher, dass Sie diesen Abschnitt und alle seine Aufgaben löschen möchten?",
+      "noTasksInSection": "Keine Aufgaben in diesem Abschnitt. Klicken Sie auf \"Aufgabe hinzufügen\", um eine zu erstellen.",
+      "saving": "Wird gespeichert...",
+      "saveNow": "Jetzt speichern",
+      "saved": "Gespeichert",
+      "unsavedChanges": "Sie haben ungespeicherte Änderungen. Klicken Sie auf \"Jetzt speichern\", um Ihre Arbeit zu speichern.",
+      "templateSaved": "Vorlage erfolgreich gespeichert",
+      "templateExported": "Vorlage erfolgreich exportiert",
+      "templateImported": "Vorlage erfolgreich importiert",
+      "errors": {
+        "loadFailed": "Fehler beim Laden der Vorlage",
+        "saveFailed": "Fehler beim Speichern der Vorlage",
+        "exportFailed": "Fehler beim Exportieren der Vorlage",
+        "importFailed": "Fehler beim Importieren der Vorlage",
+        "noSections": "Vorlage muss mindestens einen Abschnitt haben",
+        "sectionsNeedTasks": "Jeder Abschnitt muss mindestens eine Aufgabe haben. Bitte fügen Sie Aufgaben hinzu oder löschen Sie leere Abschnitte.",
+        "invalidDateFormat": "Ungültiges Datumsformat: {value}. Verwenden Sie WEDDING_DATE, WEDDING_DATE-90, usw."
+      },
+      "fields": {
+        "drag": "Ziehen",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "assignedTo": "Zugewiesen an",
+        "dueDate": "Fälligkeitsdatum (Relativ)",
+        "actions": "Aktionen",
+        "taskTitle": "Aufgabentitel",
+        "addTitle": "Klicken Sie, um einen Titel hinzuzufügen",
+        "addDescription": "Beschreibung hinzufügen...",
+        "clickToAddDescription": "Klicken Sie, um eine Beschreibung hinzuzufügen",
+        "dueDatePlaceholder": "z.B., WEDDING_DATE-90",
+        "dueDateExamples": "Beispiele: WEDDING_DATE, WEDDING_DATE-90 (90 Tage vorher), WEDDING_DATE+7 (7 Tage nachher)"
+      },
+      "assignment": {
+        "weddingPlanner": "Hochzeitsplaner",
+        "couple": "Paar",
+        "other": "Andere"
+      }
+    },
+    "checklist": {
+      "title": "Hochzeits-Checkliste",
+      "subtitle": "Aufgaben verwalten und Fortschritt verfolgen",
+      "description": "Aufgaben verwalten und Fortschritt für diese Hochzeit verfolgen"
     },
     "stats": {
       "totalWeddings": "Gesamtzahl Hochzeiten",
@@ -153,7 +219,9 @@
       "noWeddings": "Noch keine Hochzeiten",
       "getStarted": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit.",
       "backToWeddings": "Zurück zu Hochzeiten",
+      "backToWedding": "Zurück zur Hochzeit",
       "backToDashboard": "Zurück zum Dashboard",
+      "quickActions": "Schnellaktionen",
       "manageEvents": "Verwalten Sie alle Ihre Hochzeitsereignisse",
       "createError": "Fehler beim Erstellen der Hochzeit",
       "loadError": "Fehler beim Laden der Hochzeiten",
@@ -522,6 +590,44 @@
         "save": "Konfiguration speichern",
         "saving": "Speichern...",
         "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut."
+      }
+    },
+    "checklist": {
+      "title": "Hochzeits-Checkliste",
+      "subtitle": "Aufgaben verwalten und Fortschritt Ihrer Hochzeit verfolgen",
+      "loading": "Checkliste wird geladen...",
+      "saving": "Speichern...",
+      "error": "Fehler beim Laden der Checkliste",
+      "retry": "Erneut versuchen",
+      "emptyTitle": "Noch keine Aufgaben",
+      "emptyDesc": "Importieren Sie eine Checkliste oder warten Sie, bis Ihr Planer Aufgaben hinzufügt.",
+      "import": "Aus Excel importieren",
+      "importing": "Importiere...",
+      "export": "Nach Excel exportieren",
+      "exporting": "Exportiere...",
+      "delete": "Löschen",
+      "deleteConfirm": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?",
+      "markComplete": "Als erledigt markieren",
+      "markIncomplete": "Als nicht erledigt markieren",
+      "descriptionPlaceholder": "Beschreibung hinzufügen...",
+      "columns": {
+        "done": "Erledigt",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "assignedTo": "Zugewiesen an",
+        "dueDate": "Fälligkeitsdatum",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "assignedTo": {
+        "planner": "Hochzeitsplaner",
+        "couple": "Paar",
+        "other": "Andere"
+      },
+      "status": {
+        "PENDING": "Ausstehend",
+        "IN_PROGRESS": "In Bearbeitung",
+        "COMPLETED": "Abgeschlossen"
       }
     },
     "templates": {

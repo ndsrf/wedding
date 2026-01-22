@@ -22,7 +22,19 @@
       "mcp__spec-workflow__spec-workflow-guide",
       "Bash(npx prisma migrate dev:*)",
       "Bash(./node_modules/.bin/prisma migrate dev --name add_rsvp_config_fields)",
-      "Bash(npm run migrate:dev:*)"
+      "Bash(npm run migrate:dev:*)",
+      "mcp__spec-workflow__approvals",
+      "Bash(npx prisma db pull:*)",
+      "Bash(npx prisma:*)",
+      "Bash(psql:*)",
+      "Bash(npx next lint:*)",
+      "Bash(npx next build:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(find:*)",
+      "Bash(node -e:*)",
+      "Bash(for lang in en es fr de it)",
+      "Bash(do echo \"Checking $lang...\")",
+      "Bash(done)"
     ]
   }
 }

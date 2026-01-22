@@ -24,6 +24,11 @@
       "clearFilters": "Clear all filters",
       "retry": "Retry"
     },
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
     "navigation": {
       "home": "Home",
       "dashboard": "Dashboard",
@@ -152,8 +157,67 @@
       "allWeddings": "All Weddings",
       "allWeddingsSubtitle": "View and manage all your weddings",
       "createWeddingSubtitle": "Set up a new wedding event",
+      "checklistTemplate": "Checklist Template",
+      "checklistTemplateSubtitle": "Manage task templates for your weddings",
       "noWeddings": "No weddings yet",
       "noWeddingsSubtitle": "Get started by creating your first wedding."
+    },
+    "checklistTemplate": {
+      "title": "Checklist Template",
+      "subtitle": "Create and manage task templates for your weddings",
+      "description": "Create your default checklist template. It will be copied to new weddings with dates converted.",
+      "loadingTemplate": "Loading template...",
+      "noTemplateYet": "No template yet",
+      "getStarted": "Get started by creating your first section.",
+      "addSection": "Add Section",
+      "addTask": "Add Task",
+      "sectionName": "Section name",
+      "newSection": "New Section",
+      "newTask": "New Task",
+      "deleteSection": "Delete section",
+      "deleteTask": "Delete task",
+      "confirmDeleteSection": "Are you sure you want to delete this section and all its tasks?",
+      "noTasksInSection": "No tasks in this section. Click \"Add Task\" to create one.",
+      "saving": "Saving...",
+      "saveNow": "Save Now",
+      "saved": "Saved",
+      "unsavedChanges": "You have unsaved changes. Click \"Save Now\" to save your work.",
+      "templateSaved": "Template saved successfully",
+      "templateExported": "Template exported successfully",
+      "templateImported": "Template imported successfully",
+      "errors": {
+        "loadFailed": "Failed to load template",
+        "saveFailed": "Failed to save template",
+        "exportFailed": "Failed to export template",
+        "importFailed": "Failed to import template",
+        "noSections": "Template must have at least one section",
+        "sectionsNeedTasks": "Each section must have at least one task. Please add tasks or delete empty sections.",
+        "invalidDateFormat": "Invalid date format: {value}. Use WEDDING_DATE, WEDDING_DATE-90, etc."
+      },
+      "fields": {
+        "drag": "Drag",
+        "title": "Title",
+        "description": "Description",
+        "assignedTo": "Assigned To",
+        "dueDate": "Due Date (Relative)",
+        "actions": "Actions",
+        "taskTitle": "Task title",
+        "addTitle": "Click to add title",
+        "addDescription": "Add description...",
+        "clickToAddDescription": "Click to add description",
+        "dueDatePlaceholder": "e.g., WEDDING_DATE-90",
+        "dueDateExamples": "Examples: WEDDING_DATE, WEDDING_DATE-90 (90 days before), WEDDING_DATE+7 (7 days after)"
+      },
+      "assignment": {
+        "weddingPlanner": "Wedding Planner",
+        "couple": "Couple",
+        "other": "Other"
+      }
+    },
+    "checklist": {
+      "title": "Wedding Checklist",
+      "subtitle": "Manage tasks and track progress",
+      "description": "Manage tasks and track progress for this wedding"
     },
     "stats": {
       "totalWeddings": "Total Weddings",
@@ -168,7 +232,9 @@
       "noWeddings": "No weddings yet",
       "getStarted": "Get started by creating your first wedding.",
       "backToWeddings": "Back to weddings",
+      "backToWedding": "Back to Wedding",
       "backToDashboard": "Back to Dashboard",
+      "quickActions": "Quick Actions",
       "manageEvents": "Manage all your wedding events",
       "createError": "Failed to create wedding",
       "loadError": "Failed to load weddings",
@@ -308,6 +374,8 @@
       "importGuestsSubtitle": "Upload Excel file",
       "templates": "Message Templates",
       "templatesSubtitle": "Manage invitations and reminders",
+      "checklist": "Wedding Checklist",
+      "checklistSubtitle": "Track tasks and progress",
       "rsvpProgress": "RSVP Progress",
       "daysUntilWedding": "days until the wedding",
       "responded": "responded",
@@ -548,6 +616,46 @@
         "save": "Save Configuration",
         "saving": "Saving...",
         "submitError": "Failed to save configuration. Please try again."
+      }
+    },
+    "checklist": {
+      "title": "Wedding Checklist",
+      "subtitle": "Manage tasks and track progress for your wedding",
+      "loading": "Loading checklist...",
+      "saving": "Saving...",
+      "save": "Save Changes",
+      "unsavedChanges": "You have unsaved changes",
+      "error": "Error loading checklist",
+      "retry": "Retry",
+      "emptyTitle": "No tasks yet",
+      "emptyDesc": "Import a checklist or wait for your planner to add tasks.",
+      "import": "Import from Excel",
+      "importing": "Importing...",
+      "export": "Export to Excel",
+      "exporting": "Exporting...",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete this task?",
+      "markComplete": "Mark as complete",
+      "markIncomplete": "Mark as incomplete",
+      "descriptionPlaceholder": "Add description...",
+      "columns": {
+        "done": "Done",
+        "title": "Title",
+        "description": "Description",
+        "assignedTo": "Assigned To",
+        "dueDate": "Due Date",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "assignedTo": {
+        "planner": "Wedding Planner",
+        "couple": "Couple",
+        "other": "Other"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "IN_PROGRESS": "In Progress",
+        "COMPLETED": "Completed"
       }
     },
     "templates": {

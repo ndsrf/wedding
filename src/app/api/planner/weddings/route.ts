@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { seedTemplatesForWedding } from '@/lib/templates/seed';
+import { copyTemplateToWedding } from '@/lib/checklist/template';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -352,6 +353,22 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('Failed to seed templates for wedding:', error);
       // Don't fail the whole operation if template seeding fails
+    }
+
+    // Copy planner's checklist template to the new wedding
+    // This automatically converts relative dates (e.g., "WEDDING_DATE-90") to absolute dates
+    try {
+      // Only copy if wedding has a valid wedding_date
+      if (wedding.wedding_date && wedding.wedding_date instanceof Date) {
+        const tasksCreated = await copyTemplateToWedding(user.planner_id, wedding.id);
+        if (tasksCreated > 0) {
+          console.log(`Successfully copied ${tasksCreated} tasks from template to wedding ${wedding.id}`);
+        }
+      }
+    } catch (error) {
+      // Log error but don't fail wedding creation
+      console.error('Failed to copy checklist template to wedding:', error);
+      // This is not critical - planner can still manually create checklist if needed
     }
 
     const response: CreateWeddingResponse = {

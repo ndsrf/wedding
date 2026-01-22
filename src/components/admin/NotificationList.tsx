@@ -118,6 +118,8 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
       GUEST_ADDED: 'guestAdded',
       PAYMENT_RECEIVED: 'paymentReceived',
       REMINDER_SENT: 'reminderSent',
+      TASK_ASSIGNED: 'taskAssigned',
+      TASK_COMPLETED: 'taskCompleted',
     };
     
     // For RSVP_STARTED, which isn't in our map explicitly, we could add it or fallback

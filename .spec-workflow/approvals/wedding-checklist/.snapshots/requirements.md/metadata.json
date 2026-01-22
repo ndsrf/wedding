@@ -1,0 +1,30 @@
+{
+  "filePath": ".spec-workflow/specs/wedding-checklist/requirements.md",
+  "currentVersion": 3,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-01-21T20:49:58.971Z",
+      "trigger": "initial",
+      "approvalId": "approval_1769028598959_luvj7djt0",
+      "approvalTitle": "Requirements Document - Wedding Checklist"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2026-01-21T20:55:25.257Z",
+      "trigger": "revision_requested",
+      "approvalId": "approval_1769028598959_luvj7djt0",
+      "approvalTitle": "Requirements Document - Wedding Checklist"
+    },
+    {
+      "version": 3,
+      "filename": "snapshot-003.json",
+      "timestamp": "2026-01-21T20:57:07.615Z",
+      "trigger": "approved",
+      "approvalId": "approval_1769029017553_3scgsfhju",
+      "approvalTitle": "Requirements Document - Wedding Checklist (Revised)"
+    }
+  ]
+}

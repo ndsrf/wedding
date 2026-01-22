@@ -220,6 +220,41 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.weddings.quickActions')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link
+              href={`/planner/weddings/${weddingId}/checklist`}
+              className="bg-white border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 rounded-lg p-6 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    {t('planner.checklist.title') || 'Wedding Checklist'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {t('planner.checklist.description') || 'Manage tasks and track progress'}
+                  </p>
+                </div>
+                <svg
+                  className="h-6 w-6 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Wedding Information */}
           <div className="bg-white shadow rounded-lg p-6">

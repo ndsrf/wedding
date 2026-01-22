@@ -13,6 +13,7 @@ import { prisma } from '@/lib/db/prisma';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { WeddingCard } from '@/components/planner/WeddingCard';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { UpcomingTasksWidget } from '@/components/planner/UpcomingTasksWidget';
 import type { PlannerStats } from '@/types/api';
 import type { AuthenticatedUser } from '@/types/api';
 
@@ -179,10 +180,15 @@ export default async function PlannerDashboardPage() {
           </div>
         )}
 
+        {/* Upcoming Tasks Widget */}
+        <div className="mb-8">
+          <UpcomingTasksWidget />
+        </div>
+
         {/* Quick Links */}
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.dashboard.quickActions')}</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Link
               href="/planner/weddings"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
@@ -230,6 +236,31 @@ export default async function PlannerDashboardPage() {
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-900">{t('planner.dashboard.createWedding')}</h3>
                 <p className="mt-1 text-sm text-gray-500">{t('planner.dashboard.createWeddingSubtitle')}</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/planner/checklist-template"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
+            >
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-sm font-medium text-gray-900">{t('planner.dashboard.checklistTemplate')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('planner.dashboard.checklistTemplateSubtitle')}</p>
               </div>
             </Link>
           </div>

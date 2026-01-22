@@ -30,6 +30,17 @@ const PROTECTED_ROUTES = {
   wedding_admin: ['/admin', '/api/admin'],
 };
 
+// Shared routes accessible by multiple roles
+// These are checked before role-specific routes
+const SHARED_ROUTES = {
+  // Checklist routes accessible by both planners and wedding admins
+  planner_and_admin: [
+    '/api/admin/checklist',
+    '/api/admin/checklist/export',
+    '/api/admin/checklist/import',
+  ],
+};
+
 // Guest routes (use magic link authentication)
 const GUEST_ROUTES = ['/rsvp', '/api/guest'];
 
@@ -61,6 +72,23 @@ function isPublicRoute(path: string): boolean {
  */
 function isGuestRoute(path: string): boolean {
   return matchesAnyPattern(path, GUEST_ROUTES);
+}
+
+/**
+ * Check if route is shared and if user has access
+ */
+function hasSharedRouteAccess(path: string, userRole: string): boolean {
+  for (const [allowedRoles, patterns] of Object.entries(SHARED_ROUTES)) {
+    if (matchesAnyPattern(path, patterns)) {
+      // Check if user role is in allowed roles
+      if (allowedRoles === 'planner_and_admin') {
+        return userRole === 'planner' || userRole === 'wedding_admin';
+      }
+      // Add more shared route combinations as needed
+      return false;
+    }
+  }
+  return false;
 }
 
 /**
@@ -115,6 +143,29 @@ export async function middleware(request: NextRequest) {
   });
 
   const user = token?.user as AuthenticatedUser | undefined;
+
+  // Check if this is a shared route (accessible by multiple roles)
+  const isShared = Object.values(SHARED_ROUTES)
+    .flat()
+    .some((pattern) => matchesAnyPattern(pathname, [pattern]));
+
+  if (isShared) {
+    // Shared route - requires authentication
+    if (!user) {
+      const signInUrl = new URL('/auth/signin', request.url);
+      signInUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    // Check if user has access to this shared route
+    if (hasSharedRouteAccess(pathname, user.role)) {
+      return NextResponse.next();
+    } else {
+      // User doesn't have access - redirect to their dashboard
+      const redirectUrl = new URL(getRedirectForRole(user.role), request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
 
   // Check if route requires authentication
   const requiredRole = getRequiredRole(pathname);

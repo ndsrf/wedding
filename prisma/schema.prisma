@@ -1,6 +1,3 @@
-// Wedding Management Platform - Database Schema
-// Multi-tenant architecture with data isolation
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,88 +6,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// ============================================================================
-// ENUMS
-// ============================================================================
-
-enum Language {
-  ES // Spanish (default)
-  EN // English
-  FR // French
-  IT // Italian
-  DE // German
-}
-
-enum AuthProvider {
-  GOOGLE
-  FACEBOOK
-  INSTAGRAM
-  APPLE
-  MICROSOFT
-}
-
-enum PaymentMode {
-  AUTOMATED // Auto-match payments with reference codes
-  MANUAL // Manual payment tracking
-}
-
-enum WeddingStatus {
-  ACTIVE
-  ARCHIVED
-  COMPLETED
-  DELETED
-}
-
-enum MemberType {
-  ADULT
-  CHILD
-  INFANT
-}
-
-enum EventType {
-  LINK_OPENED
-  RSVP_STARTED
-  RSVP_SUBMITTED
-  RSVP_UPDATED
-  GUEST_ADDED
-  PAYMENT_RECEIVED
-  REMINDER_SENT
-  INVITATION_SENT
-}
-
-enum TemplateType {
-  INVITATION // First notification when guest is added
-  REMINDER // Subsequent reminders
-}
-
-enum Channel {
-  WHATSAPP
-  EMAIL
-  SMS
-}
-
-enum GiftStatus {
-  PENDING // Payment pending
-  RECEIVED // Payment received, not confirmed
-  CONFIRMED // Payment confirmed by admin
-}
-
-enum TranslationContext {
-  ADMIN
-  GUEST
-  PLANNER
-  MASTER
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  INACTIVE
-}
-
-// ============================================================================
-// PLATFORM MANAGEMENT
-// ============================================================================
 
 model MasterAdmin {
   id                 String   @id @default(uuid())
@@ -116,98 +31,84 @@ model WeddingPlanner {
   created_at          DateTime           @default(now())
   created_by          String
   last_login_at       DateTime?
-
-  weddings Wedding[]
-  themes   Theme[]
+  checklist_template  ChecklistTemplate?
+  themes              Theme[]
+  weddings            Wedding[]
 
   @@index([enabled])
   @@map("wedding_planners")
 }
 
-// ============================================================================
-// THEME SYSTEM
-// ============================================================================
-
 model Theme {
-  id                String   @id @default(uuid())
+  id                String          @id @default(uuid())
   planner_id        String?
   name              String
   description       String
-  is_default        Boolean  @default(false)
-  is_system_theme   Boolean  @default(false)
-  config            Json // ThemeConfig JSON object
+  is_default        Boolean         @default(false)
+  is_system_theme   Boolean         @default(false)
+  config            Json
   preview_image_url String?
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-
-  planner  WeddingPlanner? @relation(fields: [planner_id], references: [id], onDelete: SetNull)
-  weddings Wedding[]
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
+  planner           WeddingPlanner? @relation(fields: [planner_id], references: [id])
+  weddings          Wedding[]
 
   @@index([planner_id])
   @@index([is_system_theme])
   @@map("themes")
 }
 
-// ============================================================================
-// WEDDING MANAGEMENT
-// ============================================================================
-
 model Wedding {
-  id                    String        @id @default(uuid())
-  planner_id            String
-  theme_id              String?
-  couple_names          String
-  wedding_date          DateTime
-  wedding_time          String
-  location              String
-  rsvp_cutoff_date      DateTime
-  dress_code            String?
-  additional_info       String?
-  payment_tracking_mode PaymentMode   @default(MANUAL)
-  gift_iban             String?
-  allow_guest_additions Boolean       @default(true)
-  default_language      Language      @default(ES)
-  status                WeddingStatus @default(ACTIVE)
-  is_disabled           Boolean       @default(false)
-  disabled_at           DateTime?
-  disabled_by           String?
-  deleted_at            DateTime?
-  deleted_by            String?
-  created_at            DateTime      @default(now())
-  created_by            String
-  updated_at            DateTime      @updatedAt
-  updated_by            String?
-
-  // RSVP Configuration - Transportation question
-  transportation_question_enabled Boolean @default(false)
+  id                              String             @id @default(uuid())
+  planner_id                      String
+  theme_id                        String?
+  couple_names                    String
+  wedding_date                    DateTime
+  wedding_time                    String
+  location                        String
+  rsvp_cutoff_date                DateTime
+  dress_code                      String?
+  additional_info                 String?
+  payment_tracking_mode           PaymentMode        @default(MANUAL)
+  allow_guest_additions           Boolean            @default(true)
+  default_language                Language           @default(ES)
+  status                          WeddingStatus      @default(ACTIVE)
+  created_at                      DateTime           @default(now())
+  created_by                      String
+  updated_at                      DateTime           @updatedAt
+  updated_by                      String?
+  transportation_question_enabled Boolean            @default(false)
   transportation_question_text    String?
-
-  // RSVP Configuration - Dietary restrictions
-  dietary_restrictions_enabled Boolean @default(false)
-
-  // RSVP Configuration - Extra Yes/No questions (up to 3)
-  extra_question_1_enabled Boolean @default(false)
-  extra_question_1_text    String?
-  extra_question_2_enabled Boolean @default(false)
-  extra_question_2_text    String?
-  extra_question_3_enabled Boolean @default(false)
-  extra_question_3_text    String?
-
-  // RSVP Configuration - Extra mandatory info fields (up to 3)
-  extra_info_1_enabled Boolean @default(false)
-  extra_info_1_label   String?
-  extra_info_2_enabled Boolean @default(false)
-  extra_info_2_label   String?
-  extra_info_3_enabled Boolean @default(false)
-  extra_info_3_label   String?
-
-  planner            WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
-  theme              Theme?          @relation(fields: [theme_id], references: [id], onDelete: SetNull)
-  wedding_admins     WeddingAdmin[]
-  families           Family[]
-  tracking_events    TrackingEvent[]
-  notifications      Notification[]
-  message_templates  MessageTemplate[]
+  dietary_restrictions_enabled    Boolean            @default(false)
+  extra_question_1_enabled        Boolean            @default(false)
+  extra_question_1_text           String?
+  extra_question_2_enabled        Boolean            @default(false)
+  extra_question_2_text           String?
+  extra_question_3_enabled        Boolean            @default(false)
+  extra_question_3_text           String?
+  extra_info_1_enabled            Boolean            @default(false)
+  extra_info_1_label              String?
+  extra_info_2_enabled            Boolean            @default(false)
+  extra_info_2_label              String?
+  extra_info_3_enabled            Boolean            @default(false)
+  extra_info_3_label              String?
+  deleted_at                      DateTime?
+  deleted_by                      String?
+  disabled_at                     DateTime?
+  disabled_by                     String?
+  is_disabled                     Boolean            @default(false)
+  gift_iban                       String?
+  couple_table_id                 String?
+  checklist_sections              ChecklistSection[]
+  checklist_tasks                 ChecklistTask[]
+  families                        Family[]
+  message_templates               MessageTemplate[]
+  notifications                   Notification[]
+  tables                          tables[]
+  tracking_events                 TrackingEvent[]
+  wedding_admins                  WeddingAdmin[]
+  planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  theme                           Theme?             @relation(fields: [theme_id], references: [id])
 
   @@index([planner_id])
   @@index([theme_id])
@@ -232,8 +133,7 @@ model WeddingAdmin {
   accepted_at         DateTime?
   last_login_at       DateTime?
   created_at          DateTime      @default(now())
-
-  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  wedding             Wedding       @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
 
   @@unique([email, wedding_id])
   @@index([wedding_id])
@@ -242,17 +142,16 @@ model WeddingAdmin {
 }
 
 model MessageTemplate {
-  id          String       @id @default(uuid())
-  wedding_id  String
-  type        TemplateType
-  language    Language
-  channel     Channel
-  subject     String
-  body        String       @db.Text
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
-
-  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  id         String       @id @default(uuid())
+  wedding_id String
+  type       TemplateType
+  language   Language
+  channel    Channel
+  subject    String
+  body       String
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  wedding    Wedding      @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
 
   @@unique([wedding_id, type, language, channel])
   @@index([wedding_id])
@@ -260,37 +159,30 @@ model MessageTemplate {
   @@map("message_templates")
 }
 
-// ============================================================================
-// GUEST MANAGEMENT
-// ============================================================================
-
 model Family {
-  id                 String   @id @default(uuid())
-  wedding_id         String
-  name               String
-  email              String?
-  phone              String?
-  whatsapp_number    String?
-  magic_token        String   @unique @default(uuid())
-  reference_code     String?  @unique
-  channel_preference Channel?
-  preferred_language Language @default(ES)
-  created_at         DateTime @default(now())
-
-  // RSVP Question Answers
-  transportation_answer   Boolean?
-  extra_question_1_answer Boolean?
-  extra_question_2_answer Boolean?
-  extra_question_3_answer Boolean?
+  id                      String          @id @default(uuid())
+  wedding_id              String
+  name                    String
+  email                   String?
+  phone                   String?
+  whatsapp_number         String?
+  magic_token             String          @unique @default(uuid())
+  reference_code          String?         @unique
+  channel_preference      Channel?
+  preferred_language      Language        @default(ES)
+  created_at              DateTime        @default(now())
   extra_info_1_value      String?
   extra_info_2_value      String?
   extra_info_3_value      String?
-
-  wedding         Wedding         @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
-  members         FamilyMember[]
-  tracking_events TrackingEvent[]
-  gifts           Gift[]
-  notifications   Notification[]
+  extra_question_1_answer Boolean?
+  extra_question_2_answer Boolean?
+  extra_question_3_answer Boolean?
+  transportation_answer   Boolean?
+  wedding                 Wedding         @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  members                 FamilyMember[]
+  gifts                   Gift[]
+  notifications           Notification[]
+  tracking_events         TrackingEvent[]
 
   @@index([wedding_id])
   @@index([magic_token])
@@ -310,17 +202,16 @@ model FamilyMember {
   accessibility_needs  String?
   added_by_guest       Boolean    @default(false)
   created_at           DateTime   @default(now())
-
-  family Family @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  seating_group        String?
+  table_id             String?
+  family               Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  tables               tables?    @relation(fields: [table_id], references: [id])
 
   @@index([family_id])
   @@index([added_by_guest])
+  @@index([table_id])
   @@map("family_members")
 }
-
-// ============================================================================
-// TRACKING & NOTIFICATIONS
-// ============================================================================
 
 model TrackingEvent {
   id              String    @id @default(uuid())
@@ -331,9 +222,8 @@ model TrackingEvent {
   metadata        Json?
   admin_triggered Boolean   @default(false)
   timestamp       DateTime  @default(now())
-
-  family  Family  @relation(fields: [family_id], references: [id], onDelete: Cascade)
-  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  family          Family    @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  wedding         Wedding   @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
 
   @@index([family_id])
   @@index([wedding_id])
@@ -353,9 +243,8 @@ model Notification {
   read_at    DateTime?
   admin_id   String
   created_at DateTime  @default(now())
-
-  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
-  family  Family? @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  family     Family?   @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  wedding    Wedding   @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
 
   @@index([wedding_id])
   @@index([admin_id])
@@ -363,10 +252,6 @@ model Notification {
   @@index([created_at])
   @@map("notifications")
 }
-
-// ============================================================================
-// PAYMENT TRACKING
-// ============================================================================
 
 model Gift {
   id                  String     @id @default(uuid())
@@ -378,8 +263,7 @@ model Gift {
   status              GiftStatus @default(PENDING)
   transaction_date    DateTime
   created_at          DateTime   @default(now())
-
-  family Family @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  family              Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)
 
   @@index([family_id])
   @@index([wedding_id])
@@ -388,15 +272,11 @@ model Gift {
   @@map("gifts")
 }
 
-// ============================================================================
-// INTERNATIONALIZATION
-// ============================================================================
-
 model Translation {
   id         String             @id @default(uuid())
   key        String
   language   Language
-  value      String             @db.Text
+  value      String
   context    TranslationContext
   updated_at DateTime           @updatedAt
 
@@ -404,4 +284,169 @@ model Translation {
   @@index([context])
   @@index([language])
   @@map("translations")
+}
+
+model ChecklistTemplate {
+  id         String             @id @default(uuid())
+  planner_id String             @unique
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+  sections   ChecklistSection[]
+  tasks      ChecklistTask[]
+  planner    WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+
+  @@index([planner_id])
+  @@map("checklist_templates")
+}
+
+model ChecklistSection {
+  id          String             @id @default(uuid())
+  template_id String?
+  wedding_id  String?
+  name        String
+  order       Int
+  created_at  DateTime           @default(now())
+  template    ChecklistTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  wedding     Wedding?           @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  tasks       ChecklistTask[]
+
+  @@index([template_id])
+  @@index([wedding_id])
+  @@index([order])
+  @@map("checklist_sections")
+}
+
+model ChecklistTask {
+  id                String             @id @default(uuid())
+  section_id        String?
+  wedding_id        String?            // Null if task belongs to template
+  template_id       String?            // Null if task belongs to wedding
+  title             String
+  description       String?            @db.Text
+  assigned_to       TaskAssignment     @default(COUPLE)
+  due_date          DateTime?          // Absolute date for wedding tasks
+  due_date_relative String?            // Relative date for template tasks (e.g., "WEDDING_DATE-90")
+  status            TaskStatus         @default(PENDING)
+  completed         Boolean            @default(false)
+  completed_at      DateTime?
+  completed_by      String?            // User ID who completed the task
+  order             Int
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+  section           ChecklistSection?  @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  wedding           Wedding?           @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  template          ChecklistTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
+
+  @@index([section_id])
+  @@index([wedding_id])
+  @@index([template_id])
+  @@index([assigned_to])
+  @@index([due_date])
+  @@index([status])
+  @@index([completed])
+  @@index([order])
+  @@map("checklist_tasks")
+}
+
+model tables {
+  id             String         @id
+  wedding_id     String
+  name           String?
+  number         Int
+  capacity       Int
+  created_at     DateTime       @default(now())
+  updated_at     DateTime
+  family_members FamilyMember[]
+  weddings       Wedding        @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@unique([wedding_id, number])
+  @@index([wedding_id])
+}
+
+enum Language {
+  ES
+  EN
+  FR
+  IT
+  DE
+}
+
+enum AuthProvider {
+  GOOGLE
+  FACEBOOK
+  INSTAGRAM
+  APPLE
+  MICROSOFT
+}
+
+enum PaymentMode {
+  AUTOMATED
+  MANUAL
+}
+
+enum WeddingStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  DELETED
+}
+
+enum MemberType {
+  ADULT
+  CHILD
+  INFANT
+}
+
+enum EventType {
+  LINK_OPENED
+  RSVP_STARTED
+  RSVP_SUBMITTED
+  RSVP_UPDATED
+  GUEST_ADDED
+  PAYMENT_RECEIVED
+  REMINDER_SENT
+  INVITATION_SENT
+  TASK_ASSIGNED
+  TASK_COMPLETED
+}
+
+enum TemplateType {
+  INVITATION
+  REMINDER
+}
+
+enum Channel {
+  WHATSAPP
+  EMAIL
+  SMS
+}
+
+enum GiftStatus {
+  PENDING
+  RECEIVED
+  CONFIRMED
+}
+
+enum TranslationContext {
+  ADMIN
+  GUEST
+  PLANNER
+  MASTER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TaskAssignment {
+  WEDDING_PLANNER
+  COUPLE
+  OTHER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
 }

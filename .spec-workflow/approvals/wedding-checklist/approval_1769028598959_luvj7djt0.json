@@ -1,0 +1,21 @@
+{
+  "id": "approval_1769028598959_luvj7djt0",
+  "title": "Requirements Document - Wedding Checklist",
+  "filePath": ".spec-workflow/specs/wedding-checklist/requirements.md",
+  "type": "document",
+  "status": "needs-revision",
+  "createdAt": "2026-01-21T20:49:58.959Z",
+  "category": "spec",
+  "categoryName": "wedding-checklist",
+  "response": "Feedback Summary (1 comments):\n\nGeneral Comments:\n1. Please add functionality to export the checklist to Excel and Import checklist to Excel (provide a template with the columns). This functionality is available for both the checklist template and the individual checklists.\n\n",
+  "annotations": "{\n  \"decision\": \"needs-revision\",\n  \"comments\": [\n    {\n      \"type\": \"general\",\n      \"comment\": \"Please add functionality to export the checklist to Excel and Import checklist to Excel (provide a template with the columns). This functionality is available for both the checklist template and the individual checklists.\",\n      \"timestamp\": \"2026-01-21T20:55:16.754Z\",\n      \"id\": \"comment_1769028916754_z7wemht9e\"\n    }\n  ],\n  \"summary\": \"Feedback Summary (1 comments):\\n\\nGeneral Comments:\\n1. Please add functionality to export the checklist to Excel and Import checklist to Excel (provide a template with the columns). This functionality is available for both the checklist template and the individual checklists.\\n\\n\",\n  \"timestamp\": \"2026-01-21T20:55:24.606Z\"\n}",
+  "respondedAt": "2026-01-21T20:55:25.263Z",
+  "comments": [
+    {
+      "type": "general",
+      "comment": "Please add functionality to export the checklist to Excel and Import checklist to Excel (provide a template with the columns). This functionality is available for both the checklist template and the individual checklists.",
+      "timestamp": "2026-01-21T20:55:16.754Z",
+      "id": "comment_1769028916754_z7wemht9e"
+    }
+  ]
+}

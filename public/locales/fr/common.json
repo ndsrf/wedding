@@ -20,7 +20,14 @@
       "import": "Importer",
       "download": "Télécharger",
       "upload": "Mettre en ligne",
-      "send": "Envoyer"
+      "send": "Envoyer",
+      "clearFilters": "Effacer tous les filtres",
+      "retry": "Réessayer"
+    },
+    "status": {
+      "pending": "En attente",
+      "inProgress": "En cours",
+      "completed": "Terminé"
     },
     "navigation": {
       "home": "Accueil",
@@ -137,8 +144,67 @@
       "allWeddings": "Tous les Mariages",
       "allWeddingsSubtitle": "Voir et gérer tous vos mariages",
       "createWeddingSubtitle": "Configurer un nouvel événement de mariage",
+      "checklistTemplate": "Modèle de Liste de Tâches",
+      "checklistTemplateSubtitle": "Gérer les modèles de tâches pour vos mariages",
       "noWeddings": "Pas encore de mariages",
       "noWeddingsSubtitle": "Commencez par créer votre premier mariage."
+    },
+    "checklistTemplate": {
+      "title": "Modèle de Liste de Tâches",
+      "subtitle": "Créez et gérez des modèles de tâches pour vos mariages",
+      "description": "Créez votre modèle de liste de tâches par défaut. Il sera copié pour les nouveaux mariages avec les dates converties.",
+      "loadingTemplate": "Chargement du modèle...",
+      "noTemplateYet": "Pas encore de modèle",
+      "getStarted": "Commencez par créer votre première section.",
+      "addSection": "Ajouter une Section",
+      "addTask": "Ajouter une Tâche",
+      "sectionName": "Nom de la section",
+      "newSection": "Nouvelle Section",
+      "newTask": "Nouvelle Tâche",
+      "deleteSection": "Supprimer la section",
+      "deleteTask": "Supprimer la tâche",
+      "confirmDeleteSection": "Êtes-vous sûr de vouloir supprimer cette section et toutes ses tâches ?",
+      "noTasksInSection": "Aucune tâche dans cette section. Cliquez sur \"Ajouter une Tâche\" pour en créer une.",
+      "saving": "Enregistrement...",
+      "saveNow": "Enregistrer Maintenant",
+      "saved": "Enregistré",
+      "unsavedChanges": "Vous avez des modifications non enregistrées. Cliquez sur \"Enregistrer Maintenant\" pour sauvegarder votre travail.",
+      "templateSaved": "Modèle enregistré avec succès",
+      "templateExported": "Modèle exporté avec succès",
+      "templateImported": "Modèle importé avec succès",
+      "errors": {
+        "loadFailed": "Échec du chargement du modèle",
+        "saveFailed": "Échec de l'enregistrement du modèle",
+        "exportFailed": "Échec de l'exportation du modèle",
+        "importFailed": "Échec de l'importation du modèle",
+        "noSections": "Le modèle doit avoir au moins une section",
+        "sectionsNeedTasks": "Chaque section doit avoir au moins une tâche. Veuillez ajouter des tâches ou supprimer les sections vides.",
+        "invalidDateFormat": "Format de date invalide : {value}. Utilisez WEDDING_DATE, WEDDING_DATE-90, etc."
+      },
+      "fields": {
+        "drag": "Glisser",
+        "title": "Titre",
+        "description": "Description",
+        "assignedTo": "Assigné à",
+        "dueDate": "Date d'échéance (Relative)",
+        "actions": "Actions",
+        "taskTitle": "Titre de la tâche",
+        "addTitle": "Cliquez pour ajouter un titre",
+        "addDescription": "Ajouter une description...",
+        "clickToAddDescription": "Cliquez pour ajouter une description",
+        "dueDatePlaceholder": "par ex., WEDDING_DATE-90",
+        "dueDateExamples": "Exemples : WEDDING_DATE, WEDDING_DATE-90 (90 jours avant), WEDDING_DATE+7 (7 jours après)"
+      },
+      "assignment": {
+        "weddingPlanner": "Organisateur de Mariage",
+        "couple": "Couple",
+        "other": "Autre"
+      }
+    },
+    "checklist": {
+      "title": "Liste de Contrôle du Mariage",
+      "subtitle": "Gérer les tâches et suivre les progrès",
+      "description": "Gérer les tâches et suivre les progrès pour ce mariage"
     },
     "stats": {
       "totalWeddings": "Total Mariages",
@@ -153,7 +219,9 @@
       "noWeddings": "Pas encore de mariages",
       "getStarted": "Commencez par créer votre premier mariage.",
       "backToWeddings": "Retour aux mariages",
+      "backToWedding": "Retour au Mariage",
       "backToDashboard": "Retour au tableau de bord",
+      "quickActions": "Actions Rapides",
       "manageEvents": "Gérez tous vos événements de mariage",
       "createError": "Échec de la création du mariage",
       "loadError": "Échec du chargement des mariages",
@@ -522,6 +590,44 @@
         "save": "Enregistrer la Configuration",
         "saving": "Enregistrement...",
         "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer."
+      }
+    },
+    "checklist": {
+      "title": "Liste de Contrôle du Mariage",
+      "subtitle": "Gérez les tâches et suivez les progrès de votre mariage",
+      "loading": "Chargement de la liste...",
+      "saving": "Enregistrement...",
+      "error": "Erreur lors du chargement de la liste",
+      "retry": "Réessayer",
+      "emptyTitle": "Pas encore de tâches",
+      "emptyDesc": "Importez une liste ou attendez que votre organisateur ajoute des tâches.",
+      "import": "Importer depuis Excel",
+      "importing": "Importation...",
+      "export": "Exporter vers Excel",
+      "exporting": "Exportation...",
+      "delete": "Supprimer",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette tâche ?",
+      "markComplete": "Marquer comme terminée",
+      "markIncomplete": "Marquer comme incomplète",
+      "descriptionPlaceholder": "Ajouter une description...",
+      "columns": {
+        "done": "Fait",
+        "title": "Titre",
+        "description": "Description",
+        "assignedTo": "Assigné à",
+        "dueDate": "Date d'échéance",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "assignedTo": {
+        "planner": "Organisateur de Mariage",
+        "couple": "Couple",
+        "other": "Autre"
+      },
+      "status": {
+        "PENDING": "En attente",
+        "IN_PROGRESS": "En cours",
+        "COMPLETED": "Terminé"
       }
     },
     "templates": {
