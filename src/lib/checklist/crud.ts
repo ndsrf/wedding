@@ -360,10 +360,12 @@ export async function getUpcomingTasksForPlanner(
   planner_id: string,
   limit_per_wedding: number = 3
 ): Promise<UpcomingTask[]> {
-  // Get all weddings for this planner
+  // Get all active, non-deleted weddings for this planner
   const weddings = await prisma.wedding.findMany({
     where: {
       planner_id,
+      status: 'ACTIVE', // Only active weddings
+      deleted_at: null, // Exclude deleted weddings
     },
     select: {
       id: true,

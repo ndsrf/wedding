@@ -337,6 +337,14 @@
       "inUse": "In Uso",
       "cannotDelete": "Impossibile eliminare. Il tema è in uso da {count} matrimonio/i."
     },
+    "upcomingTasks": {
+      "title": "Attività in Arrivo",
+      "wedding": "Matrimonio",
+      "task": "Attività",
+      "viewAllWeddings": "Visualizza tutti i matrimoni",
+      "noTasks": "Nessuna attività in arrivo",
+      "noTasksDescription": "Tutte le attività sono completate o non ci sono attività assegnate a te in tutti i matrimoni."
+    },
     "providers": {
       "title": "Gestione Fornitori",
       "description": "Gestisci la tua libreria di fornitori",

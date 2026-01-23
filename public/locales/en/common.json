@@ -350,6 +350,14 @@
       "inUse": "In Use",
       "cannotDelete": "Cannot delete. Theme is in use by {count} wedding(s)."
     },
+    "upcomingTasks": {
+      "title": "Upcoming Tasks",
+      "wedding": "Wedding",
+      "task": "Task",
+      "viewAllWeddings": "View all weddings",
+      "noTasks": "No upcoming tasks",
+      "noTasksDescription": "All tasks are completed or there are no tasks assigned to you across all weddings."
+    },
     "providers": {
       "title": "Provider Management",
       "description": "Manage your library of providers",

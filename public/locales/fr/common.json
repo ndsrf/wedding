@@ -337,6 +337,14 @@
       "inUse": "En Usage",
       "cannotDelete": "Impossible de supprimer. Le thème est utilisé par {count} mariage(s)."
     },
+    "upcomingTasks": {
+      "title": "Tâches à Venir",
+      "wedding": "Mariage",
+      "task": "Tâche",
+      "viewAllWeddings": "Voir tous les mariages",
+      "noTasks": "Aucune tâche à venir",
+      "noTasksDescription": "Toutes les tâches sont terminées ou il n'y a pas de tâches qui vous sont assignées dans tous les mariages."
+    },
     "providers": {
       "title": "Gestion des Prestataires",
       "description": "Gérez votre bibliothèque de prestataires",

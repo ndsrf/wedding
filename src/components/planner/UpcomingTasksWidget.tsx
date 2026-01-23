@@ -16,6 +16,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { UpcomingTask } from '@/types/checklist';
 import type { APIResponse } from '@/types/api';
 
@@ -23,6 +24,7 @@ type SortField = 'due_date' | 'title' | 'wedding';
 type SortDirection = 'asc' | 'desc';
 
 export function UpcomingTasksWidget() {
+  const t = useTranslations();
   const [tasks, setTasks] = useState<UpcomingTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -152,10 +154,10 @@ export function UpcomingTasksWidget() {
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.upcomingTasks.title')}</h2>
         <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" aria-hidden="true"></div>
-          <span className="ml-3 text-gray-500">Loading tasks...</span>
+          <span className="ml-3 text-gray-500">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -164,7 +166,7 @@ export function UpcomingTasksWidget() {
   if (error) {
     return (
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.upcomingTasks.title')}</h2>
         <div className="text-center py-8" role="alert" aria-live="assertive">
           <svg
             className="mx-auto h-12 w-12 text-red-400"
@@ -189,7 +191,7 @@ export function UpcomingTasksWidget() {
   if (tasks.length === 0) {
     return (
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.upcomingTasks.title')}</h2>
         <div className="text-center py-8">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
@@ -204,14 +206,14 @@ export function UpcomingTasksWidget() {
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No upcoming tasks</h3>
-          <p className="mt-1 text-sm text-gray-500">All tasks are completed or there are no tasks assigned to you across all weddings.</p>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('planner.upcomingTasks.noTasks')}</h3>
+          <p className="mt-1 text-sm text-gray-500">{t('planner.upcomingTasks.noTasksDescription')}</p>
           <div className="mt-6">
             <Link
               href="/planner/weddings"
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              View Weddings
+              {t('planner.upcomingTasks.viewAllWeddings')}
             </Link>
           </div>
         </div>
@@ -222,12 +224,12 @@ export function UpcomingTasksWidget() {
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-gray-900">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900">{t('planner.upcomingTasks.title')}</h2>
         <Link
           href="/planner/weddings"
           className="text-sm font-medium text-blue-600 hover:text-blue-500"
         >
-          View all weddings
+          {t('planner.upcomingTasks.viewAllWeddings')}
         </Link>
       </div>
 
@@ -250,7 +252,7 @@ export function UpcomingTasksWidget() {
                 }}
               >
                 <div className="flex items-center">
-                  Wedding
+                  {t('planner.upcomingTasks.wedding')}
                   {sortField === 'wedding' && (
                     <span className="ml-1" aria-hidden="true">
                       {sortDirection === 'asc' ? '↑' : '↓'}
@@ -272,7 +274,7 @@ export function UpcomingTasksWidget() {
                 }}
               >
                 <div className="flex items-center">
-                  Task
+                  {t('planner.upcomingTasks.task')}
                   {sortField === 'title' && (
                     <span className="ml-1" aria-hidden="true">
                       {sortDirection === 'asc' ? '↑' : '↓'}

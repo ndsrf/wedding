@@ -347,6 +347,14 @@
       "inUse": "En Uso",
       "cannotDelete": "No se puede eliminar. El tema está en uso por {count} boda(s)."
     },
+    "upcomingTasks": {
+      "title": "Tareas Próximas",
+      "wedding": "Boda",
+      "task": "Tarea",
+      "viewAllWeddings": "Ver todas las bodas",
+      "noTasks": "No hay tareas próximas",
+      "noTasksDescription": "Todas las tareas están completadas o no hay tareas asignadas a ti en todas las bodas."
+    },
     "providers": {
       "title": "Gestión de Proveedores",
       "description": "Administra tu biblioteca de proveedores",

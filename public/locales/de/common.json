@@ -337,6 +337,14 @@
       "inUse": "In Verwendung",
       "cannotDelete": "Kann nicht gelöscht werden. Thema wird von {count} Hochzeit(en) verwendet."
     },
+    "upcomingTasks": {
+      "title": "Bevorstehende Aufgaben",
+      "wedding": "Hochzeit",
+      "task": "Aufgabe",
+      "viewAllWeddings": "Alle Hochzeiten anzeigen",
+      "noTasks": "Keine bevorstehenden Aufgaben",
+      "noTasksDescription": "Alle Aufgaben sind abgeschlossen oder es gibt keine Aufgaben, die Ihnen über alle Hochzeiten zugewiesen sind."
+    },
     "providers": {
       "title": "Dienstleisterverwaltung",
       "description": "Verwalten Sie Ihre Dienstleister-Bibliothek",
