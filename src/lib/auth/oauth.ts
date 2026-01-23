@@ -5,8 +5,6 @@
  * Supports Google, Facebook/Instagram, and Apple Sign-In.
  */
 
-import fs from 'fs';
-import path from 'path';
 import type { AuthProvider, Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 
@@ -14,32 +12,43 @@ import { prisma } from '@/lib/db/prisma';
 // MASTER ADMIN CONFIGURATION
 // ============================================================================
 
-interface MasterAdminConfig {
-  masterAdminEmails: string[];
-  description?: string;
-}
-
 /**
  * Check if an email is configured as a master admin
- * IMPORTANT: This function reads from disk on every call (no caching)
- * to ensure master admin access can be revoked immediately.
+ * Reads from MASTER_ADMIN_EMAILS environment variable (comma-separated list)
  *
  * @param email - Email to check
- * @returns true if email is in master admin config file
+ * @returns true if email is in master admin list
  */
 export function isMasterAdmin(email: string): boolean {
   try {
-    const configPath = path.join(process.cwd(), 'config', 'master-admin.json');
-    const configFile = fs.readFileSync(configPath, 'utf-8');
-    const config: MasterAdminConfig = JSON.parse(configFile);
+    const masterAdminEmailsEnv = process.env.MASTER_ADMIN_EMAILS;
+
+    if (!masterAdminEmailsEnv) {
+      console.warn('MASTER_ADMIN_EMAILS environment variable not set');
+      return false;
+    }
+
+    // Parse comma-separated emails
+    const masterAdminEmails = masterAdminEmailsEnv
+      .split(',')
+      .map(e => e.trim())
+      .filter(e => e.length > 0);
 
     // Case-insensitive email comparison
     const normalizedEmail = email.toLowerCase().trim();
-    return config.masterAdminEmails.some(
+    const isAdmin = masterAdminEmails.some(
       (adminEmail) => adminEmail.toLowerCase().trim() === normalizedEmail
     );
+
+    console.log('Master admin check:', {
+      email: normalizedEmail,
+      masterAdminEmails,
+      isAdmin
+    });
+
+    return isAdmin;
   } catch (error) {
-    console.error('Error reading master admin config:', error);
+    console.error('Error reading master admin emails:', error);
     return false;
   }
 }

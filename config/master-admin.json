@@ -1,6 +1,0 @@
-{
-  "masterAdminEmails": [
-    "admin@example.com"
-  ],
-  "description": "Add email addresses that should have master admin access to the platform. Master admins can manage wedding planners and view all weddings."
-}
