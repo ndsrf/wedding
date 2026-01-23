@@ -188,16 +188,29 @@ export function ChecklistEditor({
     (taskId: string, updates: Record<string, unknown>) => {
       if (readOnly) return;
 
-      // Store previous data for rollback
-      let previousTask: ChecklistTask | undefined;
-
       setChecklist((prev) => {
         if (!prev) return prev;
 
-        previousTask =
+        // Find the task to update
+        const previousTask =
           prev.sections.flatMap((s) => s.tasks).find((t) => t.id === taskId) ||
           prev.tasks.find((t) => t.id === taskId);
 
+        // If task found, store it for rollback
+        if (previousTask) {
+          pendingUpdatesRef.current.set(taskId, {
+            id: taskId,
+            updates,
+            previousData: previousTask,
+          });
+
+          // Mark as having unsaved changes
+          // Note: This needs to be called outside the setState callback
+          // Use setTimeout to ensure it runs after state update
+          setTimeout(() => setHasUnsavedChanges(true), 0);
+        }
+
+        // Return updated checklist
         return {
           ...prev,
           sections: prev.sections.map((section) => ({
@@ -211,18 +224,6 @@ export function ChecklistEditor({
           ),
         };
       });
-
-      if (previousTask) {
-        // Store pending update
-        pendingUpdatesRef.current.set(taskId, {
-          id: taskId,
-          updates,
-          previousData: previousTask,
-        });
-
-        // Mark as having unsaved changes
-        setHasUnsavedChanges(true);
-      }
     },
     [readOnly]
   );

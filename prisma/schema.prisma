@@ -34,6 +34,8 @@ model WeddingPlanner {
   checklist_template  ChecklistTemplate?
   themes              Theme[]
   weddings            Wedding[]
+  provider_categories ProviderCategory[]
+  providers           Provider[]
 
   @@index([enabled])
   @@map("wedding_planners")
@@ -107,6 +109,7 @@ model Wedding {
   tables                          Table[]
   tracking_events                 TrackingEvent[]
   wedding_admins                  WeddingAdmin[]
+  providers                       WeddingProvider[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   theme                           Theme?             @relation(fields: [theme_id], references: [id])
 
@@ -377,6 +380,90 @@ model ChecklistTask {
 }
 
 // -----------------------------------------------------------------------------
+// PROVIDERS & PAYMENTS
+// -----------------------------------------------------------------------------
+
+model ProviderCategory {
+  id          String         @id @default(uuid())
+  planner_id  String
+  name        String
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  planner     WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  providers   Provider[]
+  wedding_providers WeddingProvider[]
+
+  @@unique([planner_id, name])
+  @@index([planner_id])
+  @@map("provider_categories")
+}
+
+model Provider {
+  id              String            @id @default(uuid())
+  planner_id      String
+  category_id     String
+  name            String
+  contact_name    String?
+  email           String?
+  phone           String?
+  website         String?
+  social_media    String?
+  approx_price    Decimal?          @db.Decimal(10, 2)
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+  planner         WeddingPlanner    @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  category        ProviderCategory  @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  wedding_assignments WeddingProvider[]
+
+  @@index([planner_id])
+  @@index([category_id])
+  @@map("providers")
+}
+
+model WeddingProvider {
+  id              String    @id @default(uuid())
+  wedding_id      String
+  category_id     String
+  provider_id     String?
+  name            String?
+  contact_name    String?
+  email           String?
+  phone           String?
+  website         String?
+  social_media    String?
+  total_price     Decimal?  @db.Decimal(10, 2)
+  contract_url    String?
+  notes           String?   @db.Text
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  wedding         Wedding   @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  category        ProviderCategory @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  provider        Provider? @relation(fields: [provider_id], references: [id], onDelete: Restrict)
+  payments        Payment[]
+
+  @@unique([wedding_id, category_id, provider_id])
+  @@index([wedding_id])
+  @@index([category_id])
+  @@index([provider_id])
+  @@map("wedding_providers")
+}
+
+model Payment {
+  id                  String          @id @default(uuid())
+  wedding_provider_id String
+  amount              Decimal         @db.Decimal(10, 2)
+  date                DateTime        @default(now())
+  method              PaymentMethod
+  notes               String?         @db.Text
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+  wedding_provider    WeddingProvider @relation(fields: [wedding_provider_id], references: [id], onDelete: Cascade)
+
+  @@index([wedding_provider_id])
+  @@map("payments")
+}
+
+// -----------------------------------------------------------------------------
 // Enums
 // -----------------------------------------------------------------------------
 
@@ -466,4 +553,13 @@ enum TaskStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  PAYPAL
+  BIZUM
+  REVOLUT
+  OTHER
 }
