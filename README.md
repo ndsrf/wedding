@@ -262,6 +262,146 @@ git commit -m "Add migration"
 
 For more details, see [`prisma/migrations/README.md`](./prisma/migrations/README.md).
 
+## Versioning and Releases
+
+This project follows [Semantic Versioning](https://semver.org/) (SemVer) for version management:
+
+- **MAJOR** version (X.0.0): Breaking changes or incompatible API changes
+- **MINOR** version (0.X.0): New features, backwards-compatible
+- **PATCH** version (0.0.X): Bug fixes, backwards-compatible
+
+### Creating a New Version
+
+#### 1. Update package.json Version
+
+Use npm version command to bump the version and create a git tag automatically:
+
+```bash
+# Patch version (0.0.X) - for bug fixes
+npm version patch
+
+# Minor version (0.X.0) - for new features
+npm version minor
+
+# Major version (X.0.0) - for breaking changes
+npm version major
+```
+
+These commands will:
+- Update the version in `package.json`
+- Create a git commit with the message "X.Y.Z"
+- Create a git tag `vX.Y.Z`
+
+#### 2. Push Changes and Tags
+
+```bash
+# Push commits and tags to GitHub
+git push origin main --follow-tags
+
+# Or push separately
+git push origin main
+git push origin --tags
+```
+
+### Creating GitHub Releases
+
+#### Option 1: Via GitHub Web Interface
+
+1. Navigate to your repository on GitHub
+2. Click on **"Releases"** in the right sidebar
+3. Click **"Draft a new release"**
+4. Fill in the release information:
+   - **Choose a tag**: Select the existing tag (e.g., `v1.2.3`) or create a new one
+   - **Release title**: Version number (e.g., `v1.2.3`) or descriptive name
+   - **Description**: Add release notes (see template below)
+   - **Attach binaries** (optional): Upload any build artifacts
+5. Click **"Publish release"**
+
+#### Option 2: Via GitHub CLI
+
+```bash
+# Install GitHub CLI if not already installed
+# https://cli.github.com/
+
+# Create a release from an existing tag
+gh release create v1.2.3 \
+  --title "v1.2.3" \
+  --notes "Release notes go here"
+
+# Create a release with auto-generated notes
+gh release create v1.2.3 --generate-notes
+
+# Create a pre-release
+gh release create v1.2.3-beta --prerelease
+```
+
+### Release Notes Template
+
+Use this template for consistent release notes:
+
+```markdown
+## What's Changed
+
+### Features
+- Added feature X for better user experience
+- Implemented feature Y for improved performance
+
+### Bug Fixes
+- Fixed issue with Z causing errors
+- Resolved problem with A not working correctly
+
+### Improvements
+- Optimized database queries for faster load times
+- Updated dependencies to latest versions
+
+### Breaking Changes
+- Changed API endpoint from /old to /new
+- Removed deprecated feature X
+
+### Migration Guide
+If applicable, provide steps for users to migrate from the previous version.
+
+## Full Changelog
+https://github.com/your-username/wedding/compare/v1.2.2...v1.2.3
+```
+
+### Complete Release Workflow
+
+```bash
+# 1. Ensure all changes are committed
+git status
+
+# 2. Run tests and linting
+npm test
+npm run lint
+
+# 3. Build the project
+npm run build
+
+# 4. Bump version (choose one)
+npm version patch   # Bug fixes: 1.0.0 → 1.0.1
+npm version minor   # New features: 1.0.0 → 1.1.0
+npm version major   # Breaking changes: 1.0.0 → 2.0.0
+
+# 5. Push to GitHub
+git push origin main --follow-tags
+
+# 6. Create GitHub release
+gh release create v1.2.3 --generate-notes
+
+# Or manually create release on GitHub.com
+```
+
+### Best Practices
+
+- **Always test** before creating a release
+- **Write clear release notes** explaining what changed
+- **Use semantic versioning** consistently
+- **Tag releases** with `v` prefix (e.g., `v1.2.3`)
+- **Create releases** from the main/master branch
+- **Include migration instructions** for breaking changes
+- **Attach build artifacts** if distributing compiled versions
+
 ## Deployment
 
 The application uses Docker containers and GitHub Actions for automated deployment. See the [deployment documentation](./docs/deployment.md) for details.
