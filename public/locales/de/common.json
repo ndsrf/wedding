@@ -853,6 +853,24 @@
     "edit": {
       "title": "RSVP bearbeiten",
       "canEdit": "Sie können Ihre RSVP bis zum {date} bearbeiten."
+    },
+    "footer": {
+      "contactCouple": "Bei Fragen wenden Sie sich bitte direkt an das Paar."
+    },
+    "gardenBirds": {
+      "weAreGettingMarried": "Wir heiraten",
+      "tapToOpen": "Tippen zum Öffnen",
+      "scrollForDetails": "Scrollen für weitere Details",
+      "countdown": "Countdown",
+      "countdownSubtitle": "Bis zum schönsten Tag unseres Lebens",
+      "days": "Tage",
+      "hours": "Stunden",
+      "minutes": "Minuten",
+      "seconds": "Sekunden",
+      "location": "Ort",
+      "timeRange": "Von {startTime} bis 01:00 Uhr",
+      "details": "Details des Tages",
+      "detailsSubtitle": "Alles was Sie wissen müssen"
     }
   },
   "auth": {

@@ -885,6 +885,21 @@
     },
     "footer": {
       "contactCouple": "If you have any questions, please contact the couple directly."
+    },
+    "gardenBirds": {
+      "weAreGettingMarried": "We Are Getting Married",
+      "tapToOpen": "Tap to open",
+      "scrollForDetails": "Scroll for more details",
+      "countdown": "Countdown",
+      "countdownSubtitle": "To the most special day of our lives",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "location": "Location",
+      "timeRange": "From {startTime} to 01:00h",
+      "details": "Details of the day",
+      "detailsSubtitle": "Everything you need to know"
     }
   },
   "auth": {

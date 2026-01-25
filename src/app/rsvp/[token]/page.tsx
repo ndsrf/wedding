@@ -15,6 +15,7 @@ import RSVPForm from '@/components/guest/RSVPForm';
 import PaymentInfo from '@/components/guest/PaymentInfo';
 import LanguageSelector from '@/components/guest/LanguageSelector';
 import ConfirmationMessage from '@/components/guest/ConfirmationMessage';
+import { EnvelopeReveal } from '@/components/guest/EnvelopeReveal';
 import type { GuestRSVPPageData } from '@/types/api';
 
 export default function GuestRSVPPage() {
@@ -119,9 +120,75 @@ export default function GuestRSVPPage() {
   }
 
   const { family, wedding, theme, rsvp_cutoff_passed } = data;
+  const isGardenBirds = theme.name === 'Garden Birds';
+
+  // Content to be wrapped in envelope or displayed normally
+  const mainContent = (
+    <>
+      {/* Welcome Section */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          {t('guest.welcome.title', { familyName: family.name })} 👋
+        </h2>
+        <p className="text-xl text-gray-600 mb-4">
+          {t('guest.welcome.subtitle')}
+        </p>
+        <div className="space-y-2 text-lg text-gray-700">
+          <p>
+            <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
+          </p>
+          <p>
+            <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString() })}</strong>
+          </p>
+          <p>
+            <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
+          </p>
+          <p>
+            <strong>{t('guest.welcome.location', { location: wedding.location })}</strong>
+          </p>
+          {wedding.dress_code && (
+            <p>
+              <strong>{t('guest.welcome.dressCode')}</strong> {wedding.dress_code}
+            </p>
+          )}
+        </div>
+        {wedding.additional_info && (
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <p className="text-lg text-gray-700">{wedding.additional_info}</p>
+          </div>
+        )}
+      </div>
+
+      {/* RSVP Form or Confirmation */}
+      {rsvpSubmitted ? (
+        <ConfirmationMessage
+          familyName={family.name}
+          canEdit={!rsvp_cutoff_passed}
+          cutoffDate={wedding.rsvp_cutoff_date}
+          onEdit={() => setRsvpSubmitted(false)}
+        />
+      ) : (
+        <RSVPForm
+          token={token}
+          family={family}
+          wedding={wedding}
+          rsvpCutoffPassed={rsvp_cutoff_passed}
+          onSuccess={handleRSVPSuccess}
+        />
+      )}
+
+      {/* Payment Information */}
+      {rsvpSubmitted && (
+        <PaymentInfo
+          token={token}
+          paymentMode={data.wedding.payment_tracking_mode || 'MANUAL'}
+        />
+      )}
+    </>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: isGardenBirds ? theme.config.colors.background : '#f9fafb' }}>
       {/* Apply theme CSS */}
       <style jsx global>{`
         :root {
@@ -138,89 +205,57 @@ export default function GuestRSVPPage() {
         }
       `}</style>
 
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-900">
-            {wedding.couple_names}
-          </h1>
-          <LanguageSelector
-            token={token}
-            currentLanguage={family.preferred_language}
-            onLanguageChange={() => window.location.reload()}
-          />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Welcome Section */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            {t('guest.welcome.title', { familyName: family.name })} 👋
-          </h2>
-          <p className="text-xl text-gray-600 mb-4">
-            {t('guest.welcome.subtitle')}
-          </p>
-          <div className="space-y-2 text-lg text-gray-700">
-            <p>
-              <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
-            </p>
-            <p>
-              <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString() })}</strong>
-            </p>
-            <p>
-              <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
-            </p>
-            <p>
-              <strong>{t('guest.welcome.location', { location: wedding.location })}</strong>
-            </p>
-            {wedding.dress_code && (
-              <p>
-                <strong>{t('guest.welcome.dressCode')}</strong> {wedding.dress_code}
-              </p>
-            )}
+      {isGardenBirds ? (
+        // Garden Birds template with envelope reveal
+        <EnvelopeReveal
+          coupleNames={wedding.couple_names}
+          weddingDate={wedding.wedding_date}
+          weddingTime={wedding.wedding_time}
+          location={wedding.location}
+          additionalInfo={wedding.additional_info || undefined}
+        >
+          {/* Language Selector in top right */}
+          <div className="absolute top-4 right-4 z-10">
+            <LanguageSelector
+              token={token}
+              currentLanguage={family.preferred_language}
+              onLanguageChange={() => window.location.reload()}
+            />
           </div>
-          {wedding.additional_info && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-lg text-gray-700">{wedding.additional_info}</p>
+          <div className="space-y-6">
+            {mainContent}
+          </div>
+        </EnvelopeReveal>
+      ) : (
+        // Standard template layout
+        <>
+          {/* Header */}
+          <div className="bg-white shadow-sm border-b border-gray-200">
+            <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+              <h1 className="text-xl font-bold text-gray-900">
+                {wedding.couple_names}
+              </h1>
+              <LanguageSelector
+                token={token}
+                currentLanguage={family.preferred_language}
+                onLanguageChange={() => window.location.reload()}
+              />
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* RSVP Form or Confirmation */}
-        {rsvpSubmitted ? (
-          <ConfirmationMessage
-            familyName={family.name}
-            canEdit={!rsvp_cutoff_passed}
-            cutoffDate={wedding.rsvp_cutoff_date}
-            onEdit={() => setRsvpSubmitted(false)}
-          />
-        ) : (
-          <RSVPForm
-            token={token}
-            family={family}
-            wedding={wedding}
-            rsvpCutoffPassed={rsvp_cutoff_passed}
-            onSuccess={handleRSVPSuccess}
-          />
-        )}
+          {/* Main Content */}
+          <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+            {mainContent}
+          </div>
 
-        {/* Payment Information */}
-        {rsvpSubmitted && (
-          <PaymentInfo
-            token={token}
-            paymentMode={data.wedding.payment_tracking_mode || 'MANUAL'}
-          />
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="max-w-4xl mx-auto px-4 py-8 text-center text-gray-500">
-        <p className="text-base">
-          {t('guest.footer.contactCouple')}
-        </p>
-      </div>
+          {/* Footer */}
+          <div className="max-w-4xl mx-auto px-4 py-8 text-center text-gray-500">
+            <p className="text-base">
+              {t('guest.footer.contactCouple')}
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

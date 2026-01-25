@@ -85,6 +85,7 @@ export enum ThemePreset {
   MODERN_MINIMAL = 'modern-minimal',
   RUSTIC_CHARM = 'rustic-charm',
   BEACH_BREEZE = 'beach-breeze',
+  GARDEN_BIRDS = 'garden-birds',
 }
 
 /**
@@ -408,6 +409,31 @@ export const PRESET_THEMES: Record<ThemePreset, ThemeConfig> = {
       background: '/themes/beach/waves-pattern.svg',
     },
   },
+
+  [ThemePreset.GARDEN_BIRDS]: {
+    colors: {
+      primary: '#6B8E6F', // Soft sage green
+      secondary: '#A8C5A4', // Light moss green
+      accent: '#E8B86D', // Warm golden yellow
+      background: '#FAF9F5', // Warm off-white
+      text: '#3A4F3C', // Deep forest green
+      textSecondary: '#6E7F70', // Muted green-gray
+      border: '#D9E3D6', // Soft sage border
+    },
+    fonts: {
+      heading: 'Crimson Text, serif',
+      body: 'Libre Baskerville, serif',
+    },
+    styles: {
+      buttonRadius: '20px',
+      cardShadow: '0 6px 20px rgba(107, 142, 111, 0.15)',
+      spacing: '1.25rem',
+      borderRadius: '15px',
+    },
+    images: {
+      background: '/themes/garden-birds/botanical-pattern.svg',
+    },
+  },
 };
 
 /**
@@ -443,5 +469,11 @@ export const THEME_PRESET_INFO: Record<ThemePreset, ThemePresetInfo> = {
     name: 'Beach Breeze',
     description: 'Light and airy with coastal vibes',
     tags: ['beach', 'coastal', 'light', 'casual'],
+  },
+  [ThemePreset.GARDEN_BIRDS]: {
+    id: ThemePreset.GARDEN_BIRDS,
+    name: 'Garden Birds',
+    description: 'Enchanting envelope reveal with botanical elegance',
+    tags: ['garden', 'nature', 'elegant', 'envelope', 'botanical'],
   },
 };
