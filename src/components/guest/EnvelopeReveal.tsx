@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface EnvelopeRevealProps {
   children: React.ReactNode;
@@ -22,6 +23,7 @@ interface EnvelopeRevealProps {
 export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime, location, additionalInfo }: EnvelopeRevealProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const t = useTranslations('guest.gardenBirds');
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -225,7 +227,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                 {/* Click to Open Text */}
                 <div className="absolute bottom-2 left-0 right-0 text-center pulse-cta">
                   <p className="text-sm md:text-base" style={{ color: '#6E7F70' }}>
-                    Tap to open
+                    {t('tapToOpen')}
                   </p>
                 </div>
               </div>
@@ -261,7 +263,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                 fontFamily: 'var(--font-body, serif)',
                 letterSpacing: '0.3em'
               }}>
-                Nos Casamos
+                {t('weAreGettingMarried')}
               </h1>
 
               {/* Couple names */}
@@ -316,7 +318,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
               <div className="mt-12">
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-sm pulse-cta" style={{ color: 'var(--color-text-secondary, #6E7F70)' }}>
-                    Scroll para más detalles
+                    {t('scrollForDetails')}
                   </p>
                   <div className="text-2xl bounce-arrow">↓</div>
                 </div>
@@ -332,10 +334,10 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                     color: '#F5F1E8',
                     fontStyle: 'italic'
                   }}>
-                    Cuenta atrás
+                    {t('countdown')}
                   </h2>
                   <p className="text-lg mb-8" style={{ color: '#E8E4D8' }}>
-                    Para el día más especial de nuestras vidas
+                    {t('countdownSubtitle')}
                   </p>
 
                   {/* Countdown Grid */}
@@ -348,7 +350,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                         {timeLeft.days}
                       </div>
                       <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
-                        Días
+                        {t('days')}
                       </div>
                     </div>
                     <div className="backdrop-blur-sm rounded-lg p-6" style={{
@@ -359,7 +361,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                         {timeLeft.hours}
                       </div>
                       <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
-                        Horas
+                        {t('hours')}
                       </div>
                     </div>
                     <div className="backdrop-blur-sm rounded-lg p-6" style={{
@@ -370,7 +372,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                         {timeLeft.minutes}
                       </div>
                       <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
-                        Minutos
+                        {t('minutes')}
                       </div>
                     </div>
                     <div className="backdrop-blur-sm rounded-lg p-6" style={{
@@ -381,7 +383,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                         {timeLeft.seconds}
                       </div>
                       <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
-                        Segundos
+                        {t('seconds')}
                       </div>
                     </div>
                   </div>
@@ -407,7 +409,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                     color: 'var(--color-primary, #6B8E6F)',
                     fontStyle: 'italic'
                   }}>
-                    Localización
+                    {t('location')}
                   </h2>
 
                   <p className="text-xl md:text-2xl mb-4" style={{
@@ -422,7 +424,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                     <div className="flex items-center justify-center gap-2 mb-8">
                       <span className="text-lg">🕐</span>
                       <p className="text-lg" style={{ color: 'var(--color-text-secondary, #6E7F70)' }}>
-                        De {weddingTime} a 01:00h
+                        {t('timeRange', { startTime: weddingTime })}
                       </p>
                     </div>
                   )}
@@ -462,10 +464,10 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                   color: 'var(--color-primary, #6B8E6F)',
                   fontStyle: 'italic'
                 }}>
-                  Detalles del día
+                  {t('details')}
                 </h2>
                 <p className="text-lg" style={{ color: 'var(--color-text-secondary, #6E7F70)' }}>
-                  Todo lo que necesitas saber
+                  {t('detailsSubtitle')}
                 </p>
               </div>
 
