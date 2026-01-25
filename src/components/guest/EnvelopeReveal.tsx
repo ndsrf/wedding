@@ -63,7 +63,13 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
     if (!weddingDate) return;
 
     const calculateTimeLeft = () => {
-      const weddingDateTime = new Date(weddingDate + (weddingTime ? `T${weddingTime}` : 'T00:00:00'));
+      // Handle both ISO string (YYYY-MM-DDTHH:mm:ss.sssZ) and simple date string (YYYY-MM-DD)
+      const datePart = weddingDate.includes('T') ? weddingDate.split('T')[0] : weddingDate;
+      const timePart = weddingTime ? weddingTime : '00:00';
+      // Create date object treating the time as local to the user's browser for now
+      // (since we don't have venue timezone info)
+      const weddingDateTime = new Date(`${datePart}T${timePart}:00`);
+      
       const now = new Date();
       const difference = weddingDateTime.getTime() - now.getTime();
 
@@ -429,20 +435,17 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                     </div>
                   )}
 
-                  {/* Placeholder for venue image/map */}
-                  <div className="rounded-lg overflow-hidden shadow-lg mb-6 max-w-2xl mx-auto" style={{
-                    background: 'linear-gradient(to bottom, #D4C9B8 0%, #C9B8A8 100%)',
-                    minHeight: '300px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <div className="text-center p-8">
-                      <span className="text-6xl mb-4 block">🏛️</span>
-                      <p className="text-lg" style={{ color: '#5A6B5C' }}>
-                        {location}
-                      </p>
-                    </div>
+                  {/* Google Maps Embed */}
+                  <div className="rounded-lg overflow-hidden shadow-lg mb-6 max-w-2xl mx-auto h-[350px] relative z-0">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                    ></iframe>
                   </div>
 
                   {additionalInfo && (
