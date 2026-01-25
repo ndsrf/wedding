@@ -115,7 +115,8 @@ Platform includes default themes:
 - Garden Romance (florals, pastels)
 - Modern Minimal (clean, contemporary)
 - Rustic Charm (warm, earthy)
-- Beach Breeze (light, coastal)
+- Beach Breeze (light, airy)
+- Garden Birds (botanical, enchanting)
 
 Planners can customize these defaults or create entirely new themes.
 

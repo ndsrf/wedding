@@ -4,12 +4,13 @@
  * Pre-built system themes for the wedding management platform.
  * These themes are available to all planners and cannot be modified.
  *
- * Contains 5 distinct visual themes:
+ * Contains 6 distinct visual themes:
  * 1. Classic Elegance - Timeless and sophisticated
  * 2. Garden Romance - Soft florals and natural beauty
  * 3. Modern Minimal - Clean and contemporary
  * 4. Rustic Charm - Warm and cozy
  * 5. Beach Breeze - Light and airy
+ * 6. Garden Birds - Enchanting botanical reveal
  */
 
 import {

@@ -8,6 +8,7 @@ const nextConfig = {
   // Enable standalone output for Docker deployment
   output: 'standalone',
   experimental: {
+    instrumentationHook: true,
     serverActions: {
       bodySizeLimit: '5mb',
     },
