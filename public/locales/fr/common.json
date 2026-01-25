@@ -817,7 +817,8 @@
       "confirmationMessage": "Nous avons bien reçu votre confirmation. Nous avons hâte de vous voir au mariage !",
       "cutoffPassed": "La date limite de réponse est passée. Veuillez contacter les organisateurs.",
       "additionalQuestions": "Questions Supplémentaires",
-      "defaultTransportationQuestion": "Aurez-vous besoin d'un transport vers le lieu?"
+      "defaultTransportationQuestion": "Aurez-vous besoin d'un transport vers le lieu?",
+      "emptyConfirmation": "Vous confirmez que personne de votre groupe ne sera présent, est-ce ce que vous voulez confirmer ? Sinon, veuillez annuler et sélectionner les membres de votre groupe qui seront présents"
     },
     "members": {
       "title": "Membres de la Famille",

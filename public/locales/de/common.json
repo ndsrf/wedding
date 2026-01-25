@@ -817,7 +817,8 @@
       "confirmationMessage": "Wir haben Ihre Bestätigung erhalten. Wir freuen uns darauf, Sie bei der Hochzeit zu sehen!",
       "cutoffPassed": "Die RSVP-Frist ist abgelaufen. Bitte kontaktieren Sie die Organisatoren.",
       "additionalQuestions": "Zusätzliche Fragen",
-      "defaultTransportationQuestion": "Benötigen Sie Transport zum Veranstaltungsort?"
+      "defaultTransportationQuestion": "Benötigen Sie Transport zum Veranstaltungsort?",
+      "emptyConfirmation": "Sie bestätigen, dass niemand aus Ihrer Gruppe teilnehmen wird. Ist das das, was Sie bestätigen möchten? Andernfalls brechen Sie bitte ab und wählen Sie diejenigen aus Ihrer Gruppe aus, die teilnehmen werden"
     },
     "members": {
       "title": "Familienmitglieder",

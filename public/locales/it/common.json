@@ -817,7 +817,8 @@
       "confirmationMessage": "Abbiamo ricevuto la tua conferma. Non vediamo l'ora di vederti al matrimonio!",
       "cutoffPassed": "La scadenza per l'RSVP è passata. Contatta gli organizzatori.",
       "additionalQuestions": "Domande Aggiuntive",
-      "defaultTransportationQuestion": "Avrete bisogno di trasporto per raggiungere la location?"
+      "defaultTransportationQuestion": "Avrete bisogno di trasporto per raggiungere la location?",
+      "emptyConfirmation": "Stai confermando che nessuno del tuo gruppo parteciperà, è quello che vuoi confermare? Altrimenti, annulla e seleziona i membri del tuo gruppo che parteciperanno"
     },
     "members": {
       "title": "Membri della Famiglia",

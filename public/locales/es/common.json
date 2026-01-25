@@ -833,7 +833,8 @@
       "confirmationMessage": "Hemos recibido tu confirmación. ¡Esperamos verte en la boda!",
       "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los organizadores.",
       "additionalQuestions": "Preguntas Adicionales",
-      "defaultTransportationQuestion": "¿Necesitarás transporte al lugar del evento?"
+      "defaultTransportationQuestion": "¿Necesitarás transporte al lugar del evento?",
+      "emptyConfirmation": "Estás confirmando que nadie de tu grupo asistirá, ¿es eso lo que quieres confirmar? De lo contrario, cancela y selecciona a los que asistirán de tu grupo"
     },
     "members": {
       "title": "Miembros de la Familia",

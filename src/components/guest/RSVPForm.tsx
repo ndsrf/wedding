@@ -162,6 +162,14 @@ export default function RSVPForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // If no one is attending, ask for confirmation
+    const attendingCount = members.filter((m) => m.attending).length;
+    if (attendingCount === 0) {
+      const confirmed = window.confirm(t('guest.rsvp.emptyConfirmation'));
+      if (!confirmed) return;
+    }
+
     setSubmitting(true);
     setError(null);
 

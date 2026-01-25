@@ -846,7 +846,8 @@
       "confirmationMessage": "We have received your confirmation. We look forward to seeing you at the wedding!",
       "cutoffPassed": "The RSVP deadline has passed. Please contact the organizers.",
       "additionalQuestions": "Additional Questions",
-      "defaultTransportationQuestion": "Will you need transportation to the venue?"
+      "defaultTransportationQuestion": "Will you need transportation to the venue?",
+      "emptyConfirmation": "You are confirming no one from your group will be attending, is that what you want to confirm? Otherwise please cancel and select those from your group who are attending"
     },
     "members": {
       "title": "Family Members",
