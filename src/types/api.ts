@@ -283,6 +283,7 @@ export interface DeleteThemeResponse {
 export interface WeddingDetails extends WeddingWithStats {
   planner_name: string;
   admin_count: number;
+  available_themes: Theme[];
 }
 
 export type GetWeddingDetailsResponse = APIResponse<WeddingDetails>;
@@ -292,6 +293,7 @@ export interface UpdateWeddingConfigRequest {
   rsvp_cutoff_date?: string; // ISO date string
   payment_tracking_mode?: PaymentMode;
   gift_iban?: string | null;
+  theme_id?: string | null;
   allow_guest_additions?: boolean;
   dress_code?: string | null;
   additional_info?: string | null;

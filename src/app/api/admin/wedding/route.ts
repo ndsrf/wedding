@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { getAllSystemThemes } from '@/lib/theme/presets';
+import type { ThemeConfig } from '@/types/theme';
 import type {
   APIResponse,
   GetWeddingDetailsResponse,
@@ -21,6 +23,7 @@ const updateWeddingConfigSchema = z.object({
   rsvp_cutoff_date: z.string().datetime().optional(),
   payment_tracking_mode: z.enum(['AUTOMATED', 'MANUAL']).optional(),
   gift_iban: z.string().nullable().optional(),
+  theme_id: z.string().nullable().optional(),
   allow_guest_additions: z.boolean().optional(),
   dress_code: z.string().nullable().optional(),
   additional_info: z.string().nullable().optional(),
@@ -139,6 +142,38 @@ export async function GET() {
       )
     ).length;
 
+    // Fetch available themes
+    const systemThemes = getAllSystemThemes();
+    const systemThemeObjects = systemThemes.map((theme) => ({
+      id: theme.id,
+      planner_id: null,
+      name: theme.info.name,
+      description: theme.info.description,
+      is_default: false,
+      is_system_theme: true,
+      config: theme.config,
+      preview_image_url: theme.info.preview_image_url || null,
+      created_at: new Date('2024-01-01'),
+      updated_at: new Date('2024-01-01'),
+    }));
+
+    const customThemes = await prisma.theme.findMany({
+      where: {
+        planner_id: wedding.planner_id,
+        is_system_theme: false,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    const customThemeObjects = customThemes.map((theme) => ({
+      ...theme,
+      config: theme.config as unknown as ThemeConfig,
+    }));
+
+    const availableThemes = [...systemThemeObjects, ...customThemeObjects];
+
     const weddingDetails = {
       id: wedding.id,
       planner_id: wedding.planner_id,
@@ -189,6 +224,7 @@ export async function GET() {
       // Additional details for admin view
       planner_name: wedding.planner.name,
       admin_count: wedding.wedding_admins.length,
+      available_themes: availableThemes,
     };
 
     const response: GetWeddingDetailsResponse = {
@@ -273,6 +309,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (validatedData.gift_iban !== undefined) {
       updateData.gift_iban = validatedData.gift_iban;
+    }
+    if (validatedData.theme_id !== undefined) {
+      updateData.theme_id = validatedData.theme_id;
     }
     if (validatedData.allow_guest_additions !== undefined) {
       updateData.allow_guest_additions = validatedData.allow_guest_additions;

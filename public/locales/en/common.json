@@ -694,6 +694,10 @@
       "backToDashboard": "Back to Dashboard",
       "form": {
         "basicSettings": "Basic Settings",
+        "theme": "Wedding Theme",
+        "noTheme": "No theme selected",
+        "systemTheme": "System",
+        "giftIbanPlaceholder": "e.g., ES91 1234 5678 9012 3456 7890",
         "paymentTrackingMode": "Payment Tracking Mode",
         "paymentTrackingModeDesc": "Automated mode generates unique reference codes for each family to track bank transfers.",
         "automated": "Automated (with reference codes)",

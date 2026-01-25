@@ -11,24 +11,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
 import { WeddingConfigForm } from '@/components/admin/WeddingConfigForm';
-import type { Wedding } from '@/types/models';
-import type { UpdateWeddingConfigRequest } from '@/types/api';
-
-interface WeddingWithStats extends Wedding {
-  guest_count: number;
-  rsvp_count: number;
-  rsvp_completion_percentage: number;
-  attending_count: number;
-  payment_received_count: number;
-  planner_name: string;
-  admin_count: number;
-}
+import type { UpdateWeddingConfigRequest, WeddingDetails } from '@/types/api';
 
 export default function ConfigureWeddingPage() {
   const router = useRouter();
   const t = useTranslations('admin.configure');
   const format = useFormatter();
-  const [wedding, setWedding] = useState<WeddingWithStats | null>(null);
+  const [wedding, setWedding] = useState<WeddingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -178,6 +167,7 @@ export default function ConfigureWeddingPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <WeddingConfigForm
           wedding={wedding}
+          themes={wedding.available_themes}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
         />

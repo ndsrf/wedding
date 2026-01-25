@@ -682,6 +682,10 @@
       "backToDashboard": "Volver al Panel",
       "form": {
         "basicSettings": "Ajustes Básicos",
+        "theme": "Tema de la boda",
+        "noTheme": "Sin tema seleccionado",
+        "systemTheme": "Sistema",
+        "giftIbanPlaceholder": "ej., ES91 1234 5678 9012 3456 7890",
         "paymentTrackingMode": "Modo de Seguimiento de Pagos",
         "paymentTrackingModeDesc": "El modo automatizado genera códigos de referencia únicos para cada familia para rastrear transferencias bancarias.",
         "automated": "Automatizado (con códigos de referencia)",

@@ -668,6 +668,10 @@
       "backToDashboard": "Retour au Tableau de Bord",
       "form": {
         "basicSettings": "Paramètres de Base",
+        "theme": "Thème du mariage",
+        "noTheme": "Aucun thème sélectionné",
+        "systemTheme": "Système",
+        "giftIbanPlaceholder": "ex., FR76 1234 5678 9012 3456 7890",
         "paymentTrackingMode": "Mode de Suivi des Paiements",
         "paymentTrackingModeDesc": "Le mode automatisé génère des codes de référence uniques pour chaque famille afin de suivre les virements bancaires.",
         "automated": "Automatisé (avec codes de référence)",

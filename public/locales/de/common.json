@@ -668,6 +668,10 @@
       "backToDashboard": "Zurück zum Dashboard",
       "form": {
         "basicSettings": "Grundeinstellungen",
+        "theme": "Hochzeitsthema",
+        "noTheme": "Kein Thema ausgewählt",
+        "systemTheme": "System",
+        "giftIbanPlaceholder": "z.B., DE89 1234 5678 9012 3456 7890",
         "paymentTrackingMode": "Zahlungsverfolgungsmodus",
         "paymentTrackingModeDesc": "Der automatisierte Modus generiert eindeutige Referenzcodes für jede Familie, um Banküberweisungen zu verfolgen.",
         "automated": "Automatisiert (mit Referenzcodes)",
