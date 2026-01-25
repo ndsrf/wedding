@@ -5,6 +5,7 @@ import { useState } from 'react';
 interface EnvelopeRevealProps {
   children: React.ReactNode;
   coupleNames: string;
+  weddingDate?: string;
 }
 
 /**
@@ -15,11 +16,40 @@ interface EnvelopeRevealProps {
  *
  * @component
  */
-export function EnvelopeReveal({ children, coupleNames }: EnvelopeRevealProps) {
+export function EnvelopeReveal({ children, coupleNames, weddingDate }: EnvelopeRevealProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => {
     setIsOpen(true);
+  };
+
+  // Parse couple names (handle formats like "Mar & Jaume", "Mar y Jaume", "Mar and Jaume")
+  const getCoupleNamesArray = () => {
+    const separators = [' & ', ' y ', ' and ', ' e '];
+    for (const sep of separators) {
+      if (coupleNames.includes(sep)) {
+        return coupleNames.split(sep);
+      }
+    }
+    // Fallback: split by space and take first and last
+    const parts = coupleNames.split(' ');
+    if (parts.length >= 2) {
+      return [parts[0], parts[parts.length - 1]];
+    }
+    return [coupleNames, ''];
+  };
+
+  const [firstName, secondName] = getCoupleNamesArray();
+
+  // Format wedding date nicely
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   };
 
   return (
@@ -80,6 +110,11 @@ export function EnvelopeReveal({ children, coupleNames }: EnvelopeRevealProps) {
           to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(10px); }
+        }
+
         .bird-1 { animation: float 3s ease-in-out infinite; }
         .bird-2 { animation: floatReverse 2.5s ease-in-out infinite; animation-delay: 0.5s; }
         .leaf-1 { animation: rotate 2s ease-in-out infinite; }
@@ -92,6 +127,7 @@ export function EnvelopeReveal({ children, coupleNames }: EnvelopeRevealProps) {
         .content-enter { animation: slideUp 0.6s ease-out; }
         .header-enter { animation: slideDown 0.5s ease-out 0.3s both; }
         .footer-enter { animation: slideDown 0.5s ease-out 0.7s both; }
+        .bounce-arrow { animation: bounce 2s ease-in-out infinite; }
       `}</style>
 
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -167,31 +203,113 @@ export function EnvelopeReveal({ children, coupleNames }: EnvelopeRevealProps) {
             </div>
           </div>
         ) : (
-          <div className="w-full max-w-4xl content-enter">
-            {/* Decorative header with birds */}
-            <div className="text-center mb-6 header-enter">
-              <div className="flex justify-center items-center gap-4 mb-4">
-                <span className="text-3xl">🐦</span>
+          <div className="w-full content-enter">
+            {/* Hero Welcome Section */}
+            <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-12 header-enter">
+              {/* Decorative string lights */}
+              <div className="flex justify-center items-center gap-3 mb-8">
+                <span className="text-2xl">💡</span>
+                <span className="text-xl">💡</span>
+                <span className="text-2xl">💡</span>
+                <span className="text-xl">💡</span>
+                <span className="text-2xl">💡</span>
+              </div>
+
+              {/* Birds decorations */}
+              <div className="flex justify-center items-center gap-6 mb-6">
+                <span className="text-3xl bird-1">🐦</span>
                 <div className="flex gap-2">
-                  <span className="text-2xl">🌿</span>
+                  <span className="text-2xl leaf-1">🌿</span>
                   <span className="text-2xl">🍃</span>
-                  <span className="text-2xl">🌿</span>
+                  <span className="text-2xl leaf-2">🌿</span>
                 </div>
-                <span className="text-3xl">🕊️</span>
+                <span className="text-3xl bird-2">🕊️</span>
+              </div>
+
+              {/* Main heading */}
+              <h1 className="text-sm uppercase tracking-widest mb-6" style={{
+                color: 'var(--color-text-secondary, #6E7F70)',
+                fontFamily: 'var(--font-body, serif)',
+                letterSpacing: '0.3em'
+              }}>
+                Nos Casamos
+              </h1>
+
+              {/* Couple names */}
+              <div className="mb-8">
+                <h2 className="text-5xl md:text-7xl mb-4" style={{
+                  fontFamily: 'var(--font-heading, Crimson Text, serif)',
+                  color: 'var(--color-primary, #6B8E6F)',
+                  fontWeight: 400,
+                  fontStyle: 'italic'
+                }}>
+                  {firstName}
+                </h2>
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <div className="h-px w-12 bg-current" style={{ color: 'var(--color-accent, #E8B86D)' }}></div>
+                  <span className="text-3xl" style={{ color: 'var(--color-accent, #E8B86D)' }}>✦</span>
+                  <div className="h-px w-12 bg-current" style={{ color: 'var(--color-accent, #E8B86D)' }}></div>
+                </div>
+                <h2 className="text-5xl md:text-7xl" style={{
+                  fontFamily: 'var(--font-heading, Crimson Text, serif)',
+                  color: 'var(--color-primary, #6B8E6F)',
+                  fontWeight: 400,
+                  fontStyle: 'italic'
+                }}>
+                  {secondName}
+                </h2>
+              </div>
+
+              {/* Decorative fountain element */}
+              <div className="mb-6">
+                <div className="text-4xl mb-2">⛲</div>
+                <div className="flex gap-2 justify-center mb-4">
+                  <span className="text-xl">🌸</span>
+                  <span className="text-xl">🌺</span>
+                  <span className="text-xl">🌸</span>
+                </div>
+              </div>
+
+              {/* Wedding Date */}
+              {weddingDate && (
+                <div className="mb-8">
+                  <p className="text-xl md:text-2xl" style={{
+                    fontFamily: 'var(--font-body, serif)',
+                    color: 'var(--color-text, #3A4F3C)',
+                    fontStyle: 'italic'
+                  }}>
+                    {formatDate(weddingDate)}
+                  </p>
+                </div>
+              )}
+
+              {/* Scroll indicator */}
+              <div className="mt-12">
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-sm pulse-cta" style={{ color: 'var(--color-text-secondary, #6E7F70)' }}>
+                    Scroll para más detalles
+                  </p>
+                  <div className="text-2xl bounce-arrow">↓</div>
+                </div>
               </div>
             </div>
 
-            {/* Main Content */}
-            <div>
+            {/* Main Content - RSVP Form */}
+            <div className="max-w-4xl mx-auto px-4 pb-12">
               {children}
             </div>
 
             {/* Decorative footer */}
-            <div className="text-center mt-8 footer-enter">
+            <div className="text-center py-8 footer-enter">
+              <div className="flex justify-center gap-3 mb-4">
+                <span className="text-2xl leaf-1">🌿</span>
+                <span className="text-2xl">🍃</span>
+                <span className="text-2xl leaf-2">🌿</span>
+              </div>
               <div className="flex justify-center gap-2">
-                <span className="text-xl">🌸</span>
-                <span className="text-xl">🌺</span>
-                <span className="text-xl">🌸</span>
+                <span className="text-xl">🐦</span>
+                <span className="text-xl">🕊️</span>
+                <span className="text-xl">🐦</span>
               </div>
             </div>
           </div>

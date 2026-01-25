@@ -207,7 +207,10 @@ export default function GuestRSVPPage() {
 
       {isGardenBirds ? (
         // Garden Birds template with envelope reveal
-        <EnvelopeReveal coupleNames={wedding.couple_names}>
+        <EnvelopeReveal
+          coupleNames={wedding.couple_names}
+          weddingDate={wedding.wedding_date}
+        >
           {/* Language Selector in top right */}
           <div className="absolute top-4 right-4 z-10">
             <LanguageSelector
