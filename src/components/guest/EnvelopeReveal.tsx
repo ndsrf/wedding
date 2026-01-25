@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface EnvelopeRevealProps {
   children: React.ReactNode;
   coupleNames: string;
   weddingDate?: string;
+  weddingTime?: string;
+  location?: string;
+  additionalInfo?: string;
 }
 
 /**
@@ -16,8 +19,9 @@ interface EnvelopeRevealProps {
  *
  * @component
  */
-export function EnvelopeReveal({ children, coupleNames, weddingDate }: EnvelopeRevealProps) {
+export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime, location, additionalInfo }: EnvelopeRevealProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -51,6 +55,31 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate }: EnvelopeR
       year: 'numeric'
     });
   };
+
+  // Countdown timer
+  useEffect(() => {
+    if (!weddingDate) return;
+
+    const calculateTimeLeft = () => {
+      const weddingDateTime = new Date(weddingDate + (weddingTime ? `T${weddingTime}` : 'T00:00:00'));
+      const now = new Date();
+      const difference = weddingDateTime.getTime() - now.getTime();
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [weddingDate, weddingTime]);
 
   return (
     <>
@@ -294,13 +323,160 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate }: EnvelopeR
               </div>
             </div>
 
-            {/* Main Content - RSVP Form */}
-            <div className="max-w-4xl mx-auto px-4 pb-12">
-              {children}
+            {/* Countdown Section */}
+            {weddingDate && (
+              <div className="py-16 px-4" style={{ background: 'linear-gradient(to bottom, #8B9B7E 0%, #7A8B6E 100%)' }}>
+                <div className="max-w-4xl mx-auto text-center">
+                  <h2 className="text-3xl md:text-4xl mb-4" style={{
+                    fontFamily: 'var(--font-heading, Crimson Text, serif)',
+                    color: '#F5F1E8',
+                    fontStyle: 'italic'
+                  }}>
+                    Cuenta atrás
+                  </h2>
+                  <p className="text-lg mb-8" style={{ color: '#E8E4D8' }}>
+                    Para el día más especial de nuestras vidas
+                  </p>
+
+                  {/* Countdown Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                    <div className="backdrop-blur-sm rounded-lg p-6" style={{
+                      background: 'rgba(255, 255, 255, 0.15)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      <div className="text-5xl md:text-6xl font-bold mb-2" style={{ color: '#F5F1E8' }}>
+                        {timeLeft.days}
+                      </div>
+                      <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
+                        Días
+                      </div>
+                    </div>
+                    <div className="backdrop-blur-sm rounded-lg p-6" style={{
+                      background: 'rgba(255, 255, 255, 0.15)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      <div className="text-5xl md:text-6xl font-bold mb-2" style={{ color: '#F5F1E8' }}>
+                        {timeLeft.hours}
+                      </div>
+                      <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
+                        Horas
+                      </div>
+                    </div>
+                    <div className="backdrop-blur-sm rounded-lg p-6" style={{
+                      background: 'rgba(255, 255, 255, 0.15)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      <div className="text-5xl md:text-6xl font-bold mb-2" style={{ color: '#F5F1E8' }}>
+                        {timeLeft.minutes}
+                      </div>
+                      <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
+                        Minutos
+                      </div>
+                    </div>
+                    <div className="backdrop-blur-sm rounded-lg p-6" style={{
+                      background: 'rgba(255, 255, 255, 0.15)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      <div className="text-5xl md:text-6xl font-bold mb-2" style={{ color: '#F5F1E8' }}>
+                        {timeLeft.seconds}
+                      </div>
+                      <div className="text-sm uppercase tracking-widest" style={{ color: '#E8E4D8' }}>
+                        Segundos
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Location Section */}
+            {location && (
+              <div className="py-16 px-4" style={{ background: '#F5F1E8' }}>
+                <div className="max-w-4xl mx-auto text-center">
+                  {/* Location Icon */}
+                  <div className="mb-6">
+                    <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center" style={{
+                      background: 'rgba(139, 142, 110, 0.15)'
+                    }}>
+                      <span className="text-4xl">📍</span>
+                    </div>
+                  </div>
+
+                  <h2 className="text-3xl md:text-4xl mb-4" style={{
+                    fontFamily: 'var(--font-heading, Crimson Text, serif)',
+                    color: 'var(--color-primary, #6B8E6F)',
+                    fontStyle: 'italic'
+                  }}>
+                    Localización
+                  </h2>
+
+                  <p className="text-xl md:text-2xl mb-4" style={{
+                    fontFamily: 'var(--font-body, serif)',
+                    color: 'var(--color-text, #3A4F3C)',
+                    fontWeight: 600
+                  }}>
+                    {location}
+                  </p>
+
+                  {weddingTime && (
+                    <div className="flex items-center justify-center gap-2 mb-8">
+                      <span className="text-lg">🕐</span>
+                      <p className="text-lg" style={{ color: 'var(--color-text-secondary, #6E7F70)' }}>
+                        De {weddingTime} a 01:00h
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Placeholder for venue image/map */}
+                  <div className="rounded-lg overflow-hidden shadow-lg mb-6 max-w-2xl mx-auto" style={{
+                    background: 'linear-gradient(to bottom, #D4C9B8 0%, #C9B8A8 100%)',
+                    minHeight: '300px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <div className="text-center p-8">
+                      <span className="text-6xl mb-4 block">🏛️</span>
+                      <p className="text-lg" style={{ color: '#5A6B5C' }}>
+                        {location}
+                      </p>
+                    </div>
+                  </div>
+
+                  {additionalInfo && (
+                    <div className="text-center max-w-2xl mx-auto">
+                      <p className="text-base" style={{ color: 'var(--color-text-secondary, #6E7F70)' }}>
+                        {additionalInfo}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Details Section */}
+            <div className="py-16 px-4" style={{ background: '#FFFFFF' }}>
+              <div className="max-w-4xl mx-auto text-center mb-12">
+                <h2 className="text-3xl md:text-4xl mb-4" style={{
+                  fontFamily: 'var(--font-heading, Crimson Text, serif)',
+                  color: 'var(--color-primary, #6B8E6F)',
+                  fontStyle: 'italic'
+                }}>
+                  Detalles del día
+                </h2>
+                <p className="text-lg" style={{ color: 'var(--color-text-secondary, #6E7F70)' }}>
+                  Todo lo que necesitas saber
+                </p>
+              </div>
+
+              {/* Main Content - RSVP Form */}
+              <div className="max-w-4xl mx-auto px-4">
+                {children}
+              </div>
             </div>
 
             {/* Decorative footer */}
-            <div className="text-center py-8 footer-enter">
+            <div className="text-center py-8 footer-enter" style={{ background: '#FAF9F5' }}>
               <div className="flex justify-center gap-3 mb-4">
                 <span className="text-2xl leaf-1">🌿</span>
                 <span className="text-2xl">🍃</span>

@@ -210,6 +210,9 @@ export default function GuestRSVPPage() {
         <EnvelopeReveal
           coupleNames={wedding.couple_names}
           weddingDate={wedding.wedding_date}
+          weddingTime={wedding.wedding_time}
+          location={wedding.location}
+          additionalInfo={wedding.additional_info || undefined}
         >
           {/* Language Selector in top right */}
           <div className="absolute top-4 right-4 z-10">
