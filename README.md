@@ -402,9 +402,216 @@ gh release create v1.2.3 --generate-notes
 - **Include migration instructions** for breaking changes
 - **Attach build artifacts** if distributing compiled versions
 
-## Deployment
+## Production Deployment
 
-The application uses Docker containers and GitHub Actions for automated deployment. See the [deployment documentation](./docs/deployment.md) for details.
+The application is designed for **extremely simple deployment** using Docker Compose with pre-built images from GitHub Container Registry. **No source code, no nginx configuration, no manual migrations required.**
+
+### Architecture
+
+```
+Internet → Next.js app (port 80) → PostgreSQL (port 5432)
+```
+
+- Next.js app serves traffic directly on port 80
+- Next.js app runs in a non-root container
+- PostgreSQL stores data in persistent Docker volumes
+- **Migrations run automatically on app startup**
+- SSL can be handled by Cloudflare, load balancer, or reverse proxy
+
+### Prerequisites
+
+- Docker and Docker Compose installed on server
+- Access to pull from `ghcr.io/ndsrf/wedding`
+
+### Quick Start
+
+1. **Copy deployment files to your server:**
+   ```bash
+   # You only need 2 files (no source code required):
+   docker-compose.yml
+   .env
+   ```
+
+2. **Configure environment variables in `.env`:**
+   ```bash
+   # Database credentials
+   POSTGRES_USER=wedding
+   POSTGRES_PASSWORD=<strong-random-password>
+   POSTGRES_DB=wedding_db
+
+   # Authentication (generate a strong secret)
+   NEXTAUTH_URL=https://your-domain.com
+   NEXTAUTH_SECRET=<long-random-secret>
+
+   # Application
+   NODE_ENV=production
+   APP_URL=https://your-domain.com
+   APP_PORT=80                           # Port to expose (default: 80)
+   LOG_LEVEL=info
+
+   # Email service
+   RESEND_API_KEY=<your-resend-api-key>
+   EMAIL_FROM=noreply@your-domain.com
+   EMAIL_FROM_NAME="Wedding Platform"
+
+   # Admin access
+   MASTER_ADMIN_EMAILS=admin@your-domain.com
+
+   # OAuth (optional)
+   GOOGLE_CLIENT_ID=<your-client-id>
+   GOOGLE_CLIENT_SECRET=<your-client-secret>
+   ```
+
+3. **Pull the latest image and start services:**
+   ```bash
+   docker compose pull
+   docker compose up -d
+   ```
+
+4. **Check logs to verify startup:**
+   ```bash
+   docker compose logs -f app
+   ```
+
+That's it! The application will:
+- Create the PostgreSQL database on first run
+- Automatically run all database migrations
+- Start serving on port 80 (or whatever port you set in APP_PORT)
+
+### First Time Database Initialization
+
+On first startup with a new database:
+
+1. PostgreSQL container creates a fresh database using `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`
+2. Next.js app starts and detects no migrations exist
+3. Automatically creates initial migration from Prisma schema
+4. Applies all migrations to create database tables
+5. App becomes ready to serve traffic
+
+**No manual migration steps required!**
+
+### Updating to a New Version
+
+```bash
+# Pull the latest image
+docker compose pull
+
+# Restart services (migrations run automatically)
+docker compose up -d
+
+# Watch logs to verify successful migration
+docker compose logs -f app
+```
+
+The app automatically detects and applies any new migrations on startup.
+
+### Environment Variables Reference
+
+#### Required Variables
+- `POSTGRES_PASSWORD` - Database password (used for initial DB creation)
+- `NEXTAUTH_URL` - Full URL where app is accessible (e.g., https://wedding.example.com)
+- `NEXTAUTH_SECRET` - Random secret for session encryption (generate with `openssl rand -base64 32`)
+- `APP_URL` - Same as NEXTAUTH_URL
+
+#### Optional Variables
+- `POSTGRES_USER` - Database username (default: `wedding`)
+- `POSTGRES_DB` - Database name (default: `wedding_db`)
+- `APP_PORT` - Port to expose on host (default: `80`)
+- `WEDDING_APP_IMAGE` - Override Docker image (default: `ghcr.io/ndsrf/wedding:latest`)
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - Google OAuth
+- `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET` - Facebook OAuth
+- `APPLE_CLIENT_ID` / `APPLE_CLIENT_SECRET` - Apple OAuth
+- `RESEND_API_KEY` - Email service API key
+- `EMAIL_FROM` - Sender email address (default: noreply@example.com)
+- `EMAIL_FROM_NAME` - Sender name (default: Wedding Platform)
+- `REDIS_URL` - Redis connection string (optional caching)
+- `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
+- `MASTER_ADMIN_EMAILS` - Comma-separated admin emails
+
+### SSL/HTTPS Configuration
+
+The app runs on HTTP by default. For production HTTPS, use one of these approaches:
+
+**Option 1: Cloudflare (Recommended - Zero Configuration)**
+- Point your domain to your server IP
+- Enable Cloudflare proxy (orange cloud)
+- Cloudflare handles SSL automatically
+- No changes to docker-compose.yml needed
+
+**Option 2: Reverse Proxy (nginx, Caddy, Traefik)**
+- Install reverse proxy on your server
+- Configure it to forward to `localhost:80` (or your APP_PORT)
+- Proxy handles SSL certificates (Let's Encrypt)
+
+**Option 3: Direct SSL in Next.js**
+- Not recommended for production
+- Requires custom server.js modifications
+
+### Building and Pushing Images (CI/CD)
+
+For maintainers building new versions:
+
+```bash
+# Build the image
+docker build -t ghcr.io/ndsrf/wedding:latest .
+docker build -t ghcr.io/ndsrf/wedding:v1.2.3 .
+
+# Push to registry
+docker push ghcr.io/ndsrf/wedding:latest
+docker push ghcr.io/ndsrf/wedding:v1.2.3
+```
+
+Or use GitHub Actions (see `.github/workflows/` for automated builds on push).
+
+### Troubleshooting
+
+**Check service status:**
+```bash
+docker compose ps
+```
+
+**View logs:**
+```bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs -f app
+docker compose logs -f db
+```
+
+**Database connection issues:**
+```bash
+# Check database is healthy
+docker compose exec db pg_isready -U wedding
+
+# Connect to database
+docker compose exec db psql -U wedding -d wedding_db
+```
+
+**Reset database (WARNING: deletes all data):**
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+**Check migration status:**
+```bash
+docker compose exec app npx prisma migrate status
+```
+
+### Port Access
+
+- **Port 80** (default): Exposed to host, serves the application (configurable via APP_PORT)
+- **Port 3000**: Internal container port, mapped to APP_PORT on host
+- **Port 5432**: Internal only, database not exposed to host
+
+### Data Persistence
+
+Data is stored in Docker volumes:
+- `wedding-postgres-data` - Database files
+
+This persists across container restarts and updates.
 
 ## Project Structure
 
