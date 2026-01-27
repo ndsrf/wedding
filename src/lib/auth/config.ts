@@ -80,8 +80,6 @@ export const authOptions: NextAuthConfig = {
         // Detect user role - this will throw if user is not authorized
         await detectUserRole(user.email, authProvider);
 
-        console.log(`Sign-in callback success for: ${user.email}`);
-
         return true;
       } catch (error) {
         console.error('Sign-in error:', error);
@@ -217,21 +215,9 @@ export const authOptions: NextAuthConfig = {
   // Trust host header (required for Docker/Proxy)
   trustHost: true,
 
-  // Force secure cookies in production (Cloudflare terminates SSL, but we want secure cookies)
+  // Force secure cookies ONLY in production/HTTPS (Cloudflare)
+  // For localhost/HTTP, we let NextAuth use its defaults which work correctly
   useSecureCookies: process.env.NEXTAUTH_URL?.startsWith('https://'),
-  
-  cookies: {
-    sessionToken: {
-      name: `${process.env.NEXTAUTH_URL?.startsWith('https://') ? '__Secure-' : ''}next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NEXTAUTH_URL?.startsWith('https://'),
-        domain: process.env.NEXTAUTH_URL ? new URL(process.env.NEXTAUTH_URL).hostname : undefined,
-      },
-    },
-  },
 };
 
 // Export auth helper for server components
