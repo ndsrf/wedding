@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 interface TemplatePreviewProps {
   templateId: string;
@@ -138,11 +139,13 @@ export function TemplatePreview({
                     {/* Email Body */}
                     <div className="p-6 bg-white">
                       {preview.image_url && (
-                        <div className="mb-4">
-                          <img
+                        <div className="mb-4 relative w-full aspect-video">
+                          <Image
                             src={preview.image_url}
                             alt="Template"
-                            className="w-full rounded-lg"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 672px"
+                            className="object-contain rounded-lg"
                           />
                         </div>
                       )}
@@ -178,11 +181,13 @@ export function TemplatePreview({
                           <div className="flex justify-start mb-2">
                             <div className="bg-white rounded-lg p-3 max-w-[85%] shadow-sm">
                               {preview.image_url && (
-                                <div className="mb-2 -m-3 mb-3">
-                                  <img
+                                <div className="mb-2 -m-3 mb-3 relative w-full aspect-video">
+                                  <Image
                                     src={preview.image_url}
                                     alt="Template"
-                                    className="w-full rounded-t-lg"
+                                    fill
+                                    sizes="340px"
+                                    className="object-contain rounded-t-lg"
                                   />
                                 </div>
                               )}

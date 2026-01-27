@@ -286,6 +286,7 @@ export async function POST(request: NextRequest) {
             if (template) {
               // Use database template
               console.log('[REMINDER DEBUG] Using database template for', familyLanguage);
+              console.log('[REMINDER DEBUG] Template image_url:', template.image_url);
 
               const variables = {
                 familyName: family.name,
@@ -300,12 +301,19 @@ export async function POST(request: NextRequest) {
               const renderedSubject = renderTemplate(template.subject, variables);
               const renderedBody = renderTemplate(template.body, variables);
 
+              // Convert relative image URL to absolute URL for email clients
+              const absoluteImageUrl = template.image_url
+                ? `${baseUrl}${template.image_url}`
+                : null;
+              console.log('[REMINDER DEBUG] Absolute image URL:', absoluteImageUrl);
+
               result = await sendDynamicEmail(
                 family.email,
                 renderedSubject,
                 renderedBody,
                 language,
-                wedding.couple_names
+                wedding.couple_names,
+                absoluteImageUrl
               );
             } else {
               // Fallback to hardcoded template

@@ -8,10 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { verifyTemplateOwnership, updateTemplate, getTemplateById } from '@/lib/templates/crud';
 import { processTemplateImage, isValidImageType } from '@/lib/images/processor';
-import { writeFile, unlink } from 'fs/promises';
+import { writeFile, unlink, mkdir } from 'fs/promises';
 import path from 'path';
-import { prisma } from '@/lib/prisma';
-import { Channel, Language, TemplateType } from '@prisma/client';
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * POST /api/admin/templates/[id]/image
@@ -101,7 +100,11 @@ export async function POST(
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 8);
     const filename = `template_${template.wedding_id}_${timestamp}_${randomString}.png`;
-    const filePath = path.join(process.cwd(), 'public', 'uploads', 'templates', filename);
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'templates');
+    const filePath = path.join(uploadDir, filename);
+
+    // Ensure the upload directory exists
+    await mkdir(uploadDir, { recursive: true });
 
     // Save the processed image
     await writeFile(filePath, result.buffer);
@@ -110,17 +113,17 @@ export async function POST(
 
     // If applyToAll is true, check if there are existing images
     if (applyToAll) {
-      // Get all templates for this wedding with the same type
+      // Get all templates for this wedding (all types, languages, and channels)
       const templatesWithImages = await prisma.messageTemplate.findMany({
         where: {
           wedding_id: template.wedding_id,
-          type: template.type,
           image_url: {
             not: null,
           },
         },
         select: {
           id: true,
+          type: true,
           language: true,
           channel: true,
         },
@@ -142,11 +145,10 @@ export async function POST(
         });
       }
 
-      // Apply to all templates with the same type
+      // Apply to all templates for this wedding (all types, languages, and channels)
       await prisma.messageTemplate.updateMany({
         where: {
           wedding_id: template.wedding_id,
-          type: template.type,
         },
         data: {
           image_url: imageUrl,
@@ -161,7 +163,6 @@ export async function POST(
           updatedCount: await prisma.messageTemplate.count({
             where: {
               wedding_id: template.wedding_id,
-              type: template.type,
             },
           }),
           processedImage: {
@@ -254,11 +255,10 @@ export async function PUT(
       );
     }
 
-    // Apply to all templates with the same type
+    // Apply to all templates for this wedding (all types, languages, and channels)
     const updateResult = await prisma.messageTemplate.updateMany({
       where: {
         wedding_id: template.wedding_id,
-        type: template.type,
       },
       data: {
         image_url: imageUrl,

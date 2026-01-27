@@ -37,6 +37,8 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-80}:3000"
+    volumes:
+      - uploads_data:/app/public/uploads
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-wedding}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-wedding_db}
@@ -93,3 +95,5 @@ networks:
 volumes:
   postgres_data:
     name: wedding-postgres-data
+  uploads_data:
+    name: wedding-uploads-data

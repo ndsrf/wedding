@@ -9,6 +9,7 @@ import {
   Container,
   Head,
   Html as BaseEmailHtml,
+  Img,
   Link,
   Preview,
   Section,
@@ -22,6 +23,7 @@ interface DynamicMessageEmailProps {
   subject: string;
   body: string;
   coupleNames?: string;
+  imageUrl?: string | null;
 }
 
 export const DynamicMessageEmail = ({
@@ -29,7 +31,10 @@ export const DynamicMessageEmail = ({
   subject = 'Important Message',
   body = 'This is an important message from the couple.',
   coupleNames = 'The Couple',
+  imageUrl = null,
 }: DynamicMessageEmailProps) => {
+  console.log('[EMAIL TEMPLATE] Rendering with imageUrl:', imageUrl);
+
   // Convert simple markdown-like formatting to styled text
   // Supports **bold**, *italic*, and [[link|url]]
   const renderFormattedBody = (content: string) => {
@@ -138,6 +143,16 @@ export const DynamicMessageEmail = ({
       <Preview>{subject}</Preview>
       <Body style={main}>
         <Container style={container}>
+          {imageUrl && (
+            <Section style={imageSection}>
+              <Img
+                src={imageUrl}
+                alt="Invitation"
+                width="100%"
+                style={image}
+              />
+            </Section>
+          )}
           {renderFormattedBody(body)}
 
           <Section style={footer}>
@@ -165,6 +180,18 @@ const container = {
   padding: '20px 0 48px',
   marginBottom: '64px',
   maxWidth: '600px',
+};
+
+const imageSection = {
+  padding: '0',
+  margin: '0',
+};
+
+const image = {
+  display: 'block',
+  width: '100%',
+  height: 'auto',
+  margin: '0 auto',
 };
 
 const text = {

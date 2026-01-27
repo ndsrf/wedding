@@ -389,9 +389,10 @@ export async function sendDynamicEmail(
   body: string,
   language: Language = 'en',
   coupleNames?: string,
+  imageUrl?: string | null,
   retries = 3
 ): Promise<EmailResult> {
-  console.log('[RESEND DEBUG] sendDynamicEmail called with:', { to, subject, language });
+  console.log('[RESEND DEBUG] sendDynamicEmail called with:', { to, subject, language, imageUrl });
 
   // Validate email address
   if (!isValidEmail(to)) {
@@ -423,6 +424,7 @@ export async function sendDynamicEmail(
         subject,
         body,
         coupleNames,
+        imageUrl,
       });
 
       console.log('[RESEND DEBUG] React component created, attempting to send...');

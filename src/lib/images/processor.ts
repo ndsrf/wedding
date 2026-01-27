@@ -44,7 +44,7 @@ function detectAspectRatio(width: number, height: number): keyof typeof ALLOWED_
  */
 export async function processTemplateImage(
   fileBuffer: Buffer,
-  originalMimeType: string
+  _originalMimeType: string
 ): Promise<ImageProcessingResult> {
   try {
     // Load the image with sharp

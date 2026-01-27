@@ -64,9 +64,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Copy built application artifacts
 COPY --from=builder /app/public ./public
 
-# Set correct permissions for prerender cache
+# Set correct permissions for prerender cache and create uploads directory
 RUN mkdir .next && \
-    chown nextjs:nodejs .next
+    chown nextjs:nodejs .next && \
+    mkdir -p ./public/uploads/templates && \
+    chown -R nextjs:nodejs ./public/uploads
 
 # Copy standalone output (Next.js standalone mode)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

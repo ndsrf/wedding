@@ -7,6 +7,7 @@
 
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import type { MessageTemplate } from '@prisma/client';
 
 interface TemplateEditorProps {
@@ -34,7 +35,13 @@ export function TemplateEditor({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [applyToAll, setApplyToAll] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [confirmationData, setConfirmationData] = useState<any>(null);
+  const [confirmationData, setConfirmationData] = useState<{
+    requiresConfirmation: boolean;
+    message: string;
+    templatesWithImages: Array<{ id: string; language: string; channel: string }>;
+    imageUrl: string;
+    processedImage: { width: number; height: number; aspectRatio: string };
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get channel-specific labels
@@ -263,11 +270,13 @@ export function TemplateEditor({
           </div>
 
           {imageUrl && (
-            <div className="relative w-full max-w-md">
-              <img
+            <div className="relative w-full max-w-md aspect-video">
+              <Image
                 src={imageUrl}
                 alt="Template"
-                className="w-full rounded-lg border border-gray-200"
+                fill
+                sizes="(max-width: 768px) 100vw, 448px"
+                className="object-contain rounded-lg border border-gray-200"
               />
             </div>
           )}
@@ -282,7 +291,7 @@ export function TemplateEditor({
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor="applyToAll" className="text-sm text-gray-700">
-                Apply to all methods (WhatsApp & Email) and all languages
+                Apply to all templates (Invitations & Reminders, all methods and languages)
               </label>
             </div>
 
