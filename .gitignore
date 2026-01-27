@@ -60,3 +60,6 @@ tmp/
 temp/
 *.tmp
 audit.log
+
+# Uploaded files
+public/uploads/

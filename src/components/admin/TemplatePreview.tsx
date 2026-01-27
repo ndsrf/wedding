@@ -23,6 +23,8 @@ export function TemplatePreview({
   const [preview, setPreview] = useState<{
     subject: string;
     body: string;
+    image_url: string | null;
+    channel: string;
     variables: Record<string, string>;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,22 +101,6 @@ export function TemplatePreview({
 
           {preview && (
             <div className="space-y-6">
-              {/* Subject Preview */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">{t('subject')}</h3>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">{preview.subject}</p>
-                </div>
-              </div>
-
-              {/* Body Preview */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">{t('body')}</h3>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 whitespace-pre-wrap text-gray-900 text-sm leading-relaxed">
-                  {preview.body}
-                </div>
-              </div>
-
               {/* Variables Used */}
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">{t('variables')}</h3>
@@ -130,28 +116,148 @@ export function TemplatePreview({
                 </div>
               </div>
 
-              {/* Email Client Preview */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">{t('emailClient')}</h3>
-                <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                  {/* Email Header */}
-                  <div className="bg-gray-100 p-3 border-b border-gray-300 text-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-900">{t('from')}</p>
-                        <p className="text-gray-600 text-xs">{t('subject')}: {preview.subject}</p>
+              {/* Channel-Specific Preview */}
+              {preview.channel === 'EMAIL' && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">Email Preview</h3>
+                  <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
+                    {/* Email Client Header */}
+                    <div className="bg-gray-100 p-3 border-b border-gray-300">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                          W
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Wedding Invitation</p>
+                          <p className="text-xs text-gray-600">wedding@example.com</p>
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 mt-2">{preview.subject}</p>
+                    </div>
+
+                    {/* Email Body */}
+                    <div className="p-6 bg-white">
+                      {preview.image_url && (
+                        <div className="mb-4">
+                          <img
+                            src={preview.image_url}
+                            alt="Template"
+                            className="w-full rounded-lg"
+                          />
+                        </div>
+                      )}
+                      <div className="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed font-sans">
+                        {preview.body}
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
 
-                  {/* Email Body */}
-                  <div className="p-6 bg-white">
-                    <div className="max-w-md whitespace-pre-wrap text-sm text-gray-700 leading-relaxed font-sans">
-                      {preview.body}
+              {preview.channel === 'WHATSAPP' && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">WhatsApp Preview</h3>
+                  <div className="mx-auto max-w-sm">
+                    {/* Phone Mockup */}
+                    <div className="bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+                      <div className="bg-white rounded-[2.5rem] overflow-hidden">
+                        {/* Phone Header */}
+                        <div className="bg-[#075E54] text-white p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+                            <div>
+                              <p className="font-semibold text-sm">Wedding Invitation</p>
+                              <p className="text-xs opacity-80">Online</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chat Area */}
+                        <div className="bg-[#E5DDD5] p-4 min-h-[400px]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h100v100H0z\' fill=\'%23E5DDD5\'/%3E%3Cpath d=\'M50 0L0 50M100 0L50 50M100 50L50 100M50 50L0 100\' stroke=\'%23D1C7B8\' stroke-width=\'0.5\' opacity=\'0.1\'/%3E%3C/svg%3E")' }}>
+                          {/* Message Bubble */}
+                          <div className="flex justify-start mb-2">
+                            <div className="bg-white rounded-lg p-3 max-w-[85%] shadow-sm">
+                              {preview.image_url && (
+                                <div className="mb-2 -m-3 mb-3">
+                                  <img
+                                    src={preview.image_url}
+                                    alt="Template"
+                                    className="w-full rounded-t-lg"
+                                  />
+                                </div>
+                              )}
+                              <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
+                                {preview.body}
+                              </p>
+                              <div className="flex items-center justify-end gap-1 mt-1">
+                                <span className="text-[10px] text-gray-500">
+                                  {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Phone Footer */}
+                        <div className="bg-[#F0F0F0] p-2 border-t border-gray-300">
+                          <div className="bg-white rounded-full px-4 py-2 flex items-center gap-2">
+                            <span className="text-gray-400 text-xs">Type a message</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {preview.channel === 'SMS' && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">SMS Preview</h3>
+                  <div className="mx-auto max-w-sm">
+                    {/* Phone Mockup */}
+                    <div className="bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+                      <div className="bg-white rounded-[2.5rem] overflow-hidden">
+                        {/* Phone Header */}
+                        <div className="bg-gray-50 border-b border-gray-200 p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                              W
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-900">Wedding Invitation</p>
+                              <p className="text-xs text-gray-500">SMS Message</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* SMS Area */}
+                        <div className="bg-white p-4 min-h-[400px]">
+                          {/* Message Bubble */}
+                          <div className="flex justify-start mb-2">
+                            <div className="bg-gray-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
+                              <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
+                                {preview.body}
+                              </p>
+                              <div className="flex items-center justify-end mt-1">
+                                <span className="text-[10px] text-gray-500">
+                                  {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Phone Footer */}
+                        <div className="bg-gray-50 p-2 border-t border-gray-200">
+                          <div className="bg-white rounded-full px-4 py-2 border border-gray-300">
+                            <span className="text-gray-400 text-xs">Text Message</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

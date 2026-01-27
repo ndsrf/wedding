@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const { template_id, type, language, channel, subject, body: bodyText, sampleData } = validation.data;
 
     // Determine which template to preview
-    let templateContent: { subject: string; body: string } | null = null;
+    let templateContent: { subject: string; body: string; image_url: string | null; channel: string } | null = null;
 
     if (template_id) {
       // Preview existing template by ID
@@ -67,7 +67,12 @@ export async function POST(request: NextRequest) {
           { status: 403 }
         );
       }
-      templateContent = { subject: template.subject, body: template.body };
+      templateContent = {
+        subject: template.subject,
+        body: template.body,
+        image_url: template.image_url,
+        channel: template.channel
+      };
     } else if (type && language && channel) {
       // Preview template by type/language/channel
       const template = await getTemplateForSending(
@@ -82,12 +87,19 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         );
       }
-      templateContent = { subject: template.subject, body: template.body };
+      templateContent = {
+        subject: template.subject,
+        body: template.body,
+        image_url: template.image_url,
+        channel: template.channel
+      };
     } else if (subject || bodyText) {
       // Preview custom template content (for editing)
       templateContent = {
         subject: subject || "",
         body: bodyText || "",
+        image_url: null,
+        channel: channel || "EMAIL"
       };
     }
 
@@ -154,6 +166,8 @@ export async function POST(request: NextRequest) {
       data: {
         subject: renderedSubject,
         body: renderedBody,
+        image_url: templateContent.image_url,
+        channel: templateContent.channel,
         variables,
         raw: {
           subject: templateContent.subject,

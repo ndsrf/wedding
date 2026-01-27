@@ -66,8 +66,9 @@ export async function updateTemplate(
   return prisma.messageTemplate.update({
     where: { id },
     data: {
-      ...(request.subject && { subject: request.subject }),
-      ...(request.body && { body: request.body }),
+      ...(request.subject !== undefined && { subject: request.subject }),
+      ...(request.body !== undefined && { body: request.body }),
+      ...(request.image_url !== undefined && { image_url: request.image_url }),
     },
   });
 }
