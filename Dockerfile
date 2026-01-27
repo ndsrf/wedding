@@ -83,13 +83,15 @@ RUN mkdir .next && \
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy Prisma files for runtime
+# Copy Prisma client and schema files
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=deps /app/prisma ./prisma
 COPY --from=deps /app/prisma.config.ts ./prisma.config.ts
+
+# Install Prisma CLI with all dependencies for migrations
+# This must be done before switching to non-root user
+RUN npm install --save-exact prisma@7.3.0
 
 # Copy public locales for i18n
 COPY --from=builder /app/public/locales ./public/locales
