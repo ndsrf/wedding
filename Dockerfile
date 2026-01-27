@@ -42,6 +42,11 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Set DATABASE_URL for Next.js build (required for API route analysis)
+# This is only used during build, not for actual DB connection
+ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ENV DATABASE_URL=${DATABASE_URL}
+
 # Build the application
 RUN npm run build
 
