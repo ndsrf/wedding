@@ -101,13 +101,19 @@ export async function sendInvitation(
     const renderedSubject = renderTemplate(template.subject, variables);
     const renderedBody = renderTemplate(template.body, variables);
 
+    // Convert relative image URL to absolute URL for email clients
+    const absoluteImageUrl = template.image_url
+      ? `${process.env.APP_URL || "http://localhost:3000"}${template.image_url}`
+      : null;
+
     // Send email
     const emailResult = await sendDynamicEmail(
       family.email,
       renderedSubject,
       renderedBody,
       family.preferred_language.toLowerCase() as I18nLanguage,
-      family.wedding.couple_names
+      family.wedding.couple_names,
+      absoluteImageUrl
     );
 
     if (!emailResult.success) {

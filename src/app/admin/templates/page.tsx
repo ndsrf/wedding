@@ -244,6 +244,10 @@ export default function TemplatesPage() {
                   }
                 }}
                 onPreview={() => setPreviewOpen(true)}
+                onImageUpdate={() => {
+                  // Refetch templates to get updated image URLs
+                  fetchTemplates();
+                }}
               />
             ) : (
               <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">

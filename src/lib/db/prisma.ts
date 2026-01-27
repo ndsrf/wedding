@@ -7,6 +7,8 @@
  */
 
 import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 import { AsyncLocalStorage } from 'async_hooks'
 
 // Type for the global prisma variable
@@ -22,8 +24,18 @@ export const tenantContext = new AsyncLocalStorage<{
   bypass_tenant_filter?: boolean
 }>()
 
+// Create connection pool for PostgreSQL
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set')
+}
+
+const pool = new Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+
 // Prisma Client configuration
 const prismaClientOptions: Prisma.PrismaClientOptions = {
+  adapter,
   log:
     process.env.NODE_ENV === 'development'
       ? ['query', 'error', 'warn']

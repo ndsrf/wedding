@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model MasterAdmin {
@@ -152,6 +151,7 @@ model MessageTemplate {
   channel    Channel
   subject    String
   body       String
+  image_url  String?
   created_at DateTime     @default(now())
   updated_at DateTime     @updatedAt
   wedding    Wedding      @relation(fields: [wedding_id], references: [id], onDelete: Cascade)

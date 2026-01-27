@@ -34,7 +34,10 @@
       "Bash(node -e:*)",
       "Bash(for lang in en es fr de it)",
       "Bash(do echo \"Checking $lang...\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(node check-templates.js:*)",
+      "Bash(node:*)",
+      "Bash(npx tsx:*)"
     ]
   }
 }

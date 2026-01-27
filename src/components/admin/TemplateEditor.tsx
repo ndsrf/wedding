@@ -5,8 +5,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import type { MessageTemplate } from '@prisma/client';
 
 interface TemplateEditorProps {
@@ -14,6 +15,7 @@ interface TemplateEditorProps {
   channel?: 'EMAIL' | 'WHATSAPP' | 'SMS';
   onSave: (subject: string, body: string) => Promise<void>;
   onPreview: () => void;
+  onImageUpdate?: () => void;
 }
 
 export function TemplateEditor({
@@ -21,6 +23,7 @@ export function TemplateEditor({
   channel = 'EMAIL',
   onSave,
   onPreview,
+  onImageUpdate,
 }: TemplateEditorProps) {
   const t = useTranslations('admin.templates.editor');
   const tChannel = useTranslations('admin.templates.channel');
@@ -28,6 +31,18 @@ export function TemplateEditor({
   const [body, setBody] = useState(template.body);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [imageUrl, setImageUrl] = useState(template.image_url);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [applyToAll, setApplyToAll] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [confirmationData, setConfirmationData] = useState<{
+    requiresConfirmation: boolean;
+    message: string;
+    templatesWithImages: Array<{ id: string; language: string; channel: string }>;
+    imageUrl: string;
+    processedImage: { width: number; height: number; aspectRatio: string };
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get channel-specific labels
   const getChannelLabel = () => {
@@ -67,6 +82,123 @@ export function TemplateEditor({
     setSubject(template.subject);
     setBody(template.body);
     setHasChanges(false);
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    setUploadError(null);
+    setConfirmationData(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('applyToAll', applyToAll.toString());
+
+      const response = await fetch(`/api/admin/templates/${template.id}/image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        setUploadError(result.error?.message || 'Failed to upload image');
+        return;
+      }
+
+      // Check if confirmation is required
+      if (result.requiresConfirmation) {
+        setConfirmationData(result);
+        return;
+      }
+
+      // Update local state
+      setImageUrl(result.data?.imageUrl || result.imageUrl);
+      onImageUpdate?.();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setUploadError('Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleConfirmApplyToAll = async () => {
+    if (!confirmationData) return;
+
+    setIsUploadingImage(true);
+    try {
+      const response = await fetch(`/api/admin/templates/${template.id}/image`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageUrl: confirmationData.imageUrl,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setImageUrl(confirmationData.imageUrl);
+        setConfirmationData(null);
+        onImageUpdate?.();
+      } else {
+        setUploadError(result.error?.message || 'Failed to apply image to all templates');
+      }
+    } catch (error) {
+      console.error('Error confirming image upload:', error);
+      setUploadError('Failed to apply image to all templates');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleCancelConfirmation = () => {
+    setConfirmationData(null);
+  };
+
+  const handleDeleteImage = async () => {
+    if (!imageUrl) return;
+
+    const confirmDelete = window.confirm(
+      applyToAll
+        ? 'Are you sure you want to remove this image from all templates?'
+        : 'Are you sure you want to remove this image?'
+    );
+
+    if (!confirmDelete) return;
+
+    setIsUploadingImage(true);
+    setUploadError(null);
+
+    try {
+      const queryParams = applyToAll ? '?removeFromAll=true' : '';
+      const response = await fetch(`/api/admin/templates/${template.id}/image${queryParams}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setImageUrl(null);
+        onImageUpdate?.();
+      } else {
+        setUploadError(result.error?.message || 'Failed to delete image');
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      setUploadError('Failed to delete image');
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   return (
@@ -118,6 +250,102 @@ export function TemplateEditor({
            {t('chars', { current: body.length, max: 5000 })}
         </p>
       </div>
+
+      {/* Image Upload Section - Only for Email and WhatsApp */}
+      {(channel === 'EMAIL' || channel === 'WHATSAPP') && (
+        <div className="border border-gray-300 rounded-lg p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-gray-700">
+              Template Image
+            </label>
+            {imageUrl && (
+              <button
+                onClick={handleDeleteImage}
+                disabled={isUploadingImage}
+                className="text-sm text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+              >
+                Remove Image
+              </button>
+            )}
+          </div>
+
+          {imageUrl && (
+            <div className="relative w-full max-w-md aspect-video">
+              <Image
+                src={imageUrl}
+                alt="Template"
+                fill
+                sizes="(max-width: 768px) 100vw, 448px"
+                className="object-contain rounded-lg border border-gray-200"
+              />
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="applyToAll"
+                checked={applyToAll}
+                onChange={(e) => setApplyToAll(e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="applyToAll" className="text-sm text-gray-700">
+                Apply to all templates (Invitations & Reminders, all methods and languages)
+              </label>
+            </div>
+
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                onChange={handleImageUpload}
+                disabled={isUploadingImage}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Supported formats: JPG, PNG, WebP, GIF. Required aspect ratio: 1:1 (square) or 16:9 (wide).
+                Images will be automatically converted to PNG and resized.
+              </p>
+            </div>
+
+            {isUploadingImage && (
+              <p className="text-sm text-blue-600">Uploading image...</p>
+            )}
+
+            {uploadError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{uploadError}</p>
+              </div>
+            )}
+
+            {confirmationData && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-3">
+                <p className="text-sm text-yellow-800 font-medium">
+                  {confirmationData.message}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleConfirmApplyToAll}
+                    disabled={isUploadingImage}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50"
+                  >
+                    Yes, Replace All
+                  </button>
+                  <button
+                    onClick={handleCancelConfirmation}
+                    disabled={isUploadingImage}
+                    className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-3">

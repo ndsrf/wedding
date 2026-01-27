@@ -43,6 +43,7 @@ export const updateTemplateSchema = z.object({
     .min(10, "Body must be at least 10 characters")
     .max(5000, "Body must be 5000 characters or less")
     .optional(),
+  image_url: z.string().url("Invalid image URL").nullable().optional(),
 });
 
 export type UpdateTemplateRequest = z.infer<typeof updateTemplateSchema>;
@@ -72,6 +73,7 @@ export const previewTemplateSchema = z.object({
   channel: channelEnum.optional(),
   subject: z.string().optional(),
   body: z.string().optional(),
+  image_url: z.string().url("Invalid image URL").nullable().optional(),
   sampleData: z
     .object({
       familyName: z.string().default("Smith"),

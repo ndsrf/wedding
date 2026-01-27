@@ -14,6 +14,7 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Install all dependencies (including devDependencies for build)
 RUN npm ci
@@ -63,9 +64,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Copy built application artifacts
 COPY --from=builder /app/public ./public
 
-# Set correct permissions for prerender cache
+# Set correct permissions for prerender cache and create uploads directory
 RUN mkdir .next && \
-    chown nextjs:nodejs .next
+    chown nextjs:nodejs .next && \
+    mkdir -p ./public/uploads/templates && \
+    chown -R nextjs:nodejs ./public/uploads
 
 # Copy standalone output (Next.js standalone mode)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -75,6 +78,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=deps /app/prisma ./prisma
+COPY --from=deps /app/prisma.config.ts ./prisma.config.ts
 
 # Copy public locales for i18n
 COPY --from=builder /app/public/locales ./public/locales
