@@ -10,6 +10,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
+import { X } from 'lucide-react';
 import { AdminInviteForm } from '@/components/planner/AdminInviteForm';
 import type { WeddingWithStats } from '@/types/models';
 import type { WeddingAdmin } from '@prisma/client';
@@ -54,8 +55,11 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
       setWedding(data.data);
 
       // Fetch admins separately (if wedding has wedding_admins relation)
-      // For now, we'll set it to empty array as the API might not return it
-      setAdmins([]);
+      if (data.data.wedding_admins) {
+        setAdmins(data.data.wedding_admins);
+      } else {
+        setAdmins([]);
+      }
     } catch (err) {
       setError(t('planner.weddings.loadError'));
       console.error('Error fetching wedding:', err);
@@ -363,9 +367,10 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                     </div>
                     <button
                       onClick={() => handleRemoveAdmin(admin.id)}
-                      className="text-sm text-red-600 hover:text-red-700"
+                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      aria-label={t('planner.admins.remove')}
                     >
-                      {t('planner.admins.remove')}
+                      <X className="h-5 w-5" />
                     </button>
                   </li>
                 ))}

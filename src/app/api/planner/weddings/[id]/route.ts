@@ -166,6 +166,7 @@ export async function GET(
       rsvp_completion_percentage,
       attending_count,
       payment_received_count,
+      wedding_admins: wedding.wedding_admins,
     };
 
     const response: GetWeddingResponse = {
