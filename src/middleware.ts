@@ -140,9 +140,14 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: process.env.NEXTAUTH_URL?.startsWith('https://'),
   });
 
   const user = token?.user as AuthenticatedUser | undefined;
+
+  if (process.env.NODE_ENV === 'production') {
+     console.log(`Middleware: ${request.method} ${pathname} - Token: ${!!token}, User: ${user?.email}, Role: ${user?.role}`);
+  }
 
   // Check if this is a shared route (accessible by multiple roles)
   const isShared = Object.values(SHARED_ROUTES)

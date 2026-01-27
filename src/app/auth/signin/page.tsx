@@ -8,8 +8,36 @@ import { useTranslations } from 'next-intl';
 function SignInContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const error = searchParams.get('error');
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const t = useTranslations();
+
+  const getErrorMessage = (error: string) => {
+    switch (error) {
+      case 'Unauthorized':
+        return t('auth.error.unauthorized');
+      case 'PlannerDisabled':
+        return t('auth.error.planner_disabled');
+      case 'AccessDenied':
+        return t('auth.error.access_denied');
+      case 'Configuration':
+        return t('auth.error.configuration');
+      case 'Verification':
+        return t('auth.error.verification');
+      case 'OAuthSignin':
+      case 'OAuthCallback':
+      case 'OAuthCreateAccount':
+      case 'EmailCreateAccount':
+      case 'Callback':
+      case 'OAuthAccountNotLinked':
+      case 'EmailSignin':
+      case 'CredentialsSignin':
+      case 'SessionRequired':
+        return t('auth.error.default');
+      default:
+        return error;
+    }
+  };
 
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider);
@@ -32,6 +60,12 @@ function SignInContent() {
             {t('auth.signin.subtitle')}
           </p>
         </div>
+
+        {error && (
+          <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+            <span className="font-medium">{t('common.error')}:</span> {getErrorMessage(error)}
+          </div>
+        )}
 
         <div className="space-y-4">
           <button
