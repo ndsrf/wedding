@@ -211,6 +211,9 @@ export const authOptions: NextAuthConfig = {
 
   // Enable debug in development
   debug: process.env.NODE_ENV === 'development',
+
+  // Trust host header (required for Docker/Proxy)
+  trustHost: true,
 };
 
 // Export auth helper for server components

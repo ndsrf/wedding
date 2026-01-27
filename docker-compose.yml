@@ -48,6 +48,7 @@ services:
       # Authentication
       NEXTAUTH_URL: ${NEXTAUTH_URL:?NextAuth URL is required}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NextAuth secret is required}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
       # OAuth Providers
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}

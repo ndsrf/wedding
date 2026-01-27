@@ -37,7 +37,11 @@
       "Bash(done)",
       "Bash(node check-templates.js:*)",
       "Bash(node:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: copy prisma CLI package to Docker runner stage\n\nThe prisma.config.ts file requires the ''prisma/config'' module which is\npart of the Prisma CLI package, not @prisma/client. This package was\nmissing from the runner stage, causing \"Cannot find module 'prisma/config'\"\nerrors when running migrations.\n\nAdded COPY instruction to include node_modules/prisma in the runner stage\nso that prisma migrate deploy can successfully load the config file.\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
