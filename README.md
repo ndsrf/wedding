@@ -454,6 +454,12 @@ Internet → Next.js app (port 80) → PostgreSQL (port 5432)
    EMAIL_FROM=noreply@your-domain.com
    EMAIL_FROM_NAME="Wedding Platform"
 
+   # SMS and WhatsApp (Twilio)
+   TWILIO_ACCOUNT_SID=<your-twilio-account-sid>
+   TWILIO_AUTH_TOKEN=<your-twilio-auth-token>
+   TWILIO_PHONE_NUMBER=<your-twilio-phone-number>
+   TWILIO_WHATSAPP_NUMBER=<your-twilio-whatsapp-number>
+
    # Admin access
    MASTER_ADMIN_EMAILS=admin@your-domain.com
 
@@ -524,6 +530,10 @@ The app automatically detects and applies any new migrations on startup.
 - `RESEND_API_KEY` - Email service API key
 - `EMAIL_FROM` - Sender email address (default: noreply@example.com)
 - `EMAIL_FROM_NAME` - Sender name (default: Wedding Platform)
+- `TWILIO_ACCOUNT_SID` - Twilio Account SID for SMS/WhatsApp
+- `TWILIO_AUTH_TOKEN` - Twilio Auth Token
+- `TWILIO_PHONE_NUMBER` - Twilio phone number for SMS (format: +1234567890)
+- `TWILIO_WHATSAPP_NUMBER` - Twilio WhatsApp number (format: +1234567890 or whatsapp:+1234567890)
 - `REDIS_URL` - Redis connection string (optional caching)
 - `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
 - `MASTER_ADMIN_EMAILS` - Comma-separated admin emails
@@ -546,6 +556,144 @@ The app runs on HTTP by default. For production HTTPS, use one of these approach
 **Option 3: Direct SSL in Next.js**
 - Not recommended for production
 - Requires custom server.js modifications
+
+### Twilio Setup for SMS and WhatsApp
+
+The application supports sending invitations, reminders, and confirmations via SMS and WhatsApp using Twilio. Follow these steps to set up Twilio integration:
+
+#### 1. Create a Twilio Account
+
+1. Sign up at [https://www.twilio.com/try-twilio](https://www.twilio.com/try-twilio)
+2. Verify your email and phone number
+3. Complete the account setup
+
+#### 2. Get Your Twilio Credentials
+
+1. Navigate to the [Twilio Console](https://console.twilio.com/)
+2. Find your **Account SID** and **Auth Token** on the dashboard
+3. Add these to your `.env` file:
+   ```bash
+   TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TWILIO_AUTH_TOKEN=your_auth_token_here
+   ```
+
+#### 3. Set Up SMS (Optional)
+
+1. Go to [Phone Numbers > Manage > Buy a number](https://console.twilio.com/us1/develop/phone-numbers/manage/search)
+2. Search for a phone number in your desired country
+3. Purchase the number (costs vary by country)
+4. Add the number to your `.env` file:
+   ```bash
+   TWILIO_PHONE_NUMBER=+1234567890
+   ```
+
+#### 4. Set Up WhatsApp
+
+**Option A: WhatsApp Sandbox (Testing)**
+
+Perfect for development and testing:
+
+1. Navigate to [Messaging > Try it out > Send a WhatsApp message](https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn)
+2. Follow the instructions to join the sandbox by sending a WhatsApp message to the Twilio number
+3. The sandbox number is typically: `+1 415 523 8886`
+4. Add to your `.env`:
+   ```bash
+   TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+   ```
+
+**Option B: Production WhatsApp (Meta Business Verification)**
+
+For production use with custom branding:
+
+1. Go to [Messaging > Senders > WhatsApp senders](https://console.twilio.com/us1/develop/sms/senders/whatsapp-senders)
+2. Click "Get started" and follow the Meta Business verification process
+3. Submit your business profile for verification (can take several days)
+4. Once approved, request a WhatsApp-enabled phone number
+5. Add the approved number to your `.env`:
+   ```bash
+   TWILIO_WHATSAPP_NUMBER=+1234567890
+   ```
+
+#### 5. Configure WhatsApp Message Templates
+
+**IMPORTANT:** WhatsApp messages require pre-approved templates from Meta. You cannot send free-form messages.
+
+1. Navigate to [Messaging > Content Editor](https://console.twilio.com/us1/develop/sms/content-editor)
+2. Click "Create new Content" and select WhatsApp
+3. Create templates for each message type:
+   - **Invitation Template**: For initial wedding invitations
+   - **Reminder Template**: For RSVP reminders
+   - **Confirmation Template**: For RSVP confirmations
+4. Each template must be submitted to Meta for approval (typically takes 24-48 hours)
+5. Use the template editor in the Wedding Management App as a reference, but remember:
+   - Changes in the app's template editor do NOT automatically update WhatsApp templates
+   - You must update and resubmit templates through the Twilio Console
+   - Templates must be approved by Meta before they can be used
+
+**Template Guidelines:**
+- Use placeholders (variables) for dynamic content (family name, wedding date, etc.)
+- Keep messages concise and professional
+- Follow Meta's WhatsApp Business Policy
+- Avoid promotional or marketing language
+
+#### 6. Configure Guest Channel Preferences
+
+In the Wedding Management App:
+
+1. Navigate to **Guest Management**
+2. For each family/guest, set their preferred communication channel:
+   - **Email**: Uses Resend (default)
+   - **SMS**: Uses Twilio SMS
+   - **WhatsApp**: Uses Twilio WhatsApp
+3. Ensure contact information is complete:
+   - Email address for EMAIL channel
+   - Phone number for SMS channel (format: +1234567890)
+   - WhatsApp number for WHATSAPP channel (format: +1234567890)
+
+#### 7. Test the Integration
+
+1. Create a test guest with your own phone number
+2. Set the channel preference to SMS or WhatsApp
+3. Send a test invitation or reminder
+4. Verify you receive the message
+
+#### Troubleshooting
+
+**SMS not sending:**
+- Verify `TWILIO_PHONE_NUMBER` is in E.164 format (+1234567890)
+- Check that the number is SMS-enabled in Twilio Console
+- Review Twilio logs at [Monitor > Logs > Messaging](https://console.twilio.com/us1/monitor/logs/sms)
+
+**WhatsApp not sending:**
+- For sandbox: Ensure you've joined the sandbox by sending the code
+- For production: Verify templates are approved by Meta
+- Check that `TWILIO_WHATSAPP_NUMBER` has the correct format
+- Review WhatsApp logs in Twilio Console
+
+**Template approval taking too long:**
+- Ensure template follows Meta's guidelines
+- Avoid promotional language
+- Keep messages concise and clear
+- Contact Twilio support if approval takes more than 72 hours
+
+**Rate limits:**
+- Free trial accounts have sending limits
+- Upgrade to a paid account for production use
+- Consider implementing rate limiting in your application
+
+#### Cost Considerations
+
+- **SMS**: Varies by country (typically $0.0075-$0.10 per message)
+- **WhatsApp**: $0.005-$0.02 per message (depends on conversation type)
+- **Phone numbers**: Monthly rental fee (typically $1-$15/month)
+- Check current pricing at [https://www.twilio.com/pricing](https://www.twilio.com/pricing)
+
+#### Additional Resources
+
+- [Twilio SMS Documentation](https://www.twilio.com/docs/sms)
+- [Twilio WhatsApp Documentation](https://www.twilio.com/docs/whatsapp)
+- [WhatsApp Message Templates](https://www.twilio.com/docs/whatsapp/tutorial/send-whatsapp-notification-messages-templates)
+- [Meta WhatsApp Business Policy](https://www.whatsapp.com/legal/business-policy/)
 
 ### Building and Pushing Images (CI/CD)
 

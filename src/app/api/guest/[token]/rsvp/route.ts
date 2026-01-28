@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateMagicLink } from '@/lib/auth/magic-link';
 import { trackRSVPSubmitted } from '@/lib/tracking/events';
 import { prisma } from '@/lib/db/prisma';
-import { sendRSVPConfirmation } from '@/lib/email/resend';
+import { sendConfirmation } from '@/lib/notifications/confirmation';
 import type { SubmitRSVPRequest, SubmitRSVPResponse } from '@/types/api';
 import type { Channel } from '@prisma/client';
 
@@ -123,31 +123,20 @@ export async function POST(
       }
     );
 
-    // Format wedding date for email
-    const weddingDate = wedding.wedding_date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-
-    // Send RSVP confirmation email
+    // Send RSVP confirmation via preferred channel
     try {
-      if (family.email && family.name && wedding.couple_names) {
-        const languageCode = family.preferred_language ?? wedding.default_language ?? 'en';
-        await sendRSVPConfirmation(
-          family.email,
-          languageCode.toLowerCase() as any,
-          family.name,
-          wedding.couple_names,
-          weddingDate,
-          wedding.wedding_time ?? undefined,
-          wedding.location ?? undefined
-        );
+      const confirmationResult = await sendConfirmation({
+        family_id: family.id,
+        wedding_id: wedding.id,
+      });
+
+      if (!confirmationResult.success) {
+        console.error('Failed to send RSVP confirmation:', confirmationResult.error);
+        // Don't fail the RSVP submission if confirmation sending fails
       }
     } catch (error) {
-      console.error('Failed to send RSVP confirmation email:', error);
-      // Don't fail the RSVP submission if email sending fails
+      console.error('Failed to send RSVP confirmation:', error);
+      // Don't fail the RSVP submission if confirmation sending fails
     }
 
     return NextResponse.json<SubmitRSVPResponse>({

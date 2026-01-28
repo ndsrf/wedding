@@ -96,6 +96,35 @@ Con cariño,
         body: `Recordatorio: Confirma tu asistencia antes de {{rsvpCutoffDate}}. {{magicLink}}`,
       },
     },
+    CONFIRMATION: {
+      EMAIL: {
+        subject: "¡Confirmación recibida! Nos vemos pronto",
+        body: `Estimada familia {{familyName}},
+
+¡Gracias por confirmar su asistencia a nuestra boda!
+
+Estamos muy emocionados de celebrar este día especial con ustedes.
+
+**{{coupleNames}}**
+
+📅 **Fecha:** {{weddingDate}}
+⏰ **Hora:** {{weddingTime}}
+📍 **Ubicación:** {{location}}
+
+Nos vemos pronto.
+
+Con cariño,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "¡Confirmación recibida!",
+        body: `¡Gracias {{familyName}} por confirmar tu asistencia! Nos emociona verte en nuestra boda el {{weddingDate}} en {{location}}. ¡Nos vemos pronto!`,
+      },
+      SMS: {
+        subject: "Confirmación",
+        body: `¡Gracias {{familyName}}! Tu asistencia ha sido confirmada para el {{weddingDate}}. ¡Nos vemos allí!`,
+      },
+    },
   },
   EN: {
     INVITATION: {
@@ -172,6 +201,35 @@ With love,
       SMS: {
         subject: "Reminder",
         body: `Reminder: Please confirm by {{rsvpCutoffDate}}. {{magicLink}}`,
+      },
+    },
+    CONFIRMATION: {
+      EMAIL: {
+        subject: "RSVP Confirmed! See you soon",
+        body: `Dear {{familyName}},
+
+Thank you for confirming your attendance at our wedding!
+
+We are so excited to celebrate this special day with you.
+
+**{{coupleNames}}**
+
+📅 **Date:** {{weddingDate}}
+⏰ **Time:** {{weddingTime}}
+📍 **Location:** {{location}}
+
+See you soon!
+
+With love,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "RSVP Confirmed!",
+        body: `Thank you {{familyName}} for confirming your attendance! We're so excited to see you at our wedding on {{weddingDate}} at {{location}}. See you soon!`,
+      },
+      SMS: {
+        subject: "Confirmed",
+        body: `Thank you {{familyName}}! Your attendance is confirmed for {{weddingDate}}. See you there!`,
       },
     },
   },
@@ -252,6 +310,35 @@ Avec amour,
         body: `Rappel: Veuillez confirmer avant {{rsvpCutoffDate}}. {{magicLink}}`,
       },
     },
+    CONFIRMATION: {
+      EMAIL: {
+        subject: "Confirmation reçue! À bientôt",
+        body: `Chère famille {{familyName}},
+
+Merci d'avoir confirmé votre présence à notre mariage!
+
+Nous sommes ravis de célébrer ce jour spécial avec vous.
+
+**{{coupleNames}}**
+
+📅 **Date:** {{weddingDate}}
+⏰ **Heure:** {{weddingTime}}
+📍 **Lieu:** {{location}}
+
+À bientôt!
+
+Avec amour,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Confirmation reçue!",
+        body: `Merci {{familyName}} d'avoir confirmé votre présence! Nous sommes ravis de vous voir à notre mariage le {{weddingDate}} à {{location}}. À bientôt!`,
+      },
+      SMS: {
+        subject: "Confirmé",
+        body: `Merci {{familyName}}! Votre présence est confirmée pour le {{weddingDate}}. À bientôt!`,
+      },
+    },
   },
   IT: {
     INVITATION: {
@@ -328,6 +415,35 @@ Con amore,
       SMS: {
         subject: "Promemoria",
         body: `Promemoria: Confermate entro {{rsvpCutoffDate}}. {{magicLink}}`,
+      },
+    },
+    CONFIRMATION: {
+      EMAIL: {
+        subject: "Conferma ricevuta! A presto",
+        body: `Caro famiglia {{familyName}},
+
+Grazie per aver confermato la vostra partecipazione al nostro matrimonio!
+
+Siamo molto felici di celebrare questo giorno speciale con voi.
+
+**{{coupleNames}}**
+
+📅 **Data:** {{weddingDate}}
+⏰ **Ora:** {{weddingTime}}
+📍 **Luogo:** {{location}}
+
+A presto!
+
+Con amore,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Conferma ricevuta!",
+        body: `Grazie {{familyName}} per aver confermato la vostra partecipazione! Siamo felicissimi di vedervi al nostro matrimonio il {{weddingDate}} a {{location}}. A presto!`,
+      },
+      SMS: {
+        subject: "Confermato",
+        body: `Grazie {{familyName}}! La vostra partecipazione è confermata per il {{weddingDate}}. A presto!`,
       },
     },
   },
@@ -408,6 +524,35 @@ Mit Liebe,
         body: `Erinnerung: Bestätigt bis {{rsvpCutoffDate}}. {{magicLink}}`,
       },
     },
+    CONFIRMATION: {
+      EMAIL: {
+        subject: "Bestätigung erhalten! Bis bald",
+        body: `Liebe Familie {{familyName}},
+
+Vielen Dank für die Bestätigung eurer Teilnahme an unserer Hochzeit!
+
+Wir freuen uns sehr darauf, diesen besonderen Tag mit euch zu feiern.
+
+**{{coupleNames}}**
+
+📅 **Datum:** {{weddingDate}}
+⏰ **Uhrzeit:** {{weddingTime}}
+📍 **Ort:** {{location}}
+
+Bis bald!
+
+Mit Liebe,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Bestätigung erhalten!",
+        body: `Danke {{familyName}} für die Bestätigung! Wir freuen uns sehr, euch bei unserer Hochzeit am {{weddingDate}} in {{location}} zu sehen. Bis bald!`,
+      },
+      SMS: {
+        subject: "Bestätigt",
+        body: `Danke {{familyName}}! Eure Teilnahme ist für den {{weddingDate}} bestätigt. Bis bald!`,
+      },
+    },
   },
 };
 
@@ -423,7 +568,7 @@ export function getDefaultTemplate(
 }
 
 /**
- * Get all default templates for a wedding (5 languages x 2 types x 3 channels = 30 templates)
+ * Get all default templates for a wedding (5 languages x 3 types x 3 channels = 45 templates)
  */
 export function getAllDefaultTemplates(): Array<{
   language: Language;
@@ -433,7 +578,7 @@ export function getAllDefaultTemplates(): Array<{
   body: string;
 }> {
   const languages: Language[] = ["ES", "EN", "FR", "IT", "DE"];
-  const types: TemplateType[] = ["INVITATION", "REMINDER"];
+  const types: TemplateType[] = ["INVITATION", "REMINDER", "CONFIRMATION"];
   const channels: Channel[] = ["EMAIL", "WHATSAPP", "SMS"];
 
   return languages.flatMap((language) =>
