@@ -111,22 +111,21 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   }, [fetchData]);
 
   const fetchCategories = async () => {
-    if (!isPlanner) return;
-
     try {
-      const [categoriesRes, providersRes] = await Promise.all([
-        fetch('/api/planner/providers/categories'),
-        fetch('/api/planner/providers'),
-      ]);
+      const categoriesRes = await fetch(`/api/weddings/${weddingId}/categories`);
 
       if (categoriesRes.ok) {
         const data = await categoriesRes.json();
         setCategories(data.data || []);
       }
 
-      if (providersRes.ok) {
-        const data = await providersRes.json();
-        setAllProviders(data.data || []);
+      // Only fetch providers from library for planners
+      if (isPlanner) {
+        const providersRes = await fetch('/api/planner/providers');
+        if (providersRes.ok) {
+          const data = await providersRes.json();
+          setAllProviders(data.data || []);
+        }
       }
     } catch (error) {
       console.error(error);
