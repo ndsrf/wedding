@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { verifyTemplateOwnership, updateTemplate, getTemplateById } from '@/lib/templates/crud';
 import { processTemplateImage, isValidImageType } from '@/lib/images/processor';
-import { writeFile, unlink, mkdir } from 'fs/promises';
+import { writeFile, unlink, mkdir, stat } from 'fs/promises';
 import path from 'path';
 import { prisma } from '@/lib/db/prisma';
 
@@ -103,11 +103,21 @@ export async function POST(
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'templates');
     const filePath = path.join(uploadDir, filename);
 
+    console.log('[Upload] Writing file to:', filePath);
+
     // Ensure the upload directory exists
     await mkdir(uploadDir, { recursive: true });
 
     // Save the processed image
     await writeFile(filePath, result.buffer);
+
+    // Verify file existence and size
+    try {
+      const stats = await stat(filePath);
+      console.log(`[Upload] File written successfully. Size: ${stats.size} bytes`);
+    } catch (e) {
+      console.error('[Upload] Error verifying file after write:', e);
+    }
 
     const imageUrl = `/uploads/templates/${filename}`;
 

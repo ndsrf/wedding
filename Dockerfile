@@ -71,7 +71,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copy built application artifacts
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Set correct permissions for prerender cache and create uploads directory
 RUN mkdir .next && \
@@ -82,6 +82,9 @@ RUN mkdir .next && \
 # Copy standalone output (Next.js standalone mode)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Install sharp explicitly for standalone mode (resolves image optimization issues)
+RUN npm install sharp
 
 # Copy Prisma client and schema files
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
