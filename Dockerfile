@@ -15,6 +15,11 @@ COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
 
+# Set build-time DATABASE_URL (required for Prisma config during postinstall)
+# This is only used during build for prisma generate, not for actual DB connection
+ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ENV DATABASE_URL=${DATABASE_URL}
+
 # Install all dependencies (including devDependencies for build)
 RUN npm ci
 
