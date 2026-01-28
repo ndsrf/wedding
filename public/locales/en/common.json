@@ -159,6 +159,8 @@
       "createWeddingSubtitle": "Set up a new wedding event",
       "checklistTemplate": "Checklist Template",
       "checklistTemplateSubtitle": "Manage task templates for your weddings",
+      "providers": "Providers",
+      "providersSubtitle": "Manage your provider library",
       "noWeddings": "No weddings yet",
       "noWeddingsSubtitle": "Get started by creating your first wedding."
     },
@@ -415,6 +417,8 @@
     "dashboard": {
       "title": "Wedding Admin Dashboard",
       "welcome": "Welcome",
+      "configure": "Configure",
+      "configureSubtitle": "RSVP settings",
       "weddingDetails": "Wedding Details",
       "metrics": "Metrics",
       "metricTitles": {
@@ -446,6 +450,33 @@
       "providersSubtitle": "Manage providers and payments",
       "weddingNotFound": "Wedding not found",
       "contactPlanner": "Please contact your wedding planner."
+    },
+    "providers": {
+      "noWeddingAssigned": "No wedding assigned."
+    },
+    "checklist": {
+      "loadError": "Unable to load checklist"
+    },
+    "tasks": {
+      "title": "Upcoming Tasks",
+      "noDueDate": "No due date",
+      "daysOverdue": "days overdue",
+      "dueToday": "Due today",
+      "daysRemaining": "days",
+      "noDeadline": "No deadline",
+      "overdue": "Overdue",
+      "dueSoon": "Due soon",
+      "upcoming": "Upcoming",
+      "loading": "Loading tasks...",
+      "noTasks": "No upcoming tasks",
+      "noTasksDescription": "All tasks are completed or there are no tasks assigned to you.",
+      "viewChecklist": "View Checklist",
+      "viewAll": "View all",
+      "columnTask": "Task",
+      "columnSection": "Section",
+      "columnDueDate": "Due Date",
+      "columnStatus": "Status",
+      "noSection": "No section"
     },
     "seating": {
       "title": "Seating Plan",
@@ -692,6 +723,10 @@
       "notFound": "Wedding not found",
       "contactPlanner": "Please contact your wedding planner.",
       "backToDashboard": "Back to Dashboard",
+      "tabs": {
+        "basic": "Basic Settings",
+        "rsvp": "RSVP Settings"
+      },
       "form": {
         "basicSettings": "Basic Settings",
         "theme": "Wedding Theme",

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 export default async function AdminWeddingProvidersPage() {
-  const t = await getTranslations('common');
+  const t = await getTranslations();
   let user;
   try {
     user = await requireRole('wedding_admin');
@@ -14,7 +14,7 @@ export default async function AdminWeddingProvidersPage() {
   }
 
   if (!user.wedding_id) {
-    return <div>No wedding assigned.</div>;
+    return <div>{t('admin.providers.noWeddingAssigned')}</div>;
   }
 
   return (

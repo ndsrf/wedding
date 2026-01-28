@@ -146,6 +146,8 @@
       "createWeddingSubtitle": "Imposta un nuovo evento matrimonio",
       "checklistTemplate": "Modello di Lista di Controllo",
       "checklistTemplateSubtitle": "Gestisci i modelli di attività per i tuoi matrimoni",
+      "providers": "Fornitori",
+      "providersSubtitle": "Gestisci la tua libreria di fornitori",
       "noWeddings": "Ancora nessun matrimonio",
       "noWeddingsSubtitle": "Inizia creando il tuo primo matrimonio."
     },
@@ -402,6 +404,8 @@
     "dashboard": {
       "title": "Dashboard Amministrazione Matrimonio",
       "welcome": "Benvenuto",
+      "configure": "Configura",
+      "configureSubtitle": "Impostazioni RSVP",
       "weddingDetails": "Dettagli Matrimonio",
       "metrics": "Metriche",
       "metricTitles": {
@@ -431,6 +435,33 @@
       "providersSubtitle": "Gestire fornitori e pagamenti",
       "weddingNotFound": "Matrimonio non trovato",
       "contactPlanner": "Contatta il tuo organizzatore di matrimoni."
+    },
+    "providers": {
+      "noWeddingAssigned": "Nessun matrimonio assegnato."
+    },
+    "checklist": {
+      "loadError": "Impossibile caricare la lista di controllo"
+    },
+    "tasks": {
+      "title": "Attività in Arrivo",
+      "noDueDate": "Nessuna data di scadenza",
+      "daysOverdue": "giorni di ritardo",
+      "dueToday": "Scadenza oggi",
+      "daysRemaining": "giorni",
+      "noDeadline": "Nessuna scadenza",
+      "overdue": "Scaduto",
+      "dueSoon": "Scade presto",
+      "upcoming": "Prossimamente",
+      "loading": "Caricamento attività...",
+      "noTasks": "Nessuna attività in arrivo",
+      "noTasksDescription": "Tutte le attività sono completate o non hai attività assegnate.",
+      "viewChecklist": "Visualizza Lista di Controllo",
+      "viewAll": "Visualizza tutto",
+      "columnTask": "Attività",
+      "columnSection": "Sezione",
+      "columnDueDate": "Data di Scadenza",
+      "columnStatus": "Stato",
+      "noSection": "Nessuna sezione"
     },
     "seating": {
       "title": "Piano dei Posti",
@@ -666,6 +697,10 @@
       "notFound": "Matrimonio non trovato",
       "contactPlanner": "Si prega di contattare il proprio wedding planner.",
       "backToDashboard": "Torna alla Dashboard",
+      "tabs": {
+        "basic": "Impostazioni di Base",
+        "rsvp": "Impostazioni RSVP"
+      },
       "form": {
         "basicSettings": "Impostazioni di Base",
         "theme": "Tema del matrimonio",

@@ -101,14 +101,14 @@ export default function TemplatesPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center">
-            <Link href="/admin" className="text-gray-500 hover:text-gray-700 mr-4">
+            <Link href="/admin" className="text-gray-600 hover:text-gray-700 mr-4">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-600">
                 {t('description')}
               </p>
             </div>
@@ -127,7 +127,7 @@ export default function TemplatesPage() {
                 setError(null);
                 fetchTemplates();
               }}
-              className="mt-2 text-red-600 hover:text-red-800 font-medium"
+              className="mt-2 px-4 py-3 text-red-600 hover:text-red-800 font-medium"
             >
               {t('tryAgain')}
             </button>
@@ -145,7 +145,7 @@ export default function TemplatesPage() {
                   <button
                     key={type}
                     onClick={() => setActiveTab(type)}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all ${
+                    className={`flex-1 px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
                       activeTab === type
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'bg-gray-100 text-gray-900 border-2 border-gray-300 hover:bg-gray-200 hover:border-gray-400'
@@ -163,7 +163,7 @@ export default function TemplatesPage() {
               <select
                 value={selectedLanguage}
                 onChange={(e) => setSelectedLanguage(e.target.value as Language)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="ES">🇪🇸 {commonT('languages.ES')} (Español)</option>
                 <option value="EN">🇺🇸 {commonT('languages.EN')}</option>
@@ -179,7 +179,7 @@ export default function TemplatesPage() {
               <select
                 value={selectedChannel}
                 onChange={(e) => setSelectedChannel(e.target.value as TemplateChannel)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="EMAIL">{t('channel.email')}</option>
                 <option value="WHATSAPP">{t('channel.whatsapp')}</option>
@@ -193,10 +193,10 @@ export default function TemplatesPage() {
               <div className="space-y-2">
                 {placeholders.map((placeholder) => (
                   <div key={placeholder.key} className="text-sm">
-                    <code className="block bg-white px-2 py-1 rounded border border-blue-200 font-mono text-blue-900">
+                    <code className="block bg-white px-2 py-2 rounded border border-blue-200 font-mono text-blue-900">
                       {`{{${placeholder.key}}}`}
                     </code>
-                    <p className="text-blue-700 text-xs mt-1">{placeholder.description}</p>
+                    <p className="text-blue-600 text-xs mt-1">{placeholder.description}</p>
                   </div>
                 ))}
               </div>
@@ -251,7 +251,7 @@ export default function TemplatesPage() {
               />
             ) : (
               <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   {t('editor.notFound', {
                     type: activeTab === 'INVITATION' ? t('type.invitation') : t('type.reminder'),
                     language: commonT(`languages.${selectedLanguage}`),

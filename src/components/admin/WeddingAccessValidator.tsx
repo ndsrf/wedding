@@ -13,6 +13,7 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 import { WeddingAccessProvider } from '@/contexts/WeddingAccessContext';
 import type { GetWeddingDetailsResponse } from '@/types/api';
@@ -22,6 +23,7 @@ interface WeddingAccessValidatorProps {
 }
 
 export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps) {
+  const t = useTranslations();
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isDisabled, setIsDisabled] = useState(false);
@@ -79,7 +81,7 @@ export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );

@@ -156,6 +156,8 @@
       "createWeddingSubtitle": "Configurar un nuevo evento de boda",
       "checklistTemplate": "Plantilla de Lista de Tareas",
       "checklistTemplateSubtitle": "Gestionar plantillas de tareas para tus bodas",
+      "providers": "Proveedores",
+      "providersSubtitle": "Administra tu biblioteca de proveedores",
       "noWeddings": "Aún no hay bodas",
       "noWeddingsSubtitle": "Empieza creando tu primera boda."
     },
@@ -412,6 +414,8 @@
     "dashboard": {
       "title": "Panel de Administración de Boda",
       "welcome": "Bienvenido",
+      "configure": "Configurar",
+      "configureSubtitle": "Ajustes de RSVP",
       "weddingDetails": "Detalles de la Boda",
       "metrics": "Métricas",
       "metricTitles": {
@@ -443,6 +447,33 @@
       "providersSubtitle": "Gestionar proveedores y pagos",
       "weddingNotFound": "Boda no encontrada",
       "contactPlanner": "Por favor contacta a tu organizador de bodas."
+    },
+    "providers": {
+      "noWeddingAssigned": "Ninguna boda asignada."
+    },
+    "checklist": {
+      "loadError": "No se pudo cargar la lista de tareas"
+    },
+    "tasks": {
+      "title": "Tareas Próximas",
+      "noDueDate": "Sin fecha de vencimiento",
+      "daysOverdue": "días retrasados",
+      "dueToday": "Vence hoy",
+      "daysRemaining": "días",
+      "noDeadline": "Sin fecha límite",
+      "overdue": "Retrasado",
+      "dueSoon": "Vence pronto",
+      "upcoming": "Próximo",
+      "loading": "Cargando tareas...",
+      "noTasks": "No hay tareas próximas",
+      "noTasksDescription": "Todas las tareas están completadas o no hay tareas asignadas a ti.",
+      "viewChecklist": "Ver Lista de Tareas",
+      "viewAll": "Ver todos",
+      "columnTask": "Tarea",
+      "columnSection": "Sección",
+      "columnDueDate": "Fecha de Vencimiento",
+      "columnStatus": "Estado",
+      "noSection": "Sin sección"
     },
     "seating": {
       "title": "Plan de Asientos",
@@ -680,6 +711,10 @@
       "notFound": "Boda no encontrada",
       "contactPlanner": "Por favor contacta a tu organizador de bodas.",
       "backToDashboard": "Volver al Panel",
+      "tabs": {
+        "basic": "Ajustes Básicos",
+        "rsvp": "Ajustes de RSVP"
+      },
       "form": {
         "basicSettings": "Ajustes Básicos",
         "theme": "Tema de la boda",

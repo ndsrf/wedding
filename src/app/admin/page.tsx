@@ -134,18 +134,18 @@ export default async function AdminDashboardPage() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{stats.couple_names}</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-600">
                 {formatDate(stats.wedding_date)} • {stats.location}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
               <LanguageSwitcher />
               <Link
                 href="/api/auth/signout"
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center sm:text-left"
               >
                 {t('common.navigation.logout')}
               </Link>
@@ -344,8 +344,8 @@ export default async function AdminDashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-900">Configure</h3>
-                <p className="mt-1 text-sm text-gray-500">RSVP settings</p>
+                <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.configure')}</h3>
+                <p className="mt-1 text-sm text-gray-600">{t('admin.dashboard.configureSubtitle')}</p>
               </div>
             </Link>
 

@@ -126,7 +126,7 @@ function PlannerWeddingsContent() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <Link
                 href="/planner"
@@ -149,18 +149,18 @@ function PlannerWeddingsContent() {
                 {t('common.navigation.dashboard')}
               </Link>
               <h1 className="text-2xl font-bold text-gray-900">{t('planner.dashboard.myWeddings')}</h1>
-              <p className="mt-1 text-sm text-gray-500">{t('planner.weddings.manageEvents')}</p>
+              <p className="mt-1 text-sm text-gray-600">{t('planner.weddings.manageEvents')}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
               <Link
                 href="/planner/weddings/deleted"
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                className="px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               >
                 {t('planner.weddings.viewDeleted')}
               </Link>
               <button
                 onClick={() => setShowForm(true)}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-4 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 {t('planner.dashboard.createWedding')}
               </button>
@@ -182,7 +182,7 @@ function PlannerWeddingsContent() {
         {loading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-sm text-gray-500">{t('planner.weddings.loading')}</p>
+            <p className="mt-2 text-sm text-gray-600">{t('planner.weddings.loading')}</p>
           </div>
         )}
 
@@ -212,11 +212,11 @@ function PlannerWeddingsContent() {
               />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">{t('planner.weddings.noWeddings')}</h3>
-            <p className="mt-1 text-sm text-gray-500">{t('planner.weddings.getStarted')}</p>
+            <p className="mt-1 text-sm text-gray-600">{t('planner.weddings.getStarted')}</p>
             <div className="mt-6">
               <button
                 onClick={() => setShowForm(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-3 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 {t('planner.dashboard.createWedding')}
               </button>
@@ -252,7 +252,7 @@ export default function PlannerWeddingsPage() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-sm text-gray-500">Loading...</p>
+            <p className="mt-2 text-sm text-gray-600">Loading...</p>
           </div>
         </div>
       }

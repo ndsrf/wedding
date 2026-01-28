@@ -146,6 +146,8 @@
       "createWeddingSubtitle": "Configurer un nouvel événement de mariage",
       "checklistTemplate": "Modèle de Liste de Tâches",
       "checklistTemplateSubtitle": "Gérer les modèles de tâches pour vos mariages",
+      "providers": "Prestataires",
+      "providersSubtitle": "Gérez votre bibliothèque de prestataires",
       "noWeddings": "Pas encore de mariages",
       "noWeddingsSubtitle": "Commencez par créer votre premier mariage."
     },
@@ -402,6 +404,8 @@
     "dashboard": {
       "title": "Tableau de Bord Admin Mariage",
       "welcome": "Bienvenue",
+      "configure": "Configurer",
+      "configureSubtitle": "Paramètres RSVP",
       "weddingDetails": "Détails du Mariage",
       "metrics": "Métriques",
       "metricTitles": {
@@ -431,6 +435,33 @@
       "providersSubtitle": "Gérer les prestataires et les paiements",
       "weddingNotFound": "Mariage introuvable",
       "contactPlanner": "Veuillez contacter votre organisateur de mariage."
+    },
+    "providers": {
+      "noWeddingAssigned": "Aucun mariage assigné."
+    },
+    "checklist": {
+      "loadError": "Impossible de charger la liste de contrôle"
+    },
+    "tasks": {
+      "title": "Tâches à Venir",
+      "noDueDate": "Pas de date d'échéance",
+      "daysOverdue": "jours de retard",
+      "dueToday": "Dû aujourd'hui",
+      "daysRemaining": "jours",
+      "noDeadline": "Pas de délai",
+      "overdue": "En retard",
+      "dueSoon": "Dû bientôt",
+      "upcoming": "À venir",
+      "loading": "Chargement des tâches...",
+      "noTasks": "Aucune tâche à venir",
+      "noTasksDescription": "Toutes les tâches sont terminées ou il n'y a aucune tâche qui vous est assignée.",
+      "viewChecklist": "Afficher la Liste de Contrôle",
+      "viewAll": "Voir tout",
+      "columnTask": "Tâche",
+      "columnSection": "Section",
+      "columnDueDate": "Date d'Échéance",
+      "columnStatus": "Statut",
+      "noSection": "Aucune section"
     },
     "seating": {
       "title": "Plan de Table",
@@ -666,6 +697,10 @@
       "notFound": "Mariage introuvable",
       "contactPlanner": "Veuillez contacter votre organisateur de mariage.",
       "backToDashboard": "Retour au Tableau de Bord",
+      "tabs": {
+        "basic": "Paramètres de Base",
+        "rsvp": "Paramètres RSVP"
+      },
       "form": {
         "basicSettings": "Paramètres de Base",
         "theme": "Thème du mariage",

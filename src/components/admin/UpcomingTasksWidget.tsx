@@ -15,6 +15,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { UpcomingTask } from '@/types/checklist';
 import type { APIResponse } from '@/types/api';
 
@@ -26,6 +27,7 @@ type SortField = 'due_date' | 'title';
 type SortDirection = 'asc' | 'desc';
 
 export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
+  const t = useTranslations('admin.tasks');
   const [tasks, setTasks] = useState<UpcomingTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
   };
 
   const formatDueDate = (dueDate: Date | null, daysUntilDue: number | null) => {
-    if (!dueDate) return 'No due date';
+    if (!dueDate) return t('noDueDate');
 
     const date = new Date(dueDate);
     const dateString = date.toLocaleDateString('en-US', {
@@ -132,29 +134,29 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
     if (daysUntilDue === null) return dateString;
 
     if (daysUntilDue < 0) {
-      return `${dateString} (${Math.abs(daysUntilDue)} days overdue)`;
+      return `${dateString} (${Math.abs(daysUntilDue)} ${t('daysOverdue')})`;
     } else if (daysUntilDue === 0) {
-      return `${dateString} (Due today)`;
+      return `${dateString} (${t('dueToday')})`;
     } else {
-      return `${dateString} (${daysUntilDue} days)`;
+      return `${dateString} (${daysUntilDue} ${t('daysRemaining')})`;
     }
   };
 
   const getUrgencyLabel = (urgencyColor: string, daysUntilDue: number | null) => {
-    if (daysUntilDue === null) return 'No deadline';
-    if (daysUntilDue < 0) return 'Overdue';
-    if (daysUntilDue === 0) return 'Due today';
-    if (urgencyColor === 'orange') return 'Due soon';
-    return 'Upcoming';
+    if (daysUntilDue === null) return t('noDeadline');
+    if (daysUntilDue < 0) return t('overdue');
+    if (daysUntilDue === 0) return t('dueToday');
+    if (urgencyColor === 'orange') return t('dueSoon');
+    return t('upcoming');
   };
 
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('title')}</h2>
         <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" aria-hidden="true"></div>
-          <span className="ml-3 text-gray-500">Loading tasks...</span>
+          <span className="ml-3 text-gray-500">{t('loading')}</span>
         </div>
       </div>
     );
@@ -163,7 +165,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
   if (error) {
     return (
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('title')}</h2>
         <div className="text-center py-8" role="alert" aria-live="assertive">
           <svg
             className="mx-auto h-12 w-12 text-red-400"
@@ -188,7 +190,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
   if (tasks.length === 0) {
     return (
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('title')}</h2>
         <div className="text-center py-8">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
@@ -203,14 +205,14 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No upcoming tasks</h3>
-          <p className="mt-1 text-sm text-gray-500">All tasks are completed or there are no tasks assigned to you.</p>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('noTasks')}</h3>
+          <p className="mt-1 text-sm text-gray-500">{t('noTasksDescription')}</p>
           <div className="mt-6">
             <Link
-              href={`/admin/${weddingId}/checklist`}
+              href="/admin/checklist"
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
-              View Checklist
+              {t('viewChecklist')}
             </Link>
           </div>
         </div>
@@ -221,9 +223,9 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-gray-900">Upcoming Tasks</h2>
+        <h2 className="text-lg font-medium text-gray-900">{t('title')}</h2>
         <Link
-          href={`/admin/${weddingId}/checklist`}
+          href="/admin/checklist"
           className="text-sm font-medium text-purple-600 hover:text-purple-500"
         >
           View all
@@ -249,7 +251,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                 }}
               >
                 <div className="flex items-center">
-                  Task
+                  {t('tableHeaderTask')}
                   {sortField === 'title' && (
                     <span className="ml-1" aria-hidden="true">
                       {sortDirection === 'asc' ? '↑' : '↓'}
@@ -258,7 +260,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                 </div>
               </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" role="columnheader">
-                Section
+                {t('tableHeaderSection')}
               </th>
               <th
                 className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
@@ -274,7 +276,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                 }}
               >
                 <div className="flex items-center">
-                  Due Date
+                  {t('tableHeaderDueDate')}
                   {sortField === 'due_date' && (
                     <span className="ml-1" aria-hidden="true">
                       {sortDirection === 'asc' ? '↑' : '↓'}
@@ -283,7 +285,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                 </div>
               </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" role="columnheader">
-                Status
+                {t('tableHeaderStatus')}
               </th>
             </tr>
           </thead>
@@ -296,7 +298,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                   key={task.id}
                   className={`${styles.bg} ${styles.border} hover:opacity-75 cursor-pointer transition-opacity`}
                   onClick={() => {
-                    window.location.href = `/admin/${weddingId}/checklist`;
+                    window.location.href = "/admin/checklist";
                   }}
                   role="row"
                   tabIndex={0}
@@ -304,7 +306,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      window.location.href = `/admin/${weddingId}/checklist`;
+                      window.location.href = "/admin/checklist";
                     }
                   }}
                 >
@@ -313,7 +315,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                   </td>
                   <td className="px-3 py-4 whitespace-nowrap" role="cell">
                     <div className="text-sm text-gray-500">
-                      {task.section_name || 'No section'}
+                      {task.section_name || t('noSection')}
                     </div>
                   </td>
                   <td className="px-3 py-4 whitespace-nowrap" role="cell">
@@ -344,7 +346,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
           return (
             <Link
               key={task.id}
-              href={`/admin/${weddingId}/checklist`}
+              href="/admin/checklist"
               className={`block ${styles.bg} ${styles.border} rounded-lg p-4 hover:opacity-75 transition-opacity`}
             >
               <div className="flex items-start justify-between">
@@ -353,7 +355,7 @@ export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
                     {task.title}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {task.section_name || 'No section'}
+                    {task.section_name || t('noSection')}
                   </p>
                   <p className={`text-xs ${styles.text} mt-2`}>
                     {formatDueDate(task.due_date, task.days_until_due)}

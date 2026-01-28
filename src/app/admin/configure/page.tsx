@@ -105,10 +105,10 @@ export default function ConfigureWeddingPage() {
           <h1 className="text-xl font-bold text-gray-900">
             {error || t('notFound')}
           </h1>
-          <p className="mt-2 text-gray-500">{t('contactPlanner')}</p>
+          <p className="mt-2 text-gray-600">{t('contactPlanner')}</p>
           <Link
             href="/admin"
-            className="mt-4 inline-block px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
+            className="mt-4 inline-block px-4 py-3 text-sm font-medium text-purple-600 hover:text-purple-700"
           >
             {t('backToDashboard')}
           </Link>
@@ -122,12 +122,12 @@ export default function ConfigureWeddingPage() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
                 <Link
                   href="/admin"
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-600 hover:text-gray-700"
                 >
                   <svg
                     className="h-5 w-5"
@@ -145,7 +145,7 @@ export default function ConfigureWeddingPage() {
                 </Link>
                 <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
               </div>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-600">
                 {wedding.couple_names} • {format.dateTime(new Date(wedding.wedding_date), {
                   weekday: 'long',
                   year: 'numeric',

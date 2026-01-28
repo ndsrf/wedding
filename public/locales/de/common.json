@@ -146,6 +146,8 @@
       "createWeddingSubtitle": "Ein neues Hochzeitsereignis einrichten",
       "checklistTemplate": "Checklisten-Vorlage",
       "checklistTemplateSubtitle": "Aufgabenvorlagen für Ihre Hochzeiten verwalten",
+      "providers": "Dienstleister",
+      "providersSubtitle": "Verwalten Sie Ihre Dienstleister-Bibliothek",
       "noWeddings": "Noch keine Hochzeiten",
       "noWeddingsSubtitle": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit."
     },
@@ -402,6 +404,8 @@
     "dashboard": {
       "title": "Hochzeits-Admin-Dashboard",
       "welcome": "Willkommen",
+      "configure": "Konfigurieren",
+      "configureSubtitle": "RSVP-Einstellungen",
       "weddingDetails": "Hochzeitsdetails",
       "metrics": "Kennzahlen",
       "metricTitles": {
@@ -431,6 +435,33 @@
       "providersSubtitle": "Anbieter und Zahlungen verwalten",
       "weddingNotFound": "Hochzeit nicht gefunden",
       "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner."
+    },
+    "providers": {
+      "noWeddingAssigned": "Keine Hochzeit zugewiesen."
+    },
+    "checklist": {
+      "loadError": "Checkliste konnte nicht geladen werden"
+    },
+    "tasks": {
+      "title": "Bevorstehende Aufgaben",
+      "noDueDate": "Kein Fälligkeitsdatum",
+      "daysOverdue": "Tage überfällig",
+      "dueToday": "Heute fällig",
+      "daysRemaining": "Tage",
+      "noDeadline": "Keine Frist",
+      "overdue": "Überfällig",
+      "dueSoon": "Bald fällig",
+      "upcoming": "Bevorstehend",
+      "loading": "Aufgaben werden geladen...",
+      "noTasks": "Keine bevorstehenden Aufgaben",
+      "noTasksDescription": "Alle Aufgaben sind abgeschlossen oder es gibt keine Aufgaben, die Ihnen zugewiesen sind.",
+      "viewChecklist": "Checkliste anzeigen",
+      "viewAll": "Alle anzeigen",
+      "columnTask": "Aufgabe",
+      "columnSection": "Abschnitt",
+      "columnDueDate": "Fälligkeitsdatum",
+      "columnStatus": "Status",
+      "noSection": "Kein Abschnitt"
     },
     "seating": {
       "title": "Sitzplan",
@@ -666,6 +697,10 @@
       "notFound": "Hochzeit nicht gefunden",
       "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner.",
       "backToDashboard": "Zurück zum Dashboard",
+      "tabs": {
+        "basic": "Grundeinstellungen",
+        "rsvp": "RSVP-Einstellungen"
+      },
       "form": {
         "basicSettings": "Grundeinstellungen",
         "theme": "Hochzeitsthema",

@@ -47,7 +47,7 @@ export default function SeatingPlanPage() {
         <p className="text-red-500">{t('common.errors.generic')}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-md"
+          className="mt-4 px-4 py-3 bg-purple-600 text-white rounded-md"
         >
           {t('common.buttons.retry')}
         </button>
@@ -60,11 +60,11 @@ export default function SeatingPlanPage() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <Link
                 href="/admin"
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-2 text-gray-600 hover:text-gray-600 transition-colors"
               >
                 <svg
                   className="h-6 w-6"
@@ -82,7 +82,7 @@ export default function SeatingPlanPage() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{t('admin.seating.title')}</h1>
-                <p className="text-sm text-gray-500">{t('admin.seating.subtitle')}</p>
+                <p className="text-sm text-gray-600">{t('admin.seating.subtitle')}</p>
               </div>
             </div>
           </div>
