@@ -6,13 +6,21 @@
 # ============================================
 FROM node:20-alpine AS deps
 
-# Install libc6-compat for Alpine compatibility
-RUN apk add --no-cache libc6-compat openssl
-
 WORKDIR /app
 
 # Copy package files for dependency installation
 COPY package.json package-lock.json* ./
+
+# Install all dependencies (including devDependencies for build)
+RUN npm ci
+
+# ============================================
+# Stage 2: Prisma
+# Generate Prisma client
+# ============================================
+FROM deps AS prisma
+
+# Copy Prisma files
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
 
@@ -20,22 +28,18 @@ COPY prisma.config.ts ./
 # This is only used during build for prisma generate, not for actual DB connection
 ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
 
-# Install all dependencies (including devDependencies for build)
-RUN npm ci
-
 # Generate Prisma client
 RUN npx prisma generate
 
 # ============================================
-# Stage 2: Builder
+# Stage 3: Builder
 # Build the Next.js application
 # ============================================
-FROM node:20-alpine AS builder
+FROM prisma AS builder
 
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy all source code
 COPY . .
 
 # Set build-time environment variables
@@ -51,14 +55,27 @@ ENV DATABASE_URL=${DATABASE_URL}
 RUN npm run build
 
 # ============================================
-# Stage 3: Production Runner
+# Stage 4: Prune
+# Remove devDependencies to create smaller production dependency tree
+# ============================================
+FROM deps AS prune
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Prune devDependencies
+RUN npm prune --omit=dev
+
+# ============================================
+# Stage 5: Production Runner
 # Minimal production image with only runtime deps
 # ============================================
 FROM node:20-alpine AS runner
 
-# Install security updates and required runtime dependencies
-RUN apk add --no-cache libc6-compat openssl dumb-init && \
-    apk upgrade --no-cache
+# Install required runtime dependencies
+RUN apk add --no-cache libc6-compat openssl dumb-init
 
 WORKDIR /app
 
@@ -70,34 +87,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy built application artifacts
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Copy production dependencies from prune stage
+COPY --from=prune --chown=nextjs:nodejs /app/node_modules ./node_modules
 
-# Set correct permissions for prerender cache and create uploads directory
-RUN mkdir .next && \
-    chown nextjs:nodejs .next && \
-    mkdir -p ./public/uploads/templates && \
-    chown -R nextjs:nodejs ./public/uploads
-
-# Copy standalone output (Next.js standalone mode)
+# Copy built application artifacts and source code
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=prisma --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=prisma /app/prisma.config.ts ./prisma.config.ts
 
-# Install sharp explicitly for standalone mode (resolves image optimization issues)
-RUN npm install sharp
-
-# Copy Prisma client and schema files
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-COPY --from=deps /app/prisma ./prisma
-COPY --from=deps /app/prisma.config.ts ./prisma.config.ts
-
-# Install Prisma CLI with all dependencies for migrations
-# This must be done before switching to non-root user
-RUN npm install --save-exact prisma@7.3.0
-
-# Copy public locales for i18n
-COPY --from=builder /app/public/locales ./public/locales
+# Create uploads directory
+RUN mkdir -p ./public/uploads/templates && \
+    chown -R nextjs:nodejs ./public/uploads
 
 # Switch to non-root user
 USER nextjs
