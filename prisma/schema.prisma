@@ -455,6 +455,7 @@ model Payment {
   date                DateTime        @default(now())
   method              PaymentMethod
   notes               String?         @db.Text
+  document_url        String?
   created_at          DateTime        @default(now())
   updated_at          DateTime        @updatedAt
   wedding_provider    WeddingProvider @relation(fields: [wedding_provider_id], references: [id], onDelete: Cascade)

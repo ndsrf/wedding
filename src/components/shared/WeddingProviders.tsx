@@ -43,6 +43,7 @@ interface Payment {
   date: string;
   method: string;
   notes: string | null;
+  document_url: string | null;
 }
 
 interface ProviderCategory {
@@ -86,6 +87,8 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER');
   const [paymentNotes, setPaymentNotes] = useState('');
+  const [paymentDocumentUrl, setPaymentDocumentUrl] = useState('');
+  const [uploadingPaymentDoc, setUploadingPaymentDoc] = useState(false);
 
   // Provider Edit State
   const [editingProviderId, setEditingProviderId] = useState<string | null>(null);
@@ -244,6 +247,31 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     }
   };
 
+  const handlePaymentDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    setUploadingPaymentDoc(true);
+    const formData = new FormData();
+    formData.append('file', e.target.files[0]);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPaymentDocumentUrl(data.url);
+      } else {
+        alert('Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload failed', error);
+      alert('Upload failed');
+    } finally {
+      setUploadingPaymentDoc(false);
+    }
+  };
+
   const handleAddPayment = async (providerId: string) => {
     if (!paymentAmount) return;
     try {
@@ -255,6 +283,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
           amount: Number(paymentAmount),
           method: paymentMethod,
           notes: paymentNotes,
+          document_url: paymentDocumentUrl || undefined,
         }),
       });
       if (res.ok) {
@@ -262,6 +291,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
         setShowPaymentForm(null);
         setPaymentAmount('');
         setPaymentNotes('');
+        setPaymentDocumentUrl('');
       }
     } catch (error) {
       console.error(error);
@@ -557,7 +587,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                 </div>
                 <div className="w-40">
                      <label className="text-xs font-medium text-gray-700">{t('method')}</label>
-                     <select 
+                     <select
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
@@ -574,9 +604,36 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                     <label className="text-xs font-medium text-gray-700">{t('notes')}</label>
                     <Input value={paymentNotes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentNotes(e.target.value)} placeholder={t('paymentNotesPlaceholder')} />
                 </div>
+
+                {/* NEW: Document Upload Field */}
+                <div className="flex-1 min-w-[200px]">
+                    <label className="text-xs font-medium text-gray-700">Document</label>
+                    <div className="flex gap-2 items-center">
+                        <Input
+                            type="file"
+                            onChange={handlePaymentDocumentUpload}
+                            disabled={uploadingPaymentDoc}
+                            className="text-sm"
+                        />
+                        {paymentDocumentUrl && (
+                            <a
+                                href={paymentDocumentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm whitespace-nowrap"
+                            >
+                              View
+                            </a>
+                        )}
+                    </div>
+                </div>
+
                 <div className="flex gap-2">
-                     <Button size="sm" onClick={() => handleAddPayment(showPaymentForm)} className="bg-green-600 hover:bg-green-700">{t('savePayment')}</Button>
-                     <Button size="sm" variant="ghost" onClick={() => setShowPaymentForm(null)}>{t('cancel')}</Button>
+                     <Button size="sm" onClick={() => handleAddPayment(showPaymentForm)} className="bg-green-600 hover:bg-green-700" disabled={uploadingPaymentDoc}>{t('savePayment')}</Button>
+                     <Button size="sm" variant="ghost" onClick={() => {
+                       setShowPaymentForm(null);
+                       setPaymentDocumentUrl('');
+                     }}>{t('cancel')}</Button>
                 </div>
             </div>
          </div>
@@ -594,6 +651,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('amount')}</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('method')}</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions')}</th>
                     </tr>
                 </thead>
@@ -617,6 +675,21 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                                 <td className="px-6 py-4 text-sm text-gray-500">
                                     {payment.notes}
                                 </td>
+                                {/* NEW: Document cell */}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    {payment.document_url ? (
+                                        <a
+                                            href={payment.document_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline flex items-center"
+                                        >
+                                            <FileText className="w-4 h-4 mr-1" /> View
+                                        </a>
+                                    ) : (
+                                        '-'
+                                    )}
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <button type="button" onClick={() => deletePayment(payment.id)} className="text-red-600 hover:text-red-900">
                                         <Trash2 className="w-4 h-4" />
@@ -627,7 +700,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                     }
                     {providers.flatMap(wp => wp.payments).length === 0 && (
                         <tr>
-                            <td colSpan={6} className="px-6 py-4 text-center text-gray-500 text-sm">{t('noPayments')}</td>
+                            <td colSpan={7} className="px-6 py-4 text-center text-gray-500 text-sm">{t('noPayments')}</td>
                         </tr>
                     )}
                 </tbody>

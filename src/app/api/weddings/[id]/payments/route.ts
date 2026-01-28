@@ -9,6 +9,7 @@ const createPaymentSchema = z.object({
   date: z.string().datetime().optional(), // ISO string
   method: z.enum(['CASH', 'BANK_TRANSFER', 'PAYPAL', 'BIZUM', 'REVOLUT', 'OTHER']),
   notes: z.string().optional(),
+  document_url: z.string().optional(),
 });
 
 export async function POST(
@@ -34,13 +35,15 @@ export async function POST(
     const body = await request.json();
     const validated = createPaymentSchema.parse(body);
 
-    const payment = await prisma.payment.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payment = await (prisma.payment.create as any)({
       data: {
         wedding_provider_id: validated.wedding_provider_id,
         amount: validated.amount,
         date: validated.date ? new Date(validated.date) : new Date(),
         method: validated.method,
         notes: validated.notes,
+        document_url: validated.document_url,
       },
     });
 

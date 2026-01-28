@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/auth/middleware';
+import { unlink } from 'fs/promises';
+import path from 'path';
 
 const updateWeddingProviderSchema = z.object({
   name: z.string().optional().nullable().or(z.literal('')),
@@ -87,9 +89,47 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Fetch all payments for this provider to clean up associated documents
+    const payments = await prisma.payment.findMany({
+      where: { wedding_provider_id: providerId },
+      select: { id: true, document_url: true },
+    });
+
+    // Fetch the provider to get its contract_url
+    const provider = await prisma.weddingProvider.findUnique({
+      where: { id: providerId },
+      select: { contract_url: true },
+    });
+
+    // Delete the provider (cascades to delete payments)
     await prisma.weddingProvider.delete({
       where: { id: providerId },
     });
+
+    // Delete associated document files after provider is deleted
+    // Delete provider's contract document
+    if (provider?.contract_url) {
+      try {
+        const filePath = path.join(process.cwd(), 'public', provider.contract_url);
+        await unlink(filePath);
+      } catch (error) {
+        console.error(`Failed to delete contract file for provider ${providerId}:`, error);
+        // Continue - don't fail the request if file deletion fails
+      }
+    }
+
+    // Delete payment documents
+    for (const payment of payments) {
+      if (payment.document_url) {
+        try {
+          const filePath = path.join(process.cwd(), 'public', payment.document_url);
+          await unlink(filePath);
+        } catch (error) {
+          console.error(`Failed to delete document file for payment ${payment.id}:`, error);
+          // Continue - don't fail the request if file deletion fails
+        }
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
