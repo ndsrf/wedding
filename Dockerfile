@@ -11,31 +11,18 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package.json package-lock.json* ./
 
+# Copy Prisma schema files (required for postinstall hook)
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
+
 # Install all dependencies (including devDependencies for build)
 RUN npm ci
 
 # ============================================
-# Stage 2: Prisma
-# Generate Prisma client
-# ============================================
-FROM deps AS prisma
-
-# Copy Prisma files
-COPY prisma ./prisma/
-COPY prisma.config.ts ./
-
-# Set build-time DATABASE_URL (required by Prisma 7 config)
-# This is only used during build for prisma generate, not for actual DB connection
-ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# ============================================
-# Stage 3: Builder
+# Stage 2: Builder
 # Build the Next.js application
 # ============================================
-FROM prisma AS builder
+FROM deps AS builder
 
 WORKDIR /app
 
@@ -55,7 +42,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 RUN npm run build
 
 # ============================================
-# Stage 4: Prune
+# Stage 3: Prune
 # Remove devDependencies to create smaller production dependency tree
 # ============================================
 FROM deps AS prune
@@ -69,7 +56,7 @@ COPY package.json package-lock.json* ./
 RUN npm prune --omit=dev
 
 # ============================================
-# Stage 5: Production Runner
+# Stage 4: Production Runner
 # Minimal production image with only runtime deps
 # ============================================
 FROM node:20-alpine AS runner
@@ -94,8 +81,8 @@ COPY --from=prune --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=prisma --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=prisma /app/prisma.config.ts ./prisma.config.ts
+COPY --from=deps --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=deps /app/prisma.config.ts ./prisma.config.ts
 
 # Create uploads directory
 RUN mkdir -p ./public/uploads/templates && \
