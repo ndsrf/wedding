@@ -518,6 +518,7 @@ enum EventType {
 enum TemplateType {
   INVITATION
   REMINDER
+  CONFIRMATION
 }
 
 enum Channel {
