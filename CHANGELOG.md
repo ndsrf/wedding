@@ -1,3 +1,34 @@
+# [0.5.0](https://github.com/ndsrf/wedding/compare/v0.4.0...v0.5.0) (2026-01-28)
+
+
+### Bug Fixes
+
+* add DATABASE_URL build arg to Dockerfile for Prisma 7 ([1e4479f](https://github.com/ndsrf/wedding/commit/1e4479fbd0c7f10f4ddfb9519de2dd356579d658))
+* add DATABASE_URL to all GitHub Actions workflows for Prisma 7 ([43ad9a4](https://github.com/ndsrf/wedding/commit/43ad9a427c1bd24537a30853be0212181446e1f9))
+* add DATABASE_URL to builder stage for Next.js build ([feeffbb](https://github.com/ndsrf/wedding/commit/feeffbbe9a17b28e57accd4fc47b6abdc28043bc))
+* add PostgreSQL adapter for Prisma 7 client initialization ([e054107](https://github.com/ndsrf/wedding/commit/e054107ef8f1de376ff4b46929a489cb02392a19))
+* compilation issue, I committed too quickly ([f8179a2](https://github.com/ndsrf/wedding/commit/f8179a2d62bf1cb50453d32403019d7c621dd073))
+* copy node_modules/.bin to Docker runner for prisma CLI ([130005e](https://github.com/ndsrf/wedding/commit/130005ec3a57145c3e5c6259daab39e29e5a1650))
+* copy prisma CLI package to Docker runner stage ([08b6e22](https://github.com/ndsrf/wedding/commit/08b6e2269396e065de0be44ec35ec5e2207545c1))
+* enhance image upload and processing for templates ([547ae4c](https://github.com/ndsrf/wedding/commit/547ae4c8e09baf030c9f111d6e8632d5f7973d2c))
+* install Prisma CLI in runner stage with all dependencies ([2a80b65](https://github.com/ndsrf/wedding/commit/2a80b650ecd341faec491d9c6be266a15a0a959a))
+* issues with uploaded images in emails ([561d3d1](https://github.com/ndsrf/wedding/commit/561d3d1b038753b72f9bd553fb7092b4f50754d7))
+* logging and cookie settings to fix auth issues in production - deployed with cloudflare zero does not work ([a24dfca](https://github.com/ndsrf/wedding/commit/a24dfca67edbd7095f10f6d86221ac9c0bd1cf6f))
+* more docker google auth issues ([967dd7b](https://github.com/ndsrf/wedding/commit/967dd7bf9151625ed94ab36dffa75369fe9fe689))
+* remove dotenv import from prisma.config.ts for Docker compatibility ([ff660c7](https://github.com/ndsrf/wedding/commit/ff660c7c2a227e417dccda001b90bbef46c4a743))
+* troubleshooting image upload in production ([a9c8d10](https://github.com/ndsrf/wedding/commit/a9c8d10b6b7099b2a44a7b7bbe1c7f66dc02c654))
+* trying to fix auth issues in production ([4035735](https://github.com/ndsrf/wedding/commit/40357351e736eb746af394e6c7da46471aebec89))
+
+
+### Features
+
+* add image upload functionality to admin template page ([eae7a92](https://github.com/ndsrf/wedding/commit/eae7a92311d675bbd2efc751b6b66fd0a7c200e5))
+* include wedding admins in wedding details response and update admin management UI ([ee54e45](https://github.com/ndsrf/wedding/commit/ee54e4548e3f60fc65535c6529014cc135e898f3))
+* mobile friendly changes ([59c7408](https://github.com/ndsrf/wedding/commit/59c74083ca4405d65196f19c48d94817a6b9317b))
+* upgrade to Prisma 7 for Docker compatibility ([41a78d9](https://github.com/ndsrf/wedding/commit/41a78d998d088c5c9c67ae0dcafe4fcc5d5b45d7))
+
+
+
 # [0.4.0](https://github.com/ndsrf/wedding/compare/v0.3.0...v0.4.0) (2026-01-26)
 
 
