@@ -254,7 +254,7 @@ export function GuestTable({
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">{guest.name}</h3>
                     {guest.email && (
-                      <p className="text-sm text-gray-500">{guest.email}</p>
+                      <p className="text-sm text-gray-600">{guest.email}</p>
                     )}
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export function GuestTable({
               >
                 {guest.rsvp_status === 'submitted' ? t('admin.guests.filters.confirmed') : t('admin.guests.filters.pending')}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-600">
                 {guest.attending_count}/{guest.total_members} {t('admin.dashboard.metricTitles.attending').toLowerCase()}
               </span>
               <span

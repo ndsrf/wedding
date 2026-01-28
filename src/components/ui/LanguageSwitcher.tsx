@@ -31,7 +31,7 @@ export function LanguageSwitcher() {
         value={locale}
         onChange={(e) => handleLanguageChange(e.target.value)}
         disabled={isPending}
-        className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+        className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md cursor-pointer"
       >
         {LANGUAGES.map((lang) => (
           <option key={lang.code} value={lang.code}>
