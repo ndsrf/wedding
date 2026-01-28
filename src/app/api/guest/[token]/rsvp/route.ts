@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateMagicLink } from '@/lib/auth/magic-link';
 import { trackRSVPSubmitted } from '@/lib/tracking/events';
 import { prisma } from '@/lib/db/prisma';
+import { sendRSVPConfirmation } from '@/lib/email/resend';
 import type { SubmitRSVPRequest, SubmitRSVPResponse } from '@/types/api';
 import type { Channel } from '@prisma/client';
 
@@ -121,6 +122,33 @@ export async function POST(
         attending_count: attendingCount,
       }
     );
+
+    // Format wedding date for email
+    const weddingDate = wedding.wedding_date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    // Send RSVP confirmation email
+    try {
+      if (family.email && family.name && wedding.couple_names) {
+        const languageCode = family.preferred_language ?? wedding.default_language ?? 'en';
+        await sendRSVPConfirmation(
+          family.email,
+          languageCode.toLowerCase() as any,
+          family.name,
+          wedding.couple_names,
+          weddingDate,
+          wedding.wedding_time ?? undefined,
+          wedding.location ?? undefined
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send RSVP confirmation email:', error);
+      // Don't fail the RSVP submission if email sending fails
+    }
 
     return NextResponse.json<SubmitRSVPResponse>({
       success: true,

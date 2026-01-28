@@ -24,6 +24,8 @@ interface RSVPReminderEmailProps {
   coupleNames: string;
   weddingDate: string;
   magicLink: string;
+  weddingTime?: string;
+  location?: string;
 }
 
 const translations = {
@@ -32,6 +34,8 @@ const translations = {
     greeting: 'Hola familia',
     intro: 'Esperamos que estén bien. Les escribimos para recordarles que aún no hemos recibido la confirmación de su asistencia a la boda de',
     weddingDate: 'Fecha de la boda:',
+    time: 'Hora:',
+    location: 'Ubicación:',
     importance: 'Su confirmación es muy importante para nosotros, ya que nos ayuda a planificar mejor el evento y asegurarnos de que todos nuestros invitados tengan una experiencia maravillosa.',
     easy: 'Confirmar su asistencia es muy fácil y solo toma unos minutos:',
     step1: 'Haz clic en el botón de abajo',
@@ -50,6 +54,8 @@ const translations = {
     greeting: 'Hello',
     intro: 'We hope you are well. We are writing to remind you that we have not yet received confirmation of your attendance to the wedding of',
     weddingDate: 'Wedding date:',
+    time: 'Time:',
+    location: 'Location:',
     importance: 'Your confirmation is very important to us, as it helps us better plan the event and ensure that all our guests have a wonderful experience.',
     easy: 'Confirming your attendance is very easy and only takes a few minutes:',
     step1: 'Click the button below',
@@ -68,6 +74,8 @@ const translations = {
     greeting: 'Bonjour famille',
     intro: 'Nous espérons que vous allez bien. Nous vous écrivons pour vous rappeler que nous n\'avons pas encore reçu la confirmation de votre présence au mariage de',
     weddingDate: 'Date du mariage:',
+    time: 'Heure:',
+    location: 'Lieu:',
     importance: 'Votre confirmation est très importante pour nous, car elle nous aide à mieux planifier l\'événement et à nous assurer que tous nos invités vivent une expérience merveilleuse.',
     easy: 'Confirmer votre présence est très facile et ne prend que quelques minutes:',
     step1: 'Cliquez sur le bouton ci-dessous',
@@ -86,6 +94,8 @@ const translations = {
     greeting: 'Ciao famiglia',
     intro: 'Speriamo che stiate bene. Vi scriviamo per ricordarvi che non abbiamo ancora ricevuto la conferma della vostra presenza al matrimonio di',
     weddingDate: 'Data del matrimonio:',
+    time: 'Ora:',
+    location: 'Luogo:',
     importance: 'La vostra conferma è molto importante per noi, poiché ci aiuta a pianificare meglio l\'evento e ad assicurarci che tutti i nostri ospiti abbiano un\'esperienza meravigliosa.',
     easy: 'Confermare la vostra presenza è molto facile e richiede solo pochi minuti:',
     step1: 'Clicca sul pulsante qui sotto',
@@ -104,6 +114,8 @@ const translations = {
     greeting: 'Hallo Familie',
     intro: 'Wir hoffen, es geht Ihnen gut. Wir schreiben Ihnen, um Sie daran zu erinnern, dass wir noch keine Bestätigung Ihrer Teilnahme an der Hochzeit von',
     weddingDate: 'Hochzeitsdatum:',
+    time: 'Uhrzeit:',
+    location: 'Ort:',
     importance: 'Ihre Bestätigung ist uns sehr wichtig, da sie uns hilft, die Veranstaltung besser zu planen und sicherzustellen, dass alle unsere Gäste ein wunderbares Erlebnis haben.',
     easy: 'Die Bestätigung Ihrer Teilnahme ist sehr einfach und dauert nur wenige Minuten:',
     step1: 'Klicken Sie auf die Schaltfläche unten',
@@ -125,6 +137,8 @@ export const RSVPReminderEmail = ({
   coupleNames = 'John & Jane',
   weddingDate = 'June 15, 2024',
   magicLink = 'https://app.weddingplatform.com/rsvp/abc123',
+  weddingTime = '',
+  location = '',
 }: RSVPReminderEmailProps) => {
   const t = translations[language];
 
@@ -144,6 +158,16 @@ export const RSVPReminderEmail = ({
             <Text style={dateText}>
               <strong>{t.weddingDate}</strong> {weddingDate}
             </Text>
+            {weddingTime && (
+              <Text style={dateText}>
+                <strong>{t.time}</strong> {weddingTime}
+              </Text>
+            )}
+            {location && (
+              <Text style={dateText}>
+                <strong>{t.location}</strong> {location}
+              </Text>
+            )}
           </Section>
           
           <Text style={text}>{t.importance}</Text>

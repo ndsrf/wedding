@@ -320,7 +320,9 @@ export async function sendRSVPReminder(
   familyName: string,
   coupleNames: string,
   weddingDate: string,
-  magicLink: string
+  magicLink: string,
+  weddingTime?: string,
+  location?: string
 ): Promise<EmailResult> {
   return sendEmail({
     to,
@@ -331,6 +333,8 @@ export async function sendRSVPReminder(
       coupleNames,
       weddingDate,
       magicLink,
+      ...(weddingTime && { weddingTime }),
+      ...(location && { location }),
     },
   });
 }
@@ -343,7 +347,9 @@ export async function sendRSVPConfirmation(
   language: Language,
   familyName: string,
   coupleNames: string,
-  weddingDate: string
+  weddingDate: string,
+  weddingTime?: string,
+  location?: string
 ): Promise<EmailResult> {
   return sendEmail({
     to,
@@ -353,6 +359,8 @@ export async function sendRSVPConfirmation(
       familyName,
       coupleNames,
       weddingDate,
+      ...(weddingTime && { weddingTime }),
+      ...(location && { location }),
     },
   });
 }

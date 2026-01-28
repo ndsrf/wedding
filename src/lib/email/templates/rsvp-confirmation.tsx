@@ -21,6 +21,8 @@ interface RSVPConfirmationEmailProps {
   familyName: string;
   coupleNames: string;
   weddingDate: string;
+  weddingTime?: string;
+  location?: string;
 }
 
 const translations = {
@@ -32,6 +34,8 @@ const translations = {
     weddingInfo: 'Detalles de la boda:',
     couple: 'Pareja:',
     date: 'Fecha:',
+    time: 'Hora:',
+    location: 'Ubicación:',
     nextSteps: 'Próximos pasos:',
     step1: 'Hemos recibido tu confirmación de asistencia',
     step2: 'Recibirás más información sobre el evento próximamente',
@@ -51,6 +55,8 @@ const translations = {
     weddingInfo: 'Wedding details:',
     couple: 'Couple:',
     date: 'Date:',
+    time: 'Time:',
+    location: 'Location:',
     nextSteps: 'Next steps:',
     step1: 'We have received your attendance confirmation',
     step2: 'You will receive more information about the event soon',
@@ -70,6 +76,8 @@ const translations = {
     weddingInfo: 'Détails du mariage:',
     couple: 'Couple:',
     date: 'Date:',
+    time: 'Heure:',
+    location: 'Lieu:',
     nextSteps: 'Prochaines étapes:',
     step1: 'Nous avons reçu votre confirmation de présence',
     step2: 'Vous recevrez bientôt plus d\'informations sur l\'événement',
@@ -89,6 +97,8 @@ const translations = {
     weddingInfo: 'Dettagli del matrimonio:',
     couple: 'Coppia:',
     date: 'Data:',
+    time: 'Ora:',
+    location: 'Luogo:',
     nextSteps: 'Prossimi passi:',
     step1: 'Abbiamo ricevuto la tua conferma di presenza',
     step2: 'Riceverai presto maggiori informazioni sull\'evento',
@@ -108,6 +118,8 @@ const translations = {
     weddingInfo: 'Hochzeitsdetails:',
     couple: 'Paar:',
     date: 'Datum:',
+    time: 'Uhrzeit:',
+    location: 'Ort:',
     nextSteps: 'Nächste Schritte:',
     step1: 'Wir haben Ihre Teilnahmebestätigung erhalten',
     step2: 'Sie erhalten bald weitere Informationen zur Veranstaltung',
@@ -126,6 +138,8 @@ export const RSVPConfirmationEmail = ({
   familyName = 'Smith',
   coupleNames = 'John & Jane',
   weddingDate = 'June 15, 2024',
+  weddingTime = '',
+  location = '',
 }: RSVPConfirmationEmailProps) => {
   const t = translations[language];
 
@@ -153,6 +167,16 @@ export const RSVPConfirmationEmail = ({
             <Text style={infoText}>
               <strong>{t.date}</strong> {weddingDate}
             </Text>
+            {weddingTime && (
+              <Text style={infoText}>
+                <strong>{t.time}</strong> {weddingTime}
+              </Text>
+            )}
+            {location && (
+              <Text style={infoText}>
+                <strong>{t.location}</strong> {location}
+              </Text>
+            )}
           </Section>
           
           <Text style={sectionTitle}>{t.nextSteps}</Text>

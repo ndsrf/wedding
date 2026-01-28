@@ -123,6 +123,8 @@ export async function POST(request: NextRequest) {
         id: true,
         couple_names: true,
         wedding_date: true,
+        wedding_time: true,
+        location: true,
         rsvp_cutoff_date: true,
         default_language: true,
       },
@@ -292,8 +294,8 @@ export async function POST(request: NextRequest) {
                 familyName: family.name,
                 coupleNames: wedding.couple_names,
                 weddingDate,
-                weddingTime: '', // Not available in this context, will be empty
-                location: '', // Not available in this context, will be empty
+                weddingTime: wedding.wedding_time || '',
+                location: wedding.location || '',
                 magicLink,
                 rsvpCutoffDate: cutoffDate,
               };
@@ -324,7 +326,9 @@ export async function POST(request: NextRequest) {
                 family.name,
                 wedding.couple_names,
                 weddingDate,
-                magicLink
+                magicLink,
+                wedding.wedding_time || undefined,
+                wedding.location || undefined
               );
             }
           }
