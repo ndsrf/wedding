@@ -446,7 +446,7 @@ export default async function AdminDashboardPage() {
         {/* Upcoming Tasks Widget */}
         {user.wedding_id && (
           <div className="mt-8">
-            <UpcomingTasksWidget weddingId={user.wedding_id} />
+            <UpcomingTasksWidget />
           </div>
         )}
       </main>

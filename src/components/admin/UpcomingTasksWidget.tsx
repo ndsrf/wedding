@@ -19,14 +19,10 @@ import { useTranslations } from 'next-intl';
 import type { UpcomingTask } from '@/types/checklist';
 import type { APIResponse } from '@/types/api';
 
-interface UpcomingTasksWidgetProps {
-  weddingId: string;
-}
-
 type SortField = 'due_date' | 'title';
 type SortDirection = 'asc' | 'desc';
 
-export function UpcomingTasksWidget({ weddingId }: UpcomingTasksWidgetProps) {
+export function UpcomingTasksWidget() {
   const t = useTranslations('admin.tasks');
   const [tasks, setTasks] = useState<UpcomingTask[]>([]);
   const [loading, setLoading] = useState(true);
