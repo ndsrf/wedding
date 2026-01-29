@@ -388,8 +388,9 @@ export interface ExportNotificationsRequest {
 
 // POST /api/admin/reminders
 export interface SendRemindersRequest {
-  channel: Channel;
+  channel: Channel | 'PREFERRED';
   message_template?: string; // Optional custom message
+  family_ids?: string[]; // Optional: specific families to send to
 }
 
 export interface SendRemindersResult {
@@ -399,6 +400,33 @@ export interface SendRemindersResult {
 }
 
 export type SendRemindersResponse = APIResponse<SendRemindersResult>;
+
+// POST /api/admin/reminders/validate
+export interface ValidateRemindersRequest {
+  channel: Channel | 'PREFERRED';
+  family_ids?: string[];
+}
+
+export interface ValidateRemindersResult {
+  valid_families: Array<{
+    id: string;
+    name: string;
+    channel: Channel;
+  }>;
+  invalid_families: Array<{
+    id: string;
+    name: string;
+    missing_info: 'email' | 'phone' | 'whatsapp_number';
+    expected_channel: Channel;
+  }>;
+  summary: {
+    total: number;
+    valid: number;
+    invalid: number;
+  };
+}
+
+export type ValidateRemindersResponse = APIResponse<ValidateRemindersResult>;
 
 // GET /api/admin/reminders/preview
 export interface ReminderPreview {

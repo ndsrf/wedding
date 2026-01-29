@@ -107,11 +107,14 @@ export default function NotificationsPage() {
     setShowReminderModal(true);
   };
 
-  const handleSendReminders = async (channel: Channel) => {
+  const handleSendReminders = async (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => {
     const response = await fetch('/api/admin/reminders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel }),
+      body: JSON.stringify({
+        channel,
+        ...(validFamilyIds && { family_ids: validFamilyIds }),
+      }),
     });
     const data = await response.json();
 

@@ -4,7 +4,6 @@
  */
 
 import twilio from 'twilio';
-import { Language } from '../i18n/config';
 
 // Initialize Twilio client lazily to avoid build-time API key requirement
 let twilioClient: ReturnType<typeof twilio> | null = null;
@@ -15,7 +14,7 @@ function getTwilioClient() {
     const authToken = process.env.TWILIO_AUTH_TOKEN;
 
     if (!accountSid || !authToken) {
-      throw new Error('TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN environment variables are required');
+      throw new Error('Missing credentials');
     }
 
     twilioClient = twilio(accountSid, authToken);
@@ -43,6 +42,14 @@ interface MessageResult {
   success: boolean;
   messageId?: string;
   error?: string;
+}
+
+interface TwilioMessageParams {
+  body: string;
+  from: string;
+  to: string;
+  mediaUrl?: string[];
+  statusCallback?: string;
 }
 
 /**
@@ -116,7 +123,7 @@ export async function sendMessage(
       : fromNumber;
 
     // Prepare message params
-    const messageParams: any = {
+    const messageParams: TwilioMessageParams = {
       body,
       from: formattedFrom,
       to: formattedTo,
@@ -127,8 +134,23 @@ export async function sendMessage(
       messageParams.mediaUrl = [mediaUrl];
     }
 
+    // Add status callback URL for delivery and read receipts (only if webhook is enabled)
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const webhookEnabled = process.env.TWILIO_WEBHOOK_ENABLED !== 'false';
+    const isLocalhost = appUrl.includes('localhost') || appUrl.includes('127.0.0.1');
+
+    if (webhookEnabled && !isLocalhost) {
+      messageParams.statusCallback = `${appUrl}/api/webhooks/twilio/status`;
+    }
+
     // Send message
     const client = getTwilioClient();
+    console.log('[TWILIO] Sending message with params:', {
+      from: messageParams.from,
+      to: messageParams.to,
+      bodyLength: messageParams.body.length,
+      accountSid: process.env.TWILIO_ACCOUNT_SID?.slice(0, 10) + '...',
+    });
     const message = await client.messages.create(messageParams);
 
     console.log(`✅ ${type} message sent successfully:`, {
@@ -141,7 +163,8 @@ export async function sendMessage(
       success: true,
       messageId: message.sid,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(`❌ Failed to send ${options.type} message:`, error);
 
     // Retry logic
@@ -153,7 +176,7 @@ export async function sendMessage(
 
     return {
       success: false,
-      error: error.message || 'Failed to send message',
+      error: errorMessage || 'Failed to send message',
     };
   }
 }

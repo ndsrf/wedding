@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Language, Channel } from '@/types/models';
+import type { ValidateRemindersResult } from '@/types/api';
 
 interface ReminderFamily {
   id: string;
@@ -21,7 +22,7 @@ interface ReminderModalProps {
   isOpen: boolean;
   onClose: () => void;
   eligibleFamilies: ReminderFamily[];
-  onSendReminders: (channel: Channel) => Promise<void>;
+  onSendReminders: (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => Promise<void>;
   loading?: boolean;
   weddingGiftIban?: string | null;
 }
@@ -35,19 +36,54 @@ export function ReminderModal({
   weddingGiftIban,
 }: ReminderModalProps) {
   const t = useTranslations();
-  const [selectedChannel, setSelectedChannel] = useState<Channel>('EMAIL');
+  const [selectedChannel, setSelectedChannel] = useState<Channel | 'PREFERRED'>('PREFERRED');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showIbanWarning, setShowIbanWarning] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidateRemindersResult | null>(null);
+  const [showValidationWarning, setShowValidationWarning] = useState(false);
 
   if (!isOpen) return null;
+
+  const validateChannel = async () => {
+    setError(null);
+    try {
+      const response = await fetch('/api/admin/reminders/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: selectedChannel,
+          family_ids: eligibleFamilies.map(f => f.id),
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setValidationResult(data.data);
+        if (data.data.invalid_families.length > 0) {
+          setShowValidationWarning(true);
+          return false; // Validation failed
+        }
+        return true; // Validation passed
+      }
+      throw new Error(data.error?.message || t('common.errors.generic'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('common.errors.generic'));
+      return false;
+    }
+  };
 
   const handleSend = async () => {
     // Check if IBAN is empty and warning hasn't been shown yet
     if (!weddingGiftIban && !showIbanWarning) {
       setShowIbanWarning(true);
       return;
+    }
+
+    // Validate channel before sending
+    const isValid = await validateChannel();
+    if (!isValid) {
+      return; // Show validation warning, wait for user action
     }
 
     setSending(true);
@@ -59,6 +95,31 @@ export function ReminderModal({
         onClose();
         setSuccess(false);
         setShowIbanWarning(false);
+        setShowValidationWarning(false);
+        setValidationResult(null);
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('common.errors.generic'));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleContinueWithInvalidFamilies = async () => {
+    if (!validationResult) return;
+    setShowValidationWarning(false);
+    setSending(true);
+    setError(null);
+    try {
+      // Send only to valid families
+      const validFamilyIds = validationResult.valid_families.map(f => f.id);
+      await onSendReminders(selectedChannel, validFamilyIds);
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+        setSuccess(false);
+        setShowValidationWarning(false);
+        setValidationResult(null);
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
@@ -138,6 +199,63 @@ export function ReminderModal({
                 {t('admin.reminders.allCaughtUpDesc')}
               </p>
             </div>
+          ) : showValidationWarning && validationResult ? (
+            <>
+              {/* Validation Warning */}
+              <div className="py-6">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                  <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="mt-4 text-center">
+                  <h3 className="text-lg font-medium text-gray-900">{t('admin.reminders.validationWarning.title')}</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    {t('admin.reminders.validationWarning.message')}
+                  </p>
+
+                  {/* List of families with missing info */}
+                  <div className="mt-4 max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                    <ul className="space-y-2">
+                      {validationResult.invalid_families.map((family) => (
+                        <li key={family.id} className="text-sm text-gray-700">
+                          <span className="font-medium">{family.name}</span>
+                          <span className="text-gray-500"> - </span>
+                          <span className="text-red-600">
+                            {t(`admin.reminders.validationWarning.missing_${family.missing_info}`)}
+                          </span>
+                          {selectedChannel === 'PREFERRED' && (
+                            <span className="text-gray-500 text-xs">
+                              {' '}({t(`common.channels.${family.expected_channel}`)})
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning Actions */}
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowValidationWarning(false);
+                    setValidationResult(null);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  {t('common.buttons.cancel')}
+                </button>
+                <button
+                  onClick={handleContinueWithInvalidFamilies}
+                  disabled={sending}
+                  className="px-4 py-2 text-sm font-medium text-white bg-yellow-600 border border-transparent rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {sending ? t('admin.reminders.sending') : t('admin.reminders.sendToValidOnly', { count: validationResult.summary.valid })}
+                </button>
+              </div>
+            </>
           ) : showIbanWarning ? (
             <>
               {/* IBAN Warning */}
@@ -203,14 +321,16 @@ export function ReminderModal({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('admin.reminders.sendVia')}
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {(['EMAIL', 'WHATSAPP', 'SMS'] as Channel[]).map((channel) => (
+                <div className="grid grid-cols-2 gap-3">
+                  {(['PREFERRED', 'EMAIL', 'WHATSAPP', 'SMS'] as (Channel | 'PREFERRED')[]).map((channel) => (
                     <button
                       key={channel}
                       onClick={() => setSelectedChannel(channel)}
                       className={`px-4 py-2 text-sm font-medium rounded-md border ${
                         selectedChannel === channel
-                          ? 'border-purple-600 bg-purple-50 text-purple-700'
+                          ? channel === 'PREFERRED'
+                            ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                            : 'border-purple-600 bg-purple-50 text-purple-700'
                           : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                       }`}
                     >

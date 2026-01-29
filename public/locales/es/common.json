@@ -22,7 +22,8 @@
       "upload": "Subir",
       "send": "Enviar",
       "clearFilters": "Limpiar filtros",
-      "retry": "Reintentar"
+      "retry": "Reintentar",
+      "continue": "Continuar"
     },
     "status": {
       "pending": "Pendiente",
@@ -82,6 +83,7 @@
       "WHATSAPP": "WhatsApp",
       "EMAIL": "Email",
       "SMS": "SMS",
+      "PREFERRED": "Canal Preferido del Invitado",
       "none": "-"
     },
     "loading": "Cargando...",
@@ -644,7 +646,19 @@
       "sending": "Enviando...",
       "sendAction": "Enviar {count} Recordatorios",
       "bulkSend": "Enviar Recordatorios Masivos",
-      "selectGuestsHint": "Selecciona invitados de la tabla a continuación para enviar recordatorios"
+      "selectGuestsHint": "Selecciona invitados de la tabla a continuación para enviar recordatorios",
+      "ibanWarning": {
+        "title": "IBAN de Regalo No Configurado",
+        "message": "Aún no has configurado un IBAN para regalos. Los invitados no podrán ver los detalles de pago. ¿Continuar enviando recordatorios de todas formas?"
+      },
+      "validationWarning": {
+        "title": "Información de Contacto Faltante",
+        "message": "Las siguientes familias no pueden recibir recordatorios porque les falta información requerida:",
+        "missing_email": "Email requerido",
+        "missing_phone": "Número de teléfono requerido",
+        "missing_whatsapp_number": "Número de WhatsApp requerido"
+      },
+      "sendToValidOnly": "Enviar a {count} familias de todas formas"
     },
     "payments": {
       "title": "Gestión de Pagos",

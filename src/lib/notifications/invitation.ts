@@ -185,6 +185,7 @@ export async function sendInvitation(
           channel,
           contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
           admin_id,
+          ...(messageResult.messageId && { message_sid: messageResult.messageId }),
         },
         admin_triggered: true,
       });

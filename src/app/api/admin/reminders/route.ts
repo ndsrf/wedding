@@ -27,7 +27,7 @@ import type { Language, Channel } from '@prisma/client';
 
 // Validation schema for send reminders request
 const sendRemindersSchema = z.object({
-  channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']),
+  channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS', 'PREFERRED']),
   message_template: z.string().optional(),
   family_ids: z.array(z.string()).optional(),
 });
@@ -191,159 +191,321 @@ export async function POST(request: NextRequest) {
     // Prepare personalized messages for each family in their preferred language
     const baseUrl = process.env.APP_URL || 'http://localhost:3000';
 
-    const trackingEventsData = eligibleFamilies.map((family) => {
-      // Use family's preferred language, fallback to wedding default
-      const language = family.preferred_language || wedding.default_language;
-      const messages = REMINDER_MESSAGES[language];
-
-      const magicLink = `${baseUrl}/rsvp/${family.magic_token}?channel=${channel.toLowerCase()}`;
-      const weddingDate = formatDate(wedding.wedding_date, language);
-      const cutoffDate = formatDate(wedding.rsvp_cutoff_date, language);
-
-      // Build personalized message
-      const personalizedMessage = {
-        language,
-        subject: messages.subject,
-        greeting: messages.greeting(family.name),
-        body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
-        cta: messages.cta,
-        magic_link: magicLink,
-      };
-
-      return {
-        family_id: family.id,
-        wedding_id: user.wedding_id!,
-        event_type: 'REMINDER_SENT' as const,
-        channel: channel,
-        metadata: {
-          admin_id: user.id,
-          admin_triggered: true,
-          reminder_type: 'manual',
-          personalized_message: personalizedMessage,
-          family_language: language,
-          channel_used: channel,
-        },
-        admin_triggered: true,
-      };
-    });
-
-    // Batch create tracking events
-    await prisma.trackingEvent.createMany({
-      data: trackingEventsData,
-    });
-
-    // Send emails if channel is EMAIL
+    // Send reminders
     let sentCount = 0;
     let failedCount = 0;
 
-    if (channel === 'EMAIL') {
-      console.log('[REMINDER DEBUG] Sending emails to', eligibleFamilies.length, 'families');
+    // Helper function to send email reminder to a family
+    const sendEmailReminder = async (family: typeof eligibleFamilies[0]): Promise<boolean> => {
+      // Only send if family has an email
+      if (!family.email) {
+        console.log('[REMINDER DEBUG] Family', family.name, 'has no email, skipping');
+        return false;
+      }
 
-      for (const family of eligibleFamilies) {
-        // Only send if family has an email
-        if (!family.email) {
-          console.log('[REMINDER DEBUG] Family', family.name, 'has no email, skipping');
-          failedCount++;
-          continue;
+      console.log('[REMINDER DEBUG] Processing family', family.name);
+
+      try {
+        // Check if INVITATION_SENT event exists for this family
+        const invitationSent = await prisma.trackingEvent.findFirst({
+          where: {
+            family_id: family.id,
+            event_type: 'INVITATION_SENT',
+          },
+        });
+
+        let result;
+
+        if (!invitationSent) {
+          // No invitation sent yet, send invitation email
+          console.log('[REMINDER DEBUG] No invitation sent yet for', family.name, ', sending invitation');
+          result = await sendInvitation({
+            family_id: family.id,
+            wedding_id: user.wedding_id!,
+            admin_id: user.id,
+          });
+        } else {
+          // Invitation already sent, send reminder email
+          console.log('[REMINDER DEBUG] Invitation already sent for', family.name, ', sending reminder');
+
+          const familyLanguage = family.preferred_language || wedding.default_language;
+          const language = (familyLanguage).toLowerCase() as I18nLanguage;
+          const weddingDate = formatDate(wedding.wedding_date, familyLanguage);
+          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, familyLanguage);
+          const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
+
+          // Try to fetch template from database
+          const template = await getTemplateForSending(
+            user.wedding_id!,
+            'REMINDER',
+            familyLanguage,
+            'EMAIL'
+          );
+
+          if (template) {
+            // Use database template
+            console.log('[REMINDER DEBUG] Using database template for', familyLanguage);
+            console.log('[REMINDER DEBUG] Template image_url:', template.image_url);
+
+            const variables = {
+              familyName: family.name,
+              coupleNames: wedding.couple_names,
+              weddingDate,
+              weddingTime: wedding.wedding_time || '',
+              location: wedding.location || '',
+              magicLink,
+              rsvpCutoffDate: cutoffDate,
+            };
+
+            const renderedSubject = renderTemplate(template.subject, variables);
+            const renderedBody = renderTemplate(template.body, variables);
+
+            // Convert relative image URL to absolute URL for email clients
+            const absoluteImageUrl = template.image_url
+              ? `${baseUrl}${template.image_url}`
+              : null;
+            console.log('[REMINDER DEBUG] Absolute image URL:', absoluteImageUrl);
+
+            result = await sendDynamicEmail(
+              family.email,
+              renderedSubject,
+              renderedBody,
+              language,
+              wedding.couple_names,
+              absoluteImageUrl
+            );
+          } else {
+            // Fallback to hardcoded template
+            console.log('[REMINDER DEBUG] Using hardcoded template for', familyLanguage);
+            result = await sendRSVPReminder(
+              family.email,
+              language,
+              family.name,
+              wedding.couple_names,
+              weddingDate,
+              magicLink,
+              wedding.wedding_time || undefined,
+              wedding.location || undefined
+            );
+          }
         }
 
-        console.log('[REMINDER DEBUG] Processing family', family.name);
+        if (result.success) {
+          console.log('[REMINDER DEBUG] Email sent successfully to', family.email);
 
-        try {
-          // Check if INVITATION_SENT event exists for this family
-          const invitationSent = await prisma.trackingEvent.findFirst({
-            where: {
+          // Create tracking event with message_sid if available
+          const language = family.preferred_language || wedding.default_language;
+          const messages = REMINDER_MESSAGES[language];
+          const weddingDate = formatDate(wedding.wedding_date, language);
+          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, language);
+          const magicLink = `${baseUrl}/rsvp/${family.magic_token}?channel=email`;
+
+          const personalizedMessage = {
+            language,
+            subject: messages.subject,
+            greeting: messages.greeting(family.name),
+            body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
+            cta: messages.cta,
+            magic_link: magicLink,
+          };
+
+          await prisma.trackingEvent.create({
+            data: {
               family_id: family.id,
-              event_type: 'INVITATION_SENT',
+              wedding_id: user.wedding_id!,
+              event_type: 'REMINDER_SENT',
+              channel: 'EMAIL' as Channel,
+              metadata: {
+                admin_id: user.id,
+                admin_triggered: true,
+                reminder_type: 'manual',
+                personalized_message: personalizedMessage,
+                family_language: language,
+                channel_used: 'EMAIL',
+                ...(result.messageId && { message_sid: result.messageId }),
+              } as any,
+              admin_triggered: true,
             },
           });
 
-          let result;
+          return true;
+        } else {
+          console.error('[REMINDER DEBUG] Failed to send email to', family.email, ':', result.error);
+          return false;
+        }
+      } catch (error) {
+        console.error('[REMINDER DEBUG] Error sending email to', family.email, ':', error);
+        return false;
+      }
+    };
 
-          if (!invitationSent) {
-            // No invitation sent yet, send invitation email
-            console.log('[REMINDER DEBUG] No invitation sent yet for', family.name, ', sending invitation');
-            result = await sendInvitation({
+    // Helper function to send SMS/WhatsApp reminder to a family
+    const sendSmsOrWhatsappReminder = async (family: typeof eligibleFamilies[0], targetChannel: Channel): Promise<boolean> => {
+      // Validate family has required contact info
+      const contactInfo = targetChannel === 'SMS' ? family.phone : family.whatsapp_number;
+
+      if (!contactInfo) {
+        console.log('[REMINDER DEBUG] Family', family.name, 'has no', targetChannel, 'contact, skipping');
+        return false;
+      }
+
+      console.log('[REMINDER DEBUG] Processing family', family.name);
+
+      try {
+        // Check if INVITATION_SENT event exists for this family
+        const invitationSent = await prisma.trackingEvent.findFirst({
+          where: {
+            family_id: family.id,
+            event_type: 'INVITATION_SENT',
+          },
+        });
+
+        let result;
+
+        if (!invitationSent) {
+          // No invitation sent yet, send invitation
+          console.log('[REMINDER DEBUG] No invitation sent yet for', family.name, ', sending invitation');
+          result = await sendInvitation({
+            family_id: family.id,
+            wedding_id: user.wedding_id!,
+            admin_id: user.id,
+          });
+        } else {
+          // Invitation already sent, send reminder
+          console.log('[REMINDER DEBUG] Invitation already sent for', family.name, ', sending reminder');
+
+          const familyLanguage = family.preferred_language || wedding.default_language;
+          const weddingDate = formatDate(wedding.wedding_date, familyLanguage);
+          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, familyLanguage);
+          const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
+
+          // Fetch template from database
+          const template = await getTemplateForSending(
+            user.wedding_id!,
+            'REMINDER',
+            familyLanguage,
+            targetChannel
+          );
+
+          if (template) {
+            // Use database template
+            console.log('[REMINDER DEBUG] Using database template for', familyLanguage, targetChannel);
+
+            const variables = {
+              familyName: family.name,
+              coupleNames: wedding.couple_names,
+              weddingDate,
+              weddingTime: wedding.wedding_time || '',
+              location: wedding.location || '',
+              magicLink,
+              rsvpCutoffDate: cutoffDate,
+            };
+
+            const renderedBody = renderTemplate(template.body, variables);
+
+            // Convert relative image URL to absolute URL (for WhatsApp)
+            const absoluteImageUrl = template.image_url && targetChannel === 'WHATSAPP'
+              ? `${baseUrl}${template.image_url}`
+              : undefined;
+
+            result = await sendDynamicMessage(
+              contactInfo,
+              renderedBody,
+              targetChannel === 'SMS' ? MessageType.SMS : MessageType.WHATSAPP,
+              absoluteImageUrl
+            );
+          } else {
+            // Fallback to hardcoded message
+            console.log('[REMINDER DEBUG] No template found, using fallback message');
+            const messages = REMINDER_MESSAGES[familyLanguage];
+            const fallbackBody = `${messages.greeting(family.name)}\n\n${messages.body(wedding.couple_names, weddingDate, cutoffDate)}\n\n${messages.cta}: ${magicLink}`;
+
+            result = await sendDynamicMessage(
+              contactInfo,
+              fallbackBody,
+              targetChannel === 'SMS' ? MessageType.SMS : MessageType.WHATSAPP
+            );
+          }
+        }
+
+        if (result.success) {
+          console.log('[REMINDER DEBUG] Message sent successfully to', contactInfo);
+
+          // Create tracking event with message_sid
+          const language = family.preferred_language || wedding.default_language;
+          const messages = REMINDER_MESSAGES[language];
+          const weddingDate = formatDate(wedding.wedding_date, language);
+          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, language);
+          const magicLink = `${baseUrl}/rsvp/${family.magic_token}?channel=${targetChannel.toLowerCase()}`;
+
+          const personalizedMessage = {
+            language,
+            subject: messages.subject,
+            greeting: messages.greeting(family.name),
+            body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
+            cta: messages.cta,
+            magic_link: magicLink,
+          };
+
+          await prisma.trackingEvent.create({
+            data: {
               family_id: family.id,
               wedding_id: user.wedding_id!,
-              admin_id: user.id,
-            });
-          } else {
-            // Invitation already sent, send reminder email
-            console.log('[REMINDER DEBUG] Invitation already sent for', family.name, ', sending reminder');
+              event_type: 'REMINDER_SENT',
+              channel: targetChannel,
+              metadata: {
+                admin_id: user.id,
+                admin_triggered: true,
+                reminder_type: 'manual',
+                personalized_message: personalizedMessage,
+                family_language: language,
+                channel_used: targetChannel,
+                ...(result.messageId && { message_sid: result.messageId }),
+              } as any,
+              admin_triggered: true,
+            },
+          });
 
-            const familyLanguage = family.preferred_language || wedding.default_language;
-            const language = (familyLanguage).toLowerCase() as I18nLanguage;
-            const weddingDate = formatDate(wedding.wedding_date, familyLanguage);
-            const cutoffDate = formatDate(wedding.rsvp_cutoff_date, familyLanguage);
-            const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
+          return true;
+        } else {
+          console.error('[REMINDER DEBUG] Failed to send message to', contactInfo, ':', result.error);
+          return false;
+        }
+      } catch (error) {
+        console.error('[REMINDER DEBUG] Error sending message to', contactInfo, ':', error);
+        return false;
+      }
+    };
 
-            // Try to fetch template from database
-            const template = await getTemplateForSending(
-              user.wedding_id!,
-              'REMINDER',
-              familyLanguage,
-              'EMAIL'
-            );
+    // Handle PREFERRED mode: send via each family's preferred channel
+    if (channel === 'PREFERRED') {
+      console.log('[REMINDER DEBUG] Sending via PREFERRED channel to', eligibleFamilies.length, 'families');
 
-            if (template) {
-              // Use database template
-              console.log('[REMINDER DEBUG] Using database template for', familyLanguage);
-              console.log('[REMINDER DEBUG] Template image_url:', template.image_url);
+      for (const family of eligibleFamilies) {
+        const familyChannel = (family.channel_preference || 'EMAIL') as Channel;
 
-              const variables = {
-                familyName: family.name,
-                coupleNames: wedding.couple_names,
-                weddingDate,
-                weddingTime: wedding.wedding_time || '',
-                location: wedding.location || '',
-                magicLink,
-                rsvpCutoffDate: cutoffDate,
-              };
+        let success = false;
+        if (familyChannel === 'EMAIL') {
+          success = await sendEmailReminder(family);
+        } else {
+          success = await sendSmsOrWhatsappReminder(family, familyChannel);
+        }
 
-              const renderedSubject = renderTemplate(template.subject, variables);
-              const renderedBody = renderTemplate(template.body, variables);
-
-              // Convert relative image URL to absolute URL for email clients
-              const absoluteImageUrl = template.image_url
-                ? `${baseUrl}${template.image_url}`
-                : null;
-              console.log('[REMINDER DEBUG] Absolute image URL:', absoluteImageUrl);
-
-              result = await sendDynamicEmail(
-                family.email,
-                renderedSubject,
-                renderedBody,
-                language,
-                wedding.couple_names,
-                absoluteImageUrl
-              );
-            } else {
-              // Fallback to hardcoded template
-              console.log('[REMINDER DEBUG] Using hardcoded template for', familyLanguage);
-              result = await sendRSVPReminder(
-                family.email,
-                language,
-                family.name,
-                wedding.couple_names,
-                weddingDate,
-                magicLink,
-                wedding.wedding_time || undefined,
-                wedding.location || undefined
-              );
-            }
-          }
-
-          if (result.success) {
-            sentCount++;
-            console.log('[REMINDER DEBUG] Email sent successfully to', family.email);
-          } else {
-            failedCount++;
-            console.error('[REMINDER DEBUG] Failed to send email to', family.email, ':', result.error);
-          }
-        } catch (error) {
+        if (success) {
+          sentCount++;
+        } else {
           failedCount++;
-          console.error('[REMINDER DEBUG] Error sending email to', family.email, ':', error);
+        }
+      }
+    } else if (channel === 'EMAIL') {
+      console.log('[REMINDER DEBUG] Sending emails to', eligibleFamilies.length, 'families');
+
+      for (const family of eligibleFamilies) {
+        const success = await sendEmailReminder(family);
+        if (success) {
+          sentCount++;
+        } else {
+          failedCount++;
         }
       }
     } else {
@@ -351,104 +513,11 @@ export async function POST(request: NextRequest) {
       console.log('[REMINDER DEBUG] Sending', channel, 'messages to', eligibleFamilies.length, 'families');
 
       for (const family of eligibleFamilies) {
-        // Validate family has required contact info
-        const contactInfo = channel === 'SMS' ? family.phone : family.whatsapp_number;
-
-        if (!contactInfo) {
-          console.log('[REMINDER DEBUG] Family', family.name, 'has no', channel, 'contact, skipping');
+        const success = await sendSmsOrWhatsappReminder(family, channel as Channel);
+        if (success) {
+          sentCount++;
+        } else {
           failedCount++;
-          continue;
-        }
-
-        console.log('[REMINDER DEBUG] Processing family', family.name);
-
-        try {
-          // Check if INVITATION_SENT event exists for this family
-          const invitationSent = await prisma.trackingEvent.findFirst({
-            where: {
-              family_id: family.id,
-              event_type: 'INVITATION_SENT',
-            },
-          });
-
-          let result;
-
-          if (!invitationSent) {
-            // No invitation sent yet, send invitation
-            console.log('[REMINDER DEBUG] No invitation sent yet for', family.name, ', sending invitation');
-            result = await sendInvitation({
-              family_id: family.id,
-              wedding_id: user.wedding_id!,
-              admin_id: user.id,
-            });
-          } else {
-            // Invitation already sent, send reminder
-            console.log('[REMINDER DEBUG] Invitation already sent for', family.name, ', sending reminder');
-
-            const familyLanguage = family.preferred_language || wedding.default_language;
-            const weddingDate = formatDate(wedding.wedding_date, familyLanguage);
-            const cutoffDate = formatDate(wedding.rsvp_cutoff_date, familyLanguage);
-            const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
-
-            // Fetch template from database
-            const template = await getTemplateForSending(
-              user.wedding_id!,
-              'REMINDER',
-              familyLanguage,
-              channel as Channel
-            );
-
-            if (template) {
-              // Use database template
-              console.log('[REMINDER DEBUG] Using database template for', familyLanguage, channel);
-
-              const variables = {
-                familyName: family.name,
-                coupleNames: wedding.couple_names,
-                weddingDate,
-                weddingTime: wedding.wedding_time || '',
-                location: wedding.location || '',
-                magicLink,
-                rsvpCutoffDate: cutoffDate,
-              };
-
-              const renderedBody = renderTemplate(template.body, variables);
-
-              // Convert relative image URL to absolute URL (for WhatsApp)
-              const absoluteImageUrl = template.image_url && channel === 'WHATSAPP'
-                ? `${baseUrl}${template.image_url}`
-                : undefined;
-
-              result = await sendDynamicMessage(
-                contactInfo,
-                renderedBody,
-                channel === 'SMS' ? MessageType.SMS : MessageType.WHATSAPP,
-                absoluteImageUrl
-              );
-            } else {
-              // Fallback to hardcoded message
-              console.log('[REMINDER DEBUG] No template found, using fallback message');
-              const messages = REMINDER_MESSAGES[familyLanguage];
-              const fallbackBody = `${messages.greeting(family.name)}\n\n${messages.body(wedding.couple_names, weddingDate, cutoffDate)}\n\n${messages.cta}: ${magicLink}`;
-
-              result = await sendDynamicMessage(
-                contactInfo,
-                fallbackBody,
-                channel === 'SMS' ? MessageType.SMS : MessageType.WHATSAPP
-              );
-            }
-          }
-
-          if (result.success) {
-            sentCount++;
-            console.log('[REMINDER DEBUG] Message sent successfully to', contactInfo);
-          } else {
-            failedCount++;
-            console.error('[REMINDER DEBUG] Failed to send message to', contactInfo, ':', result.error);
-          }
-        } catch (error) {
-          failedCount++;
-          console.error('[REMINDER DEBUG] Error sending message to', contactInfo, ':', error);
         }
       }
     }

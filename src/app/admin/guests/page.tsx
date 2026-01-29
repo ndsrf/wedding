@@ -329,7 +329,7 @@ export default function GuestsPage() {
   };
 
   // Send reminders for the selected family
-  const handleSendReminders = async (channel: Channel) => {
+  const handleSendReminders = async (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => {
     if (!reminderFamily) return;
 
     setReminderLoading(true);
@@ -339,7 +339,7 @@ export default function GuestsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel,
-          family_ids: [reminderFamily.id],
+          family_ids: validFamilyIds || [reminderFamily.id],
         }),
       });
       const data = await response.json();
@@ -357,7 +357,7 @@ export default function GuestsPage() {
   };
 
   // Handle bulk reminder sending
-  const handleBulkReminderSend = async (channel: Channel) => {
+  const handleBulkReminderSend = async (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => {
     setReminderLoading(true);
     try {
       const response = await fetch('/api/admin/reminders', {
@@ -365,13 +365,13 @@ export default function GuestsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel,
-          family_ids: selectedGuestIds,
+          family_ids: validFamilyIds || selectedGuestIds,
         }),
       });
       const data = await response.json();
 
       if (data.success) {
-        showNotification('success', t('admin.reminders.sent', { count: selectedGuestIds.length }));
+        showNotification('success', t('admin.reminders.sent', { count: (validFamilyIds || selectedGuestIds).length }));
         setSelectedGuestIds([]);
       } else {
         throw new Error(data.error?.message || t('common.errors.generic'));
