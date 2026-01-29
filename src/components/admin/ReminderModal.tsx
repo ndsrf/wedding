@@ -216,19 +216,20 @@ export function ReminderModal({
 
                   {/* List of families with missing info */}
                   <div className="mt-4 max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-3">
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                       {validationResult.invalid_families.map((family) => (
-                        <li key={family.id} className="text-sm text-gray-700">
-                          <span className="font-medium">{family.name}</span>
-                          <span className="text-gray-500"> - </span>
-                          <span className="text-red-600">
-                            {t(`admin.reminders.validationWarning.missing_${family.missing_info}`)}
-                          </span>
-                          {selectedChannel === 'PREFERRED' && (
-                            <span className="text-gray-500 text-xs">
-                              {' '}({t(`common.channels.${family.expected_channel}`)})
+                        <li key={family.id} className="text-sm border-l-4 border-red-300 pl-3">
+                          <div className="font-semibold text-gray-900">{family.name}</div>
+                          <div className="flex items-center gap-1 mt-1 text-xs">
+                            <span className="text-red-600 font-medium">
+                              {t(`admin.reminders.validationWarning.missing_${family.missing_info}`)}
                             </span>
-                          )}
+                            {selectedChannel === 'PREFERRED' && (
+                              <span className="text-gray-500">
+                                ({t(`common.channels.${family.expected_channel}`)})
+                              </span>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>
