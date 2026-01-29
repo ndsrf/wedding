@@ -227,21 +227,26 @@ export function ReminderModal({
                   {validationResult.invalid_families.length > 0 && (
                     <div className="mt-4 max-h-48 overflow-y-auto bg-gray-50 rounded-lg p-4 border border-red-200">
                       <ul className="space-y-3">
-                        {validationResult.invalid_families.map((family) => (
-                          <li key={family.id} className="text-sm border-l-4 border-red-400 pl-3 py-2">
-                            <div className="font-semibold text-gray-900 text-base">{family.name || `Family ${family.id}`}</div>
-                            <div className="flex flex-col gap-1 mt-1">
-                              <span className="text-red-600 font-medium text-sm">
-                                {t(`admin.reminders.validationWarning.missing_${family.missing_info}`)}
-                              </span>
-                              {selectedChannel === 'PREFERRED' && family.expected_channel && (
-                                <span className="text-gray-600 text-xs">
-                                  Expected channel: {t(`common.channels.${family.expected_channel}`)}
+                        {validationResult.invalid_families && validationResult.invalid_families.map((family) => {
+                          console.log('[ReminderModal] Rendering family:', family);
+                          return (
+                            <li key={family.id} className="text-sm border-l-4 border-red-400 pl-3 py-2">
+                              <div className="font-semibold text-gray-900 text-base">
+                                {family && family.name ? family.name : `Family (ID: ${family?.id})`}
+                              </div>
+                              <div className="flex flex-col gap-1 mt-1">
+                                <span className="text-red-600 font-medium text-sm">
+                                  {t(`admin.reminders.validationWarning.missing_${family.missing_info}`)}
                                 </span>
-                              )}
-                            </div>
-                          </li>
-                        ))}
+                                {selectedChannel === 'PREFERRED' && family.expected_channel && (
+                                  <span className="text-gray-600 text-xs">
+                                    Expected channel: {t(`common.channels.${family.expected_channel}`)}
+                                  </span>
+                                )}
+                              </div>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   )}

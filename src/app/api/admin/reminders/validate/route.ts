@@ -91,7 +91,10 @@ export async function POST(request: NextRequest) {
     const invalidFamilies: ValidateRemindersResult['invalid_families'] = [];
 
     // Validate each family
+    console.log('[VALIDATE] Processing', families.length, 'families');
     for (const family of families) {
+      console.log('[VALIDATE] Family:', { id: family.id, name: family.name, email: !!family.email, phone: !!family.phone, whatsapp: !!family.whatsapp_number, channel_preference: family.channel_preference });
+
       // Determine the channel to use for this family
       let targetChannel: Channel;
       if (channel === 'PREFERRED') {
@@ -115,6 +118,8 @@ export async function POST(request: NextRequest) {
         if (!isValid) missingInfo = 'whatsapp_number';
       }
 
+      console.log('[VALIDATE] Result:', { id: family.id, name: family.name, targetChannel, isValid, missingInfo });
+
       if (isValid) {
         validFamilies.push({
           id: family.id,
@@ -130,6 +135,8 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+
+    console.log('[VALIDATE] Final results:', { validFamilies, invalidFamilies });
 
     const result: ValidateRemindersResult = {
       valid_families: validFamilies,
