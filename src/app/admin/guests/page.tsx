@@ -345,7 +345,7 @@ export default function GuestsPage() {
       const data = await response.json();
 
       if (data.success) {
-        showNotification('success', t('admin.reminders.sent', { count: 1 }));
+        showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
       } else {
         throw new Error(data.error?.message || t('common.errors.generic'));
       }
@@ -371,7 +371,7 @@ export default function GuestsPage() {
       const data = await response.json();
 
       if (data.success) {
-        showNotification('success', t('admin.reminders.sent', { count: (validFamilyIds || selectedGuestIds).length }));
+        showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
         setSelectedGuestIds([]);
       } else {
         throw new Error(data.error?.message || t('common.errors.generic'));
