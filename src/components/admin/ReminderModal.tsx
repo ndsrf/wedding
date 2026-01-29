@@ -58,7 +58,10 @@ export function ReminderModal({
         }),
       });
       const data = await response.json();
+      console.log('[ReminderModal] Validation response:', data);
+
       if (data.success) {
+        console.log('[ReminderModal] Invalid families:', data.data.invalid_families);
         setValidationResult(data.data);
         if (data.data.invalid_families.length > 0) {
           setShowValidationWarning(true);
@@ -68,6 +71,7 @@ export function ReminderModal({
       }
       throw new Error(data.error?.message || t('common.errors.generic'));
     } catch (err) {
+      console.error('[ReminderModal] Validation error:', err);
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
       return false;
     }
@@ -208,32 +212,39 @@ export function ReminderModal({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <div className="mt-4 text-center">
-                  <h3 className="text-lg font-medium text-gray-900">{t('admin.reminders.validationWarning.title')}</h3>
-                  <p className="mt-2 text-sm text-gray-500">
+                <div className="mt-4">
+                  <h3 className="text-lg font-medium text-gray-900 text-center">{t('admin.reminders.validationWarning.title')}</h3>
+                  <p className="mt-2 text-sm text-gray-500 text-center">
                     {t('admin.reminders.validationWarning.message')}
                   </p>
 
-                  {/* List of families with missing info */}
-                  <div className="mt-4 max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-3">
-                    <ul className="space-y-3">
-                      {validationResult.invalid_families.map((family) => (
-                        <li key={family.id} className="text-sm border-l-4 border-red-300 pl-3">
-                          <div className="font-semibold text-gray-900">{family.name}</div>
-                          <div className="flex items-center gap-1 mt-1 text-xs">
-                            <span className="text-red-600 font-medium">
-                              {t(`admin.reminders.validationWarning.missing_${family.missing_info}`)}
-                            </span>
-                            {selectedChannel === 'PREFERRED' && (
-                              <span className="text-gray-500">
-                                ({t(`common.channels.${family.expected_channel}`)})
-                              </span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                  {/* Summary count */}
+                  <div className="mt-4 text-center text-sm font-medium text-red-700">
+                    {validationResult.invalid_families.length} {validationResult.invalid_families.length === 1 ? 'family' : 'families'} missing required information
                   </div>
+
+                  {/* List of families with missing info */}
+                  {validationResult.invalid_families.length > 0 && (
+                    <div className="mt-4 max-h-48 overflow-y-auto bg-gray-50 rounded-lg p-4 border border-red-200">
+                      <ul className="space-y-3">
+                        {validationResult.invalid_families.map((family) => (
+                          <li key={family.id} className="text-sm border-l-4 border-red-400 pl-3 py-2">
+                            <div className="font-semibold text-gray-900 text-base">{family.name || `Family ${family.id}`}</div>
+                            <div className="flex flex-col gap-1 mt-1">
+                              <span className="text-red-600 font-medium text-sm">
+                                {t(`admin.reminders.validationWarning.missing_${family.missing_info}`)}
+                              </span>
+                              {selectedChannel === 'PREFERRED' && family.expected_channel && (
+                                <span className="text-gray-600 text-xs">
+                                  Expected channel: {t(`common.channels.${family.expected_channel}`)}
+                                </span>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
 
