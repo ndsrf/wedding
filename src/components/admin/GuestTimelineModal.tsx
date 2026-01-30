@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import type { EventType, Channel } from '@/types/models';
 
@@ -88,13 +88,7 @@ export function GuestTimelineModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen && familyId) {
-      fetchTimeline();
-    }
-  }, [isOpen, familyId]);
-
-  const fetchTimeline = async () => {
+  const fetchTimeline = useCallback(async () => {
     if (!familyId) return;
 
     setLoading(true);
@@ -113,7 +107,13 @@ export function GuestTimelineModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [familyId]);
+
+  useEffect(() => {
+    if (isOpen && familyId) {
+      fetchTimeline();
+    }
+  }, [isOpen, familyId, fetchTimeline]);
 
   if (!isOpen) return null;
 
