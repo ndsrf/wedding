@@ -24,6 +24,7 @@ interface GuestTableProps {
   onEdit?: (guestId: string) => void;
   onDelete?: (guestId: string) => void;
   onSendReminder?: (guestId: string) => void;
+  onViewTimeline?: (guestId: string, guestName: string) => void;
   loading?: boolean;
   selectedGuestIds?: string[];
   onSelectGuest?: (guestId: string, selected: boolean) => void;
@@ -52,6 +53,7 @@ export function GuestTable({
   onEdit,
   onDelete,
   onSendReminder,
+  onViewTimeline,
   loading,
   selectedGuestIds = [],
   onSelectGuest,
@@ -134,7 +136,7 @@ export function GuestTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.language')}
               </th>
-              {(onEdit || onDelete || onSendReminder) && (
+              {(onEdit || onDelete || onSendReminder || onViewTimeline) && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('admin.guests.table.actions')}
                 </th>
@@ -196,9 +198,18 @@ export function GuestTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {t(`common.languages.${guest.preferred_language}`)}
                 </td>
-                {(onEdit || onDelete || onSendReminder) && (
+                {(onEdit || onDelete || onSendReminder || onViewTimeline) && (
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
+                      {onViewTimeline && (
+                        <button
+                          onClick={() => onViewTimeline(guest.id, guest.name)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          title={t('admin.guests.timeline.viewTimeline')}
+                        >
+                          {t('admin.guests.timeline.timeline')}
+                        </button>
+                      )}
                       {onSendReminder && guest.rsvp_status !== 'submitted' && (
                         <button
                           onClick={() => onSendReminder(guest.id)}
@@ -258,8 +269,16 @@ export function GuestTable({
                     )}
                   </div>
                 </div>
-              {(onEdit || onDelete || onSendReminder) && (
-                <div className="flex gap-2">
+              {(onEdit || onDelete || onSendReminder || onViewTimeline) && (
+                <div className="flex gap-2 flex-wrap">
+                  {onViewTimeline && (
+                    <button
+                      onClick={() => onViewTimeline(guest.id, guest.name)}
+                      className="text-indigo-600 hover:text-indigo-900 text-sm"
+                    >
+                      {t('admin.guests.timeline.timeline')}
+                    </button>
+                  )}
                   {onSendReminder && guest.rsvp_status !== 'submitted' && (
                     <button
                       onClick={() => onSendReminder(guest.id)}
