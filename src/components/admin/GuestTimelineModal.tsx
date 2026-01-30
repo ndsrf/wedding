@@ -195,7 +195,12 @@ export function GuestTimelineModal({
 
           {!loading && !error && events.length > 0 && (
             <div className="space-y-4">
-              {events.map((event, index) => (
+              {events.map((event, index) => {
+                const templateName = event.metadata && typeof event.metadata === 'object' && 'template_name' in event.metadata
+                  ? String(event.metadata.template_name)
+                  : null;
+
+                return (
                 <div key={event.id} className="relative">
                   {/* Timeline connector line */}
                   {index < events.length - 1 && (
@@ -237,9 +242,9 @@ export function GuestTimelineModal({
                               {t('admin.notifications.adminTriggered')}
                             </span>
                           )}
-                          {event.metadata && typeof event.metadata === 'object' && 'template_name' in event.metadata && event.metadata.template_name && (
+                          {templateName && (
                             <span className="text-gray-500">
-                              Template: {String(event.metadata.template_name as string)}
+                              Template: {templateName}
                             </span>
                           )}
                         </div>
@@ -247,7 +252,8 @@ export function GuestTimelineModal({
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
