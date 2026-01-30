@@ -549,6 +549,14 @@
         "emptyDesc": "Try adjusting your filters or import a guest list.",
         "noPayment": "No payment"
       },
+      "timeline": {
+        "title": "Guest Activity Timeline",
+        "subtitle": "Activity history for {family}",
+        "timeline": "Timeline",
+        "viewTimeline": "View Activity Timeline",
+        "noEvents": "No activity recorded for this guest yet.",
+        "loading": "Loading timeline..."
+      },
       "export": "Export to Excel",
       "template": "Download Template",
       "familyName": "Family Name",
@@ -612,6 +620,7 @@
       },
       "markAsRead": "Mark as Read",
       "export": "Export Notifications",
+      "adminTriggered": "Admin Action",
       "events": {
         "linkOpened": "Link Opened",
         "rsvpStarted": "RSVP Started",
@@ -626,6 +635,21 @@
         "messageDelivered": "Message Delivered",
         "messageRead": "Message Read",
         "messageFailed": "Message Failed"
+      },
+      "eventTypes": {
+        "LINK_OPENED": "Link Opened",
+        "RSVP_STARTED": "RSVP Started",
+        "RSVP_SUBMITTED": "RSVP Submitted",
+        "RSVP_UPDATED": "RSVP Updated",
+        "GUEST_ADDED": "Guest Added",
+        "PAYMENT_RECEIVED": "Payment Received",
+        "REMINDER_SENT": "Reminder Sent",
+        "INVITATION_SENT": "Invitation Sent",
+        "TASK_ASSIGNED": "Task Assigned",
+        "TASK_COMPLETED": "Task Completed",
+        "MESSAGE_DELIVERED": "Message Delivered",
+        "MESSAGE_READ": "Message Read",
+        "MESSAGE_FAILED": "Message Failed"
       }
     },
     "reminders": {

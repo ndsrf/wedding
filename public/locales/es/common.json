@@ -545,6 +545,14 @@
         "emptyDesc": "Intenta ajustar tus filtros o importa una lista de invitados.",
         "noPayment": "Sin pago"
       },
+      "timeline": {
+        "title": "Cronología de Actividad del Invitado",
+        "subtitle": "Historial de actividad para {family}",
+        "timeline": "Cronología",
+        "viewTimeline": "Ver Cronología de Actividad",
+        "noEvents": "Aún no se ha registrado actividad para este invitado.",
+        "loading": "Cargando cronología..."
+      },
       "import": "Importar desde Excel",
       "export": "Exportar a Excel",
       "template": "Descargar Plantilla",
@@ -611,6 +619,7 @@
       },
       "markAsRead": "Marcar como Leído",
       "export": "Exportar Notificaciones",
+      "adminTriggered": "Acción del Administrador",
       "events": {
         "linkOpened": "Enlace Abierto",
         "rsvpStarted": "RSVP Iniciado",
@@ -625,6 +634,21 @@
         "messageDelivered": "Mensaje Entregado",
         "messageRead": "Mensaje Leído",
         "messageFailed": "Mensaje Fallido"
+      },
+      "eventTypes": {
+        "LINK_OPENED": "Enlace Abierto",
+        "RSVP_STARTED": "RSVP Iniciado",
+        "RSVP_SUBMITTED": "RSVP Enviado",
+        "RSVP_UPDATED": "RSVP Actualizado",
+        "GUEST_ADDED": "Invitado Añadido",
+        "PAYMENT_RECEIVED": "Pago Recibido",
+        "REMINDER_SENT": "Recordatorio Enviado",
+        "INVITATION_SENT": "Invitación Enviada",
+        "TASK_ASSIGNED": "Tarea Asignada",
+        "TASK_COMPLETED": "Tarea Completada",
+        "MESSAGE_DELIVERED": "Mensaje Entregado",
+        "MESSAGE_READ": "Mensaje Leído",
+        "MESSAGE_FAILED": "Mensaje Fallido"
       }
     },
     "reminders": {

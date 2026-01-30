@@ -533,6 +533,14 @@
         "emptyDesc": "Essayez d'ajuster vos filtres ou importez une liste d'invités.",
         "noPayment": "Aucun paiement"
       },
+      "timeline": {
+        "title": "Chronologie d'Activité de l'Invité",
+        "subtitle": "Historique d'activité pour {family}",
+        "timeline": "Chronologie",
+        "viewTimeline": "Voir la Chronologie d'Activité",
+        "noEvents": "Aucune activité enregistrée pour cet invité pour le moment.",
+        "loading": "Chargement de la chronologie..."
+      },
       "import": "Importer depuis Excel",
       "export": "Exporter vers Excel",
       "template": "Télécharger Modèle",
@@ -597,6 +605,7 @@
       },
       "markAsRead": "Marquer comme Lu",
       "export": "Exporter Notifications",
+      "adminTriggered": "Action Administrateur",
       "events": {
         "linkOpened": "Lien Ouvert",
         "rsvpStarted": "RSVP Commencé",
@@ -611,6 +620,21 @@
         "messageDelivered": "Message Livré",
         "messageRead": "Message Lu",
         "messageFailed": "Message Échoué"
+      },
+      "eventTypes": {
+        "LINK_OPENED": "Lien Ouvert",
+        "RSVP_STARTED": "RSVP Commencé",
+        "RSVP_SUBMITTED": "RSVP Soumis",
+        "RSVP_UPDATED": "RSVP Mis à Jour",
+        "GUEST_ADDED": "Invité Ajouté",
+        "PAYMENT_RECEIVED": "Paiement Reçu",
+        "REMINDER_SENT": "Rappel Envoyé",
+        "INVITATION_SENT": "Invitation Envoyée",
+        "TASK_ASSIGNED": "Tâche Assignée",
+        "TASK_COMPLETED": "Tâche Terminée",
+        "MESSAGE_DELIVERED": "Message Livré",
+        "MESSAGE_READ": "Message Lu",
+        "MESSAGE_FAILED": "Message Échoué"
       }
     },
     "reminders": {

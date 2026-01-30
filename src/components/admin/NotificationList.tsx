@@ -8,6 +8,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslations, useFormatter } from 'next-intl';
 import type { EventType, Channel } from '@/types/models';
 
@@ -121,6 +122,12 @@ const getEventTypeColor = (type: EventType): string => {
 export function NotificationList({ notifications, onMarkRead, loading }: NotificationListProps) {
   const t = useTranslations();
   const format = useFormatter();
+  const router = useRouter();
+
+  const handleNotificationClick = (familyName: string) => {
+    // Navigate to guests page with search filter for this family
+    router.push(`/admin/guests?search=${encodeURIComponent(familyName)}`);
+  };
 
   const getEventTypeLabel = (type: EventType): string => {
     const keyMap: Record<EventType, string> = {
@@ -184,7 +191,12 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
         {notifications.map((notification) => (
           <li
             key={notification.id}
-            className={`p-4 hover:bg-gray-50 ${!notification.read ? 'bg-purple-50' : ''}`}
+            className={`p-4 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-purple-50' : ''}`}
+            onClick={() => {
+              if (notification.family) {
+                handleNotificationClick(notification.family.name);
+              }
+            }}
           >
             <div className="flex items-start space-x-4">
               <div className={`p-2 rounded-full ${getEventTypeColor(notification.event_type)}`}>

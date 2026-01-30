@@ -533,6 +533,14 @@
         "emptyDesc": "Versuchen Sie, Ihre Filter anzupassen oder eine Gästeliste zu importieren.",
         "noPayment": "Keine Zahlung"
       },
+      "timeline": {
+        "title": "Gast-Aktivitätsverlauf",
+        "subtitle": "Aktivitätsverlauf für {family}",
+        "timeline": "Zeitverlauf",
+        "viewTimeline": "Aktivitätsverlauf anzeigen",
+        "noEvents": "Für diesen Gast wurde noch keine Aktivität aufgezeichnet.",
+        "loading": "Lade Zeitverlauf..."
+      },
       "import": "Aus Excel importieren",
       "export": "Nach Excel exportieren",
       "template": "Vorlage herunterladen",
@@ -597,6 +605,7 @@
       },
       "markAsRead": "Als gelesen markieren",
       "export": "Benachrichtigungen exportieren",
+      "adminTriggered": "Administratoraktion",
       "events": {
         "linkOpened": "Link geöffnet",
         "rsvpStarted": "RSVP gestartet",
@@ -611,6 +620,21 @@
         "messageDelivered": "Nachricht zugestellt",
         "messageRead": "Nachricht gelesen",
         "messageFailed": "Nachricht fehlgeschlagen"
+      },
+      "eventTypes": {
+        "LINK_OPENED": "Link geöffnet",
+        "RSVP_STARTED": "RSVP gestartet",
+        "RSVP_SUBMITTED": "RSVP eingereicht",
+        "RSVP_UPDATED": "RSVP aktualisiert",
+        "GUEST_ADDED": "Gast hinzugefügt",
+        "PAYMENT_RECEIVED": "Zahlung erhalten",
+        "REMINDER_SENT": "Erinnerung gesendet",
+        "INVITATION_SENT": "Einladung gesendet",
+        "TASK_ASSIGNED": "Aufgabe zugewiesen",
+        "TASK_COMPLETED": "Aufgabe abgeschlossen",
+        "MESSAGE_DELIVERED": "Nachricht zugestellt",
+        "MESSAGE_READ": "Nachricht gelesen",
+        "MESSAGE_FAILED": "Nachricht fehlgeschlagen"
       }
     },
     "reminders": {

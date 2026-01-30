@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { GuestTable } from '@/components/admin/GuestTable';
 import { GuestFilters } from '@/components/admin/GuestFilters';
@@ -15,6 +16,7 @@ import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
 import { GuestFormModal } from '@/components/admin/GuestFormModal';
 import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
 import { ReminderModal } from '@/components/admin/ReminderModal';
+import { GuestTimelineModal } from '@/components/admin/GuestTimelineModal';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
 import type { FamilyWithMembers, GiftStatus, Language, Channel } from '@/types/models';
 import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
@@ -77,6 +79,7 @@ interface WeddingQuestionConfig {
 export default function GuestsPage() {
   const t = useTranslations();
   const { isReadOnly } = useWeddingAccess();
+  const searchParams = useSearchParams();
   const [guests, setGuests] = useState<GuestWithStatus[]>([]);
   const [guestAdditions, setGuestAdditions] = useState<GuestAddition[]>([]);
   const [guestAdditionsEnabled, setGuestAdditionsEnabled] = useState(false);
@@ -105,6 +108,11 @@ export default function GuestsPage() {
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [reminderFamily, setReminderFamily] = useState<ReminderFamily | null>(null);
   const [reminderLoading, setReminderLoading] = useState(false);
+
+  // Timeline modal state
+  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
+  const [selectedTimelineFamilyId, setSelectedTimelineFamilyId] = useState<string | null>(null);
+  const [selectedTimelineFamilyName, setSelectedTimelineFamilyName] = useState<string | null>(null);
 
   // Bulk reminder state
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
@@ -179,6 +187,14 @@ export default function GuestsPage() {
       console.error('Error fetching wedding config:', error);
     }
   }, []);
+
+  // Initialize filters from URL search params
+  useEffect(() => {
+    const search = searchParams.get('search');
+    if (search) {
+      setFilters((prev) => ({ ...prev, search }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchGuests();
@@ -326,6 +342,13 @@ export default function GuestsPage() {
       });
       setIsReminderModalOpen(true);
     }
+  };
+
+  // Handle view timeline
+  const handleViewTimeline = (guestId: string, guestName: string) => {
+    setSelectedTimelineFamilyId(guestId);
+    setSelectedTimelineFamilyName(guestName);
+    setIsTimelineModalOpen(true);
   };
 
   // Send reminders for the selected family
@@ -607,6 +630,7 @@ export default function GuestsPage() {
               onEdit={handleEditGuest}
               onDelete={handleDeleteGuest}
               onSendReminder={handleSendReminder}
+              onViewTimeline={handleViewTimeline}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
               onSelectGuest={handleSelectGuest}
@@ -725,6 +749,18 @@ export default function GuestsPage() {
         onSendReminders={reminderFamily ? handleSendReminders : handleBulkReminderSend}
         loading={reminderLoading}
         weddingGiftIban={weddingGiftIban}
+      />
+
+      {/* Timeline Modal */}
+      <GuestTimelineModal
+        isOpen={isTimelineModalOpen}
+        familyId={selectedTimelineFamilyId}
+        familyName={selectedTimelineFamilyName}
+        onClose={() => {
+          setIsTimelineModalOpen(false);
+          setSelectedTimelineFamilyId(null);
+          setSelectedTimelineFamilyName(null);
+        }}
       />
 
       {/* Notification Toast */}
