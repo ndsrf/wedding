@@ -1,3 +1,21 @@
+# [0.6.0](https://github.com/ndsrf/wedding/compare/v0.5.1...v0.6.0) (2026-01-30)
+
+
+### Bug Fixes
+
+* Ensure family names are prominently displayed in validation warning ([f335ae0](https://github.com/ndsrf/wedding/commit/f335ae0a16c47796eaf5d180850047869e7e0e80))
+* location and time not appearing on the invites rvsp - now fixed ([7667d3d](https://github.com/ndsrf/wedding/commit/7667d3df0679a81f8e300a65fc25616617916fa4))
+* Use actual sent_count from API response in success notification ([dec0d77](https://github.com/ndsrf/wedding/commit/dec0d77572b38fa539c5c22233f53069234d5dbb))
+
+
+### Features
+
+* Add attachments to payments (for providers) ([7f09715](https://github.com/ndsrf/wedding/commit/7f0971501b5af0408fc08c696c90d4660c66ea59))
+* Add Twilio integration for SMS and WhatsApp messaging ([58a3542](https://github.com/ndsrf/wedding/commit/58a354289fef4c3107e623f8d223b30464715356))
+* Implement Guest Preferred Channel with pre-send validation ([31bb57f](https://github.com/ndsrf/wedding/commit/31bb57f14cff6816b63ca645161a34afb12c0597))
+
+
+
 ## [0.5.1](https://github.com/ndsrf/wedding/compare/v0.5.0...v0.5.1) (2026-01-28)
 
 
