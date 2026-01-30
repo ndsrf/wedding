@@ -60,6 +60,12 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       EMAIL_FROM: ${EMAIL_FROM:-noreply@example.com}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Wedding Platform}
+      # SMS and WhatsApp Service (Twilio)
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER:-}
+      TWILIO_WEBHOOK_ENABLED: ${TWILIO_WEBHOOK_ENABLED:-false}
       # Application
       APP_URL: ${APP_URL:?App URL is required}
       REDIS_URL: ${REDIS_URL:-}
