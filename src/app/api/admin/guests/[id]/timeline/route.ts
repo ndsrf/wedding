@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
-import { prisma } from '@/lib/prisma/prisma';
+import { prisma } from '@/lib/db/prisma';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 
@@ -80,7 +80,15 @@ export async function GET(_request: NextRequest, context: RouteParams) {
     });
 
     // Add family name to each event for convenience
-    const eventsWithFamily = events.map((event) => ({
+    const eventsWithFamily = events.map((event: {
+      id: string;
+      family_id: string;
+      event_type: string;
+      channel: string | null;
+      metadata: unknown;
+      admin_triggered: boolean;
+      timestamp: Date;
+    }) => ({
       ...event,
       family_name: family.name,
     }));

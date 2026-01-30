@@ -237,7 +237,7 @@ export function GuestTimelineModal({
                               {t('admin.notifications.adminTriggered')}
                             </span>
                           )}
-                          {event.metadata.template_name && (
+                          {event.metadata && typeof event.metadata === 'object' && 'template_name' in event.metadata && event.metadata.template_name && (
                             <span className="text-gray-500">
                               Template: {String(event.metadata.template_name)}
                             </span>

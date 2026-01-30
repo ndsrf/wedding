@@ -124,7 +124,7 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
   const format = useFormatter();
   const router = useRouter();
 
-  const handleNotificationClick = (familyId: string, familyName: string) => {
+  const handleNotificationClick = (familyName: string) => {
     // Navigate to guests page with search filter for this family
     router.push(`/admin/guests?search=${encodeURIComponent(familyName)}`);
   };
@@ -194,7 +194,7 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
             className={`p-4 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-purple-50' : ''}`}
             onClick={() => {
               if (notification.family) {
-                handleNotificationClick(notification.family_id, notification.family.name);
+                handleNotificationClick(notification.family.name);
               }
             }}
           >
