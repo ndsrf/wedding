@@ -22,7 +22,8 @@
       "upload": "Upload",
       "send": "Send",
       "clearFilters": "Clear all filters",
-      "retry": "Retry"
+      "retry": "Retry",
+      "continue": "Continue"
     },
     "status": {
       "pending": "Pending",
@@ -82,6 +83,7 @@
       "WHATSAPP": "WhatsApp",
       "EMAIL": "Email",
       "SMS": "SMS",
+      "PREFERRED": "Guest Preferred Channel",
       "none": "-"
     },
     "loading": "Loading...",
@@ -620,7 +622,10 @@
         "reminderSent": "Reminder Sent",
         "invitationSent": "Invitation Sent",
         "taskAssigned": "Task Assigned",
-        "taskCompleted": "Task Completed"
+        "taskCompleted": "Task Completed",
+        "messageDelivered": "Message Delivered",
+        "messageRead": "Message Read",
+        "messageFailed": "Message Failed"
       }
     },
     "reminders": {
@@ -645,7 +650,19 @@
       "sending": "Sending...",
       "sendAction": "Send {count} Reminders",
       "bulkSend": "Send Bulk Reminders",
-      "selectGuestsHint": "Select guests from the table below to send reminders"
+      "selectGuestsHint": "Select guests from the table below to send reminders",
+      "ibanWarning": {
+        "title": "Gift IBAN Not Configured",
+        "message": "You haven't set a gift IBAN yet. Guests won't be able to see payment details. Continue sending reminders anyway?"
+      },
+      "validationWarning": {
+        "title": "Missing Contact Information",
+        "message": "The following families cannot receive reminders because they are missing required information:",
+        "missing_email": "Email required",
+        "missing_phone": "Phone number required",
+        "missing_whatsapp_number": "WhatsApp number required"
+      },
+      "sendToValidOnly": "Send to {count} families anyway"
     },
     "payments": {
       "title": "Payment Management",

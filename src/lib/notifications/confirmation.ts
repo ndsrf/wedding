@@ -1,6 +1,6 @@
 /**
- * Invitation Service
- * Handles sending first-time invitations when guests are added to a wedding
+ * Confirmation Service
+ * Handles sending RSVP confirmations when guests submit their RSVP
  */
 
 import { prisma } from "@/lib/db";
@@ -15,24 +15,23 @@ import { trackEvent } from "@/lib/tracking/events";
 import type { Language as I18nLanguage } from "@/lib/i18n/config";
 import type { Channel } from "@prisma/client";
 
-export interface SendInvitationOptions {
+export interface SendConfirmationOptions {
   family_id: string;
   wedding_id: string;
-  admin_id: string;
 }
 
 /**
- * Send invitation email to a family when they're added to a wedding
- * Fetches template from database and renders with family/wedding data
+ * Send RSVP confirmation to a family when they submit their RSVP
+ * Uses CONFIRMATION template type and sends via family's preferred channel
  */
-export async function sendInvitation(
-  options: SendInvitationOptions
+export async function sendConfirmation(
+  options: SendConfirmationOptions
 ): Promise<{
   success: boolean;
   error?: string;
   messageId?: string;
 }> {
-  const { family_id, wedding_id, admin_id } = options;
+  const { family_id, wedding_id } = options;
 
   try {
     // Fetch family with members
@@ -47,7 +46,7 @@ export async function sendInvitation(
     });
 
     if (!family) {
-      console.error(`[INVITATION] Family not found: ${family_id}`);
+      console.error(`[CONFIRMATION] Family not found: ${family_id}`);
       return { success: false, error: "Family not found" };
     }
 
@@ -56,12 +55,12 @@ export async function sendInvitation(
 
     // Validate that family has the required contact info for the channel
     if (channel === "EMAIL" && !family.email) {
-      console.error(`[INVITATION] Family has no email: ${family_id}`);
+      console.error(`[CONFIRMATION] Family has no email: ${family_id}`);
       return { success: false, error: "Family has no email address" };
     }
 
     if (channel === "SMS" && !family.phone) {
-      console.warn(`[INVITATION] Family has no phone, falling back to EMAIL: ${family_id}`);
+      console.warn(`[CONFIRMATION] Family has no phone, falling back to EMAIL: ${family_id}`);
       channel = "EMAIL";
       if (!family.email) {
         return { success: false, error: "Family has no phone or email address" };
@@ -69,24 +68,24 @@ export async function sendInvitation(
     }
 
     if (channel === "WHATSAPP" && !family.whatsapp_number) {
-      console.warn(`[INVITATION] Family has no WhatsApp, falling back to EMAIL: ${family_id}`);
+      console.warn(`[CONFIRMATION] Family has no WhatsApp, falling back to EMAIL: ${family_id}`);
       channel = "EMAIL";
       if (!family.email) {
         return { success: false, error: "Family has no WhatsApp or email address" };
       }
     }
 
-    // Fetch invitation template in family's preferred language and channel
+    // Fetch confirmation template in family's preferred language and channel
     const template = await getTemplateForSending(
       wedding_id,
-      "INVITATION",
+      "CONFIRMATION",
       family.preferred_language,
       channel
     );
 
     if (!template) {
       console.error(
-        `[INVITATION] No template found for wedding ${wedding_id}, language ${family.preferred_language}`
+        `[CONFIRMATION] No template found for wedding ${wedding_id}, language ${family.preferred_language}, channel ${channel}`
       );
       return { success: false, error: "Template not found" };
     }
@@ -162,7 +161,7 @@ export async function sendInvitation(
 
     if (!messageResult.success) {
       console.error(
-        `[INVITATION] Failed to send ${channel} to ${family.name}:`,
+        `[CONFIRMATION] Failed to send ${channel} to ${family.name}:`,
         messageResult.error
       );
       return {
@@ -171,32 +170,31 @@ export async function sendInvitation(
       };
     }
 
-    // Track invitation sent event
+    // Track confirmation sent event
     try {
       await trackEvent({
         family_id,
         wedding_id,
-        event_type: "INVITATION_SENT",
+        event_type: "REMINDER_SENT",
         channel,
         metadata: {
           template_id: template.id,
-          template_type: "INVITATION",
+          template_type: "CONFIRMATION",
           language: family.preferred_language,
           channel,
           contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
-          admin_id,
           ...(messageResult.messageId && { message_sid: messageResult.messageId }),
         },
-        admin_triggered: true,
+        admin_triggered: false,
       });
     } catch (error) {
-      console.error("[INVITATION] Failed to track event:", error);
+      console.error("[CONFIRMATION] Failed to track event:", error);
       // Don't fail the whole operation if tracking fails
     }
 
     const contactInfo = channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number;
     console.log(
-      `[INVITATION] Invitation sent to ${family.name} via ${channel} (${contactInfo})`
+      `[CONFIRMATION] Confirmation sent to ${family.name} via ${channel} (${contactInfo})`
     );
 
     return {
@@ -204,50 +202,11 @@ export async function sendInvitation(
       messageId: messageResult.messageId,
     };
   } catch (error) {
-    console.error("[INVITATION] Error sending invitation:", error);
+    console.error("[CONFIRMATION] Error sending confirmation:", error);
     return {
       success: false,
       error:
         error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
-}
-
-/**
- * Send invitations to multiple families
- * Useful for bulk operations like importing guests
- */
-export async function sendInvitationsBulk(
-  options: SendInvitationOptions[]
-): Promise<{
-  total: number;
-  successful: number;
-  failed: number;
-  errors: { family_id: string; error: string }[];
-}> {
-  const errors: { family_id: string; error: string }[] = [];
-  let successful = 0;
-
-  console.log(
-    `[INVITATION] Sending invitations to ${options.length} families...`
-  );
-
-  for (const option of options) {
-    const result = await sendInvitation(option);
-    if (result.success) {
-      successful++;
-    } else {
-      errors.push({
-        family_id: option.family_id,
-        error: result.error || "Unknown error",
-      });
-    }
-  }
-
-  return {
-    total: options.length,
-    successful,
-    failed: errors.length,
-    errors,
-  };
 }

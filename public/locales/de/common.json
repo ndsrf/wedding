@@ -22,7 +22,8 @@
       "upload": "Hochladen",
       "send": "Senden",
       "clearFilters": "Alle Filter löschen",
-      "retry": "Erneut versuchen"
+      "retry": "Erneut versuchen",
+      "continue": "Fortfahren"
     },
     "status": {
       "pending": "Ausstehend",
@@ -80,6 +81,7 @@
       "WHATSAPP": "WhatsApp",
       "EMAIL": "E-Mail",
       "SMS": "SMS",
+      "PREFERRED": "Bevorzugter Kanal des Gastes",
       "none": "-"
     },
     "loading": "Laden...",
@@ -605,7 +607,10 @@
         "reminderSent": "Erinnerung gesendet",
         "invitationSent": "Einladung gesendet",
         "taskAssigned": "Aufgabe zugewiesen",
-        "taskCompleted": "Aufgabe abgeschlossen"
+        "taskCompleted": "Aufgabe abgeschlossen",
+        "messageDelivered": "Nachricht zugestellt",
+        "messageRead": "Nachricht gelesen",
+        "messageFailed": "Nachricht fehlgeschlagen"
       }
     },
     "reminders": {
@@ -630,7 +635,19 @@
       "sending": "Senden...",
       "sendAction": "{count} Erinnerungen senden",
       "bulkSend": "Massen-Erinnerungen senden",
-      "selectGuestsHint": "Wählen Sie Gäste aus der Tabelle unten aus, um Erinnerungen zu senden"
+      "selectGuestsHint": "Wählen Sie Gäste aus der Tabelle unten aus, um Erinnerungen zu senden",
+      "ibanWarning": {
+        "title": "Geschenk-IBAN nicht konfiguriert",
+        "message": "Sie haben noch kein Geschenk-IBAN festgelegt. Gäste können Zahlungsdetails nicht sehen. Trotzdem Erinnerungen senden?"
+      },
+      "validationWarning": {
+        "title": "Fehlende Kontaktinformationen",
+        "message": "Die folgenden Familien können keine Erinnerungen erhalten, da ihnen erforderliche Informationen fehlen:",
+        "missing_email": "E-Mail erforderlich",
+        "missing_phone": "Telefonnummer erforderlich",
+        "missing_whatsapp_number": "WhatsApp-Nummer erforderlich"
+      },
+      "sendToValidOnly": "Trotzdem an {count} Familien senden"
     },
     "payments": {
       "title": "Zahlungsverwaltung",

@@ -22,7 +22,8 @@
       "upload": "Carica",
       "send": "Invia",
       "clearFilters": "Cancella tutti i filtri",
-      "retry": "Riprova"
+      "retry": "Riprova",
+      "continue": "Continua"
     },
     "status": {
       "pending": "In attesa",
@@ -80,6 +81,7 @@
       "WHATSAPP": "WhatsApp",
       "EMAIL": "Email",
       "SMS": "SMS",
+      "PREFERRED": "Canale Preferito dell'Ospite",
       "none": "-"
     },
     "loading": "Caricamento...",
@@ -605,7 +607,10 @@
         "reminderSent": "Promemoria Inviato",
         "invitationSent": "Invito Inviato",
         "taskAssigned": "Compito Assegnato",
-        "taskCompleted": "Compito Completato"
+        "taskCompleted": "Compito Completato",
+        "messageDelivered": "Messaggio Consegnato",
+        "messageRead": "Messaggio Letto",
+        "messageFailed": "Messaggio Non Riuscito"
       }
     },
     "reminders": {
@@ -630,7 +635,19 @@
       "sending": "Invio in corso...",
       "sendAction": "Invia {count} Promemoria",
       "bulkSend": "Invia Promemoria di Massa",
-      "selectGuestsHint": "Seleziona gli ospiti dalla tabella sottostante per inviare promemoria"
+      "selectGuestsHint": "Seleziona gli ospiti dalla tabella sottostante per inviare promemoria",
+      "ibanWarning": {
+        "title": "IBAN Regalo Non Configurato",
+        "message": "Non hai ancora configurato un IBAN per i regali. Gli ospiti non potranno vedere i dettagli di pagamento. Continuare ad inviare i promemoria comunque?"
+      },
+      "validationWarning": {
+        "title": "Informazioni di Contatto Mancanti",
+        "message": "Le seguenti famiglie non possono ricevere promemoria perché mancano informazioni richieste:",
+        "missing_email": "Email richiesta",
+        "missing_phone": "Numero di telefono richiesto",
+        "missing_whatsapp_number": "Numero WhatsApp richiesto"
+      },
+      "sendToValidOnly": "Invia comunque a {count} famiglie"
     },
     "payments": {
       "title": "Gestione Pagamenti",
