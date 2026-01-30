@@ -172,7 +172,7 @@ export async function getChannelReadRates(wedding_id: string) {
           where: {
             wedding_id,
             channel: channel as Channel,
-            event_type: 'MESSAGE_READ' as any,
+            event_type: 'MESSAGE_READ',
           },
         });
 
@@ -180,7 +180,7 @@ export async function getChannelReadRates(wedding_id: string) {
           where: {
             wedding_id,
             channel: channel as Channel,
-            event_type: 'MESSAGE_DELIVERED' as any,
+            event_type: 'MESSAGE_DELIVERED',
           },
         });
 
@@ -188,7 +188,7 @@ export async function getChannelReadRates(wedding_id: string) {
           where: {
             wedding_id,
             channel: channel as Channel,
-            event_type: 'MESSAGE_FAILED' as any,
+            event_type: 'MESSAGE_FAILED',
           },
         });
 
@@ -232,7 +232,7 @@ export async function getFamiliesWithUnreadMessages(wedding_id: string) {
           where: {
             family_id: family.id,
             event_type: {
-              in: ['INVITATION_SENT', 'MESSAGE_READ', 'MESSAGE_DELIVERED'] as any,
+              in: ['INVITATION_SENT', 'MESSAGE_READ', 'MESSAGE_DELIVERED'],
             },
           },
           orderBy: { timestamp: 'asc' },
@@ -256,10 +256,10 @@ export async function getFamiliesWithUnreadMessages(wedding_id: string) {
       })
       .map((family) => {
         const invitationEvent = family.events.find(
-          (e: any) => e.event_type === 'INVITATION_SENT'
+          (e: { event_type: string; timestamp: Date; channel: Channel | null }) => e.event_type === 'INVITATION_SENT'
         );
         const deliveredEvent = family.events.find(
-          (e: any) => e.event_type === 'MESSAGE_DELIVERED'
+          (e: { event_type: string; timestamp: Date; channel: Channel | null }) => e.event_type === 'MESSAGE_DELIVERED'
         );
 
         return {

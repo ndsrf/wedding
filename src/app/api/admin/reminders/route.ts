@@ -323,7 +323,7 @@ export async function POST(request: NextRequest) {
                 family_language: language,
                 channel_used: 'EMAIL',
                 ...(result.messageId && { message_sid: result.messageId }),
-              } as any,
+              },
               admin_triggered: true,
             },
           });
@@ -461,7 +461,7 @@ export async function POST(request: NextRequest) {
                 family_language: language,
                 channel_used: targetChannel,
                 ...(result.messageId && { message_sid: result.messageId }),
-              } as any,
+              },
               admin_triggered: true,
             },
           });

@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       where: {
         family_id: originalEvent.family_id,
         wedding_id: originalEvent.wedding_id,
-        event_type: eventType as any,
+        event_type: eventType!,
         metadata: {
           path: ['message_sid'],
           equals: messageSid,
@@ -150,12 +150,12 @@ export async function POST(request: NextRequest) {
       data: {
         family_id: originalEvent.family_id,
         wedding_id: originalEvent.wedding_id,
-        event_type: eventType as any,
+        event_type: eventType!,
         channel: originalEvent.channel,
         metadata: {
           message_sid: messageSid,
           original_event_id: originalEvent.id,
-          original_event_type: (originalEvent.metadata as any)?.template_type || 'UNKNOWN',
+          original_event_type: (originalEvent.metadata as unknown as Record<string, unknown>)?.template_type || 'UNKNOWN',
           error_code: params.ErrorCode,
           error_message: params.ErrorMessage,
         },

@@ -621,7 +621,10 @@
         "reminderSent": "Recordatorio Enviado",
         "invitationSent": "Invitación Enviada",
         "taskAssigned": "Tarea Asignada",
-        "taskCompleted": "Tarea Completada"
+        "taskCompleted": "Tarea Completada",
+        "messageDelivered": "Mensaje Entregado",
+        "messageRead": "Mensaje Leído",
+        "messageFailed": "Mensaje Fallido"
       }
     },
     "reminders": {

@@ -622,7 +622,10 @@
         "reminderSent": "Reminder Sent",
         "invitationSent": "Invitation Sent",
         "taskAssigned": "Task Assigned",
-        "taskCompleted": "Task Completed"
+        "taskCompleted": "Task Completed",
+        "messageDelivered": "Message Delivered",
+        "messageRead": "Message Read",
+        "messageFailed": "Message Failed"
       }
     },
     "reminders": {

@@ -75,6 +75,14 @@ const getEventTypeIcon = (type: EventType): React.ReactNode => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
       );
+    case 'MESSAGE_DELIVERED':
+    case 'MESSAGE_READ':
+    case 'MESSAGE_FAILED':
+      return (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      );
     default:
       return (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,6 +107,12 @@ const getEventTypeColor = (type: EventType): string => {
       return 'text-blue-600 bg-blue-100';
     case 'REMINDER_SENT':
       return 'text-orange-600 bg-orange-100';
+    case 'MESSAGE_DELIVERED':
+      return 'text-green-600 bg-green-100';
+    case 'MESSAGE_READ':
+      return 'text-blue-600 bg-blue-100';
+    case 'MESSAGE_FAILED':
+      return 'text-red-600 bg-red-100';
     default:
       return 'text-gray-600 bg-gray-100';
   }
@@ -120,8 +134,11 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
       REMINDER_SENT: 'reminderSent',
       TASK_ASSIGNED: 'taskAssigned',
       TASK_COMPLETED: 'taskCompleted',
+      MESSAGE_DELIVERED: 'messageDelivered',
+      MESSAGE_READ: 'messageRead',
+      MESSAGE_FAILED: 'messageFailed',
     };
-    
+
     // For RSVP_STARTED, which isn't in our map explicitly, we could add it or fallback
     // Since it wasn't in the original map either (it was RSVP_UPDATED essentially), we'll map it
     const key = keyMap[type] || 'linkOpened'; // Default fallback

@@ -607,7 +607,10 @@
         "reminderSent": "Promemoria Inviato",
         "invitationSent": "Invito Inviato",
         "taskAssigned": "Compito Assegnato",
-        "taskCompleted": "Compito Completato"
+        "taskCompleted": "Compito Completato",
+        "messageDelivered": "Messaggio Consegnato",
+        "messageRead": "Messaggio Letto",
+        "messageFailed": "Messaggio Non Riuscito"
       }
     },
     "reminders": {

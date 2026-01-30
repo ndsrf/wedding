@@ -607,7 +607,10 @@
         "reminderSent": "Rappel Envoyé",
         "invitationSent": "Invitation Envoyée",
         "taskAssigned": "Tâche Assignée",
-        "taskCompleted": "Tâche Terminée"
+        "taskCompleted": "Tâche Terminée",
+        "messageDelivered": "Message Livré",
+        "messageRead": "Message Lu",
+        "messageFailed": "Message Échoué"
       }
     },
     "reminders": {
