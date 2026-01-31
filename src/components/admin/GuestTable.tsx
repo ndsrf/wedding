@@ -17,6 +17,7 @@ interface GuestWithStatus extends FamilyWithMembers {
   total_members: number;
   payment_status: GiftStatus | null;
   invitation_sent: boolean;
+  save_the_date_sent?: string | null;
 }
 
 interface GuestTableProps {
@@ -24,6 +25,7 @@ interface GuestTableProps {
   onEdit?: (guestId: string) => void;
   onDelete?: (guestId: string) => void;
   onSendReminder?: (guestId: string) => void;
+  onSendSaveTheDate?: (guestId: string) => void;
   onViewTimeline?: (guestId: string, guestName: string) => void;
   loading?: boolean;
   selectedGuestIds?: string[];
@@ -53,6 +55,7 @@ export function GuestTable({
   onEdit,
   onDelete,
   onSendReminder,
+  onSendSaveTheDate,
   onViewTimeline,
   loading,
   selectedGuestIds = [],
@@ -136,7 +139,7 @@ export function GuestTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.language')}
               </th>
-              {(onEdit || onDelete || onSendReminder || onViewTimeline) && (
+              {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('admin.guests.table.actions')}
                 </th>
@@ -198,7 +201,7 @@ export function GuestTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {t(`common.languages.${guest.preferred_language}`)}
                 </td>
-                {(onEdit || onDelete || onSendReminder || onViewTimeline) && (
+                {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
                       {onViewTimeline && (
@@ -208,6 +211,15 @@ export function GuestTable({
                           title={t('admin.guests.timeline.viewTimeline')}
                         >
                           {t('admin.guests.timeline.timeline')}
+                        </button>
+                      )}
+                      {onSendSaveTheDate && !guest.save_the_date_sent && !guest.invitation_sent && (
+                        <button
+                          onClick={() => onSendSaveTheDate(guest.id)}
+                          className="text-green-600 hover:text-green-900"
+                          title="Send Save the Date"
+                        >
+                          Save Date
                         </button>
                       )}
                       {onSendReminder && guest.rsvp_status !== 'submitted' && (
@@ -269,7 +281,7 @@ export function GuestTable({
                     )}
                   </div>
                 </div>
-              {(onEdit || onDelete || onSendReminder || onViewTimeline) && (
+              {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
                 <div className="flex gap-2 flex-wrap">
                   {onViewTimeline && (
                     <button
@@ -277,6 +289,14 @@ export function GuestTable({
                       className="text-indigo-600 hover:text-indigo-900 text-sm"
                     >
                       {t('admin.guests.timeline.timeline')}
+                    </button>
+                  )}
+                  {onSendSaveTheDate && !guest.save_the_date_sent && !guest.invitation_sent && (
+                    <button
+                      onClick={() => onSendSaveTheDate(guest.id)}
+                      className="text-green-600 hover:text-green-900 text-sm"
+                    >
+                      Save Date
                     </button>
                   )}
                   {onSendReminder && guest.rsvp_status !== 'submitted' && (

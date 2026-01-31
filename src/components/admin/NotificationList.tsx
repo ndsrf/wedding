@@ -70,6 +70,12 @@ const getEventTypeIcon = (type: EventType): React.ReactNode => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       );
+    case 'SAVE_THE_DATE_SENT':
+      return (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      );
     case 'REMINDER_SENT':
       return (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,6 +112,8 @@ const getEventTypeColor = (type: EventType): string => {
       return 'text-purple-600 bg-purple-100';
     case 'INVITATION_SENT':
       return 'text-blue-600 bg-blue-100';
+    case 'SAVE_THE_DATE_SENT':
+      return 'text-teal-600 bg-teal-100';
     case 'REMINDER_SENT':
       return 'text-orange-600 bg-orange-100';
     case 'MESSAGE_DELIVERED':
@@ -133,6 +141,7 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
     const keyMap: Record<EventType, string> = {
       LINK_OPENED: 'linkOpened',
       INVITATION_SENT: 'invitationSent',
+      SAVE_THE_DATE_SENT: 'saveTheDateSent',
       RSVP_STARTED: 'rsvpStarted',
       RSVP_SUBMITTED: 'rsvpSubmitted',
       RSVP_UPDATED: 'rsvpEdited',

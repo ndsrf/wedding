@@ -34,6 +34,7 @@ interface GuestWithStatus extends FamilyWithMembers {
   total_members: number;
   payment_status: GiftStatus | null;
   invitation_sent: boolean;
+  save_the_date_sent: string | null;
 }
 
 interface GuestAddition {
@@ -60,6 +61,7 @@ interface Filters {
 }
 
 interface WeddingQuestionConfig {
+  save_the_date_enabled: boolean;
   transportation_question_enabled: boolean;
   transportation_question_text: string | null;
   extra_question_1_enabled: boolean;
@@ -166,6 +168,7 @@ export default function GuestsPage() {
 
       if (data.success) {
         setWeddingConfig({
+          save_the_date_enabled: data.data.save_the_date_enabled || false,
           transportation_question_enabled: data.data.transportation_question_enabled,
           transportation_question_text: data.data.transportation_question_text,
           extra_question_1_enabled: data.data.extra_question_1_enabled,
@@ -349,6 +352,38 @@ export default function GuestsPage() {
     setSelectedTimelineFamilyId(guestId);
     setSelectedTimelineFamilyName(guestName);
     setIsTimelineModalOpen(true);
+  };
+
+  // Handle send save the date
+  const handleSendSaveTheDate = async (guestId: string) => {
+    const guest = guests.find((g) => g.id === guestId);
+    if (!guest) return;
+
+    const confirmed = window.confirm(
+      t('admin.saveTheDate.confirmSend', { familyName: guest.name })
+    );
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch('/api/admin/save-the-date', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          family_ids: [guestId],
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
+        fetchGuests(); // Refresh the guest list
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      console.error('Error sending save the date:', error);
+      showNotification('error', error instanceof Error ? error.message : t('common.errors.generic'));
+    }
   };
 
   // Send reminders for the selected family
@@ -630,6 +665,7 @@ export default function GuestsPage() {
               onEdit={handleEditGuest}
               onDelete={handleDeleteGuest}
               onSendReminder={handleSendReminder}
+              onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}

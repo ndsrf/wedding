@@ -20,6 +20,45 @@ export type TemplateDefaults = {
 
 export const DEFAULT_TEMPLATES: TemplateDefaults = {
   ES: {
+    SAVE_THE_DATE: {
+      EMAIL: {
+        subject: "¡Reserva la fecha! Nos casamos",
+        body: `Estimada familia {{familyName}},
+
+¡Estamos emocionados de anunciar que nos casamos!
+
+**{{coupleNames}}**
+
+📅 **Fecha:** {{weddingDate}}
+📍 **Ubicación:** {{location}}
+
+Reserva esta fecha en tu calendario. Pronto recibirás la invitación formal con todos los detalles.
+
+¡Esperamos celebrar contigo!
+
+Con cariño,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "¡Reserva la fecha!",
+        body: `¡Hola {{familyName}}!
+
+Nos emociona anunciarte que nos casamos.
+
+{{coupleNames}}
+
+📅 {{weddingDate}}
+📍 {{location}}
+
+¡Reserva la fecha! Pronto más detalles.
+
+¡Nos vemos allí!`,
+      },
+      SMS: {
+        subject: "Reserva la fecha",
+        body: `¡Hola {{familyName}}! Nos casamos el {{weddingDate}}. ¡Reserva la fecha! Más detalles pronto.`,
+      },
+    },
     INVITATION: {
       EMAIL: {
         subject: "¡Estamos emocionados de compartir nuestro gran día!",
@@ -127,6 +166,45 @@ Con cariño,
     },
   },
   EN: {
+    SAVE_THE_DATE: {
+      EMAIL: {
+        subject: "Save the Date! We're getting married",
+        body: `Dear {{familyName}},
+
+We're excited to announce that we're getting married!
+
+**{{coupleNames}}**
+
+📅 **Date:** {{weddingDate}}
+📍 **Location:** {{location}}
+
+Please save this date on your calendar. You'll receive the formal invitation with all the details soon.
+
+We can't wait to celebrate with you!
+
+With love,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Save the Date!",
+        body: `Hi {{familyName}}!
+
+We're excited to announce we're getting married!
+
+{{coupleNames}}
+
+📅 {{weddingDate}}
+📍 {{location}}
+
+Save the date! More details coming soon.
+
+See you there!`,
+      },
+      SMS: {
+        subject: "Save the Date",
+        body: `Hi {{familyName}}! We're getting married on {{weddingDate}}. Save the date! More details soon.`,
+      },
+    },
     INVITATION: {
       EMAIL: {
         subject: "You're invited to celebrate our wedding!",
@@ -234,6 +312,45 @@ With love,
     },
   },
   FR: {
+    SAVE_THE_DATE: {
+      EMAIL: {
+        subject: "Réservez la date! Nous nous marions",
+        body: `Chère famille {{familyName}},
+
+Nous sommes ravis d'annoncer que nous nous marions!
+
+**{{coupleNames}}**
+
+📅 **Date:** {{weddingDate}}
+📍 **Lieu:** {{location}}
+
+Réservez cette date dans votre agenda. Vous recevrez bientôt l'invitation formelle avec tous les détails.
+
+Nous avons hâte de célébrer avec vous!
+
+Avec amour,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Réservez la date!",
+        body: `Bonjour {{familyName}}!
+
+Nous sommes heureux d'annoncer que nous nous marions!
+
+{{coupleNames}}
+
+📅 {{weddingDate}}
+📍 {{location}}
+
+Réservez la date! Plus de détails bientôt.
+
+À bientôt!`,
+      },
+      SMS: {
+        subject: "Réservez la date",
+        body: `Bonjour {{familyName}}! Nous nous marions le {{weddingDate}}. Réservez la date! Plus de détails bientôt.`,
+      },
+    },
     INVITATION: {
       EMAIL: {
         subject: "Vous êtes invités à célébrer notre mariage!",
@@ -341,6 +458,45 @@ Avec amour,
     },
   },
   IT: {
+    SAVE_THE_DATE: {
+      EMAIL: {
+        subject: "Segnate la data! Ci sposiamo",
+        body: `Caro famiglia {{familyName}},
+
+Siamo felicissimi di annunciare che ci sposiamo!
+
+**{{coupleNames}}**
+
+📅 **Data:** {{weddingDate}}
+📍 **Luogo:** {{location}}
+
+Segnate questa data nel vostro calendario. Riceverete presto l'invito formale con tutti i dettagli.
+
+Non vediamo l'ora di festeggiare con voi!
+
+Con amore,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Segnate la data!",
+        body: `Ciao {{familyName}}!
+
+Siamo felici di annunciare che ci sposiamo!
+
+{{coupleNames}}
+
+📅 {{weddingDate}}
+📍 {{location}}
+
+Segnate la data! Altri dettagli a breve.
+
+A presto!`,
+      },
+      SMS: {
+        subject: "Segnate la data",
+        body: `Ciao {{familyName}}! Ci sposiamo il {{weddingDate}}. Segnate la data! Altri dettagli a breve.`,
+      },
+    },
     INVITATION: {
       EMAIL: {
         subject: "Siete invitati a celebrare il nostro matrimonio!",
@@ -448,6 +604,45 @@ Con amore,
     },
   },
   DE: {
+    SAVE_THE_DATE: {
+      EMAIL: {
+        subject: "Reserviert euch den Termin! Wir heiraten",
+        body: `Liebe Familie {{familyName}},
+
+Wir freuen uns, euch mitzuteilen, dass wir heiraten!
+
+**{{coupleNames}}**
+
+📅 **Datum:** {{weddingDate}}
+📍 **Ort:** {{location}}
+
+Bitte reserviert euch diesen Termin. Die formelle Einladung mit allen Details folgt bald.
+
+Wir freuen uns darauf, mit euch zu feiern!
+
+Mit Liebe,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Reserviert den Termin!",
+        body: `Hallo {{familyName}}!
+
+Wir freuen uns, euch mitzuteilen, dass wir heiraten!
+
+{{coupleNames}}
+
+📅 {{weddingDate}}
+📍 {{location}}
+
+Reserviert den Termin! Mehr Details folgen bald.
+
+Bis bald!`,
+      },
+      SMS: {
+        subject: "Reserviert den Termin",
+        body: `Hallo {{familyName}}! Wir heiraten am {{weddingDate}}. Reserviert den Termin! Mehr Details bald.`,
+      },
+    },
     INVITATION: {
       EMAIL: {
         subject: "Ihr seid zu unserer Hochzeit eingeladen!",
@@ -568,7 +763,7 @@ export function getDefaultTemplate(
 }
 
 /**
- * Get all default templates for a wedding (5 languages x 3 types x 3 channels = 45 templates)
+ * Get all default templates for a wedding (5 languages x 4 types x 3 channels = 60 templates)
  */
 export function getAllDefaultTemplates(): Array<{
   language: Language;
@@ -578,7 +773,7 @@ export function getAllDefaultTemplates(): Array<{
   body: string;
 }> {
   const languages: Language[] = ["ES", "EN", "FR", "IT", "DE"];
-  const types: TemplateType[] = ["INVITATION", "REMINDER", "CONFIRMATION"];
+  const types: TemplateType[] = ["SAVE_THE_DATE", "INVITATION", "REMINDER", "CONFIRMATION"];
   const channels: Channel[] = ["EMAIL", "WHATSAPP", "SMS"];
 
   return languages.flatMap((language) =>
