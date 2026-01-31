@@ -852,7 +852,8 @@
         "title": "Tipo de Plantilla",
         "invitation": "📩 Invitaciones",
         "reminder": "🔔 Recordatorios",
-        "confirmation": "✅ Confirmaciones"
+        "confirmation": "✅ Confirmaciones",
+        "saveTheDate": "📅 Reserva la Fecha"
       },
       "language": {
         "title": "Idioma"

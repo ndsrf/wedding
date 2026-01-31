@@ -864,7 +864,8 @@
         "title": "Template Type",
         "invitation": "📩 Invitations",
         "reminder": "🔔 Reminders",
-        "confirmation": "✅ Confirmations"
+        "confirmation": "✅ Confirmations",
+        "saveTheDate": "📅 Save the Date"
       },
       "language": {
         "title": "Language"

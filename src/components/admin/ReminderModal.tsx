@@ -48,9 +48,6 @@ export function ReminderModal({
 
   if (!isOpen) return null;
 
-  const titleKey = mode === 'save_the_date' ? 'admin.reminders.sendSaveTheDate' : 'admin.reminders.send';
-  const successTitleKey = mode === 'save_the_date' ? 'admin.saveTheDate.sent' : 'admin.reminders.sendSuccess';
-
   const validateChannel = async () => {
     setError(null);
     try {
