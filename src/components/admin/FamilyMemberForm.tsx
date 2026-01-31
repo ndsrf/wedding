@@ -144,7 +144,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                   type="text"
                   value={member.name}
                   onChange={(e) => updateMember(index, 'name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   required
                 />
               </div>
@@ -157,7 +157,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                 <select
                   value={member.type}
                   onChange={(e) => updateMember(index, 'type', e.target.value as MemberType)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   required
                 >
                   <option value="ADULT">{t('guest.members.types.adult')}</option>
@@ -177,7 +177,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                   onChange={(e) =>
                     updateMember(index, 'age', e.target.value ? parseInt(e.target.value) : null)
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                 />
               </div>
 
@@ -192,7 +192,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                   onChange={(e) =>
                     updateMember(index, 'dietary_restrictions', e.target.value || null)
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   placeholder={t('guest.rsvp.dietaryPlaceholder')}
                 />
               </div>
@@ -207,7 +207,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                 type="text"
                 value={member.accessibility_needs || ''}
                 onChange={(e) => updateMember(index, 'accessibility_needs', e.target.value || null)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                 placeholder={t('guest.rsvp.accessibilityPlaceholder')}
               />
             </div>

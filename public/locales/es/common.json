@@ -844,7 +844,8 @@
       "type": {
         "title": "Tipo de Plantilla",
         "invitation": "📩 Invitaciones",
-        "reminder": "🔔 Recordatorios"
+        "reminder": "🔔 Recordatorios",
+        "confirmation": "✅ Confirmaciones"
       },
       "language": {
         "title": "Idioma"

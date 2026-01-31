@@ -214,7 +214,7 @@ export default function NotificationsPage() {
                 onChange={(e) =>
                   setFilters({ ...filters, event_type: e.target.value as EventType || undefined })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
               >
                 <option value="">{t('admin.guests.filters.all')}</option>
                 <option value="LINK_OPENED">{t('admin.notifications.events.linkOpened')}</option>
@@ -239,7 +239,7 @@ export default function NotificationsPage() {
                 onChange={(e) =>
                   setFilters({ ...filters, channel: e.target.value as Channel || undefined })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
               >
                 <option value="">{t('admin.guests.filters.all')}</option>
                 <option value="WHATSAPP">{t('admin.guests.filters.whatsapp')}</option>
@@ -263,7 +263,7 @@ export default function NotificationsPage() {
                     date_from: e.target.value ? new Date(e.target.value).toISOString() : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
               />
             </div>
 
@@ -282,7 +282,7 @@ export default function NotificationsPage() {
                     date_to: e.target.value ? new Date(e.target.value).toISOString() : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
               />
             </div>
           </div>

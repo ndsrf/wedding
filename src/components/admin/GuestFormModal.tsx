@@ -189,7 +189,7 @@ export function GuestFormModal({
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value || null })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   />
                 </div>
 
@@ -201,7 +201,7 @@ export function GuestFormModal({
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value || null })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   />
                 </div>
 
@@ -213,7 +213,7 @@ export function GuestFormModal({
                     onChange={(e) =>
                       setFormData({ ...formData, whatsapp_number: e.target.value || null })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   />
                 </div>
 
@@ -229,7 +229,7 @@ export function GuestFormModal({
                         channel_preference: (e.target.value as Channel) || null,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   >
                     <option value="">{t('common.channels.none')}</option>
                     <option value="WHATSAPP">{t('common.channels.WHATSAPP')}</option>
@@ -289,7 +289,7 @@ export function GuestFormModal({
                               transportation_answer: e.target.value === '' ? null : e.target.value === 'yes',
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                         >
                           <option value="">-</option>
                           <option value="yes">{t('common.yes')}</option>
@@ -312,7 +312,7 @@ export function GuestFormModal({
                               extra_question_1_answer: e.target.value === '' ? null : e.target.value === 'yes',
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                         >
                           <option value="">-</option>
                           <option value="yes">{t('common.yes')}</option>
@@ -335,7 +335,7 @@ export function GuestFormModal({
                               extra_question_2_answer: e.target.value === '' ? null : e.target.value === 'yes',
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                         >
                           <option value="">-</option>
                           <option value="yes">{t('common.yes')}</option>
@@ -358,7 +358,7 @@ export function GuestFormModal({
                               extra_question_3_answer: e.target.value === '' ? null : e.target.value === 'yes',
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                         >
                           <option value="">-</option>
                           <option value="yes">{t('common.yes')}</option>
@@ -379,7 +379,7 @@ export function GuestFormModal({
                           onChange={(e) =>
                             setFormData({ ...formData, extra_info_1_value: e.target.value || null })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                         />
                       </div>
                     )}
@@ -396,7 +396,7 @@ export function GuestFormModal({
                           onChange={(e) =>
                             setFormData({ ...formData, extra_info_2_value: e.target.value || null })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                         />
                       </div>
                     )}
@@ -413,7 +413,7 @@ export function GuestFormModal({
                           onChange={(e) =>
                             setFormData({ ...formData, extra_info_3_value: e.target.value || null })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                         />
                       </div>
                     )}

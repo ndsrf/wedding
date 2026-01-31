@@ -250,7 +250,7 @@ export default function PaymentsPage() {
                 id="guestStatusFilter"
                 value={guestStatusFilter}
                 onChange={(e) => setGuestStatusFilter(e.target.value as GuestStatusFilter)}
-                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
               >
                 <option value="all">{t('admin.payments.filterFamilies.all')}</option>
                 <option value="attending">{t('admin.payments.filterFamilies.attending')}</option>
@@ -281,7 +281,7 @@ export default function PaymentsPage() {
                 onChange={(e) =>
                   setFilters({ ...filters, status: e.target.value as GiftStatus || undefined })
                 }
-                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
               >
                 <option value="">{t('admin.guests.filters.all')}</option>
                 <option value="PENDING">{t('admin.payments.statuses.pending')}</option>

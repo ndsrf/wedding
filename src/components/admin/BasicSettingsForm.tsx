@@ -150,7 +150,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
             id="theme_id"
             value={formData.theme_id}
             onChange={(e) => handleChange('theme_id', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
           >
             <option value="">{t('noTheme')}</option>
             {themes.map((theme) => (
@@ -203,7 +203,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
             type="text"
             value={formData.gift_iban}
             onChange={(e) => handleChange('gift_iban', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
             placeholder={t('giftIbanPlaceholder')}
           />
           <p className="mt-1 text-sm text-gray-500">
@@ -237,7 +237,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
             type="text"
             value={formData.dress_code}
             onChange={(e) => handleChange('dress_code', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
             placeholder={t('dressCodePlaceholder')}
           />
         </div>
@@ -252,7 +252,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
             value={formData.additional_info}
             onChange={(e) => handleChange('additional_info', e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
             placeholder={t('additionalInfoPlaceholder')}
           />
         </div>

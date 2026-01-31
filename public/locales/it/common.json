@@ -828,7 +828,8 @@
       "type": {
         "title": "Tipo di Modello",
         "invitation": "📩 Inviti",
-        "reminder": "🔔 Promemoria"
+        "reminder": "🔔 Promemoria",
+        "confirmation": "✅ Conferme"
       },
       "language": {
         "title": "Lingua"
