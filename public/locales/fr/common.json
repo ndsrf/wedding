@@ -637,11 +637,16 @@
         "MESSAGE_FAILED": "Message Échoué"
       }
     },
+    "saveTheDate": {
+      "confirmSend": "Êtes-vous sûr de vouloir envoyer un message Réservez la Date à {familyName} ?",
+      "sent": "Réservez la Date envoyé à {count} famille(s)"
+    },
     "reminders": {
       "title": "Système de Rappels",
       "send": "Envoyer Rappels",
       "sendReminder": "Envoyer Rappel",
       "sendInvite": "Envoyer Invitation",
+      "sendSaveTheDate": "Envoyer Réservez la Date",
       "preview": "Aperçu Destinataires",
       "channel": "Canal d'Envoi",
       "recipients": "Destinataires : {count} famille(s)",
@@ -760,6 +765,8 @@
         "dressCodePlaceholder": "ex. Formel, Semi-formel, Décontracté",
         "additionalInfo": "Informations Supplémentaires pour les Invités",
         "additionalInfoPlaceholder": "Tout détail supplémentaire pour les invités (parking, hébergement, etc.)...",
+        "saveTheDate": "Activer les messages 'Réservez la Date'",
+        "saveTheDateDesc": "Envoyez des messages 'Réservez la date' avant les invitations officielles. Cela vous permet d'informer les invités de la date du mariage à l'avance.",
         "rsvpQuestions": "Questions RSVP",
         "rsvpQuestionsDesc": "Personnalisez les questions posées aux invités lorsqu'ils complètent leur RSVP.",
         "transportation": "Ajouter une question sur le transport au RSVP",

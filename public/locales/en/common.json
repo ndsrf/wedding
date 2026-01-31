@@ -652,11 +652,16 @@
         "MESSAGE_FAILED": "Message Failed"
       }
     },
+    "saveTheDate": {
+      "confirmSend": "Are you sure you want to send a Save the Date message to {familyName}?",
+      "sent": "Save the Date sent to {count} family(ies)"
+    },
     "reminders": {
       "title": "Reminder System",
       "send": "Send Reminders",
       "sendReminder": "Send Reminder",
       "sendInvite": "Send Invite",
+      "sendSaveTheDate": "Send Save the Date",
       "preview": "Preview Recipients",
       "channel": "Send Channel",
       "recipients": "Recipients: {count} family(ies)",
@@ -786,6 +791,8 @@
         "dressCodePlaceholder": "e.g., Formal, Semi-formal, Casual",
         "additionalInfo": "Additional Information for Guests",
         "additionalInfoPlaceholder": "Any additional details for guests (parking, accommodation, etc.)...",
+        "saveTheDate": "Enable Save the Date messages",
+        "saveTheDateDesc": "Send save the date messages before formal invitations. This allows you to inform guests about the wedding date early.",
         "rsvpQuestions": "RSVP Questions",
         "rsvpQuestionsDesc": "Customize the questions shown to guests when they complete their RSVP.",
         "transportation": "Add transportation question to RSVP",

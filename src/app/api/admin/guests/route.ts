@@ -208,6 +208,7 @@ export async function GET(request: NextRequest) {
         reference_code: family.reference_code,
         channel_preference: family.channel_preference,
         preferred_language: family.preferred_language,
+        save_the_date_sent: family.save_the_date_sent,
         created_at: family.created_at,
         // RSVP Question Answers
         transportation_answer: family.transportation_answer,

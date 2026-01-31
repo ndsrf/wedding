@@ -19,6 +19,7 @@ export interface SendSaveTheDateOptions {
   family_id: string;
   wedding_id: string;
   admin_id: string;
+  channel?: Channel | "PREFERRED";
 }
 
 /**
@@ -32,7 +33,7 @@ export async function sendSaveTheDate(
   error?: string;
   messageId?: string;
 }> {
-  const { family_id, wedding_id, admin_id } = options;
+  const { family_id, wedding_id, admin_id, channel: requestedChannel } = options;
 
   try {
     // Fetch family with members
@@ -63,8 +64,14 @@ export async function sendSaveTheDate(
       return { success: false, error: "Save the date already sent to this family" };
     }
 
-    // Determine channel based on family preference or fallback to EMAIL
-    let channel: Channel = family.channel_preference || "EMAIL";
+    // Determine channel based on request or family preference or fallback to EMAIL
+    let channel: Channel;
+    
+    if (requestedChannel && requestedChannel !== "PREFERRED") {
+      channel = requestedChannel;
+    } else {
+      channel = family.channel_preference || "EMAIL";
+    }
 
     // Validate that family has the required contact info for the channel
     if (channel === "EMAIL" && !family.email) {

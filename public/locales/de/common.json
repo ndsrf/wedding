@@ -637,11 +637,16 @@
         "MESSAGE_FAILED": "Nachricht fehlgeschlagen"
       }
     },
+    "saveTheDate": {
+      "confirmSend": "Möchten Sie wirklich eine Save-the-Date-Nachricht an {familyName} senden?",
+      "sent": "Save-the-Date an {count} Familie(n) gesendet"
+    },
     "reminders": {
       "title": "Erinnerungssystem",
       "send": "Erinnerungen senden",
       "sendReminder": "Erinnerung senden",
       "sendInvite": "Einladung senden",
+      "sendSaveTheDate": "Save-the-Date senden",
       "preview": "Empfängervorschau",
       "channel": "Versandkanal",
       "recipients": "Empfänger: {count} Familie(n)",
@@ -760,6 +765,8 @@
         "dressCodePlaceholder": "z.B. Formell, Halbformell, Lässig",
         "additionalInfo": "Zusätzliche Informationen für Gäste",
         "additionalInfoPlaceholder": "Alle weiteren Details für Gäste (Parken, Unterkunft, etc.)...",
+        "saveTheDate": "Save-the-Date-Nachrichten aktivieren",
+        "saveTheDateDesc": "Senden Sie Save-the-Date-Nachrichten vor den formellen Einladungen. So können Sie die Gäste frühzeitig über den Hochzeitstermin informieren.",
         "rsvpQuestions": "RSVP-Fragen",
         "rsvpQuestionsDesc": "Passen Sie die Fragen an, die Gästen beim Ausfüllen ihrer RSVP angezeigt werden.",
         "transportation": "Transportfrage zur RSVP hinzufügen",

@@ -21,6 +21,7 @@ import { API_ERROR_CODES } from '@/types/api';
 // Validation schema for send save the date request
 const sendSaveTheDateSchema = z.object({
   family_ids: z.array(z.string()).optional(),
+  channel: z.enum(['EMAIL', 'SMS', 'WHATSAPP', 'PREFERRED']).optional(),
 });
 
 interface SendSaveTheDateResponse extends APIResponse {
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
-    const { family_ids } = sendSaveTheDateSchema.parse(body);
+    const { family_ids, channel } = sendSaveTheDateSchema.parse(body);
 
     // Get wedding details
     const wedding = await prisma.wedding.findUnique({
@@ -136,6 +137,7 @@ export async function POST(request: NextRequest) {
         family_id: family.id,
         wedding_id: user.wedding_id!,
         admin_id: user.id,
+        channel,
       }))
     );
 

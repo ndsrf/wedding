@@ -25,6 +25,7 @@ interface ReminderModalProps {
   onSendReminders: (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => Promise<void>;
   loading?: boolean;
   weddingGiftIban?: string | null;
+  mode?: 'reminder' | 'save_the_date';
 }
 
 export function ReminderModal({
@@ -34,6 +35,7 @@ export function ReminderModal({
   onSendReminders,
   loading,
   weddingGiftIban,
+  mode = 'reminder',
 }: ReminderModalProps) {
   const t = useTranslations();
   const [selectedChannel, setSelectedChannel] = useState<Channel | 'PREFERRED'>('PREFERRED');
@@ -45,6 +47,9 @@ export function ReminderModal({
   const [showValidationWarning, setShowValidationWarning] = useState(false);
 
   if (!isOpen) return null;
+
+  const titleKey = mode === 'save_the_date' ? 'admin.reminders.sendSaveTheDate' : 'admin.reminders.send';
+  const successTitleKey = mode === 'save_the_date' ? 'admin.saveTheDate.sent' : 'admin.reminders.sendSuccess';
 
   const validateChannel = async () => {
     setError(null);
@@ -76,10 +81,11 @@ export function ReminderModal({
       return false;
     }
   };
-
+  
   const handleSend = async () => {
     // Check if IBAN is empty and warning hasn't been shown yet
-    if (!weddingGiftIban && !showIbanWarning) {
+    // Only check IBAN for reminders/invites, not Save the Date (usually no gifts info yet)
+    if (mode === 'reminder' && !weddingGiftIban && !showIbanWarning) {
       setShowIbanWarning(true);
       return;
     }
@@ -167,7 +173,9 @@ export function ReminderModal({
         <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">{t('admin.reminders.send')}</h3>
+            <h3 className="text-lg font-medium text-gray-900">
+              {mode === 'save_the_date' ? t('admin.reminders.sendSaveTheDate') : t('admin.reminders.send')}
+            </h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500"
@@ -188,10 +196,17 @@ export function ReminderModal({
               <svg className="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.reminders.sendSuccess')}</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {t('admin.reminders.sendSuccessDesc', { count: eligibleFamilies.length })}
-              </p>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                {mode === 'save_the_date' 
+                  ? t('admin.saveTheDate.sent', { count: eligibleFamilies.length })
+                  : t('admin.reminders.sendSuccess')
+                }
+              </h3>
+              {mode === 'reminder' && (
+                <p className="mt-1 text-sm text-gray-500">
+                  {t('admin.reminders.sendSuccessDesc', { count: eligibleFamilies.length })}
+                </p>
+              )}
             </div>
           ) : eligibleFamilies.length === 0 ? (
             <div className="py-8 text-center">

@@ -19,7 +19,6 @@ interface RsvpSettingsFormData {
   allow_guest_additions: boolean;
   dress_code: string;
   additional_info: string;
-  save_the_date_enabled: boolean;
   transportation_question_enabled: boolean;
   transportation_question_text: string;
   dietary_restrictions_enabled: boolean;
@@ -52,7 +51,6 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
     allow_guest_additions: wedding.allow_guest_additions,
     dress_code: wedding.dress_code || '',
     additional_info: wedding.additional_info || '',
-    save_the_date_enabled: wedding.save_the_date_enabled || false,
     transportation_question_enabled: wedding.transportation_question_enabled,
     transportation_question_text: wedding.transportation_question_text || '',
     dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
@@ -86,7 +84,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
         allow_guest_additions: formData.allow_guest_additions,
         dress_code: formData.dress_code || null,
         additional_info: formData.additional_info || null,
-        save_the_date_enabled: formData.save_the_date_enabled,
+        save_the_date_enabled: wedding.save_the_date_enabled,
         transportation_question_enabled: formData.transportation_question_enabled,
         transportation_question_text: formData.transportation_question_enabled
           ? formData.transportation_question_text || null
@@ -192,32 +190,6 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
           </label>
           <p className="mt-1 ml-6 text-sm text-gray-500">
             {t('dietaryDesc')}
-          </p>
-        </div>
-      </div>
-
-      {/* Messaging Settings */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('messagingSettings') || 'Messaging Settings'}</h3>
-        <p className="text-sm text-gray-500 mb-6">
-          {t('messagingSettingsDesc') || 'Configure optional message types for your guests'}
-        </p>
-
-        {/* Save the Date */}
-        <div className="mb-6 p-4 border border-gray-200 rounded-lg">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={formData.save_the_date_enabled}
-              onChange={(e) => handleChange('save_the_date_enabled', e.target.checked)}
-              className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-            />
-            <span className="ml-2 text-sm font-medium text-gray-700">
-              {t('saveTheDate') || 'Enable Save the Date messages'}
-            </span>
-          </label>
-          <p className="mt-1 ml-6 text-sm text-gray-500">
-            {t('saveTheDateDesc') || 'Send save the date messages before formal invitations. This allows you to inform guests about the wedding date early.'}
           </p>
         </div>
       </div>

@@ -216,9 +216,9 @@ export function GuestTable({
                         <button
                           onClick={() => onSendSaveTheDate(guest.id)}
                           className="text-green-600 hover:text-green-900"
-                          title="Send Save the Date"
+                          title={t('admin.reminders.sendSaveTheDate')}
                         >
-                          Save Date
+                          {t('admin.reminders.sendSaveTheDate')}
                         </button>
                       )}
                       {onSendReminder && guest.rsvp_status !== 'submitted' && (
@@ -295,7 +295,7 @@ export function GuestTable({
                       onClick={() => onSendSaveTheDate(guest.id)}
                       className="text-green-600 hover:text-green-900 text-sm"
                     >
-                      Save Date
+                      {t('admin.reminders.sendSaveTheDate')}
                     </button>
                   )}
                   {onSendReminder && guest.rsvp_status !== 'submitted' && (
