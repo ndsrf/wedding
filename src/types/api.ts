@@ -305,6 +305,9 @@ export interface UpdateWeddingConfigRequest {
   // RSVP Configuration - Dietary restrictions
   dietary_restrictions_enabled?: boolean;
 
+  // Messaging Configuration - Save the Date
+  save_the_date_enabled?: boolean;
+
   // RSVP Configuration - Extra Yes/No questions (up to 3)
   extra_question_1_enabled?: boolean;
   extra_question_1_text?: string | null;

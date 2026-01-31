@@ -34,7 +34,6 @@ interface GuestWithStatus extends FamilyWithMembers {
   total_members: number;
   payment_status: GiftStatus | null;
   invitation_sent: boolean;
-  save_the_date_sent: string | null;
 }
 
 interface GuestAddition {

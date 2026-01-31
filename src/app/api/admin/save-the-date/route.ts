@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import { sendSaveTheDate, sendSaveTheDateBulk } from '@/lib/notifications/save-the-date';
+import { sendSaveTheDateBulk } from '@/lib/notifications/save-the-date';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 

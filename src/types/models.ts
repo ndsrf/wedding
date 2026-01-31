@@ -123,6 +123,9 @@ export interface Wedding {
   // RSVP Configuration - Dietary restrictions
   dietary_restrictions_enabled: boolean;
 
+  // Messaging Configuration - Save the Date
+  save_the_date_enabled: boolean;
+
   // RSVP Configuration - Extra Yes/No questions (up to 3)
   extra_question_1_enabled: boolean;
   extra_question_1_text: string | null;
@@ -171,6 +174,7 @@ export interface Family {
   reference_code: string | null;
   channel_preference: Channel | null;
   preferred_language: Language;
+  save_the_date_sent: Date | null;
   created_at: Date;
 
   // RSVP Question Answers
