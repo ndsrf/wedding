@@ -637,11 +637,16 @@
         "MESSAGE_FAILED": "Messaggio Non Riuscito"
       }
     },
+    "saveTheDate": {
+      "confirmSend": "Sei sicuro di voler inviare un messaggio Salva la Data a {familyName}?",
+      "sent": "Salva la Data inviato a {count} famiglia/e"
+    },
     "reminders": {
       "title": "Sistema Promemoria",
       "send": "Invia Promemoria",
       "sendReminder": "Invia Promemoria",
       "sendInvite": "Invia Invito",
+      "sendSaveTheDate": "Invia Salva la Data",
       "preview": "Anteprima Destinatari",
       "channel": "Canale Invio",
       "recipients": "Destinatari: {count} famiglia/e",
@@ -760,6 +765,8 @@
         "dressCodePlaceholder": "es. Formale, Semi-formale, Casual",
         "additionalInfo": "Informazioni Aggiuntive per gli Ospiti",
         "additionalInfoPlaceholder": "Qualsiasi dettaglio aggiuntivo per gli ospiti (parcheggio, alloggio, ecc.)...",
+        "saveTheDate": "Abilita messaggi 'Salva la Data'",
+        "saveTheDateDesc": "Invia messaggi 'Salva la data' prima degli inviti formali. Questo ti permette di informare gli ospiti sulla data del matrimonio in anticipo.",
         "rsvpQuestions": "Domande RSVP",
         "rsvpQuestionsDesc": "Personalizza le domande mostrate agli ospiti quando completano il loro RSVP.",
         "transportation": "Aggiungi domanda sul trasporto all'RSVP",

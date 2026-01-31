@@ -19,6 +19,7 @@ interface BasicSettingsFormData {
   allow_guest_additions: boolean;
   dress_code: string;
   additional_info: string;
+  save_the_date_enabled: boolean;
   transportation_question_enabled: boolean;
   transportation_question_text: string;
   dietary_restrictions_enabled: boolean;
@@ -52,6 +53,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
     allow_guest_additions: wedding.allow_guest_additions,
     dress_code: wedding.dress_code || '',
     additional_info: wedding.additional_info || '',
+    save_the_date_enabled: wedding.save_the_date_enabled || false,
     transportation_question_enabled: wedding.transportation_question_enabled,
     transportation_question_text: wedding.transportation_question_text || '',
     dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
@@ -85,6 +87,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
         allow_guest_additions: formData.allow_guest_additions,
         dress_code: formData.dress_code || null,
         additional_info: formData.additional_info || null,
+        save_the_date_enabled: formData.save_the_date_enabled,
         transportation_question_enabled: formData.transportation_question_enabled,
         transportation_question_text: formData.transportation_question_enabled
           ? formData.transportation_question_text || null
@@ -255,6 +258,22 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
             placeholder={t('additionalInfoPlaceholder')}
           />
+        </div>
+
+        {/* Save the Date */}
+        <div className="mt-6">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={formData.save_the_date_enabled}
+              onChange={(e) => handleChange('save_the_date_enabled', e.target.checked)}
+              className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+            />
+            <span className="ml-2 text-sm text-gray-700">{t('saveTheDate')}</span>
+          </label>
+          <p className="mt-1 ml-6 text-sm text-gray-500">
+            {t('saveTheDateDesc')}
+          </p>
         </div>
       </div>
 

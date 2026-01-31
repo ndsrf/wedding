@@ -84,6 +84,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
         allow_guest_additions: formData.allow_guest_additions,
         dress_code: formData.dress_code || null,
         additional_info: formData.additional_info || null,
+        save_the_date_enabled: wedding.save_the_date_enabled,
         transportation_question_enabled: formData.transportation_question_enabled,
         transportation_question_text: formData.transportation_question_enabled
           ? formData.transportation_question_text || null
@@ -191,6 +192,14 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
             {t('dietaryDesc')}
           </p>
         </div>
+      </div>
+
+      {/* RSVP Questions Section */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('rsvpQuestions')}</h3>
+        <p className="text-sm text-gray-500 mb-6">
+          {t('rsvpQuestionsDesc')}
+        </p>
 
         {/* Extra Yes/No Questions */}
         <div className="mb-6">

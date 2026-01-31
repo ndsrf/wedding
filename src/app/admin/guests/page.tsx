@@ -60,6 +60,7 @@ interface Filters {
 }
 
 interface WeddingQuestionConfig {
+  save_the_date_enabled: boolean;
   transportation_question_enabled: boolean;
   transportation_question_text: string | null;
   extra_question_1_enabled: boolean;
@@ -108,6 +109,7 @@ export default function GuestsPage() {
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [reminderFamily, setReminderFamily] = useState<ReminderFamily | null>(null);
   const [reminderLoading, setReminderLoading] = useState(false);
+  const [reminderMode, setReminderMode] = useState<'reminder' | 'save_the_date'>('reminder');
 
   // Timeline modal state
   const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
@@ -166,6 +168,7 @@ export default function GuestsPage() {
 
       if (data.success) {
         setWeddingConfig({
+          save_the_date_enabled: data.data.save_the_date_enabled || false,
           transportation_question_enabled: data.data.transportation_question_enabled,
           transportation_question_text: data.data.transportation_question_text,
           extra_question_1_enabled: data.data.extra_question_1_enabled,
@@ -340,6 +343,7 @@ export default function GuestsPage() {
         preferred_language: guest.preferred_language,
         channel_preference: guest.channel_preference,
       });
+      setReminderMode('reminder');
       setIsReminderModalOpen(true);
     }
   };
@@ -351,13 +355,30 @@ export default function GuestsPage() {
     setIsTimelineModalOpen(true);
   };
 
+  // Handle send save the date
+  const handleSendSaveTheDate = async (guestId: string) => {
+    const guest = guests.find((g) => g.id === guestId);
+    if (guest) {
+      setReminderFamily({
+        id: guest.id,
+        name: guest.name,
+        preferred_language: guest.preferred_language,
+        channel_preference: guest.channel_preference,
+      });
+      setReminderMode('save_the_date');
+      setIsReminderModalOpen(true);
+    }
+  };
+
   // Send reminders for the selected family
   const handleSendReminders = async (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => {
     if (!reminderFamily) return;
 
     setReminderLoading(true);
     try {
-      const response = await fetch('/api/admin/reminders', {
+      const endpoint = reminderMode === 'save_the_date' ? '/api/admin/save-the-date' : '/api/admin/reminders';
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -368,7 +389,12 @@ export default function GuestsPage() {
       const data = await response.json();
 
       if (data.success) {
-        showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
+        if (reminderMode === 'save_the_date') {
+          showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
+          fetchGuests(); // Refresh the guest list
+        } else {
+          showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
+        }
       } else {
         throw new Error(data.error?.message || t('common.errors.generic'));
       }
@@ -428,6 +454,7 @@ export default function GuestsPage() {
   // Open bulk reminder modal
   const handleOpenBulkReminderModal = () => {
     setReminderFamily(null);
+    setReminderMode('reminder');
     setIsReminderModalOpen(true);
   };
 
@@ -630,6 +657,7 @@ export default function GuestsPage() {
               onEdit={handleEditGuest}
               onDelete={handleDeleteGuest}
               onSendReminder={handleSendReminder}
+              onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
@@ -749,6 +777,7 @@ export default function GuestsPage() {
         onSendReminders={reminderFamily ? handleSendReminders : handleBulkReminderSend}
         loading={reminderLoading}
         weddingGiftIban={weddingGiftIban}
+        mode={reminderMode}
       />
 
       {/* Timeline Modal */}

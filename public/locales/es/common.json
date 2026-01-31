@@ -651,11 +651,16 @@
         "MESSAGE_FAILED": "Mensaje Fallido"
       }
     },
+    "saveTheDate": {
+      "confirmSend": "¿Estás seguro de que quieres enviar un mensaje de Reserva la Fecha a {familyName}?",
+      "sent": "Reserva la Fecha enviada a {count} familia(s)"
+    },
     "reminders": {
       "title": "Sistema de Recordatorios",
       "send": "Enviar Recordatorios",
       "sendReminder": "Enviar Recordatorio",
       "sendInvite": "Enviar Invitación",
+      "sendSaveTheDate": "Enviar Reserva la Fecha",
       "preview": "Vista Previa de Destinatarios",
       "channel": "Canal de Envío",
       "recipients": "Destinatarios: {count} familia(s)",
@@ -774,6 +779,8 @@
         "dressCodePlaceholder": "ej. Formal, Semi-formal, Casual",
         "additionalInfo": "Información Adicional para Invitados",
         "additionalInfoPlaceholder": "Cualquier detalle adicional para los invitados (aparcamiento, alojamiento, etc.)...",
+        "saveTheDate": "Habilitar mensajes de 'Reserva la Fecha'",
+        "saveTheDateDesc": "Envía mensajes de reserva de fecha antes de las invitaciones formales. Esto permite informar a los invitados sobre la fecha de la boda con antelación.",
         "rsvpQuestions": "Preguntas de RSVP",
         "rsvpQuestionsDesc": "Personaliza las preguntas mostradas a los invitados cuando completan su RSVP.",
         "transportation": "Añadir pregunta de transporte al RSVP",
@@ -845,7 +852,8 @@
         "title": "Tipo de Plantilla",
         "invitation": "📩 Invitaciones",
         "reminder": "🔔 Recordatorios",
-        "confirmation": "✅ Confirmaciones"
+        "confirmation": "✅ Confirmaciones",
+        "saveTheDate": "📅 Reserva la Fecha"
       },
       "language": {
         "title": "Idioma"

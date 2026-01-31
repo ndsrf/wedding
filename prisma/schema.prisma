@@ -81,6 +81,7 @@ model Wedding {
   transportation_question_enabled Boolean            @default(false)
   transportation_question_text    String?
   dietary_restrictions_enabled    Boolean            @default(false)
+  save_the_date_enabled           Boolean            @default(false)
   extra_question_1_enabled        Boolean            @default(false)
   extra_question_1_text           String?
   extra_question_2_enabled        Boolean            @default(false)
@@ -173,6 +174,7 @@ model Family {
   reference_code          String?         @unique
   channel_preference      Channel?
   preferred_language      Language        @default(ES)
+  save_the_date_sent      DateTime?
   created_at              DateTime        @default(now())
   extra_info_1_value      String?
   extra_info_2_value      String?
@@ -511,6 +513,7 @@ enum EventType {
   PAYMENT_RECEIVED
   REMINDER_SENT
   INVITATION_SENT
+  SAVE_THE_DATE_SENT
   TASK_ASSIGNED
   TASK_COMPLETED
   MESSAGE_DELIVERED
@@ -519,6 +522,7 @@ enum EventType {
 }
 
 enum TemplateType {
+  SAVE_THE_DATE
   INVITATION
   REMINDER
   CONFIRMATION

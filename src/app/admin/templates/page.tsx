@@ -18,7 +18,7 @@ import { TemplateEditor } from '@/components/admin/TemplateEditor';
 import { TemplatePreview } from '@/components/admin/TemplatePreview';
 import { getAvailablePlaceholders } from '@/lib/templates';
 
-type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION';
+type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE';
 type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
 
 export default function TemplatesPage() {
@@ -34,6 +34,7 @@ export default function TemplatesPage() {
   const [selectedChannel, setSelectedChannel] = useState<TemplateChannel>('EMAIL');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [placeholders] = useState(getAvailablePlaceholders());
+  const [saveTheDateEnabled, setSaveTheDateEnabled] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -41,6 +42,27 @@ export default function TemplatesPage() {
       router.push('/auth/signin');
     }
   }, [status, router]);
+
+  // Fetch wedding configuration
+  useEffect(() => {
+    const fetchWeddingConfig = async () => {
+      try {
+        const response = await fetch('/api/admin/wedding');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setSaveTheDateEnabled(data.data.save_the_date_enabled);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch wedding config:', err);
+      }
+    };
+
+    if (status === 'authenticated') {
+      fetchWeddingConfig();
+    }
+  }, [status]);
 
   // Fetch templates
   const fetchTemplates = useCallback(async () => {
@@ -79,6 +101,25 @@ export default function TemplatesPage() {
 
   // Get single template for editing
   const currentTemplate = filteredTemplates[0];
+
+  const availableTabs: TemplateTypeTab[] = saveTheDateEnabled
+    ? ['SAVE_THE_DATE', 'INVITATION', 'REMINDER', 'CONFIRMATION']
+    : ['INVITATION', 'REMINDER', 'CONFIRMATION'];
+
+  const getTabLabel = (type: TemplateTypeTab) => {
+    switch (type) {
+      case 'INVITATION':
+        return t('type.invitation');
+      case 'REMINDER':
+        return t('type.reminder');
+      case 'CONFIRMATION':
+        return t('type.confirmation');
+      case 'SAVE_THE_DATE':
+        return t('type.saveTheDate');
+      default:
+        return type;
+    }
+  };
 
   if (status === 'loading' || loading) {
     return (
@@ -141,7 +182,7 @@ export default function TemplatesPage() {
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('type.title')}</h2>
               <div className="flex flex-col gap-2">
-                {(['INVITATION', 'REMINDER', 'CONFIRMATION'] as TemplateTypeTab[]).map((type) => (
+                {availableTabs.map((type) => (
                   <button
                     key={type}
                     onClick={() => setActiveTab(type)}
@@ -151,7 +192,7 @@ export default function TemplatesPage() {
                         : 'bg-gray-100 text-gray-900 border-2 border-gray-300 hover:bg-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    {type === 'INVITATION' ? t('type.invitation') : type === 'REMINDER' ? t('type.reminder') : t('type.confirmation')}
+                    {getTabLabel(type)}
                   </button>
                 ))}
               </div>
@@ -253,7 +294,7 @@ export default function TemplatesPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                 <p className="text-gray-600 text-sm">
                   {t('editor.notFound', {
-                    type: activeTab === 'INVITATION' ? t('type.invitation') : activeTab === 'REMINDER' ? t('type.reminder') : t('type.confirmation'),
+                    type: getTabLabel(activeTab),
                     language: commonT(`languages.${selectedLanguage}`),
                     channel: t(`channel.${selectedChannel.toLowerCase()}`)
                   })}

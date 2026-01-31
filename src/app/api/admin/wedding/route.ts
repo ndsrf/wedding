@@ -27,6 +27,7 @@ const updateWeddingConfigSchema = z.object({
   allow_guest_additions: z.boolean().optional(),
   dress_code: z.string().nullable().optional(),
   additional_info: z.string().nullable().optional(),
+  save_the_date_enabled: z.boolean().optional(),
 
   // RSVP Configuration - Transportation question
   transportation_question_enabled: z.boolean().optional(),
@@ -203,6 +204,7 @@ export async function GET() {
       transportation_question_enabled: wedding.transportation_question_enabled,
       transportation_question_text: wedding.transportation_question_text,
       dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
+      save_the_date_enabled: wedding.save_the_date_enabled,
       extra_question_1_enabled: wedding.extra_question_1_enabled,
       extra_question_1_text: wedding.extra_question_1_text,
       extra_question_2_enabled: wedding.extra_question_2_enabled,
@@ -321,6 +323,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (validatedData.additional_info !== undefined) {
       updateData.additional_info = validatedData.additional_info;
+    }
+    if (validatedData.save_the_date_enabled !== undefined) {
+      updateData.save_the_date_enabled = validatedData.save_the_date_enabled;
     }
 
     // Transportation question
