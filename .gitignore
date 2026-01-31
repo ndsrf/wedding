@@ -63,3 +63,7 @@ audit.log
 
 # Uploaded files
 public/uploads/
+
+# Playwright
+playwright-report/
+playwright/.auth/

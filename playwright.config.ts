@@ -1,30 +1,38 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
-
-/**
- * See https://playwright.dev/docs/test-configuration.
+ * Playwright Configuration for Wedding Planner E2E Tests
+ *
+ * Supports sequential test execution with database setup:
+ * 1. db_setup - Resets database and seeds NEW_USER data
+ * 2. auth_setup - Authenticates as all three user roles
+ * 3. onboarding_suite - Tests onboarding flows
+ * 4. db_seed_full - Seeds EXISTING_WEDDING data
+ * 5. functional_suite - Tests main application features
+ *
+ * Run with: npm run test:e2e
+ * Run specific project: npm run test:e2e -- --project=auth_setup
  */
 export default defineConfig({
   testDir: './tests/e2e',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+
+  /* Run tests sequentially to maintain database state between suites */
+  fullyParallel: false,
+
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
+
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+
+  /* Sequential execution: 1 worker prevents database race conditions */
+  workers: 1,
+
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['list'],
-    process.env.CI ? ['github'] : ['line'],
-  ],
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'on-failure' }]],
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -35,36 +43,48 @@ export default defineConfig({
 
     /* Take screenshot on failure */
     screenshot: 'only-on-failure',
-
-    /* Record video on failure */
-    video: 'on-first-retry',
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for sequential execution with dependencies */
   projects: [
+    // Step 1: Database Setup - Reset database and seed NEW_USER mode
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'db_setup',
+      testMatch: /db\.setup\.ts/,
     },
 
+    // Step 2: Auth Setup - Authenticate as each role and save storage state
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      name: 'auth_setup',
+      testMatch: /auth\.setup\.ts/,
+      dependencies: ['db_setup'],
     },
 
+    // Step 3: Onboarding Tests - Test user onboarding flows
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      name: 'onboarding_suite',
+      testDir: './tests/e2e/onboarding',
+      dependencies: ['auth_setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+      },
     },
 
-    /* Test against mobile viewports. */
+    // Step 4: Seed Full Wedding - Reset database and seed EXISTING_WEDDING mode
     {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      name: 'db_seed_full',
+      testMatch: /db\.seed-full\.ts/,
+      dependencies: ['onboarding_suite'],
     },
+
+    // Step 5: Functional Tests - Test main application features with full wedding data
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      name: 'functional_suite',
+      testDir: './tests/e2e/functional',
+      dependencies: ['db_seed_full'],
+      use: {
+        ...devices['Desktop Chrome'],
+      },
     },
   ],
 

@@ -9,6 +9,7 @@ import NextAuth, { type NextAuthConfig } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 import AppleProvider from 'next-auth/providers/apple';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { detectUserRole, mapAuthProvider } from '@/lib/auth/oauth';
 import type { AuthenticatedUser } from '@/types/api';
 
@@ -49,6 +50,43 @@ export const authOptions: NextAuthConfig = {
       clientId: process.env.APPLE_CLIENT_ID!,
       clientSecret: process.env.APPLE_CLIENT_SECRET!,
     }),
+
+    // E2E Testing Provider - ONLY enabled when NEXT_PUBLIC_IS_E2E=true
+    // SECURITY: This provider MUST NEVER be enabled in production environments
+    ...(process.env.NEXT_PUBLIC_IS_E2E === 'true' ? [
+      CredentialsProvider({
+        id: 'e2e-bypass',
+        name: 'E2E Testing',
+        credentials: {
+          email: { label: "Email", type: "email" }
+        },
+        async authorize(credentials: any) {
+          // Validate credentials exist
+          if (!credentials?.email || typeof credentials.email !== 'string') {
+            console.warn('[E2E Auth] Missing or invalid email in credentials');
+            return null;
+          }
+
+          try {
+            // Detect user role using existing function
+            // This will create master admin if email is in MASTER_ADMIN_EMAILS
+            const roleInfo = await detectUserRole(
+              credentials.email,
+              'GOOGLE' // Provider doesn't matter for E2E
+            );
+
+            return {
+              id: roleInfo.id,
+              email: credentials.email,
+              name: roleInfo.name,
+            } as any;
+          } catch (error) {
+            console.error('[E2E Auth] Authorization failed:', error);
+            return null;
+          }
+        }
+      })
+    ] : []),
   ],
 
   // Custom pages
