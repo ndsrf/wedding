@@ -80,7 +80,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
             id="family"
             value={familyId}
             onChange={(e) => setFamilyId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
             required
           >
             <option value="">{t('admin.payments.selectFamily')}</option>
@@ -107,7 +107,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
               min="0.01"
               step="0.01"
               placeholder="0.00"
-              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
               required
             />
           </div>
@@ -127,7 +127,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
             value={transactionDate}
             onChange={(e) => setTransactionDate(e.target.value)}
             max={new Date().toISOString().split('T')[0]}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
             required
           />
         </div>
@@ -146,7 +146,7 @@ export function PaymentForm({ families, onSubmit, onCancel }: PaymentFormProps) 
             value={referenceCode}
             onChange={(e) => setReferenceCode(e.target.value)}
             placeholder="e.g., REF-12345"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
           />
         </div>
 

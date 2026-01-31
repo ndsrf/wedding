@@ -828,7 +828,8 @@
       "type": {
         "title": "Vorlagentyp",
         "invitation": "📩 Einladungen",
-        "reminder": "🔔 Erinnerungen"
+        "reminder": "🔔 Erinnerungen",
+        "confirmation": "✅ Bestätigungen"
       },
       "language": {
         "title": "Sprache"

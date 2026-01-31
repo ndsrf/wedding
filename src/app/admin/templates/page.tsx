@@ -18,7 +18,7 @@ import { TemplateEditor } from '@/components/admin/TemplateEditor';
 import { TemplatePreview } from '@/components/admin/TemplatePreview';
 import { getAvailablePlaceholders } from '@/lib/templates';
 
-type TemplateTypeTab = 'INVITATION' | 'REMINDER';
+type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION';
 type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
 
 export default function TemplatesPage() {
@@ -140,18 +140,18 @@ export default function TemplatesPage() {
             {/* Template Type Tabs */}
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('type.title')}</h2>
-              <div className="flex gap-2">
-                {(['INVITATION', 'REMINDER'] as TemplateTypeTab[]).map((type) => (
+              <div className="flex flex-col gap-2">
+                {(['INVITATION', 'REMINDER', 'CONFIRMATION'] as TemplateTypeTab[]).map((type) => (
                   <button
                     key={type}
                     onClick={() => setActiveTab(type)}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
+                    className={`px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
                       activeTab === type
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'bg-gray-100 text-gray-900 border-2 border-gray-300 hover:bg-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    {type === 'INVITATION' ? t('type.invitation') : t('type.reminder')}
+                    {type === 'INVITATION' ? t('type.invitation') : type === 'REMINDER' ? t('type.reminder') : t('type.confirmation')}
                   </button>
                 ))}
               </div>
@@ -163,7 +163,7 @@ export default function TemplatesPage() {
               <select
                 value={selectedLanguage}
                 onChange={(e) => setSelectedLanguage(e.target.value as Language)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900"
               >
                 <option value="ES">🇪🇸 {commonT('languages.ES')} (Español)</option>
                 <option value="EN">🇺🇸 {commonT('languages.EN')}</option>
@@ -179,7 +179,7 @@ export default function TemplatesPage() {
               <select
                 value={selectedChannel}
                 onChange={(e) => setSelectedChannel(e.target.value as TemplateChannel)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900"
               >
                 <option value="EMAIL">{t('channel.email')}</option>
                 <option value="WHATSAPP">{t('channel.whatsapp')}</option>
@@ -253,7 +253,7 @@ export default function TemplatesPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                 <p className="text-gray-600 text-sm">
                   {t('editor.notFound', {
-                    type: activeTab === 'INVITATION' ? t('type.invitation') : t('type.reminder'),
+                    type: activeTab === 'INVITATION' ? t('type.invitation') : activeTab === 'REMINDER' ? t('type.reminder') : t('type.confirmation'),
                     language: commonT(`languages.${selectedLanguage}`),
                     channel: t(`channel.${selectedChannel.toLowerCase()}`)
                   })}

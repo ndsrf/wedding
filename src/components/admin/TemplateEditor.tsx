@@ -254,7 +254,7 @@ export function TemplateEditor({
             id="subject"
             value={subject}
             onChange={(e) => handleSubjectChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900"
             maxLength={200}
           />
           <p className="mt-1 text-sm text-gray-500">
@@ -273,7 +273,7 @@ export function TemplateEditor({
           value={body}
           onChange={(e) => handleBodyChange(e.target.value)}
           rows={12}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm bg-white text-gray-900"
           maxLength={5000}
         />
         <p className="mt-1 text-sm text-gray-500">

@@ -856,7 +856,8 @@
       "type": {
         "title": "Template Type",
         "invitation": "📩 Invitations",
-        "reminder": "🔔 Reminders"
+        "reminder": "🔔 Reminders",
+        "confirmation": "✅ Confirmations"
       },
       "language": {
         "title": "Language"
