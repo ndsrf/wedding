@@ -95,7 +95,7 @@ export function GuestTimelineModal({
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/families/${familyId}/timeline`);
+      const response = await fetch(`/api/admin/guests/${familyId}/timeline`);
       if (!response.ok) {
         throw new Error('Failed to fetch timeline');
       }
