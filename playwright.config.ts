@@ -97,7 +97,11 @@ export default defineConfig({
     env: {
       // Enable E2E credentials provider (must be NEXT_PUBLIC_ to be available client-side)
       NEXT_PUBLIC_IS_E2E: 'true',
-      // Inherit other env vars from parent process (DATABASE_URL, NEXTAUTH_SECRET, etc.)
+      // Explicitly pass required env vars to webServer subprocess
+      DATABASE_URL: process.env.DATABASE_URL || '',
+      NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'test-secret',
+      NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+      NODE_ENV: process.env.NODE_ENV || 'test',
     },
   },
 
