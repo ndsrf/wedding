@@ -179,9 +179,10 @@ jobs:
       - name: Create .env file for build
         run: |
           cat > .env <<'EOF'
-          DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
-          EOF
-          echo "Created .env file for build"
+DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+EOF
+          echo "✓ Created .env file for build"
+          cat .env
 
       - name: Install dependencies
         run: npm ci
@@ -210,6 +211,29 @@ jobs:
             exit 1
           fi
 
+      - name: Pre-build diagnostics
+        run: |
+          echo "=== Node version ==="
+          node --version
+          echo ""
+          echo "=== npm version ==="
+          npm --version
+          echo ""
+          echo "=== Environment variables ==="
+          echo "DATABASE_URL: ${DATABASE_URL:0:20}..." || echo "DATABASE_URL not set"
+          echo "NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:0:10}..." || echo "NEXTAUTH_SECRET not set"
+          echo ""
+          echo "=== Checking for required files ==="
+          [ -f "next.config.js" ] && echo "✓ next.config.js found" || echo "✗ next.config.js NOT found"
+          [ -f "tsconfig.json" ] && echo "✓ tsconfig.json found" || echo "✗ tsconfig.json NOT found"
+          [ -f "package.json" ] && echo "✓ package.json found" || echo "✗ package.json NOT found"
+          [ -d "src" ] && echo "✓ src directory found" || echo "✗ src directory NOT found"
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          NEXTAUTH_SECRET: dummy-secret-for-build
+          NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_IS_E2E: 'true'
+
       - name: Build application
         run: |
           echo "=== Starting Next.js build ==="
@@ -223,6 +247,7 @@ jobs:
           NEXTAUTH_SECRET: dummy-secret-for-build
           NEXTAUTH_URL: http://localhost:3000
           NEXT_PUBLIC_IS_E2E: 'true'
+        continue-on-error: true
 
       - name: Check build logs for errors
         if: always()
@@ -239,6 +264,7 @@ jobs:
           fi
 
       - name: Verify build output exists
+        if: always()
         run: |
           echo "=== Checking build directory structure ==="
           ls -lah
@@ -249,6 +275,7 @@ jobs:
             echo "Size: $(du -sh .next | cut -f1)"
             echo "Contents:"
             ls -la .next | head -20
+            exit 0
           else
             echo "✗ .next directory NOT found"
             echo ""
@@ -256,17 +283,21 @@ jobs:
             find . -maxdepth 1 -type d -ls
             echo ""
             echo "=== Checking for alternative output directories ==="
-            find . -maxdepth 2 -name ".next*" -o -name "out" -o -name "dist" 2>/dev/null
+            find . -maxdepth 2 -name ".next*" -o -name "out" -o -name "dist" 2>/dev/null || echo "None found"
+            echo ""
+            echo "=== Full build log (if available) ==="
+            [ -f build.log ] && tail -200 build.log || echo "No build.log found"
             exit 1
           fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: build-output
           path: .next
           retention-days: 5
-          if-no-files-found: warn
+          if-no-files-found: error
 
   # ============================================
   # E2E Tests (optional, runs on main only)
