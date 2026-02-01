@@ -182,12 +182,34 @@ jobs:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Generate Prisma client
-        run: npx prisma generate
+        run: |
+          echo "=== Generating Prisma Client ==="
+          npx prisma generate --verbose
+          echo "=== Prisma generate completed ==="
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
+      - name: Verify Prisma client generated
+        run: |
+          echo "=== Checking for Prisma client ==="
+          if [ -d "node_modules/.prisma/client" ]; then
+            echo "✓ Prisma client found"
+            ls -la node_modules/.prisma/client | head -10
+          else
+            echo "✗ Prisma client NOT found"
+            echo "=== node_modules structure ==="
+            ls -la node_modules/.prisma 2>/dev/null || echo "No .prisma directory"
+            ls -la node_modules | grep prisma || echo "No prisma packages found"
+            exit 1
+          fi
+
       - name: Build application
-        run: npm run build 2>&1 | tee build.log
+        run: |
+          echo "=== Starting Next.js build ==="
+          npm run build 2>&1 | tee build.log
+          BUILD_EXIT_CODE=${PIPESTATUS[0]}
+          echo "=== Build exit code: $BUILD_EXIT_CODE ==="
+          exit $BUILD_EXIT_CODE
         env:
           # Provide dummy env vars for build
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
@@ -198,15 +220,21 @@ jobs:
       - name: Check build logs for errors
         if: always()
         run: |
-          if grep -i "error\|fatal" build.log > /dev/null; then
-            echo "=== BUILD ERRORS FOUND ==="
-            grep -i "error\|fatal" build.log || true
+          echo "=== Build Log (Last 100 lines) ==="
+          tail -100 build.log || echo "No build.log found"
+          echo ""
+          echo "=== Searching for errors in build log ==="
+          if grep -i "error\|fatal\|failed" build.log > /dev/null 2>&1; then
+            echo "ERRORS FOUND:"
+            grep -i "error\|fatal\|failed" build.log | head -20
+          else
+            echo "No obvious errors found in build log"
           fi
 
       - name: Verify build output exists
         run: |
           echo "=== Checking build directory structure ==="
-          ls -la
+          ls -lah
           echo ""
           echo "=== Checking if .next exists ==="
           if [ -d ".next" ]; then
@@ -217,11 +245,11 @@ jobs:
           else
             echo "✗ .next directory NOT found"
             echo ""
-            echo "=== Available directories in current folder ==="
-            ls -la | grep "^d" || echo "No directories found"
+            echo "=== Available directories ==="
+            find . -maxdepth 1 -type d -ls
             echo ""
-            echo "=== Build log content ==="
-            tail -50 build.log || echo "No build.log found"
+            echo "=== Checking for alternative output directories ==="
+            find . -maxdepth 2 -name ".next*" -o -name "out" -o -name "dist" 2>/dev/null
             exit 1
           fi
 
