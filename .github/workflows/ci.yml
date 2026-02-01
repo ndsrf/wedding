@@ -270,7 +270,12 @@ jobs:
           echo "=== Checking if .next exists ==="
           if [ -d ".next" ]; then
             echo "✓ .next directory found"
-            echo "Size: $(du -sh .next | cut -f1)"
+            echo "Size before cleanup: $(du -sh .next | cut -f1)"
+            echo ""
+            echo "Removing cache and standalone dirs to reduce artifact size..."
+            rm -rf .next/cache .next/standalone
+            echo "Size after cleanup: $(du -sh .next | cut -f1)"
+            echo ""
             echo "Contents:"
             ls -la .next | head -20
             exit 0
@@ -296,6 +301,9 @@ jobs:
           path: .next
           retention-days: 5
           if-no-files-found: error
+          compression-level: 6
+          overwrite: false
+          include-hidden-files: false
 
   # ============================================
   # E2E Tests (optional, runs on main only)
