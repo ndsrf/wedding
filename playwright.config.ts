@@ -95,10 +95,9 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
     env: {
+      // Enable E2E credentials provider (must be NEXT_PUBLIC_ to be available client-side)
       NEXT_PUBLIC_IS_E2E: 'true',
-      DATABASE_URL: process.env.DATABASE_URL || '',
-      NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'test-secret',
-      NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+      // Inherit other env vars from parent process (DATABASE_URL, NEXTAUTH_SECRET, etc.)
     },
   },
 
