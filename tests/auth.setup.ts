@@ -16,6 +16,7 @@
 
 import { test as setup } from '@playwright/test';
 import path from 'path';
+import fs from 'fs';
 
 // Storage state file paths
 const authDir = path.join(__dirname, '../playwright/.auth');
@@ -24,6 +25,12 @@ const authFiles = {
   planner: path.join(authDir, 'planner.json'),
   weddingAdmin: path.join(authDir, 'wedding-admin.json'),
 };
+
+// Ensure auth directory exists
+if (!fs.existsSync(authDir)) {
+  fs.mkdirSync(authDir, { recursive: true });
+  console.log(`📁 Created auth directory: ${authDir}`);
+}
 
 // Test user credentials (must match those seeded in db.setup.ts)
 const testUsers = {
