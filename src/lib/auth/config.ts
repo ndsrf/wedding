@@ -5,7 +5,7 @@
  * Implements custom callbacks for user session management and role detection.
  */
 
-import NextAuth, { type NextAuthConfig } from 'next-auth';
+import NextAuth, { type NextAuthConfig, type User } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 import AppleProvider from 'next-auth/providers/apple';
@@ -60,7 +60,7 @@ export const authOptions: NextAuthConfig = {
         credentials: {
           email: { label: "Email", type: "email" }
         },
-        async authorize(credentials: any) {
+        async authorize(credentials: Record<string, string | undefined>) {
           // Validate credentials exist
           if (!credentials?.email || typeof credentials.email !== 'string') {
             console.warn('[E2E Auth] Missing or invalid email in credentials');
@@ -79,7 +79,7 @@ export const authOptions: NextAuthConfig = {
               id: roleInfo.id,
               email: credentials.email,
               name: roleInfo.name,
-            } as any;
+            } as User;
           } catch (error) {
             console.error('[E2E Auth] Authorization failed:', error);
             return null;

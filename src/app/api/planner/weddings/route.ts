@@ -136,11 +136,10 @@ export async function GET(request: NextRequest) {
         ).length;
         const rsvp_completion_percentage =
           families.length > 0 ? Math.round((rsvp_count / families.length) * 100) : 0;
-        const attending_count = families.reduce(
-          (sum, family) => sum + family.members.filter((member) => member.attending === true).length,
-          0
-        );
-        const payment_received_count = families.filter((family) =>
+                const attending_count = families.reduce(
+                  (sum, family) => sum + family.members.filter((member) => member.attending === true).length,
+                  0
+                );        const payment_received_count = families.filter((family) =>
           family.gifts.some((gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED')
         ).length;
 
