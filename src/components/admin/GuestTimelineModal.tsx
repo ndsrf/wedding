@@ -102,7 +102,8 @@ export function GuestTimelineModal({
         throw new Error('Failed to fetch timeline');
       }
       const data = await response.json();
-      setEvents(data.events || []);
+      // APIResponse wrapper puts the actual payload in 'data' property
+      setEvents(data.data?.events || []);
     } catch (err) {
       console.error('Error fetching timeline:', err);
       setError(err instanceof Error ? err.message : 'Failed to load timeline');
