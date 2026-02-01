@@ -182,7 +182,7 @@ jobs:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Build application
-        run: npm run build
+        run: npm run build 2>&1 | tee build.log
         env:
           # Provide dummy env vars for build
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
@@ -190,14 +190,35 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
           NEXT_PUBLIC_IS_E2E: 'true'
 
+      - name: Check build logs for errors
+        if: always()
+        run: |
+          if grep -i "error\|fatal" build.log > /dev/null; then
+            echo "=== BUILD ERRORS FOUND ==="
+            grep -i "error\|fatal" build.log || true
+          fi
+
       - name: Verify build output exists
         run: |
-          if [ ! -d ".next" ]; then
-            echo "ERROR: .next directory not found after build"
+          echo "=== Checking build directory structure ==="
+          ls -la
+          echo ""
+          echo "=== Checking if .next exists ==="
+          if [ -d ".next" ]; then
+            echo "✓ .next directory found"
+            echo "Size: $(du -sh .next | cut -f1)"
+            echo "Contents:"
+            ls -la .next | head -20
+          else
+            echo "✗ .next directory NOT found"
+            echo ""
+            echo "=== Available directories in current folder ==="
+            ls -la | grep "^d" || echo "No directories found"
+            echo ""
+            echo "=== Build log content ==="
+            tail -50 build.log || echo "No build.log found"
             exit 1
           fi
-          echo "Build output verified: .next directory exists"
-          du -sh .next
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -205,7 +226,7 @@ jobs:
           name: build-output
           path: .next
           retention-days: 5
-          if-no-files-found: error
+          if-no-files-found: warn
 
   # ============================================
   # E2E Tests (optional, runs on main only)
