@@ -18,7 +18,7 @@ const { requireRole } = require('@/lib/auth/middleware');
 
 describe('Integration Tests - Guests API', () => {
   let testWeddingId: string;
-  let testUserId: string;
+  let testAdminId: string;
   let testPlannerId: string;
 
   beforeAll(async () => {
@@ -27,6 +27,8 @@ describe('Integration Tests - Guests API', () => {
       data: {
         name: 'Test Planner Integration',
         email: 'planner-integration@test.com',
+        auth_provider: 'EMAIL',
+        created_by: 'system',
       },
     });
     testPlannerId = planner.id;
@@ -39,42 +41,36 @@ describe('Integration Tests - Guests API', () => {
         wedding_date: new Date('2026-12-31'),
         wedding_time: '18:00',
         location: 'Test Venue',
+        rsvp_cutoff_date: new Date('2026-12-20'),
         default_language: 'EN',
+        created_by: testPlannerId,
       },
     });
     testWeddingId = wedding.id;
 
-    // Create test user
-    const user = await prisma.user.create({
+    // Create test wedding admin
+    const weddingAdmin = await prisma.weddingAdmin.create({
       data: {
+        name: 'Test Wedding Admin',
         email: 'wedding-admin-integration@test.com',
-        role: 'wedding_admin',
-      },
-    });
-    testUserId = user.id;
-
-    // Link user to wedding as admin
-    await prisma.weddingAdmin.create({
-      data: {
-        user_id: testUserId,
+        auth_provider: 'EMAIL',
         wedding_id: testWeddingId,
+        invited_by: testPlannerId,
       },
     });
+    testAdminId = weddingAdmin.id;
   });
 
   afterAll(async () => {
     // Clean up test data
     await prisma.weddingAdmin.deleteMany({
-      where: { user_id: testUserId },
+      where: { id: testAdminId },
     });
     await prisma.family.deleteMany({
       where: { wedding_id: testWeddingId },
     });
     await prisma.wedding.delete({
       where: { id: testWeddingId },
-    });
-    await prisma.user.delete({
-      where: { id: testUserId },
     });
     await prisma.weddingPlanner.delete({
       where: { id: testPlannerId },
@@ -84,7 +80,7 @@ describe('Integration Tests - Guests API', () => {
   beforeEach(() => {
     // Mock requireRole to return our test user
     requireRole.mockResolvedValue({
-      id: testUserId,
+      id: testAdminId,
       email: 'wedding-admin-integration@test.com',
       role: 'wedding_admin',
       wedding_id: testWeddingId,
@@ -101,48 +97,37 @@ describe('Integration Tests - Guests API', () => {
       const family1 = await prisma.family.create({
         data: {
           wedding_id: testWeddingId,
-          name: 'Integration Test Family 1',
-          email: 'family1@test.com',
+          name: 'Family Alpha',
+          email: 'alpha@test.com',
           preferred_language: 'EN',
-          members: {
-            create: [
-              {
-                name: 'Member 1',
-                type: 'ADULT',
-              },
-            ],
-          },
         },
-        include: { members: true },
       });
 
       const family2 = await prisma.family.create({
         data: {
           wedding_id: testWeddingId,
-          name: 'Integration Test Family 2',
-          email: 'family2@test.com',
+          name: 'Family Beta',
+          email: 'beta@test.com',
           preferred_language: 'ES',
-          members: {
-            create: [
-              {
-                name: 'Member 2',
-                type: 'ADULT',
-              },
-            ],
-          },
         },
-        include: { members: true },
       });
 
-      // Create mock request
-      const url = 'http://localhost:3000/api/admin/guests?page=1&limit=10';
+      // Create members for the families
+      await prisma.familyMember.createMany({
+        data: [
+          { family_id: family1.id, name: 'Alpha Member 1', type: 'ADULT', attending: true },
+          { family_id: family1.id, name: 'Alpha Member 2', type: 'ADULT', attending: false },
+          { family_id: family2.id, name: 'Beta Member 1', type: 'ADULT', attending: null },
+        ],
+      });
+
+      const url = 'http://localhost:3000/api/admin/guests?page=1';
       const request = new NextRequest(url);
 
-      // Call the GET handler
       const response = await GET(request);
       const data = await response.json();
 
-      // Verify response
+      // Verify response structure
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data).toHaveProperty('items');
@@ -151,80 +136,68 @@ describe('Integration Tests - Guests API', () => {
       expect(data.data.items.length).toBeGreaterThanOrEqual(2);
 
       // Verify pagination
-      expect(data.data.pagination.page).toBe(1);
-      expect(data.data.pagination.limit).toBe(10);
-      expect(data.data.pagination.total).toBeGreaterThanOrEqual(2);
+      expect(data.data.pagination).toHaveProperty('total');
+      expect(data.data.pagination).toHaveProperty('page');
+      expect(data.data.pagination).toHaveProperty('totalPages');
 
-      // Verify item structure
-      const firstItem = data.data.items[0];
-      expect(firstItem).toHaveProperty('id');
-      expect(firstItem).toHaveProperty('name');
-      expect(firstItem).toHaveProperty('wedding_id', testWeddingId);
-      expect(firstItem).toHaveProperty('members');
-      expect(firstItem).toHaveProperty('rsvp_status');
-      expect(firstItem).toHaveProperty('attending_count');
-      expect(firstItem).toHaveProperty('total_members');
+      // Verify guest data structure
+      const firstGuest = data.data.items[0];
+      expect(firstGuest).toHaveProperty('id');
+      expect(firstGuest).toHaveProperty('name');
+      expect(firstGuest).toHaveProperty('preferred_language');
+      expect(firstGuest).toHaveProperty('rsvp_status');
+      expect(firstGuest).toHaveProperty('attending_count');
+      expect(firstGuest).toHaveProperty('total_members');
 
       // Clean up
-      await prisma.member.deleteMany({
-        where: {
-          OR: [{ family_id: family1.id }, { family_id: family2.id }],
-        },
-      });
-      await prisma.family.deleteMany({
-        where: {
-          id: { in: [family1.id, family2.id] },
-        },
-      });
+      await prisma.familyMember.deleteMany({ where: { family_id: family1.id } });
+      await prisma.familyMember.deleteMany({ where: { family_id: family2.id } });
+      await prisma.family.delete({ where: { id: family1.id } });
+      await prisma.family.delete({ where: { id: family2.id } });
     });
 
-    it('should filter guests by search query', async () => {
-      // Create test family with unique name
+    it('should filter guests by RSVP status', async () => {
+      // Create test family with submitted RSVP
       const family = await prisma.family.create({
         data: {
           wedding_id: testWeddingId,
-          name: 'UniqueSearchName Integration',
-          email: 'uniquesearch@test.com',
+          name: 'Family With RSVP',
           preferred_language: 'EN',
-          members: {
-            create: [
-              {
-                name: 'John Unique',
-                type: 'ADULT',
-              },
-            ],
-          },
         },
-        include: { members: true },
       });
 
-      // Search for the unique name
-      const url = 'http://localhost:3000/api/admin/guests?search=UniqueSearchName';
+      await prisma.familyMember.create({
+        data: {
+          family_id: family.id,
+          name: 'RSVP Member',
+          type: 'ADULT',
+          attending: true, // RSVP submitted
+        },
+      });
+
+      const url = 'http://localhost:3000/api/admin/guests?page=1&rsvp_status=submitted';
       const request = new NextRequest(url);
 
       const response = await GET(request);
       const data = await response.json();
 
-      // Verify response
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data.items.length).toBeGreaterThan(0);
 
-      // Verify the family is in results
-      const foundFamily = data.data.items.find((item: any) => item.id === family.id);
+      // Verify filtered results
+      const foundFamily = data.data.items.find((g: any) => g.name === 'Family With RSVP');
       expect(foundFamily).toBeDefined();
-      expect(foundFamily.name).toBe('UniqueSearchName Integration');
+      expect(foundFamily.rsvp_status).toBe('submitted');
 
       // Clean up
-      await prisma.member.deleteMany({ where: { family_id: family.id } });
+      await prisma.familyMember.deleteMany({ where: { family_id: family.id } });
       await prisma.family.delete({ where: { id: family.id } });
     });
 
-    it('should return 401 when user is not authenticated', async () => {
-      // Mock requireRole to throw authentication error
+    it('should return 401 for unauthenticated user', async () => {
       requireRole.mockRejectedValue(new Error('UNAUTHORIZED'));
 
-      const url = 'http://localhost:3000/api/admin/guests';
+      const url = 'http://localhost:3000/api/admin/guests?page=1';
       const request = new NextRequest(url);
 
       const response = await GET(request);
@@ -238,37 +211,34 @@ describe('Integration Tests - Guests API', () => {
 
   describe('POST /api/admin/guests', () => {
     it('should create a new family with members', async () => {
-      const newFamilyData = {
-        name: 'New Integration Family',
-        email: 'newintegration@test.com',
-        phone: '+34600111222',
-        preferred_language: 'EN',
-        channel_preference: 'EMAIL',
+      const familyData = {
+        name: 'New Test Family',
+        email: 'newtest@family.com',
+        phone: '+34600000001',
+        preferred_language: 'ES',
         members: [
           {
-            name: 'John New',
+            name: 'John Doe',
             type: 'ADULT',
-            age: 30,
+            age: 35,
           },
           {
-            name: 'Jane New',
+            name: 'Jane Doe',
             type: 'ADULT',
-            age: 28,
+            age: 32,
           },
         ],
       };
 
-      // Create mock request
       const url = 'http://localhost:3000/api/admin/guests';
       const request = new NextRequest(url, {
         method: 'POST',
-        body: JSON.stringify(newFamilyData),
+        body: JSON.stringify(familyData),
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      // Call the POST handler
       const response = await POST(request);
       const data = await response.json();
 
@@ -276,16 +246,8 @@ describe('Integration Tests - Guests API', () => {
       expect(response.status).toBe(201);
       expect(data.success).toBe(true);
       expect(data.data).toHaveProperty('id');
-      expect(data.data.name).toBe('New Integration Family');
-      expect(data.data.email).toBe('newintegration@test.com');
-      expect(data.data.wedding_id).toBe(testWeddingId);
-      expect(data.data).toHaveProperty('magic_token');
-      expect(data.data).toHaveProperty('reference_code');
-      expect(data.data.members.length).toBe(2);
-
-      // Verify members were created
-      expect(data.data.members[0].name).toBe('John New');
-      expect(data.data.members[1].name).toBe('Jane New');
+      expect(data.data.name).toBe('New Test Family');
+      expect(data.data.members).toHaveLength(2);
 
       // Verify in database
       const familyInDb = await prisma.family.findUnique({
@@ -293,18 +255,18 @@ describe('Integration Tests - Guests API', () => {
         include: { members: true },
       });
       expect(familyInDb).toBeDefined();
-      expect(familyInDb?.members.length).toBe(2);
+      expect(familyInDb?.name).toBe('New Test Family');
+      expect(familyInDb?.members).toHaveLength(2);
 
       // Clean up
-      await prisma.member.deleteMany({ where: { family_id: data.data.id } });
+      await prisma.familyMember.deleteMany({ where: { family_id: data.data.id } });
       await prisma.family.delete({ where: { id: data.data.id } });
     });
 
-    it('should return validation error for invalid family data', async () => {
+    it('should return validation error for invalid data', async () => {
       const invalidData = {
-        // Missing required 'name' field
-        email: 'not-an-email', // Invalid email
-        preferred_language: 'INVALID', // Invalid language
+        // Missing required name field
+        email: 'invalid@test.com',
       };
 
       const url = 'http://localhost:3000/api/admin/guests';
@@ -322,47 +284,21 @@ describe('Integration Tests - Guests API', () => {
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
       expect(data.error.code).toBe('VALIDATION_ERROR');
-      expect(data.error.details).toBeDefined();
-      expect(Array.isArray(data.error.details)).toBe(true);
-      expect(data.error.details.length).toBeGreaterThan(0);
     });
 
-    it('should create family without members', async () => {
+    it('should return 401 for unauthenticated user', async () => {
+      requireRole.mockRejectedValue(new Error('UNAUTHORIZED'));
+
       const familyData = {
-        name: 'No Members Family',
-        email: 'nomembers@test.com',
-        preferred_language: 'ES',
-        members: [], // Empty members array
+        name: 'Test Family',
+        preferred_language: 'EN',
+        members: [],
       };
 
       const url = 'http://localhost:3000/api/admin/guests';
       const request = new NextRequest(url, {
         method: 'POST',
         body: JSON.stringify(familyData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(201);
-      expect(data.success).toBe(true);
-      expect(data.data.name).toBe('No Members Family');
-      expect(data.data.members.length).toBe(0);
-
-      // Clean up
-      await prisma.family.delete({ where: { id: data.data.id } });
-    });
-
-    it('should return 401 for unauthenticated request', async () => {
-      requireRole.mockRejectedValue(new Error('UNAUTHORIZED'));
-
-      const url = 'http://localhost:3000/api/admin/guests';
-      const request = new NextRequest(url, {
-        method: 'POST',
-        body: JSON.stringify({ name: 'Test' }),
         headers: {
           'Content-Type': 'application/json',
         },

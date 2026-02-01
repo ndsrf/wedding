@@ -9,6 +9,7 @@ import {
   createFamilySchema,
   updateFamilySchema,
   createMemberSchema,
+  updateMemberSchema,
   languageSchema,
   channelSchema,
   memberTypeSchema,

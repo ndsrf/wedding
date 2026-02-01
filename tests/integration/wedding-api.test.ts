@@ -17,7 +17,7 @@ const { requireRole } = require('@/lib/auth/middleware');
 
 describe('Integration Tests - Wedding Configuration API', () => {
   let testWeddingId: string;
-  let testUserId: string;
+  let testAdminId: string;
   let testPlannerId: string;
 
   beforeAll(async () => {
@@ -26,6 +26,8 @@ describe('Integration Tests - Wedding Configuration API', () => {
       data: {
         name: 'Test Planner Wedding Config',
         email: 'planner-weddingconfig@test.com',
+        auth_provider: 'EMAIL',
+        created_by: 'system',
       },
     });
     testPlannerId = planner.id;
@@ -38,44 +40,38 @@ describe('Integration Tests - Wedding Configuration API', () => {
         wedding_date: new Date('2026-08-15'),
         wedding_time: '17:00',
         location: 'Config Test Location',
+        rsvp_cutoff_date: new Date('2026-08-01'),
         default_language: 'EN',
         dress_code: 'Formal',
         additional_info: 'Test additional info',
         transportation_question_enabled: false,
         dietary_restrictions_enabled: true,
         save_the_date_enabled: false,
+        created_by: testPlannerId,
       },
     });
     testWeddingId = wedding.id;
 
-    // Create test user
-    const user = await prisma.user.create({
+    // Create test wedding admin
+    const weddingAdmin = await prisma.weddingAdmin.create({
       data: {
+        name: 'Test Wedding Admin',
         email: 'wedding-admin-config@test.com',
-        role: 'wedding_admin',
-      },
-    });
-    testUserId = user.id;
-
-    // Link user to wedding
-    await prisma.weddingAdmin.create({
-      data: {
-        user_id: testUserId,
+        auth_provider: 'EMAIL',
         wedding_id: testWeddingId,
+        invited_by: testPlannerId,
       },
     });
+    testAdminId = weddingAdmin.id;
   });
 
   afterAll(async () => {
     // Clean up
     await prisma.weddingAdmin.deleteMany({
-      where: { user_id: testUserId },
+      where: { id: testAdminId },
     });
     await prisma.wedding.delete({
       where: { id: testWeddingId },
-    });
-    await prisma.user.delete({
-      where: { id: testUserId },
     });
     await prisma.weddingPlanner.delete({
       where: { id: testPlannerId },
@@ -85,7 +81,7 @@ describe('Integration Tests - Wedding Configuration API', () => {
   beforeEach(() => {
     // Mock requireRole to return our test user
     requireRole.mockResolvedValue({
-      id: testUserId,
+      id: testAdminId,
       email: 'wedding-admin-config@test.com',
       role: 'wedding_admin',
       wedding_id: testWeddingId,
@@ -104,25 +100,25 @@ describe('Integration Tests - Wedding Configuration API', () => {
           wedding_id: testWeddingId,
           name: 'Stats Test Family',
           preferred_language: 'EN',
-          members: {
-            create: [
-              {
-                name: 'Member Stats 1',
-                type: 'ADULT',
-                attending: true,
-              },
-              {
-                name: 'Member Stats 2',
-                type: 'ADULT',
-                attending: null,
-              },
-            ],
-          },
         },
       });
 
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url);
+      await prisma.familyMember.createMany({
+        data: [
+          {
+            family_id: family.id,
+            name: 'Member Stats 1',
+            type: 'ADULT',
+            attending: true,
+          },
+          {
+            family_id: family.id,
+            name: 'Member Stats 2',
+            type: 'ADULT',
+            attending: null,
+          },
+        ],
+      });
 
       const response = await GET();
       const data = await response.json();
@@ -158,21 +154,18 @@ describe('Integration Tests - Wedding Configuration API', () => {
       expect(wedding.available_themes.length).toBeGreaterThan(0);
 
       // Clean up
-      await prisma.member.deleteMany({ where: { family_id: family.id } });
+      await prisma.familyMember.deleteMany({ where: { family_id: family.id } });
       await prisma.family.delete({ where: { id: family.id } });
     });
 
     it('should return 404 for non-existent wedding', async () => {
       // Mock user with non-existent wedding
       requireRole.mockResolvedValue({
-        id: testUserId,
+        id: testAdminId,
         email: 'wedding-admin-config@test.com',
         role: 'wedding_admin',
         wedding_id: '00000000-0000-0000-0000-000000000000',
       });
-
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url);
 
       const response = await GET();
       const data = await response.json();
@@ -184,9 +177,6 @@ describe('Integration Tests - Wedding Configuration API', () => {
 
     it('should return 401 for unauthenticated user', async () => {
       requireRole.mockRejectedValue(new Error('UNAUTHORIZED'));
-
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url);
 
       const response = await GET();
       const data = await response.json();
@@ -205,8 +195,7 @@ describe('Integration Tests - Wedding Configuration API', () => {
         allow_guest_additions: true,
       };
 
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url, {
+      const request = new NextRequest('http://localhost:3000/api/admin/wedding', {
         method: 'PATCH',
         body: JSON.stringify(updateData),
         headers: {
@@ -242,8 +231,7 @@ describe('Integration Tests - Wedding Configuration API', () => {
         extra_question_1_text: 'Will you attend the rehearsal dinner?',
       };
 
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url, {
+      const request = new NextRequest('http://localhost:3000/api/admin/wedding', {
         method: 'PATCH',
         body: JSON.stringify(updateData),
         headers: {
@@ -277,8 +265,7 @@ describe('Integration Tests - Wedding Configuration API', () => {
         extra_info_2_label: 'Flight Number',
       };
 
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url, {
+      const request = new NextRequest('http://localhost:3000/api/admin/wedding', {
         method: 'PATCH',
         body: JSON.stringify(updateData),
         headers: {
@@ -302,8 +289,7 @@ describe('Integration Tests - Wedding Configuration API', () => {
         payment_tracking_mode: 'INVALID_MODE',
       };
 
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url, {
+      const request = new NextRequest('http://localhost:3000/api/admin/wedding', {
         method: 'PATCH',
         body: JSON.stringify(invalidData),
         headers: {
@@ -323,8 +309,7 @@ describe('Integration Tests - Wedding Configuration API', () => {
     it('should return 401 for unauthenticated user', async () => {
       requireRole.mockRejectedValue(new Error('UNAUTHORIZED'));
 
-      const url = 'http://localhost:3000/api/admin/wedding';
-      const request = new NextRequest(url, {
+      const request = new NextRequest('http://localhost:3000/api/admin/wedding', {
         method: 'PATCH',
         body: JSON.stringify({ dress_code: 'Casual' }),
         headers: {
