@@ -190,12 +190,15 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
           NEXT_PUBLIC_IS_E2E: 'true'
 
+      - name: Verify build output exists
+        run: ls -la .next || (echo "ERROR: .next directory not found" && exit 1)
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-output
           path: .next
-          retention-days: 1
+          retention-days: 7
 
   # ============================================
   # E2E Tests (optional, runs on main only)
