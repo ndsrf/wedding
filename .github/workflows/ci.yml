@@ -178,9 +178,7 @@ jobs:
 
       - name: Create .env file for build
         run: |
-          cat > .env <<'EOF'
-DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
-EOF
+          echo "DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy" > .env
           echo "✓ Created .env file for build"
           cat .env
 
