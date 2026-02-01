@@ -181,6 +181,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
       - name: Build application
         run: npm run build 2>&1 | tee build.log
         env:
@@ -266,6 +271,14 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
 
+      - name: List available artifacts
+        if: always()
+        run: |
+          echo "=== Checking for available artifacts ==="
+          echo "Expected artifact: build-output"
+          echo ""
+          echo "Note: If no artifacts are listed below, the build job may have failed or not uploaded artifacts"
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -276,10 +289,14 @@ jobs:
         run: |
           if [ ! -d ".next" ]; then
             echo "ERROR: .next directory not found after download"
+            echo ""
+            echo "=== Current directory contents ==="
+            ls -la
             exit 1
           fi
-          echo "Artifacts verified: .next directory exists"
-          du -sh .next
+          echo "✓ Artifacts verified: .next directory exists"
+          echo "Size: $(du -sh .next | cut -f1)"
+          ls -la .next | head -10
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
