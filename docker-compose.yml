@@ -106,6 +106,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.docker/config.json:/config.json:ro
     environment:
+      # Fix for "client version too old" error
+      DOCKER_API_VERSION: "1.44"
       # Poll interval: 5 minutes (300 seconds)
       WATCHTOWER_POLL_INTERVAL: 300
       # Enable label-based updating (only update labeled containers)
