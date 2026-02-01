@@ -94,6 +94,12 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    env: {
+      // Inherit all environment variables from parent process
+      ...process.env,
+      // Override: Enable E2E credentials provider (must be NEXT_PUBLIC_ to be available client-side)
+      NEXT_PUBLIC_IS_E2E: 'true',
+    },
   },
 
   /* Global timeout for each test */
