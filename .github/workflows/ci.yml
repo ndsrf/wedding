@@ -81,7 +81,7 @@ jobs:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Run unit tests
-        run: npm run test:unit --if-present || echo "No unit tests configured yet"
+        run: npm run test:unit
         env:
           CI: true
 
@@ -142,7 +142,7 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
 
       - name: Run integration tests
-        run: npm run test:integration --if-present || echo "No integration tests configured yet"
+        run: npm run test:integration
         env:
           CI: true
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
@@ -248,12 +248,16 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
 
       - name: Run E2E tests
-        run: npm run test:e2e --if-present || echo "No E2E tests configured yet"
+        run: npm run test:e2e
         env:
           CI: true
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
           NEXTAUTH_SECRET: test-secret-for-ci
           NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_IS_E2E: true
+          MASTER_ADMIN_EMAIL: master@example.com
+          PLANNER_EMAIL: planner@example.com
+          WEDDING_ADMIN_EMAIL: admin@example.com
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
