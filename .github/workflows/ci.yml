@@ -261,7 +261,7 @@ jobs:
             echo "No obvious errors found in build log"
           fi
 
-      - name: Verify build output exists
+      - name: Verify and prepare build output
         if: always()
         run: |
           echo "=== Checking build directory structure ==="
@@ -276,7 +276,11 @@ jobs:
             rm -rf .next/cache .next/standalone
             echo "Size after cleanup: $(du -sh .next | cut -f1)"
             echo ""
-            echo "Contents:"
+            echo "Creating tar archive for upload..."
+            tar -czf .next-build.tar.gz .next/
+            echo "Archive size: $(du -sh .next-build.tar.gz | cut -f1)"
+            echo ""
+            echo "Contents of .next directory:"
             ls -la .next | head -20
             exit 0
           else
@@ -298,12 +302,9 @@ jobs:
         if: success()
         with:
           name: build-output
-          path: .next
+          path: .next-build.tar.gz
           retention-days: 5
           if-no-files-found: error
-          compression-level: 6
-          overwrite: false
-          include-hidden-files: false
 
   # ============================================
   # E2E Tests (optional, runs on main only)
@@ -355,19 +356,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: .next
 
-      - name: Verify downloaded artifacts
+      - name: Extract and verify build artifacts
         run: |
-          if [ ! -d ".next" ]; then
-            echo "ERROR: .next directory not found after download"
-            echo ""
-            echo "=== Current directory contents ==="
+          echo "=== Extracting build artifacts ==="
+          if [ ! -f ".next-build.tar.gz" ]; then
+            echo "ERROR: .next-build.tar.gz not found"
             ls -la
             exit 1
           fi
-          echo "✓ Artifacts verified: .next directory exists"
+          tar -xzf .next-build.tar.gz
+          echo "✓ Build artifacts extracted"
           echo "Size: $(du -sh .next | cut -f1)"
+          echo ""
+          echo "Verifying .next directory structure:"
           ls -la .next | head -10
 
       - name: Install Playwright browsers
