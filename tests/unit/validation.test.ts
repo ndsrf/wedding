@@ -7,7 +7,6 @@
 import {
   validateFamilyData,
   createFamilySchema,
-  updateFamilySchema,
   createMemberSchema,
   updateMemberSchema,
   languageSchema,

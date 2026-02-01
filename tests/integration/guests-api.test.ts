@@ -27,7 +27,7 @@ describe('Integration Tests - Guests API', () => {
       data: {
         name: 'Test Planner Integration',
         email: 'planner-integration@test.com',
-        auth_provider: 'EMAIL',
+        auth_provider: 'GOOGLE',
         created_by: 'system',
       },
     });
@@ -53,7 +53,7 @@ describe('Integration Tests - Guests API', () => {
       data: {
         name: 'Test Wedding Admin',
         email: 'wedding-admin-integration@test.com',
-        auth_provider: 'EMAIL',
+        auth_provider: 'GOOGLE',
         wedding_id: testWeddingId,
         invited_by: testPlannerId,
       },
