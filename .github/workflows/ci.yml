@@ -90,7 +90,7 @@ jobs:
         if: always()
         continue-on-error: true
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN || '' }}
           files: ./coverage/lcov.info
           flags: unit-tests
           fail_ci_if_error: false
@@ -154,7 +154,7 @@ jobs:
         if: always()
         continue-on-error: true
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN || '' }}
           files: ./coverage/lcov.info
           flags: integration-tests
           fail_ci_if_error: false
@@ -190,12 +190,22 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
           NEXT_PUBLIC_IS_E2E: true
 
+      - name: Verify build output exists
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "ERROR: .next directory not found after build"
+            exit 1
+          fi
+          echo "Build output verified: .next directory exists"
+          du -sh .next
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-output
           path: .next
-          retention-days: 1
+          retention-days: 5
+          if-no-files-found: error
 
   # ============================================
   # E2E Tests (optional, runs on main only)
@@ -240,6 +250,15 @@ jobs:
         with:
           name: build-output
           path: .next
+
+      - name: Verify downloaded artifacts
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "ERROR: .next directory not found after download"
+            exit 1
+          fi
+          echo "Artifacts verified: .next directory exists"
+          du -sh .next
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
