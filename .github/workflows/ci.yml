@@ -188,7 +188,7 @@ jobs:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
           NEXTAUTH_SECRET: dummy-secret-for-build
           NEXTAUTH_URL: http://localhost:3000
-          NEXT_PUBLIC_IS_E2E: true
+          NEXT_PUBLIC_IS_E2E: 'true'
 
       - name: Verify build output exists
         run: |
@@ -280,10 +280,7 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
           NEXTAUTH_SECRET: test-secret-for-ci
           NEXTAUTH_URL: http://localhost:3000
-          NEXT_PUBLIC_IS_E2E: true
-          MASTER_ADMIN_EMAIL: master@example.com
-          PLANNER_EMAIL: planner@example.com
-          WEDDING_ADMIN_EMAIL: admin@example.com
+          NEXT_PUBLIC_IS_E2E: 'true'
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
