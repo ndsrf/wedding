@@ -247,28 +247,6 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
 
-      - name: Build Next.js application
-        run: npm run build
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
-          NEXTAUTH_SECRET: test-secret-for-ci
-          NEXTAUTH_URL: http://localhost:3000
-          NEXT_PUBLIC_IS_E2E: true
-
-      - name: Start Next.js server
-        run: npm run start &
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
-          NEXTAUTH_SECRET: test-secret-for-ci
-          NEXTAUTH_URL: http://localhost:3000
-          NEXT_PUBLIC_IS_E2E: true
-          MASTER_ADMIN_EMAIL: master@example.com
-          PLANNER_EMAIL: planner@example.com
-          WEDDING_ADMIN_EMAIL: admin@example.com
-
-      - name: Wait for server to be ready
-        run: npx wait-on http://localhost:3000 -t 60000
-
       - name: Run E2E tests
         run: npm run test:e2e
         env:
