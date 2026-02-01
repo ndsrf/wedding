@@ -67,3 +67,4 @@ public/uploads/
 # Playwright
 playwright-report/
 playwright/.auth/
+test-results/
