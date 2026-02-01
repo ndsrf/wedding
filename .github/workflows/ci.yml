@@ -188,6 +188,7 @@ jobs:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
           NEXTAUTH_SECRET: dummy-secret-for-build
           NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_IS_E2E: true
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -233,6 +234,12 @@ jobs:
         run: npm ci
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: .next
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
