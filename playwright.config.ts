@@ -50,12 +50,14 @@ export default defineConfig({
     // Step 1: Database Setup - Reset database and seed NEW_USER mode
     {
       name: 'db_setup',
+      testDir: './tests',
       testMatch: /db\.setup\.ts/,
     },
 
     // Step 2: Auth Setup - Authenticate as each role and save storage state
     {
       name: 'auth_setup',
+      testDir: './tests',
       testMatch: /auth\.setup\.ts/,
       dependencies: ['db_setup'],
     },
@@ -73,6 +75,7 @@ export default defineConfig({
     // Step 4: Seed Full Wedding - Reset database and seed EXISTING_WEDDING mode
     {
       name: 'db_seed_full',
+      testDir: './tests',
       testMatch: /db\.seed-full\.ts/,
       dependencies: ['onboarding_suite'],
     },
