@@ -49,8 +49,7 @@ setup('authenticate as wedding admin', async ({ page, context }) => {
 
     // Wait for redirect to wedding admin dashboard
     // Couples are usually redirected to /admin
-    await page.waitForURL(/
-/(admin|planner)?$/, { timeout: 15000 });
+    await page.waitForURL(/(admin|planner)?$/, { timeout: 15000 });
   } else {
     console.warn('   ⚠️ E2E credentials provider not available');
     throw new Error('E2E auth provider not configured');
