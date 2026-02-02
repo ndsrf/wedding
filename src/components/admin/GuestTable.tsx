@@ -49,6 +49,22 @@ const getPaymentBadgeClass = (status: GiftStatus | null): string => {
   return classes[status] || 'bg-gray-100 text-gray-800';
 };
 
+const getPreferredContact = (guest: GuestWithStatus): string | null => {
+  if (!guest.channel_preference) {
+    return guest.email || null;
+  }
+
+  switch (guest.channel_preference) {
+    case 'WHATSAPP':
+      return guest.whatsapp_number || guest.email || null;
+    case 'SMS':
+      return guest.phone || guest.email || null;
+    case 'EMAIL':
+    default:
+      return guest.email || null;
+  }
+};
+
 export function GuestTable({
   guests,
   onEdit,
@@ -169,8 +185,8 @@ export function GuestTable({
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-gray-900">{guest.name}</span>
-                      {guest.email && (
-                        <span className="text-sm text-gray-500">{guest.email}</span>
+                      {getPreferredContact(guest) && (
+                        <span className="text-sm text-gray-500">{getPreferredContact(guest)}</span>
                       )}
                     </div>
                   </td>
@@ -275,8 +291,8 @@ export function GuestTable({
                   )}
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">{guest.name}</h3>
-                    {guest.email && (
-                      <p className="text-sm text-gray-600">{guest.email}</p>
+                    {getPreferredContact(guest) && (
+                      <p className="text-sm text-gray-600">{getPreferredContact(guest)}</p>
                     )}
                   </div>
                 </div>
