@@ -95,7 +95,7 @@ export default function PaymentsPage() {
   const fetchFamilies = useCallback(async () => {
     try {
       const params = new URLSearchParams();
-      params.set('limit', '500');
+      params.set('limit', '100');
 
       // Map guest status filter to API attendance parameter
       if (guestStatusFilter === 'attending') {

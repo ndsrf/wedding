@@ -45,7 +45,9 @@
       "Bash(npx ts-node:*)",
       "Bash(gh run view:*)",
       "Bash(gh pr create --title \"fix: reduce build artifact size for E2E tests\" --body \"$\\(cat <<''EOF''\n## Summary\n- Remove `.next/cache` and `.next/standalone` directories before artifact upload\n- These directories are large \\(~300MB\\) but not needed for E2E tests\n- Reduces artifact size from 440MB to ~150MB\n- Should fix the artifact upload failure in CI\n\n## Changes\n- Modified `.github/workflows/ci.yml` to clean up unnecessary build artifacts\n- Added cleanup step in \"Verify build output exists\" to remove cache and standalone dirs\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\nEOF\n\\)\")",
-      "Bash(gh run list:*)"
+      "Bash(gh run list:*)",
+      "WebSearch",
+      "WebFetch(domain:www.twilio.com)"
     ]
   }
 }
