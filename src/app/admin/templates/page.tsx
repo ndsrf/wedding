@@ -250,14 +250,14 @@ export default function TemplatesPage() {
               <TemplateEditor
                 template={currentTemplate}
                 channel={selectedChannel}
-                onSave={async (subject, body) => {
+                onSave={async (subject, body, contentTemplateId) => {
                   try {
                     const response = await fetch(
                       `/api/admin/templates/${currentTemplate.id}`,
                       {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ subject, body }),
+                        body: JSON.stringify({ subject, body, content_template_id: contentTemplateId }),
                       }
                     );
 
@@ -269,7 +269,7 @@ export default function TemplatesPage() {
                     setTemplates(
                       templates.map((tmpl) =>
                         tmpl.id === currentTemplate.id
-                          ? { ...tmpl, subject, body }
+                          ? { ...tmpl, subject, body, content_template_id: contentTemplateId }
                           : tmpl
                       )
                     );

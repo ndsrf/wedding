@@ -38,6 +38,12 @@ export interface MessageOptions {
   mediaUrl?: string;
 }
 
+export interface ContentTemplateOptions {
+  to: string;
+  contentSid: string;
+  contentVariables: Record<string, string>;
+}
+
 interface MessageResult {
   success: boolean;
   messageId?: string;
@@ -248,4 +254,87 @@ export async function sendWhatsApp(
     type: MessageType.WHATSAPP,
     mediaUrl,
   });
+}
+
+/**
+ * Send WhatsApp message using Twilio Content Template API
+ * Uses approved Meta templates with variable substitution
+ */
+export async function sendWhatsAppWithContentTemplate(
+  to: string,
+  contentSid: string,
+  contentVariables: Record<string, string>,
+  retries = 3
+): Promise<MessageResult> {
+  try {
+    // Validate phone number
+    if (!isValidPhoneNumber(to)) {
+      return {
+        success: false,
+        error: `Invalid phone number format: ${to}`,
+      };
+    }
+
+    // Get Twilio WhatsApp number
+    const fromNumber = TWILIO_WHATSAPP_NUMBER;
+    if (!fromNumber) {
+      return {
+        success: false,
+        error: "TWILIO_WHATSAPP_NUMBER environment variable is not set",
+      };
+    }
+
+    // Format phone number
+    const formattedTo = formatPhoneNumber(to, MessageType.WHATSAPP);
+    const formattedFrom = !fromNumber.startsWith("whatsapp:")
+      ? "whatsapp:" + fromNumber
+      : fromNumber;
+
+    // Send message using Content Template API
+    const client = getTwilioClient();
+    console.log("[TWILIO] Sending WhatsApp message with content template:", {
+      from: formattedFrom,
+      to: formattedTo,
+      contentSid,
+      accountSid: process.env.TWILIO_ACCOUNT_SID?.slice(0, 10) + "...",
+    });
+
+    const message = await client.messages.create({
+      contentSid,
+      contentVariables: JSON.stringify(contentVariables),
+      from: formattedFrom,
+      to: formattedTo,
+    });
+
+    console.log("✅ WhatsApp message with content template sent successfully:", {
+      messageId: message.sid,
+      to: formattedTo,
+      status: message.status,
+    });
+
+    return {
+      success: true,
+      messageId: message.sid,
+    };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("❌ Failed to send WhatsApp content template message:", error);
+
+    // Retry logic
+    if (retries > 0) {
+      console.log(`⏳ Retrying... (${retries} attempts remaining)`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return sendWhatsAppWithContentTemplate(
+        to,
+        contentSid,
+        contentVariables,
+        retries - 1
+      );
+    }
+
+    return {
+      success: false,
+      error: errorMessage || "Failed to send WhatsApp message",
+    };
+  }
 }

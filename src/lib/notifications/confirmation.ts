@@ -146,12 +146,26 @@ export async function sendConfirmation(
         MessageType.SMS
       );
     } else if (channel === "WHATSAPP") {
-      messageResult = await sendDynamicMessage(
-        family.whatsapp_number!,
-        renderedBody,
-        MessageType.WHATSAPP,
-        absoluteImageUrl
-      );
+      // Check if using content template
+      const contentTemplateId = (template as any).content_template_id;
+      if (contentTemplateId) {
+        const { mapToWhatsAppVariables } = await import("@/lib/templates/whatsapp-mapper");
+        const { sendWhatsAppWithContentTemplate } = await import("@/lib/sms/twilio");
+
+        const whatsappVars = mapToWhatsAppVariables(variables, absoluteImageUrl);
+        messageResult = await sendWhatsAppWithContentTemplate(
+          family.whatsapp_number!,
+          contentTemplateId,
+          whatsappVars
+        );
+      } else {
+        messageResult = await sendDynamicMessage(
+          family.whatsapp_number!,
+          renderedBody,
+          MessageType.WHATSAPP,
+          absoluteImageUrl
+        );
+      }
     } else {
       return {
         success: false,

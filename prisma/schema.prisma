@@ -145,17 +145,18 @@ model WeddingAdmin {
 }
 
 model MessageTemplate {
-  id         String       @id @default(uuid())
-  wedding_id String
-  type       TemplateType
-  language   Language
-  channel    Channel
-  subject    String
-  body       String
-  image_url  String?
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
-  wedding    Wedding      @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  id                 String       @id @default(uuid())
+  wedding_id         String
+  type               TemplateType
+  language           Language
+  channel            Channel
+  subject            String
+  body               String
+  image_url          String?
+  content_template_id String?      // Twilio Content Template SID for WhatsApp
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+  wedding            Wedding      @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
 
   @@unique([wedding_id, type, language, channel])
   @@index([wedding_id])

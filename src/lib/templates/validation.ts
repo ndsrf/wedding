@@ -44,6 +44,11 @@ export const updateTemplateSchema = z.object({
     .max(5000, "Body must be 5000 characters or less")
     .optional(),
   image_url: z.string().url("Invalid image URL").nullable().optional(),
+  content_template_id: z
+    .string()
+    .max(100, "Content Template ID must be 100 characters or less")
+    .nullable()
+    .optional(),
 });
 
 export type UpdateTemplateRequest = z.infer<typeof updateTemplateSchema>;

@@ -13,7 +13,7 @@ import type { MessageTemplate } from '@prisma/client';
 interface TemplateEditorProps {
   template: MessageTemplate;
   channel?: 'EMAIL' | 'WHATSAPP' | 'SMS';
-  onSave: (subject: string, body: string) => Promise<void>;
+  onSave: (subject: string, body: string, contentTemplateId?: string | null) => Promise<void>;
   onPreview: () => void;
   onImageUpdate?: () => void;
 }
@@ -29,6 +29,7 @@ export function TemplateEditor({
   const tChannel = useTranslations('admin.templates.channel');
   const [subject, setSubject] = useState(template.subject);
   const [body, setBody] = useState(template.body);
+  const [contentTemplateId, setContentTemplateId] = useState((template as any).content_template_id || null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [imageUrl, setImageUrl] = useState(template.image_url);
@@ -68,10 +69,15 @@ export function TemplateEditor({
     setHasChanges(true);
   };
 
+  const handleContentTemplateIdChange = (value: string) => {
+    setContentTemplateId(value || null);
+    setHasChanges(true);
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSave(subject, body);
+      await onSave(subject, body, contentTemplateId);
       setHasChanges(false);
     } finally {
       setIsSaving(false);
@@ -81,6 +87,7 @@ export function TemplateEditor({
   const handleReset = () => {
     setSubject(template.subject);
     setBody(template.body);
+    setContentTemplateId((template as any).content_template_id || null);
     setHasChanges(false);
   };
 
@@ -240,6 +247,89 @@ export function TemplateEditor({
               </a>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Content Template ID - Only for WhatsApp */}
+      {channel === 'WHATSAPP' && (
+        <div>
+          <label htmlFor="contentTemplateId" className="block text-sm font-medium text-gray-700 mb-2">
+            Content Template ID (optional)
+          </label>
+          <input
+            type="text"
+            id="contentTemplateId"
+            value={contentTemplateId || ''}
+            onChange={(e) => handleContentTemplateIdChange(e.target.value)}
+            placeholder="e.g., HXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-900"
+            maxLength={100}
+          />
+          <p className="mt-1 text-sm text-gray-500">
+            Enter the Content SID from Twilio Console for Meta-approved template variables
+          </p>
+        </div>
+      )}
+
+      {/* WhatsApp Variable Mapping - Only for WhatsApp */}
+      {channel === 'WHATSAPP' && (
+        <div className="border border-purple-200 rounded-lg p-4 bg-purple-50">
+          <h3 className="text-sm font-semibold text-purple-900 mb-3">
+            WhatsApp Variable Mapping
+          </h3>
+          <p className="text-xs text-purple-800 mb-3">
+            If you use a Content Template ID, variables will be mapped as follows:
+          </p>
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-2 mb-2 pb-2 border-b border-purple-200">
+              <div className="text-xs font-semibold text-purple-900">App Variable</div>
+              <div className="text-xs font-semibold text-purple-900">WhatsApp Var</div>
+              <div className="text-xs font-semibold text-purple-900">Description</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">familyName</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{1}}'}</div>
+              <div className="text-xs text-purple-700">Family name</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">coupleNames</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{2}}'}</div>
+              <div className="text-xs text-purple-700">Couple names</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">weddingDate</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{3}}'}</div>
+              <div className="text-xs text-purple-700">Wedding date</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">weddingTime</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{4}}'}</div>
+              <div className="text-xs text-purple-700">Wedding time</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">inviteImageName</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{5}}'}</div>
+              <div className="text-xs text-purple-700">Image filename</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">magicLink</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{6}}'}</div>
+              <div className="text-xs text-purple-700">RSVP link</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">rsvpCutoffDate</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{7}}'}</div>
+              <div className="text-xs text-purple-700">Cutoff date</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">referenceCode</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{8}}'}</div>
+              <div className="text-xs text-purple-700">Reference code</div>
+            </div>
+          </div>
+          <p className="text-xs text-purple-700 mt-3 italic">
+            Note: The body field above is for reference only. When using a Content Template ID, the actual message content comes from Meta&apos;s approved template.
+          </p>
         </div>
       )}
 

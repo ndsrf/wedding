@@ -35,3 +35,10 @@ export {
   type ListTemplatesQuery,
   type PreviewTemplateRequest,
 } from "./validation";
+
+// WhatsApp Mapper
+export {
+  WHATSAPP_VARIABLE_MAPPING,
+  mapToWhatsAppVariables,
+  getWhatsAppVariableMappingDisplay,
+} from "./whatsapp-mapper";

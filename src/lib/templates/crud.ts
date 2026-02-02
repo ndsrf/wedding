@@ -69,6 +69,7 @@ export async function updateTemplate(
       ...(request.subject !== undefined && { subject: request.subject }),
       ...(request.body !== undefined && { body: request.body }),
       ...(request.image_url !== undefined && { image_url: request.image_url }),
+      ...(request.content_template_id !== undefined && { content_template_id: request.content_template_id }),
     },
   });
 }
