@@ -54,7 +54,13 @@ setup('authenticate as master admin', async ({ page, context }) => {
   await page.goto('/auth/signin');
 
   // Check if E2E credentials provider is available
-  const emailInput = page.getByLabel(/email|enter your email/i).first();
+  const emailInput = page.getByLabel(/email|enter your email|e2e login/i).first();
+  
+  // Wait for the input to appear (it might take a moment for hydration)
+  await emailInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+    console.log('   (Timeout waiting for email input, checking visibility...)');
+  });
+
   if (await emailInput.isVisible()) {
     // Use E2E credentials provider (email-only login)
     console.log('   Using E2E credentials provider');
@@ -93,7 +99,13 @@ setup('authenticate as planner', async ({ page, context }) => {
   await page.goto('/auth/signin');
 
   // Check if E2E credentials provider is available
-  const emailInput = page.getByLabel(/email|enter your email/i).first();
+  const emailInput = page.getByLabel(/email|enter your email|e2e login/i).first();
+  
+  // Wait for the input to appear (it might take a moment for hydration)
+  await emailInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+    console.log('   (Timeout waiting for email input, checking visibility...)');
+  });
+
   if (await emailInput.isVisible()) {
     console.log('   Using E2E credentials provider');
     await emailInput.fill(testUsers.planner);
@@ -128,7 +140,13 @@ setup('authenticate as wedding admin', async ({ page, context }) => {
   await page.goto('/auth/signin');
 
   // Check if E2E credentials provider is available
-  const emailInput = page.getByLabel(/email|enter your email/i).first();
+  const emailInput = page.getByLabel(/email|enter your email|e2e login/i).first();
+  
+  // Wait for the input to appear (it might take a moment for hydration)
+  await emailInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+    console.log('   (Timeout waiting for email input, checking visibility...)');
+  });
+
   if (await emailInput.isVisible()) {
     console.log('   Using E2E credentials provider');
     await emailInput.fill(testUsers.weddingAdmin);

@@ -10,7 +10,9 @@ function SignInContent() {
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const error = searchParams.get('error');
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
   const t = useTranslations();
+  const isE2E = process.env.NEXT_PUBLIC_IS_E2E === 'true';
 
   const getErrorMessage = (error: string) => {
     switch (error) {
@@ -42,7 +44,11 @@ function SignInContent() {
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider);
     try {
-      await signIn(provider, { callbackUrl });
+      if (provider === 'e2e-bypass') {
+        await signIn('e2e-bypass', { email, callbackUrl });
+      } else {
+        await signIn(provider, { callbackUrl });
+      }
     } catch (error) {
       console.error('Sign-in error:', error);
       setIsLoading(null);
@@ -68,6 +74,36 @@ function SignInContent() {
         )}
 
         <div className="space-y-4">
+          {isE2E && (
+            <div className="p-4 border-2 border-dashed border-amber-300 rounded-lg bg-amber-50 mb-6">
+              <h2 className="text-sm font-semibold text-amber-800 mb-3 uppercase tracking-wider">
+                E2E Testing Bypass
+              </h2>
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="e2e-email" className="block text-xs font-medium text-amber-700 mb-1">
+                    Enter Email for E2E Login
+                  </label>
+                  <input
+                    id="e2e-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="planner@example.com"
+                    className="w-full px-3 py-2 border border-amber-300 rounded text-sm focus:ring-amber-500 focus:border-amber-500"
+                  />
+                </div>
+                <button
+                  onClick={() => handleSignIn('e2e-bypass')}
+                  disabled={isLoading !== null || !email}
+                  className="w-full py-2 bg-amber-600 text-white rounded font-medium hover:bg-amber-700 disabled:opacity-50 transition-colors text-sm"
+                >
+                  {isLoading === 'e2e-bypass' ? 'Authenticating...' : 'Sign In as E2E User'}
+                </button>
+              </div>
+            </div>
+          )}
+
           <button
             onClick={() => handleSignIn('google')}
             disabled={isLoading !== null}
