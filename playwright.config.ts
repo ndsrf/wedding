@@ -80,11 +80,19 @@ export default defineConfig({
       dependencies: ['onboarding_suite'],
     },
 
-    // Step 5: Functional Tests - Test main application features with full wedding data
+    // Step 5: Auth Setup Admin - Authenticate as wedding admin after full seed
+    {
+      name: 'auth_setup_admin',
+      testDir: './tests',
+      testMatch: /auth\.admin\.setup\.ts/,
+      dependencies: ['db_seed_full'],
+    },
+
+    // Step 6: Functional Tests - Test main application features with full wedding data
     {
       name: 'functional_suite',
       testDir: './tests/e2e/functional',
-      dependencies: ['db_seed_full'],
+      dependencies: ['auth_setup_admin'],
       use: {
         ...devices['Desktop Chrome'],
       },
@@ -102,6 +110,8 @@ export default defineConfig({
       ...process.env,
       // Override: Enable E2E credentials provider (must be NEXT_PUBLIC_ to be available client-side)
       NEXT_PUBLIC_IS_E2E: 'true',
+      // Ensure Master Admin email is recognized
+      MASTER_ADMIN_EMAILS: process.env.MASTER_ADMIN_EMAIL || 'master@example.com',
     },
   },
 

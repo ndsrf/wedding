@@ -21,7 +21,12 @@ import { prisma } from '@/lib/db/prisma';
  */
 export function isMasterAdmin(email: string): boolean {
   try {
-    const masterAdminEmailsEnv = process.env.MASTER_ADMIN_EMAILS;
+    let masterAdminEmailsEnv = process.env.MASTER_ADMIN_EMAILS;
+
+    // Fallback for E2E testing if not set
+    if (!masterAdminEmailsEnv && process.env.NEXT_PUBLIC_IS_E2E === 'true') {
+      masterAdminEmailsEnv = 'master@example.com';
+    }
 
     if (!masterAdminEmailsEnv) {
       console.warn('MASTER_ADMIN_EMAILS environment variable not set');
@@ -98,6 +103,8 @@ export async function detectUserRole(email: string, authProvider: AuthProvider) 
   const planner = await prisma.weddingPlanner.findUnique({
     where: { email },
   });
+
+  console.log(`[Auth Debug] Checking planner for ${email}:`, planner ? 'Found' : 'Not Found');
 
   if (planner) {
     // Update last login info
