@@ -174,7 +174,7 @@ export function GuestFormModal({
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   required
                 />
               </div>
@@ -249,7 +249,7 @@ export function GuestFormModal({
                   onChange={(e) =>
                     setFormData({ ...formData, preferred_language: e.target.value as Language })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                   required
                 >
                   <option value="ES">{t('common.languages.ES')}</option>

@@ -45,7 +45,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             placeholder={t('admin.guests.filters.searchPlaceholder')}
             value={filters.search || ''}
             onChange={(e) => handleChange('search', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
           />
         </div>
 
@@ -58,7 +58,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             id="rsvp_status"
             value={filters.rsvp_status || ''}
             onChange={(e) => handleChange('rsvp_status', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
           >
             <option value="">{t('admin.guests.filters.all')}</option>
             <option value="pending">{t('admin.guests.filters.pending')}</option>
@@ -75,7 +75,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             id="attendance"
             value={filters.attendance || ''}
             onChange={(e) => handleChange('attendance', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
           >
             <option value="">{t('admin.guests.filters.all')}</option>
             <option value="yes">{t('admin.guests.filters.attending')}</option>
@@ -93,7 +93,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             id="channel"
             value={filters.channel || ''}
             onChange={(e) => handleChange('channel', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
           >
             <option value="">{t('admin.guests.filters.all')}</option>
             <option value="WHATSAPP">{t('admin.guests.filters.whatsapp')}</option>
@@ -111,7 +111,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             id="payment_status"
             value={filters.payment_status || ''}
             onChange={(e) => handleChange('payment_status', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
           >
             <option value="">{t('admin.guests.filters.all')}</option>
             <option value="PENDING">{t('admin.guests.filters.pending')}</option>

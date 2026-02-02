@@ -168,7 +168,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
                 type="text"
                 value={formData.transportation_question_text}
                 onChange={(e) => handleChange('transportation_question_text', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                 placeholder={t('transportationPlaceholder')}
               />
             </div>
@@ -222,7 +222,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
                   type="text"
                   value={formData.extra_question_1_text}
                   onChange={(e) => handleChange('extra_question_1_text', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                   placeholder={t('questionPlaceholder')}
                 />
               </div>
@@ -246,7 +246,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
                   type="text"
                   value={formData.extra_question_2_text}
                   onChange={(e) => handleChange('extra_question_2_text', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                   placeholder={t('questionPlaceholder')}
                 />
               </div>
@@ -270,7 +270,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
                   type="text"
                   value={formData.extra_question_3_text}
                   onChange={(e) => handleChange('extra_question_3_text', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                   placeholder={t('questionPlaceholder')}
                 />
               </div>
@@ -303,7 +303,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
                   type="text"
                   value={formData.extra_info_1_label}
                   onChange={(e) => handleChange('extra_info_1_label', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                   placeholder={t('infoPlaceholder')}
                 />
               </div>
@@ -328,7 +328,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
                   type="text"
                   value={formData.extra_info_2_label}
                   onChange={(e) => handleChange('extra_info_2_label', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                   placeholder={t('infoPlaceholder')}
                 />
               </div>
@@ -353,7 +353,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
                   type="text"
                   value={formData.extra_info_3_label}
                   onChange={(e) => handleChange('extra_info_3_label', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                   placeholder={t('infoPlaceholder')}
                 />
               </div>

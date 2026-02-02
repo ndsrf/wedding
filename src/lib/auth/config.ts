@@ -60,7 +60,7 @@ export const authOptions: NextAuthConfig = {
         credentials: {
           email: { label: "Email", type: "email" }
         },
-        async authorize(credentials: Record<string, string | undefined>) {
+        async authorize(credentials) {
           // Validate credentials exist
           if (!credentials?.email || typeof credentials.email !== 'string') {
             console.warn('[E2E Auth] Missing or invalid email in credentials');
