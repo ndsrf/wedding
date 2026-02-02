@@ -66,6 +66,7 @@ jobs:
           NEXT_PUBLIC_IS_E2E: 'true'
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           MASTER_ADMIN_EMAIL: master@example.com
+          MASTER_ADMIN_EMAILS: master@example.com
           PLANNER_EMAIL: planner@example.com
           WEDDING_ADMIN_EMAIL: admin@example.com
 
