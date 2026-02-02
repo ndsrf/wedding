@@ -19,14 +19,14 @@ setup('seed EXISTING_WEDDING data', async () => {
   try {
     // Reset database - truncate all tables
     console.log('   🔄 Resetting database...');
-    execSync('npx ts-node scripts/reset-database.ts', {
+    execSync('npx tsx scripts/reset-database.ts', {
       stdio: 'inherit',
       env: { ...process.env, ALLOW_RESET: 'true' }
     });
 
     // Seed EXISTING_WEDDING mode
     console.log('   📋 Seeding EXISTING_WEDDING mode...');
-    execSync('npx ts-node prisma/seed.ts', {
+    execSync('npx tsx prisma/seed.ts', {
       stdio: 'inherit',
       env: {
         ...process.env,

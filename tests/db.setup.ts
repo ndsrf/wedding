@@ -17,14 +17,14 @@ setup('reset database and seed NEW_USER', async () => {
   console.log('\n🔄 [DB Setup] Resetting database...');
   try {
     // Reset database - truncate all tables
-    execSync('npx ts-node scripts/reset-database.ts', {
+    execSync('npx tsx scripts/reset-database.ts', {
       stdio: 'inherit',
       env: { ...process.env, ALLOW_RESET: 'true' }
     });
 
     console.log('\n📋 [DB Setup] Seeding NEW_USER data...');
     // Seed NEW_USER mode
-    execSync('npx ts-node prisma/seed.ts', {
+    execSync('npx tsx prisma/seed.ts', {
       stdio: 'inherit',
       env: {
         ...process.env,
