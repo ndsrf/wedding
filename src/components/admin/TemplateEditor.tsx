@@ -29,7 +29,7 @@ export function TemplateEditor({
   const tChannel = useTranslations('admin.templates.channel');
   const [subject, setSubject] = useState(template.subject);
   const [body, setBody] = useState(template.body);
-  const [contentTemplateId, setContentTemplateId] = useState((template as any).content_template_id || null);
+  const [contentTemplateId, setContentTemplateId] = useState((template as unknown as { content_template_id?: string }).content_template_id || null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [imageUrl, setImageUrl] = useState(template.image_url);
@@ -87,7 +87,7 @@ export function TemplateEditor({
   const handleReset = () => {
     setSubject(template.subject);
     setBody(template.body);
-    setContentTemplateId((template as any).content_template_id || null);
+    setContentTemplateId((template as unknown as { content_template_id?: string }).content_template_id || null);
     setHasChanges(false);
   };
 

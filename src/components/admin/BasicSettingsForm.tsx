@@ -51,7 +51,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
     payment_tracking_mode: wedding.payment_tracking_mode,
     gift_iban: wedding.gift_iban || '',
     theme_id: wedding.theme_id || '',
-    invitation_template_id: (wedding as any).invitation_template_id || '',
+    invitation_template_id: (wedding as unknown as { invitation_template_id?: string }).invitation_template_id || '',
     allow_guest_additions: wedding.allow_guest_additions,
     dress_code: wedding.dress_code || '',
     additional_info: wedding.additional_info || '',
@@ -158,7 +158,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
             onChange={(e) => {
               const theme = themes.find(t => t.id === e.target.value);
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              if ((theme as any)?._type === 'invitation_template') {
+              if ((theme as unknown as Record<string, unknown>)?._type === 'invitation_template') {
                 handleChange('invitation_template_id', e.target.value);
                 handleChange('theme_id', '');
               } else {

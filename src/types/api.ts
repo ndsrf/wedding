@@ -539,6 +539,11 @@ export interface GuestRSVPPageData {
     extra_info_3_label: string | null;
   };
   theme: Theme;
+  invitation_template?: {
+    id: string;
+    name: string;
+    design: unknown; // TemplateDesign (stored as JSON in DB)
+  };
   rsvp_cutoff_passed: boolean;
   has_submitted_rsvp: boolean;
 }

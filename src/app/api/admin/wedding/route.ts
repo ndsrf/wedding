@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { getAllSystemThemes } from '@/lib/theme/presets';
 import type { ThemeConfig } from '@/types/theme';
+import type { Theme } from '@/types/models';
 import type {
   APIResponse,
   GetWeddingDetailsResponse,
@@ -185,7 +186,6 @@ export async function GET() {
     });
 
     // Convert invitation templates to theme-like objects for display
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const invitationTemplateObjects = invitationTemplates.map((template) => ({
       id: template.id,
       planner_id: null,
@@ -193,12 +193,12 @@ export async function GET() {
       description: 'Custom invitation template',
       is_default: false,
       is_system_theme: false,
-      config: {},
+      config: {} as ThemeConfig,
       preview_image_url: null,
       created_at: template.created_at,
       updated_at: template.updated_at,
       _type: 'invitation_template',
-    } as any));
+    } as unknown as Theme));
 
     const availableThemes = [...systemThemeObjects, ...customThemeObjects, ...invitationTemplateObjects];
 
@@ -207,7 +207,7 @@ export async function GET() {
       id: wedding.id,
       planner_id: wedding.planner_id,
       theme_id: wedding.theme_id,
-      invitation_template_id: (wedding as any).invitation_template_id || null,
+      invitation_template_id: (wedding as unknown as { invitation_template_id: string | null }).invitation_template_id || null,
       couple_names: wedding.couple_names,
       wedding_date: wedding.wedding_date,
       wedding_time: wedding.wedding_time,

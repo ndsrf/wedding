@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
-import type { TemplateDesign } from '@/types/invitation-template';
+import { Prisma } from '@prisma/client';
 
 // ============================================================================
 // GET - Get single template
@@ -101,7 +101,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { name, design } = body;
 
     // Build update object
-    const updateData: any = {};
+    const updateData: Prisma.InvitationTemplateUpdateInput = {};
 
     if (name !== undefined) {
       if (typeof name !== 'string' || name.trim().length === 0) {
@@ -120,7 +120,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           { status: 400 }
         );
       }
-      updateData.design = design as TemplateDesign;
+      updateData.design = design as unknown as Prisma.InputJsonValue;
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -130,11 +130,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updated = await prisma.invitationTemplate.update({
       where: { id },
-      data: updateData as any,
+      data: updateData,
     });
 
     return NextResponse.json(updated);

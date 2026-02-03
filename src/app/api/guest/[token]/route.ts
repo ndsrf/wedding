@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateMagicLink } from '@/lib/auth/magic-link';
 import { trackLinkOpened } from '@/lib/tracking/events';
+import { prisma } from '@/lib/db/prisma';
 import type { GetGuestRSVPPageResponse, GuestRSVPPageData } from '@/types/api';
 import type { Channel } from '@prisma/client';
 import type { ThemeConfig } from '@/types/theme';
@@ -38,6 +39,23 @@ export async function GET(
     }
 
     const { family, wedding, theme } = validation;
+
+    // Fetch invitation template if the wedding has one configured
+    let invitationTemplate: { id: string; name: string; design: unknown } | undefined;
+    if (wedding.invitation_template_id) {
+      try {
+        const template = await prisma.invitationTemplate.findUnique({
+          where: { id: wedding.invitation_template_id },
+          select: { id: true, name: true, design: true },
+        });
+        if (template) {
+          invitationTemplate = template;
+        }
+      } catch (err) {
+        console.error('Failed to fetch invitation template:', err);
+        // Continue without template if fetch fails
+      }
+    }
 
     // Extract channel from URL query parameter
     const channel = request.nextUrl.searchParams.get('channel')?.toUpperCase() as Channel | null;
@@ -142,6 +160,7 @@ export async function GET(
         extra_info_3_label: wedding.extra_info_3_label,
       },
       theme: themeData,
+      ...(invitationTemplate && { invitation_template: invitationTemplate }),
       rsvp_cutoff_passed,
       has_submitted_rsvp,
     };

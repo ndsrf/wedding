@@ -16,7 +16,9 @@ import PaymentInfo from '@/components/guest/PaymentInfo';
 import LanguageSelector from '@/components/guest/LanguageSelector';
 import ConfirmationMessage from '@/components/guest/ConfirmationMessage';
 import { EnvelopeReveal } from '@/components/guest/EnvelopeReveal';
+import TemplateRenderer from '@/components/guest/TemplateRenderer';
 import type { GuestRSVPPageData } from '@/types/api';
+import type { SupportedLanguage } from '@/types/invitation-template';
 
 export default function GuestRSVPPage() {
   const params = useParams();
@@ -119,45 +121,60 @@ export default function GuestRSVPPage() {
     );
   }
 
-  const { family, wedding, theme, rsvp_cutoff_passed } = data;
+  const { family, wedding, theme, invitation_template, rsvp_cutoff_passed } = data;
   const isGardenBirds = theme.name === 'Garden Birds';
+  const hasTemplate = !!invitation_template;
+
+  // Map preferred_language to SupportedLanguage
+  const templateLanguage = (family.preferred_language.toUpperCase()) as SupportedLanguage;
 
   // Content to be wrapped in envelope or displayed normally
   const mainContent = (
     <>
-      {/* Welcome Section */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          {t('guest.welcome.title', { familyName: family.name })} 👋
-        </h2>
-        <p className="text-xl text-gray-600 mb-4">
-          {t('guest.welcome.subtitle')}
-        </p>
-        <div className="space-y-2 text-lg text-gray-700">
-          <p>
-            <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
+      {/* Custom Invitation Template or Standard Welcome Section */}
+      {hasTemplate ? (
+        <TemplateRenderer
+          design={invitation_template.design}
+          weddingDate={wedding.wedding_date}
+          weddingTime={wedding.wedding_time}
+          location={wedding.location}
+          coupleNames={wedding.couple_names}
+          language={templateLanguage}
+        />
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            {t('guest.welcome.title', { familyName: family.name })} 👋
+          </h2>
+          <p className="text-xl text-gray-600 mb-4">
+            {t('guest.welcome.subtitle')}
           </p>
-          <p>
-            <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString() })}</strong>
-          </p>
-          <p>
-            <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
-          </p>
-          <p>
-            <strong>{t('guest.welcome.location', { location: wedding.location })}</strong>
-          </p>
-          {wedding.dress_code && (
+          <div className="space-y-2 text-lg text-gray-700">
             <p>
-              <strong>{t('guest.welcome.dressCode')}</strong> {wedding.dress_code}
+              <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
             </p>
+            <p>
+              <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString() })}</strong>
+            </p>
+            <p>
+              <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
+            </p>
+            <p>
+              <strong>{t('guest.welcome.location', { location: wedding.location })}</strong>
+            </p>
+            {wedding.dress_code && (
+              <p>
+                <strong>{t('guest.welcome.dressCode')}</strong> {wedding.dress_code}
+              </p>
+            )}
+          </div>
+          {wedding.additional_info && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-lg text-gray-700">{wedding.additional_info}</p>
+            </div>
           )}
         </div>
-        {wedding.additional_info && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-lg text-gray-700">{wedding.additional_info}</p>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* RSVP Form or Confirmation */}
       {rsvpSubmitted ? (

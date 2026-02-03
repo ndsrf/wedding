@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { getAllSystemSeeds } from '@/lib/invitation-template/seeds';
+import { Prisma } from '@prisma/client';
 
 // ============================================================================
 // GET - List templates and system seeds
@@ -94,12 +95,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Create template
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const template = await prisma.invitationTemplate.create({
       data: {
         wedding_id: user.wedding_id,
         name: name.trim(),
-        design: design as any,
+        design: design as unknown as Prisma.InputJsonValue,
         based_on_preset: based_on_preset || null,
         is_system_template: false,
       },

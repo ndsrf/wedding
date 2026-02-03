@@ -167,7 +167,7 @@ export async function sendSaveTheDate(
       );
     } else if (channel === "WHATSAPP") {
       // Check if using content template
-      const contentTemplateId = (template as any).content_template_id;
+      const contentTemplateId = (template as unknown as { content_template_id?: string }).content_template_id;
       if (contentTemplateId) {
         const { mapToWhatsAppVariables } = await import("@/lib/templates/whatsapp-mapper");
         const { sendWhatsAppWithContentTemplate } = await import("@/lib/sms/twilio");
