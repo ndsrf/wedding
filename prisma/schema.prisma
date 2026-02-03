@@ -63,6 +63,7 @@ model Wedding {
   id                              String             @id @default(uuid())
   planner_id                      String
   theme_id                        String?
+  invitation_template_id          String?
   couple_names                    String
   wedding_date                    DateTime
   wedding_time                    String
@@ -105,6 +106,7 @@ model Wedding {
   checklist_tasks                 ChecklistTask[]
   families                        Family[]
   message_templates               MessageTemplate[]
+  invitation_templates            InvitationTemplate[]
   notifications                   Notification[]
   tables                          Table[]
   tracking_events                 TrackingEvent[]
@@ -162,6 +164,21 @@ model MessageTemplate {
   @@index([wedding_id])
   @@index([type])
   @@map("message_templates")
+}
+
+model InvitationTemplate {
+  id                  String   @id @default(uuid())
+  wedding_id          String
+  name                String
+  is_system_template  Boolean  @default(false)
+  based_on_preset     String?  // ThemePreset id if forked from a system seed; null if blank
+  design              Json     // TemplateDesign
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  wedding             Wedding  @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@index([wedding_id])
+  @@map("invitation_templates")
 }
 
 model Family {
