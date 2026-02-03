@@ -16,6 +16,7 @@ interface BasicSettingsFormData {
   payment_tracking_mode: PaymentMode;
   gift_iban: string;
   theme_id: string;
+  invitation_template_id: string;
   allow_guest_additions: boolean;
   dress_code: string;
   additional_info: string;
@@ -50,6 +51,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
     payment_tracking_mode: wedding.payment_tracking_mode,
     gift_iban: wedding.gift_iban || '',
     theme_id: wedding.theme_id || '',
+    invitation_template_id: (wedding as any).invitation_template_id || '',
     allow_guest_additions: wedding.allow_guest_additions,
     dress_code: wedding.dress_code || '',
     additional_info: wedding.additional_info || '',
@@ -80,10 +82,11 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
     setError(null);
 
     try {
-      const updateData: UpdateWeddingConfigRequest = {
+      const updateData: UpdateWeddingConfigRequest & { invitation_template_id?: string | null } = {
         payment_tracking_mode: formData.payment_tracking_mode,
         gift_iban: formData.gift_iban || null,
         theme_id: formData.theme_id || null,
+        invitation_template_id: formData.invitation_template_id || null,
         allow_guest_additions: formData.allow_guest_additions,
         dress_code: formData.dress_code || null,
         additional_info: formData.additional_info || null,
@@ -151,8 +154,18 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
           </label>
           <select
             id="theme_id"
-            value={formData.theme_id}
-            onChange={(e) => handleChange('theme_id', e.target.value)}
+            value={formData.invitation_template_id || formData.theme_id}
+            onChange={(e) => {
+              const theme = themes.find(t => t.id === e.target.value);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              if ((theme as any)?._type === 'invitation_template') {
+                handleChange('invitation_template_id', e.target.value);
+                handleChange('theme_id', '');
+              } else {
+                handleChange('theme_id', e.target.value);
+                handleChange('invitation_template_id', '');
+              }
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
           >
             <option value="">{t('noTheme')}</option>

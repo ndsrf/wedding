@@ -435,6 +435,8 @@
       "seatingPlanSubtitle": "Assegna gli ospiti ai tavoli",
       "providers": "Fornitori e Pagamenti",
       "providersSubtitle": "Gestire fornitori e pagamenti",
+      "invitationBuilder": "Creatore di Inviti",
+      "invitationBuilderSubtitle": "Progetta il tuo invito matrimoniale",
       "weddingNotFound": "Matrimonio non trovato",
       "contactPlanner": "Contatta il tuo organizzatore di matrimoni."
     },
@@ -874,6 +876,35 @@
         "from": "Da: Piattaforma Gestione Matrimoni",
         "close": "Chiudi"
       }
+    },
+    "invitationBuilder": {
+      "title": "Creatore di Inviti",
+      "description": "Progetta la tua pagina di invito matrimoniale",
+      "createNew": "Crea Nuovo",
+      "startFromScratch": "Inizia da Zero",
+      "startFromTemplate": "Inizia da un Modello di Sistema",
+      "templateName": "Nome modello",
+      "save": "Salva",
+      "saved": "Salvato",
+      "preview": "Anteprima",
+      "addBlock": "Aggiungi Blocco",
+      "blockText": "Testo",
+      "blockImage": "Immagine",
+      "blockLocation": "Ubicazione",
+      "blockCountdown": "Conto alla Rovescia",
+      "blockAddToCalendar": "Aggiungi al Calendario",
+      "styleFont": "Carattere",
+      "styleSize": "Dimensione",
+      "styleColor": "Colore",
+      "styleAlign": "Allineamento",
+      "styleLanguages": "Lingue",
+      "canvasBackground": "Sfondo",
+      "pickImage": "Seleziona Immagine",
+      "uploadNewImage": "Carica Nuova Immagine",
+      "noImagesUploaded": "Nessuna immagine caricata ancora",
+      "editTemplate": "Modifica",
+      "deleteTemplate": "Elimina",
+      "back": "Indietro"
     }
   },
   "guest": {
@@ -960,6 +991,19 @@
       "timeRange": "Dalle {startTime} alle 01:00",
       "details": "Dettagli del giorno",
       "detailsSubtitle": "Tutto ciò che devi sapere"
+    },
+    "invitation": {
+      "countdown": "Conto alla rovescia",
+      "countdownSubtitle": "Fino al grande giorno",
+      "days": "Giorni",
+      "hours": "Ore",
+      "minutes": "Minuti",
+      "seconds": "Secondi",
+      "location": "Località",
+      "addToCalendar": "Aggiungi al Calendario",
+      "googleCalendar": "Google Calendar",
+      "appleCalendar": "Apple Calendar",
+      "getDirections": "Ottieni Indicazioni"
     }
   },
   "auth": {

@@ -435,6 +435,8 @@
       "seatingPlanSubtitle": "Gäste den Tischen zuweisen",
       "providers": "Anbieter und Zahlungen",
       "providersSubtitle": "Anbieter und Zahlungen verwalten",
+      "invitationBuilder": "Einladungsgenerator",
+      "invitationBuilderSubtitle": "Gestalten Sie Ihre Hochzeitseinladung",
       "weddingNotFound": "Hochzeit nicht gefunden",
       "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner."
     },
@@ -874,6 +876,35 @@
         "from": "Von: Hochzeitsmanagement-Plattform",
         "close": "Schließen"
       }
+    },
+    "invitationBuilder": {
+      "title": "Einladungsgenerator",
+      "description": "Gestalten Sie Ihre Hochzeitseinladungsseite",
+      "createNew": "Neu Erstellen",
+      "startFromScratch": "Von Grund auf Neu Anfangen",
+      "startFromTemplate": "Von einer Systemvorlage Anfangen",
+      "templateName": "Vorlagenname",
+      "save": "Speichern",
+      "saved": "Gespeichert",
+      "preview": "Vorschau",
+      "addBlock": "Block Hinzufügen",
+      "blockText": "Text",
+      "blockImage": "Bild",
+      "blockLocation": "Ort",
+      "blockCountdown": "Countdown",
+      "blockAddToCalendar": "Zum Kalender Hinzufügen",
+      "styleFont": "Schriftart",
+      "styleSize": "Größe",
+      "styleColor": "Farbe",
+      "styleAlign": "Ausrichtung",
+      "styleLanguages": "Sprachen",
+      "canvasBackground": "Hintergrund",
+      "pickImage": "Bild Auswählen",
+      "uploadNewImage": "Neues Bild Hochladen",
+      "noImagesUploaded": "Noch keine Bilder hochgeladen",
+      "editTemplate": "Bearbeiten",
+      "deleteTemplate": "Löschen",
+      "back": "Zurück"
     }
   },
   "guest": {
@@ -960,6 +991,19 @@
       "timeRange": "Von {startTime} bis 01:00 Uhr",
       "details": "Details des Tages",
       "detailsSubtitle": "Alles was Sie wissen müssen"
+    },
+    "invitation": {
+      "countdown": "Countdown",
+      "countdownSubtitle": "Bis zum großen Tag",
+      "days": "Tage",
+      "hours": "Stunden",
+      "minutes": "Minuten",
+      "seconds": "Sekunden",
+      "location": "Ort",
+      "addToCalendar": "Zum Kalender Hinzufügen",
+      "googleCalendar": "Google Calendar",
+      "appleCalendar": "Apple Calendar",
+      "getDirections": "Richtungen Abrufen"
     }
   },
   "auth": {

@@ -269,7 +269,7 @@ export default function TemplatesPage() {
                     setTemplates(
                       templates.map((tmpl) =>
                         tmpl.id === currentTemplate.id
-                          ? { ...tmpl, subject, body, content_template_id: contentTemplateId }
+                          ? { ...tmpl, subject, body, content_template_id: contentTemplateId || null }
                           : tmpl
                       )
                     );

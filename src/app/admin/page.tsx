@@ -375,6 +375,31 @@ export default async function AdminDashboardPage() {
             </Link>
 
             <Link
+              href="/admin/invitation-builder"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-amber-300 hover:bg-amber-50 transition-colors"
+            >
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-amber-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.invitationBuilder')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('admin.dashboard.invitationBuilderSubtitle')}</p>
+              </div>
+            </Link>
+
+            <Link
               href="/admin/seating"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-cyan-300 hover:bg-cyan-50 transition-colors"
             >

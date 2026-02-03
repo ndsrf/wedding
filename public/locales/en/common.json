@@ -451,6 +451,8 @@
       "seatingPlanSubtitle": "Assign guests to tables",
       "providers": "Providers & Payments",
       "providersSubtitle": "Manage providers and payments",
+      "invitationBuilder": "Invitation Builder",
+      "invitationBuilderSubtitle": "Design your wedding invitation",
       "weddingNotFound": "Wedding not found",
       "contactPlanner": "Please contact your wedding planner."
     },
@@ -906,6 +908,35 @@
         "from": "From: Wedding Management Platform",
         "close": "Close"
       }
+    },
+    "invitationBuilder": {
+      "title": "Invitation Builder",
+      "description": "Design your wedding invitation page",
+      "createNew": "Create New Template",
+      "startFromScratch": "Start from scratch",
+      "startFromTemplate": "Start from a system template",
+      "templateName": "Template name",
+      "save": "Save",
+      "saved": "Saved",
+      "preview": "Preview",
+      "addBlock": "Add Block",
+      "blockText": "Text",
+      "blockImage": "Image",
+      "blockLocation": "Location",
+      "blockCountdown": "Countdown",
+      "blockAddToCalendar": "Add to Calendar",
+      "styleFont": "Font",
+      "styleSize": "Size",
+      "styleColor": "Color",
+      "styleAlign": "Alignment",
+      "styleLanguages": "Languages",
+      "canvasBackground": "Background",
+      "pickImage": "Pick Image",
+      "uploadNewImage": "Upload New Image",
+      "noImagesUploaded": "No images uploaded yet",
+      "editTemplate": "Edit",
+      "deleteTemplate": "Delete",
+      "back": "Back"
     }
   },
   "guest": {
@@ -993,6 +1024,19 @@
       "timeRange": "From {startTime} to 01:00h",
       "details": "Details of the day",
       "detailsSubtitle": "Everything you need to know"
+    },
+    "invitation": {
+      "countdown": "Countdown",
+      "countdownSubtitle": "Until the big day",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "location": "Location",
+      "addToCalendar": "Add to Calendar",
+      "googleCalendar": "Google Calendar",
+      "appleCalendar": "Apple Calendar",
+      "getDirections": "Get Directions"
     }
   },
   "auth": {

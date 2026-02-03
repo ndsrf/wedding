@@ -24,6 +24,7 @@ const updateWeddingConfigSchema = z.object({
   payment_tracking_mode: z.enum(['AUTOMATED', 'MANUAL']).optional(),
   gift_iban: z.string().nullable().optional(),
   theme_id: z.string().nullable().optional(),
+  invitation_template_id: z.string().nullable().optional(),
   allow_guest_additions: z.boolean().optional(),
   dress_code: z.string().nullable().optional(),
   additional_info: z.string().nullable().optional(),
@@ -173,12 +174,40 @@ export async function GET() {
       config: theme.config as unknown as ThemeConfig,
     }));
 
-    const availableThemes = [...systemThemeObjects, ...customThemeObjects];
+    // Fetch invitation templates for this wedding
+    const invitationTemplates = await prisma.invitationTemplate.findMany({
+      where: {
+        wedding_id: wedding.id,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
 
+    // Convert invitation templates to theme-like objects for display
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const invitationTemplateObjects = invitationTemplates.map((template) => ({
+      id: template.id,
+      planner_id: null,
+      name: `[Invitation] ${template.name}`,
+      description: 'Custom invitation template',
+      is_default: false,
+      is_system_theme: false,
+      config: {},
+      preview_image_url: null,
+      created_at: template.created_at,
+      updated_at: template.updated_at,
+      _type: 'invitation_template',
+    } as any));
+
+    const availableThemes = [...systemThemeObjects, ...customThemeObjects, ...invitationTemplateObjects];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const weddingDetails = {
       id: wedding.id,
       planner_id: wedding.planner_id,
       theme_id: wedding.theme_id,
+      invitation_template_id: (wedding as any).invitation_template_id || null,
       couple_names: wedding.couple_names,
       wedding_date: wedding.wedding_date,
       wedding_time: wedding.wedding_time,
@@ -314,6 +343,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (validatedData.theme_id !== undefined) {
       updateData.theme_id = validatedData.theme_id;
+    }
+    if (validatedData.invitation_template_id !== undefined) {
+      updateData.invitation_template_id = validatedData.invitation_template_id;
     }
     if (validatedData.allow_guest_additions !== undefined) {
       updateData.allow_guest_additions = validatedData.allow_guest_additions;
