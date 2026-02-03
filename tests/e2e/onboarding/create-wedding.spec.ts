@@ -56,6 +56,15 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     await expect(locationInput).toBeVisible();
     await locationInput.fill('Grand Hotel Barcelona');
 
+    // Fill in RSVP cutoff date (required)
+    const rsvpCutoffInput = page.getByLabel(/rsvp cutoff/i).first();
+    await expect(rsvpCutoffInput).toBeVisible();
+    
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() + 5); // 1 month before wedding
+    const cutoffString = cutoffDate.toISOString().split('T')[0];
+    await rsvpCutoffInput.fill(cutoffString);
+
     // Fill in admin email
     const adminEmailInput = page.getByLabel(/admin.*email|email.*admin|couple.*email/i).first();
     if (await adminEmailInput.isVisible()) {
@@ -63,7 +72,7 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     }
 
     // Submit the form
-    const submitButton = page.getByRole('button', { name: /create|save|submit/i }).first();
+    const submitButton = page.locator('form').getByRole('button', { name: /create|save|submit/i });
     await submitButton.click();
 
     // Wait for success indication
@@ -120,7 +129,7 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     await page.waitForTimeout(500);
 
     // Try to submit empty form
-    const submitButton = page.getByRole('button', { name: /create|save|submit/i }).first();
+    const submitButton = page.locator('form').getByRole('button', { name: /create|save|submit/i });
     await expect(submitButton).toBeVisible({ timeout: 5000 });
     await submitButton.click();
 
