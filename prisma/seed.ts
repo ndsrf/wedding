@@ -245,7 +245,7 @@ async function seedExistingWedding(planner: any) {
       email: WEDDING_ADMIN_EMAIL,
       name: 'Sofia & Miguel García',
       auth_provider: 'GOOGLE' as AuthProvider,
-      preferred_language: 'ES' as Language,
+      preferred_language: 'EN' as Language,
       invited_by: planner.id,
       wedding_id: wedding.id,
     },
