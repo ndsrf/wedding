@@ -574,6 +574,7 @@
       "notAnswered": "Nicht Beantwortet",
       "channel": "Kanal",
       "paymentStatus": "Geschenkstatus",
+      "invitedBy": "Eingeladen von",
       "filters": {
         "all": "Alle",
         "pending": "Ausstehend",

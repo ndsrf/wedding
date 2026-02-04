@@ -45,6 +45,7 @@ export const createFamilySchema = z.object({
   whatsapp_number: z.string().nullable().optional(),
   channel_preference: channelSchema.nullable().optional(),
   preferred_language: languageSchema.default('ES'),
+  invited_by_admin_id: z.string().uuid().nullable().optional(),
   members: z.array(createMemberSchema).default([]),
 });
 
@@ -56,6 +57,7 @@ export const updateFamilySchema = z.object({
   whatsapp_number: z.string().nullable().optional(),
   channel_preference: channelSchema.nullable().optional(),
   preferred_language: languageSchema.optional(),
+  invited_by_admin_id: z.string().uuid().nullable().optional(),
   members: z.array(updateMemberSchema).optional(),
   // RSVP Question Answers
   transportation_answer: z.boolean().nullable().optional(),

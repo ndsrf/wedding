@@ -182,6 +182,23 @@ test.describe('API Tests - Guests Endpoints', () => {
     expect(data.data.members[0].name).toBe('John API Test');
     expect(data.data.members[1].name).toBe('Jane API Test');
 
+    // Verify invited_by_admin_id was defaulted (should be a non-null string)
+    expect(typeof data.data.invited_by_admin_id).toBe('string');
+    expect(data.data.invited_by_admin_id.length).toBeGreaterThan(0);
+
+    // Verify invited_by_admin_name is returned in the list response
+    const listResponse = await page.request.get(`/api/admin/guests?search=API Test Family`);
+    const listData = await listResponse.json();
+    expect(listData.success).toBeTruthy();
+    if (listData.data.items.length > 0) {
+      const createdGuest = listData.data.items.find((g: any) => g.id === data.data.id);
+      if (createdGuest) {
+        expect(createdGuest).toHaveProperty('invited_by_admin_id');
+        expect(createdGuest).toHaveProperty('invited_by_admin_name');
+        expect(typeof createdGuest.invited_by_admin_name).toBe('string');
+      }
+    }
+
     // Clean up: Delete the created family
     await page.request.delete(`/api/admin/guests/${data.data.id}`);
 

@@ -56,6 +56,7 @@ interface Filters {
   attendance?: string;
   channel?: string;
   payment_status?: string;
+  invited_by_admin_id?: string;
   search?: string;
 }
 
@@ -92,6 +93,7 @@ export default function GuestsPage() {
   const [activeTab, setActiveTab] = useState<'guests' | 'additions'>('guests');
   const [weddingConfig, setWeddingConfig] = useState<WeddingQuestionConfig | null>(null);
   const [weddingGiftIban, setWeddingGiftIban] = useState<string | null>(null);
+  const [admins, setAdmins] = useState<Array<{ id: string; name: string; email: string }>>([]);
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -128,6 +130,7 @@ export default function GuestsPage() {
       if (filters.attendance) params.set('attendance', filters.attendance);
       if (filters.channel) params.set('channel', filters.channel);
       if (filters.payment_status) params.set('payment_status', filters.payment_status);
+      if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
       if (filters.search) params.set('search', filters.search);
 
       const response = await fetch(`/api/admin/guests?${params.toString()}`);
@@ -191,6 +194,18 @@ export default function GuestsPage() {
     }
   }, []);
 
+  const fetchAdmins = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/admins');
+      const data = await response.json();
+      if (data.success) {
+        setAdmins(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching admins:', error);
+    }
+  }, []);
+
   // Initialize filters from URL search params
   useEffect(() => {
     const search = searchParams.get('search');
@@ -210,6 +225,10 @@ export default function GuestsPage() {
   useEffect(() => {
     fetchWeddingConfig();
   }, [fetchWeddingConfig]);
+
+  useEffect(() => {
+    fetchAdmins();
+  }, [fetchAdmins]);
 
   const handleExport = async () => {
     try {
@@ -630,7 +649,7 @@ export default function GuestsPage() {
         {activeTab === 'guests' ? (
           <>
             {/* Filters */}
-            <GuestFilters filters={filters} onFilterChange={setFilters} />
+            <GuestFilters filters={filters} admins={admins} onFilterChange={setFilters} />
 
             {/* Bulk Reminder Section */}
             {!isReadOnly && (
@@ -716,6 +735,7 @@ export default function GuestsPage() {
       <GuestFormModal
         isOpen={isFormModalOpen}
         mode={formMode}
+        admins={admins}
         initialData={
           selectedGuest
             ? {
@@ -725,6 +745,7 @@ export default function GuestsPage() {
                 whatsapp_number: selectedGuest.whatsapp_number,
                 channel_preference: selectedGuest.channel_preference,
                 preferred_language: selectedGuest.preferred_language,
+                invited_by_admin_id: selectedGuest.invited_by_admin_id || null,
                 members: selectedGuest.members.map((m) => ({
                   id: m.id,
                   name: m.name,

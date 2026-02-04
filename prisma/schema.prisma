@@ -193,6 +193,7 @@ model Family {
   reference_code          String?         @unique
   channel_preference      Channel?
   preferred_language      Language        @default(ES)
+  invited_by_admin_id     String?
   save_the_date_sent      DateTime?
   created_at              DateTime        @default(now())
   extra_info_1_value      String?

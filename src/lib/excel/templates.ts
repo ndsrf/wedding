@@ -45,6 +45,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     'Phone',
     'WhatsApp',
     'Language *',
+    'Invited By',
     'Member 1 Name *',
     'Member 1 Type *',
     'Member 1 Age',
@@ -90,6 +91,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
         '+34612345678',
         '+34612345678',
         'ES',
+        '',
         'Juan García',
         'ADULT',
         '45',
@@ -128,6 +130,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
         '+441234567890',
         '+441234567890',
         'EN',
+        '',
         'John Smith',
         'ADULT',
         '50',
@@ -179,6 +182,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     ['- Email: Contact email (recommended for email invitations)'],
     ['- Phone: Contact phone number'],
     ['- WhatsApp: WhatsApp number (recommended for WhatsApp invitations)'],
+    ['- Invited By: Name or email of the admin who invited this guest (leave blank to default to the first admin)'],
     ['- Member X Age: Age of family member (optional)'],
     [''],
     ['Member Types:'],
@@ -217,6 +221,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     { wch: 15 }, // Phone
     { wch: 15 }, // WhatsApp
     { wch: 10 }, // Language
+    { wch: 20 }, // Invited By
   ];
 
   // Add widths for member columns
@@ -259,6 +264,7 @@ export function generatePrefilledTemplate(
     phone: string | null;
     whatsapp_number: string | null;
     preferred_language: Language;
+    invitedByAdmin?: string;
     members: Array<{
       name: string;
       type: string;
@@ -274,6 +280,7 @@ export function generatePrefilledTemplate(
     'Phone',
     'WhatsApp',
     'Language *',
+    'Invited By',
     'Member 1 Name *',
     'Member 1 Type *',
     'Member 1 Age',
@@ -318,6 +325,7 @@ export function generatePrefilledTemplate(
       family.phone || '',
       family.whatsapp_number || '',
       family.preferred_language,
+      family.invitedByAdmin || '',
     ];
 
     // Add up to 10 members
@@ -345,6 +353,7 @@ export function generatePrefilledTemplate(
     { wch: 15 }, // Phone
     { wch: 15 }, // WhatsApp
     { wch: 10 }, // Language
+    { wch: 20 }, // Invited By
   ];
 
   // Add widths for member columns

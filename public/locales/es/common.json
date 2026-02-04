@@ -578,6 +578,7 @@
       "notAnswered": "Sin Respuesta",
       "channel": "Canal",
       "paymentStatus": "Estado de Regalo",
+      "invitedBy": "De parte de",
       "filters": {
         "all": "Todos",
         "pending": "Pendiente",

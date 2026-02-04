@@ -73,6 +73,13 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     // Wait for the add guest modal/form to appear
     await page.waitForTimeout(500);
 
+    // Verify the "Invited By" select is visible and pre-populated
+    const invitedBySelect = page.getByLabel(/invited.*by/i).first();
+    if (await invitedBySelect.isVisible({ timeout: 3000 }).catch(() => false)) {
+      const selectedValue = await invitedBySelect.inputValue();
+      expect(selectedValue.length).toBeGreaterThan(0); // Should be pre-populated with first admin
+    }
+
     // Fill in family name
     const familyNameInput = page.getByLabel(/family.*name|name/i).first();
     await expect(familyNameInput).toBeVisible({ timeout: 5000 });

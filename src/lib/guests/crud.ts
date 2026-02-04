@@ -59,6 +59,19 @@ export async function createFamily(
     throw new Error('Wedding not found');
   }
 
+  // Resolve invited_by_admin_id: use provided value or default to first admin
+  let invited_by_admin_id = validatedInput.invited_by_admin_id ?? null;
+  if (!invited_by_admin_id) {
+    const firstAdmin = await prisma.weddingAdmin.findFirst({
+      where: { wedding_id: validatedInput.wedding_id },
+      orderBy: { created_at: 'asc' },
+      select: { id: true },
+    });
+    if (firstAdmin) {
+      invited_by_admin_id = firstAdmin.id;
+    }
+  }
+
   // Generate magic token
   const magic_token = crypto.randomUUID();
 
@@ -80,6 +93,7 @@ export async function createFamily(
         reference_code,
         channel_preference: validatedInput.channel_preference || null,
         preferred_language: validatedInput.preferred_language,
+        invited_by_admin_id,
       },
       include: {
         members: true,
@@ -190,6 +204,8 @@ export async function updateFamily(
       familyUpdateData.channel_preference = validatedInput.channel_preference;
     if (validatedInput.preferred_language !== undefined)
       familyUpdateData.preferred_language = validatedInput.preferred_language;
+    if (validatedInput.invited_by_admin_id !== undefined)
+      familyUpdateData.invited_by_admin_id = validatedInput.invited_by_admin_id;
     // RSVP Question Answers
     if (validatedInput.transportation_answer !== undefined)
       familyUpdateData.transportation_answer = validatedInput.transportation_answer;

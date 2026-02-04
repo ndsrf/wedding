@@ -582,6 +582,7 @@
       "notAnswered": "Not Answered",
       "channel": "Channel",
       "paymentStatus": "Gift Status",
+      "invitedBy": "Invited By",
       "filters": {
         "all": "All",
         "pending": "Pending",

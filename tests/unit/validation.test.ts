@@ -171,6 +171,26 @@ describe('Guest Validation - createFamilySchema', () => {
     expect(() => createFamilySchema.parse(familyWithValidEmail)).not.toThrow();
   });
 
+  it('should accept a valid UUID for invited_by_admin_id', () => {
+    const familyWithAdmin = {
+      wedding_id: '123e4567-e89b-12d3-a456-426614174000',
+      name: 'Smith Family',
+      invited_by_admin_id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    };
+    expect(() => createFamilySchema.parse(familyWithAdmin)).not.toThrow();
+    const result = createFamilySchema.parse(familyWithAdmin);
+    expect(result.invited_by_admin_id).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+  });
+
+  it('should reject a non-UUID value for invited_by_admin_id', () => {
+    const familyWithInvalidAdmin = {
+      wedding_id: '123e4567-e89b-12d3-a456-426614174000',
+      name: 'Smith Family',
+      invited_by_admin_id: 'not-a-uuid',
+    };
+    expect(() => createFamilySchema.parse(familyWithInvalidAdmin)).toThrow();
+  });
+
   it('should default to ES language and empty members array', () => {
     const minimalFamily = {
       wedding_id: '123e4567-e89b-12d3-a456-426614174000',

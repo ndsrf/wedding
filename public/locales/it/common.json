@@ -566,6 +566,7 @@
       "notAnswered": "Non Risposto",
       "channel": "Canale",
       "paymentStatus": "Stato Regalo",
+      "invitedBy": "Invitato da",
       "filters": {
         "all": "Tutti",
         "pending": "In Attesa",

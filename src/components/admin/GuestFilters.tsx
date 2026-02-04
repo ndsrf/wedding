@@ -16,12 +16,14 @@ interface GuestFiltersProps {
     attendance?: string;
     channel?: string;
     payment_status?: string;
+    invited_by_admin_id?: string;
     search?: string;
   };
+  admins: Array<{ id: string; name: string; email: string }>;
   onFilterChange: (filters: GuestFiltersProps['filters']) => void;
 }
 
-export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
+export function GuestFilters({ filters, admins, onFilterChange }: GuestFiltersProps) {
   const t = useTranslations();
 
   const handleChange = (key: string, value: string) => {
@@ -33,7 +35,7 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
         {/* Search */}
         <div>
           <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
@@ -119,10 +121,30 @@ export function GuestFilters({ filters, onFilterChange }: GuestFiltersProps) {
             <option value="CONFIRMED">{t('admin.guests.filters.confirmed')}</option>
           </select>
         </div>
+
+        {/* Invited By */}
+        <div>
+          <label htmlFor="invited_by_admin_id" className="block text-sm font-medium text-gray-700 mb-1">
+            {t('admin.guests.invitedBy')}
+          </label>
+          <select
+            id="invited_by_admin_id"
+            value={filters.invited_by_admin_id || ''}
+            onChange={(e) => handleChange('invited_by_admin_id', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
+          >
+            <option value="">{t('admin.guests.filters.all')}</option>
+            {admins.map((admin) => (
+              <option key={admin.id} value={admin.id}>
+                {admin.name || admin.email}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Clear Filters Button */}
-      {(filters.rsvp_status || filters.attendance || filters.channel || filters.payment_status || filters.search) && (
+      {(filters.rsvp_status || filters.attendance || filters.channel || filters.payment_status || filters.invited_by_admin_id || filters.search) && (
         <div className="mt-4 flex justify-end">
           <button
             onClick={() => onFilterChange({})}

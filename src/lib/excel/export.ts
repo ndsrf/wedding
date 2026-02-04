@@ -34,6 +34,7 @@ interface FamilyExportData {
   phone: string;
   whatsapp: string;
   language: Language;
+  invitedByAdmin: string;
   referenceCode: string;
   rsvpStatus: string;
   attendingCount: number;
@@ -61,27 +62,35 @@ interface FamilyExportData {
  * Fetch all guest data for a wedding
  */
 async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
-  const families = await prisma.family.findMany({
-    where: {
-      wedding_id,
-    },
-    include: {
-      members: {
-        orderBy: {
-          created_at: 'asc',
+  const [families, weddingAdmins] = await Promise.all([
+    prisma.family.findMany({
+      where: {
+        wedding_id,
+      },
+      include: {
+        members: {
+          orderBy: {
+            created_at: 'asc',
+          },
+        },
+        gifts: {
+          orderBy: {
+            created_at: 'desc',
+          },
+          take: 1,
         },
       },
-      gifts: {
-        orderBy: {
-          created_at: 'desc',
-        },
-        take: 1,
+      orderBy: {
+        name: 'asc',
       },
-    },
-    orderBy: {
-      name: 'asc',
-    },
-  });
+    }),
+    prisma.weddingAdmin.findMany({
+      where: { wedding_id },
+      select: { id: true, name: true, email: true },
+    }),
+  ]);
+
+  const adminMap = new Map(weddingAdmins.map((a) => [a.id, a.name || a.email]));
 
   return families.map((family) => {
     // Calculate RSVP status
@@ -110,6 +119,7 @@ async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
       phone: family.phone || '',
       whatsapp: family.whatsapp_number || '',
       language: family.preferred_language,
+      invitedByAdmin: family.invited_by_admin_id ? (adminMap.get(family.invited_by_admin_id) || '') : '',
       referenceCode: family.reference_code || '',
       rsvpStatus,
       attendingCount: attendingMembers.length,
@@ -163,6 +173,7 @@ export async function exportGuestData(
     'Phone',
     'WhatsApp',
     'Language',
+    'Invited By',
     'Reference Code',
   ];
 
@@ -208,6 +219,7 @@ export async function exportGuestData(
       family.phone,
       family.whatsapp,
       family.language,
+      family.invitedByAdmin,
       family.referenceCode,
     ];
 
@@ -258,6 +270,7 @@ export async function exportGuestData(
     { wch: 15 }, // Phone
     { wch: 15 }, // WhatsApp
     { wch: 10 }, // Language
+    { wch: 20 }, // Invited By
     { wch: 15 }, // Reference Code
   ];
 

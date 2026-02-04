@@ -21,6 +21,7 @@ export interface ImportRow {
   phone: string | null;
   whatsapp: string | null;
   language: Language;
+  invitedBy: string | null;
   members: Array<{
     name: string;
     type: MemberType;
@@ -143,14 +144,15 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
     const phone = row[3] ? String(row[3]).trim() : null;
     const whatsapp = row[4] ? String(row[4]).trim() : null;
     const language = String(row[5] || 'ES').trim().toUpperCase() as Language;
+    const invitedBy = row[6] ? String(row[6]).trim() : null;
 
     // Parse members (up to 10)
     const members: ImportRow['members'] = [];
 
     for (let i = 0; i < 10; i++) {
-      const nameIndex = 6 + (i * 3);
-      const typeIndex = 7 + (i * 3);
-      const ageIndex = 8 + (i * 3);
+      const nameIndex = 7 + (i * 3);
+      const typeIndex = 8 + (i * 3);
+      const ageIndex = 9 + (i * 3);
 
       const memberName = row[nameIndex] ? String(row[nameIndex]).trim() : '';
       const memberType = row[typeIndex] ? String(row[typeIndex]).trim() : '';
@@ -172,6 +174,7 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
       phone: phone || null,
       whatsapp: whatsapp || null,
       language,
+      invitedBy: invitedBy || null,
       members,
     });
   }
@@ -188,7 +191,8 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
  */
 function validateImportData(
   rows: ImportRow[],
-  defaultLanguage: Language
+  defaultLanguage: Language,
+  adminNames: Set<string>
 ): { errors: ValidationError[]; warnings: ValidationWarning[] } {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
@@ -299,6 +303,16 @@ function validateImportData(
         message: 'No contact method provided (email, phone, or WhatsApp)',
       });
     }
+
+    // Warn if invitedBy value doesn't match any admin
+    if (row.invitedBy && !adminNames.has(row.invitedBy.toLowerCase())) {
+      warnings.push({
+        row: rowNum,
+        field: 'Invited By',
+        message: `Admin '${row.invitedBy}' not found, will default to first admin`,
+      });
+      row.invitedBy = null;
+    }
   });
 
   return { errors, warnings };
@@ -356,8 +370,30 @@ export async function importGuestList(
       };
     }
 
+    // Fetch admins for the wedding to resolve invitedBy
+    const weddingAdmins = await prisma.weddingAdmin.findMany({
+      where: { wedding_id },
+      select: { id: true, name: true, email: true },
+      orderBy: { created_at: 'asc' },
+    });
+    const defaultAdminId = weddingAdmins.length > 0 ? weddingAdmins[0].id : null;
+
+    // Build lookup map: lowercase name -> id, lowercase email -> id
+    const adminLookup = new Map<string, string>();
+    const adminNames = new Set<string>();
+    for (const admin of weddingAdmins) {
+      if (admin.name) {
+        adminLookup.set(admin.name.toLowerCase(), admin.id);
+        adminNames.add(admin.name.toLowerCase());
+      }
+      if (admin.email) {
+        adminLookup.set(admin.email.toLowerCase(), admin.id);
+        adminNames.add(admin.email.toLowerCase());
+      }
+    }
+
     // Validate data
-    const { errors, warnings } = validateImportData(rows, defaultLanguage);
+    const { errors, warnings } = validateImportData(rows, defaultLanguage, adminNames);
 
     if (errors.length > 0) {
       return {
@@ -383,6 +419,11 @@ export async function importGuestList(
         const referenceCode =
           paymentMode === 'AUTOMATED' ? await ensureUniqueReferenceCode(wedding_id) : null;
 
+        // Resolve invited_by_admin_id: match by name first, then email, then default
+        const resolvedAdminId = row.invitedBy
+          ? (adminLookup.get(row.invitedBy.toLowerCase()) || defaultAdminId)
+          : defaultAdminId;
+
         // Create family
         const family = await tx.family.create({
           data: {
@@ -394,6 +435,7 @@ export async function importGuestList(
             magic_token: magicToken,
             reference_code: referenceCode,
             preferred_language: row.language,
+            invited_by_admin_id: resolvedAdminId,
           },
         });
 

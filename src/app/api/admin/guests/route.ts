@@ -23,6 +23,7 @@ const listGuestsQuerySchema = z.object({
   attendance: z.enum(['yes', 'no', 'partial']).optional(),
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
   payment_status: z.enum(['PENDING', 'RECEIVED', 'CONFIRMED']).optional(),
+  invited_by_admin_id: z.string().uuid().optional(),
   search: z.string().optional(),
 });
 
@@ -55,10 +56,11 @@ export async function GET(request: NextRequest) {
       attendance: searchParams.get('attendance') || undefined,
       channel: searchParams.get('channel') || undefined,
       payment_status: searchParams.get('payment_status') || undefined,
+      invited_by_admin_id: searchParams.get('invited_by_admin_id') || undefined,
       search: searchParams.get('search') || undefined,
     });
 
-    const { page, limit, rsvp_status, attendance, channel, payment_status, search } =
+    const { page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search } =
       queryParams;
     const skip = (page - 1) * limit;
 
@@ -78,6 +80,11 @@ export async function GET(request: NextRequest) {
     // Channel filter
     if (channel) {
       whereClause.channel_preference = channel;
+    }
+
+    // Invited By filter
+    if (invited_by_admin_id) {
+      whereClause.invited_by_admin_id = invited_by_admin_id;
     }
 
     // Get all families matching base filters first (for RSVP and attendance filtering)
@@ -190,12 +197,21 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Fetch all admins once for name resolution
+    const weddingAdmins = await prisma.weddingAdmin.findMany({
+      where: { wedding_id: user.wedding_id },
+      select: { id: true, name: true, email: true },
+    });
+    const adminMap = new Map(weddingAdmins.map((a) => [a.id, a]));
+
     // Transform response to include RSVP status and payment status
     const familiesWithStatus = families.map((family) => {
       const hasRsvp = family.members.some((m) => m.attending !== null);
       const attendingMembers = family.members.filter((m) => m.attending === true);
       const latestGift = family.gifts[0];
       const invitationSent = family.tracking_events.length > 0;
+
+      const invitedByAdmin = family.invited_by_admin_id ? adminMap.get(family.invited_by_admin_id) : null;
 
       return {
         id: family.id,
@@ -208,6 +224,8 @@ export async function GET(request: NextRequest) {
         reference_code: family.reference_code,
         channel_preference: family.channel_preference,
         preferred_language: family.preferred_language,
+        invited_by_admin_id: family.invited_by_admin_id,
+        invited_by_admin_name: invitedByAdmin ? (invitedByAdmin.name || invitedByAdmin.email) : null,
         save_the_date_sent: family.save_the_date_sent,
         created_at: family.created_at,
         // RSVP Question Answers

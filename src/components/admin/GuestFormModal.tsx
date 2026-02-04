@@ -18,6 +18,7 @@ interface GuestFormData {
   whatsapp_number?: string | null;
   channel_preference?: Channel | null;
   preferred_language: Language;
+  invited_by_admin_id?: string | null;
   members: FamilyMemberFormData[];
   // RSVP Question Answers
   transportation_answer?: boolean | null;
@@ -50,6 +51,7 @@ interface GuestFormModalProps {
   isOpen: boolean;
   mode: 'add' | 'edit';
   initialData?: GuestFormData;
+  admins: Array<{ id: string; name: string; email: string }>;
   weddingConfig?: WeddingQuestionConfig;
   onSubmit: (data: GuestFormData) => Promise<void>;
   onCancel: () => void;
@@ -62,6 +64,7 @@ const defaultFormData: GuestFormData = {
   whatsapp_number: null,
   channel_preference: null,
   preferred_language: 'ES',
+  invited_by_admin_id: null,
   members: [],
   // RSVP Question Answers
   transportation_answer: null,
@@ -77,6 +80,7 @@ export function GuestFormModal({
   isOpen,
   mode,
   initialData,
+  admins,
   weddingConfig,
   onSubmit,
   onCancel,
@@ -89,10 +93,16 @@ export function GuestFormModal({
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
     if (isOpen) {
-      setFormData(initialData || defaultFormData);
+      const data = initialData || defaultFormData;
+      // In add mode, default invited_by_admin_id to first admin
+      if (mode === 'add' && !data.invited_by_admin_id && admins.length > 0) {
+        setFormData({ ...data, invited_by_admin_id: admins[0].id });
+      } else {
+        setFormData(data);
+      }
       setError(null);
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, mode, admins]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,6 +275,29 @@ export function GuestFormModal({
                   <option value="DE">{t('common.languages.DE')}</option>
                 </select>
               </div>
+
+              {/* Invited By */}
+              {admins.length > 0 && (
+                <div>
+                  <label htmlFor="guest-invited-by" className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('admin.guests.invitedBy')}
+                  </label>
+                  <select
+                    id="guest-invited-by"
+                    value={formData.invited_by_admin_id || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, invited_by_admin_id: e.target.value || null })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                  >
+                    {admins.map((admin) => (
+                      <option key={admin.id} value={admin.id}>
+                        {admin.name || admin.email}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* RSVP Question Answers - Only show in edit mode when questions are configured */}
               {mode === 'edit' && weddingConfig && (
