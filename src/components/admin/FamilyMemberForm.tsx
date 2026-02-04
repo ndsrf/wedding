@@ -137,10 +137,11 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor={`member-name-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
                   {t('guest.members.name')} <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id={`member-name-${index}`}
                   type="text"
                   value={member.name}
                   onChange={(e) => updateMember(index, 'name', e.target.value)}
@@ -151,10 +152,11 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
 
               {/* Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor={`member-type-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
                   {t('guest.members.type')} <span className="text-red-500">*</span>
                 </label>
                 <select
+                  id={`member-type-${index}`}
                   value={member.type}
                   onChange={(e) => updateMember(index, 'type', e.target.value as MemberType)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
@@ -168,8 +170,9 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
 
               {/* Age */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('guest.members.age')}</label>
+                <label htmlFor={`member-age-${index}`} className="block text-sm font-medium text-gray-700 mb-1">{t('guest.members.age')}</label>
                 <input
+                  id={`member-age-${index}`}
                   type="number"
                   min="0"
                   max="150"
@@ -183,10 +186,11 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
 
               {/* Dietary Restrictions */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor={`member-dietary-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
                   {t('guest.rsvp.dietaryRestrictions')}
                 </label>
                 <input
+                  id={`member-dietary-${index}`}
                   type="text"
                   value={member.dietary_restrictions || ''}
                   onChange={(e) =>
@@ -200,10 +204,11 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
 
             {/* Accessibility Needs */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor={`member-accessibility-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
                 {t('guest.rsvp.accessibilityNeeds')}
               </label>
               <input
+                id={`member-accessibility-${index}`}
                 type="text"
                 value={member.accessibility_needs || ''}
                 onChange={(e) => updateMember(index, 'accessibility_needs', e.target.value || null)}

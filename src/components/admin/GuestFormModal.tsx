@@ -167,10 +167,11 @@ export function GuestFormModal({
             <div className="space-y-4">
               {/* Family Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="guest-family-name" className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.guests.familyName')} <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="guest-family-name"
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -182,8 +183,9 @@ export function GuestFormModal({
               {/* Contact Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.email')}</label>
+                  <label htmlFor="guest-email" className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.email')}</label>
                   <input
+                    id="guest-email"
                     type="email"
                     value={formData.email || ''}
                     onChange={(e) =>
@@ -194,8 +196,9 @@ export function GuestFormModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.phone')}</label>
+                  <label htmlFor="guest-phone" className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.phone')}</label>
                   <input
+                    id="guest-phone"
                     type="tel"
                     value={formData.phone || ''}
                     onChange={(e) =>
@@ -206,8 +209,9 @@ export function GuestFormModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.whatsapp')}</label>
+                  <label htmlFor="guest-whatsapp" className="block text-sm font-medium text-gray-700 mb-1">{t('admin.guests.whatsapp')}</label>
                   <input
+                    id="guest-whatsapp"
                     type="tel"
                     value={formData.whatsapp_number || ''}
                     onChange={(e) =>
@@ -218,10 +222,11 @@ export function GuestFormModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="guest-channel" className="block text-sm font-medium text-gray-700 mb-1">
                     {t('admin.guests.form.preferredChannel')}
                   </label>
                   <select
+                    id="guest-channel"
                     value={formData.channel_preference || ''}
                     onChange={(e) =>
                       setFormData({
@@ -241,10 +246,11 @@ export function GuestFormModal({
 
               {/* Language Preference */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="guest-language" className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.guests.form.languagePreference')}
                 </label>
                 <select
+                  id="guest-language"
                   value={formData.preferred_language}
                   onChange={(e) =>
                     setFormData({ ...formData, preferred_language: e.target.value as Language })
