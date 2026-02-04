@@ -23,7 +23,8 @@
       "send": "Senden",
       "clearFilters": "Alle Filter löschen",
       "retry": "Erneut versuchen",
-      "continue": "Fortfahren"
+      "continue": "Fortfahren",
+      "copy": "Kopieren"
     },
     "status": {
       "pending": "Ausstehend",
@@ -90,9 +91,17 @@
     "yes": "Ja",
     "no": "Nein"
   },
+  "landing": {
+    "title": "Hochzeitsmanagementsystem",
+    "subtitle": "Mandantenfähige Hochzeitsmanagement-Plattform",
+    "description": {
+      "p1": "Plattform für Hochzeitsplaner, Administratoren und Gäste",
+      "p2": "Mit RSVP-Verfolgung, Geschenkverwaltung und mehrsprachiger Unterstützung"
+    }
+  },
   "metadata": {
     "title": "Hochzeitsmanagementsystem",
-    "description": "Mandantenfähige Hochzeitsmanagement-Plattform mit RSVP-Verfolgung und Zahlungsverwaltung"
+    "description": "Mandantenfähige Hochzeitsmanagement-Plattform mit RSVP-Verfolgung und Geschenkverwaltung"
   },
   "master": {
     "dashboard": {
@@ -414,15 +423,15 @@
         "totalGuests": "Gesamtzahl Gäste",
         "rsvpCompletion": "RSVP-Abschluss",
         "attending": "Teilnehmend",
-        "paymentsReceived": "Erhaltene Zahlungen"
+        "paymentsReceived": "Erhaltene Geschenke"
       },
       "manageWedding": "Hochzeit verwalten",
       "guestList": "Gästeliste",
       "guestListSubtitle": "Gäste anzeigen und verwalten",
       "activity": "Aktivität",
       "activitySubtitle": "Gästeaktivität verfolgen",
-      "payments": "Zahlungen",
-      "paymentsSubtitle": "Geschenke und Zahlungen verfolgen",
+      "payments": "Geschenke",
+      "paymentsSubtitle": "Geschenke verfolgen",
       "importGuests": "Gäste importieren",
       "importGuestsSubtitle": "Excel-Datei hochladen",
       "templates": "Nachrichtenvorlagen",
@@ -433,8 +442,8 @@
       "complete": "abgeschlossen",
       "seatingPlan": "Sitzplan",
       "seatingPlanSubtitle": "Gäste den Tischen zuweisen",
-      "providers": "Anbieter und Zahlungen",
-      "providersSubtitle": "Anbieter und Zahlungen verwalten",
+      "providers": "Anbieter und Geschenke",
+      "providersSubtitle": "Anbieter und Geschenke verwalten",
       "invitationBuilder": "Einladungsgenerator",
       "invitationBuilderSubtitle": "Gestalten Sie Ihre Hochzeitseinladung",
       "weddingNotFound": "Hochzeit nicht gefunden",
@@ -527,13 +536,13 @@
         "members": "Mitglieder",
         "rsvp": "RSVP",
         "channel": "Kanal",
-        "payment": "Zahlung",
+        "payment": "Geschenk",
         "language": "Sprache",
         "actions": "Aktionen",
         "loading": "Lade Gäste...",
         "emptyTitle": "Keine Gäste gefunden",
         "emptyDesc": "Versuchen Sie, Ihre Filter anzupassen oder eine Gästeliste zu importieren.",
-        "noPayment": "Keine Zahlung"
+        "noPayment": "Kein Geschenk"
       },
       "timeline": {
         "title": "Gast-Aktivitätsverlauf",
@@ -557,7 +566,7 @@
       "attendance": "Teilnahme",
       "notAnswered": "Nicht Beantwortet",
       "channel": "Kanal",
-      "paymentStatus": "Zahlungsstatus",
+      "paymentStatus": "Geschenkstatus",
       "filters": {
         "all": "Alle",
         "pending": "Ausstehend",
@@ -569,8 +578,8 @@
         "whatsapp": "WhatsApp",
         "email": "E-Mail",
         "sms": "SMS",
-        "paid": "Bezahlt",
-        "unpaid": "Unbezahlt",
+        "paid": "Geschenk erhalten",
+        "unpaid": "Kein Geschenk",
         "received": "Erhalten",
         "searchPlaceholder": "Name oder E-Mail...",
         "clearAll": "Filter löschen"
@@ -681,18 +690,18 @@
       "sendToValidOnly": "Trotzdem an {count} Familien senden"
     },
     "payments": {
-      "title": "Zahlungsverwaltung",
-      "list": "Zahlungsliste",
-      "loading": "Lade Zahlungen...",
-      "emptyTitle": "Keine Zahlungen aufgezeichnet",
-      "emptyDesc": "Zahlungen erscheinen hier, wenn sie aufgezeichnet werden.",
-      "recordTitle": "Zahlung aufzeichnen",
+      "title": "Geschenkverwaltung",
+      "list": "Geschenkliste",
+      "loading": "Lade Geschenke...",
+      "emptyTitle": "Keine Geschenke aufgezeichnet",
+      "emptyDesc": "Geschenke erscheinen hier, wenn sie aufgezeichnet werden.",
+      "recordTitle": "Geschenk aufzeichnen",
       "selectFamily": "Familie auswählen",
       "currencyAmount": "Betrag ({currency})",
       "recording": "Aufzeichnen...",
       "markReceived": "Als erhalten markieren",
       "auto": "Auto",
-      "record": "Manuelle Zahlung erfassen",
+      "record": "Manuelles Geschenk erfassen",
       "family": "Familie",
       "amount": "Betrag",
       "referenceCode": "Referenzcode",
@@ -703,8 +712,8 @@
         "received": "Erhalten",
         "confirmed": "Bestätigt"
       },
-      "recordSuccess": "Zahlung erfolgreich erfasst",
-      "updateSuccess": "Zahlungsstatus aktualisiert"
+      "recordSuccess": "Geschenk erfolgreich erfasst",
+      "updateSuccess": "Geschenkstatus aktualisiert"
     },
     "deleteDialog": {
       "title": "Gastfamilie löschen",
@@ -952,17 +961,19 @@
       "noMembers": "Noch keine Mitglieder hinzugefügt"
     },
     "payment": {
-      "title": "Zahlungsinformationen",
+      "title": "Geschenkinformationen",
       "subtitle": "Details zum Hochzeitsgeschenk",
-      "iban": "IBAN für Überweisung:",
+      "iban": "IBAN:",
       "referenceCode": "Referenzcode:",
       "referenceInstructions": "Bitte geben Sie diesen Referenzcode bei Ihrer Überweisung an.",
-      "status": "Zahlungsstatus:",
+      "status": "Geschenkstatus:",
       "statuses": {
         "pending": "Ausstehend",
         "received": "Erhalten",
         "confirmed": "Bestätigt"
       },
+      "presenceMessage": "Ihre Anwesenheit ist das Wichtigste für uns. Wenn Sie uns ein Geschenk machen möchten, können Sie dies auf die für Sie angenehmste Weise tun.",
+      "cashMessage": "Wenn Sie es bevorzugen, kann das Geschenk in bar erfolgen. Falls es für Sie bequemer ist, können Sie auch eine Überweisung tätigen:",
       "manualMode": "Bitte verwenden Sie die folgende IBAN für Ihr Geschenk.",
       "thankYou": "Vielen Dank für Ihre Großzügigkeit!"
     },

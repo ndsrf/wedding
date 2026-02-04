@@ -1,8 +1,8 @@
 /**
  * Payment Info Component
  *
- * Displays payment information including IBAN and reference code (if automated mode).
- * Shows payment status if payment has been received.
+ * Displays gift information including IBAN and reference code (if automated mode).
+ * Shows gift status if gift has been received.
  */
 
 'use client';
@@ -32,7 +32,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
           setPaymentInfo(result.data);
         }
       } catch (error) {
-        console.error('Load payment info error:', error);
+        console.error('Load gift info error:', error);
       } finally {
         setLoading(false);
       }
@@ -86,14 +86,19 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+      <h3 className="text-2xl font-bold text-gray-900 mb-4">
         {t('guest.payment.title')} 💝
       </h3>
-      <p className="text-lg text-gray-600 mb-6">
-        {paymentMode === 'AUTOMATED'
-          ? t('guest.payment.subtitle')
-          : t('guest.payment.manualMode')}
-      </p>
+
+      {/* New Intro Text */}
+      <div className="prose prose-blue max-w-none mb-6">
+         <p className="text-lg text-gray-700 italic">
+            {t('guest.payment.presenceMessage')}
+         </p>
+         <p className="text-lg text-gray-700 mt-2">
+            {t('guest.payment.cashMessage')}
+         </p>
+      </div>
 
       {/* Payment Status */}
       {paymentInfo.payment_status && (
@@ -120,7 +125,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
       )}
 
       {/* IBAN */}
-      <div className="mb-4">
+      <div className="mb-6">
         <label className="block text-base font-semibold text-gray-700 mb-2">
           {t('guest.payment.iban')}
         </label>
@@ -129,13 +134,13 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
             type="text"
             value={paymentInfo.iban}
             readOnly
-            className="flex-1 px-4 py-3 text-lg font-mono border-2 border-gray-300 rounded-lg bg-gray-50"
+            className="flex-1 px-4 py-3 text-lg font-mono font-bold text-gray-900 bg-gray-50 border-2 border-gray-300 rounded-lg"
           />
           <button
             onClick={() => copyToClipboard(paymentInfo.iban, 'iban')}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
           >
-            {copied === 'iban' ? '✓ Copied' : 'Copy'}
+            {copied === 'iban' ? '✓' : t('common.buttons.copy')}
           </button>
         </div>
       </div>
@@ -151,7 +156,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
               type="text"
               value={paymentInfo.reference_code}
               readOnly
-              className="flex-1 px-4 py-3 text-lg font-mono border-2 border-gray-300 rounded-lg bg-gray-50"
+              className="flex-1 px-4 py-3 text-lg font-mono font-bold text-gray-900 bg-gray-50 border-2 border-gray-300 rounded-lg"
             />
             <button
               onClick={() =>
@@ -159,7 +164,7 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
               }
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              {copied === 'reference' ? '✓ Copied' : 'Copy'}
+              {copied === 'reference' ? '✓' : t('common.buttons.copy')}
             </button>
           </div>
           <p className="mt-2 text-base text-gray-600">
@@ -177,3 +182,4 @@ export default function PaymentInfo({ token, paymentMode }: PaymentInfoProps) {
     </div>
   );
 }
+

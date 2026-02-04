@@ -23,7 +23,8 @@
       "send": "Enviar",
       "clearFilters": "Limpiar filtros",
       "retry": "Reintentar",
-      "continue": "Continuar"
+      "continue": "Continuar",
+      "copy": "Copiar"
     },
     "status": {
       "pending": "Pendiente",
@@ -97,12 +98,12 @@
     "subtitle": "Plataforma de gestión de bodas multi-inquilino",
     "description": {
       "p1": "Plataforma para organizadores de bodas, administradores e invitados",
-      "p2": "Con seguimiento de RSVP, gestión de pagos y soporte multi-idioma"
+      "p2": "Con seguimiento de RSVP, gestión de regalos y soporte multi-idioma"
     }
   },
   "metadata": {
     "title": "Sistema de Gestión de Bodas",
-    "description": "Plataforma de gestión de bodas multi-inquilino con seguimiento de RSVP y gestión de pagos"
+    "description": "Plataforma de gestión de bodas multi-inquilino con seguimiento de RSVP y gestión de regalos"
   },
   "master": {
     "dashboard": {
@@ -424,15 +425,15 @@
         "totalGuests": "Total de Invitados",
         "rsvpCompletion": "Completado de RSVP",
         "attending": "Asistentes",
-        "paymentsReceived": "Pagos Recibidos"
+        "paymentsReceived": "Regalos Recibidos"
       },
       "manageWedding": "Gestionar Boda",
       "guestList": "Lista de Invitados",
       "guestListSubtitle": "Ver y gestionar invitados",
       "activity": "Actividad",
       "activitySubtitle": "Rastrear actividad de invitados",
-      "payments": "Pagos",
-      "paymentsSubtitle": "Rastrear regalos y pagos",
+      "payments": "Regalos",
+      "paymentsSubtitle": "Rastrear regalos",
       "importGuests": "Importar Invitados",
       "importGuestsSubtitle": "Subir archivo Excel",
       "templates": "Plantillas de Mensajes",
@@ -445,8 +446,8 @@
       "complete": "completo",
       "seatingPlan": "Plan de Asientos",
       "seatingPlanSubtitle": "Asignar invitados a mesas",
-      "providers": "Proveedores y Pagos",
-      "providersSubtitle": "Gestionar proveedores y pagos",
+      "providers": "Proveedores y Regalos",
+      "providersSubtitle": "Gestionar proveedores y regalos",
       "invitationBuilder": "Constructor de Invitaciones",
       "invitationBuilderSubtitle": "Diseña tu invitación de boda",
       "weddingNotFound": "Boda no encontrada",
@@ -539,13 +540,13 @@
         "members": "Miembros",
         "rsvp": "RSVP",
         "channel": "Canal",
-        "payment": "Pago",
+        "payment": "Regalo",
         "language": "Idioma",
         "actions": "Acciones",
         "loading": "Cargando invitados...",
         "emptyTitle": "No se encontraron invitados",
         "emptyDesc": "Intenta ajustar tus filtros o importa una lista de invitados.",
-        "noPayment": "Sin pago"
+        "noPayment": "Sin regalo"
       },
       "timeline": {
         "title": "Cronología de Actividad del Invitado",
@@ -569,7 +570,7 @@
       "attendance": "Asistencia",
       "notAnswered": "Sin Respuesta",
       "channel": "Canal",
-      "paymentStatus": "Estado de Pago",
+      "paymentStatus": "Estado de Regalo",
       "filters": {
         "all": "Todos",
         "pending": "Pendiente",
@@ -581,8 +582,8 @@
         "whatsapp": "WhatsApp",
         "email": "Email",
         "sms": "SMS",
-        "paid": "Pagado",
-        "unpaid": "No Pagado",
+        "paid": "Regalado",
+        "unpaid": "No Regalado",
         "received": "Recibido",
         "searchPlaceholder": "Nombre o email...",
         "clearAll": "Limpiar filtros"
@@ -697,18 +698,18 @@
       "sendToValidOnly": "Enviar a {count} familias de todas formas"
     },
     "payments": {
-      "title": "Gestión de Pagos",
-      "list": "Lista de Pagos",
-      "loading": "Cargando pagos...",
-      "emptyTitle": "No hay pagos registrados",
-      "emptyDesc": "Los pagos aparecerán aquí cuando sean registrados.",
-      "recordTitle": "Registrar Pago",
+      "title": "Gestión de Regalos",
+      "list": "Lista de Regalos",
+      "loading": "Cargando regalos...",
+      "emptyTitle": "No hay regalos registrados",
+      "emptyDesc": "Los regalos aparecerán aquí cuando sean registrados.",
+      "recordTitle": "Registrar Regalo",
       "selectFamily": "Seleccionar una familia",
       "currencyAmount": "Monto ({currency})",
       "recording": "Registrando...",
       "markReceived": "Marcar Recibido",
       "auto": "Auto",
-      "record": "Registrar Pago Manual",
+      "record": "Registrar Regalo Manual",
       "family": "Familia",
       "amount": "Monto",
       "referenceCode": "Código de Referencia",
@@ -719,8 +720,8 @@
         "received": "Recibido",
         "confirmed": "Confirmado"
       },
-      "recordSuccess": "Pago registrado exitosamente",
-      "updateSuccess": "Estado del pago actualizado"
+      "recordSuccess": "Regalo registrado exitosamente",
+      "updateSuccess": "Estado del regalo actualizado"
     },
     "deleteDialog": {
       "title": "Eliminar Familia de Invitados",
@@ -971,17 +972,19 @@
       "noMembers": "No hay miembros añadidos aún"
     },
     "payment": {
-      "title": "Información de Pago",
+      "title": "Información de Regalo",
       "subtitle": "Detalles del regalo de boda",
-      "iban": "IBAN para transferencia:",
+      "iban": "IBAN:",
       "referenceCode": "Código de referencia:",
       "referenceInstructions": "Por favor incluye este código de referencia en tu transferencia.",
-      "status": "Estado del pago:",
+      "status": "Estado del regalo:",
       "statuses": {
         "pending": "Pendiente",
         "received": "Recibido",
         "confirmed": "Confirmado"
       },
+      "presenceMessage": "Vuestra presencia es lo más importante para nosotros. Si deseáis hacernos un regalo, podéis hacerlo de la forma que os resulte más cómoda.",
+      "cashMessage": "Si lo preferís, el regalo puede ser en dinero en efectivo. En caso de que os resulte más cómodo, también podéis realizar una transferencia:",
       "manualMode": "Por favor usa el siguiente IBAN para tu regalo.",
       "thankYou": "¡Gracias por tu generosidad!"
     },

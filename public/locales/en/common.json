@@ -23,7 +23,8 @@
       "send": "Send",
       "clearFilters": "Clear all filters",
       "retry": "Retry",
-      "continue": "Continue"
+      "continue": "Continue",
+      "copy": "Copy"
     },
     "status": {
       "pending": "Pending",
@@ -98,12 +99,12 @@
     "subtitle": "Multi-tenant wedding management platform",
     "description": {
       "p1": "Platform for wedding planners, admins, and guests",
-      "p2": "Featuring RSVP tracking, payment management, and multi-language support"
+      "p2": "Featuring RSVP tracking, gift management, and multi-language support"
     }
   },
   "metadata": {
     "title": "Wedding Management System",
-    "description": "Multi-tenant wedding management platform with RSVP tracking and payment management"
+    "description": "Multi-tenant wedding management platform with RSVP tracking and gift management"
   },
   "master": {
     "dashboard": {
@@ -428,15 +429,15 @@
         "totalGuests": "Total Guests",
         "rsvpCompletion": "RSVP Completion",
         "attending": "Attending",
-        "paymentsReceived": "Payments Received"
+        "paymentsReceived": "Gifts Received"
       },
       "manageWedding": "Manage Wedding",
       "guestList": "Guest List",
       "guestListSubtitle": "View and manage guests",
       "activity": "Activity",
       "activitySubtitle": "Track guest activity",
-      "payments": "Payments",
-      "paymentsSubtitle": "Track gifts and payments",
+      "payments": "Gifts",
+      "paymentsSubtitle": "Track gifts",
       "importGuests": "Import Guests",
       "importGuestsSubtitle": "Upload Excel file",
       "templates": "Message Templates",
@@ -449,8 +450,8 @@
       "complete": "complete",
       "seatingPlan": "Seating Plan",
       "seatingPlanSubtitle": "Assign guests to tables",
-      "providers": "Providers & Payments",
-      "providersSubtitle": "Manage providers and payments",
+      "providers": "Providers & Gifts",
+      "providersSubtitle": "Manage providers and gifts",
       "invitationBuilder": "Invitation Builder",
       "invitationBuilderSubtitle": "Design your wedding invitation",
       "weddingNotFound": "Wedding not found",
@@ -544,13 +545,13 @@
         "members": "Members",
         "rsvp": "RSVP",
         "channel": "Channel",
-        "payment": "Payment",
+        "payment": "Gift",
         "language": "Language",
         "actions": "Actions",
         "loading": "Loading guests...",
         "emptyTitle": "No guests found",
         "emptyDesc": "Try adjusting your filters or import a guest list.",
-        "noPayment": "No payment"
+        "noPayment": "No gift"
       },
       "timeline": {
         "title": "Guest Activity Timeline",
@@ -573,7 +574,7 @@
       "attendance": "Attendance",
       "notAnswered": "Not Answered",
       "channel": "Channel",
-      "paymentStatus": "Payment Status",
+      "paymentStatus": "Gift Status",
       "filters": {
         "all": "All",
         "pending": "Pending",
@@ -585,8 +586,8 @@
         "whatsapp": "WhatsApp",
         "email": "Email",
         "sms": "SMS",
-        "paid": "Paid",
-        "unpaid": "Unpaid",
+        "paid": "Gift Sent",
+        "unpaid": "No Gift",
         "received": "Received",
         "searchPlaceholder": "Name or email...",
         "clearAll": "Clear all filters"
@@ -699,19 +700,19 @@
       "sendToValidOnly": "Send to {count} families anyway"
     },
     "payments": {
-      "title": "Payment Management",
-      "tracking": "Payment Tracking",
-      "list": "Payment List",
-      "loading": "Loading payments...",
-      "emptyTitle": "No payments recorded",
-      "emptyDesc": "Payments will appear here when recorded.",
-      "recordTitle": "Record Payment",
+      "title": "Gift Management",
+      "tracking": "Gift Tracking",
+      "list": "Gift List",
+      "loading": "Loading gifts...",
+      "emptyTitle": "No gifts recorded",
+      "emptyDesc": "Gifts will appear here when recorded.",
+      "recordTitle": "Record Gift",
       "selectFamily": "Select a family",
       "currencyAmount": "Amount ({currency})",
       "recording": "Recording...",
       "markReceived": "Mark Received",
       "auto": "Auto",
-      "record": "Record Manual Payment",
+      "record": "Record Manual Gift",
       "showFamilies": "Show Families",
       "filterFamiliesDesc": "Filter which families appear in the dropdown below",
       "filterFamilies": {
@@ -720,7 +721,7 @@
         "notAttending": "Not Attending Only"
       },
       "stats": {
-        "totalPayments": "Total Payments"
+        "totalPayments": "Total Gifts"
       },
       "family": "Family",
       "amount": "Amount",
@@ -732,8 +733,8 @@
         "received": "Received",
         "confirmed": "Confirmed"
       },
-      "recordSuccess": "Payment recorded successfully",
-      "updateSuccess": "Payment status updated"
+      "recordSuccess": "Gift recorded successfully",
+      "updateSuccess": "Gift status updated"
     },
     "deleteDialog": {
       "title": "Delete Guest Family",
@@ -985,17 +986,19 @@
       "noMembers": "No members added yet"
     },
     "payment": {
-      "title": "Payment Information",
+      "title": "Gift Information",
       "subtitle": "Wedding gift details",
-      "iban": "IBAN for transfer:",
+      "iban": "IBAN:",
       "referenceCode": "Reference code:",
       "referenceInstructions": "Please include this reference code in your transfer.",
-      "status": "Payment status:",
+      "status": "Gift status:",
       "statuses": {
         "pending": "Pending",
         "received": "Received",
         "confirmed": "Confirmed"
       },
+      "presenceMessage": "Your presence is the most important thing to us. If you wish to give us a gift, you can do so in the way that is most comfortable for you.",
+      "cashMessage": "If you prefer, the gift can be in cash. In case it is more comfortable for you, you can also make a transfer:",
       "manualMode": "Please use the following IBAN for your gift.",
       "thankYou": "Thank you for your generosity!"
     },

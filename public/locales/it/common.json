@@ -23,7 +23,8 @@
       "send": "Invia",
       "clearFilters": "Cancella tutti i filtri",
       "retry": "Riprova",
-      "continue": "Continua"
+      "continue": "Continua",
+      "copy": "Copia"
     },
     "status": {
       "pending": "In attesa",
@@ -414,15 +415,15 @@
         "totalGuests": "Totale Ospiti",
         "rsvpCompletion": "Completamento RSVP",
         "attending": "Presenti",
-        "paymentsReceived": "Pagamenti Ricevuti"
+        "paymentsReceived": "Regali Ricevuti"
       },
       "manageWedding": "Gestisci Matrimonio",
       "guestList": "Lista Ospiti",
       "guestListSubtitle": "Visualizza e gestisci ospiti",
       "activity": "Attività",
       "activitySubtitle": "Traccia attività ospiti",
-      "payments": "Pagamenti",
-      "paymentsSubtitle": "Traccia regali e pagamenti",
+      "payments": "Regali",
+      "paymentsSubtitle": "Traccia regali",
       "importGuests": "Importa Ospiti",
       "importGuestsSubtitle": "Carica file Excel",
       "templates": "Modelli di Messaggi",
@@ -433,8 +434,8 @@
       "complete": "completo",
       "seatingPlan": "Piano dei Posti",
       "seatingPlanSubtitle": "Assegna gli ospiti ai tavoli",
-      "providers": "Fornitori e Pagamenti",
-      "providersSubtitle": "Gestire fornitori e pagamenti",
+      "providers": "Fornitori e Regali",
+      "providersSubtitle": "Gestire fornitori e regali",
       "invitationBuilder": "Creatore di Inviti",
       "invitationBuilderSubtitle": "Progetta il tuo invito matrimoniale",
       "weddingNotFound": "Matrimonio non trovato",
@@ -527,13 +528,13 @@
         "members": "Membri",
         "rsvp": "RSVP",
         "channel": "Canale",
-        "payment": "Pagamento",
+        "payment": "Regalo",
         "language": "Lingua",
         "actions": "Azioni",
         "loading": "Caricamento ospiti...",
         "emptyTitle": "Nessun ospite trovato",
         "emptyDesc": "Prova a regolare i filtri o importa una lista di ospiti.",
-        "noPayment": "Nessun pagamento"
+        "noPayment": "Nessun regalo"
       },
       "timeline": {
         "title": "Cronologia Attività Ospite",
@@ -557,7 +558,7 @@
       "attendance": "Presenza",
       "notAnswered": "Non Risposto",
       "channel": "Canale",
-      "paymentStatus": "Stato Pagamento",
+      "paymentStatus": "Stato Regalo",
       "filters": {
         "all": "Tutti",
         "pending": "In Attesa",
@@ -569,8 +570,8 @@
         "whatsapp": "WhatsApp",
         "email": "Email",
         "sms": "SMS",
-        "paid": "Pagato",
-        "unpaid": "Non Pagato",
+        "paid": "Regalo Inviato",
+        "unpaid": "Nessun Regalo",
         "received": "Ricevuto",
         "searchPlaceholder": "Nome o email...",
         "clearAll": "Cancella filtri"
@@ -681,18 +682,18 @@
       "sendToValidOnly": "Invia comunque a {count} famiglie"
     },
     "payments": {
-      "title": "Gestione Pagamenti",
-      "list": "Lista Pagamenti",
-      "loading": "Caricamento pagamenti...",
-      "emptyTitle": "Nessun pagamento registrato",
-      "emptyDesc": "I pagamenti appariranno qui quando registrati.",
-      "recordTitle": "Registra Pagamento",
+      "title": "Gestione Regali",
+      "list": "Lista Regali",
+      "loading": "Caricamento regali...",
+      "emptyTitle": "Nessun regalo registrato",
+      "emptyDesc": "I regali appariranno qui quando registrati.",
+      "recordTitle": "Registra Regalo",
       "selectFamily": "Seleziona una famiglia",
       "currencyAmount": "Importo ({currency})",
       "recording": "Registrazione...",
       "markReceived": "Segna come Ricevuto",
       "auto": "Auto",
-      "record": "Registra Pagamento Manuale",
+      "record": "Registra Regalo Manuale",
       "family": "Famiglia",
       "amount": "Importo",
       "referenceCode": "Codice Riferimento",
@@ -703,8 +704,8 @@
         "received": "Ricevuto",
         "confirmed": "Confermato"
       },
-      "recordSuccess": "Pagamento registrato con successo",
-      "updateSuccess": "Stato pagamento aggiornato"
+      "recordSuccess": "Regalo registrato con successo",
+      "updateSuccess": "Stato regalo aggiornato"
     },
     "deleteDialog": {
       "title": "Elimina Famiglia Ospiti",
@@ -952,17 +953,19 @@
       "noMembers": "Nessun membro aggiunto ancora"
     },
     "payment": {
-      "title": "Informazioni Pagamento",
+      "title": "Informazioni Regalo",
       "subtitle": "Dettagli regalo matrimonio",
-      "iban": "IBAN per bonifico:",
+      "iban": "IBAN:",
       "referenceCode": "Codice riferimento:",
       "referenceInstructions": "Includi questo codice di riferimento nel bonifico.",
-      "status": "Stato pagamento:",
+      "status": "Stato regalo:",
       "statuses": {
         "pending": "In Attesa",
         "received": "Ricevuto",
         "confirmed": "Confermato"
       },
+      "presenceMessage": "La vostra presenza è la cosa più importante per noi. Se desiderate farci un regalo, potete farlo nel modo che vi risulta più comodo.",
+      "cashMessage": "Se preferite, il regalo può essere in contanti. Nel caso vi risulti più comodo, potete anche effettuare un bonifico:",
       "manualMode": "Usa il seguente IBAN per il tuo regalo.",
       "thankYou": "Grazie per la tua generosità!"
     },

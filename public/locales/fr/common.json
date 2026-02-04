@@ -23,7 +23,8 @@
       "send": "Envoyer",
       "clearFilters": "Effacer tous les filtres",
       "retry": "Réessayer",
-      "continue": "Continuer"
+      "continue": "Continuer",
+      "copy": "Copier"
     },
     "status": {
       "pending": "En attente",
@@ -90,9 +91,17 @@
     "yes": "Oui",
     "no": "Non"
   },
+  "landing": {
+    "title": "Système de Gestion de Mariages",
+    "subtitle": "Plateforme de gestion de mariages multi-locataires",
+    "description": {
+      "p1": "Plateforme pour les organisateurs de mariages, les administrateurs et les invités",
+      "p2": "Avec suivi RSVP, gestion des cadeaux et support multilingue"
+    }
+  },
   "metadata": {
     "title": "Système de Gestion de Mariages",
-    "description": "Plateforme de gestion de mariages multi-locataires avec suivi RSVP et gestion des paiements"
+    "description": "Plateforme de gestion de mariages multi-locataires avec suivi RSVP et gestion des cadeaux"
   },
   "master": {
     "dashboard": {
@@ -414,15 +423,15 @@
         "totalGuests": "Total Invités",
         "rsvpCompletion": "Taux de Réponse RSVP",
         "attending": "Présents",
-        "paymentsReceived": "Paiements Reçus"
+        "paymentsReceived": "Cadeaux Reçus"
       },
       "manageWedding": "Gérer le Mariage",
       "guestList": "Liste des Invités",
       "guestListSubtitle": "Voir et gérer les invités",
       "activity": "Activité",
       "activitySubtitle": "Suivre l'activité des invités",
-      "payments": "Paiements",
-      "paymentsSubtitle": "Suivre les cadeaux et paiements",
+      "payments": "Cadeaux",
+      "paymentsSubtitle": "Suivre les cadeaux",
       "importGuests": "Importer Invités",
       "importGuestsSubtitle": "Mettre en ligne fichier Excel",
       "templates": "Modèles de Messages",
@@ -433,8 +442,8 @@
       "complete": "complet",
       "seatingPlan": "Plan de Table",
       "seatingPlanSubtitle": "Assigner les invités aux tables",
-      "providers": "Prestataires et Paiements",
-      "providersSubtitle": "Gérer les prestataires et les paiements",
+      "providers": "Prestataires et Cadeaux",
+      "providersSubtitle": "Gérer les prestataires et les cadeaux",
       "invitationBuilder": "Créateur d'Invitations",
       "invitationBuilderSubtitle": "Concevez votre invitation de mariage",
       "weddingNotFound": "Mariage introuvable",
@@ -527,13 +536,13 @@
         "members": "Membres",
         "rsvp": "RSVP",
         "channel": "Canal",
-        "payment": "Paiement",
+        "payment": "Cadeau",
         "language": "Langue",
         "actions": "Actions",
         "loading": "Chargement des invités...",
         "emptyTitle": "Aucun invité trouvé",
         "emptyDesc": "Essayez d'ajuster vos filtres ou importez une liste d'invités.",
-        "noPayment": "Aucun paiement"
+        "noPayment": "Aucun cadeau"
       },
       "timeline": {
         "title": "Chronologie d'Activité de l'Invité",
@@ -557,7 +566,7 @@
       "attendance": "Présence",
       "notAnswered": "Non Répondu",
       "channel": "Canal",
-      "paymentStatus": "Statut Paiement",
+      "paymentStatus": "Statut Cadeau",
       "filters": {
         "all": "Tous",
         "pending": "En Attente",
@@ -569,8 +578,8 @@
         "whatsapp": "WhatsApp",
         "email": "Email",
         "sms": "SMS",
-        "paid": "Payé",
-        "unpaid": "Non Payé",
+        "paid": "Cadeau Envoyé",
+        "unpaid": "Pas de Cadeau",
         "received": "Reçu",
         "searchPlaceholder": "Nom ou email...",
         "clearAll": "Effacer les filtres"
@@ -681,18 +690,18 @@
       "sendToValidOnly": "Envoyer à {count} familles quand même"
     },
     "payments": {
-      "title": "Gestion des Paiements",
-      "list": "Liste des Paiements",
-      "loading": "Chargement des paiements...",
-      "emptyTitle": "Aucun paiement enregistré",
-      "emptyDesc": "Les paiements apparaîtront ici lorsqu'ils seront enregistrés.",
-      "recordTitle": "Enregistrer Paiement",
+      "title": "Gestion des Cadeaux",
+      "list": "Liste des Cadeaux",
+      "loading": "Chargement des cadeaux...",
+      "emptyTitle": "Aucun cadeau enregistré",
+      "emptyDesc": "Les cadeaux apparaîtront ici lorsqu'ils seront enregistrés.",
+      "recordTitle": "Enregistrer Cadeau",
       "selectFamily": "Sélectionner une famille",
       "currencyAmount": "Montant ({currency})",
       "recording": "Enregistrement...",
       "markReceived": "Marquer Reçu",
       "auto": "Auto",
-      "record": "Enregistrer Paiement Manuel",
+      "record": "Enregistrer Cadeau Manuel",
       "family": "Famille",
       "amount": "Montant",
       "referenceCode": "Code de Référence",
@@ -703,8 +712,8 @@
         "received": "Reçu",
         "confirmed": "Confirmé"
       },
-      "recordSuccess": "Paiement enregistré avec succès",
-      "updateSuccess": "Statut du paiement mis à jour"
+      "recordSuccess": "Cadeau enregistré avec succès",
+      "updateSuccess": "Statut du cadeau mis à jour"
     },
     "deleteDialog": {
       "title": "Supprimer Famille d'Invités",
@@ -952,17 +961,19 @@
       "noMembers": "Aucun membre ajouté pour le moment"
     },
     "payment": {
-      "title": "Informations de Paiement",
+      "title": "Informations sur le Cadeau",
       "subtitle": "Détails du cadeau de mariage",
-      "iban": "IBAN pour virement :",
+      "iban": "IBAN :",
       "referenceCode": "Code de référence :",
       "referenceInstructions": "Veuillez inclure ce code de référence dans votre virement.",
-      "status": "Statut du paiement :",
+      "status": "Statut du cadeau :",
       "statuses": {
         "pending": "En Attente",
         "received": "Reçu",
         "confirmed": "Confirmé"
       },
+      "presenceMessage": "Votre présence est la chose la plus importante pour nous. Si vous souhaitez nous faire un cadeau, vous pouvez le faire de la manière qui vous convient le mieux.",
+      "cashMessage": "Si vous préférez, le cadeau peut être en espèces. Si cela vous convient mieux, vous pouvez également effectuer un virement :",
       "manualMode": "Veuillez utiliser l'IBAN suivant pour votre cadeau.",
       "thankYou": "Merci pour votre générosité !"
     },
