@@ -94,41 +94,33 @@ END:VCALENDAR`;
   };
 
   return (
-    <div className="py-12 px-4" style={{ background: '#FFFFFF' }}>
+    <div className="py-4 px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <h2
-          className="text-3xl md:text-4xl mb-8"
-          style={{
-            fontFamily: 'var(--font-heading, serif)',
-            color: 'var(--color-primary)',
-          }}
-        >
-          Add to Calendar
-        </h2>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
           {/* Google Calendar Button */}
           <button
             onClick={handleGoogleCalendar}
-            className="px-6 py-3 rounded-lg font-medium transition-opacity hover:opacity-90"
+            className="px-3 py-1 text-sm rounded font-medium transition-opacity hover:opacity-90"
             style={{
               background: 'var(--color-primary)',
               color: '#FFFFFF',
             }}
+            title="Add to Google Calendar"
           >
-            Google Calendar
+            + Google
           </button>
 
           {/* Apple Calendar Button */}
           <button
             onClick={handleAppleCalendar}
-            className="px-6 py-3 rounded-lg font-medium transition-opacity hover:opacity-90"
+            className="px-3 py-1 text-sm rounded font-medium transition-opacity hover:opacity-90"
             style={{
               background: 'var(--color-secondary)',
               color: '#FFFFFF',
             }}
+            title="Add to Apple Calendar"
           >
-            Apple Calendar
+            + Apple
           </button>
         </div>
       </div>

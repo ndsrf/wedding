@@ -5,18 +5,12 @@ import type { TextBlock, SupportedLanguage } from '@/types/invitation-template';
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['ES', 'EN', 'FR', 'IT', 'DE'];
 
 const FONT_FAMILIES = [
-  'Georgia, serif',
   'Playfair Display, serif',
   'Crimson Text, serif',
-  'Libre Baskerville, serif',
   'Cormorant Garamond, serif',
-  'Merriweather, serif',
   'Lora, serif',
   'Inter, sans-serif',
   'Poppins, sans-serif',
-  'Nunito, sans-serif',
-  'Open Sans, sans-serif',
-  'Quicksand, sans-serif',
 ];
 
 const FONT_SIZES = ['0.875rem', '1rem', '1.25rem', '1.5rem', '2rem', '2.5rem', '3rem'];

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useMemo } from 'react';
-import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock } from '@/types/invitation-template';
+import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
@@ -107,19 +107,23 @@ function TemplateBlock({
   }
 
   if (block.type === 'location') {
+    const locationBlock = block as LocationBlockType;
     return (
       <LocationBlock
         location={location}
         weddingTime={weddingTime}
+        style={locationBlock.style}
       />
     );
   }
 
   if (block.type === 'countdown') {
+    const countdownBlock = block as CountdownBlockType;
     return (
       <CountdownBlock
         weddingDate={weddingDate}
         weddingTime={weddingTime}
+        style={countdownBlock.style}
       />
     );
   }

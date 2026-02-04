@@ -5,6 +5,11 @@ import { useState, useEffect } from 'react';
 interface CountdownBlockProps {
   weddingDate: string;
   weddingTime?: string;
+  style?: {
+    fontFamily?: string;
+    fontSize?: string;
+    color?: string;
+  };
 }
 
 /**
@@ -15,7 +20,7 @@ interface CountdownBlockProps {
  *
  * @component
  */
-export function CountdownBlock({ weddingDate, weddingTime }: CountdownBlockProps) {
+export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlockProps) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   // Countdown timer
@@ -49,24 +54,19 @@ export function CountdownBlock({ weddingDate, weddingTime }: CountdownBlockProps
   }, [weddingDate, weddingTime]);
 
   return (
-    <div className="py-12 px-4" style={{ background: 'var(--countdown-bg, #FFFFFF)' }}>
+    <div className="py-12 px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <h2
-          className="text-3xl md:text-4xl mb-8"
-          style={{
-            fontFamily: 'var(--font-heading, serif)',
-            color: 'var(--color-primary)',
-          }}
-        >
-          Countdown
-        </h2>
 
         <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
           {/* Days */}
           <div className="flex flex-col items-center">
             <div
               className="text-4xl md:text-5xl font-bold mb-2"
-              style={{ color: 'var(--color-accent, #D4AF37)' }}
+              style={{
+                fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
+                fontSize: style?.fontSize || '2.25rem',
+                color: style?.color || 'var(--color-accent, #D4AF37)',
+              }}
             >
               {timeLeft.days}
             </div>
@@ -79,7 +79,11 @@ export function CountdownBlock({ weddingDate, weddingTime }: CountdownBlockProps
           <div className="flex flex-col items-center">
             <div
               className="text-4xl md:text-5xl font-bold mb-2"
-              style={{ color: 'var(--color-accent, #D4AF37)' }}
+              style={{
+                fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
+                fontSize: style?.fontSize || '2.25rem',
+                color: style?.color || 'var(--color-accent, #D4AF37)',
+              }}
             >
               {timeLeft.hours}
             </div>
@@ -92,7 +96,11 @@ export function CountdownBlock({ weddingDate, weddingTime }: CountdownBlockProps
           <div className="flex flex-col items-center">
             <div
               className="text-4xl md:text-5xl font-bold mb-2"
-              style={{ color: 'var(--color-accent, #D4AF37)' }}
+              style={{
+                fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
+                fontSize: style?.fontSize || '2.25rem',
+                color: style?.color || 'var(--color-accent, #D4AF37)',
+              }}
             >
               {timeLeft.minutes}
             </div>
@@ -105,7 +113,11 @@ export function CountdownBlock({ weddingDate, weddingTime }: CountdownBlockProps
           <div className="flex flex-col items-center">
             <div
               className="text-4xl md:text-5xl font-bold mb-2"
-              style={{ color: 'var(--color-accent, #D4AF37)' }}
+              style={{
+                fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
+                fontSize: style?.fontSize || '2.25rem',
+                color: style?.color || 'var(--color-accent, #D4AF37)',
+              }}
             >
               {timeLeft.seconds}
             </div>

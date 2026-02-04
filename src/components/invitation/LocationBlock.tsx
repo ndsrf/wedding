@@ -3,6 +3,12 @@
 interface LocationBlockProps {
   location: string;
   weddingTime?: string;
+  style?: {
+    fontFamily?: string;
+    fontSize?: string;
+    color?: string;
+    mapStyle?: 'color' | 'grayscale';
+  };
 }
 
 /**
@@ -12,12 +18,13 @@ interface LocationBlockProps {
  *
  * @component
  */
-export function LocationBlock({ location, weddingTime }: LocationBlockProps) {
+export function LocationBlock({ location, weddingTime, style }: LocationBlockProps) {
   const mapsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   const directionsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(location)}&output=directions`;
+  const isGrayscale = style?.mapStyle === 'grayscale';
 
   return (
-    <div className="py-16 px-4" style={{ background: '#F5F1E8' }}>
+    <div className="py-16 px-4">
       <div className="max-w-4xl mx-auto text-center">
         {/* Location Icon */}
         <div className="mb-6">
@@ -29,22 +36,12 @@ export function LocationBlock({ location, weddingTime }: LocationBlockProps) {
           </div>
         </div>
 
-        <h2
-          className="text-3xl md:text-4xl mb-4"
-          style={{
-            fontFamily: 'var(--font-heading, Crimson Text, serif)',
-            color: 'var(--color-primary, #6B8E6F)',
-            fontStyle: 'italic',
-          }}
-        >
-          Location
-        </h2>
-
         <p
           className="text-xl md:text-2xl mb-4"
           style={{
-            fontFamily: 'var(--font-body, serif)',
-            color: 'var(--color-text, #3A4F3C)',
+            fontFamily: style?.fontFamily || 'var(--font-body, serif)',
+            fontSize: style?.fontSize || '1.25rem',
+            color: style?.color || 'var(--color-text, #3A4F3C)',
             fontWeight: 600,
           }}
         >
@@ -61,7 +58,12 @@ export function LocationBlock({ location, weddingTime }: LocationBlockProps) {
         )}
 
         {/* Google Maps Embed */}
-        <div className="rounded-lg overflow-hidden shadow-lg mb-6 max-w-2xl mx-auto h-[350px] relative z-0">
+        <div
+          className="rounded-lg overflow-hidden shadow-lg mb-6 max-w-2xl mx-auto h-[350px] relative z-0"
+          style={{
+            filter: isGrayscale ? 'grayscale(100%)' : 'none',
+          }}
+        >
           <iframe
             width="100%"
             height="100%"
@@ -73,7 +75,7 @@ export function LocationBlock({ location, weddingTime }: LocationBlockProps) {
           />
         </div>
 
-        {/* Get Directions Link */}
+        {/* Google Maps Link */}
         <a
           href={directionsUrl}
           target="_blank"
@@ -81,7 +83,7 @@ export function LocationBlock({ location, weddingTime }: LocationBlockProps) {
           className="inline-block px-6 py-2 text-white rounded-lg transition-opacity hover:opacity-80"
           style={{ background: 'var(--color-primary, #6B8E6F)' }}
         >
-          Get Directions
+          Google Maps
         </a>
       </div>
     </div>

@@ -6,10 +6,14 @@ import type {
   TemplateBlock,
   TextBlock,
   ImageBlock,
+  LocationBlock as LocationBlockType,
+  CountdownBlock as CountdownBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
 import { ImageBlockEditor } from './ImageBlockEditor';
+import { LocationBlockEditor } from './LocationBlockEditor';
+import { CountdownBlockEditor } from './CountdownBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
@@ -58,6 +62,8 @@ export function InvitationTemplateEditor({
   );
 
   const isSelectedBlockText = selectedBlock?.type === 'text';
+  const isSelectedBlockLocation = selectedBlock?.type === 'location';
+  const isSelectedBlockCountdown = selectedBlock?.type === 'countdown';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -149,6 +155,26 @@ export function InvitationTemplateEditor({
     }));
   }, []);
 
+  // Handle update location block
+  const handleUpdateLocationBlock = useCallback((blockId: string, updates: Partial<LocationBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'location' ? ({ ...b, ...updates } as LocationBlockType) : b
+      ),
+    }));
+  }, []);
+
+  // Handle update countdown block
+  const handleUpdateCountdownBlock = useCallback((blockId: string, updates: Partial<CountdownBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'countdown' ? ({ ...b, ...updates } as CountdownBlockType) : b
+      ),
+    }));
+  }, []);
+
   // Handle open image modal
   const handleOpenImageModal = useCallback((blockId: string) => {
     setImageModalBlockId(blockId);
@@ -230,6 +256,20 @@ export function InvitationTemplateEditor({
             activeLanguage={activeLanguage}
             onLanguageChange={setActiveLanguage}
             onUpdate={handleUpdateTextBlock}
+          />
+        )}
+
+        {isSelectedBlockLocation && selectedBlock && selectedBlock.type === 'location' && (
+          <LocationBlockEditor
+            block={selectedBlock}
+            onUpdate={handleUpdateLocationBlock}
+          />
+        )}
+
+        {isSelectedBlockCountdown && selectedBlock && selectedBlock.type === 'countdown' && (
+          <CountdownBlockEditor
+            block={selectedBlock}
+            onUpdate={handleUpdateCountdownBlock}
           />
         )}
 
@@ -369,6 +409,7 @@ export function InvitationTemplateEditor({
                     <LocationBlock
                       location={weddingData.location}
                       weddingTime={weddingData.wedding_time}
+                      style={(block as LocationBlockType).style}
                     />
                   )}
 
@@ -380,6 +421,7 @@ export function InvitationTemplateEditor({
                           : new Date(weddingData.wedding_date).toISOString()
                       }
                       weddingTime={weddingData.wedding_time}
+                      style={(block as CountdownBlockType).style}
                     />
                   )}
 

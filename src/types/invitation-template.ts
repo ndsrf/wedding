@@ -57,11 +57,22 @@ export interface ImageBlock {
 export interface LocationBlock {
   id: string;
   type: 'location';
+  style?: {
+    fontFamily?: string;
+    fontSize?: string;
+    color?: string;
+    mapStyle?: 'color' | 'grayscale';
+  };
 }
 
 export interface CountdownBlock {
   id: string;
   type: 'countdown';
+  style?: {
+    fontFamily?: string;
+    fontSize?: string;
+    color?: string;
+  };
 }
 
 export interface AddToCalendarBlock {
