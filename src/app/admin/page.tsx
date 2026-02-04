@@ -10,6 +10,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { formatDateByLanguage } from '@/lib/date-formatter';
+import { isValidLanguage } from '@/lib/i18n/config';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
@@ -122,6 +123,7 @@ export default async function AdminDashboardPage() {
   }
 
   const locale = await getLocale();
+  const language = isValidLanguage(locale) ? locale : 'en';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,7 +134,7 @@ export default async function AdminDashboardPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{stats.couple_names}</h1>
               <p className="mt-1 text-sm text-gray-600">
-                {formatDateByLanguage(stats.wedding_date, locale)} • {stats.location}
+                {formatDateByLanguage(stats.wedding_date, language)} • {stats.location}
               </p>
             </div>
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
