@@ -53,7 +53,9 @@
       "Bash(jq:*)",
       "Bash(xargs cat:*)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate dev:*)",
-      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma generate:*)"
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma generate:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate diff:*)"
     ]
   }
 }
