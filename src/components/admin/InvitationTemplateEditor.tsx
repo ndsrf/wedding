@@ -90,9 +90,26 @@ export function InvitationTemplateEditor({
           alt: '',
         };
       } else if (type === 'location') {
-        newBlock = { id: crypto.randomUUID(), type: 'location' };
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'location',
+          style: {
+            fontFamily: 'Lora, serif',
+            fontSize: '1.25rem',
+            color: '#3A4F3C',
+            mapStyle: 'color',
+          },
+        };
       } else if (type === 'countdown') {
-        newBlock = { id: crypto.randomUUID(), type: 'countdown' };
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'countdown',
+          style: {
+            fontFamily: 'Lora, serif',
+            fontSize: '2.25rem',
+            color: '#D4AF37',
+          },
+        };
       } else if (type === 'add-to-calendar') {
         newBlock = { id: crypto.randomUUID(), type: 'add-to-calendar' };
       } else {
