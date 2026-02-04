@@ -86,6 +86,10 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
         allow_guest_additions: formData.allow_guest_additions,
       };
 
+      if (formData.whatsapp_mode) {
+        updateData.whatsapp_mode = formData.whatsapp_mode;
+      }
+
       // Only include optional fields if they have values
       if (formData.theme_id) {
         updateData.theme_id = formData.theme_id;

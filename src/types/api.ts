@@ -178,6 +178,7 @@ export interface CreateWeddingRequest {
   payment_tracking_mode: PaymentMode;
   allow_guest_additions: boolean;
   default_language: Language;
+  whatsapp_mode?: import('@prisma/client').WhatsAppMode;
 }
 
 export type CreateWeddingResponse = APIResponse<Wedding>;

@@ -50,7 +50,10 @@
       "WebFetch(domain:www.twilio.com)",
       "Bash(npm run test:e2e:*)",
       "Bash(tee:*)",
-      "Bash(jq:*)"
+      "Bash(jq:*)",
+      "Bash(xargs cat:*)",
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate dev:*)",
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma generate:*)"
     ]
   }
 }

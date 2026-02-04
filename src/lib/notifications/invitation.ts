@@ -15,6 +15,7 @@ import { trackEvent } from "@/lib/tracking/events";
 import type { Language as I18nLanguage } from "@/lib/i18n/config";
 import type { Channel } from "@prisma/client";
 import { formatDateByLanguage } from "@/lib/date-formatter";
+import { buildWhatsAppLink } from "@/lib/notifications/whatsapp-links";
 
 export interface SendInvitationOptions {
   family_id: string;
@@ -32,6 +33,7 @@ export async function sendInvitation(
   success: boolean;
   error?: string;
   messageId?: string;
+  waLink?: string;
 }> {
   const { family_id, wedding_id, admin_id } = options;
 
@@ -143,6 +145,36 @@ export async function sendInvitation(
         MessageType.SMS
       );
     } else if (channel === "WHATSAPP") {
+      // LINKS mode: return wa.me URL instead of sending via Twilio
+      if (family.wedding.whatsapp_mode === "LINKS") {
+        const waLink = buildWhatsAppLink(family.whatsapp_number!, renderedBody);
+
+        // Track invitation sent event (same as BUSINESS path)
+        try {
+          await trackEvent({
+            family_id,
+            wedding_id,
+            event_type: "INVITATION_SENT",
+            channel,
+            metadata: {
+              template_id: template.id,
+              template_type: "INVITATION",
+              language: family.preferred_language,
+              channel,
+              contact: family.whatsapp_number,
+              admin_id,
+              whatsapp_mode: "LINKS",
+            },
+            admin_triggered: true,
+          });
+        } catch (error) {
+          console.error("[INVITATION] Failed to track event:", error);
+        }
+
+        console.log(`[INVITATION] LINKS mode – wa.me link generated for ${family.name}`);
+        return { success: true, waLink };
+      }
+
       // Check if using content template
       const contentTemplateId = (template as unknown as { content_template_id?: string }).content_template_id;
       if (contentTemplateId) {
@@ -234,8 +266,10 @@ export async function sendInvitationsBulk(
   successful: number;
   failed: number;
   errors: { family_id: string; error: string }[];
+  waLinks: { family_id: string; waLink: string }[];
 }> {
   const errors: { family_id: string; error: string }[] = [];
+  const waLinks: { family_id: string; waLink: string }[] = [];
   let successful = 0;
 
   console.log(
@@ -246,6 +280,9 @@ export async function sendInvitationsBulk(
     const result = await sendInvitation(option);
     if (result.success) {
       successful++;
+      if (result.waLink) {
+        waLinks.push({ family_id: option.family_id, waLink: result.waLink });
+      }
     } else {
       errors.push({
         family_id: option.family_id,
@@ -259,5 +296,6 @@ export async function sendInvitationsBulk(
     successful,
     failed: errors.length,
     errors,
+    waLinks,
   };
 }

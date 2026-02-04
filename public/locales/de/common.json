@@ -296,6 +296,13 @@
         "title": "Hinweis:",
         "content": "Zusätzliche Einstellungen wie Zahlungsmodus, Gastzusätze, Kleiderordnung und RSVP-Fragen können vom Hochzeitsadmin im Hochzeits-Dashboard nach der Erstellung konfiguriert werden."
       },
+      "whatsappMode": {
+        "label": "WhatsApp-Versandmodus",
+        "business": "WhatsApp Business",
+        "businessDesc": "Nachrichten direkt über die WhatsApp-Business-API (Twilio) senden.",
+        "links": "WhatsApp-Links",
+        "linksDesc": "Für jeden Gast einen wa.me-Link in einem neuen Browser-Tab öffnen, anstatt automatisch zu senden."
+      },
       "buttons": {
         "saving": "Speichern...",
         "update": "Hochzeit aktualisieren",

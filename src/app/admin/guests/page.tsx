@@ -389,6 +389,12 @@ export default function GuestsPage() {
       const data = await response.json();
 
       if (data.success) {
+        // Open wa.me links in new tabs when WhatsApp Links mode is active
+        if (data.data.wa_links && data.data.wa_links.length > 0) {
+          data.data.wa_links.forEach((item: { wa_link: string }) => {
+            window.open(item.wa_link, '_blank');
+          });
+        }
         if (reminderMode === 'save_the_date') {
           showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
           fetchGuests(); // Refresh the guest list
@@ -420,6 +426,12 @@ export default function GuestsPage() {
       const data = await response.json();
 
       if (data.success) {
+        // Open wa.me links in new tabs when WhatsApp Links mode is active
+        if (data.data.wa_links && data.data.wa_links.length > 0) {
+          data.data.wa_links.forEach((item: { wa_link: string }) => {
+            window.open(item.wa_link, '_blank');
+          });
+        }
         showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
         setSelectedGuestIds([]);
       } else {

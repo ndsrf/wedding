@@ -83,6 +83,7 @@ model Wedding {
   transportation_question_text    String?
   dietary_restrictions_enabled    Boolean            @default(false)
   save_the_date_enabled           Boolean            @default(false)
+  whatsapp_mode                   WhatsAppMode       @default(BUSINESS)
   extra_question_1_enabled        Boolean            @default(false)
   extra_question_1_text           String?
   extra_question_2_enabled        Boolean            @default(false)
@@ -589,4 +590,9 @@ enum PaymentMethod {
   BIZUM
   REVOLUT
   OTHER
+}
+
+enum WhatsAppMode {
+  BUSINESS
+  LINKS
 }

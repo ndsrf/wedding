@@ -25,6 +25,7 @@ import type { APIResponse, SendRemindersResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import type { Channel } from '@prisma/client';
 import { formatDateByLanguage } from '@/lib/date-formatter';
+import { buildWhatsAppLink } from '@/lib/notifications/whatsapp-links';
 
 // Validation schema for send reminders request
 const sendRemindersSchema = z.object({
@@ -112,6 +113,7 @@ export async function POST(request: NextRequest) {
         location: true,
         rsvp_cutoff_date: true,
         default_language: true,
+        whatsapp_mode: true,
       },
     });
 
@@ -178,6 +180,7 @@ export async function POST(request: NextRequest) {
     // Send reminders
     let sentCount = 0;
     let failedCount = 0;
+    const waLinks: { family_name: string; wa_link: string }[] = [];
 
     // Helper function to send email reminder to a family
     const sendEmailReminder = async (family: typeof eligibleFamilies[0]): Promise<boolean> => {
@@ -355,6 +358,10 @@ export async function POST(request: NextRequest) {
             wedding_id: user.wedding_id!,
             admin_id: user.id,
           });
+          // Collect waLink from invitation result (LINKS mode)
+          if (result.waLink) {
+            waLinks.push({ family_name: family.name, wa_link: result.waLink });
+          }
         } else {
           // Invitation already sent, send reminder
           console.log('[REMINDER DEBUG] Invitation already sent for', family.name, ', sending reminder');
@@ -373,10 +380,10 @@ export async function POST(request: NextRequest) {
             targetChannel
           );
 
-          if (template) {
-            // Use database template
-            console.log('[REMINDER DEBUG] Using database template for', familyLanguage, targetChannel);
+          let renderedBody: string;
 
+          if (template) {
+            console.log('[REMINDER DEBUG] Using database template for', familyLanguage, targetChannel);
             const variables = {
               familyName: family.name,
               coupleNames: wedding.couple_names,
@@ -386,14 +393,23 @@ export async function POST(request: NextRequest) {
               magicLink,
               rsvpCutoffDate: cutoffDate,
             };
+            renderedBody = renderTemplate(template.body, variables);
+          } else {
+            console.log('[REMINDER DEBUG] No template found, using fallback message');
+            const messages = REMINDER_MESSAGES[language];
+            renderedBody = `${messages.greeting(family.name)}\n\n${messages.body(wedding.couple_names, weddingDate, cutoffDate)}\n\n${messages.cta}: ${magicLink}`;
+          }
 
-            const renderedBody = renderTemplate(template.body, variables);
-
-            // Convert relative image URL to absolute URL (for WhatsApp)
+          // LINKS mode: generate wa.me link instead of sending via Twilio
+          if (targetChannel === 'WHATSAPP' && wedding.whatsapp_mode === 'LINKS') {
+            const waLink = buildWhatsAppLink(family.whatsapp_number!, renderedBody);
+            waLinks.push({ family_name: family.name, wa_link: waLink });
+            console.log('[REMINDER DEBUG] LINKS mode – wa.me link generated for', family.name);
+            result = { success: true };
+          } else if (template) {
             const absoluteImageUrl = template.image_url && targetChannel === 'WHATSAPP'
               ? `${baseUrl}${template.image_url}`
               : undefined;
-
             result = await sendDynamicMessage(
               contactInfo,
               renderedBody,
@@ -401,14 +417,9 @@ export async function POST(request: NextRequest) {
               absoluteImageUrl
             );
           } else {
-            // Fallback to hardcoded message
-            console.log('[REMINDER DEBUG] No template found, using fallback message');
-            const messages = REMINDER_MESSAGES[language];
-            const fallbackBody = `${messages.greeting(family.name)}\n\n${messages.body(wedding.couple_names, weddingDate, cutoffDate)}\n\n${messages.cta}: ${magicLink}`;
-
             result = await sendDynamicMessage(
               contactInfo,
-              fallbackBody,
+              renderedBody,
               targetChannel === 'SMS' ? MessageType.SMS : MessageType.WHATSAPP
             );
           }
@@ -509,12 +520,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const response: SendRemindersResponse = {
+    const response = {
       success: true,
       data: {
         sent_count: sentCount,
         failed_count: failedCount,
         recipient_families: eligibleFamilies.map((f) => f.id),
+        ...(waLinks.length > 0 && { wa_links: waLinks }),
       },
     };
 

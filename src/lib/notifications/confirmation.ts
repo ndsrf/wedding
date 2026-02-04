@@ -142,6 +142,12 @@ export async function sendConfirmation(
         MessageType.SMS
       );
     } else if (channel === "WHATSAPP") {
+      // LINKS mode: skip auto-send (confirmation is server-triggered, no browser context)
+      if (family.wedding.whatsapp_mode === "LINKS") {
+        console.log(`[CONFIRMATION] LINKS mode – skipping auto-send for ${family.name}. Admin can send manually.`);
+        return { success: true };
+      }
+
       // Check if using content template
       const contentTemplateId = (template as unknown as { content_template_id?: string }).content_template_id;
       if (contentTemplateId) {

@@ -23,6 +23,7 @@ import type {
   GiftStatus,
   TranslationContext,
   SubscriptionStatus,
+  WhatsAppMode,
 } from '@prisma/client';
 
 export type {
@@ -36,6 +37,7 @@ export type {
   GiftStatus,
   TranslationContext,
   SubscriptionStatus,
+  WhatsAppMode,
 };
 
 // ============================================================================
@@ -125,6 +127,9 @@ export interface Wedding {
 
   // Messaging Configuration - Save the Date
   save_the_date_enabled: boolean;
+
+  // Messaging Configuration - WhatsApp mode
+  whatsapp_mode: WhatsAppMode;
 
   // RSVP Configuration - Extra Yes/No questions (up to 3)
   extra_question_1_enabled: boolean;

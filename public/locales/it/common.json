@@ -288,6 +288,13 @@
         "title": "Nota:",
         "content": "Ulteriori impostazioni come la modalità di pagamento, l'aggiunta di ospiti, il codice di abbigliamento e le domande RSVP possono essere configurate dall'amministratore del matrimonio nella dashboard del matrimonio dopo la sua creazione."
       },
+      "whatsappMode": {
+        "label": "Modalità di invio WhatsApp",
+        "business": "WhatsApp Business",
+        "businessDesc": "Inviare i messaggi direttamente tramite l'API WhatsApp Business (Twilio).",
+        "links": "Link WhatsApp",
+        "linksDesc": "Aprire un link wa.me in una nuova scheda del browser per ogni ospite invece di inviare automaticamente."
+      },
       "buttons": {
         "saving": "Salvataggio in corso...",
         "update": "Aggiorna Matrimonio",

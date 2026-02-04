@@ -16,7 +16,7 @@ import type {
   UpdateWeddingRequest,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-import { Language, PaymentMode } from '@prisma/client';
+import { Language, PaymentMode, WhatsAppMode } from '@prisma/client';
 
 // Validation schema for updating a wedding
 const updateWeddingSchema = z
@@ -32,6 +32,7 @@ const updateWeddingSchema = z
     payment_tracking_mode: z.nativeEnum(PaymentMode).optional(),
     allow_guest_additions: z.boolean().optional(),
     default_language: z.nativeEnum(Language).optional(),
+    whatsapp_mode: z.nativeEnum(WhatsAppMode).optional(),
   })
   .partial();
 
@@ -150,6 +151,7 @@ export async function GET(
       transportation_question_text: wedding.transportation_question_text,
       dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
       save_the_date_enabled: wedding.save_the_date_enabled,
+      whatsapp_mode: wedding.whatsapp_mode,
       extra_question_1_enabled: wedding.extra_question_1_enabled,
       extra_question_1_text: wedding.extra_question_1_text,
       extra_question_2_enabled: wedding.extra_question_2_enabled,
@@ -338,6 +340,7 @@ export async function PATCH(
       payment_tracking_mode: PaymentMode;
       allow_guest_additions: boolean;
       default_language: Language;
+      whatsapp_mode: WhatsAppMode;
       updated_by: string;
     }> = {
       ...restData,

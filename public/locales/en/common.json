@@ -302,6 +302,13 @@
         "title": "Note:",
         "content": "Additional settings like payment mode, guest additions, dress code, and RSVP questions can be configured by the wedding admin in the wedding dashboard after the wedding is created."
       },
+      "whatsappMode": {
+        "label": "WhatsApp Sending Mode",
+        "business": "WhatsApp Business",
+        "businessDesc": "Send messages directly via WhatsApp Business API (Twilio).",
+        "links": "WhatsApp Links",
+        "linksDesc": "Open a wa.me link in a new browser tab for each guest instead of sending automatically."
+      },
       "buttons": {
         "saving": "Saving...",
         "update": "Update Wedding",

@@ -298,6 +298,13 @@
         "title": "Nota:",
         "content": "Ajustes adicionales como el modo de pago, adiciones de invitados, código de vestimenta y preguntas de RSVP pueden ser configurados por el administrador de la boda en el panel de la boda después de crearla."
       },
+      "whatsappMode": {
+        "label": "Modo de envío por WhatsApp",
+        "business": "WhatsApp Business",
+        "businessDesc": "Enviar mensajes directamente a través de la API de WhatsApp Business (Twilio).",
+        "links": "enlaces de WhatsApp",
+        "linksDesc": "Abrir un enlace wa.me en una nueva pestaña del navegador para cada invitado en lugar de enviar automáticamente."
+      },
       "buttons": {
         "saving": "Guardando...",
         "update": "Actualizar Boda",

@@ -296,6 +296,13 @@
         "title": "Note:",
         "content": "Des paramètres supplémentaires tels que le mode de paiement, l'ajout d'invités, le code vestimentaire et les questions RSVP peuvent être configurés par l'administrateur du mariage dans le tableau de bord du mariage après sa création."
       },
+      "whatsappMode": {
+        "label": "Mode d'envoi WhatsApp",
+        "business": "WhatsApp Business",
+        "businessDesc": "Envoyer les messages directement via l'API WhatsApp Business (Twilio).",
+        "links": "Liens WhatsApp",
+        "linksDesc": "Ouvrir un lien wa.me dans un nouvel onglet du navigateur pour chaque invité au lieu d'envoyer automatiquement."
+      },
       "buttons": {
         "saving": "Enregistrement...",
         "update": "Mettre à jour le mariage",

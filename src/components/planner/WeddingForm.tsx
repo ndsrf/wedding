@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { CreateWeddingRequest } from '@/types/api';
 import type { Theme, Wedding } from '@/types/models';
-import { Language, PaymentMode } from '@prisma/client';
+import { Language, PaymentMode, WhatsAppMode } from '@prisma/client';
 
 interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'rsvp_cutoff_date'> {
   wedding_date: string;
@@ -46,6 +46,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
     payment_tracking_mode: initialData?.payment_tracking_mode || PaymentMode.MANUAL,
     allow_guest_additions: initialData?.allow_guest_additions ?? true,
     default_language: initialData?.default_language || Language.ES,
+    whatsapp_mode: initialData?.whatsapp_mode || WhatsAppMode.BUSINESS,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof WeddingFormData, string>>>({});
@@ -242,6 +243,51 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           <option value={Language.IT}>{t('common.languages.IT')} (Italiano)</option>
           <option value={Language.DE}>{t('common.languages.DE')} (Deutsch)</option>
         </select>
+      </div>
+
+      {/* WhatsApp Sending Mode */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {t('planner.weddings.whatsappMode.label')}
+        </label>
+        <div className="space-y-2">
+          <label className={`flex items-start gap-3 p-3 border rounded-md cursor-pointer transition-colors ${
+            formData.whatsapp_mode === WhatsAppMode.BUSINESS
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-300 hover:bg-gray-50'
+          }`}>
+            <input
+              type="radio"
+              name="whatsapp_mode"
+              value={WhatsAppMode.BUSINESS}
+              checked={formData.whatsapp_mode === WhatsAppMode.BUSINESS}
+              onChange={() => handleChange('whatsapp_mode', WhatsAppMode.BUSINESS)}
+              className="mt-0.5"
+            />
+            <div>
+              <p className="text-sm font-medium text-gray-900">{t('planner.weddings.whatsappMode.business')}</p>
+              <p className="text-xs text-gray-500">{t('planner.weddings.whatsappMode.businessDesc')}</p>
+            </div>
+          </label>
+          <label className={`flex items-start gap-3 p-3 border rounded-md cursor-pointer transition-colors ${
+            formData.whatsapp_mode === WhatsAppMode.LINKS
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-300 hover:bg-gray-50'
+          }`}>
+            <input
+              type="radio"
+              name="whatsapp_mode"
+              value={WhatsAppMode.LINKS}
+              checked={formData.whatsapp_mode === WhatsAppMode.LINKS}
+              onChange={() => handleChange('whatsapp_mode', WhatsAppMode.LINKS)}
+              className="mt-0.5"
+            />
+            <div>
+              <p className="text-sm font-medium text-gray-900">{t('planner.weddings.whatsappMode.links')}</p>
+              <p className="text-xs text-gray-500">{t('planner.weddings.whatsappMode.linksDesc')}</p>
+            </div>
+          </label>
+        </div>
       </div>
 
       {/* Note about additional settings */}

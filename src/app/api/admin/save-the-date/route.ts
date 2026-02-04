@@ -30,6 +30,7 @@ interface SendSaveTheDateResponse extends APIResponse {
     failed_count: number;
     recipient_families: string[];
     errors?: { family_id: string; error: string }[];
+    wa_links?: { family_name: string; wa_link: string }[];
   };
 }
 
@@ -141,6 +142,12 @@ export async function POST(request: NextRequest) {
       }))
     );
 
+    // Map waLinks family_ids to family names
+    const waLinksWithNames = result.waLinks.map((wl) => {
+      const family = eligibleFamilies.find((f) => f.id === wl.family_id);
+      return { family_name: family?.name || wl.family_id, wa_link: wl.waLink };
+    });
+
     const response: SendSaveTheDateResponse = {
       success: true,
       data: {
@@ -150,6 +157,7 @@ export async function POST(request: NextRequest) {
           .filter((f) => !result.errors.some((e) => e.family_id === f.id))
           .map((f) => f.id),
         errors: result.errors,
+        ...(waLinksWithNames.length > 0 && { wa_links: waLinksWithNames }),
       },
     };
 

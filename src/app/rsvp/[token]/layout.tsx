@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { validateMagicLink } from '@/lib/auth/magic-link'
+import { prisma } from '@/lib/db/prisma'
 import './fonts.css'
 
 type Props = {
@@ -18,9 +19,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  const title = `${validation.wedding.couple_names} - RSVP`
+  const description = `RSVP for the wedding of ${validation.wedding.couple_names}`
+
+  // Fetch the first MessageTemplate with an image for this wedding (prefer INVITATION)
+  const template = await prisma.messageTemplate.findFirst({
+    where: {
+      wedding_id: validation.wedding.id,
+      image_url: { not: null },
+      type: 'INVITATION',
+    },
+    select: { image_url: true },
+  }) ?? await prisma.messageTemplate.findFirst({
+    where: {
+      wedding_id: validation.wedding.id,
+      image_url: { not: null },
+    },
+    select: { image_url: true },
+  })
+
+  const appUrl = process.env.APP_URL || 'http://localhost:3000'
+  const ogImage = template?.image_url ? `${appUrl}${template.image_url}` : undefined
+
   return {
-    title: `${validation.wedding.couple_names} - RSVP`,
-    description: `RSVP for the wedding of ${validation.wedding.couple_names}`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      ...(ogImage && { images: [{ url: ogImage }] }),
+    },
   }
 }
 
