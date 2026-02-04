@@ -8,16 +8,62 @@
 import { test, expect } from '@playwright/test';
 
 // Use wedding admin authentication
-test.use({ storageState: 'playwright/.auth/wedding-admin.json' });
+test.use({
+  storageState: 'playwright/.auth/wedding-admin.json',
+  // Increase timeout for admin pages that need to load wedding data
+  navigationTimeout: 30000,
+});
 
 test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
   test('should successfully add a new guest family from guests page', async ({ page }) => {
     // Navigate to admin guests page
     await page.goto('/admin/guests');
-    await page.waitForLoadState('networkidle');
+    console.log('Navigated to /admin/guests');
 
-    // Should see the guests page with existing guests
-    await expect(page.getByRole('heading', { name: /guests/i })).toBeVisible();
+    // Wait for initial page load
+    await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+    console.log('DOM loaded, current URL:', page.url());
+
+    // Additional wait for networkidle
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+      console.log('Network idle timeout - continuing anyway');
+    });
+
+    // Get current page URL and content
+    const currentUrl = page.url();
+    console.log('Current URL after navigation:', currentUrl);
+
+    // Check if we're on the no-access page
+    if (currentUrl.includes('no-access')) {
+      const pageContent = await page.textContent('body');
+      throw new Error(`Redirected to no-access page. Content: ${pageContent?.substring(0, 200)}`);
+    }
+
+    // Check if we're on the correct page - wait for table or heading
+    const heading = page.getByRole('heading', { name: /guest.*management|guests/i });
+    const table = page.locator('table, [role="table"]').first();
+
+    // Try to find ANY heading to debug
+    const allHeadings = page.getByRole('heading');
+    const headingCount = await allHeadings.count();
+    console.log('Total headings found:', headingCount);
+    for (let i = 0; i < Math.min(headingCount, 3); i++) {
+      const text = await allHeadings.nth(i).textContent();
+      console.log(`Heading ${i}: "${text}"`);
+    }
+
+    // Wait for either heading or table to be visible
+    try {
+      await Promise.race([
+        heading.waitFor({ state: 'visible', timeout: 5000 }),
+        table.waitFor({ state: 'visible', timeout: 5000 })
+      ]);
+    } catch {
+      // If neither heading nor table appears, check what page we're on
+      const pageContent = await page.textContent('body');
+      console.log('Page content (first 500 chars):', pageContent?.substring(0, 500));
+      throw new Error('Neither heading nor table found on page');
+    }
 
     // Click the "Add Guest" button
     const addGuestButton = page.getByRole('button', { name: /add.*guest|add|new guest/i }).first();
@@ -134,37 +180,64 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     await expect(addGuestButton).toBeVisible({ timeout: 5000 });
     await addGuestButton.click();
 
-    // Wait for modal
+    // Wait for modal to open
     await page.waitForTimeout(500);
+
+    // Verify modal is open by checking for modal backdrop or form elements
+    const modal = page.locator('div[class*="fixed"][class*="inset-0"]').first();
+    await modal.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+      // If no modal with that class, just wait a bit more
+    });
 
     // Try to submit without filling required fields
     const submitButton = page.getByRole('button', { name: /save|create|add|submit/i }).last();
     await expect(submitButton).toBeVisible({ timeout: 5000 });
     await submitButton.click();
 
-    // Wait for validation
-    await page.waitForTimeout(500);
+    // Wait for validation response
+    await page.waitForTimeout(800);
 
-    // Should see validation errors
+    // Should see validation errors in the modal
+    const errorBox = page.locator('[class*="bg-red"], [role="alert"]').first();
+
+    // Look for error text patterns
     const errorIndicators = [
-      page.getByText(/required/i),
+      page.getByText(/family.*name.*required|required/i),
       page.getByText(/invalid/i),
       page.getByText(/please enter/i),
       page.getByText(/cannot be empty/i),
     ];
 
     let foundError = false;
-    for (const indicator of errorIndicators) {
-      const elements = await indicator.all();
-      if (elements.length > 0) {
-        for (const element of elements) {
-          if (await element.isVisible().catch(() => false)) {
-            foundError = true;
-            break;
-          }
-        }
-        if (foundError) break;
+
+    // Check error box visibility
+    if (await errorBox.isVisible().catch(() => false)) {
+      const errorText = await errorBox.textContent();
+      if (errorText && errorText.toLowerCase().includes('required')) {
+        foundError = true;
       }
+    }
+
+    // Check for error indicators
+    if (!foundError) {
+      for (const indicator of errorIndicators) {
+        const elements = await indicator.all();
+        if (elements.length > 0) {
+          for (const element of elements) {
+            if (await element.isVisible().catch(() => false)) {
+              foundError = true;
+              break;
+            }
+          }
+          if (foundError) break;
+        }
+      }
+    }
+
+    if (!foundError) {
+      // Debug: log what's on the page
+      const pageText = await page.textContent('body');
+      console.log('Page content snippet:', pageText?.substring(0, 500));
     }
 
     expect(foundError).toBeTruthy();

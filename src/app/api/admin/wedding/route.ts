@@ -64,7 +64,15 @@ export async function GET() {
     // Check authentication and require wedding_admin role
     const user = await requireRole('wedding_admin');
 
+    console.log('[API] GET /api/admin/wedding - User:', {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      wedding_id: user.wedding_id,
+    });
+
     if (!user.wedding_id) {
+      console.log('[API] Wedding ID not found in session for user:', user.id);
       const response: APIResponse = {
         success: false,
         error: {

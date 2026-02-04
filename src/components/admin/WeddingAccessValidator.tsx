@@ -35,9 +35,16 @@ export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps
     async function checkWeddingAccess() {
       if (status === 'loading') return;
       if (!session?.user) {
+        console.log('[WeddingAccessValidator] No session user, not loading wedding');
         setIsLoading(false);
         return;
       }
+
+      console.log('[WeddingAccessValidator] Checking wedding access for user:', {
+        email: session.user.email,
+        role: (session.user as unknown as { role?: string }).role,
+        wedding_id: (session.user as unknown as { wedding_id?: string }).wedding_id,
+      });
 
       try {
         const response = await fetch('/api/admin/wedding');
