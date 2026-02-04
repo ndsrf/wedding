@@ -44,6 +44,9 @@ export interface TextBlock {
     fontSize: string; // e.g. '2rem'
     color: string; // hex
     textAlign: 'left' | 'center' | 'right';
+    fontStyle?: 'normal' | 'italic';
+    fontWeight?: 'normal' | 'bold';
+    textDecoration?: 'none' | 'underline';
   };
 }
 
@@ -62,6 +65,9 @@ export interface LocationBlock {
     fontSize?: string;
     color?: string;
     mapStyle?: 'color' | 'grayscale';
+    fontStyle?: 'normal' | 'italic';
+    fontWeight?: 'normal' | 'bold';
+    textDecoration?: 'none' | 'underline';
   };
 }
 
@@ -72,6 +78,9 @@ export interface CountdownBlock {
     fontFamily?: string;
     fontSize?: string;
     color?: string;
+    fontStyle?: 'normal' | 'italic';
+    fontWeight?: 'normal' | 'bold';
+    textDecoration?: 'none' | 'underline';
   };
 }
 

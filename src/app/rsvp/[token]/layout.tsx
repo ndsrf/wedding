@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { validateMagicLink } from '@/lib/auth/magic-link'
+import './fonts.css'
 
 type Props = {
   children: React.ReactNode

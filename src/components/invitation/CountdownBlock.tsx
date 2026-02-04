@@ -9,6 +9,9 @@ interface CountdownBlockProps {
     fontFamily?: string;
     fontSize?: string;
     color?: string;
+    fontStyle?: 'normal' | 'italic';
+    fontWeight?: 'normal' | 'bold';
+    textDecoration?: 'none' | 'underline';
   };
 }
 
@@ -66,6 +69,9 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
                 fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
                 fontSize: style?.fontSize || '2.25rem',
                 color: style?.color || 'var(--color-accent, #D4AF37)',
+                fontWeight: style?.fontWeight === 'bold' ? 'bold' : (style?.fontWeight ? style.fontWeight : 'bold'),
+                fontStyle: style?.fontStyle || 'normal',
+                textDecoration: style?.textDecoration || 'none',
               }}
             >
               {timeLeft.days}
@@ -83,6 +89,9 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
                 fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
                 fontSize: style?.fontSize || '2.25rem',
                 color: style?.color || 'var(--color-accent, #D4AF37)',
+                fontWeight: style?.fontWeight === 'bold' ? 'bold' : (style?.fontWeight ? style.fontWeight : 'bold'),
+                fontStyle: style?.fontStyle || 'normal',
+                textDecoration: style?.textDecoration || 'none',
               }}
             >
               {timeLeft.hours}
@@ -100,6 +109,9 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
                 fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
                 fontSize: style?.fontSize || '2.25rem',
                 color: style?.color || 'var(--color-accent, #D4AF37)',
+                fontWeight: style?.fontWeight === 'bold' ? 'bold' : (style?.fontWeight ? style.fontWeight : 'bold'),
+                fontStyle: style?.fontStyle || 'normal',
+                textDecoration: style?.textDecoration || 'none',
               }}
             >
               {timeLeft.minutes}
@@ -117,6 +129,9 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
                 fontFamily: style?.fontFamily || 'var(--font-heading, serif)',
                 fontSize: style?.fontSize || '2.25rem',
                 color: style?.color || 'var(--color-accent, #D4AF37)',
+                fontWeight: style?.fontWeight === 'bold' ? 'bold' : (style?.fontWeight ? style.fontWeight : 'bold'),
+                fontStyle: style?.fontStyle || 'normal',
+                textDecoration: style?.textDecoration || 'none',
               }}
             >
               {timeLeft.seconds}

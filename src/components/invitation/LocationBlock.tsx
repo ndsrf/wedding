@@ -8,6 +8,9 @@ interface LocationBlockProps {
     fontSize?: string;
     color?: string;
     mapStyle?: 'color' | 'grayscale';
+    fontStyle?: 'normal' | 'italic';
+    fontWeight?: 'normal' | 'bold';
+    textDecoration?: 'none' | 'underline';
   };
 }
 
@@ -42,7 +45,9 @@ export function LocationBlock({ location, weddingTime, style }: LocationBlockPro
             fontFamily: style?.fontFamily || 'var(--font-body, serif)',
             fontSize: style?.fontSize || '1.25rem',
             color: style?.color || 'var(--color-text, #3A4F3C)',
-            fontWeight: 600,
+            fontWeight: style?.fontWeight === 'bold' ? 'bold' : (style?.fontWeight ? style.fontWeight : 600),
+            fontStyle: style?.fontStyle || 'normal',
+            textDecoration: style?.textDecoration || 'none',
           }}
         >
           {location}

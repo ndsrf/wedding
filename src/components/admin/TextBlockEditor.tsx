@@ -9,6 +9,7 @@ const FONT_FAMILIES = [
   'Crimson Text, serif',
   'Cormorant Garamond, serif',
   'Lora, serif',
+  'Alex Brush, cursive',
   'Inter, sans-serif',
   'Poppins, sans-serif',
 ];
@@ -91,6 +92,9 @@ export function TextBlockEditor({
             fontSize: block.style.fontSize,
             color: block.style.color,
             textAlign: block.style.textAlign,
+            fontWeight: block.style.fontWeight || 'normal',
+            fontStyle: block.style.fontStyle || 'normal',
+            textDecoration: block.style.textDecoration || 'none',
           }}
         >
           {languageContent || '(empty)'}
@@ -222,6 +226,58 @@ export function TextBlockEditor({
               {align === 'right' && '➡'}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Text Style */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Style</label>
+        <div className="flex gap-2">
+          <button
+            onClick={() =>
+              onUpdate(block.id, {
+                style: { ...block.style, fontWeight: block.style.fontWeight === 'bold' ? 'normal' : 'bold' },
+              })
+            }
+            className={`flex-1 px-3 py-2 rounded text-sm font-bold transition ${
+              block.style.fontWeight === 'bold'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            title="Bold"
+          >
+            B
+          </button>
+          <button
+            onClick={() =>
+              onUpdate(block.id, {
+                style: { ...block.style, fontStyle: block.style.fontStyle === 'italic' ? 'normal' : 'italic' },
+              })
+            }
+            className={`flex-1 px-3 py-2 rounded text-sm font-italic transition ${
+              block.style.fontStyle === 'italic'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            title="Italic"
+          >
+            <span className="italic">I</span>
+          </button>
+          <button
+            onClick={() =>
+              onUpdate(block.id, {
+                style: { ...block.style, textDecoration: block.style.textDecoration === 'underline' ? 'none' : 'underline' },
+              })
+            }
+            className={`flex-1 px-3 py-2 rounded text-sm font-medium transition ${
+              block.style.textDecoration === 'underline'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            title="Underline"
+          >
+            <span className="underline">U</span>
+          </button>
         </div>
       </div>
     </div>
