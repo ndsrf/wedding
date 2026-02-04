@@ -122,7 +122,6 @@ export default async function AdminDashboardPage() {
   }
 
   const locale = await getLocale();
-  const language = (locale.toUpperCase()) as any;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -133,7 +132,7 @@ export default async function AdminDashboardPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{stats.couple_names}</h1>
               <p className="mt-1 text-sm text-gray-600">
-                {formatDateByLanguage(stats.wedding_date, language)} • {stats.location}
+                {formatDateByLanguage(stats.wedding_date, locale as any)} • {stats.location}
               </p>
             </div>
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">

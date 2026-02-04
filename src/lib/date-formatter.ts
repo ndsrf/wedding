@@ -6,11 +6,11 @@ import type { Language } from '@/lib/i18n/config';
 
 // Map Language type to locale strings
 const LOCALE_MAP: Record<Language, string> = {
-  ES: 'es-ES',
-  EN: 'en-US',
-  FR: 'fr-FR',
-  IT: 'it-IT',
-  DE: 'de-DE',
+  es: 'es-ES',
+  en: 'en-US',
+  fr: 'fr-FR',
+  it: 'it-IT',
+  de: 'de-DE',
 };
 
 /**

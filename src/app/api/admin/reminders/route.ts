@@ -23,7 +23,7 @@ import { sendInvitation } from '@/lib/notifications/invitation';
 import type { Language as I18nLanguage } from '@/lib/i18n/config';
 import type { APIResponse, SendRemindersResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-import type { Language, Channel } from '@prisma/client';
+import type { Channel } from '@prisma/client';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 
 // Validation schema for send reminders request
@@ -34,41 +34,41 @@ const sendRemindersSchema = z.object({
 });
 
 // Personalized reminder messages in all supported languages
-const REMINDER_MESSAGES: Record<Language, {
+const REMINDER_MESSAGES: Record<I18nLanguage, {
   subject: string;
   greeting: (familyName: string) => string;
   body: (coupleNames: string, weddingDate: string, cutoffDate: string) => string;
   cta: string;
 }> = {
-  ES: {
+  es: {
     subject: 'Recordatorio: Confirma tu asistencia',
     greeting: (familyName) => `Hola, Familia ${familyName}!`,
     body: (coupleNames, weddingDate, cutoffDate) =>
       `Te recordamos que aún no hemos recibido tu confirmación de asistencia para la boda de ${coupleNames} el ${weddingDate}. Por favor, confirma antes del ${cutoffDate}.`,
     cta: 'Confirmar asistencia',
   },
-  EN: {
+  en: {
     subject: 'Reminder: Please confirm your attendance',
     greeting: (familyName) => `Hello, ${familyName} Family!`,
     body: (coupleNames, weddingDate, cutoffDate) =>
       `This is a friendly reminder that we haven't received your RSVP for ${coupleNames}'s wedding on ${weddingDate}. Please confirm by ${cutoffDate}.`,
     cta: 'Confirm attendance',
   },
-  FR: {
+  fr: {
     subject: 'Rappel: Confirmez votre présence',
     greeting: (familyName) => `Bonjour, Famille ${familyName}!`,
     body: (coupleNames, weddingDate, cutoffDate) =>
       `Nous vous rappelons que nous n'avons pas encore reçu votre confirmation de présence pour le mariage de ${coupleNames} le ${weddingDate}. Merci de confirmer avant le ${cutoffDate}.`,
     cta: 'Confirmer la présence',
   },
-  IT: {
+  it: {
     subject: 'Promemoria: Conferma la tua partecipazione',
     greeting: (familyName) => `Ciao, Famiglia ${familyName}!`,
     body: (coupleNames, weddingDate, cutoffDate) =>
       `Ti ricordiamo che non abbiamo ancora ricevuto la tua conferma di partecipazione al matrimonio di ${coupleNames} il ${weddingDate}. Per favore, conferma entro il ${cutoffDate}.`,
     cta: 'Conferma partecipazione',
   },
-  DE: {
+  de: {
     subject: 'Erinnerung: Bitte bestätigen Sie Ihre Teilnahme',
     greeting: (familyName) => `Hallo, Familie ${familyName}!`,
     body: (coupleNames, weddingDate, cutoffDate) =>
@@ -214,8 +214,8 @@ export async function POST(request: NextRequest) {
 
           const familyLanguage = family.preferred_language || wedding.default_language;
           const language = (familyLanguage).toLowerCase() as I18nLanguage;
-          const weddingDate = formatDateByLanguage(wedding.wedding_date, familyLanguage);
-          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, familyLanguage);
+          const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
+          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
           const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
 
           // Try to fetch template from database
@@ -278,7 +278,8 @@ export async function POST(request: NextRequest) {
           console.log('[REMINDER DEBUG] Email sent successfully to', family.email);
 
           // Create tracking event with message_sid if available
-          const language = family.preferred_language || wedding.default_language;
+          const rawLanguage = family.preferred_language || wedding.default_language;
+          const language = rawLanguage.toLowerCase() as I18nLanguage;
           const messages = REMINDER_MESSAGES[language];
           const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
           const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
@@ -359,8 +360,9 @@ export async function POST(request: NextRequest) {
           console.log('[REMINDER DEBUG] Invitation already sent for', family.name, ', sending reminder');
 
           const familyLanguage = family.preferred_language || wedding.default_language;
-          const weddingDate = formatDateByLanguage(wedding.wedding_date, familyLanguage);
-          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, familyLanguage);
+          const language = familyLanguage.toLowerCase() as I18nLanguage;
+          const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
+          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
           const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
 
           // Fetch template from database
@@ -401,7 +403,7 @@ export async function POST(request: NextRequest) {
           } else {
             // Fallback to hardcoded message
             console.log('[REMINDER DEBUG] No template found, using fallback message');
-            const messages = REMINDER_MESSAGES[familyLanguage];
+            const messages = REMINDER_MESSAGES[language];
             const fallbackBody = `${messages.greeting(family.name)}\n\n${messages.body(wedding.couple_names, weddingDate, cutoffDate)}\n\n${messages.cta}: ${magicLink}`;
 
             result = await sendDynamicMessage(
@@ -416,7 +418,8 @@ export async function POST(request: NextRequest) {
           console.log('[REMINDER DEBUG] Message sent successfully to', contactInfo);
 
           // Create tracking event with message_sid
-          const language = family.preferred_language || wedding.default_language;
+          const rawLanguage = family.preferred_language || wedding.default_language;
+          const language = rawLanguage.toLowerCase() as I18nLanguage;
           const messages = REMINDER_MESSAGES[language];
           const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
           const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);

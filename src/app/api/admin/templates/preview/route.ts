@@ -132,8 +132,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Build sample variables with wedding data
-    // Use the language parameter for date formatting, default to EN if not provided
-    const dateLanguage: Language = (language as Language) || 'EN';
+    // Use the language parameter for date formatting, default to 'en' if not provided
+    const dateLanguage: Language = (language as Language) || 'en';
 
     const formattedDate = formatDateByLanguage(wedding.wedding_date, dateLanguage);
     const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, dateLanguage);

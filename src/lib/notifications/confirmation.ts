@@ -92,14 +92,15 @@ export async function sendConfirmation(
     }
 
     // Build template variables
+    const familyLanguage = family.preferred_language.toLowerCase() as I18nLanguage;
     const weddingDate = formatDateByLanguage(
       family.wedding.wedding_date,
-      family.preferred_language as any
+      familyLanguage
     );
 
     const rsvpCutoffDate = formatDateByLanguage(
       family.wedding.rsvp_cutoff_date,
-      family.preferred_language as any
+      familyLanguage
     );
 
     const variables: TemplateVariables = {
