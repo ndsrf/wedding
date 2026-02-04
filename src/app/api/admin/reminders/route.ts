@@ -24,6 +24,7 @@ import type { Language as I18nLanguage } from '@/lib/i18n/config';
 import type { APIResponse, SendRemindersResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import type { Language, Channel } from '@prisma/client';
+import { formatDateByLanguage } from '@/lib/date-formatter';
 
 // Validation schema for send reminders request
 const sendRemindersSchema = z.object({
@@ -75,23 +76,6 @@ const REMINDER_MESSAGES: Record<Language, {
     cta: 'Teilnahme bestätigen',
   },
 };
-
-// Format date based on language
-function formatDate(date: Date, language: Language): string {
-  const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  };
-  const localeMap: Record<Language, string> = {
-    ES: 'es-ES',
-    EN: 'en-US',
-    FR: 'fr-FR',
-    IT: 'it-IT',
-    DE: 'de-DE',
-  };
-  return date.toLocaleDateString(localeMap[language], options);
-}
 
 /**
  * POST /api/admin/reminders
@@ -230,8 +214,8 @@ export async function POST(request: NextRequest) {
 
           const familyLanguage = family.preferred_language || wedding.default_language;
           const language = (familyLanguage).toLowerCase() as I18nLanguage;
-          const weddingDate = formatDate(wedding.wedding_date, familyLanguage);
-          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, familyLanguage);
+          const weddingDate = formatDateByLanguage(wedding.wedding_date, familyLanguage);
+          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, familyLanguage);
           const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
 
           // Try to fetch template from database
@@ -296,8 +280,8 @@ export async function POST(request: NextRequest) {
           // Create tracking event with message_sid if available
           const language = family.preferred_language || wedding.default_language;
           const messages = REMINDER_MESSAGES[language];
-          const weddingDate = formatDate(wedding.wedding_date, language);
-          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, language);
+          const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
+          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
           const magicLink = `${baseUrl}/rsvp/${family.magic_token}?channel=email`;
 
           const personalizedMessage = {
@@ -375,8 +359,8 @@ export async function POST(request: NextRequest) {
           console.log('[REMINDER DEBUG] Invitation already sent for', family.name, ', sending reminder');
 
           const familyLanguage = family.preferred_language || wedding.default_language;
-          const weddingDate = formatDate(wedding.wedding_date, familyLanguage);
-          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, familyLanguage);
+          const weddingDate = formatDateByLanguage(wedding.wedding_date, familyLanguage);
+          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, familyLanguage);
           const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
 
           // Fetch template from database
@@ -434,8 +418,8 @@ export async function POST(request: NextRequest) {
           // Create tracking event with message_sid
           const language = family.preferred_language || wedding.default_language;
           const messages = REMINDER_MESSAGES[language];
-          const weddingDate = formatDate(wedding.wedding_date, language);
-          const cutoffDate = formatDate(wedding.rsvp_cutoff_date, language);
+          const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
+          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
           const magicLink = `${baseUrl}/rsvp/${family.magic_token}?channel=${targetChannel.toLowerCase()}`;
 
           const personalizedMessage = {

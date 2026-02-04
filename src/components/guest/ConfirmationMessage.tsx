@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface ConfirmationMessageProps {
   familyName: string;
@@ -23,6 +23,7 @@ export default function ConfirmationMessage({
   onEdit,
 }: ConfirmationMessageProps) {
   const t = useTranslations();
+  const locale = useLocale();
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -62,7 +63,7 @@ export default function ConfirmationMessage({
       {canEdit && (
         <div className="text-center">
           <p className="text-base text-gray-600 mb-4">
-            {t('guest.edit.canEdit', { date: new Date(cutoffDate).toLocaleDateString() })}
+            {t('guest.edit.canEdit', { date: new Date(cutoffDate).toLocaleDateString(locale) })}
           </p>
           <button
             onClick={onEdit}

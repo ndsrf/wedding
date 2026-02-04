@@ -154,7 +154,7 @@ export default function GuestRSVPPage() {
               <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
             </p>
             <p>
-              <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString() })}</strong>
+              <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString(locale) })}</strong>
             </p>
             <p>
               <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>

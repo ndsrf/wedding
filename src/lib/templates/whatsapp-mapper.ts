@@ -1,6 +1,6 @@
 /**
  * WhatsApp Content Template Variable Mapping
- * Maps application variables to Twilio WhatsApp {{1}}-{{8}} variable placeholders
+ * Maps application variables to Twilio WhatsApp {{1}}-{{9}} variable placeholders
  */
 
 import path from "path";
@@ -18,6 +18,7 @@ export const WHATSAPP_VARIABLE_MAPPING = {
   magicLink: { position: 6, description: "Magic link for RSVP" },
   rsvpCutoffDate: { position: 7, description: "RSVP cutoff date" },
   referenceCode: { position: 8, description: "Family reference code" },
+  location: { position: 9, description: "Wedding location" },
 } as const;
 
 /**
@@ -45,6 +46,7 @@ export function mapToWhatsAppVariables(
   result["6"] = variables.magicLink || "";
   result["7"] = variables.rsvpCutoffDate || "";
   result["8"] = variables.referenceCode || "";
+  result["9"] = variables.location || "";
 
   return result;
 }
@@ -101,6 +103,12 @@ export function getWhatsAppVariableMappingDisplay() {
       appVariable: "referenceCode",
       placeholder: "{{8}}",
       description: "Family reference code",
+    },
+    {
+      position: 9,
+      appVariable: "location",
+      placeholder: "{{9}}",
+      description: "Wedding location",
     },
   ];
 }

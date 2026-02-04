@@ -6,9 +6,10 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
+import { formatDateByLanguage } from '@/lib/date-formatter';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
@@ -120,14 +121,8 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  const locale = await getLocale();
+  const language = (locale.toUpperCase()) as any;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -138,7 +133,7 @@ export default async function AdminDashboardPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{stats.couple_names}</h1>
               <p className="mt-1 text-sm text-gray-600">
-                {formatDate(stats.wedding_date)} • {stats.location}
+                {formatDateByLanguage(stats.wedding_date, language)} • {stats.location}
               </p>
             </div>
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">

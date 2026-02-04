@@ -14,6 +14,8 @@ import {
   getTemplateForSending,
 } from "@/lib/templates/crud";
 import { prisma } from "@/lib/db";
+import { formatDateByLanguage } from "@/lib/date-formatter";
+import type { Language } from "@/lib/i18n/config";
 
 /**
  * POST /api/admin/templates/preview
@@ -130,21 +132,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Build sample variables with wedding data
-    const formattedDate = wedding.wedding_date
-      .toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+    // Use the language parameter for date formatting, default to EN if not provided
+    const dateLanguage: Language = (language as Language) || 'EN';
 
-    const cutoffDate = wedding.rsvp_cutoff_date
-      .toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+    const formattedDate = formatDateByLanguage(wedding.wedding_date, dateLanguage);
+    const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, dateLanguage);
 
     const variables = {
       familyName: sampleData?.familyName || "Smith",

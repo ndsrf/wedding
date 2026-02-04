@@ -309,6 +309,7 @@ export default function TemplatesPage() {
       {previewOpen && currentTemplate && (
         <TemplatePreview
           templateId={currentTemplate.id}
+          language={selectedLanguage}
           onClose={() => setPreviewOpen(false)}
         />
       )}

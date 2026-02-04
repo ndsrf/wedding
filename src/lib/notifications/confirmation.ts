@@ -14,6 +14,7 @@ import { sendDynamicMessage, MessageType } from "@/lib/sms/twilio";
 import { trackEvent } from "@/lib/tracking/events";
 import type { Language as I18nLanguage } from "@/lib/i18n/config";
 import type { Channel } from "@prisma/client";
+import { formatDateByLanguage } from "@/lib/date-formatter";
 
 export interface SendConfirmationOptions {
   family_id: string;
@@ -91,21 +92,15 @@ export async function sendConfirmation(
     }
 
     // Build template variables
-    const weddingDate = family.wedding.wedding_date
-      .toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+    const weddingDate = formatDateByLanguage(
+      family.wedding.wedding_date,
+      family.preferred_language as any
+    );
 
-    const rsvpCutoffDate = family.wedding.rsvp_cutoff_date
-      .toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+    const rsvpCutoffDate = formatDateByLanguage(
+      family.wedding.rsvp_cutoff_date,
+      family.preferred_language as any
+    );
 
     const variables: TemplateVariables = {
       familyName: family.name,

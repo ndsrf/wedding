@@ -8,7 +8,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import FamilyMemberCard from './FamilyMemberCard';
 import type { FamilyWithMembers } from '@/types/models';
 
@@ -54,6 +54,7 @@ export default function RSVPForm({
   onSuccess,
 }: RSVPFormProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const [members, setMembers] = useState<MemberUpdate[]>(
     family.members.map((m) => ({
       id: m.id,
@@ -540,7 +541,7 @@ export default function RSVPForm({
       </button>
 
       <p className="mt-4 text-center text-base text-gray-500">
-        {t('guest.edit.canEdit', { date: new Date(wedding.rsvp_cutoff_date).toLocaleDateString() })}
+        {t('guest.edit.canEdit', { date: new Date(wedding.rsvp_cutoff_date).toLocaleDateString(locale) })}
       </p>
     </form>
   );

@@ -12,11 +12,13 @@ import Image from 'next/image';
 
 interface TemplatePreviewProps {
   templateId: string;
+  language?: string;
   onClose: () => void;
 }
 
 export function TemplatePreview({
   templateId,
+  language,
   onClose,
 }: TemplatePreviewProps) {
   const { data: session } = useSession();
@@ -47,6 +49,7 @@ export function TemplatePreview({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             template_id: templateId,
+            language: language,
             wedding_id: session.user.wedding_id,
           }),
         });
@@ -69,7 +72,7 @@ export function TemplatePreview({
     };
 
     fetchPreview();
-  }, [templateId, session?.user?.wedding_id]);
+  }, [templateId, language, session?.user?.wedding_id]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
