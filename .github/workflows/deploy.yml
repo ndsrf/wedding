@@ -17,7 +17,7 @@ env:
 
 jobs:
   # ============================================
-  # Run CI Checks First
+  # Run CI Checks (Lint, Type Check, Unit Tests)
   # ============================================
   ci-checks:
     name: CI Checks
@@ -49,12 +49,135 @@ jobs:
           CI: true
 
   # ============================================
+  # Build Application (Once)
+  # ============================================
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          NEXT_PUBLIC_IS_E2E: 'true'
+          NEXTAUTH_SECRET: dummy-secret-for-build
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            .next/standalone
+            .next/static
+            public
+          retention-days: 1
+
+  # ============================================
+  # Run E2E Tests (Against Production Build)
+  # ============================================
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [build, ci-checks]
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: wedding
+          POSTGRES_PASSWORD: wedding
+          POSTGRES_DB: wedding_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://wedding:wedding@localhost:5432/wedding_test
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: |
+          # Use the pre-built application instead of npm run dev
+          export NODE_ENV=production
+          npm run test:e2e
+        env:
+          DATABASE_URL: postgresql://wedding:wedding@localhost:5432/wedding_test
+          NEXTAUTH_SECRET: test-secret-for-ci-e2e-${{ github.run_id }}
+          NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_IS_E2E: 'true'
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          MASTER_ADMIN_EMAIL: master@example.com
+          MASTER_ADMIN_EMAILS: master@example.com
+          PLANNER_EMAIL: planner@example.com
+          WEDDING_ADMIN_EMAIL: admin@example.com
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ============================================
   # Build and Push Docker Image
   # ============================================
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: [ci-checks]
+    needs: [e2e-tests]
     permissions:
       contents: read
       packages: write
@@ -102,6 +225,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          build-args: |
+            DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
@@ -109,4 +234,3 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
-
