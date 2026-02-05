@@ -1,3 +1,12 @@
+## [0.7.1](https://github.com/ndsrf/wedding/compare/v0.7.0...v0.7.1) (2026-02-05)
+
+
+### Performance Improvements
+
+* optimize SQL queries and convert tracking events to fire-and-forget ([a6eda0e](https://github.com/ndsrf/wedding/commit/a6eda0ebd485327ed158809edd6d34afc735b829))
+
+
+
 # [0.7.0](https://github.com/ndsrf/wedding/compare/v0.6.0...v0.7.0) (2026-02-05)
 
 
