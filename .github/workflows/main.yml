@@ -107,9 +107,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
-      - name: Run npm audit
-        run: npm audit --audit-level=high
-        continue-on-error: true
+      - name: Run security audit check
+        run: |
+          echo "::notice::Running security audit - will fail on NEW moderate/high vulnerabilities"
+          echo "::notice::Accepted vulnerabilities are documented in SECURITY.md"
+          node .github/scripts/audit-check.js
 
   # ============================================
   # Build Application (Once)

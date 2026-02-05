@@ -60,7 +60,9 @@
       "Bash(npx jest:*)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma db execute:*)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" node:*)",
-      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate:*)"
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm audit fix:*)"
     ]
   }
 }
