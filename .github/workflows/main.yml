@@ -1,4 +1,4 @@
-name: Deploy & Release
+name: CI / CD Pipeline
 
 on:
   push:
@@ -6,11 +6,15 @@ on:
       - main
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   REGISTRY: ghcr.io
@@ -19,7 +23,7 @@ env:
 
 jobs:
   # ============================================
-  # Run CI Checks (Lint, Type Check, Unit & Integration)
+  # CI Checks (Lint, Type Check, Unit & Integration)
   # ============================================
   ci-checks:
     name: CI Checks
@@ -81,6 +85,31 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/wedding_test
           NEXTAUTH_SECRET: test-secret-for-ci
           NEXTAUTH_URL: http://localhost:3000
+
+  # ============================================
+  # Security Audit
+  # ============================================
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
 
   # ============================================
   # Build Application (Once)
@@ -195,6 +224,7 @@ jobs:
       - name: Run E2E tests
         run: |
           export NODE_ENV=production
+          export ALLOW_RESET=true
           npm run test:e2e
         env:
           DATABASE_URL: postgresql://wedding:wedding@localhost:5432/wedding_test
@@ -216,12 +246,13 @@ jobs:
           retention-days: 7
 
   # ============================================
-  # Build and Push Docker Image
+  # Build and Push Docker Image (Push/Tag only)
   # ============================================
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
     needs: [e2e-tests]
+    if: github.event_name != 'pull_request'
     permissions:
       contents: write
       packages: write
