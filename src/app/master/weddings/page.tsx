@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { WeddingList } from '@/components/master/WeddingList';
 import { useNamespacedTranslations } from '@/lib/i18n/client';
 
@@ -87,12 +88,12 @@ export default function WeddingsPage() {
                 {t('weddings.list')} (Read-only)
               </p>
             </div>
-            <a
+            <Link
               href="/master"
               className="inline-flex items-center px-5 py-2.5 border-2 border-gray-300 rounded-xl shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
             >
               {tCommon('buttons.back')}
-            </a>
+            </Link>
           </div>
         </div>
       </header>

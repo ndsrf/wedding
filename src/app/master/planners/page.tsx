@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { PlannerList } from '@/components/master/PlannerList';
 import { PlannerForm } from '@/components/master/PlannerForm';
 import { useNamespacedTranslations } from '@/lib/i18n/client';
@@ -152,12 +153,12 @@ export default function PlannersPage() {
               <p className="mt-2 text-base text-gray-600">{t('planners.list')}</p>
             </div>
             <div className="flex space-x-3">
-              <a
+              <Link
                 href="/master"
                 className="inline-flex items-center px-5 py-2.5 border-2 border-gray-300 rounded-xl shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
               >
                 {tCommon('buttons.back')}
-              </a>
+              </Link>
               <button
                 onClick={() => setShowForm(!showForm)}
                 className="inline-flex items-center px-5 py-2.5 border-2 border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
