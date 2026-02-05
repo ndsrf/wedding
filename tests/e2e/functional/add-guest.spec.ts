@@ -114,7 +114,8 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
 
       // Fill in first member details
       const memberNameInputs = modal.getByLabel(/member.*name|name/i);
-      const firstMemberNameInput = memberNameInputs.nth(0);
+      // Skip index 0 as it's the Family Name input
+      const firstMemberNameInput = memberNameInputs.nth(1);
       await expect(firstMemberNameInput).toBeVisible({ timeout: 3000 });
       await firstMemberNameInput.fill('Robert Smith');
 
@@ -127,7 +128,7 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
 
       // Add second member
       await addMemberButton.click();
-      const secondMemberNameInput = memberNameInputs.nth(1);
+      const secondMemberNameInput = memberNameInputs.nth(2);
       await expect(secondMemberNameInput).toBeVisible({ timeout: 3000 });
       await secondMemberNameInput.fill('Sarah Smith');
 
@@ -141,12 +142,6 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     const submitButton = modal.getByRole('button', { name: /save|create|add|submit/i }).last();
     await expect(submitButton).toBeVisible();
     await submitButton.click();
-
-    // Check for success indicators
-    const successIndicators = [
-      page.getByText(/test family smith/i),
-      page.getByText(/success|created|added/i),
-    ];
 
     // Wait for the modal to disappear or success message to appear
     await expect(modal).not.toBeVisible({ timeout: 10000 });
