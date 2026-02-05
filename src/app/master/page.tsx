@@ -6,6 +6,7 @@
  */
 
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { AnalyticsCard } from '@/components/master/AnalyticsCard';
@@ -115,7 +116,7 @@ export default async function MasterDashboardPage() {
         <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-8 border border-pink-100">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">{t('master.dashboard.quickActions')}</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <a
+            <Link
               href="/master/planners"
               className="flex items-center p-6 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50/50 transition-all hover:shadow-md group"
             >
@@ -140,9 +141,9 @@ export default async function MasterDashboardPage() {
                   {t('master.planners.description')}
                 </p>
               </div>
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/master/weddings"
               className="flex items-center p-6 border-2 border-purple-200 rounded-xl hover:border-purple-400 hover:bg-purple-50/50 transition-all hover:shadow-md group"
             >
@@ -167,7 +168,7 @@ export default async function MasterDashboardPage() {
                   {t('master.weddings.description')}
                 </p>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </main>

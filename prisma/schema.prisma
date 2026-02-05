@@ -84,6 +84,7 @@ model Wedding {
   dietary_restrictions_enabled    Boolean            @default(false)
   save_the_date_enabled           Boolean            @default(false)
   whatsapp_mode                   WhatsAppMode       @default(BUSINESS)
+  short_url_initials              String?            @unique
   extra_question_1_enabled        Boolean            @default(false)
   extra_question_1_text           String?
   extra_question_2_enabled        Boolean            @default(false)
@@ -190,6 +191,7 @@ model Family {
   phone                   String?
   whatsapp_number         String?
   magic_token             String          @unique @default(uuid())
+  short_url_code          String?
   reference_code          String?         @unique
   channel_preference      Channel?
   preferred_language      Language        @default(ES)
@@ -209,6 +211,7 @@ model Family {
   notifications           Notification[]
   tracking_events         TrackingEvent[]
 
+  @@unique([wedding_id, short_url_code])
   @@index([wedding_id])
   @@index([magic_token])
   @@index([reference_code])

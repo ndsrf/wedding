@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
 import type { Family, FamilyMember, Wedding, Theme } from '@prisma/client';
 import type { Channel } from '@/types/models';
+import { getShortUrlPath } from '@/lib/short-url';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -60,8 +61,9 @@ export async function generateMagicLink(
     },
   });
 
-  // Build magic link URL
-  const url = new URL(`/rsvp/${token}`, baseUrl);
+  // Build short magic link URL (/{INITIALS}/{CODE})
+  const shortPath = await getShortUrlPath(family_id);
+  const url = new URL(shortPath, baseUrl);
 
   // Add channel parameter for tracking if provided
   if (channel) {

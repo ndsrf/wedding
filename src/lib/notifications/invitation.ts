@@ -16,6 +16,7 @@ import type { Language as I18nLanguage } from "@/lib/i18n/config";
 import type { Channel } from "@prisma/client";
 import { formatDateByLanguage } from "@/lib/date-formatter";
 import { buildWhatsAppLink } from "@/lib/notifications/whatsapp-links";
+import { getShortUrlPath } from "@/lib/short-url";
 
 export interface SendInvitationOptions {
   family_id: string;
@@ -106,13 +107,16 @@ export async function sendInvitation(
       familyLanguage
     );
 
+    const baseUrl = process.env.APP_URL || "http://localhost:3000";
+    const shortPath = await getShortUrlPath(family.id);
+
     const variables: TemplateVariables = {
       familyName: family.name,
       coupleNames: family.wedding.couple_names,
       weddingDate,
       weddingTime: family.wedding.wedding_time,
       location: family.wedding.location,
-      magicLink: `${process.env.APP_URL || "http://localhost:3000"}/rsvp/${family.magic_token}`,
+      magicLink: `${baseUrl}${shortPath}`,
       rsvpCutoffDate,
       ...(family.reference_code && { referenceCode: family.reference_code }),
     };

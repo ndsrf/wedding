@@ -13,6 +13,7 @@ import {
   type UpdateFamilyInput,
 } from './validation';
 import type { Family, FamilyMember, Prisma } from '@prisma/client';
+import { assignShortCode } from '@/lib/short-url';
 
 export interface FamilyWithMembers extends Family {
   members: FamilyMember[];
@@ -99,6 +100,9 @@ export async function createFamily(
         members: true,
       },
     });
+
+    // Assign short-URL code while still inside the transaction
+    await assignShortCode(tx, newFamily.id, validatedInput.wedding_id);
 
     // Create family members if provided
     if (validatedInput.members && validatedInput.members.length > 0) {
