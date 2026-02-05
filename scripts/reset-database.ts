@@ -42,9 +42,10 @@ async function resetDatabase() {
   const isProduction = process.env.NODE_ENV === 'production';
   const hasAllowReset = process.env.ALLOW_RESET === 'true';
 
-  if (isProduction) {
+  if (isProduction && !hasAllowReset) {
     throw new Error(
-      '❌ Safety check failed: Cannot run reset on production (NODE_ENV=production). '
+      '❌ Safety check failed: Cannot run reset on production (NODE_ENV=production). ' +
+      'If you understand the risks and this is a test environment, set ALLOW_RESET=true'
     );
   }
 

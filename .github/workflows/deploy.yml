@@ -116,7 +116,13 @@ jobs:
 
       - name: Package build artifacts
         run: |
-          tar -czf build-artifacts.tar.gz .next public package.json package-lock.json prisma prisma.config.ts
+          # Copy public and static to standalone as per Next.js docs
+          cp -r public .next/standalone/
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/
+          
+          # Create a tarball of the standalone output and other necessary files
+          tar -czf build-artifacts.tar.gz .next/standalone public package.json package-lock.json prisma prisma.config.ts
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -166,7 +172,10 @@ jobs:
       - name: Extract build artifacts
         run: |
           tar -xzf build-artifacts.tar.gz
-          ls -la .next
+          # Move standalone files to root to mimic production environment
+          cp -r .next/standalone/* .
+          cp -r .next/standalone/.next .
+          ls -la
 
       - name: Install dependencies
         run: npm ci
