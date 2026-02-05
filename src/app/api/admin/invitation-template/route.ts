@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { getAllSystemSeeds } from '@/lib/invitation-template/seeds';
+import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { Prisma } from '@prisma/client';
 
 // ============================================================================
@@ -104,6 +105,8 @@ export async function POST(req: NextRequest) {
         is_system_template: false,
       },
     });
+
+    invalidateWeddingPageCache(user.wedding_id);
 
     return NextResponse.json(template, { status: 201 });
   } catch (error) {

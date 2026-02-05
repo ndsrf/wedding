@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { getAllSystemThemes } from '@/lib/theme/presets';
+import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import type { ThemeConfig } from '@/types/theme';
 import type { Theme } from '@/types/models';
 import type {
@@ -427,6 +428,8 @@ export async function PATCH(request: NextRequest) {
       where: { id: user.wedding_id },
       data: updateData,
     });
+
+    invalidateWeddingPageCache(user.wedding_id);
 
     const response: UpdateWeddingConfigResponse = {
       success: true,

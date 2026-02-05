@@ -7,9 +7,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateMagicLink } from '@/lib/auth/magic-link';
+import { validateMagicLinkLite } from '@/lib/auth/magic-link';
 import { trackLinkOpened } from '@/lib/tracking/events';
 import { prisma } from '@/lib/db/prisma';
+import { getWeddingPageCache, setWeddingPageCache } from '@/lib/cache/rsvp-page';
 import type { GetGuestRSVPPageResponse, GuestRSVPPageData } from '@/types/api';
 import type { Channel } from '@prisma/client';
 import type { ThemeConfig } from '@/types/theme';
@@ -22,10 +23,10 @@ export async function GET(
   try {
     const token = params.token;
 
-    // Validate magic token
-    const validation = await validateMagicLink(token);
+    // Validate magic token (lightweight – no wedding/theme JOIN)
+    const validation = await validateMagicLinkLite(token);
 
-    if (!validation.valid || !validation.family || !validation.wedding) {
+    if (!validation.valid || !validation.family || !validation.weddingId) {
       return NextResponse.json<GetGuestRSVPPageResponse>(
         {
           success: false,
@@ -38,129 +39,153 @@ export async function GET(
       );
     }
 
-    const { family, wedding, theme } = validation;
+    const { family, weddingId } = validation;
 
-    // Fetch invitation template if the wedding has one configured
-    let invitationTemplate: { id: string; name: string; design: unknown } | undefined;
-    if (wedding.invitation_template_id) {
-      try {
-        const template = await prisma.invitationTemplate.findUnique({
-          where: { id: wedding.invitation_template_id },
-          select: { id: true, name: true, design: true },
-        });
-        if (template) {
-          invitationTemplate = template;
-        }
-      } catch (err) {
-        console.error('Failed to fetch invitation template:', err);
-        // Continue without template if fetch fails
+    // ── per-wedding cache ─────────────────────────────────────────────────
+    // Wedding config, theme, and invitation template are identical for every
+    // guest of the same wedding.  On a cache hit the only DB query that ran
+    // was the lite token validation above (Family + Members + wedding date).
+    let cachedData = getWeddingPageCache(weddingId);
+
+    if (!cachedData) {
+      // Cache miss – fetch the full wedding row (with theme) and the active
+      // invitation template, assemble, and populate the cache.
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        include: { theme: true },
+      });
+
+      if (!wedding) {
+        return NextResponse.json<GetGuestRSVPPageResponse>(
+          {
+            success: false,
+            error: {
+              code: 'INTERNAL_ERROR',
+              message: 'An error occurred while loading the RSVP page',
+            },
+          },
+          { status: 500 }
+        );
       }
+
+      let invitationTemplate: { id: string; name: string; design: unknown } | undefined;
+      if (wedding.invitation_template_id) {
+        try {
+          const template = await prisma.invitationTemplate.findUnique({
+            where: { id: wedding.invitation_template_id },
+            select: { id: true, name: true, design: true },
+          });
+          if (template) {
+            invitationTemplate = template;
+          }
+        } catch (err) {
+          console.error('Failed to fetch invitation template:', err);
+        }
+      }
+
+      const themeData = wedding.theme ? {
+        id: wedding.theme.id,
+        planner_id: wedding.theme.planner_id,
+        name: wedding.theme.name,
+        description: wedding.theme.description,
+        is_default: wedding.theme.is_default,
+        is_system_theme: wedding.theme.is_system_theme,
+        config: wedding.theme.config as unknown as ThemeConfig,
+        preview_image_url: wedding.theme.preview_image_url,
+        created_at: wedding.theme.created_at,
+        updated_at: wedding.theme.updated_at,
+      } : {
+        id: 'default',
+        planner_id: null,
+        name: 'Default Theme',
+        description: 'Default system theme',
+        is_default: true,
+        is_system_theme: true,
+        config: {
+          colors: {
+            primary: '#4F46E5',
+            secondary: '#EC4899',
+            accent: '#F59E0B',
+            background: '#FFFFFF',
+            text: '#1F2937',
+          },
+          fonts: {
+            heading: 'Georgia, serif',
+            body: 'system-ui, sans-serif',
+          },
+          styles: {
+            buttonRadius: '0.5rem',
+            cardShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            spacing: '1rem',
+          },
+        } as ThemeConfig,
+        preview_image_url: null,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      cachedData = {
+        wedding: {
+          id: wedding.id,
+          couple_names: wedding.couple_names,
+          wedding_date: wedding.wedding_date.toISOString(),
+          wedding_time: wedding.wedding_time,
+          location: wedding.location,
+          rsvp_cutoff_date: wedding.rsvp_cutoff_date.toISOString(),
+          dress_code: wedding.dress_code,
+          additional_info: wedding.additional_info,
+          allow_guest_additions: wedding.allow_guest_additions,
+          default_language: wedding.default_language,
+          payment_tracking_mode: wedding.payment_tracking_mode,
+          gift_iban: wedding.gift_iban,
+          transportation_question_enabled: wedding.transportation_question_enabled,
+          transportation_question_text: wedding.transportation_question_text,
+          dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
+          extra_question_1_enabled: wedding.extra_question_1_enabled,
+          extra_question_1_text: wedding.extra_question_1_text,
+          extra_question_2_enabled: wedding.extra_question_2_enabled,
+          extra_question_2_text: wedding.extra_question_2_text,
+          extra_question_3_enabled: wedding.extra_question_3_enabled,
+          extra_question_3_text: wedding.extra_question_3_text,
+          extra_info_1_enabled: wedding.extra_info_1_enabled,
+          extra_info_1_label: wedding.extra_info_1_label,
+          extra_info_2_enabled: wedding.extra_info_2_enabled,
+          extra_info_2_label: wedding.extra_info_2_label,
+          extra_info_3_enabled: wedding.extra_info_3_enabled,
+          extra_info_3_label: wedding.extra_info_3_label,
+        },
+        theme: themeData,
+        ...(invitationTemplate && { invitation_template: invitationTemplate }),
+      };
+
+      setWeddingPageCache(weddingId, cachedData);
     }
 
-    // Extract channel from URL query parameter
+    // ── always-fresh: tracking + per-family fields ────────────────────────
     const channel = request.nextUrl.searchParams.get('channel')?.toUpperCase() as Channel | null;
 
-    // Track link opened event with channel attribution
-    await trackLinkOpened(
-      family.id,
-      wedding.id,
-      channel || undefined
-    );
+    // Fire-and-forget – trackEvent catches its own errors internally so this
+    // promise will never reject.  We don't block the response on a DB write
+    // that the guest doesn't need to wait for.
+    void trackLinkOpened(family.id, weddingId, channel || undefined);
 
-    // Check if RSVP cutoff has passed
-    const now = new Date();
-    const cutoffDate = new Date(wedding.rsvp_cutoff_date);
-    const rsvp_cutoff_passed = now > cutoffDate;
-
-    // Check if family has submitted RSVP (any member has attending status set)
+    const rsvp_cutoff_passed = new Date() > new Date(cachedData.wedding.rsvp_cutoff_date);
     const has_submitted_rsvp = family.members.some(
       (member) => member.attending !== null
     );
 
-    // Prepare theme with proper typing
-    const themeData = theme ? {
-      id: theme.id,
-      planner_id: theme.planner_id,
-      name: theme.name,
-      description: theme.description,
-      is_default: theme.is_default,
-      is_system_theme: theme.is_system_theme,
-      config: theme.config as unknown as ThemeConfig,
-      preview_image_url: theme.preview_image_url,
-      created_at: theme.created_at,
-      updated_at: theme.updated_at,
-    } : {
-      id: 'default',
-      planner_id: null,
-      name: 'Default Theme',
-      description: 'Default system theme',
-      is_default: true,
-      is_system_theme: true,
-      config: {
-        colors: {
-          primary: '#4F46E5',
-          secondary: '#EC4899',
-          accent: '#F59E0B',
-          background: '#FFFFFF',
-          text: '#1F2937',
-        },
-        fonts: {
-          heading: 'Georgia, serif',
-          body: 'system-ui, sans-serif',
-        },
-        styles: {
-          buttonRadius: '0.5rem',
-          cardShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          spacing: '1rem',
-        },
-      } as ThemeConfig,
-      preview_image_url: null,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-
-    // Prepare response data
+    // ── assemble final response ───────────────────────────────────────────
     const responseData: GuestRSVPPageData = {
       family: {
         ...family,
         members: family.members.map((member) => ({
           ...member,
-          // Ensure dates are serializable
           created_at: member.created_at,
         })),
       },
-      wedding: {
-        id: wedding.id,
-        couple_names: wedding.couple_names,
-        wedding_date: wedding.wedding_date.toISOString(),
-        wedding_time: wedding.wedding_time,
-        location: wedding.location,
-        rsvp_cutoff_date: wedding.rsvp_cutoff_date.toISOString(),
-        dress_code: wedding.dress_code,
-        additional_info: wedding.additional_info,
-        allow_guest_additions: wedding.allow_guest_additions,
-        default_language: wedding.default_language,
-        payment_tracking_mode: wedding.payment_tracking_mode,
-        gift_iban: wedding.gift_iban,
-        // RSVP Configuration fields
-        transportation_question_enabled: wedding.transportation_question_enabled,
-        transportation_question_text: wedding.transportation_question_text,
-        dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
-        extra_question_1_enabled: wedding.extra_question_1_enabled,
-        extra_question_1_text: wedding.extra_question_1_text,
-        extra_question_2_enabled: wedding.extra_question_2_enabled,
-        extra_question_2_text: wedding.extra_question_2_text,
-        extra_question_3_enabled: wedding.extra_question_3_enabled,
-        extra_question_3_text: wedding.extra_question_3_text,
-        extra_info_1_enabled: wedding.extra_info_1_enabled,
-        extra_info_1_label: wedding.extra_info_1_label,
-        extra_info_2_enabled: wedding.extra_info_2_enabled,
-        extra_info_2_label: wedding.extra_info_2_label,
-        extra_info_3_enabled: wedding.extra_info_3_enabled,
-        extra_info_3_label: wedding.extra_info_3_label,
-      },
-      theme: themeData,
-      ...(invitationTemplate && { invitation_template: invitationTemplate }),
+      wedding: cachedData.wedding,
+      theme: cachedData.theme,
+      ...(cachedData.invitation_template && { invitation_template: cachedData.invitation_template }),
       rsvp_cutoff_passed,
       has_submitted_rsvp,
     };
