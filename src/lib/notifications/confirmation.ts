@@ -186,27 +186,22 @@ export async function sendConfirmation(
       };
     }
 
-    // Track confirmation sent event
-    try {
-      await trackEvent({
-        family_id,
-        wedding_id,
-        event_type: "REMINDER_SENT",
+    // Track confirmation sent event (fire-and-forget for better performance)
+    void trackEvent({
+      family_id,
+      wedding_id,
+      event_type: "REMINDER_SENT",
+      channel,
+      metadata: {
+        template_id: template.id,
+        template_type: "CONFIRMATION",
+        language: family.preferred_language,
         channel,
-        metadata: {
-          template_id: template.id,
-          template_type: "CONFIRMATION",
-          language: family.preferred_language,
-          channel,
-          contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
-          ...(messageResult.messageId && { message_sid: messageResult.messageId }),
-        },
-        admin_triggered: false,
-      });
-    } catch (error) {
-      console.error("[CONFIRMATION] Failed to track event:", error);
-      // Don't fail the whole operation if tracking fails
-    }
+        contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
+        ...(messageResult.messageId && { message_sid: messageResult.messageId }),
+      },
+      admin_triggered: false,
+    });
 
     const contactInfo = channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number;
     console.log(

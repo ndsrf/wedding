@@ -112,20 +112,87 @@ export async function getGuestEngagementStatus(
 /**
  * Get engagement statistics for all families in a wedding
  * Useful for analytics dashboard
+ * OPTIMIZED: Fetches all tracking events in a single query and processes in memory
  */
 export async function getWeddingEngagementStats(wedding_id: string) {
   try {
-    const families = await prisma.family.findMany({
-      where: { wedding_id },
-      select: { id: true, name: true },
+    // Fetch all families and all tracking events in parallel (2 queries instead of N+1)
+    const [families, allEvents] = await Promise.all([
+      prisma.family.findMany({
+        where: { wedding_id },
+        select: { id: true, name: true },
+      }),
+      prisma.trackingEvent.findMany({
+        where: { wedding_id },
+        orderBy: { timestamp: 'asc' },
+        select: {
+          family_id: true,
+          event_type: true,
+          channel: true,
+          timestamp: true,
+        },
+      }),
+    ]);
+
+    // Group events by family_id for efficient lookup
+    const eventsByFamily = new Map<string, typeof allEvents>();
+    for (const event of allEvents) {
+      if (!eventsByFamily.has(event.family_id)) {
+        eventsByFamily.set(event.family_id, []);
+      }
+      eventsByFamily.get(event.family_id)!.push(event);
+    }
+
+    // Build engagement for each family using pre-fetched events
+    const validEngagements: GuestEngagement[] = families.map((family) => {
+      const events = eventsByFamily.get(family.id) || [];
+
+      // Build event map (first occurrence of each event type)
+      const eventMap = new Map<string, { timestamp: Date; channel?: Channel }>();
+      for (const event of events) {
+        if (!eventMap.has(event.event_type)) {
+          eventMap.set(event.event_type, {
+            timestamp: event.timestamp,
+            channel: event.channel || undefined,
+          });
+        }
+      }
+
+      // Build engagement object
+      const engagement: GuestEngagement = {
+        family_id: family.id,
+        family_name: family.name,
+        invited: eventMap.has('INVITATION_SENT')
+          ? { status: 'completed', ...eventMap.get('INVITATION_SENT') }
+          : { status: 'pending' },
+        delivered: eventMap.has('MESSAGE_DELIVERED')
+          ? { status: 'completed', ...eventMap.get('MESSAGE_DELIVERED') }
+          : { status: 'pending' },
+        read: eventMap.has('MESSAGE_READ')
+          ? { status: 'completed', ...eventMap.get('MESSAGE_READ') }
+          : { status: 'pending' },
+        link_opened: eventMap.has('LINK_OPENED')
+          ? { status: 'completed', ...eventMap.get('LINK_OPENED') }
+          : { status: 'pending' },
+        rsvp_confirmed: eventMap.has('RSVP_SUBMITTED')
+          ? { status: 'completed', ...eventMap.get('RSVP_SUBMITTED') }
+          : { status: 'pending' },
+        completion_percentage: 0,
+      };
+
+      // Calculate completion percentage (5 steps total)
+      const completedSteps = [
+        engagement.invited,
+        engagement.delivered,
+        engagement.read,
+        engagement.link_opened,
+        engagement.rsvp_confirmed,
+      ].filter((step) => step.status === 'completed').length;
+
+      engagement.completion_percentage = Math.round((completedSteps / 5) * 100);
+
+      return engagement;
     });
-
-    const engagements = await Promise.all(
-      families.map((family) => getGuestEngagementStatus(family.id, wedding_id))
-    );
-
-    // Filter out null results
-    const validEngagements = engagements.filter((e) => e !== null) as GuestEngagement[];
 
     // Calculate aggregate stats
     const stats = {
@@ -137,10 +204,12 @@ export async function getWeddingEngagementStats(wedding_id: string) {
         .length,
       rsvp_confirmed_count: validEngagements.filter((e) => e.rsvp_confirmed.status === 'completed')
         .length,
-      average_completion_percentage: Math.round(
-        validEngagements.reduce((sum, e) => sum + e.completion_percentage, 0) /
-          validEngagements.length
-      ),
+      average_completion_percentage: validEngagements.length > 0
+        ? Math.round(
+            validEngagements.reduce((sum, e) => sum + e.completion_percentage, 0) /
+              validEngagements.length
+          )
+        : 0,
       engagements: validEngagements,
     };
 
@@ -154,56 +223,49 @@ export async function getWeddingEngagementStats(wedding_id: string) {
 /**
  * Get channel-specific read rates
  * Compares MESSAGE_READ vs MESSAGE_SENT events by channel
+ * OPTIMIZED: Single query instead of 12 separate count queries
  */
 export async function getChannelReadRates(wedding_id: string) {
   try {
     const channels = ['WHATSAPP', 'SMS', 'EMAIL'] as const;
-    const readRates = await Promise.all(
-      channels.map(async (channel) => {
-        const sentCount = await prisma.trackingEvent.count({
-          where: {
-            wedding_id,
-            channel: channel as Channel,
-            event_type: 'INVITATION_SENT',
-          },
-        });
 
-        const readCount = await prisma.trackingEvent.count({
-          where: {
-            wedding_id,
-            channel: channel as Channel,
-            event_type: 'MESSAGE_READ',
-          },
-        });
+    // Fetch all relevant events in a single query
+    const events = await prisma.trackingEvent.findMany({
+      where: {
+        wedding_id,
+        event_type: {
+          in: ['INVITATION_SENT', 'MESSAGE_DELIVERED', 'MESSAGE_READ', 'MESSAGE_FAILED'],
+        },
+        channel: {
+          in: channels as unknown as Channel[],
+        },
+      },
+      select: {
+        channel: true,
+        event_type: true,
+      },
+    });
 
-        const deliveredCount = await prisma.trackingEvent.count({
-          where: {
-            wedding_id,
-            channel: channel as Channel,
-            event_type: 'MESSAGE_DELIVERED',
-          },
-        });
+    // Count events in memory by channel and type
+    const readRates = channels.map((channel) => {
+      const channelEvents = events.filter((e) => e.channel === channel);
 
-        const failedCount = await prisma.trackingEvent.count({
-          where: {
-            wedding_id,
-            channel: channel as Channel,
-            event_type: 'MESSAGE_FAILED',
-          },
-        });
+      const sentCount = channelEvents.filter((e) => e.event_type === 'INVITATION_SENT').length;
+      const deliveredCount = channelEvents.filter((e) => e.event_type === 'MESSAGE_DELIVERED').length;
+      const readCount = channelEvents.filter((e) => e.event_type === 'MESSAGE_READ').length;
+      const failedCount = channelEvents.filter((e) => e.event_type === 'MESSAGE_FAILED').length;
 
-        return {
-          channel,
-          sent_count: sentCount,
-          delivered_count: deliveredCount,
-          read_count: readCount,
-          failed_count: failedCount,
-          delivery_rate:
-            sentCount > 0 ? Math.round(((sentCount - failedCount) / sentCount) * 100) : 0,
-          read_rate: deliveredCount > 0 ? Math.round((readCount / deliveredCount) * 100) : 0,
-        };
-      })
-    );
+      return {
+        channel,
+        sent_count: sentCount,
+        delivered_count: deliveredCount,
+        read_count: readCount,
+        failed_count: failedCount,
+        delivery_rate:
+          sentCount > 0 ? Math.round(((sentCount - failedCount) / sentCount) * 100) : 0,
+        read_rate: deliveredCount > 0 ? Math.round((readCount / deliveredCount) * 100) : 0,
+      };
+    });
 
     return readRates;
   } catch (error) {
@@ -215,52 +277,59 @@ export async function getChannelReadRates(wedding_id: string) {
 /**
  * Get families with unread messages
  * Useful for identifying engagement gaps
+ * OPTIMIZED: Single query for all events instead of N queries
  */
 export async function getFamiliesWithUnreadMessages(wedding_id: string) {
   try {
-    // Get all families with INVITATION_SENT but no MESSAGE_READ
-    const families = await prisma.family.findMany({
-      where: {
-        wedding_id,
-      },
-    });
-
-    // Get tracking events for families with INVITATION_SENT
-    const familiesWithEvents = await Promise.all(
-      families.map(async (family) => {
-        const events = await prisma.trackingEvent.findMany({
-          where: {
-            family_id: family.id,
-            event_type: {
-              in: ['INVITATION_SENT', 'MESSAGE_READ', 'MESSAGE_DELIVERED'],
-            },
+    // Fetch all families and all relevant events in parallel (2 queries instead of N+1)
+    const [families, allEvents] = await Promise.all([
+      prisma.family.findMany({
+        where: { wedding_id },
+        select: {
+          id: true,
+          name: true,
+          channel_preference: true,
+        },
+      }),
+      prisma.trackingEvent.findMany({
+        where: {
+          wedding_id,
+          event_type: {
+            in: ['INVITATION_SENT', 'MESSAGE_READ', 'MESSAGE_DELIVERED'],
           },
-          orderBy: { timestamp: 'asc' },
-          select: {
-            event_type: true,
-            timestamp: true,
-            channel: true,
-          },
-        });
+        },
+        orderBy: { timestamp: 'asc' },
+        select: {
+          family_id: true,
+          event_type: true,
+          timestamp: true,
+          channel: true,
+        },
+      }),
+    ]);
 
-        return { ...family, events };
-      })
-    );
+    // Group events by family_id
+    const eventsByFamily = new Map<string, typeof allEvents>();
+    for (const event of allEvents) {
+      if (!eventsByFamily.has(event.family_id)) {
+        eventsByFamily.set(event.family_id, []);
+      }
+      eventsByFamily.get(event.family_id)!.push(event);
+    }
 
     // Filter to only those with INVITATION_SENT but no MESSAGE_READ
-    const unreadFamilies = familiesWithEvents
-      .filter((family) => {
-        const hasInvitation = family.events.some((e) => e.event_type === 'INVITATION_SENT');
-        const hasRead = family.events.some((e) => (e.event_type as string) === 'MESSAGE_READ');
-        return hasInvitation && !hasRead;
-      })
+    const unreadFamilies = families
       .map((family) => {
-        const invitationEvent = family.events.find(
-          (e: { event_type: string; timestamp: Date; channel: Channel | null }) => e.event_type === 'INVITATION_SENT'
-        );
-        const deliveredEvent = family.events.find(
-          (e: { event_type: string; timestamp: Date; channel: Channel | null }) => e.event_type === 'MESSAGE_DELIVERED'
-        );
+        const events = eventsByFamily.get(family.id) || [];
+        const hasInvitation = events.some((e) => e.event_type === 'INVITATION_SENT');
+        const hasRead = events.some((e) => e.event_type === 'MESSAGE_READ');
+
+        if (!hasInvitation || hasRead) {
+          return null;
+        }
+
+        const invitationEvent = events.find((e) => e.event_type === 'INVITATION_SENT');
+        const deliveredEvent = events.find((e) => e.event_type === 'MESSAGE_DELIVERED');
 
         return {
           family_id: family.id,
@@ -272,7 +341,8 @@ export async function getFamiliesWithUnreadMessages(wedding_id: string) {
             ? Math.floor((Date.now() - invitationEvent.timestamp.getTime()) / (1000 * 60 * 60 * 24))
             : undefined,
         };
-      });
+      })
+      .filter((f) => f !== null);
 
     return unreadFamilies;
   } catch (error) {

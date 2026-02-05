@@ -179,26 +179,23 @@ export async function sendSaveTheDate(
           data: { save_the_date_sent: new Date() },
         });
 
-        try {
-          await trackEvent({
-            family_id,
-            wedding_id,
-            event_type: "SAVE_THE_DATE_SENT",
+        // Track save the date sent event (fire-and-forget for better performance)
+        void trackEvent({
+          family_id,
+          wedding_id,
+          event_type: "SAVE_THE_DATE_SENT",
+          channel: "WHATSAPP",
+          metadata: {
+            template_id: template.id,
+            template_type: "SAVE_THE_DATE",
+            language: family.preferred_language,
             channel: "WHATSAPP",
-            metadata: {
-              template_id: template.id,
-              template_type: "SAVE_THE_DATE",
-              language: family.preferred_language,
-              channel: "WHATSAPP",
-              contact: family.whatsapp_number,
-              admin_id,
-              whatsapp_mode: "LINKS",
-            },
-            admin_triggered: true,
-          });
-        } catch (error) {
-          console.error("[SAVE_THE_DATE] Failed to track event:", error);
-        }
+            contact: family.whatsapp_number,
+            admin_id,
+            whatsapp_mode: "LINKS",
+          },
+          admin_triggered: true,
+        });
 
         return { success: true, waLink };
       }
@@ -249,29 +246,24 @@ export async function sendSaveTheDate(
       },
     });
 
-    // Track save the date sent event
-    try {
-      await trackEvent({
-        family_id,
-        wedding_id,
-        event_type: "SAVE_THE_DATE_SENT",
+    // Track save the date sent event (fire-and-forget for better performance)
+    void trackEvent({
+      family_id,
+      wedding_id,
+      event_type: "SAVE_THE_DATE_SENT",
+      channel,
+      metadata: {
+        template_id: template.id,
+        template_type: "SAVE_THE_DATE",
+        template_name: "Save the Date",
+        language: family.preferred_language,
         channel,
-        metadata: {
-          template_id: template.id,
-          template_type: "SAVE_THE_DATE",
-          template_name: "Save the Date",
-          language: family.preferred_language,
-          channel,
-          contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
-          admin_id,
-          ...(messageResult.messageId && { message_sid: messageResult.messageId }),
-        },
-        admin_triggered: true,
-      });
-    } catch (error) {
-      console.error("[SAVE_THE_DATE] Failed to track event:", error);
-      // Don't fail the whole operation if tracking fails
-    }
+        contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
+        admin_id,
+        ...(messageResult.messageId && { message_sid: messageResult.messageId }),
+      },
+      admin_triggered: true,
+    });
 
     const contactInfo = channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number;
     console.log(
