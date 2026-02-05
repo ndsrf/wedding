@@ -27,6 +27,19 @@ export interface MagicLinkValidationResult {
   error?: string;
 }
 
+/**
+ * Lightweight validation result – contains only what the auth check itself
+ * needs plus the family/member data that must always be fresh.  Wedding
+ * config, theme, and invitation template are served from the RSVP page cache
+ * (or fetched on a cache miss) by the caller.
+ */
+export interface MagicLinkLiteResult {
+  valid: boolean;
+  family?: FamilyWithMembers;
+  weddingId?: string;
+  error?: string;
+}
+
 export interface MagicLinkOptions {
   channel?: Channel;
   baseUrl?: string;
@@ -175,6 +188,62 @@ export async function validateMagicLink(token: string): Promise<MagicLinkValidat
       valid: false,
       error: 'VALIDATION_ERROR',
     };
+  }
+}
+
+/**
+ * Lightweight token validation – designed for the RSVP API hot path.
+ *
+ * Fetches only the data that (a) must be verified on every request for
+ * security or (b) changes per-family and therefore cannot be cached:
+ *   • Family row          – all columns (goes straight into the response)
+ *   • FamilyMember rows   – all columns (attending flags, response)
+ *   • Wedding.id          – used as the per-wedding cache key
+ *   • Wedding.wedding_date – the only field needed for the expiry check
+ *
+ * Everything else (wedding config, theme, invitation template) is served
+ * from the RSVP page cache by the caller; on a cache miss the caller does
+ * one additional query for the full wedding + theme.
+ *
+ * @param token - The magic link token to validate
+ * @returns Lite validation result
+ */
+export async function validateMagicLinkLite(token: string): Promise<MagicLinkLiteResult> {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(token)) {
+    return { valid: false, error: 'INVALID_TOKEN_FORMAT' };
+  }
+
+  try {
+    const family = await prisma.family.findFirst({
+      where: { magic_token: token },
+      include: {
+        members: { orderBy: { created_at: 'asc' } },
+        wedding: {
+          select: {
+            id: true,
+            wedding_date: true,
+          },
+        },
+      },
+    });
+
+    if (!family) {
+      return { valid: false, error: 'TOKEN_NOT_FOUND' };
+    }
+
+    if (family.wedding.wedding_date < new Date()) {
+      return { valid: false, error: 'TOKEN_EXPIRED' };
+    }
+
+    return {
+      valid: true,
+      family: family as unknown as FamilyWithMembers,
+      weddingId: family.wedding.id,
+    };
+  } catch (error) {
+    console.error('Magic link lite validation error:', error);
+    return { valid: false, error: 'VALIDATION_ERROR' };
   }
 }
 

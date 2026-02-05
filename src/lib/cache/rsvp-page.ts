@@ -3,7 +3,8 @@
  *
  * In-memory cache for the per-wedding slice of the guest RSVP API response.
  * Keyed by wedding_id.  Invalidated explicitly when an admin mutates the
- * invitation template or wedding settings; a 1-hour TTL acts as a safety net.
+ * invitation template or wedding settings; a configurable TTL
+ * (RSVP_CACHE_TTL_MINUTES, default 60) acts as a safety net.
  *
  * What is cached:  wedding config fields, theme, invitation_template
  * What is NOT cached: family/member data, has_submitted_rsvp, trackLinkOpened
@@ -75,8 +76,11 @@ interface CacheEntry {
 // CACHE
 // ============================================================================
 
-/** Safety-net TTL: 1 hour (matches theme cache) */
-const CACHE_TTL_MS = 3_600_000;
+/**
+ * Safety-net TTL driven by RSVP_CACHE_TTL_MINUTES env var (default 60).
+ * Parsed once at module load; changing the env var requires a restart.
+ */
+const CACHE_TTL_MS = (Number(process.env.RSVP_CACHE_TTL_MINUTES) || 60) * 60_000;
 
 const cache = new Map<string, CacheEntry>();
 

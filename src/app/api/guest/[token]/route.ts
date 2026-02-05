@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateMagicLink } from '@/lib/auth/magic-link';
+import { validateMagicLinkLite } from '@/lib/auth/magic-link';
 import { trackLinkOpened } from '@/lib/tracking/events';
 import { prisma } from '@/lib/db/prisma';
 import { getWeddingPageCache, setWeddingPageCache } from '@/lib/cache/rsvp-page';
@@ -23,10 +23,10 @@ export async function GET(
   try {
     const token = params.token;
 
-    // Validate magic token
-    const validation = await validateMagicLink(token);
+    // Validate magic token (lightweight – no wedding/theme JOIN)
+    const validation = await validateMagicLinkLite(token);
 
-    if (!validation.valid || !validation.family || !validation.wedding) {
+    if (!validation.valid || !validation.family || !validation.weddingId) {
       return NextResponse.json<GetGuestRSVPPageResponse>(
         {
           success: false,
@@ -39,16 +39,35 @@ export async function GET(
       );
     }
 
-    const { family, wedding, theme } = validation;
+    const { family, weddingId } = validation;
 
     // ── per-wedding cache ─────────────────────────────────────────────────
     // Wedding config, theme, and invitation template are identical for every
-    // guest of the same wedding.  Cache them and skip the template DB query
-    // on subsequent requests until an admin mutates them.
-    let cachedData = getWeddingPageCache(wedding.id);
+    // guest of the same wedding.  On a cache hit the only DB query that ran
+    // was the lite token validation above (Family + Members + wedding date).
+    let cachedData = getWeddingPageCache(weddingId);
 
     if (!cachedData) {
-      // Cache miss – fetch invitation template and assemble the per-wedding slice
+      // Cache miss – fetch the full wedding row (with theme) and the active
+      // invitation template, assemble, and populate the cache.
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        include: { theme: true },
+      });
+
+      if (!wedding) {
+        return NextResponse.json<GetGuestRSVPPageResponse>(
+          {
+            success: false,
+            error: {
+              code: 'INTERNAL_ERROR',
+              message: 'An error occurred while loading the RSVP page',
+            },
+          },
+          { status: 500 }
+        );
+      }
+
       let invitationTemplate: { id: string; name: string; design: unknown } | undefined;
       if (wedding.invitation_template_id) {
         try {
@@ -64,17 +83,17 @@ export async function GET(
         }
       }
 
-      const themeData = theme ? {
-        id: theme.id,
-        planner_id: theme.planner_id,
-        name: theme.name,
-        description: theme.description,
-        is_default: theme.is_default,
-        is_system_theme: theme.is_system_theme,
-        config: theme.config as unknown as ThemeConfig,
-        preview_image_url: theme.preview_image_url,
-        created_at: theme.created_at,
-        updated_at: theme.updated_at,
+      const themeData = wedding.theme ? {
+        id: wedding.theme.id,
+        planner_id: wedding.theme.planner_id,
+        name: wedding.theme.name,
+        description: wedding.theme.description,
+        is_default: wedding.theme.is_default,
+        is_system_theme: wedding.theme.is_system_theme,
+        config: wedding.theme.config as unknown as ThemeConfig,
+        preview_image_url: wedding.theme.preview_image_url,
+        created_at: wedding.theme.created_at,
+        updated_at: wedding.theme.updated_at,
       } : {
         id: 'default',
         planner_id: null,
@@ -139,17 +158,16 @@ export async function GET(
         ...(invitationTemplate && { invitation_template: invitationTemplate }),
       };
 
-      setWeddingPageCache(wedding.id, cachedData);
+      setWeddingPageCache(weddingId, cachedData);
     }
 
     // ── always-fresh: tracking + per-family fields ────────────────────────
     const channel = request.nextUrl.searchParams.get('channel')?.toUpperCase() as Channel | null;
 
-    await trackLinkOpened(
-      family.id,
-      wedding.id,
-      channel || undefined
-    );
+    // Fire-and-forget – trackEvent catches its own errors internally so this
+    // promise will never reject.  We don't block the response on a DB write
+    // that the guest doesn't need to wait for.
+    void trackLinkOpened(family.id, weddingId, channel || undefined);
 
     const rsvp_cutoff_passed = new Date() > new Date(cachedData.wedding.rsvp_cutoff_date);
     const has_submitted_rsvp = family.members.some(
