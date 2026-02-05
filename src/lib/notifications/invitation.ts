@@ -153,27 +153,23 @@ export async function sendInvitation(
       if (family.wedding.whatsapp_mode === "LINKS") {
         const waLink = buildWhatsAppLink(family.whatsapp_number!, renderedBody);
 
-        // Track invitation sent event (same as BUSINESS path)
-        try {
-          await trackEvent({
-            family_id,
-            wedding_id,
-            event_type: "INVITATION_SENT",
+        // Track invitation sent event (fire-and-forget for better performance)
+        void trackEvent({
+          family_id,
+          wedding_id,
+          event_type: "INVITATION_SENT",
+          channel,
+          metadata: {
+            template_id: template.id,
+            template_type: "INVITATION",
+            language: family.preferred_language,
             channel,
-            metadata: {
-              template_id: template.id,
-              template_type: "INVITATION",
-              language: family.preferred_language,
-              channel,
-              contact: family.whatsapp_number,
-              admin_id,
-              whatsapp_mode: "LINKS",
-            },
-            admin_triggered: true,
-          });
-        } catch (error) {
-          console.error("[INVITATION] Failed to track event:", error);
-        }
+            contact: family.whatsapp_number,
+            admin_id,
+            whatsapp_mode: "LINKS",
+          },
+          admin_triggered: true,
+        });
 
         console.log(`[INVITATION] LINKS mode – wa.me link generated for ${family.name}`);
         return { success: true, waLink };
@@ -217,28 +213,23 @@ export async function sendInvitation(
       };
     }
 
-    // Track invitation sent event
-    try {
-      await trackEvent({
-        family_id,
-        wedding_id,
-        event_type: "INVITATION_SENT",
+    // Track invitation sent event (fire-and-forget for better performance)
+    void trackEvent({
+      family_id,
+      wedding_id,
+      event_type: "INVITATION_SENT",
+      channel,
+      metadata: {
+        template_id: template.id,
+        template_type: "INVITATION",
+        language: family.preferred_language,
         channel,
-        metadata: {
-          template_id: template.id,
-          template_type: "INVITATION",
-          language: family.preferred_language,
-          channel,
-          contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
-          admin_id,
-          ...(messageResult.messageId && { message_sid: messageResult.messageId }),
-        },
-        admin_triggered: true,
-      });
-    } catch (error) {
-      console.error("[INVITATION] Failed to track event:", error);
-      // Don't fail the whole operation if tracking fails
-    }
+        contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
+        admin_id,
+        ...(messageResult.messageId && { message_sid: messageResult.messageId }),
+      },
+      admin_triggered: true,
+    });
 
     const contactInfo = channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number;
     console.log(

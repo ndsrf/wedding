@@ -112,8 +112,8 @@ export async function POST(
       },
     });
 
-    // Track guest added event
-    await trackGuestAdded(family.id, wedding.id, newMember.name);
+    // Track guest added event (fire-and-forget for better performance)
+    void trackGuestAdded(family.id, wedding.id, newMember.name);
 
     return NextResponse.json<AddFamilyMemberResponse>({
       success: true,

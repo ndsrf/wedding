@@ -87,85 +87,67 @@ export async function GET(request: NextRequest) {
       whereClause.invited_by_admin_id = invited_by_admin_id;
     }
 
-    // Get all families matching base filters first (for RSVP and attendance filtering)
-    let familyIds: string[] | undefined;
-
-    // RSVP status filter - requires checking members
-    if (rsvp_status) {
-      const familiesWithRsvpStatus = await prisma.family.findMany({
-        where: { wedding_id: user.wedding_id },
-        include: { members: { select: { attending: true } } },
-      });
-
-      if (rsvp_status === 'submitted') {
-        familyIds = familiesWithRsvpStatus
-          .filter((f) => f.members.some((m) => m.attending !== null))
-          .map((f) => f.id);
-      } else {
-        familyIds = familiesWithRsvpStatus
-          .filter((f) => f.members.every((m) => m.attending === null))
-          .map((f) => f.id);
-      }
+    // Use Prisma relation filters instead of in-memory filtering for better performance
+    // RSVP status filter - use relation filters
+    if (rsvp_status === 'submitted') {
+      whereClause.members = {
+        some: {
+          attending: { not: null },
+        },
+      };
+    } else if (rsvp_status === 'pending') {
+      whereClause.members = {
+        every: {
+          attending: null,
+        },
+      };
     }
 
-    // Attendance filter - requires checking members
-    if (attendance) {
-      const familiesWithAttendance = await prisma.family.findMany({
-        where: { wedding_id: user.wedding_id },
-        include: { members: { select: { attending: true } } },
-      });
-
-      let filteredIds: string[];
-      if (attendance === 'yes') {
-        // Families with at least one member attending
-        filteredIds = familiesWithAttendance
-          .filter((f) => f.members.length > 0 && f.members.some((m) => m.attending === true))
-          .map((f) => f.id);
-      } else if (attendance === 'no') {
-        // Families where no members are attending (all responded no, or mix of no/pending)
-        filteredIds = familiesWithAttendance
-          .filter(
-            (f) =>
-              f.members.length > 0 &&
-              !f.members.some((m) => m.attending === true) &&
-              f.members.some((m) => m.attending === false)
-          )
-          .map((f) => f.id);
-      } else {
-        // partial - some attending, some not or pending
-        filteredIds = familiesWithAttendance
-          .filter(
-            (f) =>
-              f.members.some((m) => m.attending === true) &&
-              f.members.some((m) => m.attending === false || m.attending === null)
-          )
-          .map((f) => f.id);
-      }
-
-      familyIds = familyIds
-        ? familyIds.filter((id) => filteredIds.includes(id))
-        : filteredIds;
+    // Attendance filter - use relation filters
+    if (attendance === 'yes') {
+      whereClause.members = {
+        some: {
+          attending: true,
+        },
+      };
+    } else if (attendance === 'no') {
+      whereClause.members = {
+        some: {
+          attending: false,
+        },
+        none: {
+          attending: true,
+        },
+      };
+    } else if (attendance === 'partial') {
+      whereClause.AND = [
+        {
+          members: {
+            some: {
+              attending: true,
+            },
+          },
+        },
+        {
+          members: {
+            some: {
+              OR: [
+                { attending: false },
+                { attending: null },
+              ],
+            },
+          },
+        },
+      ];
     }
 
-    // Payment status filter - requires checking gifts
+    // Payment status filter - use relation filters
     if (payment_status) {
-      const familiesWithPayment = await prisma.family.findMany({
-        where: { wedding_id: user.wedding_id },
-        include: { gifts: { select: { status: true } } },
-      });
-
-      const filteredIds = familiesWithPayment
-        .filter((f) => f.gifts.some((g) => g.status === payment_status))
-        .map((f) => f.id);
-
-      familyIds = familyIds
-        ? familyIds.filter((id) => filteredIds.includes(id))
-        : filteredIds;
-    }
-
-    // Apply familyIds filter if any filters were applied
-    if (familyIds !== undefined) {
-      whereClause.id = { in: familyIds };
+      whereClause.gifts = {
+        some: {
+          status: payment_status,
+        },
+      };
     }
 
     // Get total count for pagination

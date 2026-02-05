@@ -111,9 +111,9 @@ export async function POST(
     // Extract channel from URL query parameter
     const channel = request.nextUrl.searchParams.get('channel')?.toUpperCase() as Channel | null;
 
-    // Track RSVP submitted event
+    // Track RSVP submitted event (fire-and-forget for better performance)
     const attendingCount = body.members.filter((m) => m.attending).length;
-    await trackRSVPSubmitted(
+    void trackRSVPSubmitted(
       family.id,
       wedding.id,
       channel || undefined,
