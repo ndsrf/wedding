@@ -26,6 +26,7 @@ import { API_ERROR_CODES } from '@/types/api';
 import type { Channel } from '@prisma/client';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 import { buildWhatsAppLink } from '@/lib/notifications/whatsapp-links';
+import { getShortUrlPath } from '@/lib/short-url';
 
 // Validation schema for send reminders request
 const sendRemindersSchema = z.object({
@@ -219,7 +220,8 @@ export async function POST(request: NextRequest) {
           const language = (familyLanguage).toLowerCase() as I18nLanguage;
           const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
           const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
-          const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
+          const shortPath = await getShortUrlPath(family.id);
+          const magicLink = `${baseUrl}${shortPath}`;
 
           // Try to fetch template from database
           const template = await getTemplateForSending(
@@ -286,7 +288,8 @@ export async function POST(request: NextRequest) {
           const messages = REMINDER_MESSAGES[language];
           const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
           const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
-          const magicLink = `${baseUrl}/rsvp/${family.magic_token}?channel=email`;
+          const trackShortPath = await getShortUrlPath(family.id);
+          const trackMagicLink = `${baseUrl}${trackShortPath}?channel=email`;
 
           const personalizedMessage = {
             language,
@@ -294,7 +297,7 @@ export async function POST(request: NextRequest) {
             greeting: messages.greeting(family.name),
             body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
             cta: messages.cta,
-            magic_link: magicLink,
+            magic_link: trackMagicLink,
           };
 
           await prisma.trackingEvent.create({
@@ -370,7 +373,8 @@ export async function POST(request: NextRequest) {
           const language = familyLanguage.toLowerCase() as I18nLanguage;
           const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
           const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
-          const magicLink = `${baseUrl}/rsvp/${family.magic_token}`;
+          const smsShortPath = await getShortUrlPath(family.id);
+          const magicLink = `${baseUrl}${smsShortPath}`;
 
           // Fetch template from database
           const template = await getTemplateForSending(
@@ -434,7 +438,8 @@ export async function POST(request: NextRequest) {
           const messages = REMINDER_MESSAGES[language];
           const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
           const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
-          const magicLink = `${baseUrl}/rsvp/${family.magic_token}?channel=${targetChannel.toLowerCase()}`;
+          const smsTrackShortPath = await getShortUrlPath(family.id);
+          const smsTrackMagicLink = `${baseUrl}${smsTrackShortPath}?channel=${targetChannel.toLowerCase()}`;
 
           const personalizedMessage = {
             language,
@@ -442,7 +447,7 @@ export async function POST(request: NextRequest) {
             greeting: messages.greeting(family.name),
             body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
             cta: messages.cta,
-            magic_link: magicLink,
+            magic_link: smsTrackMagicLink,
           };
 
           await prisma.trackingEvent.create({
