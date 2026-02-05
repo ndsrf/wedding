@@ -71,54 +71,55 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     await addGuestButton.click();
 
     // Wait for the add guest modal/form to appear
-    await page.waitForTimeout(500);
+    const modal = page.locator('div[role="dialog"], .relative.bg-white.rounded-lg.shadow-xl').first();
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
     // Verify the "Invited By" select is visible and pre-populated
-    const invitedBySelect = page.getByLabel(/invited.*by/i).first();
+    const invitedBySelect = modal.getByLabel(/invited.*by/i).first();
     if (await invitedBySelect.isVisible({ timeout: 3000 }).catch(() => false)) {
+      // Use toHaveValue to retry until it's populated
+      await expect(invitedBySelect).not.toHaveValue('', { timeout: 5000 });
       const selectedValue = await invitedBySelect.inputValue();
-      expect(selectedValue.length).toBeGreaterThan(0); // Should be pre-populated with first admin
+      expect(selectedValue.length).toBeGreaterThan(0);
     }
 
     // Fill in family name
-    const familyNameInput = page.getByLabel(/family.*name|name/i).first();
+    const familyNameInput = modal.getByLabel(/family.*name|name/i).first();
     await expect(familyNameInput).toBeVisible({ timeout: 5000 });
     await familyNameInput.fill('Test Family Smith');
 
     // Fill in email
-    const emailInput = page.getByLabel(/email/i).first();
+    const emailInput = modal.getByLabel(/email/i).first();
     if (await emailInput.isVisible()) {
       await emailInput.fill('testsmith@example.com');
     }
 
     // Fill in phone (optional)
-    const phoneInput = page.getByLabel(/phone|telephone/i).first();
+    const phoneInput = modal.getByLabel(/phone|telephone/i).first();
     if (await phoneInput.isVisible().catch(() => false)) {
       await phoneInput.fill('+34612345678');
     }
 
     // Select preferred language (if visible)
-    const languageSelect = page.getByLabel(/language|preferred language/i).first();
+    const languageSelect = modal.getByLabel(/language|preferred language/i).first();
     if (await languageSelect.isVisible().catch(() => false)) {
       await languageSelect.selectOption('EN');
     }
 
     // Add family members
     // Look for "Add Member" button
-    const addMemberButton = page.getByRole('button', { name: /add.*member|new member/i }).first();
+    const addMemberButton = modal.getByRole('button', { name: /add.*member|new member/i }).first();
     if (await addMemberButton.isVisible().catch(() => false)) {
       await addMemberButton.click();
-      await page.waitForTimeout(300);
 
       // Fill in first member details
-      const memberNameInputs = page.getByLabel(/member.*name|name/i);
+      const memberNameInputs = modal.getByLabel(/member.*name|name/i);
       const firstMemberNameInput = memberNameInputs.nth(0);
-      if (await firstMemberNameInput.isVisible().catch(() => false)) {
-        await firstMemberNameInput.fill('Robert Smith');
-      }
+      await expect(firstMemberNameInput).toBeVisible({ timeout: 3000 });
+      await firstMemberNameInput.fill('Robert Smith');
 
       // Select member type
-      const memberTypeSelects = page.getByLabel(/type|member.*type/i);
+      const memberTypeSelects = modal.getByLabel(/type|member.*type/i);
       const firstMemberTypeSelect = memberTypeSelects.nth(0);
       if (await firstMemberTypeSelect.isVisible().catch(() => false)) {
         await firstMemberTypeSelect.selectOption('ADULT');
@@ -126,12 +127,9 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
 
       // Add second member
       await addMemberButton.click();
-      await page.waitForTimeout(300);
-
       const secondMemberNameInput = memberNameInputs.nth(1);
-      if (await secondMemberNameInput.isVisible().catch(() => false)) {
-        await secondMemberNameInput.fill('Sarah Smith');
-      }
+      await expect(secondMemberNameInput).toBeVisible({ timeout: 3000 });
+      await secondMemberNameInput.fill('Sarah Smith');
 
       const secondMemberTypeSelect = memberTypeSelects.nth(1);
       if (await secondMemberTypeSelect.isVisible().catch(() => false)) {
@@ -140,41 +138,22 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     }
 
     // Submit the form
-    const submitButton = page.getByRole('button', { name: /save|create|add|submit/i }).last();
+    const submitButton = modal.getByRole('button', { name: /save|create|add|submit/i }).last();
     await expect(submitButton).toBeVisible();
     await submitButton.click();
-
-    // Wait for success
-    await page.waitForTimeout(2000);
 
     // Check for success indicators
     const successIndicators = [
       page.getByText(/test family smith/i),
-      page.getByText(/success/i),
-      page.getByText(/created/i),
-      page.getByText(/added/i),
+      page.getByText(/success|created|added/i),
     ];
 
-    let foundSuccess = false;
-    for (const indicator of successIndicators) {
-      const elements = await indicator.all();
-      for (const element of elements) {
-        if (await element.isVisible().catch(() => false)) {
-          foundSuccess = true;
-          break;
-        }
-      }
-      if (foundSuccess) break;
-    }
-
-    expect(foundSuccess).toBeTruthy();
+    // Wait for the modal to disappear or success message to appear
+    await expect(modal).not.toBeVisible({ timeout: 10000 });
 
     // Verify the new guest appears in the table
     const guestTable = page.locator('table, [role="table"]').first();
-    if (await guestTable.isVisible().catch(() => false)) {
-      const tableContent = await guestTable.textContent();
-      expect(tableContent).toContain('Test Family Smith');
-    }
+    await expect(guestTable).toContainText('Test Family Smith', { timeout: 10000 });
   });
 
   test('should show validation errors when adding guest with invalid data', async ({ page }) => {
@@ -188,66 +167,18 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     await addGuestButton.click();
 
     // Wait for modal to open
-    await page.waitForTimeout(500);
-
-    // Verify modal is open by checking for modal backdrop or form elements
-    const modal = page.locator('div[class*="fixed"][class*="inset-0"]').first();
-    await modal.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-      // If no modal with that class, just wait a bit more
-    });
+    const modal = page.locator('div[role="dialog"], .relative.bg-white.rounded-lg.shadow-xl').first();
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
     // Try to submit without filling required fields
-    const submitButton = page.getByRole('button', { name: /save|create|add|submit/i }).last();
+    const submitButton = modal.getByRole('button', { name: /save|create|add|submit/i }).last();
     await expect(submitButton).toBeVisible({ timeout: 5000 });
     await submitButton.click();
 
-    // Wait for validation response
-    await page.waitForTimeout(800);
-
     // Should see validation errors in the modal
-    const errorBox = page.locator('[class*="bg-red"], [role="alert"]').first();
-
-    // Look for error text patterns
-    const errorIndicators = [
-      page.getByText(/family.*name.*required|required/i),
-      page.getByText(/invalid/i),
-      page.getByText(/please enter/i),
-      page.getByText(/cannot be empty/i),
-    ];
-
-    let foundError = false;
-
-    // Check error box visibility
-    if (await errorBox.isVisible().catch(() => false)) {
-      const errorText = await errorBox.textContent();
-      if (errorText && errorText.toLowerCase().includes('required')) {
-        foundError = true;
-      }
-    }
-
-    // Check for error indicators
-    if (!foundError) {
-      for (const indicator of errorIndicators) {
-        const elements = await indicator.all();
-        if (elements.length > 0) {
-          for (const element of elements) {
-            if (await element.isVisible().catch(() => false)) {
-              foundError = true;
-              break;
-            }
-          }
-          if (foundError) break;
-        }
-      }
-    }
-
-    if (!foundError) {
-      // Debug: log what's on the page
-      const pageText = await page.textContent('body');
-      console.log('Page content snippet:', pageText?.substring(0, 500));
-    }
-
-    expect(foundError).toBeTruthy();
+    const errorBox = modal.locator('[class*="bg-red"], [role="alert"]').first();
+    await expect(errorBox).toBeVisible({ timeout: 5000 });
+    await expect(errorBox).toContainText(/required|invalid|please enter|cannot be empty/i);
   });
 
   test('should allow canceling guest addition', async ({ page }) => {
@@ -255,6 +186,10 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     await page.goto('/admin/guests');
     await page.waitForLoadState('networkidle');
 
+    // Wait for table to be visible to get accurate count
+    const guestTable = page.locator('table, [role="table"]').first();
+    await expect(guestTable).toBeVisible({ timeout: 5000 });
+    
     // Get initial guest count
     const initialGuestCount = await page.locator('table tbody tr, [role="row"]').count();
 
@@ -263,29 +198,28 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     await addGuestButton.click();
 
     // Wait for modal
-    await page.waitForTimeout(500);
+    const modal = page.locator('div[role="dialog"], .relative.bg-white.rounded-lg.shadow-xl').first();
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
     // Fill in some data
-    const familyNameInput = page.getByLabel(/family.*name|name/i).first();
-    if (await familyNameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await familyNameInput.fill('Should Be Canceled');
-    }
+    const familyNameInput = modal.getByLabel(/family.*name|name/i).first();
+    await expect(familyNameInput).toBeVisible({ timeout: 3000 });
+    await familyNameInput.fill('Should Be Canceled');
 
     // Click cancel
-    const cancelButton = page.getByRole('button', { name: /cancel|close/i }).first();
+    const cancelButton = modal.getByRole('button', { name: /cancel|close/i }).first();
     await expect(cancelButton).toBeVisible({ timeout: 5000 });
     await cancelButton.click();
 
     // Wait for modal to close
-    await page.waitForTimeout(500);
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
 
     // Verify guest was not added
     const currentGuestCount = await page.locator('table tbody tr, [role="row"]').count();
     expect(currentGuestCount).toBe(initialGuestCount);
 
     // Verify the canceled guest name doesn't appear
-    const pageContent = await page.textContent('body');
-    expect(pageContent).not.toContain('Should Be Canceled');
+    await expect(page.getByText('Should Be Canceled')).not.toBeVisible();
   });
 
   test('should display existing guests in the table', async ({ page }) => {
