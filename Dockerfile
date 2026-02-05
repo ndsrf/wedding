@@ -44,7 +44,13 @@ ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Build the application
-RUN npm run build
+# Skip build if .next already exists (provided from CI context)
+RUN if [ ! -d ".next" ]; then \
+      echo "No pre-built .next found, building..." && \
+      npm run build; \
+    else \
+      echo "Using pre-built .next directory found in context"; \
+    fi
 
 # ============================================
 # Stage 3: Prune
