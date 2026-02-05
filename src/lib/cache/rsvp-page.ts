@@ -10,6 +10,7 @@
  * What is NOT cached: family/member data, has_submitted_rsvp, trackLinkOpened
  */
 
+import type { Language, PaymentMode } from '@prisma/client';
 import type { ThemeConfig } from '@/types/theme';
 
 // ============================================================================
@@ -33,8 +34,8 @@ export interface CachedWeddingPageData {
     dress_code: string | null;
     additional_info: string | null;
     allow_guest_additions: boolean;
-    default_language: string;
-    payment_tracking_mode: string;
+    default_language: Language;
+    payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
     transportation_question_enabled: boolean;
     transportation_question_text: string | null;
