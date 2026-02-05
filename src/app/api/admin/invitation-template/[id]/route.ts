@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
+import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { Prisma } from '@prisma/client';
 
 // ============================================================================
@@ -135,6 +136,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       data: updateData,
     });
 
+    invalidateWeddingPageCache(template.wedding_id);
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating invitation template:', error);
@@ -189,6 +192,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     await prisma.invitationTemplate.delete({
       where: { id },
     });
+
+    invalidateWeddingPageCache(template.wedding_id);
 
     return NextResponse.json({ success: true }, { status: 204 });
   } catch (error) {
