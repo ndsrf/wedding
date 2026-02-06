@@ -8,7 +8,7 @@
 
 import { PrismaClient, Prisma } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool } from 'pg'
+import { Pool, PoolConfig } from 'pg'
 import { AsyncLocalStorage } from 'async_hooks'
 
 // Type for the global prisma variable
@@ -34,7 +34,7 @@ if (!connectionString) {
 const platform = process.env.PLATFORM_OPTIMIZATION || 'standard'
 const isServerless = platform === 'vercel'
 
-const poolConfig: any = {
+const poolConfig: PoolConfig = {
   connectionString,
   // For serverless, we want fewer connections per function and faster timeout
   max: isServerless ? 2 : (platform === 'cloudflare' || platform === 'docker' ? 20 : 10),
