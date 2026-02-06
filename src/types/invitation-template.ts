@@ -82,6 +82,8 @@ export interface CountdownBlock {
     fontStyle?: 'normal' | 'italic';
     fontWeight?: 'normal' | 'bold';
     textDecoration?: 'none' | 'underline';
+    labelFontSize?: string; // for days/hours/minutes/seconds labels
+    labelColor?: string; // for days/hours/minutes/seconds labels
   };
 }
 

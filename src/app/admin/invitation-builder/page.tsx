@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { InvitationTemplateEditor } from '@/components/admin/InvitationTemplateEditor';
 import type {
   SystemTemplateSeed,
@@ -41,6 +42,8 @@ type ViewType = 'list' | 'picker' | 'editor';
  * Invitation Builder Page
  */
 export default function InvitationBuilderPage() {
+  const t = useTranslations('admin.invitationBuilder');
+  const tCommon = useTranslations('common');
   const [view, setView] = useState<ViewType>('list');
   const [userTemplates, setUserTemplates] = useState<UserTemplate[]>([]);
   const [systemSeeds, setSystemSeeds] = useState<SystemTemplateSeed[]>([]);
@@ -177,7 +180,7 @@ export default function InvitationBuilderPage() {
   };
 
   const handleDeleteTemplate = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this template?')) return;
+    if (!confirm(t('confirmDeleteTemplate'))) return;
 
     try {
       const res = await fetch(`/api/admin/invitation-template/${id}`, {
@@ -196,7 +199,7 @@ export default function InvitationBuilderPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500">{tCommon('loading')}</p>
       </div>
     );
   }
@@ -212,27 +215,34 @@ export default function InvitationBuilderPage() {
   // View: List
   if (view === 'list') {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <Link href="/admin" className="text-gray-500 hover:text-gray-700">
-                ← Back
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Invitation Builder</h1>
-                <p className="text-gray-600">Design your wedding invitation page</p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center">
+                <Link href="/admin" className="text-gray-600 hover:text-gray-700 mr-4">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </Link>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+                  <p className="mt-1 text-sm text-gray-600">{t('description')}</p>
+                </div>
               </div>
+              <button
+                onClick={() => setView('picker')}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-md hover:bg-amber-700"
+              >
+                {t('createNew')}
+              </button>
             </div>
-            <button
-              onClick={() => setView('picker')}
-              className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium"
-            >
-              Create New
-            </button>
           </div>
+        </header>
 
+        {/* Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Error */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
@@ -244,16 +254,16 @@ export default function InvitationBuilderPage() {
           {userTemplates.length === 0 ? (
             <div className="bg-white rounded-lg shadow p-12 text-center">
               <h2 className="text-xl font-medium text-gray-900 mb-2">
-                No templates yet
+                {t('noTemplatesYet')}
               </h2>
               <p className="text-gray-600 mb-6">
-                Create your first invitation template to get started
+                {t('noTemplatesDescription')}
               </p>
               <button
                 onClick={() => setView('picker')}
                 className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium"
               >
-                Create First Template
+                {t('createFirstTemplate')}
               </button>
             </div>
           ) : (
@@ -278,7 +288,7 @@ export default function InvitationBuilderPage() {
                     </h3>
                     {template.based_on_preset && (
                       <p className="text-sm text-gray-600 mb-4">
-                        Based on: {systemSeeds.find((s) => s.id === template.based_on_preset)?.name}
+                        {t('basedOn')}: {systemSeeds.find((s) => s.id === template.based_on_preset)?.name}
                       </p>
                     )}
 
@@ -287,13 +297,13 @@ export default function InvitationBuilderPage() {
                         onClick={() => handleEditTemplate(template)}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
                       >
-                        Edit
+                        {t('editTemplate')}
                       </button>
                       <button
                         onClick={() => handleDeleteTemplate(template.id)}
                         className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm font-medium"
                       >
-                        Delete
+                        {t('deleteTemplate')}
                       </button>
                     </div>
                   </div>
@@ -301,7 +311,7 @@ export default function InvitationBuilderPage() {
               ))}
             </div>
           )}
-        </div>
+        </main>
       </div>
     );
   }
@@ -309,23 +319,32 @@ export default function InvitationBuilderPage() {
   // View: Picker
   if (view === 'picker') {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <button
-              onClick={() => {
-                setView('list');
-                setNewTemplateName('');
-                setSelectedSeed(null);
-              }}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ← Back
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">Create Template</h1>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center">
+              <button
+                onClick={() => {
+                  setView('list');
+                  setNewTemplateName('');
+                  setSelectedSeed(null);
+                }}
+                className="text-gray-600 hover:text-gray-700 mr-4"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{t('createTemplate')}</h1>
+              </div>
+            </div>
           </div>
+        </header>
 
+        {/* Content */}
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Error */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
@@ -336,7 +355,7 @@ export default function InvitationBuilderPage() {
           {/* Template Name Input */}
           <div className="bg-white rounded-lg shadow p-6 mb-8">
             <label className="block text-lg font-semibold mb-2 text-gray-900">
-              Template Name
+              {t('templateName')}
             </label>
             <input
               type="text"
@@ -358,15 +377,15 @@ export default function InvitationBuilderPage() {
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
-              <p className="text-lg font-semibold text-gray-900">Start from Scratch</p>
-              <p className="text-sm text-gray-600 mt-2">Create a blank template</p>
+              <p className="text-lg font-semibold text-gray-900">{t('startFromScratch')}</p>
+              <p className="text-sm text-gray-600 mt-2">{t('description')}</p>
             </button>
           </div>
 
           {/* System Templates */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Start from a System Template
+              {t('startFromTemplate')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {systemSeeds.map((seed) => (
@@ -409,17 +428,17 @@ export default function InvitationBuilderPage() {
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 transition font-medium"
               disabled={isSavingTemplate}
             >
-              Cancel
+              {tCommon('buttons.cancel')}
             </button>
             <button
               onClick={handleCreateTemplate}
               disabled={!newTemplateName.trim() || isSavingTemplate}
               className="flex-1 px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSavingTemplate ? 'Creating...' : 'Create Template'}
+              {isSavingTemplate ? t('creating') : t('createTemplate')}
             </button>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -427,22 +446,31 @@ export default function InvitationBuilderPage() {
   // View: Editor
   if (view === 'editor' && currentTemplate) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <button
-              onClick={() => {
-                setView('list');
-                setCurrentTemplate(null);
-              }}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ← Back
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">{currentTemplate.name}</h1>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center">
+              <button
+                onClick={() => {
+                  setView('list');
+                  setCurrentTemplate(null);
+                }}
+                className="text-gray-600 hover:text-gray-700 mr-4"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{currentTemplate.name}</h1>
+              </div>
+            </div>
           </div>
+        </header>
 
+        {/* Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Error */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
@@ -456,7 +484,7 @@ export default function InvitationBuilderPage() {
             weddingData={weddingData}
             onSave={handleSaveTemplate}
           />
-        </div>
+        </main>
       </div>
     );
   }

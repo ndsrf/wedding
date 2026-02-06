@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { CountdownBlock } from '@/types/invitation-template';
 
 const FONT_FAMILIES = [
@@ -13,6 +14,7 @@ const FONT_FAMILIES = [
 ];
 
 const FONT_SIZES = ['0.875rem', '1rem', '1.25rem', '1.5rem', '2rem', '2.5rem', '3rem'];
+const LABEL_FONT_SIZES = ['0.75rem', '0.875rem', '1rem', '1.125rem', '1.25rem', '1.5rem'];
 
 interface CountdownBlockEditorProps {
   block: CountdownBlock;
@@ -32,6 +34,8 @@ export function CountdownBlockEditor({
   block,
   onUpdate,
 }: CountdownBlockEditorProps) {
+  const t = useTranslations('admin.invitationBuilder');
+
   const handleUpdateStyle = (key: string, value: string) => {
     onUpdate(block.id, {
       style: {
@@ -44,11 +48,11 @@ export function CountdownBlockEditor({
   // Sidebar mode
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6">
-      <h3 className="text-lg font-semibold mb-4">Countdown Settings</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('countdownSettings')}</h3>
 
       {/* Font Family */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Font</label>
+        <label className="block text-sm font-medium mb-2">{t('font')}</label>
         <select
           value={block.style?.fontFamily || 'Lora, serif'}
           onChange={(e) => handleUpdateStyle('fontFamily', e.target.value)}
@@ -64,7 +68,7 @@ export function CountdownBlockEditor({
 
       {/* Font Size */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Size</label>
+        <label className="block text-sm font-medium mb-2">{t('size')}</label>
         <select
           value={block.style?.fontSize || '2.25rem'}
           onChange={(e) => handleUpdateStyle('fontSize', e.target.value)}
@@ -80,7 +84,7 @@ export function CountdownBlockEditor({
 
       {/* Color */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Color</label>
+        <label className="block text-sm font-medium mb-2">{t('color')}</label>
         <input
           type="color"
           value={block.style?.color || '#D4AF37'}
@@ -91,7 +95,7 @@ export function CountdownBlockEditor({
 
       {/* Text Style */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Text Style</label>
+        <label className="block text-sm font-medium mb-2">{t('textStyle')}</label>
         <div className="flex gap-2">
           <button
             onClick={() =>
@@ -102,7 +106,7 @@ export function CountdownBlockEditor({
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
-            title="Bold"
+            title={t('bold')}
           >
             B
           </button>
@@ -115,7 +119,7 @@ export function CountdownBlockEditor({
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
-            title="Italic"
+            title={t('italic')}
           >
             <span className="italic">I</span>
           </button>
@@ -128,11 +132,42 @@ export function CountdownBlockEditor({
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
-            title="Underline"
+            title={t('underline')}
           >
             <span className="underline">U</span>
           </button>
         </div>
+      </div>
+
+      {/* Separator */}
+      <div className="border-t border-gray-200 my-6"></div>
+      <h4 className="text-md font-semibold mb-4">{t('labelSettings')}</h4>
+
+      {/* Label Font Size */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">{t('labelSize')}</label>
+        <select
+          value={block.style?.labelFontSize || '0.875rem'}
+          onChange={(e) => handleUpdateStyle('labelFontSize', e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
+        >
+          {LABEL_FONT_SIZES.map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Label Color */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">{t('labelColor')}</label>
+        <input
+          type="color"
+          value={block.style?.labelColor || '#6B7280'}
+          onChange={(e) => handleUpdateStyle('labelColor', e.target.value)}
+          className="w-full h-10 rounded cursor-pointer"
+        />
       </div>
     </div>
   );

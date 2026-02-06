@@ -150,7 +150,6 @@ function TemplateBlock({
     return (
       <LocationBlock
         location={location}
-        weddingTime={weddingTime}
         style={locationBlock.style}
       />
     );
@@ -162,6 +161,7 @@ function TemplateBlock({
       <CountdownBlock
         weddingDate={weddingDate}
         weddingTime={weddingTime}
+        language={language}
         style={countdownBlock.style}
       />
     );

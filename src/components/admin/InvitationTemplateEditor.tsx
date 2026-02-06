@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import type {
   TemplateDesign,
   TemplateBlock,
@@ -49,6 +50,7 @@ export function InvitationTemplateEditor({
   weddingData,
   onSave,
 }: InvitationTemplateEditorProps) {
+  const t = useTranslations('admin.invitationBuilder');
   const [design, setDesign] = useState<TemplateDesign>(template.design);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [activeLanguage, setActiveLanguage] = useState<SupportedLanguage>('EN');
@@ -253,40 +255,40 @@ export function InvitationTemplateEditor({
       <div className="lg:col-span-1">
         {/* Add Block Section */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">Add Block</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('addBlock')}</h3>
           <div className="space-y-2">
             <button
               onClick={() => handleAddBlock('text')}
-              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition"
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium"
             >
-              + Text
+              + {t('blockText')}
             </button>
             <button
               onClick={() => handleAddBlock('image')}
-              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition"
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium"
             >
-              + Image
+              + {t('blockImage')}
             </button>
             <button
               onClick={() => handleAddBlock('location')}
               disabled={hasLocation}
-              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              + Location
+              + {t('blockLocation')}
             </button>
             <button
               onClick={() => handleAddBlock('countdown')}
               disabled={hasCountdown}
-              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              + Countdown
+              + {t('blockCountdown')}
             </button>
             <button
               onClick={() => handleAddBlock('add-to-calendar')}
               disabled={hasAddToCalendar}
-              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              + Add to Calendar
+              + {t('blockAddToCalendar')}
             </button>
           </div>
         </div>
@@ -317,10 +319,10 @@ export function InvitationTemplateEditor({
 
         {/* Canvas Settings */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">Canvas Settings</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('canvasSettings')}</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Background Color</label>
+              <label className="block text-sm font-medium mb-2">{t('backgroundColor')}</label>
               <input
                 type="color"
                 value={design.globalStyle.backgroundColor}
@@ -338,7 +340,7 @@ export function InvitationTemplateEditor({
             </div>
             {design.globalStyle.backgroundImage && (
               <div>
-                <label className="block text-sm font-medium mb-2">Background Image</label>
+                <label className="block text-sm font-medium mb-2">{t('backgroundImage')}</label>
                 <p className="text-sm text-gray-600 truncate">
                   {design.globalStyle.backgroundImage}
                 </p>
@@ -346,7 +348,7 @@ export function InvitationTemplateEditor({
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium mb-2">Paper Background</label>
+              <label className="block text-sm font-medium mb-2">{t('paperBackground')}</label>
               {design.globalStyle.paperBackgroundImage ? (
                 <div className="space-y-2">
                   <div className="relative w-full h-24 bg-gray-100 rounded overflow-hidden">
@@ -369,7 +371,7 @@ export function InvitationTemplateEditor({
                       onClick={handleRemovePaperBackground}
                       className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
                     >
-                      Remove
+                      {t('remove')}
                     </button>
                   </div>
                 </div>
@@ -378,7 +380,7 @@ export function InvitationTemplateEditor({
                   onClick={() => setIsPaperBackgroundModalOpen(true)}
                   className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-sm"
                 >
-                  + Add Paper Background
+                  + {t('addPaperBackground')}
                 </button>
               )}
               <p className="text-xs text-gray-500 mt-1">
@@ -429,7 +431,7 @@ export function InvitationTemplateEditor({
           )}
 
           {/* Canvas Content */}
-          <div className="relative z-10">
+          <div className="relative z-10 pt-10">
             {design.blocks.length === 0 ? (
               <div className="flex items-center justify-center h-[600px] text-gray-400">
                 <p>No blocks added yet. Add a block from the sidebar.</p>
@@ -442,11 +444,11 @@ export function InvitationTemplateEditor({
                     selectedBlockId === block.id
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-transparent hover:border-gray-300'
-                  } transition cursor-pointer`}
+                  } transition cursor-pointer mb-2`}
                   onClick={() => setSelectedBlockId(block.id)}
                 >
                   {/* Block Toolbar */}
-                  <div className="absolute -top-8 left-0 right-0 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                  <div className="absolute -top-8 left-0 right-0 flex gap-2 opacity-0 group-hover:opacity-100 transition z-10">
                     {index > 0 && (
                       <button
                         onClick={(e) => {
@@ -503,7 +505,6 @@ export function InvitationTemplateEditor({
                   {block.type === 'location' && (
                     <LocationBlock
                       location={weddingData.location}
-                      weddingTime={weddingData.wedding_time}
                       style={(block as LocationBlockType).style}
                     />
                   )}
@@ -516,6 +517,7 @@ export function InvitationTemplateEditor({
                           : new Date(weddingData.wedding_date).toISOString()
                       }
                       weddingTime={weddingData.wedding_time}
+                      language={activeLanguage}
                       style={(block as CountdownBlockType).style}
                     />
                   )}
@@ -551,7 +553,7 @@ export function InvitationTemplateEditor({
             setImageModalBlockId(null);
           }}
           onSelectImage={handleSelectImage}
-          requireAspectRatio={true}
+          requireAspectRatio={false}
         />
       )}
 

@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { SupportedLanguage } from '@/types/invitation-template';
 
 interface CountdownBlockProps {
   weddingDate: string;
   weddingTime?: string;
+  language?: SupportedLanguage;
   style?: {
     fontFamily?: string;
     fontSize?: string;
@@ -12,8 +14,19 @@ interface CountdownBlockProps {
     fontStyle?: 'normal' | 'italic';
     fontWeight?: 'normal' | 'bold';
     textDecoration?: 'none' | 'underline';
+    labelFontSize?: string;
+    labelColor?: string;
   };
 }
+
+// Translation map for time unit labels
+const TIME_UNIT_LABELS: Record<SupportedLanguage, { days: string; hours: string; minutes: string; seconds: string }> = {
+  EN: { days: 'Days', hours: 'Hours', minutes: 'Minutes', seconds: 'Seconds' },
+  ES: { days: 'Días', hours: 'Horas', minutes: 'Minutos', seconds: 'Segundos' },
+  FR: { days: 'Jours', hours: 'Heures', minutes: 'Minutes', seconds: 'Secondes' },
+  IT: { days: 'Giorni', hours: 'Ore', minutes: 'Minuti', seconds: 'Secondi' },
+  DE: { days: 'Tage', hours: 'Stunden', minutes: 'Minuten', seconds: 'Sekunden' },
+};
 
 /**
  * CountdownBlock - Displays countdown to wedding date
@@ -23,8 +36,9 @@ interface CountdownBlockProps {
  *
  * @component
  */
-export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlockProps) {
+export function CountdownBlock({ weddingDate, weddingTime, language = 'EN', style }: CountdownBlockProps) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const labels = TIME_UNIT_LABELS[language] || TIME_UNIT_LABELS['EN'];
 
   // Countdown timer
   useEffect(() => {
@@ -76,8 +90,14 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
             >
               {timeLeft.days}
             </div>
-            <div className="text-sm md:text-base" style={{ color: 'var(--color-text-secondary)' }}>
-              Days
+            <div
+              className="text-sm md:text-base"
+              style={{
+                fontSize: style?.labelFontSize || '0.875rem',
+                color: style?.labelColor || 'var(--color-text-secondary)',
+              }}
+            >
+              {labels.days}
             </div>
           </div>
 
@@ -96,8 +116,14 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
             >
               {timeLeft.hours}
             </div>
-            <div className="text-sm md:text-base" style={{ color: 'var(--color-text-secondary)' }}>
-              Hours
+            <div
+              className="text-sm md:text-base"
+              style={{
+                fontSize: style?.labelFontSize || '0.875rem',
+                color: style?.labelColor || 'var(--color-text-secondary)',
+              }}
+            >
+              {labels.hours}
             </div>
           </div>
 
@@ -116,8 +142,14 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
             >
               {timeLeft.minutes}
             </div>
-            <div className="text-sm md:text-base" style={{ color: 'var(--color-text-secondary)' }}>
-              Minutes
+            <div
+              className="text-sm md:text-base"
+              style={{
+                fontSize: style?.labelFontSize || '0.875rem',
+                color: style?.labelColor || 'var(--color-text-secondary)',
+              }}
+            >
+              {labels.minutes}
             </div>
           </div>
 
@@ -136,8 +168,14 @@ export function CountdownBlock({ weddingDate, weddingTime, style }: CountdownBlo
             >
               {timeLeft.seconds}
             </div>
-            <div className="text-sm md:text-base" style={{ color: 'var(--color-text-secondary)' }}>
-              Seconds
+            <div
+              className="text-sm md:text-base"
+              style={{
+                fontSize: style?.labelFontSize || '0.875rem',
+                color: style?.labelColor || 'var(--color-text-secondary)',
+              }}
+            >
+              {labels.seconds}
             </div>
           </div>
         </div>

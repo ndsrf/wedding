@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { LocationBlock } from '@/types/invitation-template';
 
 const FONT_FAMILIES = [
@@ -33,6 +34,8 @@ export function LocationBlockEditor({
   block,
   onUpdate,
 }: LocationBlockEditorProps) {
+  const t = useTranslations('admin.invitationBuilder');
+
   const handleUpdateStyle = (key: string, value: string) => {
     onUpdate(block.id, {
       style: {
@@ -45,11 +48,11 @@ export function LocationBlockEditor({
   // Sidebar mode
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6">
-      <h3 className="text-lg font-semibold mb-4">Location Settings</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('locationSettings')}</h3>
 
       {/* Font Family */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Font</label>
+        <label className="block text-sm font-medium mb-2">{t('font')}</label>
         <select
           value={block.style?.fontFamily || 'Lora, serif'}
           onChange={(e) => handleUpdateStyle('fontFamily', e.target.value)}
@@ -65,7 +68,7 @@ export function LocationBlockEditor({
 
       {/* Font Size */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Size</label>
+        <label className="block text-sm font-medium mb-2">{t('size')}</label>
         <select
           value={block.style?.fontSize || '1.25rem'}
           onChange={(e) => handleUpdateStyle('fontSize', e.target.value)}
@@ -81,7 +84,7 @@ export function LocationBlockEditor({
 
       {/* Color */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Color</label>
+        <label className="block text-sm font-medium mb-2">{t('color')}</label>
         <input
           type="color"
           value={block.style?.color || '#3A4F3C'}
@@ -92,7 +95,7 @@ export function LocationBlockEditor({
 
       {/* Map Style */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Map Style</label>
+        <label className="block text-sm font-medium mb-2">{t('mapStyle')}</label>
         <div className="flex gap-2">
           {(['color', 'grayscale'] as const).map((mapStyle) => (
             <button
@@ -104,7 +107,7 @@ export function LocationBlockEditor({
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              {mapStyle === 'color' ? 'Color' : 'Grayscale'}
+              {mapStyle === 'color' ? t('colorMap') : t('grayscaleMap')}
             </button>
           ))}
         </div>
