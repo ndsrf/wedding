@@ -12,6 +12,7 @@
 export interface TemplateDesignGlobalStyle {
   backgroundColor: string; // from theme.colors.background
   backgroundImage?: string; // from theme.images?.background (e.g. '/themes/garden-birds/botanical-pattern.svg')
+  paperBackgroundImage?: string; // user-uploaded paper background image (e.g. '/uploads/invitation-images/paper-bg.jpg')
 }
 
 // ============================================================================

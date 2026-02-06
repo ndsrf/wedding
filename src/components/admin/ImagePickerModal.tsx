@@ -7,6 +7,7 @@ import type { ImageFile } from '@/types/invitation-template';
 interface ImagePickerModalProps {
   onClose: () => void;
   onSelectImage: (url: string) => void;
+  requireAspectRatio?: boolean; // If true, validates aspect ratio on selection (for image blocks)
 }
 
 /**
@@ -16,10 +17,11 @@ interface ImagePickerModalProps {
  * - List existing images
  * - Upload new images
  * - Image selection
+ * - Optional aspect ratio validation
  *
  * @component
  */
-export function ImagePickerModal({ onClose, onSelectImage }: ImagePickerModalProps) {
+export function ImagePickerModal({ onClose, onSelectImage, requireAspectRatio = false }: ImagePickerModalProps) {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -73,6 +75,44 @@ export function ImagePickerModal({ onClose, onSelectImage }: ImagePickerModalPro
       setIsUploading(false);
       e.currentTarget.value = '';
     }
+  };
+
+  const handleSelectImage = async (url: string) => {
+    // If aspect ratio validation is not required, select immediately
+    if (!requireAspectRatio) {
+      onSelectImage(url);
+      return;
+    }
+
+    // Validate aspect ratio
+    setError(null);
+    const img = new window.Image();
+    img.onload = () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      const ratio = width / height;
+
+      // Check if it matches 1:1 (with 5% tolerance)
+      const isSquare = Math.abs(ratio - 1) <= 0.05;
+
+      // Check if it matches 16:9 (with 5% tolerance)
+      const isWide = Math.abs(ratio - 16 / 9) <= 0.05;
+
+      if (!isSquare && !isWide) {
+        const actualRatio = ratio.toFixed(2);
+        setError(
+          `Image aspect ratio (${actualRatio}:1) is not supported. Please use 1:1 (square) or 16:9 (wide) aspect ratio.`
+        );
+        return;
+      }
+
+      // Valid aspect ratio, proceed
+      onSelectImage(url);
+    };
+    img.onerror = () => {
+      setError('Failed to load image for validation');
+    };
+    img.src = url;
   };
 
   return (
@@ -141,7 +181,7 @@ export function ImagePickerModal({ onClose, onSelectImage }: ImagePickerModalPro
               {images.map((image) => (
                 <button
                   key={image.url}
-                  onClick={() => onSelectImage(image.url)}
+                  onClick={() => handleSelectImage(image.url)}
                   className="relative group overflow-hidden rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
                 >
                   <div className="relative w-full h-32 bg-gray-100">

@@ -5,13 +5,25 @@ import type { TextBlock, SupportedLanguage } from '@/types/invitation-template';
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['ES', 'EN', 'FR', 'IT', 'DE'];
 
 const FONT_FAMILIES = [
+  // Elegant Serif Fonts
   'Playfair Display, serif',
   'Crimson Text, serif',
   'Cormorant Garamond, serif',
   'Lora, serif',
+  'EB Garamond, serif',
+  'Libre Baskerville, serif',
+  // Script & Cursive Fonts
   'Alex Brush, cursive',
+  'Great Vibes, cursive',
+  'Dancing Script, cursive',
+  'Parisienne, cursive',
+  'Sacramento, cursive',
+  'Allura, cursive',
+  'Tangerine, cursive',
+  // Modern Sans-Serif Fonts
   'Inter, sans-serif',
   'Poppins, sans-serif',
+  'Montserrat, sans-serif',
 ];
 
 const FONT_SIZES = ['0.875rem', '1rem', '1.25rem', '1.5rem', '2rem', '2.5rem', '3rem'];
@@ -95,6 +107,7 @@ export function TextBlockEditor({
             fontWeight: block.style.fontWeight || 'normal',
             fontStyle: block.style.fontStyle || 'normal',
             textDecoration: block.style.textDecoration || 'none',
+            whiteSpace: 'pre-line',
           }}
         >
           {languageContent || '(empty)'}
@@ -161,7 +174,7 @@ export function TextBlockEditor({
           className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
         >
           {FONT_FAMILIES.map((font) => (
-            <option key={font} value={font}>
+            <option key={font} value={font} style={{ fontFamily: font }}>
               {font.split(',')[0]}
             </option>
           ))}

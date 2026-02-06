@@ -37,14 +37,17 @@ function detectAspectRatio(width: number, height: number): keyof typeof ALLOWED_
 }
 
 /**
- * Processes an image: validates aspect ratio, converts to PNG, and resizes
+ * Processes an image: converts to PNG and optimizes
+ * Note: Aspect ratio validation removed - happens on frontend during selection
  * @param fileBuffer - The input image buffer
  * @param originalMimeType - The original MIME type of the image
+ * @param maxWidth - Maximum width for resizing (default: 2000px)
  * @returns ImageProcessingResult with processed image or error
  */
 export async function processTemplateImage(
   fileBuffer: Buffer,
-  _originalMimeType: string
+  _originalMimeType: string,
+  maxWidth: number = 2000
 ): Promise<ImageProcessingResult> {
   try {
     // Load the image with sharp
@@ -58,38 +61,36 @@ export async function processTemplateImage(
       };
     }
 
-    // Detect aspect ratio
+    // Detect aspect ratio (for informational purposes only)
     const detectedRatio = detectAspectRatio(metadata.width, metadata.height);
 
-    if (!detectedRatio) {
-      const actualRatio = (metadata.width / metadata.height).toFixed(2);
-      return {
-        success: false,
-        error: `Image aspect ratio (${actualRatio}:1) is not supported. Please use 1:1 (square) or 16:9 (wide) aspect ratio.`,
-      };
+    // Resize if needed (maintain aspect ratio, max width)
+    let processedImage = image;
+    if (metadata.width > maxWidth) {
+      processedImage = image.resize(maxWidth, null, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      });
     }
 
-    const targetDimensions = ALLOWED_ASPECT_RATIOS[detectedRatio];
-
-    // Resize and convert to PNG
-    const processedBuffer = await image
-      .resize(targetDimensions.width, targetDimensions.height, {
-        fit: 'cover',
-        position: 'center',
-      })
+    // Convert to PNG
+    const processedBuffer = await processedImage
       .png({
         quality: 90,
         compressionLevel: 9,
       })
       .toBuffer();
 
+    // Get final dimensions after processing
+    const finalMetadata = await sharp(processedBuffer).metadata();
+
     return {
       success: true,
       buffer: processedBuffer,
       mimeType: 'image/png',
-      width: targetDimensions.width,
-      height: targetDimensions.height,
-      detectedAspectRatio: targetDimensions.label,
+      width: finalMetadata.width,
+      height: finalMetadata.height,
+      detectedAspectRatio: detectedRatio ? ALLOWED_ASPECT_RATIOS[detectedRatio].label : undefined,
     };
   } catch (error) {
     console.error('Error processing image:', error);
@@ -98,6 +99,33 @@ export async function processTemplateImage(
       error: error instanceof Error ? error.message : 'Unknown error processing image',
     };
   }
+}
+
+/**
+ * Validates if an image has an allowed aspect ratio
+ * Used on frontend when selecting images for image blocks
+ */
+export function validateImageAspectRatio(width: number, height: number): {
+  valid: boolean;
+  detectedRatio?: keyof typeof ALLOWED_ASPECT_RATIOS;
+  actualRatio?: string;
+  error?: string;
+} {
+  const detectedRatio = detectAspectRatio(width, height);
+
+  if (!detectedRatio) {
+    const actualRatio = (width / height).toFixed(2);
+    return {
+      valid: false,
+      actualRatio: `${actualRatio}:1`,
+      error: `Image aspect ratio (${actualRatio}:1) is not supported. Please use 1:1 (square) or 16:9 (wide) aspect ratio.`,
+    };
+  }
+
+  return {
+    valid: true,
+    detectedRatio,
+  };
 }
 
 /**

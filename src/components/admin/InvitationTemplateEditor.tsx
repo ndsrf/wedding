@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import type {
   TemplateDesign,
   TemplateBlock,
@@ -53,6 +54,7 @@ export function InvitationTemplateEditor({
   const [activeLanguage, setActiveLanguage] = useState<SupportedLanguage>('EN');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [imageModalBlockId, setImageModalBlockId] = useState<string | null>(null);
+  const [isPaperBackgroundModalOpen, setIsPaperBackgroundModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Get selected block
@@ -207,6 +209,29 @@ export function InvitationTemplateEditor({
     setImageModalBlockId(null);
   }, [imageModalBlockId, handleUpdateImageBlock]);
 
+  // Handle select paper background image
+  const handleSelectPaperBackground = useCallback((url: string) => {
+    setDesign((prev) => ({
+      ...prev,
+      globalStyle: {
+        ...prev.globalStyle,
+        paperBackgroundImage: url,
+      },
+    }));
+    setIsPaperBackgroundModalOpen(false);
+  }, []);
+
+  // Handle remove paper background image
+  const handleRemovePaperBackground = useCallback(() => {
+    setDesign((prev) => ({
+      ...prev,
+      globalStyle: {
+        ...prev.globalStyle,
+        paperBackgroundImage: undefined,
+      },
+    }));
+  }, []);
+
   // Handle save
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -320,6 +345,46 @@ export function InvitationTemplateEditor({
                 <p className="text-xs text-gray-500 mt-1">(from theme - read-only)</p>
               </div>
             )}
+            <div>
+              <label className="block text-sm font-medium mb-2">Paper Background</label>
+              {design.globalStyle.paperBackgroundImage ? (
+                <div className="space-y-2">
+                  <div className="relative w-full h-24 bg-gray-100 rounded overflow-hidden">
+                    <Image
+                      src={design.globalStyle.paperBackgroundImage}
+                      alt="Paper background"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIsPaperBackgroundModalOpen(true)}
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition"
+                    >
+                      Change
+                    </button>
+                    <button
+                      onClick={handleRemovePaperBackground}
+                      className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsPaperBackgroundModalOpen(true)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-sm"
+                >
+                  + Add Paper Background
+                </button>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Upload an image to use as the canvas background
+              </p>
+            </div>
           </div>
         </div>
 
@@ -336,10 +401,23 @@ export function InvitationTemplateEditor({
       {/* Right Canvas */}
       <div className="lg:col-span-2">
         <div
-          className="rounded-lg shadow overflow-hidden min-h-[600px]"
+          className="rounded-lg shadow overflow-hidden min-h-[600px] relative"
           style={{ backgroundColor: design.globalStyle.backgroundColor }}
         >
-          {/* Canvas Background Image */}
+          {/* Paper Background Image (user-uploaded) */}
+          {design.globalStyle.paperBackgroundImage && (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage: `url(${design.globalStyle.paperBackgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+          )}
+
+          {/* Canvas Background Image (theme-based) */}
           {design.globalStyle.backgroundImage && (
             <div
               className="absolute inset-0 opacity-10 pointer-events-none"
@@ -465,7 +543,7 @@ export function InvitationTemplateEditor({
         </div>
       </div>
 
-      {/* Image Picker Modal */}
+      {/* Image Picker Modal (for image blocks) */}
       {isImageModalOpen && (
         <ImagePickerModal
           onClose={() => {
@@ -473,6 +551,16 @@ export function InvitationTemplateEditor({
             setImageModalBlockId(null);
           }}
           onSelectImage={handleSelectImage}
+          requireAspectRatio={true}
+        />
+      )}
+
+      {/* Image Picker Modal (for paper background) */}
+      {isPaperBackgroundModalOpen && (
+        <ImagePickerModal
+          onClose={() => setIsPaperBackgroundModalOpen(false)}
+          onSelectImage={handleSelectPaperBackground}
+          requireAspectRatio={false}
         />
       )}
     </div>
