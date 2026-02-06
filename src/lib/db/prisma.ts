@@ -30,7 +30,19 @@ if (!connectionString) {
   throw new Error('DATABASE_URL environment variable is not set')
 }
 
-const pool = new Pool({ connectionString })
+// Optimize pool configuration based on platform
+const platform = process.env.PLATFORM_OPTIMIZATION || 'standard'
+const isServerless = platform === 'vercel'
+
+const poolConfig: any = {
+  connectionString,
+  // For serverless, we want fewer connections per function and faster timeout
+  max: isServerless ? 2 : (platform === 'cloudflare' || platform === 'docker' ? 20 : 10),
+  idleTimeoutMillis: isServerless ? 1000 : 30000,
+  connectionTimeoutMillis: 2000,
+}
+
+const pool = new Pool(poolConfig)
 const adapter = new PrismaPg(pool)
 
 // Prisma Client configuration
