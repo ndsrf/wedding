@@ -65,10 +65,7 @@ export async function PATCH(_request: NextRequest, context: RouteParams) {
     const existingNotification = await prisma.notification.findFirst({
       where: {
         wedding_id: user.wedding_id,
-        details: {
-          path: ['tracking_event_id'],
-          equals: trackingEventId,
-        },
+        tracking_event_id: trackingEventId,
       },
     });
 
@@ -94,7 +91,7 @@ export async function PATCH(_request: NextRequest, context: RouteParams) {
     }
 
     // Create a new Notification record to track read status
-    // Store tracking_event_id in details for linking
+    // Store tracking_event_id in its own field for performance
     const readAt = new Date();
     const newNotification = await prisma.notification.create({
       data: {
@@ -102,8 +99,8 @@ export async function PATCH(_request: NextRequest, context: RouteParams) {
         family_id: trackingEvent.family_id,
         event_type: trackingEvent.event_type,
         channel: trackingEvent.channel,
+        tracking_event_id: trackingEventId,
         details: {
-          tracking_event_id: trackingEventId,
           original_metadata: trackingEvent.metadata || {},
           marked_read_by: user.id,
         },

@@ -1,5 +1,5 @@
 -- CreateTable invitation_templates
-CREATE TABLE "invitation_templates" (
+CREATE TABLE IF NOT EXISTS "invitation_templates" (
     "id" TEXT NOT NULL,
     "wedding_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -13,7 +13,12 @@ CREATE TABLE "invitation_templates" (
 );
 
 -- CreateIndex
-CREATE INDEX "invitation_templates_wedding_id_idx" ON "invitation_templates"("wedding_id");
+CREATE INDEX IF NOT EXISTS "invitation_templates_wedding_id_idx" ON "invitation_templates"("wedding_id");
 
 -- AddForeignKey
-ALTER TABLE "invitation_templates" ADD CONSTRAINT "invitation_templates_wedding_id_fkey" FOREIGN KEY ("wedding_id") REFERENCES "weddings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name='invitation_templates_wedding_id_fkey') THEN
+        ALTER TABLE "invitation_templates" ADD CONSTRAINT "invitation_templates_wedding_id_fkey" FOREIGN KEY ("wedding_id") REFERENCES "weddings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;

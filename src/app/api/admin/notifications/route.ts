@@ -5,10 +5,10 @@
  *
  * Features:
  * - Returns TrackingEvents as notifications
- * - Tracks read status via Notification table (linking tracking_event_id in details)
+ * - Tracks read status via Notification table (linked via tracking_event_id)
  * - Supports filters: date range, event type, family, channel, read/unread
  * - Sorted by timestamp descending
- * - Includes accurate unread count
+ * - Includes accurate unread count using efficient relational queries
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -34,6 +34,13 @@ const listNotificationsQuerySchema = z.object({
       'GUEST_ADDED',
       'PAYMENT_RECEIVED',
       'REMINDER_SENT',
+      'INVITATION_SENT',
+      'SAVE_THE_DATE_SENT',
+      'TASK_ASSIGNED',
+      'TASK_COMPLETED',
+      'MESSAGE_DELIVERED',
+      'MESSAGE_READ',
+      'MESSAGE_FAILED',
     ])
     .optional(),
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
@@ -109,44 +116,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get all notifications that track read status for this wedding
-    // The Notification table stores tracking_event_id in the details JSONB field
-    const readNotifications = await prisma.notification.findMany({
-      where: {
-        wedding_id: user.wedding_id,
-        read: true,
-      },
-      select: {
-        details: true,
-      },
-    });
-
-    // Extract tracking_event_ids that have been marked as read
-    const readTrackingEventIds = new Set<string>(
-      readNotifications
-        .map((n) => {
-          const details = n.details as { tracking_event_id?: string } | null;
-          return details?.tracking_event_id;
-        })
-        .filter((id): id is string => id !== undefined && id !== null)
-    );
-
-    // Handle read filter - filter tracking events by read status
+    // Handle read filter - use relational filters for better performance
     if (read !== undefined) {
       if (read === true) {
-        // Only show read events
-        if (readTrackingEventIds.size > 0) {
-          whereClause.id = { in: Array.from(readTrackingEventIds) };
-        } else {
-          // No read events, return empty
-          whereClause.id = { in: [] };
-        }
+        whereClause.notifications = {
+          some: {
+            read: true,
+          },
+        };
       } else {
-        // Only show unread events
-        if (readTrackingEventIds.size > 0) {
-          whereClause.id = { notIn: Array.from(readTrackingEventIds) };
-        }
-        // If no read events, don't add filter (all are unread)
+        whereClause.notifications = {
+          none: {
+            read: true,
+          },
+        };
       }
     }
 
@@ -154,6 +137,7 @@ export async function GET(request: NextRequest) {
     const total = await prisma.trackingEvent.count({ where: whereClause });
 
     // Fetch tracking events (notifications) sorted by timestamp descending
+    // Include the read status via the notifications relation
     const events = await prisma.trackingEvent.findMany({
       where: whereClause,
       skip,
@@ -168,18 +152,34 @@ export async function GET(request: NextRequest) {
             preferred_language: true,
           },
         },
+        notifications: {
+          where: {
+            read: true,
+          },
+          select: {
+            id: true,
+            read_at: true,
+          },
+          take: 1,
+        },
       },
     });
 
-    // Calculate accurate unread count (total events not marked as read)
-    const totalEventsCount = await prisma.trackingEvent.count({
-      where: { wedding_id: user.wedding_id },
+    // Calculate accurate unread count using a single count query
+    const unreadCount = await prisma.trackingEvent.count({
+      where: {
+        wedding_id: user.wedding_id,
+        notifications: {
+          none: {
+            read: true,
+          },
+        },
+      },
     });
-    const unreadCount = totalEventsCount - readTrackingEventIds.size;
 
     // Transform events to notification format with read status
     const notifications = events.map((event) => {
-      const isRead = readTrackingEventIds.has(event.id);
+      const readNotification = event.notifications[0];
       return {
         id: event.id,
         wedding_id: event.wedding_id,
@@ -187,8 +187,8 @@ export async function GET(request: NextRequest) {
         event_type: event.event_type,
         channel: event.channel,
         details: event.metadata || {},
-        read: isRead,
-        read_at: null, // Would need to join with Notification table to get this
+        read: !!readNotification,
+        read_at: readNotification?.read_at || null,
         admin_id: user.id,
         created_at: event.timestamp,
         timestamp: event.timestamp,

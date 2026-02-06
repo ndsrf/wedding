@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { cache } from 'react';
 import { prisma } from '@/lib/db/prisma';
 import type { Family, FamilyMember, Wedding, Theme } from '@prisma/client';
 import type { Channel } from '@/types/models';
@@ -14,6 +15,8 @@ import { getShortUrlPath } from '@/lib/short-url';
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
+// ... (rest of imports and types)
+
 
 export interface FamilyWithMembers extends Family {
   members: FamilyMember[];
@@ -125,7 +128,7 @@ export async function generateMagicLinks(
  * @param token - The magic link token to validate
  * @returns Validation result with family, wedding, and theme data if valid
  */
-export async function validateMagicLink(token: string): Promise<MagicLinkValidationResult> {
+export const validateMagicLink = cache(async (token: string): Promise<MagicLinkValidationResult> => {
   // Validate token format (UUID v4)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(token)) {
@@ -136,8 +139,8 @@ export async function validateMagicLink(token: string): Promise<MagicLinkValidat
   }
 
   try {
-    // Find family by magic token
-    const family = await prisma.family.findFirst({
+    // Find family by magic token using findUnique for better performance
+    const family = await prisma.family.findUnique({
       where: {
         magic_token: token,
       },
@@ -189,7 +192,7 @@ export async function validateMagicLink(token: string): Promise<MagicLinkValidat
       error: 'VALIDATION_ERROR',
     };
   }
-}
+});
 
 /**
  * Lightweight token validation – designed for the RSVP API hot path.
@@ -208,14 +211,14 @@ export async function validateMagicLink(token: string): Promise<MagicLinkValidat
  * @param token - The magic link token to validate
  * @returns Lite validation result
  */
-export async function validateMagicLinkLite(token: string): Promise<MagicLinkLiteResult> {
+export const validateMagicLinkLite = cache(async (token: string): Promise<MagicLinkLiteResult> => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(token)) {
     return { valid: false, error: 'INVALID_TOKEN_FORMAT' };
   }
 
   try {
-    const family = await prisma.family.findFirst({
+    const family = await prisma.family.findUnique({
       where: { magic_token: token },
       include: {
         members: { orderBy: { created_at: 'asc' } },
@@ -245,7 +248,7 @@ export async function validateMagicLinkLite(token: string): Promise<MagicLinkLit
     console.error('Magic link lite validation error:', error);
     return { valid: false, error: 'VALIDATION_ERROR' };
   }
-}
+});
 
 /**
  * Regenerate magic token for a family

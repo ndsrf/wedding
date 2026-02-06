@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "payments" ADD COLUMN "document_url" TEXT;
+ALTER TABLE "payments" ADD COLUMN IF NOT EXISTS "document_url" TEXT;

@@ -15,6 +15,11 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # Uncomment the following section to expose PostgreSQL to the network
+    # WARNING: This will make the database accessible from outside the Docker network
+    # Ensure you have strong passwords and consider firewall rules
+    # ports:
+    #   - "${DB_PORT:-5432}:5432"  # Maps to host port (default 5432, configurable via DB_PORT env var)
     networks:
       - wedding-network
     healthcheck:

@@ -5,6 +5,10 @@ version: '3.8'
 services:
   # Database with exposed port for local development tools
   db:
+    # Database is already exposed on port 5432 for external access
+    # This allows tools like Superset, pgAdmin, DBeaver, etc. to connect
+    # Connection string: postgresql://wedding:devpassword@localhost:5432/wedding_db
+    # To use a different port, change to: "5433:5432" (host:container)
     ports:
       - "5432:5432"
     environment:

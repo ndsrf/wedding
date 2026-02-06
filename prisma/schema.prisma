@@ -246,16 +246,17 @@ model FamilyMember {
 // ============================================================================
 
 model TrackingEvent {
-  id              String    @id @default(uuid())
+  id              String         @id @default(uuid())
   family_id       String
   wedding_id      String
   event_type      EventType
   channel         Channel?
   metadata        Json?
-  admin_triggered Boolean   @default(false)
-  timestamp       DateTime  @default(now())
-  family          Family    @relation(fields: [family_id], references: [id], onDelete: Cascade)
-  wedding         Wedding   @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  admin_triggered Boolean        @default(false)
+  timestamp       DateTime       @default(now())
+  family          Family         @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  wedding         Wedding        @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  notifications   Notification[]
 
   @@index([family_id])
   @@index([wedding_id])
@@ -265,23 +266,26 @@ model TrackingEvent {
 }
 
 model Notification {
-  id         String    @id @default(uuid())
-  wedding_id String
-  family_id  String?
-  event_type EventType
-  channel    Channel?
-  details    Json
-  read       Boolean   @default(false)
-  read_at    DateTime?
-  admin_id   String
-  created_at DateTime  @default(now())
-  family     Family?   @relation(fields: [family_id], references: [id], onDelete: Cascade)
-  wedding    Wedding   @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  id                String         @id @default(uuid())
+  wedding_id        String
+  family_id         String?
+  tracking_event_id String?
+  event_type        EventType
+  channel           Channel?
+  details           Json
+  read              Boolean        @default(false)
+  read_at           DateTime?
+  admin_id          String
+  created_at        DateTime       @default(now())
+  family            Family?        @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  wedding           Wedding        @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  tracking_event    TrackingEvent? @relation(fields: [tracking_event_id], references: [id], onDelete: Cascade)
 
   @@index([wedding_id])
   @@index([admin_id])
   @@index([read])
   @@index([created_at])
+  @@index([tracking_event_id])
   @@map("notifications")
 }
 

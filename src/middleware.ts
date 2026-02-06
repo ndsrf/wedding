@@ -41,9 +41,6 @@ const SHARED_ROUTES = {
   ],
 };
 
-// Guest routes (use magic link authentication)
-const GUEST_ROUTES = ['/rsvp', '/api/guest'];
-
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -65,13 +62,6 @@ function matchesAnyPattern(path: string, patterns: string[]): boolean {
  */
 function isPublicRoute(path: string): boolean {
   return matchesAnyPattern(path, PUBLIC_ROUTES);
-}
-
-/**
- * Check if route is for guests
- */
-function isGuestRoute(path: string): boolean {
-  return matchesAnyPattern(path, GUEST_ROUTES);
 }
 
 /**
@@ -126,16 +116,25 @@ function getRedirectForRole(role: string): string {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
+  // 1. Guest routes - CRITICAL PATH
+  // Return early for guest RSVP routes to ensure maximum performance
+  // and prioritize these requests.
+  if (pathname.startsWith('/rsvp') || pathname.startsWith('/api/guest')) {
+    const response = NextResponse.next();
+    response.headers.set('x-priority', 'high');
+    response.headers.set('x-route-type', 'rsvp');
+    // Ensure no-cache for RSVP status pages to always show fresh state
+    // but allow the browser to cache static assets
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    return response;
+  }
+
+  // 2. Public routes
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // Guest routes use magic link authentication (handled in API routes)
-  if (isGuestRoute(pathname)) {
-    return NextResponse.next();
-  }
-
+  // 3. Authenticated routes
   // Get user session token
   const token = await getToken({
     req: request,
