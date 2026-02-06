@@ -1,3 +1,13 @@
+## [0.8.3](https://github.com/ndsrf/wedding/compare/v0.8.2...v0.8.3) (2026-02-06)
+
+
+### Features
+
+* enhance invitation builder with countdown and template settings ([50ec269](https://github.com/ndsrf/wedding/commit/50ec2690da1c86d0979d78f8e6ed3040d7c1978a))
+* enhance invitation template editor with paper background support ([a875156](https://github.com/ndsrf/wedding/commit/a875156d00bb1f4fa0584cb0fd6d1985576d23d9))
+
+
+
 ## [0.8.2](https://github.com/ndsrf/wedding/compare/v0.8.1...v0.8.2) (2026-02-06)
 
 
