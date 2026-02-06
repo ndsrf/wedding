@@ -120,7 +120,7 @@ RSVP: {{magicLink}}`,
     it('should replace template variables in email', async () => {
       (prisma.family.findUnique as jest.Mock).mockResolvedValue(mockFamily);
       (getTemplateForSending as jest.Mock).mockResolvedValue(mockTemplate);
-      (sendDynamicEmail as jest.Mock).mockImplementation((to, subject, body) => {
+      (sendDynamicEmail as jest.Mock).mockImplementation((_to, subject, body) => {
         expect(subject).toContain('John & Jane');
         expect(body).toContain('Smith Family');
         expect(body).not.toContain('{{familyName}}');

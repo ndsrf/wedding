@@ -41,7 +41,7 @@ describe('Excel Import - Validation', () => {
       { id: 'admin1', name: 'Admin', email: 'admin@test.com' },
     ]);
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.success).toBe(false);
     expect(result.errors[0].message).toContain('No data found');
@@ -62,7 +62,7 @@ describe('Excel Import - Validation', () => {
       { id: 'admin1', name: 'Admin', email: 'admin@test.com' },
     ]);
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.success).toBe(false);
     expect(result.errors[0].message).toContain('Too many families');
@@ -83,7 +83,7 @@ describe('Excel Import - Validation', () => {
       { id: 'admin1', name: 'Admin', email: 'admin@test.com' },
     ]);
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.success).toBe(false);
     expect(result.errors).toContainEqual(
@@ -109,7 +109,7 @@ describe('Excel Import - Validation', () => {
       { id: 'admin1', name: 'Admin', email: 'admin@test.com' },
     ]);
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.success).toBe(false);
     expect(result.errors).toContainEqual(
@@ -135,7 +135,7 @@ describe('Excel Import - Validation', () => {
       { id: 'admin1', name: 'Admin', email: 'admin@test.com' },
     ]);
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.success).toBe(false);
     expect(result.errors).toContainEqual(
@@ -173,7 +173,7 @@ describe('Excel Import - Validation', () => {
       });
     });
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.warnings).toContainEqual(
       expect.objectContaining({
@@ -209,7 +209,7 @@ describe('Excel Import - Validation', () => {
       });
     });
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.warnings).toContainEqual(
       expect.objectContaining({
@@ -245,7 +245,7 @@ describe('Excel Import - Validation', () => {
       });
     });
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.warnings).toContainEqual(
       expect.objectContaining({
@@ -281,7 +281,7 @@ describe('Excel Import - Validation', () => {
       });
     });
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.success).toBe(true);
     expect(result.errors.length).toBe(0);
@@ -313,7 +313,7 @@ describe('Excel Import - Validation', () => {
       });
     });
 
-    const result = await importGuestList('wedding1', buffer, 'NONE', 'EN');
+    const result = await importGuestList('wedding1', buffer, 'MANUAL', 'EN');
 
     expect(result.warnings).toContainEqual(
       expect.objectContaining({

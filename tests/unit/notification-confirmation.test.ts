@@ -251,7 +251,7 @@ Best regards`,
       (prisma.family.findUnique as jest.Mock).mockResolvedValue(whatsappFamily);
       (getTemplateForSending as jest.Mock).mockResolvedValue(whatsappTemplate);
 
-      const result = await sendConfirmation({
+      await sendConfirmation({
         family_id: 'family1',
         wedding_id: 'wedding1',
       });
@@ -270,7 +270,7 @@ Best regards`,
     it('should replace all template variables', async () => {
       (prisma.family.findUnique as jest.Mock).mockResolvedValue(mockFamily);
       (getTemplateForSending as jest.Mock).mockResolvedValue(mockTemplate);
-      (sendDynamicEmail as jest.Mock).mockImplementation((to, subject, body) => {
+      (sendDynamicEmail as jest.Mock).mockImplementation((_to, _subject, body) => {
         expect(body).toContain('Smith Family');
         expect(body).toContain('John & Jane');
         expect(body).not.toContain('{{familyName}}');

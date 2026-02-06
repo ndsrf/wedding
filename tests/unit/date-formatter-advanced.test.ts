@@ -115,8 +115,6 @@ describe('Date Formatter - Advanced', () => {
 
   describe('Month Names by Language', () => {
     const january = new Date('2024-01-15T12:00:00Z');
-    const february = new Date('2024-02-15T12:00:00Z');
-    const march = new Date('2024-03-15T12:00:00Z');
     const december = new Date('2024-12-15T12:00:00Z');
 
     it('should format January correctly in different languages', () => {
