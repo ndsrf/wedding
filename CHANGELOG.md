@@ -1,3 +1,13 @@
+## [0.8.1](https://github.com/ndsrf/wedding/compare/v0.8.0...v0.8.1) (2026-02-06)
+
+
+### Features
+
+* add 270 unit tests for most complex areas & npm test command to settings.local.json ([62b1d17](https://github.com/ndsrf/wedding/commit/62b1d178194890455ef624039775729f0742da0b))
+* enhance platform optimization and security configurations ([9de9cf4](https://github.com/ndsrf/wedding/commit/9de9cf4afcd723d91a474d1c99272321c6fb8ff2))
+
+
+
 # [0.8.0](https://github.com/ndsrf/wedding/compare/v0.7.1...v0.8.0) (2026-02-06)
 
 
