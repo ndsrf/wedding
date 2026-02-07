@@ -33,7 +33,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center">
-              <Image src="/images/nupci.png" alt={commercialName} width={400} height={160} className="h-32 w-auto" />
+              <Image src="/images/nupci.webp" alt={commercialName} width={400} height={160} className="h-32 w-auto" />
             </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-700 hover:text-rose-600 transition-colors">
@@ -90,6 +90,21 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
                 {t('landing.hero.subtitle', { commercialName })}
               </p>
+
+              {/* Mobile Hero Image */}
+              <div className="lg:hidden mb-10 relative px-4">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl mx-auto max-w-md ring-8 ring-white/50">
+                  <Image
+                    src="/images/novios-mobile.webp"
+                    alt="Wedding planning"
+                    width={600}
+                    height={343}
+                    className="w-full h-auto object-cover"
+                    priority
+                  />
+                </div>
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
                   href="/contact"
@@ -111,12 +126,12 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
             {/* Right side - Hero image */}
             <div className="relative hidden lg:block">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-12 ring-white/30 transform hover:scale-[1.02] transition-transform duration-500">
                 <Image
-                  src="/images/novios.png"
+                  src="/images/novios.webp"
                   alt="Wedding planning"
-                  width={600}
-                  height={400}
+                  width={800}
+                  height={533}
                   className="w-full h-auto"
                   priority
                 />

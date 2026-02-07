@@ -95,7 +95,7 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center">
-              <Image src="/images/nupci.png" alt={commercialName} width={400} height={160} className="h-32 w-auto" />
+              <Image src="/images/nupci.webp" alt={commercialName} width={400} height={160} className="h-32 w-auto" />
             </Link>
             <div className="flex items-center gap-4">
               <LanguageSelector />
