@@ -9,7 +9,11 @@ export const routing = {
   defaultLocale: DEFAULT_LANGUAGE,
   
   // This is the default, but being explicit
-  localePrefix: 'as-needed' as const
+  localePrefix: 'as-needed' as const,
+
+  // Enable locale detection based on browser headers for public pages.
+  // This is specifically used in middleware for SEO-friendly public routes.
+  localeDetection: true
 };
 
 // Lightweight wrappers around Next.js' navigation APIs

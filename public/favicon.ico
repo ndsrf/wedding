@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Two interlocking rings representing the rose/wedding rings -->
+  <circle cx="24" cy="32" r="14" stroke="#D97D7D" stroke-width="4" fill="none"/>
+  <circle cx="40" cy="32" r="14" stroke="#C98686" stroke-width="4" fill="none"/>
+  <!-- Inner glow effect -->
+  <circle cx="24" cy="32" r="11" stroke="#E89B9B" stroke-width="2" fill="none" opacity="0.6"/>
+  <circle cx="40" cy="32" r="11" stroke="#DFA0A0" stroke-width="2" fill="none" opacity="0.6"/>
+</svg>

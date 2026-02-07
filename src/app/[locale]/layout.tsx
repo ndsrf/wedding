@@ -3,11 +3,17 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import { notFound } from 'next/navigation'
-import { Language } from '@/lib/i18n/config'
+import { isValidLanguage } from '@/lib/i18n/config'
 import '../globals.css'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  
+  // Basic validation for metadata as well
+  if (!isValidLanguage(locale)) {
+    return {};
+  }
+
   const t = await getTranslations({ locale, namespace: 'metadata' });
   return {
     title: t('title'),
@@ -29,7 +35,7 @@ export default async function RootLayout({
   const { locale } = await params;
 
   // Ensure that the incoming `locale` is valid
-  if (!routing.locales.includes(locale as Language)) {
+  if (!isValidLanguage(locale)) {
     notFound();
   }
 

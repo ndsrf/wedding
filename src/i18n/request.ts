@@ -1,5 +1,5 @@
 import { getRequestConfig } from 'next-intl/server';
-import { Language } from '@/lib/i18n/config';
+import { Language, isValidLanguage, DEFAULT_LANGUAGE } from '@/lib/i18n/config';
 
 const messageImports = {
   en: () => import('../messages/en/common.json'),
@@ -10,11 +10,16 @@ const messageImports = {
 };
 
 export default getRequestConfig(async ({ locale }) => {
-  const targetLocale = (locale as Language) || 'en';
-  const importFn = messageImports[targetLocale as keyof typeof messageImports] || messageImports.en;
+  // Validate locale - handle undefined or empty string
+  const isValid = typeof locale === 'string' && isValidLanguage(locale);
+  const targetLocale = (isValid ? locale : DEFAULT_LANGUAGE) as Language;
+  
+  const importFn = messageImports[targetLocale] || messageImports.en;
   const messages = (await importFn()).default;
 
-  console.log(`[i18n] Loaded messages for locale: "${targetLocale}". Keys: ${Object.keys(messages).join(', ')}`);
+  if (isValid) {
+    console.log(`[i18n] Loaded messages for locale: "${targetLocale}". Keys: ${Object.keys(messages).join(', ')}`);
+  }
 
   return {
     locale: targetLocale,

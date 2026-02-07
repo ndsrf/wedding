@@ -22,6 +22,14 @@ async function loadTranslations(language: Language): Promise<Record<string, unkn
     return translationCache.get(cacheKey)!;
   }
 
+  // Validate language before attempting import to avoid "module not found" errors for non-language routes (like favicon.ico)
+  if (!isValidLanguage(language)) {
+    if (language !== DEFAULT_LANGUAGE) {
+      return loadTranslations(DEFAULT_LANGUAGE);
+    }
+    return {};
+  }
+
   try {
     const messages = (await import(`../../messages/${language}/common.json`)).default;
     translationCache.set(cacheKey, messages);

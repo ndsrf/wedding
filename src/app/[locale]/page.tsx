@@ -4,7 +4,8 @@ import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
 import { Metadata } from 'next';
 import { getTranslations } from '@/lib/i18n/server';
-import { Language } from '@/lib/i18n/config';
+import { Language, isValidLanguage } from '@/lib/i18n/config';
+import { notFound } from 'next/navigation';
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -17,6 +18,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+
+  if (!isValidLanguage(locale)) {
+    notFound();
+  }
+
   setRequestLocale(locale);
   const { t } = await getTranslations(locale as Language);
 

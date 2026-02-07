@@ -3,10 +3,16 @@ import Link from 'next/link';
 import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
 import { getTranslations } from '@/lib/i18n/server';
-import { Language } from '@/lib/i18n/config';
+import { Language, isValidLanguage } from '@/lib/i18n/config';
+import { notFound } from 'next/navigation';
 
 export default async function DocsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+
+  if (!isValidLanguage(locale)) {
+    notFound();
+  }
+
   setRequestLocale(locale);
   const { t } = await getTranslations(locale as Language);
   const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
