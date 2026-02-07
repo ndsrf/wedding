@@ -7,7 +7,7 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from '@/lib/i18n/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { AnalyticsCard } from '@/components/master/AnalyticsCard';
 import { prisma } from '@/lib/db/prisma';
@@ -41,7 +41,7 @@ export default async function MasterDashboardPage() {
     redirect('/api/auth/signin');
   }
 
-  const t = await getTranslations();
+  const { t } = await getTranslations();
 
   // Fetch analytics data
   let analytics: MasterAnalytics | null = null;

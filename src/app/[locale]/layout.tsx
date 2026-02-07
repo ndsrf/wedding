@@ -36,7 +36,7 @@ export default async function RootLayout({
   // Enable static rendering
   setRequestLocale(locale);
 
-  const messages = await getMessages()
+  const messages = await getMessages({ locale })
 
   return (
     <html lang={locale}>

@@ -6,7 +6,7 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from '@/lib/i18n/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { ChecklistTemplateEditor } from '@/components/planner/ChecklistTemplateEditor';
 
@@ -18,7 +18,7 @@ export default async function ChecklistTemplatePage() {
     redirect('/api/auth/signin');
   }
 
-  const t = await getTranslations();
+  const { t } = await getTranslations();
 
   return (
     <div className="min-h-screen bg-gray-50">

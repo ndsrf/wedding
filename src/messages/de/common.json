@@ -1,0 +1,1349 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen",
+      "edit": "Bearbeiten",
+      "add": "Hinzufügen",
+      "create": "Erstellen",
+      "update": "Aktualisieren",
+      "submit": "Absenden",
+      "confirm": "Bestätigen",
+      "back": "Zurück",
+      "next": "Weiter",
+      "previous": "Vorherige",
+      "close": "Schließen",
+      "search": "Suchen",
+      "filter": "Filtern",
+      "export": "Exportieren",
+      "import": "Importieren",
+      "download": "Herunterladen",
+      "upload": "Hochladen",
+      "send": "Senden",
+      "clearFilters": "Alle Filter löschen",
+      "retry": "Erneut versuchen",
+      "continue": "Fortfahren",
+      "copy": "Kopieren"
+    },
+    "status": {
+      "pending": "Ausstehend",
+      "inProgress": "In Bearbeitung",
+      "completed": "Abgeschlossen"
+    },
+    "navigation": {
+      "home": "Startseite",
+      "dashboard": "Dashboard",
+      "settings": "Einstellungen",
+      "logout": "Abmelden",
+      "profile": "Profil"
+    },
+    "forms": {
+      "required": "Dieses Feld ist erforderlich",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein",
+      "minLength": "Muss mindestens {min} Zeichen lang sein",
+      "maxLength": "Darf nicht länger als {max} Zeichen sein"
+    },
+    "validation": {
+      "required": "Pflichtfeld",
+      "email": "Ungültige E-Mail",
+      "phone": "Ungültige Telefonnummer",
+      "date": "Ungültiges Datum",
+      "number": "Ungültige Zahl"
+    },
+    "errors": {
+      "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "network": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
+      "unauthorized": "Sie sind nicht berechtigt, diese Aktion durchzuführen.",
+      "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+      "serverError": "Serverfehler. Bitte versuchen Sie es später erneut."
+    },
+    "success": {
+      "saved": "Erfolgreich gespeichert",
+      "updated": "Erfolgreich aktualisiert",
+      "deleted": "Erfolgreich gelöscht",
+      "created": "Erfolgreich erstellt",
+      "sent": "Erfolgreich gesendet"
+    },
+    "pagination": {
+      "page": "Seite",
+      "of": "von"
+    },
+    "optional": "Optional",
+    "languages": {
+      "ES": "Spanisch",
+      "EN": "Englisch",
+      "FR": "Französisch",
+      "IT": "Italienisch",
+      "DE": "Deutsch"
+    },
+    "channels": {
+      "WHATSAPP": "WhatsApp",
+      "EMAIL": "E-Mail",
+      "SMS": "SMS",
+      "PREFERRED": "Bevorzugter Kanal des Gastes",
+      "none": "-"
+    },
+    "countdown": {
+      "days": "Tage",
+      "hours": "Stunden",
+      "minutes": "Minuten",
+      "seconds": "Sekunden"
+    },
+    "loading": "Laden...",
+    "noData": "Keine Daten verfügbar",
+    "confirmDelete": "Sind Sie sicher, dass Sie dies löschen möchten?",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "landing": {
+    "nav": {
+      "features": "Funktionen",
+      "pricing": "Preise",
+      "testimonials": "Referenzen",
+      "login": "Anmelden"
+    },
+    "hero": {
+      "title": "Stärken Sie Ihr Hochzeitsplanungsgeschäft",
+      "subtitle": "{commercialName} ist die All-in-One-Plattform für Hochzeitsplaner, um nahtlos mit Paaren zusammenzuarbeiten, Gäste zu verwalten, atemberaubende Einladungen zu gestalten und unvergessliche Feiern zu schaffen.",
+      "cta": {
+        "primary": "Kostenlos Testen",
+        "secondary": "Mehr Erfahren"
+      },
+      "trial": "Kostenlose Testversion • 1 Hochzeit • Keine Kreditkarte erforderlich"
+    },
+    "features": {
+      "title": "Alles Was Sie Für Perfekte Hochzeiten Brauchen",
+      "subtitle": "Leistungsstarke Tools für professionelle Hochzeitsplaner",
+      "items": {
+        "guestManagement": {
+          "title": "Gästeverwaltung",
+          "description": "Verwalten Sie mühelos Gästelisten, verfolgen Sie Zusagen, Ernährungsanforderungen und Sitzordnungen an einem Ort."
+        },
+        "invitationDesigner": {
+          "title": "Einladungsdesigner",
+          "description": "Erstellen Sie wunderschöne, individuelle Hochzeitseinladungen mit unseren intuitiven Design-Tools und eleganten Vorlagen."
+        },
+        "multiChannel": {
+          "title": "Multi-Channel-Einladungen",
+          "description": "Versenden Sie Einladungen per E-Mail, WhatsApp und SMS. Verfolgen Sie Zustellstatus und Antworten in Echtzeit."
+        },
+        "taskManagement": {
+          "title": "Aufgaben- & Anbieterverwaltung",
+          "description": "Arbeiten Sie mit Paaren an Aufgabenlisten zusammen, verwalten Sie Anbieter und behalten Sie alles im Zeitplan."
+        },
+        "seatingPlanner": {
+          "title": "Interaktiver Sitzplaner",
+          "description": "Erstellen Sie perfekte Sitzpläne mit unserer Drag-and-Drop-Oberfläche. Visualisieren und optimieren Sie Tischanordnungen."
+        },
+        "giftTracking": {
+          "title": "Geschenkregister & Verfolgung",
+          "description": "Helfen Sie Paaren, ihr Geschenkregister zu verwalten und empfangene Geschenke mit automatischen Dankesbenachrichtigungen zu verfolgen."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Geliebt Von Hochzeitsplanern Weltweit",
+      "subtitle": "Schließen Sie sich Tausenden von Profis an, die {commercialName} nutzen",
+      "items": [
+        {
+          "text": "{commercialName} hat die Art und Weise verändert, wie wir unser Hochzeitsplanungsgeschäft führen. Die Multi-Channel-Einladungen und Echtzeitverfolgung sparen uns unzählige Stunden.",
+          "name": "Sofia Martínez",
+          "role": "Hochzeitsplanerin, Madrid"
+        },
+        {
+          "text": "Unsere Paare lieben die kollaborativen Funktionen. Allein der Sitzplaner hat unseren Service viel wertvoller gemacht.",
+          "name": "Emma Thompson",
+          "role": "Eventkoordinatorin, London"
+        },
+        {
+          "text": "3 Hochzeiten gleichzeitig zu managen war früher stressig. Mit {commercialName} ist alles organisiert und unsere Kunden sind glücklicher denn je.",
+          "name": "Luca Romano",
+          "role": "Hochzeitsplaner, Rom"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Einfache, Transparente Preise",
+      "subtitle": "Wählen Sie den Plan, der zu Ihrem Geschäft passt",
+      "popular": "AM BELIEBTESTEN",
+      "perMonth": "Monat",
+      "cta": "Loslegen",
+      "contactUs": "Kontaktieren Sie Uns",
+      "plans": {
+        "trial": {
+          "name": "Kostenlose Testversion",
+          "price": "Kostenlos",
+          "features": [
+            "1 Hochzeit",
+            "Alle Kernfunktionen",
+            "14-tägige Testphase"
+          ]
+        },
+        "standard": {
+          "name": "Standard",
+          "price": "€50",
+          "features": [
+            "3 Hochzeiten parallel",
+            "Unbegrenzte Gäste",
+            "Alle Funktionen inklusive",
+            "Priority Support"
+          ]
+        },
+        "pro": {
+          "name": "Professionell",
+          "price": "Individuell",
+          "features": [
+            "Unbegrenzte Hochzeiten",
+            "White-Label-Option",
+            "Dedizierter Account Manager",
+            "Individuelle Integrationen"
+          ]
+        }
+      }
+    },
+    "cta": {
+      "title": "Bereit, Ihr Hochzeitsplanungsgeschäft Zu Transformieren?",
+      "subtitle": "Schließen Sie sich Hunderten von Hochzeitsplanern an, die {commercialName} vertrauen, um außergewöhnliche Erlebnisse zu bieten.",
+      "button": "Starten Sie Ihre Kostenlose Testversion"
+    },
+    "footer": {
+      "tagline": "Hochzeitsplaner befähigen, unvergessliche Feiern zu schaffen.",
+      "product": "Produkt",
+      "company": "Unternehmen",
+      "support": "Support",
+      "about": "Über Uns",
+      "contact": "Kontakt",
+      "privacy": "Datenschutzrichtlinie",
+      "help": "Hilfecenter",
+      "docs": "Dokumentation",
+      "rights": "Alle Rechte vorbehalten."
+    },
+    "title": "{commercialName} - Hochzeitsverwaltung"
+  },
+  "contact": {
+    "title": "Kontaktieren Sie uns",
+    "subtitle": "Wir sind hier, um Ihnen den Einstieg zu erleichtern",
+    "form": {
+      "name": "Vollständiger Name",
+      "namePlaceholder": "Ihr Name",
+      "email": "E-Mail-Adresse",
+      "emailPlaceholder": "sie@email.com",
+      "phone": "Telefon",
+      "phonePlaceholder": "+49 160 0000000",
+      "reason": "Grund für Kontakt",
+      "reasonPlaceholder": "Wählen Sie einen Grund",
+      "message": "Nachricht",
+      "messagePlaceholder": "Sagen Sie uns, wie wir Ihnen helfen können...",
+      "submit": "Nachricht senden",
+      "submitting": "Wird gesendet..."
+    },
+    "reasons": {
+      "trial": "Kostenlose Testversion",
+      "sales": "Vertrieb",
+      "support": "Kontakt/Support"
+    },
+    "success": {
+      "title": "Vielen Dank für Ihre Kontaktaufnahme!",
+      "message": "Wir haben Ihre Nachricht erhalten und werden uns in Kürze bei Ihnen melden.",
+      "backHome": "Zurück zur Startseite"
+    },
+    "error": {
+      "title": "Fehler beim Senden",
+      "message": "Beim Senden Ihrer Nachricht ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "metadata": {
+    "title": "Hochzeitsmanagementsystem",
+    "description": "Mandantenfähige Hochzeitsmanagement-Plattform mit RSVP-Verfolgung und Geschenkverwaltung"
+  },
+  "master": {
+    "dashboard": {
+      "title": "Haupt-Admin-Dashboard",
+      "welcome": "Willkommen, Administrator",
+      "overview": "Plattformübersicht"
+    },
+    "analytics": {
+      "totalPlanners": "Gesamtzahl Planer",
+      "activePlanners": "Aktive Planer",
+      "totalWeddings": "Gesamtzahl Hochzeiten",
+      "totalGuests": "Gesamtzahl Gäste"
+    },
+    "planners": {
+      "title": "Planerverwaltung",
+      "list": "Planerliste",
+      "add": "Planer hinzufügen",
+      "edit": "Planer bearbeiten",
+      "name": "Name",
+      "email": "E-Mail",
+      "logo": "Logo",
+      "status": "Status",
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert",
+      "weddingCount": "Anzahl Hochzeiten",
+      "lastLogin": "Letzter Login",
+      "enable": "Aktivieren",
+      "disable": "Deaktivieren",
+      "confirmDisable": "Sind Sie sicher, dass Sie diesen Planer deaktivieren möchten?",
+      "logoUrl": "Logo-URL"
+    },
+    "weddings": {
+      "title": "Hochzeitsübersicht",
+      "list": "Hochzeitsliste",
+      "coupleName": "Namen des Paares",
+      "date": "Datum",
+      "location": "Ort",
+      "planner": "Planer",
+      "guestCount": "Gästezahl"
+    }
+  },
+  "planner": {
+    "dashboard": {
+      "title": "Planer-Dashboard",
+      "welcome": "Willkommen, {name}",
+      "myWeddings": "Meine Hochzeiten",
+      "subtitle": "Verwalten Sie Ihre Hochzeiten und sehen Sie Statistiken",
+      "createWedding": "Hochzeit erstellen",
+      "upcomingWeddings": "Anstehende Hochzeiten",
+      "quickActions": "Schnellaktionen",
+      "allWeddings": "Alle Hochzeiten",
+      "allWeddingsSubtitle": "Alle Ihre Hochzeiten anzeigen und verwalten",
+      "createWeddingSubtitle": "Ein neues Hochzeitsereignis einrichten",
+      "checklistTemplate": "Checklisten-Vorlage",
+      "checklistTemplateSubtitle": "Aufgabenvorlagen für Ihre Hochzeiten verwalten",
+      "providers": "Dienstleister",
+      "providersSubtitle": "Verwalten Sie Ihre Dienstleister-Bibliothek",
+      "noWeddings": "Noch keine Hochzeiten",
+      "noWeddingsSubtitle": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit."
+    },
+    "checklistTemplate": {
+      "title": "Checklisten-Vorlage",
+      "subtitle": "Erstellen und verwalten Sie Aufgabenvorlagen für Ihre Hochzeiten",
+      "description": "Erstellen Sie Ihre Standard-Checklistenvorlage. Sie wird bei neuen Hochzeiten mit konvertierten Daten kopiert.",
+      "loadingTemplate": "Vorlage wird geladen...",
+      "noTemplateYet": "Noch keine Vorlage vorhanden",
+      "getStarted": "Beginnen Sie mit der Erstellung Ihres ersten Abschnitts.",
+      "addSection": "Abschnitt hinzufügen",
+      "addTask": "Aufgabe hinzufügen",
+      "sectionName": "Abschnittsname",
+      "newSection": "Neuer Abschnitt",
+      "newTask": "Neue Aufgabe",
+      "deleteSection": "Abschnitt löschen",
+      "deleteTask": "Aufgabe löschen",
+      "confirmDeleteSection": "Sind Sie sicher, dass Sie diesen Abschnitt und alle seine Aufgaben löschen möchten?",
+      "noTasksInSection": "Keine Aufgaben in diesem Abschnitt. Klicken Sie auf \"Aufgabe hinzufügen\", um eine zu erstellen.",
+      "saving": "Wird gespeichert...",
+      "saveNow": "Jetzt speichern",
+      "saved": "Gespeichert",
+      "unsavedChanges": "Sie haben ungespeicherte Änderungen. Klicken Sie auf \"Jetzt speichern\", um Ihre Arbeit zu speichern.",
+      "templateSaved": "Vorlage erfolgreich gespeichert",
+      "templateExported": "Vorlage erfolgreich exportiert",
+      "templateImported": "Vorlage erfolgreich importiert",
+      "errors": {
+        "loadFailed": "Fehler beim Laden der Vorlage",
+        "saveFailed": "Fehler beim Speichern der Vorlage",
+        "exportFailed": "Fehler beim Exportieren der Vorlage",
+        "importFailed": "Fehler beim Importieren der Vorlage",
+        "noSections": "Vorlage muss mindestens einen Abschnitt haben",
+        "sectionsNeedTasks": "Jeder Abschnitt muss mindestens eine Aufgabe haben. Bitte fügen Sie Aufgaben hinzu oder löschen Sie leere Abschnitte.",
+        "invalidDateFormat": "Ungültiges Datumsformat: {value}. Verwenden Sie WEDDING_DATE, WEDDING_DATE-90, usw."
+      },
+      "fields": {
+        "drag": "Ziehen",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "assignedTo": "Zugewiesen an",
+        "dueDate": "Fälligkeitsdatum (Relativ)",
+        "actions": "Aktionen",
+        "taskTitle": "Aufgabentitel",
+        "addTitle": "Klicken Sie, um einen Titel hinzuzufügen",
+        "addDescription": "Beschreibung hinzufügen...",
+        "clickToAddDescription": "Klicken Sie, um eine Beschreibung hinzuzufügen",
+        "dueDatePlaceholder": "z.B., WEDDING_DATE-90",
+        "dueDateExamples": "Beispiele: WEDDING_DATE, WEDDING_DATE-90 (90 Tage vorher), WEDDING_DATE+7 (7 Tage nachher)"
+      },
+      "assignment": {
+        "weddingPlanner": "Hochzeitsplaner",
+        "couple": "Paar",
+        "other": "Andere"
+      }
+    },
+    "checklist": {
+      "title": "Hochzeits-Checkliste",
+      "subtitle": "Aufgaben verwalten und Fortschritt verfolgen",
+      "description": "Aufgaben verwalten und Fortschritt für diese Hochzeit verfolgen"
+    },
+    "stats": {
+      "totalWeddings": "Gesamtzahl Hochzeiten",
+      "totalGuests": "Gesamtzahl Gäste",
+      "rsvpCompletion": "RSVP-Abschluss",
+      "upcomingWeddings": "Anstehende Hochzeiten"
+    },
+    "weddings": {
+      "title": "Hochzeitsverwaltung",
+      "loading": "Lade Hochzeiten...",
+      "loadingDetails": "Lade Hochzeitsdetails...",
+      "noWeddings": "Noch keine Hochzeiten",
+      "getStarted": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit.",
+      "backToWeddings": "Zurück zu Hochzeiten",
+      "backToWedding": "Zurück zur Hochzeit",
+      "backToDashboard": "Zurück zum Dashboard",
+      "quickActions": "Schnellaktionen",
+      "manageEvents": "Verwalten Sie alle Ihre Hochzeitsereignisse",
+      "createError": "Fehler beim Erstellen der Hochzeit",
+      "loadError": "Fehler beim Laden der Hochzeiten",
+      "updateDetails": "Details für {coupleNames} aktualisieren",
+      "updateError": "Fehler beim Aktualisieren der Hochzeit",
+      "notFound": "Hochzeit nicht gefunden",
+      "totalGuests": "Gesamtzahl Gäste",
+      "rsvpCompletion": "RSVP-Abschluss",
+      "attending": "Teilnehmend",
+      "paymentsReceived": "Erhaltene Zahlungen",
+      "weddingInfo": "Hochzeitsinformationen",
+      "status": "Status",
+      "at": "um",
+      "statusLabels": {
+        "ACTIVE": "Aktiv",
+        "ARCHIVED": "Archiviert",
+        "COMPLETED": "Abgeschlossen"
+      },
+      "guestAdditions": "Gastzusätze",
+      "allowed": "Erlaubt",
+      "notAllowed": "Nicht erlaubt",
+      "dressCode": "Kleiderordnung",
+      "additionalInfo": "Zusätzliche Informationen",
+      "weddingAdmins": "Hochzeitsadministratoren",
+      "noAdmins": "Noch keine Administratoren eingeladen",
+      "accepted": "Akzeptiert",
+      "pending": "Einladung ausstehend",
+      "inviteAdmin": "Hochzeitsadministrator einladen",
+      "create": "Neue Hochzeit erstellen",
+      "edit": "Hochzeit bearbeiten",
+      "coupleNames": "Namen des Paares",
+      "weddingDate": "Hochzeitsdatum",
+      "weddingTime": "Hochzeitszeit",
+      "location": "Ort",
+      "rsvpCutoff": "RSVP-Frist",
+      "defaultLanguage": "Standardsprache",
+      "theme": "Thema",
+      "noTheme": "Kein Thema",
+      "paymentMode": "Zahlungsmodus",
+      "automated": "Automatisiert",
+      "manual": "Manuell",
+      "allowGuestAdditions": "Gäste hinzufügen erlauben",
+      "overview": "Übersicht",
+      "guests": "Gäste",
+      "admins": "Administratoren",
+      "placeholders": {
+        "coupleNames": "Max & Maria",
+        "location": "Name des Veranstaltungsortes und Adresse"
+      },
+      "validation": {
+        "coupleNamesRequired": "Namen des Paares sind erforderlich",
+        "weddingDateRequired": "Hochzeitsdatum ist erforderlich",
+        "weddingTimeRequired": "Hochzeitszeit ist erforderlich",
+        "locationRequired": "Ort ist erforderlich",
+        "rsvpCutoffRequired": "RSVP-Frist ist erforderlich",
+        "rsvpCutoffInvalid": "RSVP-Frist muss vor dem Hochzeitsdatum liegen"
+      },
+      "note": {
+        "title": "Hinweis:",
+        "content": "Zusätzliche Einstellungen wie Zahlungsmodus, Gastzusätze, Kleiderordnung und RSVP-Fragen können vom Hochzeitsadmin im Hochzeits-Dashboard nach der Erstellung konfiguriert werden."
+      },
+      "whatsappMode": {
+        "label": "WhatsApp-Versandmodus",
+        "business": "WhatsApp Business",
+        "businessDesc": "Nachrichten direkt über die WhatsApp-Business-API (Twilio) senden.",
+        "links": "WhatsApp-Links",
+        "linksDesc": "Für jeden Gast einen wa.me-Link in einem neuen Browser-Tab öffnen, anstatt automatisch zu senden."
+      },
+      "buttons": {
+        "saving": "Speichern...",
+        "update": "Hochzeit aktualisieren",
+        "create": "Hochzeit erstellen"
+      },
+      "statusManagement": "Statusverwaltung",
+      "disableWedding": "Hochzeit deaktivieren",
+      "disableDescription": "Administratoren können anzeigen, aber nicht bearbeiten",
+      "disable": "Deaktivieren",
+      "enable": "Aktivieren",
+      "confirmDisable": "Sind Sie sicher, dass Sie diese Hochzeit deaktivieren möchten?",
+      "confirmEnable": "Sind Sie sicher, dass Sie diese Hochzeit aktivieren möchten?",
+      "disabledSince": "Deaktiviert seit {date}",
+      "deleteWedding": "Hochzeit löschen",
+      "deleteDescription": "Die Hochzeit wird vor Administratoren verborgen. Kann später wiederhergestellt werden.",
+      "delete": "Löschen",
+      "confirmDelete": "Diese Hochzeit löschen? Administratoren verlieren den Zugriff. Sie können sie später wiederherstellen.",
+      "deletedWeddings": "Gelöschte Hochzeiten",
+      "viewDeleted": "Gelöschte Hochzeiten anzeigen",
+      "backToActive": "Zurück zu aktiven Hochzeiten",
+      "deletedInfo": "Diese Hochzeiten wurden gelöscht. Administratoren können nicht darauf zugreifen.",
+      "noDeletedWeddings": "Keine gelöschten Hochzeiten",
+      "confirmRestore": "Diese Hochzeit wiederherstellen? Administratoren erhalten wieder Zugriff.",
+      "restoreSuccess": "Hochzeit erfolgreich wiederhergestellt"
+    },
+    "admins": {
+      "invite": "Administrator einladen",
+      "name": "Admin-Name",
+      "namePlaceholder": "Admin-Namen eingeben",
+      "email": "Admin-E-Mail",
+      "emailPlaceholder": "admin@beispiel.de",
+      "inviteSent": "Einladung erfolgreich gesendet",
+      "inviteError": "Fehler beim Einladen des Administrators",
+      "remove": "Administrator entfernen",
+      "confirmRemove": "Sind Sie sicher, dass Sie diesen Administrator entfernen möchten?",
+      "invitationNote": "Der Administrator erhält eine Einladungs-E-Mail mit Anweisungen zur Anmeldung und zum Zugriff auf diese Hochzeit.",
+      "sending": "Einladung wird gesendet...",
+      "send": "Einladung senden",
+      "validation": {
+        "nameRequired": "Name ist erforderlich",
+        "emailRequired": "E-Mail ist erforderlich",
+        "invalidEmail": "Ungültige E-Mail-Adresse"
+      }
+    },
+    "themes": {
+      "title": "Themenverwaltung",
+      "system": "Systemthemen",
+      "custom": "Benutzerdefinierte Themen",
+      "create": "Benutzerdefiniertes Thema erstellen",
+      "edit": "Thema bearbeiten",
+      "name": "Themenname",
+      "inUse": "In Verwendung",
+      "cannotDelete": "Kann nicht gelöscht werden. Thema wird von {count} Hochzeit(en) verwendet."
+    },
+    "upcomingTasks": {
+      "title": "Bevorstehende Aufgaben",
+      "wedding": "Hochzeit",
+      "task": "Aufgabe",
+      "viewAllWeddings": "Alle Hochzeiten anzeigen",
+      "noTasks": "Keine bevorstehenden Aufgaben",
+      "noTasksDescription": "Alle Aufgaben sind abgeschlossen oder es gibt keine Aufgaben, die Ihnen über alle Hochzeiten zugewiesen sind."
+    },
+    "providers": {
+      "title": "Dienstleisterverwaltung",
+      "description": "Verwalten Sie Ihre Dienstleister-Bibliothek",
+      "addCategory": "Kategorie hinzufügen",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "categoryNamePlaceholder": "Name der neuen Kategorie",
+      "confirmDeleteCategory": "Sind Sie sicher, dass Sie diese Kategorie und alle ihre Dienstleister löschen möchten?",
+      "addProvider": "Dienstleister hinzufügen",
+      "confirmDeleteProvider": "Sind Sie sicher, dass Sie diesen Dienstleister löschen möchten?",
+      "providerName": "Dienstleistername",
+      "name": "Name",
+      "contactName": "Kontaktname",
+      "contactPerson": "Kontaktperson",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "website": "Webseite",
+      "socialMedia": "Soziale Medien",
+      "approxPrice": "Ca. Preis",
+      "loading": "Laden...",
+      "noCategories": "Noch keine Kategorien. Fügen Sie eine hinzu, um zu beginnen.",
+      "weddingProvidersTitle": "Hochzeitsdienstleister",
+      "assignProvider": "Dienstleister zuweisen",
+      "selectProvider": "Dienstleister auswählen",
+      "selectCategory": "Kategorie auswählen",
+      "category": "Kategorie",
+      "notAssigned": "Nicht zugewiesen",
+      "add": "Hinzufügen",
+      "errorAddingProvider": "Fehler beim Hinzufügen des Dienstleisters",
+      "errorUpdatingProvider": "Fehler beim Aktualisieren des Dienstleisters",
+      "provider": "Dienstleister",
+      "contact": "Kontakt",
+      "totalPrice": "Gesamtpreis",
+      "paid": "Bezahlt",
+      "pending": "Ausstehend",
+      "contract": "Vertrag",
+      "notes": "Notizen",
+      "actions": "Aktionen",
+      "confirmDeletePayment": "Sind Sie sicher, dass Sie diese Zahlung löschen möchten?",
+      "confirmDeleteProviderFromWedding": "Sind Sie sicher, dass Sie diesen Dienstleister von der Hochzeit entfernen möchten?",
+      "edit": "Bearbeiten",
+      "remove": "Entfernen",
+      "addPayment": "Zahlung hinzufügen",
+      "recordPayment": "Zahlung erfassen",
+      "amount": "Betrag",
+      "method": "Methode",
+      "paymentNotesPlaceholder": "Zahlungsnotizen...",
+      "savePayment": "Zahlung speichern",
+      "paymentsHistory": "Zahlungshistorie",
+      "date": "Datum",
+      "noPayments": "Noch keine Zahlungen erfasst."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Hochzeits-Admin-Dashboard",
+      "welcome": "Willkommen",
+      "configure": "Konfigurieren",
+      "configureSubtitle": "RSVP-Einstellungen",
+      "weddingDetails": "Hochzeitsdetails",
+      "metrics": "Kennzahlen",
+      "metricTitles": {
+        "totalGuests": "Gesamtzahl Gäste",
+        "rsvpCompletion": "RSVP-Abschluss",
+        "attending": "Teilnehmend",
+        "paymentsReceived": "Erhaltene Geschenke"
+      },
+      "manageWedding": "Hochzeit verwalten",
+      "guestList": "Gästeliste",
+      "guestListSubtitle": "Gäste anzeigen und verwalten",
+      "activity": "Aktivität",
+      "activitySubtitle": "Gästeaktivität verfolgen",
+      "payments": "Geschenke",
+      "paymentsSubtitle": "Geschenke verfolgen",
+      "importGuests": "Gäste importieren",
+      "importGuestsSubtitle": "Excel-Datei hochladen",
+      "templates": "Nachrichtenvorlagen",
+      "templatesSubtitle": "Einladungen und Erinnerungen verwalten",
+      "rsvpProgress": "RSVP-Fortschritt",
+      "daysUntilWedding": "Tage bis zur Hochzeit",
+      "responded": "geantwortet",
+      "complete": "abgeschlossen",
+      "seatingPlan": "Sitzplan",
+      "seatingPlanSubtitle": "Gäste den Tischen zuweisen",
+      "providers": "Anbieter und Geschenke",
+      "providersSubtitle": "Anbieter und Geschenke verwalten",
+      "invitationBuilder": "Einladungsgenerator",
+      "invitationBuilderSubtitle": "Gestalten Sie Ihre Hochzeitseinladung",
+      "weddingNotFound": "Hochzeit nicht gefunden",
+      "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner."
+    },
+    "providers": {
+      "noWeddingAssigned": "Keine Hochzeit zugewiesen."
+    },
+    "checklist": {
+      "loadError": "Checkliste konnte nicht geladen werden"
+    },
+    "tasks": {
+      "title": "Bevorstehende Aufgaben",
+      "noDueDate": "Kein Fälligkeitsdatum",
+      "daysOverdue": "Tage überfällig",
+      "dueToday": "Heute fällig",
+      "daysRemaining": "Tage",
+      "noDeadline": "Keine Frist",
+      "overdue": "Überfällig",
+      "dueSoon": "Bald fällig",
+      "upcoming": "Bevorstehend",
+      "loading": "Aufgaben werden geladen...",
+      "noTasks": "Keine bevorstehenden Aufgaben",
+      "noTasksDescription": "Alle Aufgaben sind abgeschlossen oder es gibt keine Aufgaben, die Ihnen zugewiesen sind.",
+      "viewChecklist": "Checkliste anzeigen",
+      "viewAll": "Alle anzeigen",
+      "columnTask": "Aufgabe",
+      "columnSection": "Abschnitt",
+      "columnDueDate": "Fälligkeitsdatum",
+      "columnStatus": "Status",
+      "noSection": "Kein Abschnitt"
+    },
+    "seating": {
+      "title": "Sitzplan",
+      "subtitle": "Tische konfigurieren und bestätigte Gäste zuweisen",
+      "loading": "Lade Sitzplan...",
+      "stats": {
+        "totalGuests": "Gesamtzahl Gäste",
+        "confirmedGuests": "Bestätigte Gäste",
+        "totalSeats": "Gesamtzahl Plätze",
+        "assignedSeats": "Zugewiesene Plätze"
+      },
+      "config": {
+        "title": "Tischkonfiguration",
+        "addTable": "Tisch hinzufügen",
+        "tableName": "Tischname",
+        "tableNumber": "Nr.",
+        "capacity": "Kapazität",
+        "actions": "Aktionen",
+        "save": "Tische speichern",
+        "saving": "Speichern..."
+      },
+      "assignment": {
+        "title": "Gastzuweisung",
+        "unassigned": "Nicht zugewiesene Gäste",
+        "assigned": "Zugewiesen",
+        "randomAssign": "Zufällig zuweisen",
+        "randomAssignConfirm": "Dadurch werden alle nicht zugewiesenen bestätigten Gäste zufällig den Tischen zugewiesen. Fortfahren?",
+        "splitting": "Familien aufteilen",
+        "split": "Familie aufteilen",
+        "noTables": "Bitte konfigurieren Sie zuerst Tische.",
+        "unassignFamily": "Familie vom Tisch entfernen",
+        "unassignGuest": "Gast vom Tisch entfernen",
+        "move": "Verschieben"
+      },
+      "split": {
+        "title": "Familie aufteilen",
+        "description": "Familienmitglieder gruppieren, um an verschiedenen Tischen zu sitzen.",
+        "groupName": "Gruppenname",
+        "addGroup": "Gruppe hinzufügen",
+        "save": "Gruppen speichern",
+        "children": "Kinder",
+        "group": "Gruppe"
+      }
+    },
+    "wedding": {
+      "details": "Details",
+      "configuration": "Konfiguration",
+      "updateSuccess": "Konfiguration erfolgreich aktualisiert",
+      "disabledBanner": "Diese Hochzeit wurde vom Hochzeitsplaner deaktiviert. Sie können Daten anzeigen, aber keine Änderungen vornehmen.",
+      "noAccess": "Sie haben keinen Zugriff auf aktive Hochzeiten. Bitte kontaktieren Sie Ihren Hochzeitsplaner."
+    },
+    "guests": {
+      "title": "Gästeverwaltung",
+      "list": "Gästeliste",
+      "add": "Gast hinzufügen",
+      "selected": "ausgewählt",
+      "table": {
+        "family": "Familie",
+        "members": "Mitglieder",
+        "rsvp": "RSVP",
+        "channel": "Kanal",
+        "payment": "Geschenk",
+        "language": "Sprache",
+        "actions": "Aktionen",
+        "loading": "Lade Gäste...",
+        "emptyTitle": "Keine Gäste gefunden",
+        "emptyDesc": "Versuchen Sie, Ihre Filter anzupassen oder eine Gästeliste zu importieren.",
+        "noPayment": "Kein Geschenk"
+      },
+      "timeline": {
+        "title": "Gast-Aktivitätsverlauf",
+        "subtitle": "Aktivitätsverlauf für {family}",
+        "timeline": "Zeitverlauf",
+        "viewTimeline": "Aktivitätsverlauf anzeigen",
+        "noEvents": "Für diesen Gast wurde noch keine Aktivität aufgezeichnet.",
+        "loading": "Lade Zeitverlauf..."
+      },
+      "import": "Aus Excel importieren",
+      "export": "Nach Excel exportieren",
+      "template": "Vorlage herunterladen",
+      "familyName": "Familienname",
+      "contactPerson": "Kontaktperson",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "whatsapp": "WhatsApp",
+      "language": "Sprache",
+      "members": "Mitglieder",
+      "rsvpStatus": "RSVP-Status",
+      "attendance": "Teilnahme",
+      "notAnswered": "Nicht Beantwortet",
+      "channel": "Kanal",
+      "paymentStatus": "Geschenkstatus",
+      "invitedBy": "Eingeladen von",
+      "filters": {
+        "all": "Alle",
+        "pending": "Ausstehend",
+        "submitted": "Eingereicht",
+        "confirmed": "Bestätigt",
+        "attending": "Nimmt teil",
+        "notAttending": "Nimmt nicht teil",
+        "partial": "Teilweise",
+        "whatsapp": "WhatsApp",
+        "email": "E-Mail",
+        "sms": "SMS",
+        "paid": "Geschenk erhalten",
+        "unpaid": "Kein Geschenk",
+        "received": "Erhalten",
+        "searchPlaceholder": "Name oder E-Mail...",
+        "clearAll": "Filter löschen"
+      },
+      "form": {
+        "addTitle": "Gastfamilie hinzufügen",
+        "editTitle": "Gastfamilie bearbeiten",
+        "familyNameRequired": "Familienname ist erforderlich",
+        "memberNameRequired": "Alle Mitglieder müssen einen Namen haben",
+        "saveFailed": "Speichern des Gastes fehlgeschlagen",
+        "preferredChannel": "Bevorzugter Kanal",
+        "languagePreference": "Sprachpräferenz",
+        "saving": "Speichern...",
+        "addGuest": "Gast hinzufügen",
+        "saveChanges": "Änderungen speichern",
+        "rsvpAnswers": "RSVP-Antworten"
+      },
+      "importSuccess": "Gästeliste erfolgreich importiert",
+      "importError": "Importfehler. Bitte überprüfen Sie die Datei."
+    },
+    "notifications": {
+      "title": "Benachrichtigungen und Aktivität",
+      "newActivities": "{count, plural, =0 {Keine neuen Aktivitäten} one {# neue Aktivität} other {# neue Aktivitäten}}",
+      "loading": "Lade Benachrichtigungen...",
+      "emptyTitle": "Keine Benachrichtigungen",
+      "emptyDesc": "Aktivitäten Ihrer Gäste werden hier angezeigt.",
+      "filters": {
+        "dateRange": "Datumsbereich",
+        "eventType": "Ereignistyp",
+        "family": "Familie",
+        "channel": "Kanal",
+        "unread": "Ungelesen",
+        "read": "Gelesen"
+      },
+      "markAsRead": "Als gelesen markieren",
+      "export": "Benachrichtigungen exportieren",
+      "adminTriggered": "Administratoraktion",
+      "events": {
+        "linkOpened": "Link geöffnet",
+        "rsvpStarted": "RSVP gestartet",
+        "rsvpSubmitted": "RSVP eingereicht",
+        "rsvpEdited": "RSVP bearbeitet",
+        "guestAdded": "Gast hinzugefügt",
+        "paymentReceived": "Zahlung erhalten",
+        "reminderSent": "Erinnerung gesendet",
+        "invitationSent": "Einladung gesendet",
+        "taskAssigned": "Aufgabe zugewiesen",
+        "taskCompleted": "Aufgabe abgeschlossen",
+        "messageDelivered": "Nachricht zugestellt",
+        "messageRead": "Nachricht gelesen",
+        "messageFailed": "Nachricht fehlgeschlagen"
+      },
+      "eventTypes": {
+        "LINK_OPENED": "Link geöffnet",
+        "RSVP_STARTED": "RSVP gestartet",
+        "RSVP_SUBMITTED": "RSVP eingereicht",
+        "RSVP_UPDATED": "RSVP aktualisiert",
+        "GUEST_ADDED": "Gast hinzugefügt",
+        "PAYMENT_RECEIVED": "Zahlung erhalten",
+        "REMINDER_SENT": "Erinnerung gesendet",
+        "INVITATION_SENT": "Einladung gesendet",
+        "TASK_ASSIGNED": "Aufgabe zugewiesen",
+        "TASK_COMPLETED": "Aufgabe abgeschlossen",
+        "MESSAGE_DELIVERED": "Nachricht zugestellt",
+        "MESSAGE_READ": "Nachricht gelesen",
+        "MESSAGE_FAILED": "Nachricht fehlgeschlagen"
+      }
+    },
+    "saveTheDate": {
+      "confirmSend": "Möchten Sie wirklich eine Save-the-Date-Nachricht an {familyName} senden?",
+      "sent": "Save-the-Date an {count} Familie(n) gesendet"
+    },
+    "reminders": {
+      "title": "Erinnerungssystem",
+      "send": "Erinnerungen senden",
+      "sendReminder": "Erinnerung senden",
+      "sendInvite": "Einladung senden",
+      "sendSaveTheDate": "Save-the-Date senden",
+      "preview": "Empfängervorschau",
+      "channel": "Versandkanal",
+      "recipients": "Empfänger: {count} Familie(n)",
+      "sent": "Erinnerung erfolgreich an {count} Familie(n) gesendet",
+      "noRecipients": "Keine Familien warten auf RSVP",
+      "loadingPreview": "Lade Vorschau...",
+      "sendSuccess": "Erinnerungen gesendet!",
+      "sendSuccessDesc": "{count} Familien erhalten Erinnerungen.",
+      "allCaughtUp": "Alles erledigt!",
+      "allCaughtUpDesc": "Alle Familien haben bereits ihre RSVP eingereicht.",
+      "summary": "{count} Familien haben noch nicht auf die RSVP geantwortet.",
+      "byLanguage": "Nach Sprache",
+      "sendVia": "Senden via",
+      "viewAll": "Alle {count} Familien anzeigen",
+      "sending": "Senden...",
+      "sendAction": "{count} Erinnerungen senden",
+      "bulkSend": "Massen-Erinnerungen senden",
+      "selectGuestsHint": "Wählen Sie Gäste aus der Tabelle unten aus, um Erinnerungen zu senden",
+      "ibanWarning": {
+        "title": "Geschenk-IBAN nicht konfiguriert",
+        "message": "Sie haben noch kein Geschenk-IBAN festgelegt. Gäste können Zahlungsdetails nicht sehen. Trotzdem Erinnerungen senden?"
+      },
+      "validationWarning": {
+        "title": "Fehlende Kontaktinformationen",
+        "message": "Die folgenden Familien können keine Erinnerungen erhalten, da ihnen erforderliche Informationen fehlen:",
+        "missing_email": "E-Mail erforderlich",
+        "missing_phone": "Telefonnummer erforderlich",
+        "missing_whatsapp_number": "WhatsApp-Nummer erforderlich"
+      },
+      "sendToValidOnly": "Trotzdem an {count} Familien senden"
+    },
+    "payments": {
+      "title": "Geschenkverwaltung",
+      "list": "Geschenkliste",
+      "loading": "Lade Geschenke...",
+      "emptyTitle": "Keine Geschenke aufgezeichnet",
+      "emptyDesc": "Geschenke erscheinen hier, wenn sie aufgezeichnet werden.",
+      "recordTitle": "Geschenk aufzeichnen",
+      "selectFamily": "Familie auswählen",
+      "currencyAmount": "Betrag ({currency})",
+      "recording": "Aufzeichnen...",
+      "markReceived": "Als erhalten markieren",
+      "auto": "Auto",
+      "record": "Manuelles Geschenk erfassen",
+      "family": "Familie",
+      "amount": "Betrag",
+      "referenceCode": "Referenzcode",
+      "transactionDate": "Transaktionsdatum",
+      "status": "Status",
+      "statuses": {
+        "pending": "Ausstehend",
+        "received": "Erhalten",
+        "confirmed": "Bestätigt"
+      },
+      "recordSuccess": "Geschenk erfolgreich erfasst",
+      "updateSuccess": "Geschenkstatus aktualisiert"
+    },
+    "deleteDialog": {
+      "title": "Gastfamilie löschen",
+      "confirmTitle": "Sind Sie sicher, dass Sie {name} löschen möchten?",
+      "confirmDesc": "Dies wird {count} Mitglied(er) und alle zugehörigen Daten dauerhaft entfernen.",
+      "rsvpWarning": "Warnung",
+      "rsvpWarningDesc": "Diese Familie hat bereits ihre RSVP eingereicht. Das Löschen entfernt ihre Antwort.",
+      "deleting": "Löschen..."
+    },
+    "guestAdditions": {
+      "title": "Überprüfung von Gastzusätzen",
+      "loading": "Lade Gastzusätze...",
+      "featureDisabled": "Funktion Deaktiviert",
+      "featureDisabledDesc": "Gastzusätze sind für diese Hochzeit deaktiviert.",
+      "noAdditionsTitle": "Keine Gastzusätze",
+      "noAdditionsDesc": "Wenn Gäste Familienmitglieder hinzufügen, erscheinen sie hier zur Überprüfung.",
+      "totalAdditions": "Zusätze insgesamt",
+      "new": "neu",
+      "newBadge": "NEU",
+      "pendingReview": "Ausstehende Überprüfung",
+      "addedTo": "Hinzugefügt zu",
+      "addedBy": "Von Gast hinzugefügt",
+      "addedAt": "Hinzugefügt am {date}",
+      "diet": "Diät",
+      "accessibility": "Barrierefreiheit",
+      "approve": "Genehmigen",
+      "edit": "Bearbeiten",
+      "markReviewed": "Als überprüft markieren",
+      "previouslyReviewed": "Bereits überprüft",
+      "family": "Familie",
+      "noAdditions": "Keine Gastzusätze zur Überprüfung ausstehend"
+    },
+    "configure": {
+      "title": "Hochzeit konfigurieren",
+      "saveSuccess": "Konfiguration erfolgreich gespeichert!",
+      "error": "Fehler beim Speichern der Konfiguration",
+      "loading": "Konfiguration wird geladen...",
+      "notFound": "Hochzeit nicht gefunden",
+      "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner.",
+      "backToDashboard": "Zurück zum Dashboard",
+      "tabs": {
+        "basic": "Grundeinstellungen",
+        "rsvp": "RSVP-Einstellungen"
+      },
+      "form": {
+        "basicSettings": "Grundeinstellungen",
+        "theme": "Hochzeitsthema",
+        "noTheme": "Kein Thema ausgewählt",
+        "systemTheme": "System",
+        "giftIbanPlaceholder": "z.B., DE89 1234 5678 9012 3456 7890",
+        "paymentTrackingMode": "Zahlungsverfolgungsmodus",
+        "paymentTrackingModeDesc": "Der automatisierte Modus generiert eindeutige Referenzcodes für jede Familie, um Banküberweisungen zu verfolgen.",
+        "automated": "Automatisiert (mit Referenzcodes)",
+        "manual": "Manuelle Verfolgung",
+        "giftIban": "Geschenk-IBAN",
+        "giftIbanDesc": "Bankkontonummer für den Empfang von Hochzeitsgeschenken",
+        "allowGuestAdditions": "Gästen erlauben, Familienmitglieder hinzuzufügen",
+        "allowGuestAdditionsDesc": "Wenn aktiviert, können Gäste während der RSVP weitere Familienmitglieder hinzufügen (vorbehaltlich Ihrer Überprüfung).",
+        "dressCode": "Kleiderordnung",
+        "dressCodePlaceholder": "z.B. Formell, Halbformell, Lässig",
+        "additionalInfo": "Zusätzliche Informationen für Gäste",
+        "additionalInfoPlaceholder": "Alle weiteren Details für Gäste (Parken, Unterkunft, etc.)...",
+        "saveTheDate": "Save-the-Date-Nachrichten aktivieren",
+        "saveTheDateDesc": "Senden Sie Save-the-Date-Nachrichten vor den formellen Einladungen. So können Sie die Gäste frühzeitig über den Hochzeitstermin informieren.",
+        "rsvpQuestions": "RSVP-Fragen",
+        "rsvpQuestionsDesc": "Passen Sie die Fragen an, die Gästen beim Ausfüllen ihrer RSVP angezeigt werden.",
+        "transportation": "Transportfrage zur RSVP hinzufügen",
+        "transportationText": "Fragetext (Ja/Nein-Frage)",
+        "transportationPlaceholder": "z.B. Benötigen Sie einen Transport vom Hotel zum Veranstaltungsort?",
+        "dietary": "Frage zu diätetischen Einschränkungen zur RSVP hinzufügen",
+        "dietaryDesc": "Gäste können auswählen aus: Keine Einschränkungen, Vegetarisch, Vegan, Glutenfrei, Sonstiges und Allergien angeben.",
+        "extraQuestions": "Zusätzliche Ja/Nein-Fragen (bis zu 3)",
+        "enableQuestion": "Zusatzfrage {number} aktivieren",
+        "questionPlaceholder": "Geben Sie Ihre Ja/Nein-Frage ein...",
+        "extraInfo": "Zusätzliche Pflichtfelder (bis zu 3)",
+        "extraInfoDesc": "Fügen Sie benutzerdefinierte Textfelder hinzu, die Gäste während der RSVP ausfüllen müssen.",
+        "enableInfo": "Pflichtfeld {number} aktivieren",
+        "infoLabel": "Feldbezeichnung",
+        "infoPlaceholder": "z.B. Liedwunsch für die Party",
+        "cancel": "Abbrechen",
+        "save": "Konfiguration speichern",
+        "saving": "Speichern...",
+        "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut."
+      }
+    },
+    "checklist": {
+      "title": "Hochzeits-Checkliste",
+      "subtitle": "Aufgaben verwalten und Fortschritt Ihrer Hochzeit verfolgen",
+      "loading": "Checkliste wird geladen...",
+      "saving": "Speichern...",
+      "error": "Fehler beim Laden der Checkliste",
+      "retry": "Erneut versuchen",
+      "emptyTitle": "Noch keine Aufgaben",
+      "emptyDesc": "Importieren Sie eine Checkliste oder warten Sie, bis Ihr Planer Aufgaben hinzufügt.",
+      "import": "Aus Excel importieren",
+      "importing": "Importiere...",
+      "export": "Nach Excel exportieren",
+      "exporting": "Exportiere...",
+      "delete": "Löschen",
+      "deleteConfirm": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?",
+      "markComplete": "Als erledigt markieren",
+      "markIncomplete": "Als nicht erledigt markieren",
+      "descriptionPlaceholder": "Beschreibung hinzufügen...",
+      "columns": {
+        "done": "Erledigt",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "assignedTo": "Zugewiesen an",
+        "dueDate": "Fälligkeitsdatum",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "assignedTo": {
+        "planner": "Hochzeitsplaner",
+        "couple": "Paar",
+        "other": "Andere"
+      },
+      "status": {
+        "PENDING": "Ausstehend",
+        "IN_PROGRESS": "In Bearbeitung",
+        "COMPLETED": "Abgeschlossen"
+      }
+    },
+    "templates": {
+      "title": "Nachrichtenvorlagen",
+      "description": "Verwalten Sie Einladungs- und Erinnerungsvorlagen für Ihre Hochzeit in allen unterstützten Sprachen.",
+      "loading": "Vorlagen werden geladen...",
+      "error": "Fehler beim Abrufen der Vorlagen",
+      "tryAgain": "Erneut versuchen",
+      "type": {
+        "title": "Vorlagentyp",
+        "invitation": "📩 Einladungen",
+        "reminder": "🔔 Erinnerungen",
+        "confirmation": "✅ Bestätigungen"
+      },
+      "language": {
+        "title": "Sprache"
+      },
+      "channel": {
+        "title": "Kanal",
+        "email": "📧 E-Mail",
+        "whatsapp": "💬 WhatsApp",
+        "sms": "📱 SMS"
+      },
+      "placeholders": {
+        "title": "Verfügbare Platzhalter"
+      },
+      "editor": {
+        "channelInfo": "Bearbeite <strong>{channel}</strong>-Vorlage",
+        "subject": "E-Mail-Betreff",
+        "body": "{channel}-Nachricht",
+        "chars": "{current}/{max} Zeichen",
+        "save": "Vorlage speichern",
+        "saving": "Speichern...",
+        "preview": "Vorschau",
+        "reset": "Zurücksetzen",
+        "tip": "Tipp: Verwenden Sie Platzhalter wie <code>'{familyName}'</code>, <code>'{coupleNames}'</code> und <code>'{magicLink}'</code>, um Ihre Nachrichten zu personalisieren. Siehe Liste der verfügbaren Platzhalter links.",
+        "success": "Vorlage erfolgreich gespeichert!",
+        "error": "Fehler beim Speichern der Vorlage",
+        "notFound": "Keine Vorlage für {type} in {language} ({channel}) gefunden"
+      },
+      "preview": {
+        "title": "Vorlagenvorschau",
+        "loading": "Vorschau wird generiert...",
+        "subject": "Betreff",
+        "body": "Inhalt",
+        "variables": "Verwendete Variablen",
+        "emailClient": "E-Mail-Client-Vorschau",
+        "from": "Von: Hochzeitsmanagement-Plattform",
+        "close": "Schließen"
+      }
+    },
+    "invitationBuilder": {
+      "title": "Einladungsgenerator",
+      "description": "Gestalten Sie Ihre Hochzeitseinladungsseite",
+      "createNew": "Neu Erstellen",
+      "startFromScratch": "Von Grund auf Neu Anfangen",
+      "startFromTemplate": "Von einer Systemvorlage Anfangen",
+      "templateName": "Vorlagenname",
+      "save": "Speichern",
+      "saved": "Gespeichert",
+      "preview": "Vorschau",
+      "addBlock": "Block Hinzufügen",
+      "blockText": "Text",
+      "blockImage": "Bild",
+      "blockLocation": "Ort",
+      "blockCountdown": "Countdown",
+      "blockAddToCalendar": "Zum Kalender Hinzufügen",
+      "styleFont": "Schriftart",
+      "styleSize": "Größe",
+      "styleColor": "Farbe",
+      "styleAlign": "Ausrichtung",
+      "styleLanguages": "Sprachen",
+      "canvasBackground": "Hintergrund",
+      "pickImage": "Bild Auswählen",
+      "uploadNewImage": "Neues Bild Hochladen",
+      "noImagesUploaded": "Noch keine Bilder hochgeladen",
+      "editTemplate": "Bearbeiten",
+      "deleteTemplate": "Löschen",
+      "back": "Zurück",
+      "noTemplatesYet": "Noch keine Vorlagen",
+      "noTemplatesDescription": "Erstellen Sie Ihre erste Einladungsvorlage, um zu beginnen",
+      "createFirstTemplate": "Erste Vorlage Erstellen",
+      "createTemplate": "Vorlage Erstellen",
+      "basedOn": "Basierend auf",
+      "creating": "Wird erstellt...",
+      "confirmDeleteTemplate": "Sind Sie sicher, dass Sie diese Vorlage löschen möchten?",
+      "canvasSettings": "Canvas-Einstellungen",
+      "backgroundColor": "Hintergrundfarbe",
+      "backgroundImage": "Hintergrundbild",
+      "paperBackground": "Papierhintergrund",
+      "remove": "Entfernen",
+      "addPaperBackground": "Papierhintergrund Hinzufügen",
+      "noBlocksYet": "Noch keine Blöcke hinzugefügt. Fügen Sie einen Block aus der Seitenleiste hinzu.",
+      "countdownSettings": "Countdown-Einstellungen",
+      "locationSettings": "Standort-Einstellungen",
+      "font": "Schriftart",
+      "size": "Größe",
+      "color": "Farbe",
+      "textStyle": "Textstil",
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "underline": "Unterstrichen",
+      "labelSettings": "Label-Einstellungen (Tage, Stunden, usw.)",
+      "labelSize": "Label-Größe",
+      "labelColor": "Label-Farbe",
+      "alignment": "Ausrichtung",
+      "mapStyle": "Kartenstil",
+      "colorMap": "Farbe",
+      "grayscaleMap": "Graustufen"
+    }
+  },
+  "guest": {
+    "welcome": {
+      "title": "Hallo, Familie {familyName}!",
+      "subtitle": "Bitte bestätigen Sie Ihre Teilnahme an der Hochzeit",
+      "coupleNames": "{coupleNames}",
+      "date": "Datum: {date}",
+      "time": "Zeit: {time}",
+      "location": "Ort: {location}"
+    },
+    "rsvp": {
+      "title": "RSVP",
+      "instructions": "Bitte wählen Sie aus, wer aus Ihrer Familie an der Hochzeit teilnehmen wird.",
+      "attend": "Teilnehmen",
+      "attending": "Teilnehmend",
+      "notAttending": "Wird nicht teilnehmen",
+      "attendingSummary": "{count, plural, =0 {Niemand nimmt teil} one {1 Person nimmt teil} other {# Personen nehmen teil}}",
+      "dietaryRestrictions": "Diätetische Einschränkungen",
+      "accessibilityNeeds": "Bedürfnisse bezüglich Barrierefreiheit",
+      "dietaryPlaceholder": "Z.B. vegetarisch, Allergien, etc.",
+      "accessibilityPlaceholder": "Z.B. Rollstuhl, besondere Bedürfnisse, etc.",
+      "submit": "Teilnahme bestätigen",
+      "submitted": "Danke für Ihre Rückmeldung!",
+      "confirmationMessage": "Wir haben Ihre Bestätigung erhalten. Wir freuen uns darauf, Sie bei der Hochzeit zu sehen!",
+      "cutoffPassed": "Die RSVP-Frist ist abgelaufen. Bitte kontaktieren Sie die Organisatoren.",
+      "additionalQuestions": "Zusätzliche Fragen",
+      "defaultTransportationQuestion": "Benötigen Sie Transport zum Veranstaltungsort?",
+      "emptyConfirmation": "Sie bestätigen, dass niemand aus Ihrer Gruppe teilnehmen wird. Ist das das, was Sie bestätigen möchten? Andernfalls brechen Sie bitte ab und wählen Sie diejenigen aus Ihrer Gruppe aus, die teilnehmen werden"
+    },
+    "members": {
+      "title": "Familienmitglieder",
+      "addMember": "Familienmitglied hinzufügen",
+      "name": "Name",
+      "type": "Typ",
+      "age": "Alter",
+      "yearsOld": "{count} Jahre alt",
+      "addedByYou": "Von Ihnen hinzugefügt",
+      "types": {
+        "adult": "Erwachsener",
+        "child": "Kind",
+        "infant": "Kleinkind"
+      },
+      "addSuccess": "Mitglied erfolgreich hinzugefügt",
+      "noMembers": "Noch keine Mitglieder hinzugefügt"
+    },
+    "payment": {
+      "title": "Geschenkinformationen",
+      "subtitle": "Details zum Hochzeitsgeschenk",
+      "iban": "IBAN:",
+      "referenceCode": "Referenzcode:",
+      "referenceInstructions": "Bitte geben Sie diesen Referenzcode bei Ihrer Überweisung an.",
+      "status": "Geschenkstatus:",
+      "statuses": {
+        "pending": "Ausstehend",
+        "received": "Erhalten",
+        "confirmed": "Bestätigt"
+      },
+      "presenceMessage": "Ihre Anwesenheit ist das Wichtigste für uns. Wenn Sie uns ein Geschenk machen möchten, können Sie dies auf die für Sie angenehmste Weise tun.",
+      "cashMessage": "Wenn Sie es bevorzugen, kann das Geschenk in bar erfolgen. Falls es für Sie bequemer ist, können Sie auch eine Überweisung tätigen:",
+      "manualMode": "Bitte verwenden Sie die folgende IBAN für Ihr Geschenk.",
+      "thankYou": "Vielen Dank für Ihre Großzügigkeit!"
+    },
+    "language": {
+      "select": "Sprache wählen",
+      "updated": "Sprache aktualisiert"
+    },
+    "edit": {
+      "title": "RSVP bearbeiten",
+      "canEdit": "Sie können Ihre RSVP bis zum {date} bearbeiten."
+    },
+    "footer": {
+      "contactCouple": "Bei Fragen wenden Sie sich bitte direkt an das Paar."
+    },
+    "gardenBirds": {
+      "weAreGettingMarried": "Wir heiraten",
+      "tapToOpen": "Tippen zum Öffnen",
+      "scrollForDetails": "Scrollen für weitere Details",
+      "countdown": "Countdown",
+      "countdownSubtitle": "Bis zum schönsten Tag unseres Lebens",
+      "days": "Tage",
+      "hours": "Stunden",
+      "minutes": "Minuten",
+      "seconds": "Sekunden",
+      "location": "Ort",
+      "timeRange": "Von {startTime} bis 01:00 Uhr",
+      "details": "Details des Tages",
+      "detailsSubtitle": "Alles was Sie wissen müssen"
+    },
+    "invitation": {
+      "countdown": "Countdown",
+      "countdownSubtitle": "Bis zum großen Tag",
+      "days": "Tage",
+      "hours": "Stunden",
+      "minutes": "Minuten",
+      "seconds": "Sekunden",
+      "location": "Ort",
+      "addToCalendar": "Zum Kalender Hinzufügen",
+      "googleCalendar": "Google Calendar",
+      "appleCalendar": "Apple Calendar",
+      "getDirections": "Richtungen Abrufen"
+    }
+  },
+  "auth": {
+    "signin": {
+      "subtitle": "Melden Sie sich an, um auf Ihr Konto zuzugreifen",
+      "google": "Weiter mit Google",
+      "facebook": "Weiter mit Facebook",
+      "apple": "Weiter mit Apple",
+      "footer": "Melden Sie sich mit Ihrem autorisierten Konto an"
+    },
+    "signout": {
+      "title": "Abmelden...",
+      "subtitle": "Bitte warten Sie, während wir Sie abmelden."
+    }
+  },
+  "about": {
+    "title": "Über {commercialName}",
+    "subtitle": "Hochzeitsplaner befähigen, unvergessliche Erlebnisse zu schaffen",
+    "mission": {
+      "title": "Unsere Mission",
+      "content": "Bei {commercialName} glauben wir, dass jede Hochzeit eine stressfreie Feier der Liebe sein sollte. Unsere Mission ist es, Hochzeitsplaner mit den Werkzeugen auszustatten, die sie benötigen, um ihren Paaren außergewöhnlichen Service zu bieten und gleichzeitig die Gästeverwaltung und Kommunikation zu vereinfachen."
+    },
+    "story": {
+      "title": "Unsere Geschichte",
+      "content1": "{commercialName} entstand aus den realen Herausforderungen, mit denen Hochzeitsplaner konfrontiert sind, die mehrere Veranstaltungen gleichzeitig verwalten. Wir sahen, wie Planer mit Tabellenkalkulationen, mehreren Kommunikationskanälen und der Verfolgung von Zusagen verschiedener Paare zu kämpfen hatten.",
+      "content2": "Wir haben {commercialName} als umfassende Plattform entwickelt, die alles zusammenbringt—von der Gästeverwaltung über Einladungen bis zur Geschenkverfolgung—alles in einem eleganten, benutzerfreundlichen System, das speziell für Hochzeitsprofis entwickelt wurde."
+    },
+    "values": {
+      "title": "Unsere Werte",
+      "items": [
+        {
+          "title": "Einfachheit",
+          "content": "Wir glauben, dass leistungsstarke Tools einfach zu bedienen sein sollten. Jede Funktion ist darauf ausgelegt, Zeit zu sparen und Komplexität zu reduzieren."
+        },
+        {
+          "title": "Zuverlässigkeit",
+          "content": "Ihre Paare vertrauen Ihnen für ihren besonderen Tag. Wir stellen sicher, dass unsere Plattform immer verfügbar ist, wenn Sie sie brauchen."
+        },
+        {
+          "title": "Innovation",
+          "content": "Wir verbessern uns kontinuierlich und passen uns den sich ändernden Bedürfnissen von Hochzeitsprofis und ihren Kunden an."
+        },
+        {
+          "title": "Support",
+          "content": "Ihr Erfolg ist unser Erfolg. Wir sind hier, um Ihnen bei jedem Schritt mit dediziertem Support zu helfen."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Bereit, Ihr Hochzeitsplanungsgeschäft zu transformieren?",
+      "button": "Kontaktieren Sie uns"
+    }
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "introduction": {
+      "title": "Einführung",
+      "content": "Bei {commercialName} nehmen wir Ihre Privatsphäre ernst. Diese Datenschutzerklärung erklärt, wie wir Ihre persönlichen Informationen sammeln, verwenden und schützen, wenn Sie unsere Hochzeitsverwaltungsplattform nutzen."
+    },
+    "dataCollection": {
+      "title": "Informationen, die wir sammeln",
+      "intro": "Wir sammeln die folgenden Arten von Informationen:",
+      "items": [
+        "Kontaktinformationen (Name, E-Mail, Telefon), die von Hochzeitsplanern und Administratoren bereitgestellt werden",
+        "Informationen über Hochzeitsgäste, die über unsere Plattform verwaltet werden",
+        "Nutzungsdaten und Analysen zur Verbesserung unseres Service",
+        "Authentifizierungsinformationen über OAuth-Anbieter (Google, Facebook, Apple, Microsoft)"
+      ]
+    },
+    "dataUsage": {
+      "title": "Wie wir Ihre Informationen verwenden",
+      "items": [
+        "Um unsere Hochzeitsverwaltungsdienste bereitzustellen und zu pflegen",
+        "Um Einladungen, Erinnerungen und Kommunikationen im Namen von Hochzeitsplanern zu senden",
+        "Um Zusagen zu verfolgen und Gästelisten zu verwalten",
+        "Um unsere Plattform zu verbessern und neue Funktionen zu entwickeln"
+      ]
+    },
+    "dataProtection": {
+      "title": "Datenschutz",
+      "content": "Wir implementieren branchenübliche Sicherheitsmaßnahmen zum Schutz Ihrer Daten. Alle Daten werden während der Übertragung und im Ruhezustand verschlüsselt. Wir verwenden sichere OAuth-Authentifizierung und speichern niemals Passwörter direkt. Der Zugriff auf Daten ist streng kontrolliert und nur auf autorisiertes Personal beschränkt."
+    },
+    "userRights": {
+      "title": "Ihre Rechte",
+      "items": [
+        "Jederzeit auf Ihre persönlichen Daten zugreifen",
+        "Korrekturen Ihrer Informationen anfordern",
+        "Löschung Ihrer Daten anfordern (vorbehaltlich gesetzlicher Anforderungen)",
+        "Ihre Daten in einem Standardformat exportieren"
+      ]
+    },
+    "contact": {
+      "title": "Kontaktieren Sie uns",
+      "content": "Wenn Sie Fragen zu dieser Datenschutzerklärung oder zur Handhabung Ihrer Daten haben, bitte",
+      "link": "kontaktieren Sie uns"
+    }
+  },
+  "docs": {
+    "title": "Dokumentation",
+    "subtitle": "Alles, was Sie über {commercialName} wissen müssen",
+    "overview": {
+      "title": "Was ist {commercialName}?",
+      "content1": "{commercialName} ist eine umfassende Hochzeitsverwaltungsplattform, die speziell für Hochzeitsplaner entwickelt wurde. Sie bietet eine vollständige Lösung zur gleichzeitigen Verwaltung mehrerer Hochzeiten, von der Gästelistenverwaltung über Einladungen bis zur Geschenkverfolgung.",
+      "content2": "Mit einer Multi-Tenant-Architektur ermöglicht {commercialName} Hochzeitsplanern die gleichzeitige Verwaltung mehrerer Paare und gibt jedem Paar über eine intuitive Benutzeroberfläche sicheren Zugriff auf die Daten ihrer eigenen Hochzeit."
+    },
+    "targetUsers": {
+      "title": "Für wen ist {commercialName}?",
+      "planner": {
+        "title": "Hochzeitsplaner",
+        "content": "Professionelle Hochzeitsplaner, die mehrere Hochzeiten verwalten und eine zentralisierte Plattform für alle Aspekte der Gästeverwaltung, Kommunikation und Koordination benötigen."
+      },
+      "couple": {
+        "title": "Brautpaare",
+        "content": "Paare erhalten von ihrem Planer kostenlosen Zugang, um die Gästeliste ihrer Hochzeit zu verwalten, Zusagen zu verfolgen und über mehrere Kanäle mit ihren Gästen zu kommunizieren."
+      },
+      "guest": {
+        "title": "Gäste",
+        "content": "Gäste erhalten magische Links per WhatsApp, E-Mail oder SMS, um zuzusagen, ohne Konten erstellen zu müssen—was den Prozess so einfach wie möglich macht."
+      }
+    },
+    "keyFeatures": {
+      "title": "Hauptmerkmale",
+      "items": [
+        "Familienbasierte Gästeverwaltung mit Excel-Import/Export",
+        "Multi-Channel-Einladungen (WhatsApp, Email, SMS) in 5 Sprachen",
+        "Magic-Link-Authentifizierung für Gäste—keine Passwörter erforderlich",
+        "Echtzeit-Zusagenverfolgung mit Aktivitätsbenachrichtigungen",
+        "Geschenkverfolgung mit automatischer oder manueller Zahlungsbestätigung"
+      ]
+    },
+    "gettingStarted": {
+      "title": "Erste Schritte",
+      "content": "Bereit, Ihr Hochzeitsplanungsgeschäft zu optimieren? Beginnen Sie mit unserer 14-tägigen kostenlosen Testversion, um alle Funktionen mit Ihrer ersten Hochzeit zu erkunden. Keine Kreditkarte erforderlich.",
+      "button": "Demo anfordern"
+    }
+  }
+}

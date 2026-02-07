@@ -1,13 +1,13 @@
 /**
  * Short URL Generation and Resolution
  *
- * Produces short magic links in the format /{INITIALS}/{CODE} that HTTP-redirect
+ * Produces short magic links in the format /inv/{INITIALS}/{CODE} that HTTP-redirect
  * to the full /rsvp/{magic_token} page.
  *
  * INITIALS – derived from the couple's names (e.g. "Laura y Javier" → "LJ").
  *            Collisions across weddings are resolved by appending a number: LJ, LJ1, LJ2 …
- * CODE     – a 2-character base-62 string (a-zA-Z0-9).  62² = 3 844 combinations,
- *            more than enough for any single wedding.  Falls back to 3 characters
+ * CODE     – a 3-character base-62 string (a-zA-Z0-9).  62³ = 238,328 combinations,
+ *            more than enough for any single wedding.  Falls back to 4 characters
  *            if the unlikely case of exhaustion arises.
  */
 
@@ -103,10 +103,10 @@ function randomCode(length: number): string {
 
 /**
  * Generate a short code that is unique within the given wedding.
- * Tries 2-char codes first (3 844 slots); falls back to 3-char (238 328 slots).
+ * Tries 3-char codes first (238 328 slots); falls back to 4-char (14 776 336 slots).
  */
 async function generateShortCode(weddingId: string): Promise<string> {
-  for (let len = 2; len <= 3; len++) {
+  for (let len = 3; len <= 4; len++) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const code = randomCode(len);
       const taken = await prisma.family.findFirst({
@@ -146,7 +146,7 @@ async function ensureShortCode(familyId: string, weddingId: string): Promise<str
 /**
  * Return the short-URL **path** for a family, creating initials / code if needed.
  *
- * Example return value: "/LJ/aB"
+ * Example return value: "/inv/LJ/abc"
  */
 export async function getShortUrlPath(familyId: string): Promise<string> {
   const family = await prisma.family.findUnique({
@@ -158,7 +158,7 @@ export async function getShortUrlPath(familyId: string): Promise<string> {
   const initials = await ensureWeddingInitials(family.wedding_id);
   const code     = await ensureShortCode(familyId, family.wedding_id);
 
-  return `/${initials}/${code}`;
+  return `/inv/${initials}/${code}`;
 }
 
 /**
@@ -194,7 +194,8 @@ export async function assignShortCode(
   weddingId: string,
 ): Promise<void> {
   // Generate a unique code within this transaction
-  for (let len = 2; len <= 3; len++) {
+  // Using 3 characters for better security (62^3 = 238,328 combinations)
+  for (let len = 3; len <= 4; len++) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const code = randomCode(len);
       const taken = await tx.family.findFirst({

@@ -135,7 +135,8 @@ export async function middleware(request: NextRequest) {
 
   // 2. Auth redirect for home page (Performance optimization)
   // Check if user is logged in when accessing root to redirect to dashboard
-  if (pathname === '/' || routing.locales.some(locale => pathname === `/${locale}`)) {
+  const isRootPath = pathname === '/' || routing.locales.some(locale => pathname === `/${locale}`);
+  if (isRootPath) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
@@ -144,7 +145,11 @@ export async function middleware(request: NextRequest) {
 
     if (token?.user?.role) {
       const role = (token.user as AuthenticatedUser).role;
-      return NextResponse.redirect(new URL(getRedirectForRole(role), request.url));
+      // Extract locale if present, otherwise use default
+      const redirectPath = getRedirectForRole(role);
+      
+      // We don't want to prefix dashboard routes with locale if they are not in [locale]
+      return NextResponse.redirect(new URL(redirectPath, request.url));
     }
     
     // Fall through to intlMiddleware for non-authenticated users
@@ -153,19 +158,22 @@ export async function middleware(request: NextRequest) {
   // 3. Internationalization
   // This handles /about, /docs, etc. and redirects / to /[locale]
   // if not authenticated.
-  const response = intlMiddleware(request);
-  
-  // If intlMiddleware wants to redirect (e.g. adding locale), return that
-  // But we only want to apply intlMiddleware to specific public pages for SEO
-  // The user only wanted /, /about, /docs, /privacy to be SEO friendly.
   const isSeoFriendlyPath = pathname === '/' || 
-    pathname.startsWith('/about') || 
-    pathname.startsWith('/docs') || 
-    pathname.startsWith('/privacy') ||
-    routing.locales.some(locale => pathname.startsWith(`/${locale}`));
+    pathname === '/about' || 
+    pathname === '/docs' || 
+    pathname === '/privacy' ||
+    pathname === '/contact' ||
+    routing.locales.some(locale => {
+      const localePath = `/${locale}`;
+      return pathname === localePath || 
+             pathname === `${localePath}/about` ||
+             pathname === `${localePath}/docs` ||
+             pathname === `${localePath}/privacy` ||
+             pathname === `${localePath}/contact`;
+    });
 
   if (isSeoFriendlyPath) {
-    return response;
+    return intlMiddleware(request);
   }
 
   // 4. Public routes (non-intl)

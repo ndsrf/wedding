@@ -55,7 +55,7 @@ describe('Short URL Service', () => {
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      expect(result).toBe('/LJ/Ab');
+      expect(result).toBe('/inv/LJ/Ab');
     });
 
     it('should generate new code when family has no short code', async () => {
@@ -75,13 +75,13 @@ describe('Short URL Service', () => {
 
       // Mock family.update
       (prisma.family.update as jest.Mock).mockResolvedValue({
-        short_url_code: 'Xy',
+        short_url_code: 'Xyz',
       });
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      // Should have format /{initials}/{code}
-      expect(result).toMatch(/^\/LJ\/[a-zA-Z0-9]{2,3}$/);
+      // Should have format /inv/{initials}/{code}
+      expect(result).toMatch(/^\/inv\/LJ\/[a-zA-Z0-9]{3,4}$/);
       expect(prisma.family.update).toHaveBeenCalled();
     });
 
@@ -100,13 +100,13 @@ describe('Short URL Service', () => {
           wedding_id: '550e8400-e29b-41d4-a716-446655440000',
         })
         .mockResolvedValueOnce({
-          short_url_code: 'Zz',
+          short_url_code: 'Zzz',
         });
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      expect(result).toContain('/LJ/');
-      expect(result).toBe('/LJ/Zz');
+      expect(result).toContain('/inv/LJ/');
+      expect(result).toBe('/inv/LJ/Zzz');
     });
 
     it('should handle different wedding initials', async () => {
@@ -123,28 +123,28 @@ describe('Short URL Service', () => {
           wedding_id: '550e8400-e29b-41d4-a716-446655440001',
         })
         .mockResolvedValueOnce({
-          short_url_code: 'Xy',
+          short_url_code: 'Xyz',
         });
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      expect(result).toBe('/AP/Xy');
+      expect(result).toBe('/inv/AP/Xyz');
     });
   });
 
   describe('Path Format', () => {
-    it('should return paths starting with /', async () => {
+    it('should return paths starting with /inv/', async () => {
       (prisma.family.findUnique as jest.Mock)
         .mockResolvedValueOnce({
           wedding_id: '550e8400-e29b-41d4-a716-446655440000',
         })
         .mockResolvedValueOnce({
-          short_url_code: 'Ab',
+          short_url_code: 'Abc',
         });
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      expect(result).toMatch(/^\//);
+      expect(result).toMatch(/^\/inv\//);
     });
 
     it('should not have trailing slashes', async () => {
@@ -153,7 +153,7 @@ describe('Short URL Service', () => {
           wedding_id: '550e8400-e29b-41d4-a716-446655440000',
         })
         .mockResolvedValueOnce({
-          short_url_code: 'Ab',
+          short_url_code: 'Abc',
         });
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
@@ -161,18 +161,18 @@ describe('Short URL Service', () => {
       expect(result).not.toMatch(/\/$/);
     });
 
-    it('should use /{initials}/{code} format', async () => {
+    it('should use /inv/{initials}/{code} format', async () => {
       (prisma.family.findUnique as jest.Mock)
         .mockResolvedValueOnce({
           wedding_id: '550e8400-e29b-41d4-a716-446655440000',
         })
         .mockResolvedValueOnce({
-          short_url_code: 'Ab',
+          short_url_code: 'Abc',
         });
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      expect(result).toMatch(/^\/[A-Z]{2,4}\/[a-zA-Z0-9]{2,3}$/);
+      expect(result).toMatch(/^\/inv\/[A-Z]{2,4}\/[a-zA-Z0-9]{3,4}$/);
     });
   });
 

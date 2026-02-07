@@ -3,7 +3,6 @@
  * These functions can be used in Server Components and API routes
  */
 
-import { getRequestConfig } from 'next-intl/server';
 import { headers, cookies } from 'next/headers';
 import { Language, DEFAULT_LANGUAGE, isValidLanguage } from './config';
 
@@ -24,7 +23,7 @@ async function loadTranslations(language: Language): Promise<Record<string, unkn
   }
 
   try {
-    const messages = (await import(`../../../public/locales/${language}/common.json`)).default;
+    const messages = (await import(`../../messages/${language}/common.json`)).default;
     translationCache.set(cacheKey, messages);
     return messages;
   } catch (error) {
@@ -42,9 +41,11 @@ async function loadTranslations(language: Language): Promise<Record<string, unkn
 /**
  * Get translations for a specific language
  * This is the main function to use in Server Components
+ * If language is not provided, it will be detected from the request
  */
-export async function getTranslations(language: Language) {
-  const messages = await loadTranslations(language);
+export async function getTranslations(language?: Language) {
+  const targetLanguage = language || await getLanguageFromRequest();
+  const messages = await loadTranslations(targetLanguage);
 
   return {
     messages,
@@ -127,19 +128,6 @@ export async function getLanguageFromRequest(): Promise<Language> {
 
   return DEFAULT_LANGUAGE;
 }
-
-/**
- * next-intl request configuration
- * This is used by next-intl to determine the locale for each request
- */
-export default getRequestConfig(async ({ locale }) => {
-  const language = locale && isValidLanguage(locale) ? (locale as Language) : DEFAULT_LANGUAGE;
-
-  return {
-    locale: language,
-    messages: await loadTranslations(language),
-  };
-});
 
 /**
  * Clear the translation cache

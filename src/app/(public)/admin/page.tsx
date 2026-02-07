@@ -6,11 +6,10 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations, getLocale } from 'next-intl/server';
+import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { formatDateByLanguage } from '@/lib/date-formatter';
-import { isValidLanguage } from '@/lib/i18n/config';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
@@ -108,7 +107,7 @@ export default async function AdminDashboardPage() {
     redirect('/api/auth/signin');
   }
 
-  const t = await getTranslations();
+  const { t } = await getTranslations();
   const stats = await getWeddingStats(user);
 
   if (!stats) {
@@ -122,8 +121,7 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  const locale = await getLocale();
-  const language = isValidLanguage(locale) ? locale : 'en';
+  const language = await getLanguageFromRequest();
 
   return (
     <div className="min-h-screen bg-gray-50">

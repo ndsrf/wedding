@@ -1,0 +1,1349 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "add": "Ajouter",
+      "create": "Créer",
+      "update": "Mettre à jour",
+      "submit": "Soumettre",
+      "confirm": "Confirmer",
+      "back": "Retour",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "close": "Fermer",
+      "search": "Rechercher",
+      "filter": "Filtrer",
+      "export": "Exporter",
+      "import": "Importer",
+      "download": "Télécharger",
+      "upload": "Mettre en ligne",
+      "send": "Envoyer",
+      "clearFilters": "Effacer tous les filtres",
+      "retry": "Réessayer",
+      "continue": "Continuer",
+      "copy": "Copier"
+    },
+    "status": {
+      "pending": "En attente",
+      "inProgress": "En cours",
+      "completed": "Terminé"
+    },
+    "navigation": {
+      "home": "Accueil",
+      "dashboard": "Tableau de Bord",
+      "settings": "Paramètres",
+      "logout": "Déconnexion",
+      "profile": "Profil"
+    },
+    "forms": {
+      "required": "Ce champ est obligatoire",
+      "invalidEmail": "Veuillez entrer une adresse email valide",
+      "invalidPhone": "Veuillez entrer un numéro de téléphone valide",
+      "minLength": "Doit contenir au moins {min} caractères",
+      "maxLength": "Ne peut pas dépasser {max} caractères"
+    },
+    "validation": {
+      "required": "Champ obligatoire",
+      "email": "Email invalide",
+      "phone": "Téléphone invalide",
+      "date": "Date invalide",
+      "number": "Nombre invalide"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "network": "Erreur de connexion. Veuillez vérifier votre connexion internet.",
+      "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
+      "notFound": "La ressource demandée est introuvable.",
+      "serverError": "Erreur serveur. Veuillez réessayer plus tard."
+    },
+    "success": {
+      "saved": "Enregistré avec succès",
+      "updated": "Mis à jour avec succès",
+      "deleted": "Supprimé avec succès",
+      "created": "Créé avec succès",
+      "sent": "Envoyé avec succès"
+    },
+    "pagination": {
+      "page": "Page",
+      "of": "sur"
+    },
+    "optional": "Optionnel",
+    "languages": {
+      "ES": "Espagnol",
+      "EN": "Anglais",
+      "FR": "Français",
+      "IT": "Italien",
+      "DE": "Allemand"
+    },
+    "channels": {
+      "WHATSAPP": "WhatsApp",
+      "EMAIL": "Email",
+      "SMS": "SMS",
+      "PREFERRED": "Canal Préféré de l'Invité",
+      "none": "-"
+    },
+    "countdown": {
+      "days": "Jours",
+      "hours": "Heures",
+      "minutes": "Minutes",
+      "seconds": "Secondes"
+    },
+    "loading": "Chargement...",
+    "noData": "Aucune donnée disponible",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ceci ?",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "testimonials": "Témoignages",
+      "login": "Connexion"
+    },
+    "hero": {
+      "title": "Développez Votre Entreprise d'Organisation de Mariages",
+      "subtitle": "{commercialName} est la plateforme tout-en-un pour les organisateurs de mariages pour collaborer facilement avec les couples, gérer les invités, concevoir de superbes invitations et créer des célébrations inoubliables.",
+      "cta": {
+        "primary": "Essai Gratuit",
+        "secondary": "En Savoir Plus"
+      },
+      "trial": "Essai gratuit • 1 mariage • Aucune carte de crédit requise"
+    },
+    "features": {
+      "title": "Tout Ce Dont Vous Avez Besoin Pour Organiser Des Mariages Parfaits",
+      "subtitle": "Des outils puissants conçus pour les organisateurs professionnels",
+      "items": {
+        "guestManagement": {
+          "title": "Gestion des Invités",
+          "description": "Gérez facilement les listes d'invités, suivez les confirmations, les besoins alimentaires et les plans de table en un seul endroit."
+        },
+        "invitationDesigner": {
+          "title": "Concepteur d'Invitations",
+          "description": "Créez de magnifiques invitations personnalisées avec nos outils de conception intuitifs et nos modèles élégants."
+        },
+        "multiChannel": {
+          "title": "Invitations Multi-Canaux",
+          "description": "Envoyez des invitations par email, WhatsApp et SMS. Suivez l'état de livraison et les réponses en temps réel."
+        },
+        "taskManagement": {
+          "title": "Gestion des Tâches et Fournisseurs",
+          "description": "Collaborez avec les couples sur les listes de tâches, gérez les vendeurs et fournisseurs, et gardez tout sur la bonne voie."
+        },
+        "seatingPlanner": {
+          "title": "Planificateur de Places Interactif",
+          "description": "Organisez des plans de table parfaits avec notre interface glisser-déposer. Visualisez et optimisez les dispositions de tables."
+        },
+        "giftTracking": {
+          "title": "Registre et Suivi des Cadeaux",
+          "description": "Aidez les couples à gérer leur liste de cadeaux et à suivre les cadeaux reçus avec des rappels de remerciement automatiques."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Apprécié Par Les Organisateurs de Mariages du Monde Entier",
+      "subtitle": "Rejoignez des milliers de professionnels utilisant {commercialName}",
+      "items": [
+        {
+          "text": "{commercialName} a transformé la façon dont nous gérons notre entreprise d'organisation de mariages. Les invitations multi-canaux et le suivi en temps réel nous font gagner d'innombrables heures.",
+          "name": "Sophie Dubois",
+          "role": "Organisatrice de Mariages, Paris"
+        },
+        {
+          "text": "Nos couples adorent les fonctionnalités collaboratives. Le planificateur de places à lui seul a rendu notre service beaucoup plus précieux.",
+          "name": "Emma Thompson",
+          "role": "Coordinatrice d'Événements, Londres"
+        },
+        {
+          "text": "Gérer 3 mariages simultanément était stressant. Avec {commercialName}, tout est organisé et nos clients sont plus heureux que jamais.",
+          "name": "Luca Romano",
+          "role": "Organisateur de Mariages, Rome"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Tarification Simple et Transparente",
+      "subtitle": "Choisissez le plan qui correspond à votre entreprise",
+      "popular": "LE PLUS POPULAIRE",
+      "perMonth": "mois",
+      "cta": "Commencer",
+      "contactUs": "Nous Contacter",
+      "plans": {
+        "trial": {
+          "name": "Essai Gratuit",
+          "price": "Gratuit",
+          "features": [
+            "1 mariage",
+            "Toutes les fonctionnalités principales",
+            "Période d'essai de 14 jours"
+          ]
+        },
+        "standard": {
+          "name": "Standard",
+          "price": "€50",
+          "features": [
+            "3 mariages en parallèle",
+            "Invités illimités",
+            "Toutes les fonctionnalités incluses",
+            "Support prioritaire"
+          ]
+        },
+        "pro": {
+          "name": "Professionnel",
+          "price": "Personnalisé",
+          "features": [
+            "Mariages illimités",
+            "Option marque blanche",
+            "Gestionnaire de compte dédié",
+            "Intégrations personnalisées"
+          ]
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à Transformer Votre Entreprise d'Organisation de Mariages?",
+      "subtitle": "Rejoignez des centaines d'organisateurs qui font confiance à {commercialName} pour offrir des expériences exceptionnelles.",
+      "button": "Commencez Votre Essai Gratuit"
+    },
+    "footer": {
+      "tagline": "Permettre aux organisateurs de mariages de créer des célébrations inoubliables.",
+      "product": "Produit",
+      "company": "Entreprise",
+      "support": "Support",
+      "about": "À Propos",
+      "contact": "Contact",
+      "privacy": "Politique de Confidentialité",
+      "help": "Centre d'Aide",
+      "docs": "Documentation",
+      "rights": "Tous droits réservés."
+    },
+    "title": "{commercialName} - Gestion de Mariages"
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Nous sommes là pour vous aider à démarrer",
+    "form": {
+      "name": "Nom complet",
+      "namePlaceholder": "Votre nom",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "vous@email.com",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+33 6 00 00 00 00",
+      "reason": "Raison du contact",
+      "reasonPlaceholder": "Sélectionnez une raison",
+      "message": "Message",
+      "messagePlaceholder": "Dites-nous comment nous pouvons vous aider...",
+      "submit": "Envoyer le message",
+      "submitting": "Envoi..."
+    },
+    "reasons": {
+      "trial": "Essai Gratuit",
+      "sales": "Ventes",
+      "support": "Contact/Support"
+    },
+    "success": {
+      "title": "Merci de nous avoir contactés!",
+      "message": "Nous avons reçu votre message et vous répondrons sous peu.",
+      "backHome": "Retour à l'accueil"
+    },
+    "error": {
+      "title": "Erreur d'envoi",
+      "message": "Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer.",
+      "retry": "Réessayer"
+    }
+  },
+  "metadata": {
+    "title": "Système de Gestion de Mariages",
+    "description": "Plateforme de gestion de mariages multi-locataires avec suivi RSVP et gestion des cadeaux"
+  },
+  "master": {
+    "dashboard": {
+      "title": "Tableau de Bord Administrateur Principal",
+      "welcome": "Bienvenue, Administrateur",
+      "overview": "Aperçu de la Plateforme"
+    },
+    "analytics": {
+      "totalPlanners": "Total Organisateurs",
+      "activePlanners": "Organisateurs Actifs",
+      "totalWeddings": "Total Mariages",
+      "totalGuests": "Total Invités"
+    },
+    "planners": {
+      "title": "Gestion des Organisateurs",
+      "list": "Liste des Organisateurs",
+      "add": "Ajouter un Organisateur",
+      "edit": "Modifier l'Organisateur",
+      "name": "Nom",
+      "email": "Email",
+      "logo": "Logo",
+      "status": "Statut",
+      "enabled": "Activé",
+      "disabled": "Désactivé",
+      "weddingCount": "Nombre de Mariages",
+      "lastLogin": "Dernière Connexion",
+      "enable": "Activer",
+      "disable": "Désactiver",
+      "confirmDisable": "Êtes-vous sûr de vouloir désactiver cet organisateur ?",
+      "logoUrl": "URL du Logo"
+    },
+    "weddings": {
+      "title": "Aperçu des Mariages",
+      "list": "Liste des Mariages",
+      "coupleName": "Noms du Couple",
+      "date": "Date",
+      "location": "Lieu",
+      "planner": "Organisateur",
+      "guestCount": "Nombre d'Invités"
+    }
+  },
+  "planner": {
+    "dashboard": {
+      "title": "Tableau de Bord Organisateur",
+      "welcome": "Bienvenue, {name}",
+      "myWeddings": "Mes Mariages",
+      "subtitle": "Gérez vos mariages et consultez les statistiques",
+      "createWedding": "Créer un Mariage",
+      "upcomingWeddings": "Mariages à Venir",
+      "quickActions": "Actions Rapides",
+      "allWeddings": "Tous les Mariages",
+      "allWeddingsSubtitle": "Voir et gérer tous vos mariages",
+      "createWeddingSubtitle": "Configurer un nouvel événement de mariage",
+      "checklistTemplate": "Modèle de Liste de Tâches",
+      "checklistTemplateSubtitle": "Gérer les modèles de tâches pour vos mariages",
+      "providers": "Prestataires",
+      "providersSubtitle": "Gérez votre bibliothèque de prestataires",
+      "noWeddings": "Pas encore de mariages",
+      "noWeddingsSubtitle": "Commencez par créer votre premier mariage."
+    },
+    "checklistTemplate": {
+      "title": "Modèle de Liste de Tâches",
+      "subtitle": "Créez et gérez des modèles de tâches pour vos mariages",
+      "description": "Créez votre modèle de liste de tâches par défaut. Il sera copié pour les nouveaux mariages avec les dates converties.",
+      "loadingTemplate": "Chargement du modèle...",
+      "noTemplateYet": "Pas encore de modèle",
+      "getStarted": "Commencez par créer votre première section.",
+      "addSection": "Ajouter une Section",
+      "addTask": "Ajouter une Tâche",
+      "sectionName": "Nom de la section",
+      "newSection": "Nouvelle Section",
+      "newTask": "Nouvelle Tâche",
+      "deleteSection": "Supprimer la section",
+      "deleteTask": "Supprimer la tâche",
+      "confirmDeleteSection": "Êtes-vous sûr de vouloir supprimer cette section et toutes ses tâches ?",
+      "noTasksInSection": "Aucune tâche dans cette section. Cliquez sur \"Ajouter une Tâche\" pour en créer une.",
+      "saving": "Enregistrement...",
+      "saveNow": "Enregistrer Maintenant",
+      "saved": "Enregistré",
+      "unsavedChanges": "Vous avez des modifications non enregistrées. Cliquez sur \"Enregistrer Maintenant\" pour sauvegarder votre travail.",
+      "templateSaved": "Modèle enregistré avec succès",
+      "templateExported": "Modèle exporté avec succès",
+      "templateImported": "Modèle importé avec succès",
+      "errors": {
+        "loadFailed": "Échec du chargement du modèle",
+        "saveFailed": "Échec de l'enregistrement du modèle",
+        "exportFailed": "Échec de l'exportation du modèle",
+        "importFailed": "Échec de l'importation du modèle",
+        "noSections": "Le modèle doit avoir au moins une section",
+        "sectionsNeedTasks": "Chaque section doit avoir au moins une tâche. Veuillez ajouter des tâches ou supprimer les sections vides.",
+        "invalidDateFormat": "Format de date invalide : {value}. Utilisez WEDDING_DATE, WEDDING_DATE-90, etc."
+      },
+      "fields": {
+        "drag": "Glisser",
+        "title": "Titre",
+        "description": "Description",
+        "assignedTo": "Assigné à",
+        "dueDate": "Date d'échéance (Relative)",
+        "actions": "Actions",
+        "taskTitle": "Titre de la tâche",
+        "addTitle": "Cliquez pour ajouter un titre",
+        "addDescription": "Ajouter une description...",
+        "clickToAddDescription": "Cliquez pour ajouter une description",
+        "dueDatePlaceholder": "par ex., WEDDING_DATE-90",
+        "dueDateExamples": "Exemples : WEDDING_DATE, WEDDING_DATE-90 (90 jours avant), WEDDING_DATE+7 (7 jours après)"
+      },
+      "assignment": {
+        "weddingPlanner": "Organisateur de Mariage",
+        "couple": "Couple",
+        "other": "Autre"
+      }
+    },
+    "checklist": {
+      "title": "Liste de Contrôle du Mariage",
+      "subtitle": "Gérer les tâches et suivre les progrès",
+      "description": "Gérer les tâches et suivre les progrès pour ce mariage"
+    },
+    "stats": {
+      "totalWeddings": "Total Mariages",
+      "totalGuests": "Total Invités",
+      "rsvpCompletion": "Taux de Réponse RSVP",
+      "upcomingWeddings": "Mariages à Venir"
+    },
+    "weddings": {
+      "title": "Gestion des Mariages",
+      "loading": "Chargement des mariages...",
+      "loadingDetails": "Chargement des détails du mariage...",
+      "noWeddings": "Pas encore de mariages",
+      "getStarted": "Commencez par créer votre premier mariage.",
+      "backToWeddings": "Retour aux mariages",
+      "backToWedding": "Retour au Mariage",
+      "backToDashboard": "Retour au tableau de bord",
+      "quickActions": "Actions Rapides",
+      "manageEvents": "Gérez tous vos événements de mariage",
+      "createError": "Échec de la création du mariage",
+      "loadError": "Échec du chargement des mariages",
+      "updateDetails": "Mettre à jour les détails pour {coupleNames}",
+      "updateError": "Échec de la mise à jour du mariage",
+      "notFound": "Mariage introuvable",
+      "totalGuests": "Total Invités",
+      "rsvpCompletion": "Taux de Réponse RSVP",
+      "attending": "Présents",
+      "paymentsReceived": "Paiements Reçus",
+      "weddingInfo": "Informations sur le Mariage",
+      "status": "Statut",
+      "at": "à",
+      "statusLabels": {
+        "ACTIVE": "Actif",
+        "ARCHIVED": "Archivé",
+        "COMPLETED": "Terminé"
+      },
+      "guestAdditions": "Ajouts d'Invités",
+      "allowed": "Autorisé",
+      "notAllowed": "Non autorisé",
+      "dressCode": "Code Vestimentaire",
+      "additionalInfo": "Informations Supplémentaires",
+      "weddingAdmins": "Administrateurs de Mariage",
+      "noAdmins": "Aucun administrateur invité pour le moment",
+      "accepted": "Accepté",
+      "pending": "Invitation en attente",
+      "inviteAdmin": "Inviter un Administrateur de Mariage",
+      "create": "Créer Nouveau Mariage",
+      "edit": "Modifier Mariage",
+      "coupleNames": "Noms du Couple",
+      "weddingDate": "Date du Mariage",
+      "weddingTime": "Heure du Mariage",
+      "location": "Lieu",
+      "rsvpCutoff": "Date Limite RSVP",
+      "defaultLanguage": "Langue par Défaut",
+      "theme": "Thème",
+      "noTheme": "Aucun thème",
+      "paymentMode": "Mode de Paiement",
+      "automated": "Automatisé",
+      "manual": "Manuel",
+      "allowGuestAdditions": "Autoriser l'Ajout d'Invités",
+      "overview": "Aperçu",
+      "guests": "Invités",
+      "admins": "Administrateurs",
+      "placeholders": {
+        "coupleNames": "Jean & Jeanne",
+        "location": "Nom du lieu et adresse"
+      },
+      "validation": {
+        "coupleNamesRequired": "Les noms du couple sont obligatoires",
+        "weddingDateRequired": "La date du mariage est obligatoire",
+        "weddingTimeRequired": "L'heure du mariage est obligatoire",
+        "locationRequired": "Le lieu est obligatoire",
+        "rsvpCutoffRequired": "La date limite RSVP est obligatoire",
+        "rsvpCutoffInvalid": "La date limite RSVP doit être antérieure à la date du mariage"
+      },
+      "note": {
+        "title": "Note:",
+        "content": "Des paramètres supplémentaires tels que le mode de paiement, l'ajout d'invités, le code vestimentaire et les questions RSVP peuvent être configurés par l'administrateur du mariage dans le tableau de bord du mariage après sa création."
+      },
+      "whatsappMode": {
+        "label": "Mode d'envoi WhatsApp",
+        "business": "WhatsApp Business",
+        "businessDesc": "Envoyer les messages directement via l'API WhatsApp Business (Twilio).",
+        "links": "Liens WhatsApp",
+        "linksDesc": "Ouvrir un lien wa.me dans un nouvel onglet du navigateur pour chaque invité au lieu d'envoyer automatiquement."
+      },
+      "buttons": {
+        "saving": "Enregistrement...",
+        "update": "Mettre à jour le mariage",
+        "create": "Créer le mariage"
+      },
+      "statusManagement": "Gestion du statut",
+      "disableWedding": "Désactiver le mariage",
+      "disableDescription": "Les administrateurs peuvent voir mais pas modifier",
+      "disable": "Désactiver",
+      "enable": "Activer",
+      "confirmDisable": "Êtes-vous sûr de vouloir désactiver ce mariage?",
+      "confirmEnable": "Êtes-vous sûr de vouloir activer ce mariage?",
+      "disabledSince": "Désactivé depuis {date}",
+      "deleteWedding": "Supprimer le mariage",
+      "deleteDescription": "Le mariage sera caché des administrateurs. Peut être restauré plus tard.",
+      "delete": "Supprimer",
+      "confirmDelete": "Supprimer ce mariage? Les administrateurs perdront l'accès. Vous pouvez le restaurer plus tard.",
+      "deletedWeddings": "Mariages supprimés",
+      "viewDeleted": "Voir les mariages supprimés",
+      "backToActive": "Retour aux mariages actifs",
+      "deletedInfo": "Ces mariages ont été supprimés. Les administrateurs ne peuvent pas y accéder.",
+      "noDeletedWeddings": "Aucun mariage supprimé",
+      "confirmRestore": "Restaurer ce mariage? Les administrateurs récupéreront l'accès.",
+      "restoreSuccess": "Mariage restauré avec succès"
+    },
+    "admins": {
+      "invite": "Inviter un Administrateur",
+      "name": "Nom de l'Administrateur",
+      "namePlaceholder": "Entrez le nom de l'administrateur",
+      "email": "Email de l'Administrateur",
+      "emailPlaceholder": "admin@exemple.com",
+      "inviteSent": "Invitation envoyée avec succès",
+      "inviteError": "Échec de l'invitation de l'administrateur",
+      "remove": "Supprimer l'Administrateur",
+      "confirmRemove": "Êtes-vous sûr de vouloir supprimer cet administrateur ?",
+      "invitationNote": "L'administrateur recevra un email d'invitation avec des instructions pour se connecter et accéder à ce mariage.",
+      "sending": "Envoi de l'invitation...",
+      "send": "Envoyer l'invitation",
+      "validation": {
+        "nameRequired": "Le nom est obligatoire",
+        "emailRequired": "L'email est obligatoire",
+        "invalidEmail": "Adresse email invalide"
+      }
+    },
+    "themes": {
+      "title": "Gestion des Thèmes",
+      "system": "Thèmes Système",
+      "custom": "Thèmes Personnalisés",
+      "create": "Créer Thème Personnalisé",
+      "edit": "Modifier Thème",
+      "name": "Nom du Thème",
+      "inUse": "En Usage",
+      "cannotDelete": "Impossible de supprimer. Le thème est utilisé par {count} mariage(s)."
+    },
+    "upcomingTasks": {
+      "title": "Tâches à Venir",
+      "wedding": "Mariage",
+      "task": "Tâche",
+      "viewAllWeddings": "Voir tous les mariages",
+      "noTasks": "Aucune tâche à venir",
+      "noTasksDescription": "Toutes les tâches sont terminées ou il n'y a pas de tâches qui vous sont assignées dans tous les mariages."
+    },
+    "providers": {
+      "title": "Gestion des Prestataires",
+      "description": "Gérez votre bibliothèque de prestataires",
+      "addCategory": "Ajouter une catégorie",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "categoryNamePlaceholder": "Nom de la nouvelle catégorie",
+      "confirmDeleteCategory": "Êtes-vous sûr de vouloir supprimer cette catégorie et tous ses prestataires ?",
+      "addProvider": "Ajouter un prestataire",
+      "confirmDeleteProvider": "Êtes-vous sûr de vouloir supprimer ce prestataire ?",
+      "providerName": "Nom du prestataire",
+      "name": "Nom",
+      "contactName": "Nom du contact",
+      "contactPerson": "Personne de contact",
+      "email": "Email",
+      "phone": "Téléphone",
+      "website": "Site Web",
+      "socialMedia": "Réseaux sociaux",
+      "approxPrice": "Prix approx.",
+      "loading": "Chargement...",
+      "noCategories": "Pas encore de catégories. Ajoutez-en une pour commencer.",
+      "weddingProvidersTitle": "Prestataires du Mariage",
+      "assignProvider": "Assigner un prestataire",
+      "selectProvider": "Sélectionner un prestataire",
+      "selectCategory": "Sélectionner une catégorie",
+      "category": "Catégorie",
+      "notAssigned": "Non assigné",
+      "add": "Ajouter",
+      "errorAddingProvider": "Erreur lors de l'ajout du prestataire",
+      "errorUpdatingProvider": "Erreur lors de la mise à jour du prestataire",
+      "provider": "Prestataire",
+      "contact": "Contact",
+      "totalPrice": "Prix Total",
+      "paid": "Payé",
+      "pending": "En attente",
+      "contract": "Contrat",
+      "notes": "Notes",
+      "actions": "Actions",
+      "confirmDeletePayment": "Êtes-vous sûr de vouloir supprimer ce paiement ?",
+      "confirmDeleteProviderFromWedding": "Êtes-vous sûr de vouloir retirer ce prestataire du mariage ?",
+      "edit": "Modifier",
+      "remove": "Supprimer",
+      "addPayment": "Ajouter un paiement",
+      "recordPayment": "Enregistrer un paiement",
+      "amount": "Montant",
+      "method": "Méthode",
+      "paymentNotesPlaceholder": "Notes de paiement...",
+      "savePayment": "Enregistrer le paiement",
+      "paymentsHistory": "Historique des paiements",
+      "date": "Date",
+      "noPayments": "Aucun paiement enregistré pour le moment."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Tableau de Bord Admin Mariage",
+      "welcome": "Bienvenue",
+      "configure": "Configurer",
+      "configureSubtitle": "Paramètres RSVP",
+      "weddingDetails": "Détails du Mariage",
+      "metrics": "Métriques",
+      "metricTitles": {
+        "totalGuests": "Total Invités",
+        "rsvpCompletion": "Taux de Réponse RSVP",
+        "attending": "Présents",
+        "paymentsReceived": "Cadeaux Reçus"
+      },
+      "manageWedding": "Gérer le Mariage",
+      "guestList": "Liste des Invités",
+      "guestListSubtitle": "Voir et gérer les invités",
+      "activity": "Activité",
+      "activitySubtitle": "Suivre l'activité des invités",
+      "payments": "Cadeaux",
+      "paymentsSubtitle": "Suivre les cadeaux",
+      "importGuests": "Importer Invités",
+      "importGuestsSubtitle": "Mettre en ligne fichier Excel",
+      "templates": "Modèles de Messages",
+      "templatesSubtitle": "Gérer les invitations et les rappels",
+      "rsvpProgress": "Progression RSVP",
+      "daysUntilWedding": "jours avant le mariage",
+      "responded": "répondu",
+      "complete": "complet",
+      "seatingPlan": "Plan de Table",
+      "seatingPlanSubtitle": "Assigner les invités aux tables",
+      "providers": "Prestataires et Cadeaux",
+      "providersSubtitle": "Gérer les prestataires et les cadeaux",
+      "invitationBuilder": "Créateur d'Invitations",
+      "invitationBuilderSubtitle": "Concevez votre invitation de mariage",
+      "weddingNotFound": "Mariage introuvable",
+      "contactPlanner": "Veuillez contacter votre organisateur de mariage."
+    },
+    "providers": {
+      "noWeddingAssigned": "Aucun mariage assigné."
+    },
+    "checklist": {
+      "loadError": "Impossible de charger la liste de contrôle"
+    },
+    "tasks": {
+      "title": "Tâches à Venir",
+      "noDueDate": "Pas de date d'échéance",
+      "daysOverdue": "jours de retard",
+      "dueToday": "Dû aujourd'hui",
+      "daysRemaining": "jours",
+      "noDeadline": "Pas de délai",
+      "overdue": "En retard",
+      "dueSoon": "Dû bientôt",
+      "upcoming": "À venir",
+      "loading": "Chargement des tâches...",
+      "noTasks": "Aucune tâche à venir",
+      "noTasksDescription": "Toutes les tâches sont terminées ou il n'y a aucune tâche qui vous est assignée.",
+      "viewChecklist": "Afficher la Liste de Contrôle",
+      "viewAll": "Voir tout",
+      "columnTask": "Tâche",
+      "columnSection": "Section",
+      "columnDueDate": "Date d'Échéance",
+      "columnStatus": "Statut",
+      "noSection": "Aucune section"
+    },
+    "seating": {
+      "title": "Plan de Table",
+      "subtitle": "Configurer les tables et assigner les invités confirmés",
+      "loading": "Chargement du plan de table...",
+      "stats": {
+        "totalGuests": "Total Invités",
+        "confirmedGuests": "Invités Confirmés",
+        "totalSeats": "Total Places",
+        "assignedSeats": "Places Assignées"
+      },
+      "config": {
+        "title": "Configuration des Tables",
+        "addTable": "Ajouter Table",
+        "tableName": "Nom de la Table",
+        "tableNumber": "N°",
+        "capacity": "Capacité",
+        "actions": "Actions",
+        "save": "Enregistrer Tables",
+        "saving": "Enregistrement..."
+      },
+      "assignment": {
+        "title": "Assignation des Invités",
+        "unassigned": "Invités Non Assignés",
+        "assigned": "Assigné",
+        "randomAssign": "Assigner Aléatoirement",
+        "randomAssignConfirm": "Ceci assignera aléatoirement tous les invités confirmés non assignés aux tables. Continuer ?",
+        "splitting": "Diviser les Familles",
+        "split": "Diviser Famille",
+        "noTables": "Veuillez d'abord configurer les tables.",
+        "unassignFamily": "Retirer la famille de la table",
+        "unassignGuest": "Retirer l'invité de la table",
+        "move": "Déplacer"
+      },
+      "split": {
+        "title": "Diviser Famille",
+        "description": "Grouper les membres de la famille pour qu'ils soient assis à des tables différentes.",
+        "groupName": "Nom du Groupe",
+        "addGroup": "Ajouter Groupe",
+        "save": "Enregistrer Groupes",
+        "children": "Enfants",
+        "group": "Groupe"
+      }
+    },
+    "wedding": {
+      "details": "Détails",
+      "configuration": "Configuration",
+      "updateSuccess": "Configuration mise à jour avec succès",
+      "disabledBanner": "Ce mariage a été désactivé par l'organisateur. Vous pouvez voir les données mais ne pouvez pas les modifier.",
+      "noAccess": "Vous n'avez accès à aucun mariage actif. Veuillez contacter votre organisateur de mariage."
+    },
+    "guests": {
+      "title": "Gestion des Invités",
+      "list": "Liste des Invités",
+      "add": "Ajouter Invité",
+      "selected": "sélectionnés",
+      "table": {
+        "family": "Famille",
+        "members": "Membres",
+        "rsvp": "RSVP",
+        "channel": "Canal",
+        "payment": "Cadeau",
+        "language": "Langue",
+        "actions": "Actions",
+        "loading": "Chargement des invités...",
+        "emptyTitle": "Aucun invité trouvé",
+        "emptyDesc": "Essayez d'ajuster vos filtres ou importez une liste d'invités.",
+        "noPayment": "Aucun cadeau"
+      },
+      "timeline": {
+        "title": "Chronologie d'Activité de l'Invité",
+        "subtitle": "Historique d'activité pour {family}",
+        "timeline": "Chronologie",
+        "viewTimeline": "Voir la Chronologie d'Activité",
+        "noEvents": "Aucune activité enregistrée pour cet invité pour le moment.",
+        "loading": "Chargement de la chronologie..."
+      },
+      "import": "Importer depuis Excel",
+      "export": "Exporter vers Excel",
+      "template": "Télécharger Modèle",
+      "familyName": "Nom de Famille",
+      "contactPerson": "Personne de Contact",
+      "email": "Email",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "language": "Langue",
+      "members": "Membres",
+      "rsvpStatus": "Statut RSVP",
+      "attendance": "Présence",
+      "notAnswered": "Non Répondu",
+      "channel": "Canal",
+      "paymentStatus": "Statut Cadeau",
+      "invitedBy": "Invité par",
+      "filters": {
+        "all": "Tous",
+        "pending": "En Attente",
+        "submitted": "Soumis",
+        "confirmed": "Confirmé",
+        "attending": "Présent",
+        "notAttending": "Ne Viendra Pas",
+        "partial": "Partiel",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "sms": "SMS",
+        "paid": "Cadeau Envoyé",
+        "unpaid": "Pas de Cadeau",
+        "received": "Reçu",
+        "searchPlaceholder": "Nom ou email...",
+        "clearAll": "Effacer les filtres"
+      },
+      "form": {
+        "addTitle": "Ajouter Famille d'Invités",
+        "editTitle": "Modifier Famille d'Invités",
+        "familyNameRequired": "Le nom de famille est obligatoire",
+        "memberNameRequired": "Tous les membres doivent avoir un nom",
+        "saveFailed": "Échec de l'enregistrement de l'invité",
+        "preferredChannel": "Canal Préféré",
+        "languagePreference": "Préférence de Langue",
+        "saving": "Enregistrement...",
+        "addGuest": "Ajouter Invité",
+        "saveChanges": "Enregistrer les Modifications",
+        "rsvpAnswers": "Réponses RSVP"
+      },
+      "importSuccess": "Liste d'invités importée avec succès",
+      "importError": "Erreur d'importation. Veuillez vérifier le fichier."
+    },
+    "notifications": {
+      "title": "Notifications et Activité",
+      "newActivities": "{count, plural, =0 {Aucune nouvelle activité} one {# nouvelle activité} other {# nouvelles activités}}",
+      "loading": "Chargement des notifications...",
+      "emptyTitle": "Aucune notification",
+      "emptyDesc": "L'activité de vos invités apparaîtra ici.",
+      "filters": {
+        "dateRange": "Plage de Dates",
+        "eventType": "Type d'Événement",
+        "family": "Famille",
+        "channel": "Canal",
+        "unread": "Non Lu",
+        "read": "Lu"
+      },
+      "markAsRead": "Marquer comme Lu",
+      "export": "Exporter Notifications",
+      "adminTriggered": "Action Administrateur",
+      "events": {
+        "linkOpened": "Lien Ouvert",
+        "rsvpStarted": "RSVP Commencé",
+        "rsvpSubmitted": "RSVP Soumis",
+        "rsvpEdited": "RSVP Modifié",
+        "guestAdded": "Invité Ajouté",
+        "paymentReceived": "Paiement Reçu",
+        "reminderSent": "Rappel Envoyé",
+        "invitationSent": "Invitation Envoyée",
+        "taskAssigned": "Tâche Assignée",
+        "taskCompleted": "Tâche Terminée",
+        "messageDelivered": "Message Livré",
+        "messageRead": "Message Lu",
+        "messageFailed": "Message Échoué"
+      },
+      "eventTypes": {
+        "LINK_OPENED": "Lien Ouvert",
+        "RSVP_STARTED": "RSVP Commencé",
+        "RSVP_SUBMITTED": "RSVP Soumis",
+        "RSVP_UPDATED": "RSVP Mis à Jour",
+        "GUEST_ADDED": "Invité Ajouté",
+        "PAYMENT_RECEIVED": "Paiement Reçu",
+        "REMINDER_SENT": "Rappel Envoyé",
+        "INVITATION_SENT": "Invitation Envoyée",
+        "TASK_ASSIGNED": "Tâche Assignée",
+        "TASK_COMPLETED": "Tâche Terminée",
+        "MESSAGE_DELIVERED": "Message Livré",
+        "MESSAGE_READ": "Message Lu",
+        "MESSAGE_FAILED": "Message Échoué"
+      }
+    },
+    "saveTheDate": {
+      "confirmSend": "Êtes-vous sûr de vouloir envoyer un message Réservez la Date à {familyName} ?",
+      "sent": "Réservez la Date envoyé à {count} famille(s)"
+    },
+    "reminders": {
+      "title": "Système de Rappels",
+      "send": "Envoyer Rappels",
+      "sendReminder": "Envoyer Rappel",
+      "sendInvite": "Envoyer Invitation",
+      "sendSaveTheDate": "Envoyer Réservez la Date",
+      "preview": "Aperçu Destinataires",
+      "channel": "Canal d'Envoi",
+      "recipients": "Destinataires : {count} famille(s)",
+      "sent": "Rappel envoyé avec succès à {count} famille(s)",
+      "noRecipients": "Aucune famille en attente de RSVP",
+      "loadingPreview": "Chargement de l'aperçu...",
+      "sendSuccess": "Rappels envoyés !",
+      "sendSuccessDesc": "{count} familles recevront des rappels.",
+      "allCaughtUp": "Tout est à jour !",
+      "allCaughtUpDesc": "Toutes les familles ont déjà soumis leur RSVP.",
+      "summary": "{count} familles n'ont pas encore répondu au RSVP.",
+      "byLanguage": "Par Langue",
+      "sendVia": "Envoyer via",
+      "viewAll": "Voir toutes les {count} familles",
+      "sending": "Envoi...",
+      "sendAction": "Envoyer {count} Rappels",
+      "bulkSend": "Envoyer des Rappels en Masse",
+      "selectGuestsHint": "Sélectionnez les invités du tableau ci-dessous pour envoyer des rappels",
+      "ibanWarning": {
+        "title": "IBAN Cadeau Non Configuré",
+        "message": "Vous n'avez pas encore configuré d'IBAN pour les cadeaux. Les invités ne pourront pas voir les détails de paiement. Continuer à envoyer les rappels quand même ?"
+      },
+      "validationWarning": {
+        "title": "Informations de Contact Manquantes",
+        "message": "Les familles suivantes ne peuvent pas recevoir de rappels car il leur manque des informations requises:",
+        "missing_email": "Email requis",
+        "missing_phone": "Numéro de téléphone requis",
+        "missing_whatsapp_number": "Numéro WhatsApp requis"
+      },
+      "sendToValidOnly": "Envoyer à {count} familles quand même"
+    },
+    "payments": {
+      "title": "Gestion des Cadeaux",
+      "list": "Liste des Cadeaux",
+      "loading": "Chargement des cadeaux...",
+      "emptyTitle": "Aucun cadeau enregistré",
+      "emptyDesc": "Les cadeaux apparaîtront ici lorsqu'ils seront enregistrés.",
+      "recordTitle": "Enregistrer Cadeau",
+      "selectFamily": "Sélectionner une famille",
+      "currencyAmount": "Montant ({currency})",
+      "recording": "Enregistrement...",
+      "markReceived": "Marquer Reçu",
+      "auto": "Auto",
+      "record": "Enregistrer Cadeau Manuel",
+      "family": "Famille",
+      "amount": "Montant",
+      "referenceCode": "Code de Référence",
+      "transactionDate": "Date de Transaction",
+      "status": "Statut",
+      "statuses": {
+        "pending": "En Attente",
+        "received": "Reçu",
+        "confirmed": "Confirmé"
+      },
+      "recordSuccess": "Cadeau enregistré avec succès",
+      "updateSuccess": "Statut du cadeau mis à jour"
+    },
+    "deleteDialog": {
+      "title": "Supprimer Famille d'Invités",
+      "confirmTitle": "Êtes-vous sûr de vouloir supprimer {name} ?",
+      "confirmDesc": "Cela supprimera définitivement {count} membre{plural} et toutes les données associées.",
+      "rsvpWarning": "Attention",
+      "rsvpWarningDesc": "Cette famille a déjà soumis son RSVP. La supprimer effacera sa réponse.",
+      "deleting": "Suppression..."
+    },
+    "guestAdditions": {
+      "title": "Examen des Ajouts d'Invités",
+      "loading": "Chargement des ajouts d'invités...",
+      "featureDisabled": "Fonctionnalité Désactivée",
+      "featureDisabledDesc": "Les ajouts d'invités sont désactivés pour ce mariage.",
+      "noAdditionsTitle": "Aucun ajout d'invité",
+      "noAdditionsDesc": "Lorsque les invités ajoutent des membres de famille, ils apparaîtront ici pour examen.",
+      "totalAdditions": "ajouts totaux",
+      "new": "nouveaux",
+      "newBadge": "NOUVEAU",
+      "pendingReview": "En Attente d'Examen",
+      "addedTo": "Ajouté à",
+      "addedBy": "Ajouté par invité",
+      "addedAt": "Ajouté le {date}",
+      "diet": "Régime",
+      "accessibility": "Accessibilité",
+      "approve": "Approuver",
+      "edit": "Modifier",
+      "markReviewed": "Marquer comme Examiné",
+      "previouslyReviewed": "Précédemment Examiné",
+      "family": "Famille",
+      "noAdditions": "Aucun ajout d'invité en attente d'examen"
+    },
+    "configure": {
+      "title": "Configurer le Mariage",
+      "saveSuccess": "Configuration enregistrée avec succès !",
+      "error": "Échec de l'enregistrement de la configuration",
+      "loading": "Chargement de la configuration...",
+      "notFound": "Mariage introuvable",
+      "contactPlanner": "Veuillez contacter votre organisateur de mariage.",
+      "backToDashboard": "Retour au Tableau de Bord",
+      "tabs": {
+        "basic": "Paramètres de Base",
+        "rsvp": "Paramètres RSVP"
+      },
+      "form": {
+        "basicSettings": "Paramètres de Base",
+        "theme": "Thème du mariage",
+        "noTheme": "Aucun thème sélectionné",
+        "systemTheme": "Système",
+        "giftIbanPlaceholder": "ex., FR76 1234 5678 9012 3456 7890",
+        "paymentTrackingMode": "Mode de Suivi des Paiements",
+        "paymentTrackingModeDesc": "Le mode automatisé génère des codes de référence uniques pour chaque famille afin de suivre les virements bancaires.",
+        "automated": "Automatisé (avec codes de référence)",
+        "manual": "Suivi manuel",
+        "giftIban": "IBAN pour Cadeaux",
+        "giftIbanDesc": "Numéro de compte bancaire pour recevoir les cadeaux de mariage",
+        "allowGuestAdditions": "Autoriser les invités à ajouter des membres de la famille",
+        "allowGuestAdditionsDesc": "Lorsqu'activé, les invités peuvent ajouter des membres supplémentaires de la famille lors du RSVP (sous réserve de votre examen).",
+        "dressCode": "Code Vestimentaire",
+        "dressCodePlaceholder": "ex. Formel, Semi-formel, Décontracté",
+        "additionalInfo": "Informations Supplémentaires pour les Invités",
+        "additionalInfoPlaceholder": "Tout détail supplémentaire pour les invités (parking, hébergement, etc.)...",
+        "saveTheDate": "Activer les messages 'Réservez la Date'",
+        "saveTheDateDesc": "Envoyez des messages 'Réservez la date' avant les invitations officielles. Cela vous permet d'informer les invités de la date du mariage à l'avance.",
+        "rsvpQuestions": "Questions RSVP",
+        "rsvpQuestionsDesc": "Personnalisez les questions posées aux invités lorsqu'ils complètent leur RSVP.",
+        "transportation": "Ajouter une question sur le transport au RSVP",
+        "transportationText": "Texte de la question (Question Oui/Non)",
+        "transportationPlaceholder": "ex. Avez-vous besoin d'un transport de l'hôtel au lieu de réception ?",
+        "dietary": "Ajouter une question sur les restrictions alimentaires au RSVP",
+        "dietaryDesc": "Les invités pourront choisir parmi : Aucune restriction, Végétarien, Végétalien, Sans gluten, Autre, et spécifier des allergies.",
+        "extraQuestions": "Questions Supplémentaires Oui/Non (jusqu'à 3)",
+        "enableQuestion": "Activer la question supplémentaire {number}",
+        "questionPlaceholder": "Entrez votre question Oui/Non...",
+        "extraInfo": "Champs d'Information Obligatoire Supplémentaires (jusqu'à 3)",
+        "extraInfoDesc": "Ajoutez des champs de texte personnalisés que les invités doivent remplir lors du RSVP.",
+        "enableInfo": "Activer le champ obligatoire {number}",
+        "infoLabel": "Étiquette du champ",
+        "infoPlaceholder": "ex. Chanson demandée pour la fête",
+        "cancel": "Annuler",
+        "save": "Enregistrer la Configuration",
+        "saving": "Enregistrement...",
+        "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer."
+      }
+    },
+    "checklist": {
+      "title": "Liste de Contrôle du Mariage",
+      "subtitle": "Gérez les tâches et suivez les progrès de votre mariage",
+      "loading": "Chargement de la liste...",
+      "saving": "Enregistrement...",
+      "error": "Erreur lors du chargement de la liste",
+      "retry": "Réessayer",
+      "emptyTitle": "Pas encore de tâches",
+      "emptyDesc": "Importez une liste ou attendez que votre organisateur ajoute des tâches.",
+      "import": "Importer depuis Excel",
+      "importing": "Importation...",
+      "export": "Exporter vers Excel",
+      "exporting": "Exportation...",
+      "delete": "Supprimer",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette tâche ?",
+      "markComplete": "Marquer comme terminée",
+      "markIncomplete": "Marquer comme incomplète",
+      "descriptionPlaceholder": "Ajouter une description...",
+      "columns": {
+        "done": "Fait",
+        "title": "Titre",
+        "description": "Description",
+        "assignedTo": "Assigné à",
+        "dueDate": "Date d'échéance",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "assignedTo": {
+        "planner": "Organisateur de Mariage",
+        "couple": "Couple",
+        "other": "Autre"
+      },
+      "status": {
+        "PENDING": "En attente",
+        "IN_PROGRESS": "En cours",
+        "COMPLETED": "Terminé"
+      }
+    },
+    "templates": {
+      "title": "Modèles de Messages",
+      "description": "Gérez les modèles d'invitation et de rappel pour votre mariage dans toutes les langues prises en charge.",
+      "loading": "Chargement des modèles...",
+      "error": "Échec de la récupération des modèles",
+      "tryAgain": "Réessayer",
+      "type": {
+        "title": "Type de Modèle",
+        "invitation": "📩 Invitations",
+        "reminder": "🔔 Rappels",
+        "confirmation": "✅ Confirmations"
+      },
+      "language": {
+        "title": "Langue"
+      },
+      "channel": {
+        "title": "Canal",
+        "email": "📧 Email",
+        "whatsapp": "💬 WhatsApp",
+        "sms": "📱 SMS"
+      },
+      "placeholders": {
+        "title": "Variables Disponibles"
+      },
+      "editor": {
+        "channelInfo": "Modification du modèle <strong>{channel}</strong>",
+        "subject": "Sujet de l'Email",
+        "body": "Message {channel}",
+        "chars": "{current}/{max} caractères",
+        "save": "Enregistrer le Modèle",
+        "saving": "Enregistrement...",
+        "preview": "Aperçu",
+        "reset": "Réinitialiser",
+        "tip": "Conseil : Utilisez des variables comme <code>'{familyName}'</code>, <code>'{coupleNames}'</code>, et <code>'{magicLink}'</code> pour personnaliser vos messages. Voir la liste des variables disponibles à gauche.",
+        "success": "Modèle enregistré avec succès !",
+        "error": "Échec de l'enregistrement du modèle",
+        "notFound": "Aucun modèle trouvé pour {type} en {language} ({channel})"
+      },
+      "preview": {
+        "title": "Aperçu du Modèle",
+        "loading": "Génération de l'aperçu...",
+        "subject": "Sujet",
+        "body": "Corps",
+        "variables": "Variables Utilisées",
+        "emailClient": "Aperçu Client Email",
+        "from": "De : Plateforme de Gestion de Mariages",
+        "close": "Fermer"
+      }
+    },
+    "invitationBuilder": {
+      "title": "Créateur d'Invitations",
+      "description": "Concevez votre page d'invitation de mariage",
+      "createNew": "Créer Nouveau",
+      "startFromScratch": "Commencer à Zéro",
+      "startFromTemplate": "Commencer à partir d'un Modèle Système",
+      "templateName": "Nom du modèle",
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "preview": "Aperçu",
+      "addBlock": "Ajouter un Bloc",
+      "blockText": "Texte",
+      "blockImage": "Image",
+      "blockLocation": "Lieu",
+      "blockCountdown": "Compte à Rebours",
+      "blockAddToCalendar": "Ajouter au Calendrier",
+      "styleFont": "Police",
+      "styleSize": "Taille",
+      "styleColor": "Couleur",
+      "styleAlign": "Alignement",
+      "styleLanguages": "Langues",
+      "canvasBackground": "Arrière-plan",
+      "pickImage": "Sélectionner une Image",
+      "uploadNewImage": "Télécharger une Nouvelle Image",
+      "noImagesUploaded": "Aucune image téléchargée encore",
+      "editTemplate": "Modifier",
+      "deleteTemplate": "Supprimer",
+      "back": "Retour",
+      "noTemplatesYet": "Aucun modèle pour le moment",
+      "noTemplatesDescription": "Créez votre premier modèle d'invitation pour commencer",
+      "createFirstTemplate": "Créer Premier Modèle",
+      "createTemplate": "Créer Modèle",
+      "basedOn": "Basé sur",
+      "creating": "Création...",
+      "confirmDeleteTemplate": "Êtes-vous sûr de vouloir supprimer ce modèle ?",
+      "canvasSettings": "Paramètres du Canevas",
+      "backgroundColor": "Couleur de Fond",
+      "backgroundImage": "Image de Fond",
+      "paperBackground": "Fond de Papier",
+      "remove": "Supprimer",
+      "addPaperBackground": "Ajouter Fond de Papier",
+      "noBlocksYet": "Aucun bloc ajouté pour le moment. Ajoutez un bloc depuis la barre latérale.",
+      "countdownSettings": "Paramètres du Compte à Rebours",
+      "locationSettings": "Paramètres de Localisation",
+      "font": "Police",
+      "size": "Taille",
+      "color": "Couleur",
+      "textStyle": "Style de Texte",
+      "bold": "Gras",
+      "italic": "Italique",
+      "underline": "Souligné",
+      "labelSettings": "Paramètres des Étiquettes (Jours, Heures, etc.)",
+      "labelSize": "Taille d'Étiquette",
+      "labelColor": "Couleur d'Étiquette",
+      "alignment": "Alignement",
+      "mapStyle": "Style de Carte",
+      "colorMap": "Couleur",
+      "grayscaleMap": "Niveaux de Gris"
+    }
+  },
+  "guest": {
+    "welcome": {
+      "title": "Bonjour, Famille {familyName} !",
+      "subtitle": "Veuillez confirmer votre présence au mariage",
+      "coupleNames": "{coupleNames}",
+      "date": "Date : {date}",
+      "time": "Heure : {time}",
+      "location": "Lieu : {location}"
+    },
+    "rsvp": {
+      "title": "RSVP",
+      "instructions": "Veuillez sélectionner qui de votre famille assistera au mariage.",
+      "attend": "Assister",
+      "attending": "Présent",
+      "notAttending": "Ne Sera Pas Présent",
+      "attendingSummary": "{count, plural, =0 {Personne ne sera présent} one {1 personne sera présente} other {# personnes seront présentes}}",
+      "dietaryRestrictions": "Restrictions Alimentaires",
+      "accessibilityNeeds": "Besoins d'Accessibilité",
+      "dietaryPlaceholder": "Ex. végétarien, allergies, etc.",
+      "accessibilityPlaceholder": "Ex. fauteuil roulant, besoins spéciaux, etc.",
+      "submit": "Confirmer Présence",
+      "submitted": "Merci pour votre réponse !",
+      "confirmationMessage": "Nous avons bien reçu votre confirmation. Nous avons hâte de vous voir au mariage !",
+      "cutoffPassed": "La date limite de réponse est passée. Veuillez contacter les organisateurs.",
+      "additionalQuestions": "Questions Supplémentaires",
+      "defaultTransportationQuestion": "Aurez-vous besoin d'un transport vers le lieu?",
+      "emptyConfirmation": "Vous confirmez que personne de votre groupe ne sera présent, est-ce ce que vous voulez confirmer ? Sinon, veuillez annuler et sélectionner les membres de votre groupe qui seront présents"
+    },
+    "members": {
+      "title": "Membres de la Famille",
+      "addMember": "Ajouter Membre de la Famille",
+      "name": "Nom",
+      "type": "Type",
+      "age": "Âge",
+      "yearsOld": "{count} ans",
+      "addedByYou": "Ajouté par vous",
+      "types": {
+        "adult": "Adulte",
+        "child": "Enfant",
+        "infant": "Bébé"
+      },
+      "addSuccess": "Membre ajouté avec succès",
+      "noMembers": "Aucun membre ajouté pour le moment"
+    },
+    "payment": {
+      "title": "Informations sur le Cadeau",
+      "subtitle": "Détails du cadeau de mariage",
+      "iban": "IBAN :",
+      "referenceCode": "Code de référence :",
+      "referenceInstructions": "Veuillez inclure ce code de référence dans votre virement.",
+      "status": "Statut du cadeau :",
+      "statuses": {
+        "pending": "En Attente",
+        "received": "Reçu",
+        "confirmed": "Confirmé"
+      },
+      "presenceMessage": "Votre présence est la chose la plus importante pour nous. Si vous souhaitez nous faire un cadeau, vous pouvez le faire de la manière qui vous convient le mieux.",
+      "cashMessage": "Si vous préférez, le cadeau peut être en espèces. Si cela vous convient mieux, vous pouvez également effectuer un virement :",
+      "manualMode": "Veuillez utiliser l'IBAN suivant pour votre cadeau.",
+      "thankYou": "Merci pour votre générosité !"
+    },
+    "language": {
+      "select": "Choisir la Langue",
+      "updated": "Langue mise à jour"
+    },
+    "edit": {
+      "title": "Modifier RSVP",
+      "canEdit": "Vous pouvez modifier votre réponse jusqu'au {date}."
+    },
+    "footer": {
+      "contactCouple": "Si vous avez des questions, veuillez contacter le couple directement."
+    },
+    "gardenBirds": {
+      "weAreGettingMarried": "Nous nous marions",
+      "tapToOpen": "Appuyez pour ouvrir",
+      "scrollForDetails": "Faites défiler pour plus de détails",
+      "countdown": "Compte à rebours",
+      "countdownSubtitle": "Jusqu'au plus beau jour de nos vies",
+      "days": "Jours",
+      "hours": "Heures",
+      "minutes": "Minutes",
+      "seconds": "Secondes",
+      "location": "Lieu",
+      "timeRange": "De {startTime} à 01h00",
+      "details": "Détails du jour",
+      "detailsSubtitle": "Tout ce que vous devez savoir"
+    },
+    "invitation": {
+      "countdown": "Compte à rebours",
+      "countdownSubtitle": "Jusqu'au grand jour",
+      "days": "Jours",
+      "hours": "Heures",
+      "minutes": "Minutes",
+      "seconds": "Secondes",
+      "location": "Lieu",
+      "addToCalendar": "Ajouter au Calendrier",
+      "googleCalendar": "Google Calendar",
+      "appleCalendar": "Apple Calendar",
+      "getDirections": "Obtenir les Directions"
+    }
+  },
+  "auth": {
+    "signin": {
+      "subtitle": "Connectez-vous pour accéder à votre compte",
+      "google": "Continuer avec Google",
+      "facebook": "Continuer avec Facebook",
+      "apple": "Continuer avec Apple",
+      "footer": "Connectez-vous avec votre compte autorisé"
+    },
+    "signout": {
+      "title": "Déconnexion...",
+      "subtitle": "Veuillez patienter pendant que nous vous déconnectons."
+    }
+  },
+  "about": {
+    "title": "À Propos de {commercialName}",
+    "subtitle": "Donner aux organisateurs de mariage les moyens de créer des expériences inoubliables",
+    "mission": {
+      "title": "Notre Mission",
+      "content": "Chez {commercialName}, nous croyons que chaque mariage devrait être une célébration sans stress de l'amour. Notre mission est de donner aux organisateurs de mariage les outils dont ils ont besoin pour offrir un service exceptionnel à leurs couples, tout en simplifiant la gestion des invités et la communication."
+    },
+    "story": {
+      "title": "Notre Histoire",
+      "content1": "{commercialName} est né des défis réels auxquels sont confrontés les organisateurs de mariage qui gèrent plusieurs événements simultanément. Nous avons vu comment les planificateurs se débattaient avec des feuilles de calcul, plusieurs canaux de communication et le suivi des confirmations de présence de différents couples.",
+      "content2": "Nous avons construit {commercialName} comme une plateforme complète qui rassemble tout—de la gestion des invités aux invitations en passant par le suivi des cadeaux—le tout dans un système élégant et facile à utiliser conçu spécifiquement pour les professionnels du mariage."
+    },
+    "values": {
+      "title": "Nos Valeurs",
+      "items": [
+        {
+          "title": "Simplicité",
+          "content": "Nous croyons que les outils puissants devraient être faciles à utiliser. Chaque fonctionnalité est conçue pour gagner du temps et réduire la complexité."
+        },
+        {
+          "title": "Fiabilité",
+          "content": "Vos couples vous font confiance pour leur jour spécial. Nous veillons à ce que notre plateforme soit toujours disponible quand vous en avez besoin."
+        },
+        {
+          "title": "Innovation",
+          "content": "Nous améliorons et nous adaptons continuellement aux besoins changeants des professionnels du mariage et de leurs clients."
+        },
+        {
+          "title": "Support",
+          "content": "Votre succès est notre succès. Nous sommes là pour vous aider à chaque étape avec un support dédié."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Prêt à transformer votre activité d'organisation de mariages ?",
+      "button": "Contactez-nous"
+    }
+  },
+  "privacy": {
+    "title": "Politique de Confidentialité",
+    "lastUpdated": "Dernière mise à jour",
+    "introduction": {
+      "title": "Introduction",
+      "content": "Chez {commercialName}, nous prenons votre vie privée au sérieux. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations personnelles lorsque vous utilisez notre plateforme de gestion de mariages."
+    },
+    "dataCollection": {
+      "title": "Informations que Nous Collectons",
+      "intro": "Nous collectons les types d'informations suivants :",
+      "items": [
+        "Informations de contact (nom, e-mail, téléphone) fournies par les organisateurs de mariage et les administrateurs",
+        "Informations sur les invités du mariage gérées via notre plateforme",
+        "Données d'utilisation et analyses pour améliorer notre service",
+        "Informations d'authentification via les fournisseurs OAuth (Google, Facebook, Apple, Microsoft)"
+      ]
+    },
+    "dataUsage": {
+      "title": "Comment Nous Utilisons Vos Informations",
+      "items": [
+        "Pour fournir et maintenir nos services de gestion de mariages",
+        "Pour envoyer des invitations, des rappels et des communications au nom des organisateurs de mariage",
+        "Pour suivre les confirmations de présence et gérer les listes d'invités",
+        "Pour améliorer notre plateforme et développer de nouvelles fonctionnalités"
+      ]
+    },
+    "dataProtection": {
+      "title": "Protection des Données",
+      "content": "Nous mettons en œuvre des mesures de sécurité conformes aux normes de l'industrie pour protéger vos données. Toutes les données sont cryptées en transit et au repos. Nous utilisons une authentification OAuth sécurisée et ne stockons jamais les mots de passe directement. L'accès aux données est strictement contrôlé et limité au personnel autorisé uniquement."
+    },
+    "userRights": {
+      "title": "Vos Droits",
+      "items": [
+        "Accéder à vos données personnelles à tout moment",
+        "Demander des corrections de vos informations",
+        "Demander la suppression de vos données (sous réserve d'exigences légales)",
+        "Exporter vos données dans un format standard"
+      ]
+    },
+    "contact": {
+      "title": "Contactez-nous",
+      "content": "Si vous avez des questions sur cette politique de confidentialité ou sur la manière dont nous gérons vos données, veuillez",
+      "link": "nous contacter"
+    }
+  },
+  "docs": {
+    "title": "Documentation",
+    "subtitle": "Tout ce que vous devez savoir sur {commercialName}",
+    "overview": {
+      "title": "Qu'est-ce que {commercialName} ?",
+      "content1": "{commercialName} est une plateforme complète de gestion de mariages conçue spécifiquement pour les organisateurs de mariage. Elle fournit une solution complète pour gérer plusieurs mariages simultanément, de la gestion des listes d'invités aux invitations en passant par le suivi des cadeaux.",
+      "content2": "Construite avec une architecture multi-tenant, {commercialName} permet aux organisateurs de mariage de gérer plusieurs couples à la fois, tout en donnant à chaque couple un accès sécurisé aux données de leur propre mariage via une interface intuitive."
+    },
+    "targetUsers": {
+      "title": "Pour qui est {commercialName} ?",
+      "planner": {
+        "title": "Organisateurs de Mariage",
+        "content": "Organisateurs de mariage professionnels qui gèrent plusieurs mariages et ont besoin d'une plateforme centralisée pour gérer tous les aspects de la gestion des invités, de la communication et de la coordination."
+      },
+      "couple": {
+        "title": "Couples",
+        "content": "Les couples obtiennent un accès gratuit accordé par leur organisateur pour gérer la liste d'invités de leur mariage, suivre les confirmations de présence et communiquer avec leurs invités via plusieurs canaux."
+      },
+      "guest": {
+        "title": "Invités",
+        "content": "Les invités reçoivent des liens magiques par WhatsApp, e-mail ou SMS pour confirmer leur présence sans avoir besoin de créer de comptes—rendant le processus aussi simple que possible."
+      }
+    },
+    "keyFeatures": {
+      "title": "Fonctionnalités Principales",
+      "items": [
+        "Gestion des invités basée sur la famille avec import/export Excel",
+        "Invitations multicanal (WhatsApp, Email, SMS) en 5 langues",
+        "Authentification par lien magique pour les invités—aucun mot de passe nécessaire",
+        "Suivi des confirmations de présence en temps réel avec notifications d'activité",
+        "Suivi des cadeaux avec confirmation de paiement automatique ou manuelle"
+      ]
+    },
+    "gettingStarted": {
+      "title": "Commencer",
+      "content": "Prêt à rationaliser votre activité d'organisation de mariages ? Commencez avec notre essai gratuit de 14 jours pour explorer toutes les fonctionnalités avec votre premier mariage. Aucune carte de crédit requise.",
+      "button": "Demander une Démo"
+    }
+  }
+}

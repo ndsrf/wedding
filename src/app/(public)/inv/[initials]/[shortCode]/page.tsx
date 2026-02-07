@@ -1,6 +1,6 @@
 /**
  * Short URL redirect page
- * /{INITIALS}/{SHORT_CODE}  →  307  →  /rsvp/{magic_token}[?query…]
+ * /inv/{INITIALS}/{SHORT_CODE}  →  307  →  /rsvp/{magic_token}[?query…]
  *
  * Resolves the short URL against the database and issues a server-side
  * redirect.  Any query-string parameters (e.g. ?channel=sms) are forwarded
@@ -14,8 +14,8 @@ import { resolveShortUrl } from '@/lib/short-url';
 
 // Initials: 2-3 uppercase ASCII letters, optionally followed by digits (LJ, LJ1, AB12…)
 const INITIALS_RE = /^[A-Z]{2,3}\d*$/;
-// Short code: exactly 2-3 base-62 characters
-const CODE_RE     = /^[a-zA-Z0-9]{2,3}$/;
+// Short code: exactly 3-4 base-62 characters
+const CODE_RE     = /^[a-zA-Z0-9]{3,4}$/;
 
 interface Props {
   params:      Promise<{ initials: string; shortCode: string }>;

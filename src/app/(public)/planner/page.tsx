@@ -7,7 +7,7 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from '@/lib/i18n/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { StatsCard } from '@/components/planner/StatsCard';
@@ -101,7 +101,7 @@ export default async function PlannerDashboardPage() {
     redirect('/api/auth/signin');
   }
 
-  const t = await getTranslations();
+  const { t } = await getTranslations();
   // Fetch stats data directly from database
   const stats = await getStats(user);
 

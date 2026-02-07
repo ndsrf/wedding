@@ -1,0 +1,1382 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "add": "Add",
+      "create": "Create",
+      "update": "Update",
+      "submit": "Submit",
+      "confirm": "Confirm",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "close": "Close",
+      "search": "Search",
+      "filter": "Filter",
+      "export": "Export",
+      "import": "Import",
+      "download": "Download",
+      "upload": "Upload",
+      "send": "Send",
+      "clearFilters": "Clear all filters",
+      "retry": "Retry",
+      "continue": "Continue",
+      "copy": "Copy"
+    },
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "navigation": {
+      "home": "Home",
+      "dashboard": "Dashboard",
+      "settings": "Settings",
+      "logout": "Logout",
+      "profile": "Profile"
+    },
+    "forms": {
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email address",
+      "invalidPhone": "Please enter a valid phone number",
+      "minLength": "Must be at least {min} characters",
+      "maxLength": "Cannot exceed {max} characters",
+      "fromDate": "From Date",
+      "toDate": "To Date"
+    },
+    "validation": {
+      "required": "Required field",
+      "email": "Invalid email",
+      "phone": "Invalid phone",
+      "date": "Invalid date",
+      "number": "Invalid number"
+    },
+    "errors": {
+      "generic": "An error occurred. Please try again.",
+      "network": "Connection error. Please check your internet connection.",
+      "unauthorized": "You are not authorized to perform this action.",
+      "notFound": "The requested resource was not found.",
+      "serverError": "Server error. Please try again later."
+    },
+    "success": {
+      "saved": "Successfully saved",
+      "updated": "Successfully updated",
+      "deleted": "Successfully deleted",
+      "created": "Successfully created",
+      "sent": "Successfully sent"
+    },
+    "pagination": {
+      "page": "Page",
+      "of": "of"
+    },
+    "optional": "Optional",
+    "languages": {
+      "ES": "Spanish",
+      "EN": "English",
+      "FR": "French",
+      "IT": "Italian",
+      "DE": "German"
+    },
+    "channels": {
+      "WHATSAPP": "WhatsApp",
+      "EMAIL": "Email",
+      "SMS": "SMS",
+      "PREFERRED": "Guest Preferred Channel",
+      "none": "-"
+    },
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds"
+    },
+    "loading": "Loading...",
+    "noData": "No data available",
+    "confirmDelete": "Are you sure you want to delete this?",
+    "yes": "Yes",
+    "no": "No",
+    "error": "Error"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "login": "Login"
+    },
+    "hero": {
+      "title": "Empower Your Wedding Planning Business",
+      "subtitle": "{commercialName} is the all-in-one platform for wedding planners to collaborate seamlessly with couples, manage guests, design stunning invitations, and create unforgettable celebrations.",
+      "cta": {
+        "primary": "Start Free Trial",
+        "secondary": "Learn More"
+      },
+      "trial": "Free trial • 1 wedding • No credit card required"
+    },
+    "features": {
+      "title": "Everything You Need to Plan Perfect Weddings",
+      "subtitle": "Powerful tools designed for professional wedding planners",
+      "items": {
+        "guestManagement": {
+          "title": "Guest Management",
+          "description": "Effortlessly manage guest lists, track RSVPs, dietary requirements, and seating arrangements all in one place."
+        },
+        "invitationDesigner": {
+          "title": "Invitation Designer",
+          "description": "Create beautiful, custom wedding invitations with our intuitive design tools and elegant templates."
+        },
+        "multiChannel": {
+          "title": "Multi-Channel Invitations",
+          "description": "Send invitations via email, WhatsApp, and SMS. Track delivery status and responses in real-time."
+        },
+        "taskManagement": {
+          "title": "Task & Provider Management",
+          "description": "Collaborate with couples on task lists, manage vendors and providers, and keep everything on schedule."
+        },
+        "seatingPlanner": {
+          "title": "Interactive Seating Planner",
+          "description": "Arrange perfect seating plans with our drag-and-drop interface. Visualize and optimize table layouts."
+        },
+        "giftTracking": {
+          "title": "Gift Registry & Tracking",
+          "description": "Help couples manage their gift registry and track received gifts with automatic thank-you reminders."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Loved by Wedding Planners Worldwide",
+      "subtitle": "Join thousands of professionals using {commercialName}",
+      "items": [
+        {
+          "text": "{commercialName} has transformed how we manage our wedding planning business. The multi-channel invitations and real-time tracking save us countless hours.",
+          "name": "Sofia Martinez",
+          "role": "Wedding Planner, Madrid"
+        },
+        {
+          "text": "Our couples love the collaborative features. The seating planner alone has made our service so much more valuable.",
+          "name": "Emma Thompson",
+          "role": "Event Coordinator, London"
+        },
+        {
+          "text": "Managing 3 weddings simultaneously used to be stressful. With {commercialName}, everything is organized and our clients are happier than ever.",
+          "name": "Luca Romano",
+          "role": "Wedding Planner, Rome"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "subtitle": "Choose the plan that fits your business",
+      "popular": "MOST POPULAR",
+      "perMonth": "month",
+      "cta": "Get Started",
+      "contactUs": "Contact Us",
+      "plans": {
+        "trial": {
+          "name": "Free Trial",
+          "price": "Free",
+          "features": [
+            "1 wedding",
+            "All core features",
+            "14-day trial period"
+          ]
+        },
+        "standard": {
+          "name": "Standard",
+          "price": "€50",
+          "features": [
+            "3 weddings in parallel",
+            "Unlimited guests",
+            "All features included",
+            "Priority support"
+          ]
+        },
+        "pro": {
+          "name": "Professional",
+          "price": "Custom",
+          "features": [
+            "Unlimited weddings",
+            "White-label option",
+            "Dedicated account manager",
+            "Custom integrations"
+          ]
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Your Wedding Planning Business?",
+      "subtitle": "Join hundreds of wedding planners who trust {commercialName} to deliver exceptional experiences.",
+      "button": "Start Your Free Trial"
+    },
+    "footer": {
+      "tagline": "Empowering wedding planners to create unforgettable celebrations.",
+      "product": "Product",
+      "company": "Company",
+      "support": "Support",
+      "about": "About",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "help": "Help Center",
+      "docs": "Documentation",
+      "rights": "All rights reserved."
+    },
+    "title": "{commercialName} - Wedding Management"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We're here to help you get started",
+    "form": {
+      "name": "Full name",
+      "namePlaceholder": "Your name",
+      "email": "Email address",
+      "emailPlaceholder": "you@email.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 234 567 8900",
+      "reason": "Reason for contact",
+      "reasonPlaceholder": "Select a reason",
+      "message": "Message",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "submit": "Send message",
+      "submitting": "Sending..."
+    },
+    "reasons": {
+      "trial": "Free Trial",
+      "sales": "Sales",
+      "support": "Contact/Support"
+    },
+    "success": {
+      "title": "Thank you for contacting us!",
+      "message": "We have received your message and will get back to you shortly.",
+      "backHome": "Back to home"
+    },
+    "error": {
+      "title": "Error sending",
+      "message": "An error occurred while sending your message. Please try again.",
+      "retry": "Retry"
+    }
+  },
+  "metadata": {
+    "title": "Wedding Management System",
+    "description": "Multi-tenant wedding management platform with RSVP tracking and gift management"
+  },
+  "master": {
+    "dashboard": {
+      "title": "Master Admin Dashboard",
+      "welcome": "Welcome, Administrator",
+      "overview": "Platform Overview",
+      "quickActions": "Quick Actions"
+    },
+    "analytics": {
+      "totalPlanners": "Total Planners",
+      "activePlanners": "Active Planners",
+      "totalWeddings": "Total Weddings",
+      "totalGuests": "Total Guests"
+    },
+    "planners": {
+      "title": "Planner Management",
+      "description": "View, create, and manage wedding planners",
+      "list": "Planner List",
+      "add": "Add Planner",
+      "edit": "Edit Planner",
+      "name": "Name",
+      "email": "Email",
+      "logo": "Logo",
+      "status": "Status",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "weddingCount": "Wedding Count",
+      "lastLogin": "Last Login",
+      "enable": "Enable",
+      "disable": "Disable",
+      "confirmDisable": "Are you sure you want to disable this planner?",
+      "logoUrl": "Logo URL"
+    },
+    "weddings": {
+      "title": "Wedding Overview",
+      "description": "Browse all weddings across the platform",
+      "list": "Wedding List",
+      "coupleName": "Couple Name",
+      "date": "Date",
+      "location": "Location",
+      "planner": "Planner",
+      "guestCount": "Guest Count"
+    }
+  },
+  "planner": {
+    "dashboard": {
+      "title": "Planner Dashboard",
+      "welcome": "Welcome, {name}",
+      "myWeddings": "My Weddings",
+      "subtitle": "Manage your weddings and view statistics",
+      "createWedding": "Create Wedding",
+      "upcomingWeddings": "Upcoming Weddings",
+      "quickActions": "Quick Actions",
+      "allWeddings": "All Weddings",
+      "allWeddingsSubtitle": "View and manage all your weddings",
+      "createWeddingSubtitle": "Set up a new wedding event",
+      "checklistTemplate": "Checklist Template",
+      "checklistTemplateSubtitle": "Manage task templates for your weddings",
+      "providers": "Providers",
+      "providersSubtitle": "Manage your provider library",
+      "noWeddings": "No weddings yet",
+      "noWeddingsSubtitle": "Get started by creating your first wedding."
+    },
+    "checklistTemplate": {
+      "title": "Checklist Template",
+      "subtitle": "Create and manage task templates for your weddings",
+      "description": "Create your default checklist template. It will be copied to new weddings with dates converted.",
+      "loadingTemplate": "Loading template...",
+      "noTemplateYet": "No template yet",
+      "getStarted": "Get started by creating your first section.",
+      "addSection": "Add Section",
+      "addTask": "Add Task",
+      "sectionName": "Section name",
+      "newSection": "New Section",
+      "newTask": "New Task",
+      "deleteSection": "Delete section",
+      "deleteTask": "Delete task",
+      "confirmDeleteSection": "Are you sure you want to delete this section and all its tasks?",
+      "noTasksInSection": "No tasks in this section. Click \"Add Task\" to create one.",
+      "saving": "Saving...",
+      "saveNow": "Save Now",
+      "saved": "Saved",
+      "unsavedChanges": "You have unsaved changes. Click \"Save Now\" to save your work.",
+      "templateSaved": "Template saved successfully",
+      "templateExported": "Template exported successfully",
+      "templateImported": "Template imported successfully",
+      "errors": {
+        "loadFailed": "Failed to load template",
+        "saveFailed": "Failed to save template",
+        "exportFailed": "Failed to export template",
+        "importFailed": "Failed to import template",
+        "noSections": "Template must have at least one section",
+        "sectionsNeedTasks": "Each section must have at least one task. Please add tasks or delete empty sections.",
+        "invalidDateFormat": "Invalid date format: {value}. Use WEDDING_DATE, WEDDING_DATE-90, etc."
+      },
+      "fields": {
+        "drag": "Drag",
+        "title": "Title",
+        "description": "Description",
+        "assignedTo": "Assigned To",
+        "dueDate": "Due Date (Relative)",
+        "actions": "Actions",
+        "taskTitle": "Task title",
+        "addTitle": "Click to add title",
+        "addDescription": "Add description...",
+        "clickToAddDescription": "Click to add description",
+        "dueDatePlaceholder": "e.g., WEDDING_DATE-90",
+        "dueDateExamples": "Examples: WEDDING_DATE, WEDDING_DATE-90 (90 days before), WEDDING_DATE+7 (7 days after)"
+      },
+      "assignment": {
+        "weddingPlanner": "Wedding Planner",
+        "couple": "Couple",
+        "other": "Other"
+      }
+    },
+    "checklist": {
+      "title": "Wedding Checklist",
+      "subtitle": "Manage tasks and track progress",
+      "description": "Manage tasks and track progress for this wedding"
+    },
+    "stats": {
+      "totalWeddings": "Total Weddings",
+      "totalGuests": "Total Guests",
+      "rsvpCompletion": "RSVP Completion",
+      "upcomingWeddings": "Upcoming Weddings"
+    },
+    "weddings": {
+      "title": "Wedding Management",
+      "loading": "Loading weddings...",
+      "loadingDetails": "Loading wedding details...",
+      "noWeddings": "No weddings yet",
+      "getStarted": "Get started by creating your first wedding.",
+      "backToWeddings": "Back to weddings",
+      "backToWedding": "Back to Wedding",
+      "backToDashboard": "Back to Dashboard",
+      "quickActions": "Quick Actions",
+      "manageEvents": "Manage all your wedding events",
+      "createError": "Failed to create wedding",
+      "loadError": "Failed to load weddings",
+      "updateDetails": "Update the details for {coupleNames}",
+      "updateError": "Failed to update wedding",
+      "notFound": "Wedding not found",
+      "totalGuests": "Total Guests",
+      "rsvpCompletion": "RSVP Completion",
+      "attending": "Attending",
+      "paymentsReceived": "Payments Received",
+      "weddingInfo": "Wedding Information",
+      "status": "Status",
+      "guestAdditions": "Guest Additions",
+      "allowed": "Allowed",
+      "notAllowed": "Not allowed",
+      "dressCode": "Dress Code",
+      "additionalInfo": "Additional Information",
+      "weddingAdmins": "Wedding Admins",
+      "noAdmins": "No admins invited yet",
+      "accepted": "Accepted",
+      "pending": "Invitation pending",
+      "inviteAdmin": "Invite Wedding Admin",
+      "create": "Create New Wedding",
+      "edit": "Edit Wedding",
+      "coupleNames": "Couple Names",
+      "weddingDate": "Wedding Date",
+      "weddingTime": "Wedding Time",
+      "location": "Location",
+      "rsvpCutoff": "RSVP Cutoff Date",
+      "defaultLanguage": "Default Language",
+      "theme": "Theme",
+      "noTheme": "No theme",
+      "paymentMode": "Payment Mode",
+      "automated": "Automated",
+      "manual": "Manual",
+      "allowGuestAdditions": "Allow Guest Additions",
+      "overview": "Overview",
+      "at": "at",
+      "statusLabels": {
+        "ACTIVE": "Active",
+        "ARCHIVED": "Archived",
+        "COMPLETED": "Completed"
+      },
+      "guests": "Guests",
+      "admins": "Admins",
+      "placeholders": {
+        "coupleNames": "John & Jane",
+        "location": "Venue name and address"
+      },
+      "validation": {
+        "coupleNamesRequired": "Couple names are required",
+        "weddingDateRequired": "Wedding date is required",
+        "weddingTimeRequired": "Wedding time is required",
+        "locationRequired": "Location is required",
+        "rsvpCutoffRequired": "RSVP cutoff date is required",
+        "rsvpCutoffInvalid": "RSVP cutoff must be before the wedding date"
+      },
+      "note": {
+        "title": "Note:",
+        "content": "Additional settings like payment mode, guest additions, dress code, and RSVP questions can be configured by the wedding admin in the wedding dashboard after the wedding is created."
+      },
+      "whatsappMode": {
+        "label": "WhatsApp Sending Mode",
+        "business": "WhatsApp Business",
+        "businessDesc": "Send messages directly via WhatsApp Business API (Twilio).",
+        "links": "WhatsApp Links",
+        "linksDesc": "Open a wa.me link in a new browser tab for each guest instead of sending automatically."
+      },
+      "buttons": {
+        "saving": "Saving...",
+        "update": "Update Wedding",
+        "create": "Create Wedding"
+      },
+      "statusManagement": "Status Management",
+      "disableWedding": "Disable Wedding",
+      "disableDescription": "Admins can view but not edit",
+      "disable": "Disable",
+      "enable": "Enable",
+      "confirmDisable": "Are you sure you want to disable this wedding?",
+      "confirmEnable": "Are you sure you want to enable this wedding?",
+      "disabledSince": "Disabled since {date}",
+      "deleteWedding": "Delete Wedding",
+      "deleteDescription": "Wedding will be hidden from admins. Can be restored later.",
+      "delete": "Delete",
+      "confirmDelete": "Delete this wedding? Admins will lose access. You can restore it later.",
+      "deletedWeddings": "Deleted Weddings",
+      "viewDeleted": "View Deleted Weddings",
+      "backToActive": "Back to Active Weddings",
+      "deletedInfo": "These weddings have been deleted. Admins cannot access them.",
+      "noDeletedWeddings": "No deleted weddings",
+      "confirmRestore": "Restore this wedding? Admins will regain access.",
+      "restoreSuccess": "Wedding restored successfully"
+    },
+    "admins": {
+      "invite": "Invite Admin",
+      "name": "Admin Name",
+      "namePlaceholder": "Enter admin name",
+      "email": "Admin Email",
+      "emailPlaceholder": "admin@example.com",
+      "inviteSent": "Invitation sent successfully",
+      "inviteError": "Failed to invite admin",
+      "remove": "Remove Admin",
+      "confirmRemove": "Are you sure you want to remove this admin?",
+      "invitationNote": "The admin will receive an invitation email with instructions to sign in and access this wedding.",
+      "sending": "Sending Invitation...",
+      "send": "Send Invitation",
+      "validation": {
+        "nameRequired": "Name is required",
+        "emailRequired": "Email is required",
+        "invalidEmail": "Invalid email address"
+      }
+    },
+    "themes": {
+      "title": "Theme Management",
+      "system": "System Themes",
+      "custom": "Custom Themes",
+      "create": "Create Custom Theme",
+      "edit": "Edit Theme",
+      "name": "Theme Name",
+      "inUse": "In Use",
+      "cannotDelete": "Cannot delete. Theme is in use by {count} wedding(s)."
+    },
+    "upcomingTasks": {
+      "title": "Upcoming Tasks",
+      "wedding": "Wedding",
+      "task": "Task",
+      "viewAllWeddings": "View all weddings",
+      "noTasks": "No upcoming tasks",
+      "noTasksDescription": "All tasks are completed or there are no tasks assigned to you across all weddings."
+    },
+    "providers": {
+      "title": "Provider Management",
+      "description": "Manage your library of providers",
+      "addCategory": "Add Category",
+      "save": "Save",
+      "cancel": "Cancel",
+      "categoryNamePlaceholder": "New Category Name",
+      "confirmDeleteCategory": "Are you sure you want to delete this category and all its providers?",
+      "addProvider": "Add Provider",
+      "confirmDeleteProvider": "Are you sure you want to delete this provider?",
+      "providerName": "Provider Name",
+      "name": "Name",
+      "contactName": "Contact Name",
+      "contactPerson": "Contact Person",
+      "email": "Email",
+      "phone": "Phone",
+      "website": "Website",
+      "socialMedia": "Social Media",
+      "approxPrice": "Approx. Price",
+      "loading": "Loading...",
+      "noCategories": "No categories yet. Add one to get started.",
+      "weddingProvidersTitle": "Wedding Providers",
+      "assignProvider": "Assign Provider",
+      "selectProvider": "Select a provider",
+      "selectCategory": "Select a category",
+      "category": "Category",
+      "notAssigned": "Not assigned",
+      "add": "Add",
+      "errorAddingProvider": "Error adding provider",
+      "errorUpdatingProvider": "Error updating provider",
+      "provider": "Provider",
+      "contact": "Contact",
+      "totalPrice": "Total Price",
+      "paid": "Paid",
+      "pending": "Pending",
+      "contract": "Contract",
+      "notes": "Notes",
+      "actions": "Actions",
+      "confirmDeletePayment": "Are you sure you want to delete this payment?",
+      "confirmDeleteProviderFromWedding": "Are you sure you want to remove this provider from the wedding?",
+      "edit": "Edit",
+      "remove": "Remove",
+      "addPayment": "Add Payment",
+      "recordPayment": "Record Payment",
+      "amount": "Amount",
+      "method": "Method",
+      "paymentNotesPlaceholder": "Payment notes...",
+      "savePayment": "Save Payment",
+      "paymentsHistory": "Payments History",
+      "date": "Date",
+      "noPayments": "No payments recorded yet."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Wedding Admin Dashboard",
+      "welcome": "Welcome",
+      "configure": "Configure",
+      "configureSubtitle": "RSVP settings",
+      "weddingDetails": "Wedding Details",
+      "metrics": "Metrics",
+      "metricTitles": {
+        "totalGuests": "Total Guests",
+        "rsvpCompletion": "RSVP Completion",
+        "attending": "Attending",
+        "paymentsReceived": "Gifts Received"
+      },
+      "manageWedding": "Manage Wedding",
+      "guestList": "Guest List",
+      "guestListSubtitle": "View and manage guests",
+      "activity": "Activity",
+      "activitySubtitle": "Track guest activity",
+      "payments": "Gifts",
+      "paymentsSubtitle": "Track gifts",
+      "importGuests": "Import Guests",
+      "importGuestsSubtitle": "Upload Excel file",
+      "templates": "Message Templates",
+      "templatesSubtitle": "Manage invitations and reminders",
+      "checklist": "Wedding Checklist",
+      "checklistSubtitle": "Track tasks and progress",
+      "rsvpProgress": "RSVP Progress",
+      "daysUntilWedding": "days until the wedding",
+      "responded": "responded",
+      "complete": "complete",
+      "seatingPlan": "Seating Plan",
+      "seatingPlanSubtitle": "Assign guests to tables",
+      "providers": "Providers & Gifts",
+      "providersSubtitle": "Manage providers and gifts",
+      "invitationBuilder": "Invitation Builder",
+      "invitationBuilderSubtitle": "Design your wedding invitation",
+      "weddingNotFound": "Wedding not found",
+      "contactPlanner": "Please contact your wedding planner."
+    },
+    "providers": {
+      "noWeddingAssigned": "No wedding assigned."
+    },
+    "checklist": {
+      "loadError": "Unable to load checklist"
+    },
+    "tasks": {
+      "title": "Upcoming Tasks",
+      "noDueDate": "No due date",
+      "daysOverdue": "days overdue",
+      "dueToday": "Due today",
+      "daysRemaining": "days",
+      "noDeadline": "No deadline",
+      "overdue": "Overdue",
+      "dueSoon": "Due soon",
+      "upcoming": "Upcoming",
+      "loading": "Loading tasks...",
+      "noTasks": "No upcoming tasks",
+      "noTasksDescription": "All tasks are completed or there are no tasks assigned to you.",
+      "viewChecklist": "View Checklist",
+      "viewAll": "View all",
+      "columnTask": "Task",
+      "columnSection": "Section",
+      "columnDueDate": "Due Date",
+      "columnStatus": "Status",
+      "noSection": "No section"
+    },
+    "seating": {
+      "title": "Seating Plan",
+      "subtitle": "Configure tables and assign confirmed guests",
+      "loading": "Loading seating plan...",
+      "stats": {
+        "totalGuests": "Total Guests",
+        "confirmedGuests": "Confirmed Guests",
+        "totalSeats": "Total Seats",
+        "assignedSeats": "Assigned Seats"
+      },
+      "config": {
+        "title": "Table Configuration",
+        "addTable": "Add Table",
+        "tableName": "Table Name",
+        "tableNumber": "No.",
+        "capacity": "Capacity",
+        "actions": "Actions",
+        "save": "Save Tables",
+        "saving": "Saving..."
+      },
+      "assignment": {
+        "title": "Guest Assignment",
+        "unassigned": "Unassigned Guests",
+        "assigned": "Assigned",
+        "randomAssign": "Randomly Assign",
+        "randomAssignConfirm": "This will randomly assign all unassigned confirmed guests to tables. Continue?",
+        "splitting": "Splitting Families",
+        "split": "Split Family",
+        "noTables": "Please configure tables first.",
+        "unassignFamily": "Remove family from table",
+        "unassignGuest": "Remove guest from table",
+        "move": "Move"
+      },
+      "split": {
+        "title": "Split Family",
+        "description": "Group family members to sit at different tables.",
+        "groupName": "Group Name",
+        "addGroup": "Add Group",
+        "save": "Save Groups",
+        "children": "Children",
+        "group": "Group"
+      }
+    },
+    "wedding": {
+      "details": "Details",
+      "configuration": "Configuration",
+      "updateSuccess": "Configuration updated successfully",
+      "disabledBanner": "This wedding has been disabled by the wedding planner. You can view data but cannot make changes.",
+      "noAccess": "You don't have access to any active weddings. Please contact your wedding planner."
+    },
+    "guests": {
+      "title": "Guest Management",
+      "list": "Guest List",
+      "add": "Add Guest",
+      "import": "Import from Excel",
+      "selected": "selected",
+      "table": {
+        "family": "Family",
+        "members": "Members",
+        "rsvp": "RSVP",
+        "channel": "Channel",
+        "payment": "Gift",
+        "language": "Language",
+        "actions": "Actions",
+        "loading": "Loading guests...",
+        "emptyTitle": "No guests found",
+        "emptyDesc": "Try adjusting your filters or import a guest list.",
+        "noPayment": "No gift"
+      },
+      "timeline": {
+        "title": "Guest Activity Timeline",
+        "subtitle": "Activity history for {family}",
+        "timeline": "Timeline",
+        "viewTimeline": "View Activity Timeline",
+        "noEvents": "No activity recorded for this guest yet.",
+        "loading": "Loading timeline..."
+      },
+      "export": "Export to Excel",
+      "template": "Download Template",
+      "familyName": "Family Name",
+      "contactPerson": "Contact Person",
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "language": "Language",
+      "members": "Members",
+      "rsvpStatus": "RSVP Status",
+      "attendance": "Attendance",
+      "notAnswered": "Not Answered",
+      "channel": "Channel",
+      "paymentStatus": "Gift Status",
+      "invitedBy": "Invited By",
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "submitted": "Submitted",
+        "confirmed": "Confirmed",
+        "attending": "Attending",
+        "notAttending": "Not Attending",
+        "partial": "Partial",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "sms": "SMS",
+        "paid": "Gift Sent",
+        "unpaid": "No Gift",
+        "received": "Received",
+        "searchPlaceholder": "Name or email...",
+        "clearAll": "Clear all filters"
+      },
+      "form": {
+        "addTitle": "Add Guest Family",
+        "editTitle": "Edit Guest Family",
+        "familyNameRequired": "Family name is required",
+        "memberNameRequired": "All members must have a name",
+        "saveFailed": "Failed to save guest",
+        "preferredChannel": "Preferred Channel",
+        "languagePreference": "Language Preference",
+        "saving": "Saving...",
+        "addGuest": "Add Guest",
+        "saveChanges": "Save Changes",
+        "rsvpAnswers": "RSVP Answers"
+      },
+      "importSuccess": "Guest list imported successfully",
+      "importError": "Import error. Please check the file."
+    },
+    "notifications": {
+      "title": "Notifications and Activity",
+      "newActivities": "{count, plural, =0 {No new activities} one {# new activity} other {# new activities}}",
+      "loading": "Loading notifications...",
+      "emptyTitle": "No notifications",
+      "emptyDesc": "Activity from your guests will appear here.",
+      "filters": {
+        "dateRange": "Date Range",
+        "eventType": "Event Type",
+        "family": "Family",
+        "channel": "Channel",
+        "unread": "Unread",
+        "read": "Read"
+      },
+      "markAsRead": "Mark as Read",
+      "export": "Export Notifications",
+      "adminTriggered": "Admin Action",
+      "events": {
+        "linkOpened": "Link Opened",
+        "rsvpStarted": "RSVP Started",
+        "rsvpSubmitted": "RSVP Submitted",
+        "rsvpEdited": "RSVP Edited",
+        "guestAdded": "Guest Added",
+        "paymentReceived": "Payment Received",
+        "reminderSent": "Reminder Sent",
+        "invitationSent": "Invitation Sent",
+        "saveTheDateSent": "Save the Date Sent",
+        "taskAssigned": "Task Assigned",
+        "taskCompleted": "Task Completed",
+        "messageDelivered": "Message Delivered",
+        "messageRead": "Message Read",
+        "messageFailed": "Message Failed"
+      },
+      "eventTypes": {
+        "LINK_OPENED": "Link Opened",
+        "RSVP_STARTED": "RSVP Started",
+        "RSVP_SUBMITTED": "RSVP Submitted",
+        "RSVP_UPDATED": "RSVP Updated",
+        "GUEST_ADDED": "Guest Added",
+        "PAYMENT_RECEIVED": "Payment Received",
+        "REMINDER_SENT": "Reminder Sent",
+        "INVITATION_SENT": "Invitation Sent",
+        "SAVE_THE_DATE_SENT": "Save the Date Sent",
+        "TASK_ASSIGNED": "Task Assigned",
+        "TASK_COMPLETED": "Task Completed",
+        "MESSAGE_DELIVERED": "Message Delivered",
+        "MESSAGE_READ": "Message Read",
+        "MESSAGE_FAILED": "Message Failed"
+      }
+    },
+    "saveTheDate": {
+      "confirmSend": "Are you sure you want to send a Save the Date message to {familyName}?",
+      "sent": "Save the Date sent to {count} family(ies)"
+    },
+    "reminders": {
+      "title": "Reminder System",
+      "send": "Send Reminders",
+      "sendReminder": "Send Reminder",
+      "sendInvite": "Send Invite",
+      "sendSaveTheDate": "Send Save the Date",
+      "preview": "Preview Recipients",
+      "channel": "Send Channel",
+      "recipients": "Recipients: {count} family(ies)",
+      "sent": "Reminder sent successfully to {count} family(ies)",
+      "noRecipients": "No families pending RSVP",
+      "loadingPreview": "Loading preview...",
+      "sendSuccess": "Reminders sent!",
+      "sendSuccessDesc": "{count} families will receive reminders.",
+      "allCaughtUp": "All caught up!",
+      "allCaughtUpDesc": "All families have already submitted their RSVP.",
+      "summary": "{count} families have not yet responded to the RSVP.",
+      "byLanguage": "By Language",
+      "sendVia": "Send via",
+      "viewAll": "View all {count} families",
+      "sending": "Sending...",
+      "sendAction": "Send {count} Reminders",
+      "bulkSend": "Send Bulk Reminders",
+      "selectGuestsHint": "Select guests from the table below to send reminders",
+      "ibanWarning": {
+        "title": "Gift IBAN Not Configured",
+        "message": "You haven't set a gift IBAN yet. Guests won't be able to see payment details. Continue sending reminders anyway?"
+      },
+      "validationWarning": {
+        "title": "Missing Contact Information",
+        "message": "The following families cannot receive reminders because they are missing required information:",
+        "missing_email": "Email required",
+        "missing_phone": "Phone number required",
+        "missing_whatsapp_number": "WhatsApp number required"
+      },
+      "sendToValidOnly": "Send to {count} families anyway"
+    },
+    "payments": {
+      "title": "Gift Management",
+      "tracking": "Gift Tracking",
+      "list": "Gift List",
+      "loading": "Loading gifts...",
+      "emptyTitle": "No gifts recorded",
+      "emptyDesc": "Gifts will appear here when recorded.",
+      "recordTitle": "Record Gift",
+      "selectFamily": "Select a family",
+      "currencyAmount": "Amount ({currency})",
+      "recording": "Recording...",
+      "markReceived": "Mark Received",
+      "auto": "Auto",
+      "record": "Record Manual Gift",
+      "showFamilies": "Show Families",
+      "filterFamiliesDesc": "Filter which families appear in the dropdown below",
+      "filterFamilies": {
+        "all": "All Families",
+        "attending": "Attending Only",
+        "notAttending": "Not Attending Only"
+      },
+      "stats": {
+        "totalPayments": "Total Gifts"
+      },
+      "family": "Family",
+      "amount": "Amount",
+      "referenceCode": "Reference Code",
+      "transactionDate": "Transaction Date",
+      "status": "Status",
+      "statuses": {
+        "pending": "Pending",
+        "received": "Received",
+        "confirmed": "Confirmed"
+      },
+      "recordSuccess": "Gift recorded successfully",
+      "updateSuccess": "Gift status updated"
+    },
+    "deleteDialog": {
+      "title": "Delete Guest Family",
+      "confirmTitle": "Are you sure you want to delete {name}?",
+      "confirmDesc": "This will permanently remove {count} member{plural} and all associated data.",
+      "rsvpWarning": "Warning",
+      "rsvpWarningDesc": "This family has already submitted their RSVP. Deleting them will remove their response.",
+      "deleting": "Deleting..."
+    },
+    "guestAdditions": {
+      "title": "Guest Additions Review",
+      "loading": "Loading guest additions...",
+      "featureDisabled": "Feature Disabled",
+      "featureDisabledDesc": "Guest additions are disabled for this wedding.",
+      "noAdditionsTitle": "No guest additions",
+      "noAdditionsDesc": "When guests add family members, they will appear here for review.",
+      "totalAdditions": "total additions",
+      "new": "new",
+      "newBadge": "NEW",
+      "pendingReview": "Pending Review",
+      "addedTo": "Added to",
+      "addedBy": "Added by guest",
+      "addedAt": "Added on {date}",
+      "diet": "Diet",
+      "accessibility": "Accessibility",
+      "approve": "Approve",
+      "edit": "Edit",
+      "markReviewed": "Mark Reviewed",
+      "previouslyReviewed": "Previously Reviewed",
+      "family": "Family",
+      "noAdditions": "No guest additions pending review"
+    },
+    "configure": {
+      "title": "Configure Wedding",
+      "saveSuccess": "Configuration saved successfully!",
+      "error": "Failed to save configuration",
+      "loading": "Loading configuration...",
+      "notFound": "Wedding not found",
+      "contactPlanner": "Please contact your wedding planner.",
+      "backToDashboard": "Back to Dashboard",
+      "tabs": {
+        "basic": "Basic Settings",
+        "rsvp": "RSVP Settings"
+      },
+      "form": {
+        "basicSettings": "Basic Settings",
+        "theme": "Wedding Theme",
+        "noTheme": "No theme selected",
+        "systemTheme": "System",
+        "giftIbanPlaceholder": "e.g., ES91 1234 5678 9012 3456 7890",
+        "paymentTrackingMode": "Payment Tracking Mode",
+        "paymentTrackingModeDesc": "Automated mode generates unique reference codes for each family to track bank transfers.",
+        "automated": "Automated (with reference codes)",
+        "manual": "Manual tracking",
+        "giftIban": "Gift IBAN",
+        "giftIbanDesc": "Bank account number for receiving wedding gifts",
+        "allowGuestAdditions": "Allow guests to add family members",
+        "allowGuestAdditionsDesc": "When enabled, guests can add additional family members during RSVP (subject to your review).",
+        "dressCode": "Dress Code",
+        "dressCodePlaceholder": "e.g., Formal, Semi-formal, Casual",
+        "additionalInfo": "Additional Information for Guests",
+        "additionalInfoPlaceholder": "Any additional details for guests (parking, accommodation, etc.)...",
+        "saveTheDate": "Enable Save the Date messages",
+        "saveTheDateDesc": "Send save the date messages before formal invitations. This allows you to inform guests about the wedding date early.",
+        "rsvpQuestions": "RSVP Questions",
+        "rsvpQuestionsDesc": "Customize the questions shown to guests when they complete their RSVP.",
+        "transportation": "Add transportation question to RSVP",
+        "transportationText": "Question text (Yes/No question)",
+        "transportationPlaceholder": "e.g., Do you need transportation from the hotel to the venue?",
+        "dietary": "Add dietary restrictions question to RSVP",
+        "dietaryDesc": "Guests will be able to select from: No restrictions, Vegetarian, Vegan, Gluten-free, Other, and specify allergies.",
+        "extraQuestions": "Extra Yes/No Questions (up to 3)",
+        "enableQuestion": "Enable extra question {number}",
+        "questionPlaceholder": "Enter your Yes/No question...",
+        "extraInfo": "Extra Mandatory Information Fields (up to 3)",
+        "extraInfoDesc": "Add custom text fields that guests must fill in during RSVP.",
+        "enableInfo": "Enable mandatory field {number}",
+        "infoLabel": "Field label",
+        "infoPlaceholder": "e.g., Song request for the party",
+        "cancel": "Cancel",
+        "save": "Save Configuration",
+        "saving": "Saving...",
+        "submitError": "Failed to save configuration. Please try again."
+      }
+    },
+    "checklist": {
+      "title": "Wedding Checklist",
+      "subtitle": "Manage tasks and track progress for your wedding",
+      "loading": "Loading checklist...",
+      "saving": "Saving...",
+      "save": "Save Changes",
+      "unsavedChanges": "You have unsaved changes",
+      "error": "Error loading checklist",
+      "retry": "Retry",
+      "emptyTitle": "No tasks yet",
+      "emptyDesc": "Import a checklist or wait for your planner to add tasks.",
+      "import": "Import from Excel",
+      "importing": "Importing...",
+      "export": "Export to Excel",
+      "exporting": "Exporting...",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete this task?",
+      "markComplete": "Mark as complete",
+      "markIncomplete": "Mark as incomplete",
+      "descriptionPlaceholder": "Add description...",
+      "columns": {
+        "done": "Done",
+        "title": "Title",
+        "description": "Description",
+        "assignedTo": "Assigned To",
+        "dueDate": "Due Date",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "assignedTo": {
+        "planner": "Wedding Planner",
+        "couple": "Couple",
+        "other": "Other"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "IN_PROGRESS": "In Progress",
+        "COMPLETED": "Completed"
+      }
+    },
+    "templates": {
+      "title": "Message Templates",
+      "description": "Manage invitation and reminder templates for your wedding in all supported languages.",
+      "loading": "Loading templates...",
+      "error": "Failed to fetch templates",
+      "tryAgain": "Try Again",
+      "type": {
+        "title": "Template Type",
+        "invitation": "📩 Invitations",
+        "reminder": "🔔 Reminders",
+        "confirmation": "✅ Confirmations",
+        "saveTheDate": "📅 Save the Date"
+      },
+      "language": {
+        "title": "Language"
+      },
+      "channel": {
+        "title": "Channel",
+        "email": "📧 Email",
+        "whatsapp": "💬 WhatsApp",
+        "sms": "📱 SMS"
+      },
+      "placeholders": {
+        "title": "Available Placeholders"
+      },
+      "editor": {
+        "channelInfo": "Editing <strong>{channel}</strong> template",
+        "subject": "Email Subject",
+        "body": "{channel} Message",
+        "chars": "{current}/{max} characters",
+        "save": "Save Template",
+        "saving": "Saving...",
+        "preview": "Preview",
+        "reset": "Reset",
+        "tip": "Tip: Use placeholders like <code>'{familyName}'</code>, <code>'{coupleNames}'</code>, and <code>'{magicLink}'</code> to personalize your messages. See the list of available placeholders on the left.",
+        "success": "Template saved successfully!",
+        "error": "Failed to save template",
+        "notFound": "No template found for {type} in {language} ({channel})"
+      },
+      "preview": {
+        "title": "Template Preview",
+        "loading": "Generating preview...",
+        "subject": "Subject",
+        "body": "Body",
+        "variables": "Variables Used",
+        "emailClient": "Email Client Preview",
+        "from": "From: Wedding Management Platform",
+        "close": "Close"
+      }
+    },
+    "invitationBuilder": {
+      "title": "Invitation Builder",
+      "description": "Design your wedding invitation page",
+      "createNew": "Create New Template",
+      "startFromScratch": "Start from scratch",
+      "startFromTemplate": "Start from a system template",
+      "templateName": "Template name",
+      "save": "Save",
+      "saved": "Saved",
+      "preview": "Preview",
+      "addBlock": "Add Block",
+      "blockText": "Text",
+      "blockImage": "Image",
+      "blockLocation": "Location",
+      "blockCountdown": "Countdown",
+      "blockAddToCalendar": "Add to Calendar",
+      "styleFont": "Font",
+      "styleSize": "Size",
+      "styleColor": "Color",
+      "styleAlign": "Alignment",
+      "styleLanguages": "Languages",
+      "canvasBackground": "Background",
+      "pickImage": "Pick Image",
+      "uploadNewImage": "Upload New Image",
+      "noImagesUploaded": "No images uploaded yet",
+      "editTemplate": "Edit",
+      "deleteTemplate": "Delete",
+      "back": "Back",
+      "noTemplatesYet": "No templates yet",
+      "noTemplatesDescription": "Create your first invitation template to get started",
+      "createFirstTemplate": "Create First Template",
+      "createTemplate": "Create Template",
+      "basedOn": "Based on",
+      "creating": "Creating...",
+      "confirmDeleteTemplate": "Are you sure you want to delete this template?",
+      "canvasSettings": "Canvas Settings",
+      "backgroundColor": "Background Color",
+      "backgroundImage": "Background Image",
+      "paperBackground": "Paper Background",
+      "remove": "Remove",
+      "addPaperBackground": "Add Paper Background",
+      "noBlocksYet": "No blocks added yet. Add a block from the sidebar.",
+      "countdownSettings": "Countdown Settings",
+      "locationSettings": "Location Settings",
+      "font": "Font",
+      "size": "Size",
+      "color": "Color",
+      "textStyle": "Text Style",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "labelSettings": "Label Settings (Days, Hours, etc.)",
+      "labelSize": "Label Size",
+      "labelColor": "Label Color",
+      "alignment": "Alignment",
+      "mapStyle": "Map Style",
+      "colorMap": "Color",
+      "grayscaleMap": "Grayscale"
+    }
+  },
+  "guest": {
+    "welcome": {
+      "title": "Hello, {familyName} Family!",
+      "subtitle": "Please confirm your attendance to the wedding",
+      "coupleNames": "{coupleNames}",
+      "date": "Date: {date}",
+      "time": "Time: {time}",
+      "location": "Location: {location}",
+      "dressCode": "Dress Code:"
+    },
+    "rsvp": {
+      "title": "RSVP",
+      "instructions": "Please select who from your family will attend the wedding.",
+      "attend": "Attend",
+      "attending": "Attending",
+      "notAttending": "Will Not Attend",
+      "attendingSummary": "{count, plural, =0 {No one attending} one {1 person attending} other {# people attending}}",
+      "dietaryRestrictions": "Dietary Restrictions",
+      "accessibilityNeeds": "Accessibility Needs",
+      "dietaryPlaceholder": "E.g., vegetarian, allergies, etc.",
+      "accessibilityPlaceholder": "E.g., wheelchair, special needs, etc.",
+      "submit": "Confirm Attendance",
+      "submitted": "Thank you for your RSVP!",
+      "confirmationMessage": "We have received your confirmation. We look forward to seeing you at the wedding!",
+      "cutoffPassed": "The RSVP deadline has passed. Please contact the organizers.",
+      "additionalQuestions": "Additional Questions",
+      "defaultTransportationQuestion": "Will you need transportation to the venue?",
+      "emptyConfirmation": "You are confirming no one from your group will be attending, is that what you want to confirm? Otherwise please cancel and select those from your group who are attending"
+    },
+    "members": {
+      "title": "Family Members",
+      "addMember": "Add Family Member",
+      "name": "Name",
+      "type": "Type",
+      "age": "Age",
+      "yearsOld": "{count} years old",
+      "addedByYou": "Added by you",
+      "types": {
+        "adult": "Adult",
+        "child": "Child",
+        "infant": "Infant"
+      },
+      "addSuccess": "Member added successfully",
+      "noMembers": "No members added yet"
+    },
+    "payment": {
+      "title": "Gift Information",
+      "subtitle": "Wedding gift details",
+      "iban": "IBAN:",
+      "referenceCode": "Reference code:",
+      "referenceInstructions": "Please include this reference code in your transfer.",
+      "status": "Gift status:",
+      "statuses": {
+        "pending": "Pending",
+        "received": "Received",
+        "confirmed": "Confirmed"
+      },
+      "presenceMessage": "Your presence is the most important thing to us. If you wish to give us a gift, you can do so in the way that is most comfortable for you.",
+      "cashMessage": "If you prefer, the gift can be in cash. In case it is more comfortable for you, you can also make a transfer:",
+      "manualMode": "Please use the following IBAN for your gift.",
+      "thankYou": "Thank you for your generosity!"
+    },
+    "language": {
+      "select": "Select Language",
+      "updated": "Language updated"
+    },
+    "edit": {
+      "title": "Edit RSVP",
+      "canEdit": "You can edit your RSVP until {date}."
+    },
+    "footer": {
+      "contactCouple": "If you have any questions, please contact the couple directly."
+    },
+    "gardenBirds": {
+      "weAreGettingMarried": "We Are Getting Married",
+      "tapToOpen": "Tap to open",
+      "scrollForDetails": "Scroll for more details",
+      "countdown": "Countdown",
+      "countdownSubtitle": "To the most special day of our lives",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "location": "Location",
+      "timeRange": "From {startTime} to 01:00h",
+      "details": "Details of the day",
+      "detailsSubtitle": "Everything you need to know"
+    },
+    "invitation": {
+      "countdown": "Countdown",
+      "countdownSubtitle": "Until the big day",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "location": "Location",
+      "addToCalendar": "Add to Calendar",
+      "googleCalendar": "Google Calendar",
+      "appleCalendar": "Apple Calendar",
+      "getDirections": "Get Directions"
+    }
+  },
+  "auth": {
+    "signin": {
+      "subtitle": "Sign in to access your account",
+      "google": "Continue with Google",
+      "facebook": "Continue with Facebook",
+      "apple": "Continue with Apple",
+      "footer": "Sign in with your authorized account"
+    },
+    "signout": {
+      "title": "Signing out...",
+      "subtitle": "Please wait while we sign you out."
+    },
+    "error": {
+      "default": "An error occurred during authentication. Please try again.",
+      "unauthorized": "You are not authorized to access this platform.",
+      "planner_disabled": "Your planner account has been disabled.",
+      "access_denied": "Access denied.",
+      "configuration": "Server configuration error.",
+      "verification": "Could not verify your account."
+    }
+  },
+  "about": {
+    "title": "About {commercialName}",
+    "subtitle": "Empowering wedding planners to create unforgettable experiences",
+    "mission": {
+      "title": "Our Mission",
+      "content": "At {commercialName}, we believe every wedding should be a stress-free celebration of love. Our mission is to empower wedding planners with the tools they need to deliver exceptional service to their couples, while simplifying guest management and communication."
+    },
+    "story": {
+      "title": "Our Story",
+      "content1": "{commercialName} was born from the real challenges faced by wedding planners managing multiple events simultaneously. We saw how planners struggled with spreadsheets, multiple communication channels, and tracking RSVPs across different couples.",
+      "content2": "We built {commercialName} as a comprehensive platform that brings everything together—from guest management to invitations to gift tracking—all in one elegant, easy-to-use system designed specifically for wedding professionals."
+    },
+    "values": {
+      "title": "Our Values",
+      "items": [
+        {
+          "title": "Simplicity",
+          "content": "We believe powerful tools should be easy to use. Every feature is designed to save time and reduce complexity."
+        },
+        {
+          "title": "Reliability",
+          "content": "Your couples trust you with their special day. We ensure our platform is always available when you need it."
+        },
+        {
+          "title": "Innovation",
+          "content": "We continuously improve and adapt to the evolving needs of wedding professionals and their clients."
+        },
+        {
+          "title": "Support",
+          "content": "Your success is our success. We're here to help you every step of the way with dedicated support."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to transform your wedding planning business?",
+      "button": "Get in Touch"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "introduction": {
+      "title": "Introduction",
+      "content": "At {commercialName}, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information when you use our wedding management platform."
+    },
+    "dataCollection": {
+      "title": "Information We Collect",
+      "intro": "We collect the following types of information:",
+      "items": [
+        "Contact information (name, email, phone) provided by wedding planners and admins",
+        "Wedding guest information managed through our platform",
+        "Usage data and analytics to improve our service",
+        "Authentication information through OAuth providers (Google, Facebook, Apple, Microsoft)"
+      ]
+    },
+    "dataUsage": {
+      "title": "How We Use Your Information",
+      "items": [
+        "To provide and maintain our wedding management services",
+        "To send invitations, reminders, and communications on behalf of wedding planners",
+        "To track RSVPs and manage guest lists",
+        "To improve our platform and develop new features"
+      ]
+    },
+    "dataProtection": {
+      "title": "Data Protection",
+      "content": "We implement industry-standard security measures to protect your data. All data is encrypted in transit and at rest. We use secure OAuth authentication and never store passwords directly. Access to data is strictly controlled and limited to authorized personnel only."
+    },
+    "userRights": {
+      "title": "Your Rights",
+      "items": [
+        "Access your personal data at any time",
+        "Request corrections to your information",
+        "Request deletion of your data (subject to legal requirements)",
+        "Export your data in a standard format"
+      ]
+    },
+    "contact": {
+      "title": "Contact Us",
+      "content": "If you have any questions about this Privacy Policy or how we handle your data, please",
+      "link": "contact us"
+    }
+  },
+  "docs": {
+    "title": "Documentation",
+    "subtitle": "Everything you need to know about {commercialName}",
+    "overview": {
+      "title": "What is {commercialName}?",
+      "content1": "{commercialName} is a comprehensive wedding management platform designed specifically for wedding planners. It provides a complete solution for managing multiple weddings simultaneously, from guest list management to invitations to gift tracking.",
+      "content2": "Built with a multi-tenant architecture, {commercialName} allows wedding planners to manage multiple couples at once, while giving each couple secure access to their own wedding data through an intuitive interface."
+    },
+    "targetUsers": {
+      "title": "Who is {commercialName} for?",
+      "planner": {
+        "title": "Wedding Planners",
+        "content": "Professional wedding planners who manage multiple weddings and need a centralized platform to handle all aspects of guest management, communication, and coordination."
+      },
+      "couple": {
+        "title": "Wedding Couples",
+        "content": "Couples get free access granted by their planner to manage their wedding guest list, track RSVPs, and communicate with their guests through multiple channels."
+      },
+      "guest": {
+        "title": "Wedding Guests",
+        "content": "Guests receive magic links via WhatsApp, email, or SMS to RSVP without needing to create accounts—making the process as simple as possible."
+      }
+    },
+    "keyFeatures": {
+      "title": "Key Features",
+      "items": [
+        "Family-based guest management with Excel import/export",
+        "Multi-channel invitations (WhatsApp, Email, SMS) in 5 languages",
+        "Magic link authentication for guests—no passwords needed",
+        "Real-time RSVP tracking with activity notifications",
+        "Gift tracking with automated or manual payment confirmation"
+      ]
+    },
+    "gettingStarted": {
+      "title": "Getting Started",
+      "content": "Ready to streamline your wedding planning business? Start with our free 14-day trial to explore all features with your first wedding. No credit card required.",
+      "button": "Request a Demo"
+    }
+  }
+}

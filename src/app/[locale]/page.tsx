@@ -1,13 +1,14 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { getTranslations } from '@/lib/i18n/server';
+import { Language } from '@/lib/i18n/config';
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  await params;
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${commercialName} - Wedding Management Platform for Planners`,
     description: `Transform your wedding planning business with ${commercialName}. Manage multiple weddings, track RSVPs, and communicate with guests across WhatsApp, Email, and SMS.`,
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations('landing');
+  const { t } = await getTranslations(locale as Language);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
@@ -30,20 +31,20 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-700 hover:text-rose-600 transition-colors">
-                {t('nav.features')}
+                {t('landing.nav.features')}
               </a>
               <a href="#pricing" className="text-gray-700 hover:text-rose-600 transition-colors">
-                {t('nav.pricing')}
+                {t('landing.nav.pricing')}
               </a>
               <a href="#testimonials" className="text-gray-700 hover:text-rose-600 transition-colors">
-                {t('nav.testimonials')}
+                {t('landing.nav.testimonials')}
               </a>
               <LanguageSelector />
               <Link
                 href="/auth/signin"
                 className="px-6 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
               >
-                {t('nav.login')}
+                {t('landing.nav.login')}
               </Link>
             </nav>
             <div className="md:hidden flex items-center gap-2">
@@ -52,7 +53,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 href="/auth/signin"
                 className="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-sm"
               >
-                {t('nav.login')}
+                {t('landing.nav.login')}
               </Link>
             </div>
           </div>
@@ -78,27 +79,27 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               </div>
 
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 font-['Playfair_Display']">
-                {t('hero.title')}
+                {t('landing.hero.title')}
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
-                {t('hero.subtitle', { commercialName })}
+                {t('landing.hero.subtitle', { commercialName })}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
                   href="/contact"
                   className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
-                  {t('hero.cta.primary')}
+                  {t('landing.hero.cta.primary')}
                 </Link>
                 <a
                   href="#features"
                   className="px-8 py-4 bg-white text-rose-600 rounded-full text-lg font-semibold border-2 border-rose-300 hover:border-rose-500 transition-all shadow-md hover:shadow-lg"
                 >
-                  {t('hero.cta.secondary')}
+                  {t('landing.hero.cta.secondary')}
                 </a>
               </div>
               <p className="mt-8 text-gray-500 text-sm">
-                {t('hero.trial')}
+                {t('landing.hero.trial')}
               </p>
             </div>
 
@@ -124,10 +125,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-['Playfair_Display']">
-              {t('features.title')}
+              {t('landing.features.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {t('features.subtitle')}
+              {t('landing.features.subtitle')}
             </p>
           </div>
 
@@ -140,10 +141,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('features.items.guestManagement.title')}
+                {t('landing.features.items.guestManagement.title')}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('features.items.guestManagement.description')}
+                {t('landing.features.items.guestManagement.description')}
               </p>
             </div>
 
@@ -155,10 +156,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('features.items.invitationDesigner.title')}
+                {t('landing.features.items.invitationDesigner.title')}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('features.items.invitationDesigner.description')}
+                {t('landing.features.items.invitationDesigner.description')}
               </p>
             </div>
 
@@ -170,10 +171,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('features.items.multiChannel.title')}
+                {t('landing.features.items.multiChannel.title')}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('features.items.multiChannel.description')}
+                {t('landing.features.items.multiChannel.description')}
               </p>
             </div>
 
@@ -185,10 +186,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('features.items.taskManagement.title')}
+                {t('landing.features.items.taskManagement.title')}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('features.items.taskManagement.description')}
+                {t('landing.features.items.taskManagement.description')}
               </p>
             </div>
 
@@ -200,10 +201,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('features.items.seatingPlanner.title')}
+                {t('landing.features.items.seatingPlanner.title')}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('features.items.seatingPlanner.description')}
+                {t('landing.features.items.seatingPlanner.description')}
               </p>
             </div>
 
@@ -215,10 +216,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('features.items.giftTracking.title')}
+                {t('landing.features.items.giftTracking.title')}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {t('features.items.giftTracking.description')}
+                {t('landing.features.items.giftTracking.description')}
               </p>
             </div>
           </div>
@@ -230,10 +231,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-['Playfair_Display']">
-              {t('testimonials.title')}
+              {t('landing.testimonials.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {t('testimonials.subtitle', { commercialName })}
+              {t('landing.testimonials.subtitle', { commercialName })}
             </p>
           </div>
 
@@ -250,15 +251,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </div>
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed italic">
-                {t('testimonials.items.0.text', { commercialName })}
+                {t('landing.testimonials.items.0.text', { commercialName })}
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 flex items-center justify-center text-white font-bold text-lg">
-                  {t('testimonials.items.0.name').charAt(0)}
+                  {t('landing.testimonials.items.0.name').charAt(0)}
                 </div>
                 <div className="ml-4">
-                  <p className="font-semibold text-gray-900">{t('testimonials.items.0.name')}</p>
-                  <p className="text-gray-600 text-sm">{t('testimonials.items.0.role')}</p>
+                  <p className="font-semibold text-gray-900">{t('landing.testimonials.items.0.name')}</p>
+                  <p className="text-gray-600 text-sm">{t('landing.testimonials.items.0.role')}</p>
                 </div>
               </div>
             </div>
@@ -275,15 +276,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </div>
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed italic">
-                {t('testimonials.items.1.text')}
+                {t('landing.testimonials.items.1.text')}
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 flex items-center justify-center text-white font-bold text-lg">
-                  {t('testimonials.items.1.name').charAt(0)}
+                  {t('landing.testimonials.items.1.name').charAt(0)}
                 </div>
                 <div className="ml-4">
-                  <p className="font-semibold text-gray-900">{t('testimonials.items.1.name')}</p>
-                  <p className="text-gray-600 text-sm">{t('testimonials.items.1.role')}</p>
+                  <p className="font-semibold text-gray-900">{t('landing.testimonials.items.1.name')}</p>
+                  <p className="text-gray-600 text-sm">{t('landing.testimonials.items.1.role')}</p>
                 </div>
               </div>
             </div>
@@ -300,15 +301,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </div>
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed italic">
-                {t('testimonials.items.2.text', { commercialName })}
+                {t('landing.testimonials.items.2.text', { commercialName })}
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold text-lg">
-                  {t('testimonials.items.2.name').charAt(0)}
+                  {t('landing.testimonials.items.2.name').charAt(0)}
                 </div>
                 <div className="ml-4">
-                  <p className="font-semibold text-gray-900">{t('testimonials.items.2.name')}</p>
-                  <p className="text-gray-600 text-sm">{t('testimonials.items.2.role')}</p>
+                  <p className="font-semibold text-gray-900">{t('landing.testimonials.items.2.name')}</p>
+                  <p className="text-gray-600 text-sm">{t('landing.testimonials.items.2.role')}</p>
                 </div>
               </div>
             </div>
@@ -321,10 +322,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-['Playfair_Display']">
-              {t('pricing.title')}
+              {t('landing.pricing.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {t('pricing.subtitle')}
+              {t('landing.pricing.subtitle')}
             </p>
           </div>
 
@@ -332,124 +333,124 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             {/* Free Trial */}
             <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 hover:shadow-lg transition-shadow">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {t('pricing.plans.trial.name')}
+                {t('landing.pricing.plans.trial.name')}
               </h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">{t('pricing.plans.trial.price')}</span>
+                <span className="text-4xl font-bold text-gray-900">{t('landing.pricing.plans.trial.price')}</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">{t('pricing.plans.trial.features.0')}</span>
+                  <span className="text-gray-700">{t('landing.pricing.plans.trial.features.0')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">{t('pricing.plans.trial.features.1')}</span>
+                  <span className="text-gray-700">{t('landing.pricing.plans.trial.features.1')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">{t('pricing.plans.trial.features.2')}</span>
+                  <span className="text-gray-700">{t('landing.pricing.plans.trial.features.2')}</span>
                 </li>
               </ul>
               <Link
                 href="/contact"
                 className="block w-full py-3 px-6 text-center bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
               >
-                {t('pricing.cta')}
+                {t('landing.pricing.cta')}
               </Link>
             </div>
 
             {/* Standard Plan */}
             <div className="p-8 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 text-white transform md:scale-105 shadow-2xl relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-400 text-gray-900 px-4 py-1 rounded-full text-sm font-bold">
-                {t('pricing.popular')}
+                {t('landing.pricing.popular')}
               </div>
               <h3 className="text-2xl font-bold mb-2">
-                {t('pricing.plans.standard.name')}
+                {t('landing.pricing.plans.standard.name')}
               </h3>
               <div className="mb-6">
                 <span className="text-4xl font-bold">€50</span>
-                <span className="text-white/80">/{t('pricing.perMonth')}</span>
+                <span className="text-white/80">/{t('landing.pricing.perMonth')}</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-white mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>{t('pricing.plans.standard.features.0')}</span>
+                  <span>{t('landing.pricing.plans.standard.features.0')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-white mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>{t('pricing.plans.standard.features.1')}</span>
+                  <span>{t('landing.pricing.plans.standard.features.1')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-white mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>{t('pricing.plans.standard.features.2')}</span>
+                  <span>{t('landing.pricing.plans.standard.features.2')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-white mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>{t('pricing.plans.standard.features.3')}</span>
+                  <span>{t('landing.pricing.plans.standard.features.3')}</span>
                 </li>
               </ul>
               <Link
                 href="/contact"
                 className="block w-full py-3 px-6 text-center bg-white text-rose-600 rounded-full font-semibold hover:bg-gray-50 transition-colors"
               >
-                {t('pricing.cta')}
+                {t('landing.pricing.cta')}
               </Link>
             </div>
 
             {/* Pro Plan */}
             <div className="p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 hover:shadow-lg transition-shadow">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {t('pricing.plans.pro.name')}
+                {t('landing.pricing.plans.pro.name')}
               </h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">{t('pricing.plans.pro.price')}</span>
+                <span className="text-4xl font-bold text-gray-900">{t('landing.pricing.plans.pro.price')}</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">{t('pricing.plans.pro.features.0')}</span>
+                  <span className="text-gray-700">{t('landing.pricing.plans.pro.features.0')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">{t('pricing.plans.pro.features.1')}</span>
+                  <span className="text-gray-700">{t('landing.pricing.plans.pro.features.1')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">{t('pricing.plans.pro.features.2')}</span>
+                  <span className="text-gray-700">{t('landing.pricing.plans.pro.features.2')}</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">{t('pricing.plans.pro.features.3')}</span>
+                  <span className="text-gray-700">{t('landing.pricing.plans.pro.features.3')}</span>
                 </li>
               </ul>
               <Link
                 href="/contact"
                 className="block w-full py-3 px-6 text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all"
               >
-                {t('pricing.contactUs')}
+                {t('landing.pricing.contactUs')}
               </Link>
             </div>
           </div>
@@ -460,16 +461,16 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-rose-600 to-pink-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-['Playfair_Display']">
-            {t('cta.title')}
+            {t('landing.cta.title')}
           </h2>
           <p className="text-xl text-white/90 mb-10">
-            {t('cta.subtitle', { commercialName })}
+            {t('landing.cta.subtitle', { commercialName })}
           </p>
           <Link
             href="/contact"
             className="inline-block px-10 py-4 bg-white text-rose-600 rounded-full text-lg font-semibold hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            {t('cta.button')}
+            {t('landing.cta.button')}
           </Link>
         </div>
       </section>
@@ -481,35 +482,35 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             <div>
               <h3 className="text-xl font-bold mb-4 font-['Playfair_Display']">{commercialName}</h3>
               <p className="text-gray-400">
-                {t('footer.tagline')}
+                {t('landing.footer.tagline')}
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">{t('footer.product')}</h4>
+              <h4 className="font-semibold mb-4">{t('landing.footer.product')}</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#features" className="hover:text-white transition-colors">{t('nav.features')}</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">{t('nav.pricing')}</a></li>
-                <li><a href="#testimonials" className="hover:text-white transition-colors">{t('nav.testimonials')}</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">{t('landing.nav.features')}</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">{t('landing.nav.pricing')}</a></li>
+                <li><a href="#testimonials" className="hover:text-white transition-colors">{t('landing.nav.testimonials')}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">{t('footer.company')}</h4>
+              <h4 className="font-semibold mb-4">{t('landing.footer.company')}</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white transition-colors">{t('footer.about')}</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">{t('footer.contact')}</Link></li>
-                <li><Link href="/privacy" className="hover:text-white transition-colors">{t('footer.privacy')}</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">{t('landing.footer.about')}</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">{t('landing.footer.contact')}</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">{t('landing.footer.privacy')}</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">{t('footer.support')}</h4>
+              <h4 className="font-semibold mb-4">{t('landing.footer.support')}</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/contact" className="hover:text-white transition-colors">{t('footer.help')}</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors">{t('footer.docs')}</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">{t('landing.footer.help')}</Link></li>
+                <li><Link href="/docs" className="hover:text-white transition-colors">{t('landing.footer.docs')}</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>© 2026 {commercialName}. {t('footer.rights')}</p>
+            <p>© 2026 {commercialName}. {t('landing.footer.rights')}</p>
           </div>
         </div>
       </footer>

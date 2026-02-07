@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getMessages } from 'next-intl/server';
+import { getLanguageFromRequest } from '@/lib/i18n/server';
 import '../globals.css'
 
 export default async function PublicLayout({
@@ -7,8 +8,8 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode
 }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  const locale = await getLanguageFromRequest();
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale}>

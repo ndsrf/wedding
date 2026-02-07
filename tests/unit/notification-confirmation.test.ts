@@ -43,7 +43,7 @@ jest.mock('@/lib/date-formatter', () => ({
 }));
 
 jest.mock('@/lib/short-url', () => ({
-  getShortUrlPath: jest.fn(() => Promise.resolve('/rsvp/token123')),
+  getShortUrlPath: jest.fn(() => Promise.resolve('/inv/LJ/abc')),
 }));
 
 describe('Confirmation Notification Service', () => {

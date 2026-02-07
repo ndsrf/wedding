@@ -5,7 +5,7 @@
  * These tests call the route handler functions directly
  */
 
-import { GET, POST } from '@/app/api/admin/guests/route';
+import { GET, POST } from '@/app/(public)/api/admin/guests/route';
 import { prisma } from '@/lib/db/prisma';
 import { NextRequest } from 'next/server';
 

@@ -2,10 +2,10 @@ import { requireRole } from '@/lib/auth/middleware';
 import { WeddingProviders } from '@/components/shared/WeddingProviders';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from '@/lib/i18n/server';
 
 export default async function AdminWeddingProvidersPage() {
-  const t = await getTranslations();
+  const { t } = await getTranslations();
   let user;
   try {
     user = await requireRole('wedding_admin');

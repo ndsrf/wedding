@@ -4,7 +4,7 @@
  * Tests the /api/admin/wedding route handlers with database integration
  */
 
-import { GET, PATCH } from '@/app/api/admin/wedding/route';
+import { GET, PATCH } from '@/app/(public)/api/admin/wedding/route';
 import { prisma } from '@/lib/db/prisma';
 import { NextRequest } from 'next/server';
 

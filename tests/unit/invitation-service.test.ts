@@ -44,8 +44,7 @@ jest.mock('@/lib/date-formatter', () => ({
 }));
 
 jest.mock('@/lib/short-url', () => ({
-  getShortUrlPath: jest.fn(() => Promise.resolve('/s/ABC123')),
-}));
+      getShortUrlPath: jest.fn(() => Promise.resolve('/inv/ABC/123')),}));
 
 jest.mock('@/lib/notifications/whatsapp-links', () => ({
   buildWhatsAppLink: jest.fn((phone, message) => `https://wa.me/${phone}?text=${message}`),
