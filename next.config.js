@@ -12,8 +12,10 @@ const nextConfig = {
   // Disable compression if behind Cloudflare (let Cloudflare handle it)
   compress: process.env.PLATFORM_OPTIMIZATION !== 'cloudflare',
   compiler: {
-    // Remove console logs in production for performance
-    removeConsole: process.env.NODE_ENV === 'production',
+    // Remove console logs in production for performance, except for important system logs
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn', 'log'], // We actually want to see [Migration] and [Server] logs
+    } : false,
   },
   experimental: {
     serverActions: {

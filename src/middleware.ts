@@ -28,6 +28,7 @@ const PUBLIC_ROUTES = [
   '/api/auth',
   '/contact',
   '/api/contact',
+  '/api/health',
 ];
 
 // Routes that require specific roles
