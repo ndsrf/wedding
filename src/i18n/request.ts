@@ -1,16 +1,15 @@
 import { getRequestConfig } from 'next-intl/server';
-import { getLanguageFromRequest, getTranslations } from '@/lib/i18n/server';
+import { routing } from './routing';
+import { Language } from '@/lib/i18n/config';
 
-export default getRequestConfig(async () => {
-  // Use our custom detection logic which includes headers, etc.
-  // Note: We might not have access to search params here easily in all contexts,
-  // but getLanguageFromRequest handles headers. 
-  // We can also check cookies if needed.
-  const locale = await getLanguageFromRequest();
-  const { messages } = await getTranslations(locale);
+export default getRequestConfig(async ({ locale }) => {
+  // Ensure locale is a string and valid
+  const targetLocale = (locale && routing.locales.includes(locale as Language)) 
+    ? locale 
+    : routing.defaultLocale;
 
   return {
-    locale,
-    messages
+    locale: targetLocale,
+    messages: (await import(`../../public/locales/${targetLocale}/common.json`)).default
   };
 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/routing';
 import { useState, useRef, useEffect } from 'react';
 
 const languages = [
@@ -15,6 +15,7 @@ const languages = [
 export default function LanguageSelector() {
   const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -31,26 +32,11 @@ export default function LanguageSelector() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLanguageChange = async (langCode: string) => {
+  const handleLanguageChange = (langCode: string) => {
     setIsOpen(false);
 
-    try {
-      // Set the locale cookie
-      const response = await fetch('/api/locale', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ locale: langCode }),
-      });
-
-      if (response.ok) {
-        // Refresh the page to apply the new locale
-        router.refresh();
-      }
-    } catch (error) {
-      console.error('Error changing language:', error);
-    }
+    // router.replace handles the URL update with the new locale
+    router.replace(pathname, { locale: langCode });
   };
 
   return (

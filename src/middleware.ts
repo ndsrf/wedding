@@ -10,6 +10,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import type { AuthenticatedUser } from '@/types/api';
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
+
+// Create next-intl middleware
+const intlMiddleware = createMiddleware(routing);
 
 // ============================================================================
 // ROUTE CONFIGURATION
@@ -120,23 +125,55 @@ export async function middleware(request: NextRequest) {
 
   // 1. Guest routes - CRITICAL PATH
   // Return early for guest RSVP routes to ensure maximum performance
-  // and prioritize these requests.
   if (pathname.startsWith('/rsvp') || pathname.startsWith('/api/guest')) {
     const response = NextResponse.next();
     response.headers.set('x-priority', 'high');
     response.headers.set('x-route-type', 'rsvp');
-    // Ensure no-cache for RSVP status pages to always show fresh state
-    // but allow the browser to cache static assets
     response.headers.set('Cache-Control', 'no-store, max-age=0');
     return response;
   }
 
-  // 2. Public routes
+  // 2. Auth redirect for home page (Performance optimization)
+  // Check if user is logged in when accessing root to redirect to dashboard
+  if (pathname === '/' || routing.locales.some(locale => pathname === `/${locale}`)) {
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NEXTAUTH_URL?.startsWith('https://'),
+    });
+
+    if (token?.user?.role) {
+      const role = (token.user as AuthenticatedUser).role;
+      return NextResponse.redirect(new URL(getRedirectForRole(role), request.url));
+    }
+    
+    // Fall through to intlMiddleware for non-authenticated users
+  }
+
+  // 3. Internationalization
+  // This handles /about, /docs, etc. and redirects / to /[locale]
+  // if not authenticated.
+  const response = intlMiddleware(request);
+  
+  // If intlMiddleware wants to redirect (e.g. adding locale), return that
+  // But we only want to apply intlMiddleware to specific public pages for SEO
+  // The user only wanted /, /about, /docs, /privacy to be SEO friendly.
+  const isSeoFriendlyPath = pathname === '/' || 
+    pathname.startsWith('/about') || 
+    pathname.startsWith('/docs') || 
+    pathname.startsWith('/privacy') ||
+    routing.locales.some(locale => pathname.startsWith(`/${locale}`));
+
+  if (isSeoFriendlyPath) {
+    return response;
+  }
+
+  // 4. Public routes (non-intl)
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // 3. Authenticated routes
+  // 5. Authenticated routes
   // Get user session token
   const token = await getToken({
     req: request,

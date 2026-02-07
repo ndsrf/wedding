@@ -1,43 +1,23 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
-import { auth } from '@/lib/auth/config';
-import { redirect } from 'next/navigation';
 import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
 import { Metadata } from 'next';
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
-export const metadata: Metadata = {
-  title: `${commercialName} - Wedding Management Platform for Planners`,
-  description: `Transform your wedding planning business with ${commercialName}. Manage multiple weddings, track RSVPs, and communicate with guests across WhatsApp, Email, and SMS.`,
-};
-
-// Helper function to get redirect URL based on role
-function getRedirectForRole(role: string): string {
-  switch (role) {
-    case 'master_admin':
-      return '/master';
-    case 'planner':
-      return '/planner';
-    case 'wedding_admin':
-      return '/admin';
-    default:
-      return '/auth/signin';
-  }
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  await params;
+  return {
+    title: `${commercialName} - Wedding Management Platform for Planners`,
+    description: `Transform your wedding planning business with ${commercialName}. Manage multiple weddings, track RSVPs, and communicate with guests across WhatsApp, Email, and SMS.`,
+  };
 }
 
-export default async function LandingPage() {
+export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations('landing');
-
-  // Check if user is authenticated
-  const session = await auth();
-
-  // Only redirect if user is properly authenticated with a valid role
-  // This ensures we don't redirect on partial/invalid sessions
-  if (session?.user?.role) {
-    redirect(getRedirectForRole(session.user.role));
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">

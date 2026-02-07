@@ -1,12 +1,12 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
 
-export default function PrivacyPage() {
-  const t = useTranslations();
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations();
   const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
   return (
