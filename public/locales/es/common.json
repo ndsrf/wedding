@@ -100,11 +100,161 @@
     "no": "No"
   },
   "landing": {
-    "title": "Sistema de Gestión de Bodas",
-    "subtitle": "Plataforma de gestión de bodas multi-inquilino",
-    "description": {
-      "p1": "Plataforma para organizadores de bodas, administradores e invitados",
-      "p2": "Con seguimiento de RSVP, gestión de regalos y soporte multi-idioma"
+    "nav": {
+      "features": "Características",
+      "pricing": "Precios",
+      "testimonials": "Testimonios",
+      "login": "Iniciar Sesión"
+    },
+    "hero": {
+      "title": "Potencia Tu Negocio de Organización de Bodas",
+      "subtitle": "{commercialName} es la plataforma todo-en-uno para organizadores de bodas para colaborar sin problemas con las parejas, gestionar invitados, diseñar invitaciones impresionantes y crear celebraciones inolvidables.",
+      "cta": {
+        "primary": "Prueba Gratuita",
+        "secondary": "Saber Más"
+      },
+      "trial": "Prueba gratuita • 1 boda • Sin tarjeta de crédito"
+    },
+    "features": {
+      "title": "Todo Lo Que Necesitas Para Planear Bodas Perfectas",
+      "subtitle": "Herramientas poderosas diseñadas para organizadores profesionales",
+      "items": {
+        "guestManagement": {
+          "title": "Gestión de Invitados",
+          "description": "Gestiona listas de invitados, rastrea confirmaciones, requisitos dietéticos y disposición de asientos en un solo lugar."
+        },
+        "invitationDesigner": {
+          "title": "Diseñador de Invitaciones",
+          "description": "Crea hermosas invitaciones personalizadas con nuestras herramientas intuitivas y plantillas elegantes."
+        },
+        "multiChannel": {
+          "title": "Invitaciones Multicanal",
+          "description": "Envía invitaciones por email, WhatsApp y SMS. Rastrea el estado de entrega y respuestas en tiempo real."
+        },
+        "taskManagement": {
+          "title": "Gestión de Tareas y Proveedores",
+          "description": "Colabora con las parejas en listas de tareas, gestiona vendedores y proveedores, y mantén todo bajo control."
+        },
+        "seatingPlanner": {
+          "title": "Planificador de Asientos Interactivo",
+          "description": "Organiza planes de asientos perfectos con nuestra interfaz de arrastrar y soltar. Visualiza y optimiza distribuciones de mesas."
+        },
+        "giftTracking": {
+          "title": "Registro y Seguimiento de Regalos",
+          "description": "Ayuda a las parejas a gestionar su registro de regalos y rastrear regalos recibidos con recordatorios automáticos de agradecimiento."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Amado por Organizadores de Bodas en Todo el Mundo",
+      "subtitle": "Únete a miles de profesionales usando {commercialName}",
+      "items": [
+        {
+          "text": "{commercialName} ha transformado cómo gestionamos nuestro negocio de organización de bodas. Las invitaciones multicanal y el seguimiento en tiempo real nos ahorran innumerables horas.",
+          "name": "Sofía Martínez",
+          "role": "Organizadora de Bodas, Madrid"
+        },
+        {
+          "text": "A nuestras parejas les encantan las funciones colaborativas. Solo el planificador de asientos ha hecho nuestro servicio mucho más valioso.",
+          "name": "Emma Thompson",
+          "role": "Coordinadora de Eventos, Londres"
+        },
+        {
+          "text": "Gestionar 3 bodas simultáneamente solía ser estresante. Con {commercialName}, todo está organizado y nuestros clientes están más felices que nunca.",
+          "name": "Luca Romano",
+          "role": "Organizador de Bodas, Roma"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Precios Simples y Transparentes",
+      "subtitle": "Elige el plan que se adapte a tu negocio",
+      "popular": "MÁS POPULAR",
+      "perMonth": "mes",
+      "cta": "Comenzar",
+      "contactUs": "Contáctanos",
+      "plans": {
+        "trial": {
+          "name": "Prueba Gratuita",
+          "price": "Gratis",
+          "features": [
+            "1 boda",
+            "Todas las funciones principales",
+            "Período de prueba de 14 días"
+          ]
+        },
+        "standard": {
+          "name": "Estándar",
+          "price": "€50",
+          "features": [
+            "3 bodas en paralelo",
+            "Invitados ilimitados",
+            "Todas las funciones incluidas",
+            "Soporte prioritario"
+          ]
+        },
+        "pro": {
+          "name": "Profesional",
+          "price": "Personalizado",
+          "features": [
+            "Bodas ilimitadas",
+            "Opción de marca blanca",
+            "Gerente de cuenta dedicado",
+            "Integraciones personalizadas"
+          ]
+        }
+      }
+    },
+    "cta": {
+      "title": "¿Listo Para Transformar Tu Negocio de Organización de Bodas?",
+      "subtitle": "Únete a cientos de organizadores que confían en {commercialName} para ofrecer experiencias excepcionales.",
+      "button": "Comienza Tu Prueba Gratuita"
+    },
+    "footer": {
+      "tagline": "Empoderando a organizadores de bodas para crear celebraciones inolvidables.",
+      "product": "Producto",
+      "company": "Empresa",
+      "support": "Soporte",
+      "about": "Acerca de",
+      "contact": "Contacto",
+      "privacy": "Política de Privacidad",
+      "help": "Centro de Ayuda",
+      "docs": "Documentación",
+      "rights": "Todos los derechos reservados."
+    },
+    "title": "{commercialName} - Gestión de Bodas"
+  },
+  "contact": {
+    "title": "Contáctanos",
+    "subtitle": "Estamos aquí para ayudarte a empezar",
+    "form": {
+      "name": "Nombre completo",
+      "namePlaceholder": "Tu nombre",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@email.com",
+      "phone": "Teléfono",
+      "phonePlaceholder": "+34 600 000 000",
+      "reason": "Motivo del contacto",
+      "reasonPlaceholder": "Selecciona un motivo",
+      "message": "Mensaje",
+      "messagePlaceholder": "Cuéntanos cómo podemos ayudarte...",
+      "submit": "Enviar mensaje",
+      "submitting": "Enviando..."
+    },
+    "reasons": {
+      "trial": "Prueba Gratuita",
+      "sales": "Ventas",
+      "support": "Contacto/Soporte"
+    },
+    "success": {
+      "title": "¡Gracias por contactarnos!",
+      "message": "Hemos recibido tu mensaje y nos pondremos en contacto contigo en breve.",
+      "backHome": "Volver al inicio"
+    },
+    "error": {
+      "title": "Error al enviar",
+      "message": "Ha ocurrido un error al enviar tu mensaje. Por favor, inténtalo de nuevo.",
+      "retry": "Reintentar"
     }
   },
   "metadata": {
@@ -1083,6 +1233,128 @@
     "signout": {
       "title": "Cerrando sesión...",
       "subtitle": "Por favor espera mientras cerramos tu sesión."
+    }
+  },
+  "about": {
+    "title": "Acerca de {commercialName}",
+    "subtitle": "Empoderando a los wedding planners para crear experiencias inolvidables",
+    "mission": {
+      "title": "Nuestra Misión",
+      "content": "En {commercialName}, creemos que cada boda debe ser una celebración sin estrés del amor. Nuestra misión es empoderar a los wedding planners con las herramientas que necesitan para ofrecer un servicio excepcional a sus parejas, mientras simplificamos la gestión de invitados y la comunicación."
+    },
+    "story": {
+      "title": "Nuestra Historia",
+      "content1": "{commercialName} nació de los desafíos reales que enfrentan los wedding planners al gestionar múltiples eventos simultáneamente. Vimos cómo los planificadores luchaban con hojas de cálculo, múltiples canales de comunicación y el seguimiento de confirmaciones de asistencia de diferentes parejas.",
+      "content2": "Construimos {commercialName} como una plataforma integral que reúne todo—desde la gestión de invitados hasta las invitaciones y el seguimiento de regalos—todo en un sistema elegante y fácil de usar diseñado específicamente para profesionales de bodas."
+    },
+    "values": {
+      "title": "Nuestros Valores",
+      "items": [
+        {
+          "title": "Simplicidad",
+          "content": "Creemos que las herramientas poderosas deben ser fáciles de usar. Cada función está diseñada para ahorrar tiempo y reducir la complejidad."
+        },
+        {
+          "title": "Confiabilidad",
+          "content": "Tus parejas confían en ti para su día especial. Nos aseguramos de que nuestra plataforma esté siempre disponible cuando la necesites."
+        },
+        {
+          "title": "Innovación",
+          "content": "Mejoramos y nos adaptamos continuamente a las necesidades cambiantes de los profesionales de bodas y sus clientes."
+        },
+        {
+          "title": "Soporte",
+          "content": "Tu éxito es nuestro éxito. Estamos aquí para ayudarte en cada paso del camino con soporte dedicado."
+        }
+      ]
+    },
+    "cta": {
+      "title": "¿Listo para transformar tu negocio de planificación de bodas?",
+      "button": "Contáctanos"
+    }
+  },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "lastUpdated": "Última actualización",
+    "introduction": {
+      "title": "Introducción",
+      "content": "En {commercialName}, nos tomamos muy en serio tu privacidad. Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos tu información personal cuando usas nuestra plataforma de gestión de bodas."
+    },
+    "dataCollection": {
+      "title": "Información que Recopilamos",
+      "intro": "Recopilamos los siguientes tipos de información:",
+      "items": [
+        "Información de contacto (nombre, correo electrónico, teléfono) proporcionada por wedding planners y administradores",
+        "Información de invitados de bodas gestionada a través de nuestra plataforma",
+        "Datos de uso y análisis para mejorar nuestro servicio",
+        "Información de autenticación a través de proveedores OAuth (Google, Facebook, Apple, Microsoft)"
+      ]
+    },
+    "dataUsage": {
+      "title": "Cómo Usamos tu Información",
+      "items": [
+        "Para proporcionar y mantener nuestros servicios de gestión de bodas",
+        "Para enviar invitaciones, recordatorios y comunicaciones en nombre de los wedding planners",
+        "Para rastrear confirmaciones de asistencia y gestionar listas de invitados",
+        "Para mejorar nuestra plataforma y desarrollar nuevas funciones"
+      ]
+    },
+    "dataProtection": {
+      "title": "Protección de Datos",
+      "content": "Implementamos medidas de seguridad estándar de la industria para proteger tus datos. Todos los datos se cifran en tránsito y en reposo. Utilizamos autenticación OAuth segura y nunca almacenamos contraseñas directamente. El acceso a los datos está estrictamente controlado y limitado solo al personal autorizado."
+    },
+    "userRights": {
+      "title": "Tus Derechos",
+      "items": [
+        "Acceder a tus datos personales en cualquier momento",
+        "Solicitar correcciones a tu información",
+        "Solicitar la eliminación de tus datos (sujeto a requisitos legales)",
+        "Exportar tus datos en un formato estándar"
+      ]
+    },
+    "contact": {
+      "title": "Contáctanos",
+      "content": "Si tienes alguna pregunta sobre esta Política de Privacidad o cómo manejamos tus datos, por favor",
+      "link": "contáctanos"
+    }
+  },
+  "docs": {
+    "title": "Documentación",
+    "subtitle": "Todo lo que necesitas saber sobre Nupci",
+    "overview": {
+      "title": "¿Qué es Nupci?",
+      "content1": "Nupci es una plataforma integral de gestión de bodas diseñada específicamente para wedding planners. Proporciona una solución completa para gestionar múltiples bodas simultáneamente, desde la gestión de listas de invitados hasta invitaciones y seguimiento de regalos.",
+      "content2": "Construida con una arquitectura multi-tenant, Nupci permite a los wedding planners gestionar múltiples parejas a la vez, mientras brinda a cada pareja acceso seguro a los datos de su propia boda a través de una interfaz intuitiva."
+    },
+    "targetUsers": {
+      "title": "¿Para quién es Nupci?",
+      "planner": {
+        "title": "Wedding Planners",
+        "content": "Wedding planners profesionales que gestionan múltiples bodas y necesitan una plataforma centralizada para manejar todos los aspectos de la gestión de invitados, comunicación y coordinación."
+      },
+      "couple": {
+        "title": "Parejas de Novios",
+        "content": "Las parejas obtienen acceso gratuito otorgado por su planner para gestionar la lista de invitados de su boda, rastrear confirmaciones de asistencia y comunicarse con sus invitados a través de múltiples canales."
+      },
+      "guest": {
+        "title": "Invitados",
+        "content": "Los invitados reciben enlaces mágicos vía WhatsApp, correo electrónico o SMS para confirmar asistencia sin necesidad de crear cuentas—haciendo el proceso lo más simple posible."
+      }
+    },
+    "keyFeatures": {
+      "title": "Características Principales",
+      "items": [
+        "Gestión de invitados basada en familias con importación/exportación de Excel",
+        "Invitaciones multicanal (WhatsApp, Email, SMS) en 5 idiomas",
+        "Autenticación de enlaces mágicos para invitados—no se necesitan contraseñas",
+        "Seguimiento de confirmaciones de asistencia en tiempo real con notificaciones de actividad",
+        "Seguimiento de regalos con confirmación de pago automática o manual"
+      ]
+    },
+    "gettingStarted": {
+      "title": "Comenzar",
+      "content": "¿Listo para optimizar tu negocio de planificación de bodas? Comienza con nuestra prueba gratuita de 14 días para explorar todas las funciones con tu primera boda. No se requiere tarjeta de crédito.",
+      "button": "Solicita una Demo"
     }
   }
 }

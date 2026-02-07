@@ -97,6 +97,164 @@
     "yes": "Sì",
     "no": "No"
   },
+  "landing": {
+    "nav": {
+      "features": "Caratteristiche",
+      "pricing": "Prezzi",
+      "testimonials": "Testimonianze",
+      "login": "Accedi"
+    },
+    "hero": {
+      "title": "Potenzia La Tua Attività di Organizzazione Matrimoni",
+      "subtitle": "{commercialName} è la piattaforma tutto-in-uno per organizzatori di matrimoni per collaborare senza problemi con le coppie, gestire gli invitati, progettare inviti straordinari e creare celebrazioni indimenticabili.",
+      "cta": {
+        "primary": "Prova Gratuita",
+        "secondary": "Scopri Di Più"
+      },
+      "trial": "Prova gratuita • 1 matrimonio • Nessuna carta di credito richiesta"
+    },
+    "features": {
+      "title": "Tutto Ciò Di Cui Hai Bisogno Per Organizzare Matrimoni Perfetti",
+      "subtitle": "Strumenti potenti progettati per organizzatori professionisti",
+      "items": {
+        "guestManagement": {
+          "title": "Gestione Invitati",
+          "description": "Gestisci facilmente liste di invitati, traccia conferme, requisiti dietetici e disposizioni dei posti in un unico luogo."
+        },
+        "invitationDesigner": {
+          "title": "Designer di Inviti",
+          "description": "Crea bellissimi inviti personalizzati con i nostri strumenti di design intuitivi e modelli eleganti."
+        },
+        "multiChannel": {
+          "title": "Inviti Multi-Canale",
+          "description": "Invia inviti via email, WhatsApp e SMS. Traccia lo stato di consegna e le risposte in tempo reale."
+        },
+        "taskManagement": {
+          "title": "Gestione Attività e Fornitori",
+          "description": "Collabora con le coppie su liste di attività, gestisci venditori e fornitori, e mantieni tutto sotto controllo."
+        },
+        "seatingPlanner": {
+          "title": "Pianificatore Posti Interattivo",
+          "description": "Organizza piani posti perfetti con la nostra interfaccia drag-and-drop. Visualizza e ottimizza le disposizioni dei tavoli."
+        },
+        "giftTracking": {
+          "title": "Registro e Tracciamento Regali",
+          "description": "Aiuta le coppie a gestire la loro lista nozze e tracciare i regali ricevuti con promemoria automatici di ringraziamento."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Amato Dagli Organizzatori Di Matrimoni In Tutto Il Mondo",
+      "subtitle": "Unisciti a migliaia di professionisti che usano {commercialName}",
+      "items": [
+        {
+          "text": "{commercialName} ha trasformato il modo in cui gestiamo la nostra attività di organizzazione matrimoni. Gli inviti multi-canale e il tracciamento in tempo reale ci fanno risparmiare innumerevoli ore.",
+          "name": "Sofia Martínez",
+          "role": "Organizzatrice Matrimoni, Madrid"
+        },
+        {
+          "text": "Alle nostre coppie piacciono le funzionalità collaborative. Solo il pianificatore posti ha reso il nostro servizio molto più prezioso.",
+          "name": "Emma Thompson",
+          "role": "Coordinatrice Eventi, Londra"
+        },
+        {
+          "text": "Gestire 3 matrimoni contemporaneamente era stressante. Con {commercialName}, tutto è organizzato e i nostri clienti sono più felici che mai.",
+          "name": "Luca Romano",
+          "role": "Organizzatore Matrimoni, Roma"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Prezzi Semplici e Trasparenti",
+      "subtitle": "Scegli il piano adatto alla tua attività",
+      "popular": "PIÙ POPOLARE",
+      "perMonth": "mese",
+      "cta": "Inizia",
+      "contactUs": "Contattaci",
+      "plans": {
+        "trial": {
+          "name": "Prova Gratuita",
+          "price": "Gratis",
+          "features": [
+            "1 matrimonio",
+            "Tutte le funzionalità principali",
+            "Periodo di prova di 14 giorni"
+          ]
+        },
+        "standard": {
+          "name": "Standard",
+          "price": "€50",
+          "features": [
+            "3 matrimoni in parallelo",
+            "Invitati illimitati",
+            "Tutte le funzionalità incluse",
+            "Supporto prioritario"
+          ]
+        },
+        "pro": {
+          "name": "Professionale",
+          "price": "Personalizzato",
+          "features": [
+            "Matrimoni illimitati",
+            "Opzione white-label",
+            "Account manager dedicato",
+            "Integrazioni personalizzate"
+          ]
+        }
+      }
+    },
+    "cta": {
+      "title": "Pronto a Trasformare La Tua Attività Di Organizzazione Matrimoni?",
+      "subtitle": "Unisciti a centinaia di organizzatori che si fidano di {commercialName} per offrire esperienze eccezionali.",
+      "button": "Inizia La Tua Prova Gratuita"
+    },
+    "footer": {
+      "tagline": "Potenziare gli organizzatori di matrimoni per creare celebrazioni indimenticabili.",
+      "product": "Prodotto",
+      "company": "Azienda",
+      "support": "Supporto",
+      "about": "Chi Siamo",
+      "contact": "Contatto",
+      "privacy": "Privacy Policy",
+      "help": "Centro Assistenza",
+      "docs": "Documentazione",
+      "rights": "Tutti i diritti riservati."
+    },
+    "title": "{commercialName} - Gestione Matrimoni"
+  },
+  "contact": {
+    "title": "Contattaci",
+    "subtitle": "Siamo qui per aiutarti a iniziare",
+    "form": {
+      "name": "Nome completo",
+      "namePlaceholder": "Il tuo nome",
+      "email": "Indirizzo email",
+      "emailPlaceholder": "tu@email.com",
+      "phone": "Telefono",
+      "phonePlaceholder": "+39 333 000 0000",
+      "reason": "Motivo del contatto",
+      "reasonPlaceholder": "Seleziona un motivo",
+      "message": "Messaggio",
+      "messagePlaceholder": "Dicci come possiamo aiutarti...",
+      "submit": "Invia messaggio",
+      "submitting": "Invio..."
+    },
+    "reasons": {
+      "trial": "Prova Gratuita",
+      "sales": "Vendite",
+      "support": "Contatto/Supporto"
+    },
+    "success": {
+      "title": "Grazie per averci contattato!",
+      "message": "Abbiamo ricevuto il tuo messaggio e ti risponderemo a breve.",
+      "backHome": "Torna alla home"
+    },
+    "error": {
+      "title": "Errore di invio",
+      "message": "Si è verificato un errore durante l'invio del messaggio. Riprova.",
+      "retry": "Riprova"
+    }
+  },
   "metadata": {
     "title": "Sistema di Gestione Matrimoni",
     "description": "Piattaforma di gestione matrimoni multi-tenant con tracciamento RSVP e gestione pagamenti"
@@ -1064,6 +1222,128 @@
     "signout": {
       "title": "Disconnessione in corso...",
       "subtitle": "Attendere prego mentre effettuiamo la disconnessione."
+    }
+  },
+  "about": {
+    "title": "Chi Siamo - {commercialName}",
+    "subtitle": "Empowering wedding planners per creare esperienze indimenticabili",
+    "mission": {
+      "title": "La Nostra Missione",
+      "content": "In {commercialName}, crediamo che ogni matrimonio debba essere una celebrazione senza stress dell'amore. La nostra missione è fornire agli organizzatori di matrimoni gli strumenti di cui hanno bisogno per offrire un servizio eccezionale alle loro coppie, semplificando al contempo la gestione degli invitati e la comunicazione."
+    },
+    "story": {
+      "title": "La Nostra Storia",
+      "content1": "{commercialName} è nato dalle sfide reali affrontate dagli organizzatori di matrimoni che gestiscono più eventi contemporaneamente. Abbiamo visto come i pianificatori lottassero con fogli di calcolo, più canali di comunicazione e il monitoraggio delle conferme di presenza di diverse coppie.",
+      "content2": "Abbiamo costruito {commercialName} come una piattaforma completa che riunisce tutto—dalla gestione degli invitati agli inviti al monitoraggio dei regali—tutto in un sistema elegante e facile da usare progettato specificamente per i professionisti del matrimonio."
+    },
+    "values": {
+      "title": "I Nostri Valori",
+      "items": [
+        {
+          "title": "Semplicità",
+          "content": "Crediamo che gli strumenti potenti debbano essere facili da usare. Ogni funzionalità è progettata per risparmiare tempo e ridurre la complessità."
+        },
+        {
+          "title": "Affidabilità",
+          "content": "Le tue coppie si fidano di te per il loro giorno speciale. Garantiamo che la nostra piattaforma sia sempre disponibile quando ne hai bisogno."
+        },
+        {
+          "title": "Innovazione",
+          "content": "Miglioriamo e ci adattiamo continuamente alle esigenze in evoluzione dei professionisti del matrimonio e dei loro clienti."
+        },
+        {
+          "title": "Supporto",
+          "content": "Il tuo successo è il nostro successo. Siamo qui per aiutarti in ogni fase con un supporto dedicato."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Pronto a trasformare la tua attività di organizzazione matrimoni?",
+      "button": "Contattaci"
+    }
+  },
+  "privacy": {
+    "title": "Informativa sulla Privacy",
+    "lastUpdated": "Ultimo aggiornamento",
+    "introduction": {
+      "title": "Introduzione",
+      "content": "In {commercialName}, prendiamo sul serio la tua privacy. Questa Informativa sulla Privacy spiega come raccogliamo, utilizziamo e proteggiamo le tue informazioni personali quando utilizzi la nostra piattaforma di gestione matrimoni."
+    },
+    "dataCollection": {
+      "title": "Informazioni che Raccogliamo",
+      "intro": "Raccogliamo i seguenti tipi di informazioni:",
+      "items": [
+        "Informazioni di contatto (nome, email, telefono) fornite dagli organizzatori di matrimoni e amministratori",
+        "Informazioni sugli invitati al matrimonio gestite tramite la nostra piattaforma",
+        "Dati di utilizzo e analisi per migliorare il nostro servizio",
+        "Informazioni di autenticazione tramite provider OAuth (Google, Facebook, Apple, Microsoft)"
+      ]
+    },
+    "dataUsage": {
+      "title": "Come Utilizziamo le Tue Informazioni",
+      "items": [
+        "Per fornire e mantenere i nostri servizi di gestione matrimoni",
+        "Per inviare inviti, promemoria e comunicazioni per conto degli organizzatori di matrimoni",
+        "Per monitorare le conferme di presenza e gestire le liste degli invitati",
+        "Per migliorare la nostra piattaforma e sviluppare nuove funzionalità"
+      ]
+    },
+    "dataProtection": {
+      "title": "Protezione dei Dati",
+      "content": "Implementiamo misure di sicurezza standard del settore per proteggere i tuoi dati. Tutti i dati sono crittografati in transito e a riposo. Utilizziamo l'autenticazione OAuth sicura e non memorizziamo mai le password direttamente. L'accesso ai dati è strettamente controllato e limitato solo al personale autorizzato."
+    },
+    "userRights": {
+      "title": "I Tuoi Diritti",
+      "items": [
+        "Accedere ai tuoi dati personali in qualsiasi momento",
+        "Richiedere correzioni alle tue informazioni",
+        "Richiedere la cancellazione dei tuoi dati (soggetto a requisiti legali)",
+        "Esportare i tuoi dati in un formato standard"
+      ]
+    },
+    "contact": {
+      "title": "Contattaci",
+      "content": "Se hai domande su questa Informativa sulla Privacy o su come gestiamo i tuoi dati, per favore",
+      "link": "contattaci"
+    }
+  },
+  "docs": {
+    "title": "Documentazione",
+    "subtitle": "Tutto quello che devi sapere su {commercialName}",
+    "overview": {
+      "title": "Cos'è {commercialName}?",
+      "content1": "{commercialName} è una piattaforma completa di gestione matrimoni progettata specificamente per gli organizzatori di matrimoni. Fornisce una soluzione completa per gestire più matrimoni contemporaneamente, dalla gestione delle liste degli invitati agli inviti al monitoraggio dei regali.",
+      "content2": "Costruita con un'architettura multi-tenant, {commercialName} consente agli organizzatori di matrimoni di gestire più coppie contemporaneamente, dando a ciascuna coppia accesso sicuro ai dati del proprio matrimonio attraverso un'interfaccia intuitiva."
+    },
+    "targetUsers": {
+      "title": "Per chi è {commercialName}?",
+      "planner": {
+        "title": "Organizzatori di Matrimoni",
+        "content": "Organizzatori di matrimoni professionisti che gestiscono più matrimoni e hanno bisogno di una piattaforma centralizzata per gestire tutti gli aspetti della gestione degli invitati, comunicazione e coordinamento."
+      },
+      "couple": {
+        "title": "Coppie di Sposi",
+        "content": "Le coppie ottengono accesso gratuito concesso dal loro organizzatore per gestire la lista degli invitati del loro matrimonio, monitorare le conferme di presenza e comunicare con i loro invitati attraverso più canali."
+      },
+      "guest": {
+        "title": "Invitati",
+        "content": "Gli invitati ricevono link magici via WhatsApp, email o SMS per confermare la presenza senza dover creare account—rendendo il processo il più semplice possibile."
+      }
+    },
+    "keyFeatures": {
+      "title": "Funzionalità Principali",
+      "items": [
+        "Gestione degli invitati basata sulla famiglia con importazione/esportazione Excel",
+        "Inviti multicanale (WhatsApp, Email, SMS) in 5 lingue",
+        "Autenticazione tramite link magico per gli invitati—nessuna password necessaria",
+        "Monitoraggio delle conferme di presenza in tempo reale con notifiche di attività",
+        "Monitoraggio dei regali con conferma di pagamento automatica o manuale"
+      ]
+    },
+    "gettingStarted": {
+      "title": "Inizia",
+      "content": "Pronto a semplificare la tua attività di organizzazione matrimoni? Inizia con la nostra prova gratuita di 14 giorni per esplorare tutte le funzionalità con il tuo primo matrimonio. Nessuna carta di credito richiesta.",
+      "button": "Richiedi una Demo"
     }
   }
 }

@@ -65,7 +65,13 @@
       "Bash(npm audit fix:*)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" psql:*)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate deploy:*)",
-      "Bash(npm run test:unit:*)"
+      "Bash(npm run test:unit:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_install",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_close",
+      "Bash(curl:*)",
+      "Bash(lsof:*)"
     ]
   }
 }

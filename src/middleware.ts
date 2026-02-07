@@ -21,6 +21,8 @@ const PUBLIC_ROUTES = [
   '/auth/error',
   '/auth/signout',
   '/api/auth',
+  '/contact',
+  '/api/contact',
 ];
 
 // Routes that require specific roles
@@ -190,16 +192,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Home page - redirect based on role
+  // Home page - allow access for landing page
+  // The page itself will handle redirects for authenticated users
   if (pathname === '/') {
-    if (user) {
-      const redirectUrl = new URL(getRedirectForRole(user.role), request.url);
-      return NextResponse.redirect(redirectUrl);
-    } else {
-      // Not authenticated - show landing page or redirect to sign in
-      const signInUrl = new URL('/auth/signin', request.url);
-      return NextResponse.redirect(signInUrl);
-    }
+    return NextResponse.next();
   }
 
   // Default: allow access

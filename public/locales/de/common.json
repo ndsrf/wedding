@@ -98,11 +98,161 @@
     "no": "Nein"
   },
   "landing": {
-    "title": "Hochzeitsmanagementsystem",
-    "subtitle": "Mandantenfähige Hochzeitsmanagement-Plattform",
-    "description": {
-      "p1": "Plattform für Hochzeitsplaner, Administratoren und Gäste",
-      "p2": "Mit RSVP-Verfolgung, Geschenkverwaltung und mehrsprachiger Unterstützung"
+    "nav": {
+      "features": "Funktionen",
+      "pricing": "Preise",
+      "testimonials": "Referenzen",
+      "login": "Anmelden"
+    },
+    "hero": {
+      "title": "Stärken Sie Ihr Hochzeitsplanungsgeschäft",
+      "subtitle": "{commercialName} ist die All-in-One-Plattform für Hochzeitsplaner, um nahtlos mit Paaren zusammenzuarbeiten, Gäste zu verwalten, atemberaubende Einladungen zu gestalten und unvergessliche Feiern zu schaffen.",
+      "cta": {
+        "primary": "Kostenlos Testen",
+        "secondary": "Mehr Erfahren"
+      },
+      "trial": "Kostenlose Testversion • 1 Hochzeit • Keine Kreditkarte erforderlich"
+    },
+    "features": {
+      "title": "Alles Was Sie Für Perfekte Hochzeiten Brauchen",
+      "subtitle": "Leistungsstarke Tools für professionelle Hochzeitsplaner",
+      "items": {
+        "guestManagement": {
+          "title": "Gästeverwaltung",
+          "description": "Verwalten Sie mühelos Gästelisten, verfolgen Sie Zusagen, Ernährungsanforderungen und Sitzordnungen an einem Ort."
+        },
+        "invitationDesigner": {
+          "title": "Einladungsdesigner",
+          "description": "Erstellen Sie wunderschöne, individuelle Hochzeitseinladungen mit unseren intuitiven Design-Tools und eleganten Vorlagen."
+        },
+        "multiChannel": {
+          "title": "Multi-Channel-Einladungen",
+          "description": "Versenden Sie Einladungen per E-Mail, WhatsApp und SMS. Verfolgen Sie Zustellstatus und Antworten in Echtzeit."
+        },
+        "taskManagement": {
+          "title": "Aufgaben- & Anbieterverwaltung",
+          "description": "Arbeiten Sie mit Paaren an Aufgabenlisten zusammen, verwalten Sie Anbieter und behalten Sie alles im Zeitplan."
+        },
+        "seatingPlanner": {
+          "title": "Interaktiver Sitzplaner",
+          "description": "Erstellen Sie perfekte Sitzpläne mit unserer Drag-and-Drop-Oberfläche. Visualisieren und optimieren Sie Tischanordnungen."
+        },
+        "giftTracking": {
+          "title": "Geschenkregister & Verfolgung",
+          "description": "Helfen Sie Paaren, ihr Geschenkregister zu verwalten und empfangene Geschenke mit automatischen Dankesbenachrichtigungen zu verfolgen."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Geliebt Von Hochzeitsplanern Weltweit",
+      "subtitle": "Schließen Sie sich Tausenden von Profis an, die {commercialName} nutzen",
+      "items": [
+        {
+          "text": "{commercialName} hat die Art und Weise verändert, wie wir unser Hochzeitsplanungsgeschäft führen. Die Multi-Channel-Einladungen und Echtzeitverfolgung sparen uns unzählige Stunden.",
+          "name": "Sofia Martínez",
+          "role": "Hochzeitsplanerin, Madrid"
+        },
+        {
+          "text": "Unsere Paare lieben die kollaborativen Funktionen. Allein der Sitzplaner hat unseren Service viel wertvoller gemacht.",
+          "name": "Emma Thompson",
+          "role": "Eventkoordinatorin, London"
+        },
+        {
+          "text": "3 Hochzeiten gleichzeitig zu managen war früher stressig. Mit {commercialName} ist alles organisiert und unsere Kunden sind glücklicher denn je.",
+          "name": "Luca Romano",
+          "role": "Hochzeitsplaner, Rom"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Einfache, Transparente Preise",
+      "subtitle": "Wählen Sie den Plan, der zu Ihrem Geschäft passt",
+      "popular": "AM BELIEBTESTEN",
+      "perMonth": "Monat",
+      "cta": "Loslegen",
+      "contactUs": "Kontaktieren Sie Uns",
+      "plans": {
+        "trial": {
+          "name": "Kostenlose Testversion",
+          "price": "Kostenlos",
+          "features": [
+            "1 Hochzeit",
+            "Alle Kernfunktionen",
+            "14-tägige Testphase"
+          ]
+        },
+        "standard": {
+          "name": "Standard",
+          "price": "€50",
+          "features": [
+            "3 Hochzeiten parallel",
+            "Unbegrenzte Gäste",
+            "Alle Funktionen inklusive",
+            "Priority Support"
+          ]
+        },
+        "pro": {
+          "name": "Professionell",
+          "price": "Individuell",
+          "features": [
+            "Unbegrenzte Hochzeiten",
+            "White-Label-Option",
+            "Dedizierter Account Manager",
+            "Individuelle Integrationen"
+          ]
+        }
+      }
+    },
+    "cta": {
+      "title": "Bereit, Ihr Hochzeitsplanungsgeschäft Zu Transformieren?",
+      "subtitle": "Schließen Sie sich Hunderten von Hochzeitsplanern an, die {commercialName} vertrauen, um außergewöhnliche Erlebnisse zu bieten.",
+      "button": "Starten Sie Ihre Kostenlose Testversion"
+    },
+    "footer": {
+      "tagline": "Hochzeitsplaner befähigen, unvergessliche Feiern zu schaffen.",
+      "product": "Produkt",
+      "company": "Unternehmen",
+      "support": "Support",
+      "about": "Über Uns",
+      "contact": "Kontakt",
+      "privacy": "Datenschutzrichtlinie",
+      "help": "Hilfecenter",
+      "docs": "Dokumentation",
+      "rights": "Alle Rechte vorbehalten."
+    },
+    "title": "{commercialName} - Hochzeitsverwaltung"
+  },
+  "contact": {
+    "title": "Kontaktieren Sie uns",
+    "subtitle": "Wir sind hier, um Ihnen den Einstieg zu erleichtern",
+    "form": {
+      "name": "Vollständiger Name",
+      "namePlaceholder": "Ihr Name",
+      "email": "E-Mail-Adresse",
+      "emailPlaceholder": "sie@email.com",
+      "phone": "Telefon",
+      "phonePlaceholder": "+49 160 0000000",
+      "reason": "Grund für Kontakt",
+      "reasonPlaceholder": "Wählen Sie einen Grund",
+      "message": "Nachricht",
+      "messagePlaceholder": "Sagen Sie uns, wie wir Ihnen helfen können...",
+      "submit": "Nachricht senden",
+      "submitting": "Wird gesendet..."
+    },
+    "reasons": {
+      "trial": "Kostenlose Testversion",
+      "sales": "Vertrieb",
+      "support": "Kontakt/Support"
+    },
+    "success": {
+      "title": "Vielen Dank für Ihre Kontaktaufnahme!",
+      "message": "Wir haben Ihre Nachricht erhalten und werden uns in Kürze bei Ihnen melden.",
+      "backHome": "Zurück zur Startseite"
+    },
+    "error": {
+      "title": "Fehler beim Senden",
+      "message": "Beim Senden Ihrer Nachricht ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+      "retry": "Erneut versuchen"
     }
   },
   "metadata": {
@@ -1072,6 +1222,128 @@
     "signout": {
       "title": "Abmelden...",
       "subtitle": "Bitte warten Sie, während wir Sie abmelden."
+    }
+  },
+  "about": {
+    "title": "Über {commercialName}",
+    "subtitle": "Hochzeitsplaner befähigen, unvergessliche Erlebnisse zu schaffen",
+    "mission": {
+      "title": "Unsere Mission",
+      "content": "Bei {commercialName} glauben wir, dass jede Hochzeit eine stressfreie Feier der Liebe sein sollte. Unsere Mission ist es, Hochzeitsplaner mit den Werkzeugen auszustatten, die sie benötigen, um ihren Paaren außergewöhnlichen Service zu bieten und gleichzeitig die Gästeverwaltung und Kommunikation zu vereinfachen."
+    },
+    "story": {
+      "title": "Unsere Geschichte",
+      "content1": "{commercialName} entstand aus den realen Herausforderungen, mit denen Hochzeitsplaner konfrontiert sind, die mehrere Veranstaltungen gleichzeitig verwalten. Wir sahen, wie Planer mit Tabellenkalkulationen, mehreren Kommunikationskanälen und der Verfolgung von Zusagen verschiedener Paare zu kämpfen hatten.",
+      "content2": "Wir haben {commercialName} als umfassende Plattform entwickelt, die alles zusammenbringt—von der Gästeverwaltung über Einladungen bis zur Geschenkverfolgung—alles in einem eleganten, benutzerfreundlichen System, das speziell für Hochzeitsprofis entwickelt wurde."
+    },
+    "values": {
+      "title": "Unsere Werte",
+      "items": [
+        {
+          "title": "Einfachheit",
+          "content": "Wir glauben, dass leistungsstarke Tools einfach zu bedienen sein sollten. Jede Funktion ist darauf ausgelegt, Zeit zu sparen und Komplexität zu reduzieren."
+        },
+        {
+          "title": "Zuverlässigkeit",
+          "content": "Ihre Paare vertrauen Ihnen für ihren besonderen Tag. Wir stellen sicher, dass unsere Plattform immer verfügbar ist, wenn Sie sie brauchen."
+        },
+        {
+          "title": "Innovation",
+          "content": "Wir verbessern uns kontinuierlich und passen uns den sich ändernden Bedürfnissen von Hochzeitsprofis und ihren Kunden an."
+        },
+        {
+          "title": "Support",
+          "content": "Ihr Erfolg ist unser Erfolg. Wir sind hier, um Ihnen bei jedem Schritt mit dediziertem Support zu helfen."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Bereit, Ihr Hochzeitsplanungsgeschäft zu transformieren?",
+      "button": "Kontaktieren Sie uns"
+    }
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "introduction": {
+      "title": "Einführung",
+      "content": "Bei {commercialName} nehmen wir Ihre Privatsphäre ernst. Diese Datenschutzerklärung erklärt, wie wir Ihre persönlichen Informationen sammeln, verwenden und schützen, wenn Sie unsere Hochzeitsverwaltungsplattform nutzen."
+    },
+    "dataCollection": {
+      "title": "Informationen, die wir sammeln",
+      "intro": "Wir sammeln die folgenden Arten von Informationen:",
+      "items": [
+        "Kontaktinformationen (Name, E-Mail, Telefon), die von Hochzeitsplanern und Administratoren bereitgestellt werden",
+        "Informationen über Hochzeitsgäste, die über unsere Plattform verwaltet werden",
+        "Nutzungsdaten und Analysen zur Verbesserung unseres Service",
+        "Authentifizierungsinformationen über OAuth-Anbieter (Google, Facebook, Apple, Microsoft)"
+      ]
+    },
+    "dataUsage": {
+      "title": "Wie wir Ihre Informationen verwenden",
+      "items": [
+        "Um unsere Hochzeitsverwaltungsdienste bereitzustellen und zu pflegen",
+        "Um Einladungen, Erinnerungen und Kommunikationen im Namen von Hochzeitsplanern zu senden",
+        "Um Zusagen zu verfolgen und Gästelisten zu verwalten",
+        "Um unsere Plattform zu verbessern und neue Funktionen zu entwickeln"
+      ]
+    },
+    "dataProtection": {
+      "title": "Datenschutz",
+      "content": "Wir implementieren branchenübliche Sicherheitsmaßnahmen zum Schutz Ihrer Daten. Alle Daten werden während der Übertragung und im Ruhezustand verschlüsselt. Wir verwenden sichere OAuth-Authentifizierung und speichern niemals Passwörter direkt. Der Zugriff auf Daten ist streng kontrolliert und nur auf autorisiertes Personal beschränkt."
+    },
+    "userRights": {
+      "title": "Ihre Rechte",
+      "items": [
+        "Jederzeit auf Ihre persönlichen Daten zugreifen",
+        "Korrekturen Ihrer Informationen anfordern",
+        "Löschung Ihrer Daten anfordern (vorbehaltlich gesetzlicher Anforderungen)",
+        "Ihre Daten in einem Standardformat exportieren"
+      ]
+    },
+    "contact": {
+      "title": "Kontaktieren Sie uns",
+      "content": "Wenn Sie Fragen zu dieser Datenschutzerklärung oder zur Handhabung Ihrer Daten haben, bitte",
+      "link": "kontaktieren Sie uns"
+    }
+  },
+  "docs": {
+    "title": "Dokumentation",
+    "subtitle": "Alles, was Sie über {commercialName} wissen müssen",
+    "overview": {
+      "title": "Was ist {commercialName}?",
+      "content1": "{commercialName} ist eine umfassende Hochzeitsverwaltungsplattform, die speziell für Hochzeitsplaner entwickelt wurde. Sie bietet eine vollständige Lösung zur gleichzeitigen Verwaltung mehrerer Hochzeiten, von der Gästelistenverwaltung über Einladungen bis zur Geschenkverfolgung.",
+      "content2": "Mit einer Multi-Tenant-Architektur ermöglicht {commercialName} Hochzeitsplanern die gleichzeitige Verwaltung mehrerer Paare und gibt jedem Paar über eine intuitive Benutzeroberfläche sicheren Zugriff auf die Daten ihrer eigenen Hochzeit."
+    },
+    "targetUsers": {
+      "title": "Für wen ist {commercialName}?",
+      "planner": {
+        "title": "Hochzeitsplaner",
+        "content": "Professionelle Hochzeitsplaner, die mehrere Hochzeiten verwalten und eine zentralisierte Plattform für alle Aspekte der Gästeverwaltung, Kommunikation und Koordination benötigen."
+      },
+      "couple": {
+        "title": "Brautpaare",
+        "content": "Paare erhalten von ihrem Planer kostenlosen Zugang, um die Gästeliste ihrer Hochzeit zu verwalten, Zusagen zu verfolgen und über mehrere Kanäle mit ihren Gästen zu kommunizieren."
+      },
+      "guest": {
+        "title": "Gäste",
+        "content": "Gäste erhalten magische Links per WhatsApp, E-Mail oder SMS, um zuzusagen, ohne Konten erstellen zu müssen—was den Prozess so einfach wie möglich macht."
+      }
+    },
+    "keyFeatures": {
+      "title": "Hauptmerkmale",
+      "items": [
+        "Familienbasierte Gästeverwaltung mit Excel-Import/Export",
+        "Multi-Channel-Einladungen (WhatsApp, Email, SMS) in 5 Sprachen",
+        "Magic-Link-Authentifizierung für Gäste—keine Passwörter erforderlich",
+        "Echtzeit-Zusagenverfolgung mit Aktivitätsbenachrichtigungen",
+        "Geschenkverfolgung mit automatischer oder manueller Zahlungsbestätigung"
+      ]
+    },
+    "gettingStarted": {
+      "title": "Erste Schritte",
+      "content": "Bereit, Ihr Hochzeitsplanungsgeschäft zu optimieren? Beginnen Sie mit unserer 14-tägigen kostenlosen Testversion, um alle Funktionen mit Ihrer ersten Hochzeit zu erkunden. Keine Kreditkarte erforderlich.",
+      "button": "Demo anfordern"
     }
   }
 }
