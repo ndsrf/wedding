@@ -30,6 +30,25 @@ function getResendClient(): Resend {
 const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@weddingapp.com';
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'Wedding Management Platform';
 
+/**
+ * Replace {{WEDDING_NAME}} placeholder in the sender name
+ */
+function formatFromName(variables?: Record<string, string>, coupleNames?: string): string {
+  const weddingName = variables?.weddingName || variables?.coupleNames || coupleNames || '';
+  
+  if (!FROM_NAME.includes('{{WEDDING_NAME}}')) {
+    return FROM_NAME;
+  }
+
+  if (!weddingName) {
+    // If we don't have a wedding name but have the placeholder, 
+    // try to remove the placeholder and any following " via " or similar
+    return FROM_NAME.replace('{{WEDDING_NAME}}', '').replace(/^\s*via\s+/i, '').trim() || 'Wedding Management Platform';
+  }
+
+  return FROM_NAME.replace('{{WEDDING_NAME}}', weddingName).trim();
+}
+
 export enum EmailTemplate {
   PLANNER_INVITATION = 'planner_invitation',
   ADMIN_INVITATION = 'admin_invitation',
@@ -173,8 +192,9 @@ export async function sendEmail(
       console.log('[RESEND DEBUG] React component created, attempting to send...');
 
       const client = getResendClient();
+      const fromName = formatFromName(variables);
       const { data, error } = await client.emails.send({
-        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        from: `${fromName} <${FROM_EMAIL}>`,
         to: [to],
         subject,
         react,
@@ -438,8 +458,9 @@ export async function sendDynamicEmail(
       console.log('[RESEND DEBUG] React component created, attempting to send...');
 
       const client = getResendClient();
+      const fromName = formatFromName(undefined, coupleNames);
       const { data, error } = await client.emails.send({
-        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        from: `${fromName} <${FROM_EMAIL}>`,
         to: [to],
         subject,
         react,

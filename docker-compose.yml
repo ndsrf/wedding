@@ -66,7 +66,7 @@ services:
       # Email
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       EMAIL_FROM: ${EMAIL_FROM:-noreply@example.com}
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Wedding Platform}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-{{WEDDING_NAME}} via Nupci}
       # SMS and WhatsApp Service (Twilio)
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
