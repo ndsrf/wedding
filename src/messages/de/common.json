@@ -1216,7 +1216,6 @@
       "subtitle": "Melden Sie sich an, um auf Ihr Konto zuzugreifen",
       "google": "Weiter mit Google",
       "facebook": "Weiter mit Facebook",
-      "apple": "Weiter mit Apple",
       "footer": "Melden Sie sich mit Ihrem autorisierten Konto an"
     },
     "signout": {
@@ -1276,7 +1275,7 @@
         "Kontaktinformationen (Name, E-Mail, Telefon), die von Hochzeitsplanern und Administratoren bereitgestellt werden",
         "Informationen über Hochzeitsgäste, die über unsere Plattform verwaltet werden",
         "Nutzungsdaten und Analysen zur Verbesserung unseres Service",
-        "Authentifizierungsinformationen über OAuth-Anbieter (Google, Facebook, Apple, Microsoft)"
+        "Authentifizierungsinformationen über OAuth-Anbieter (Google, Facebook, Microsoft)"
       ]
     },
     "dataUsage": {

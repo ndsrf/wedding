@@ -90,7 +90,7 @@ This document tracks known security vulnerabilities that have been assessed and 
 
 ### Authentication & Authorization
 - All admin functions protected by NextAuth v5
-- OAuth providers: Google, Facebook, Instagram, Apple, Microsoft
+- OAuth providers: Google, Facebook, Instagram, Microsoft
 - Role-based access control (Master Admin, Planner, Wedding Admin)
 
 ### Data Protection

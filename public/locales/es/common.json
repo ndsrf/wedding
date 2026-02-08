@@ -1227,7 +1227,6 @@
       "subtitle": "Inicia sesión para acceder a tu cuenta",
       "google": "Continuar con Google",
       "facebook": "Continuar con Facebook",
-      "apple": "Continuar con Apple",
       "footer": "Inicia sesión con tu cuenta autorizada"
     },
     "signout": {
@@ -1287,7 +1286,7 @@
         "Información de contacto (nombre, correo electrónico, teléfono) proporcionada por wedding planners y administradores",
         "Información de invitados de bodas gestionada a través de nuestra plataforma",
         "Datos de uso y análisis para mejorar nuestro servicio",
-        "Información de autenticación a través de proveedores OAuth (Google, Facebook, Apple, Microsoft)"
+        "Información de autenticación a través de proveedores OAuth (Google, Facebook, Microsoft)"
       ]
     },
     "dataUsage": {

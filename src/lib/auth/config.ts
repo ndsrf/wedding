@@ -1,14 +1,13 @@
 /**
  * NextAuth.js Configuration
  *
- * Configures OAuth authentication with Google, Facebook/Instagram, and Apple providers.
+ * Configures OAuth authentication with Google and Facebook/Instagram providers.
  * Implements custom callbacks for user session management and role detection.
  */
 
 import NextAuth, { type NextAuthConfig, type User } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
-import AppleProvider from 'next-auth/providers/apple';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { detectUserRole, mapAuthProvider } from '@/lib/auth/oauth';
 import type { AuthenticatedUser } from '@/types/api';
@@ -44,11 +43,6 @@ export const authOptions: NextAuthConfig = {
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID!,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-    }),
-
-    AppleProvider({
-      clientId: process.env.APPLE_CLIENT_ID!,
-      clientSecret: process.env.APPLE_CLIENT_SECRET!,
     }),
 
     // E2E Testing Provider - ONLY enabled when NEXT_PUBLIC_IS_E2E=true

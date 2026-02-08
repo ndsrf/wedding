@@ -48,7 +48,7 @@ Master Admin (config file)
 ---
 
 ### 2. Wedding Planner (Paying Customer)
-**Authentication:** OAuth (Google, Meta/Facebook, Apple, Microsoft)  
+**Authentication:** OAuth (Google, Meta/Facebook, Microsoft)  
 **Subscription:** Monthly fee (payment outside app scope for MVP)  
 **Access:** Manage multiple weddings for different clients
 
@@ -123,7 +123,7 @@ Planners can customize these defaults or create entirely new themes.
 ---
 
 ### 3. Wedding Admin (Couple - Free Access)
-**Authentication:** OAuth (Google, Meta/Facebook, Apple, Microsoft) - invited by planner  
+**Authentication:** OAuth (Google, Meta/Facebook, Microsoft) - invited by planner  
 **Access:** Single wedding only (the one they're granted access to)  
 **Cost:** Free (granted by wedding planner)
 
@@ -378,7 +378,7 @@ master_admin
 
 wedding_planners
 ├── id, email, name (business name), google_id
-├── auth_provider (google/facebook/instagram/apple/microsoft)
+├── auth_provider (google/facebook/instagram/microsoft)
 ├── last_login_provider (tracks most recent OAuth provider used)
 ├── preferred_language (es/en/fr/it/de - default: en)
 ├── logo_url
@@ -416,7 +416,7 @@ weddings
 
 wedding_admins
 ├── id, email, name, google_id
-├── auth_provider (google/facebook/instagram/apple/microsoft)
+├── auth_provider (google/facebook/instagram/microsoft)
 ├── last_login_provider (tracks most recent OAuth provider used)
 ├── preferred_language (es/en/fr/it/de)
 ├── wedding_id (references weddings - scoped to one wedding only)
@@ -518,15 +518,13 @@ translations
   - **Google OAuth 2.0**: Full sign-in support (most popular, reliable)
   - **Meta/Facebook OAuth**: Full sign-in support (large user base in Spain)
   - **Instagram OAuth**: Uses Meta/Facebook OAuth (Instagram is owned by Meta, shares OAuth system)
-  - **Apple Sign In**: Full support with privacy relay (iOS users)
   - **Microsoft OAuth**: For Outlook/Office users (less critical for wedding context)
   
 **OAuth Provider Notes:**
 - Instagram login actually redirects to Facebook OAuth (same system, different branding)
-- Apple Sign In is mandatory if app goes to iOS App Store
-- Google + Facebook/Instagram + Apple covers ~95% of users
+- Google + Facebook/Instagram covers the majority of users
 - Microsoft can be added later if business users request it
-- **Recommendation**: Start with Google + Meta/Facebook + Apple for MVP
+- **Recommendation**: Start with Google + Meta/Facebook for MVP
 
 - **GoCardless Bank Account Data API**: Poll transactions, match reference codes (only in automated mode)
 - **Email**: Resend or similar (SMTP)
@@ -576,7 +574,7 @@ All features described in "Wedding Admin Panel" section below.
 **Context:** These features are for wedding admins (couples) managing their specific wedding
 
 ### Authentication & Access Control
-- **Login**: OAuth providers (Google, Meta/Facebook, Instagram, Apple, Microsoft)
+- **Login**: OAuth providers (Google, Meta/Facebook, Instagram, Microsoft)
 - **Login provider reminder**: System remembers which provider user last used
   - On login page, highlight last used provider with badge: "Last used ✓"
   - Helps prevent confusion and failed login attempts
@@ -784,7 +782,7 @@ if (user && user.last_login_provider) {
 
 // On successful login
 await updateUser({
-  last_login_provider: currentProvider, // 'google', 'facebook', 'apple', etc.
+  last_login_provider: currentProvider, // 'google', 'facebook', etc.
   last_login_at: new Date()
 });
 ```
@@ -802,11 +800,6 @@ await updateUser({
   <button class="provider-btn">
     <img src="facebook-icon.png" />
     Sign in with Facebook
-  </button>
-  
-  <button class="provider-btn">
-    <img src="apple-icon.png" />
-    Sign in with Apple
   </button>
 </div>
 
@@ -968,7 +961,7 @@ family.reference_code = null
 ### Phase 1: Platform Foundation
 1. **Master admin setup** (config-based authentication)
 2. **Multi-tenant database schema** (planners, weddings, themes, translations, isolation)
-3. **OAuth providers setup** (Google, Meta/Facebook, Apple)
+3. **OAuth providers setup** (Google, Meta/Facebook)
 4. **Internationalization infrastructure** (i18next, translation tables, language detection)
 5. **Master admin interface** (add/manage planners, enable/disable, language preference)
 

@@ -1241,7 +1241,6 @@
       "subtitle": "Sign in to access your account",
       "google": "Continue with Google",
       "facebook": "Continue with Facebook",
-      "apple": "Continue with Apple",
       "footer": "Sign in with your authorized account"
     },
     "signout": {
@@ -1309,7 +1308,7 @@
         "Contact information (name, email, phone) provided by wedding planners and admins",
         "Wedding guest information managed through our platform",
         "Usage data and analytics to improve our service",
-        "Authentication information through OAuth providers (Google, Facebook, Apple, Microsoft)"
+        "Authentication information through OAuth providers (Google, Facebook, Microsoft)"
       ]
     },
     "dataUsage": {

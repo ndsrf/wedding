@@ -1216,7 +1216,6 @@
       "subtitle": "Accedi per visualizzare il tuo account",
       "google": "Continua con Google",
       "facebook": "Continua con Facebook",
-      "apple": "Continua con Apple",
       "footer": "Accedi con il tuo account autorizzato"
     },
     "signout": {
@@ -1276,7 +1275,7 @@
         "Informazioni di contatto (nome, email, telefono) fornite dagli organizzatori di matrimoni e amministratori",
         "Informazioni sugli invitati al matrimonio gestite tramite la nostra piattaforma",
         "Dati di utilizzo e analisi per migliorare il nostro servizio",
-        "Informazioni di autenticazione tramite provider OAuth (Google, Facebook, Apple, Microsoft)"
+        "Informazioni di autenticazione tramite provider OAuth (Google, Facebook, Microsoft)"
       ]
     },
     "dataUsage": {

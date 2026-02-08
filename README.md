@@ -526,7 +526,6 @@ The app automatically detects and applies any new migrations on startup.
 - `WEDDING_APP_IMAGE` - Override Docker image (default: `ghcr.io/ndsrf/wedding:latest`)
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - Google OAuth
 - `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET` - Facebook OAuth
-- `APPLE_CLIENT_ID` / `APPLE_CLIENT_SECRET` - Apple OAuth
 - `RESEND_API_KEY` - Email service API key
 - `EMAIL_FROM` - Sender email address (default: noreply@example.com)
 - `EMAIL_FROM_NAME` - Sender name (default: Wedding Platform)

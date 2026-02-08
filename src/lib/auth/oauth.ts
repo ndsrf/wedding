@@ -2,7 +2,7 @@
  * OAuth Configuration and Utilities
  *
  * Provides OAuth provider configurations and helper functions for NextAuth.js
- * Supports Google, Facebook/Instagram, and Apple Sign-In.
+ * Supports Google and Facebook/Instagram Sign-In.
  */
 
 import type { AuthProvider, Language } from '@prisma/client';
@@ -173,7 +173,6 @@ export function mapAuthProvider(providerId: string): AuthProvider {
   const providerMap: Record<string, AuthProvider> = {
     google: 'GOOGLE',
     facebook: 'FACEBOOK',
-    apple: 'APPLE',
   };
 
   return providerMap[providerId] || 'GOOGLE';
