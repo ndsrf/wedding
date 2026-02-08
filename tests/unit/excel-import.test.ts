@@ -19,6 +19,7 @@ jest.mock('@/lib/db/prisma', () => ({
       findFirst: jest.fn(),
     },
     familyMember: {
+      create: jest.fn(),
       createMany: jest.fn(),
     },
     $transaction: jest.fn(),
@@ -70,8 +71,8 @@ describe('Excel Import - Validation', () => {
 
   it('should validate required fields', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
-      ['Smith Family', '', 'test@example.com', '', '', 'EN', '', 'John', 'ADULT', '30'], // Missing contact person
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
+      ['Smith Family', '', 'test@example.com', '', '', 'EN', '', '', 'John', 'ADULT', '30'], // Missing contact person
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -96,8 +97,8 @@ describe('Excel Import - Validation', () => {
 
   it('should validate member types', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
-      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', 'John', 'INVALID_TYPE', '30'],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
+      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', '', 'John', 'INVALID_TYPE', '30'],
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -122,8 +123,8 @@ describe('Excel Import - Validation', () => {
 
   it('should require at least one member', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By'],
-      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', ''],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By'],
+      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', ''],
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -148,9 +149,9 @@ describe('Excel Import - Validation', () => {
 
   it('should warn about duplicate emails', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
-      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', 'John', 'ADULT', '30'],
-      ['Jones Family', 'Jane Jones', 'test@example.com', '', '', 'EN', '', 'Jane', 'ADULT', '28'],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
+      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', '', 'John', 'ADULT', '30'],
+      ['Jones Family', 'Jane Jones', 'test@example.com', '', '', 'EN', '', '', 'Jane', 'ADULT', '28'],
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -185,8 +186,8 @@ describe('Excel Import - Validation', () => {
 
   it('should warn about no contact method', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
-      ['Smith Family', 'John Smith', '', '', '', 'EN', '', 'John', 'ADULT', '30'],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
+      ['Smith Family', 'John Smith', '', '', '', 'EN', '', '', 'John', 'ADULT', '30'],
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -221,8 +222,8 @@ describe('Excel Import - Validation', () => {
 
   it('should handle invalid language with warning', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
-      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'XX', '', 'John', 'ADULT', '30'],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
+      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'XX', '', '', 'John', 'ADULT', '30'],
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -257,8 +258,8 @@ describe('Excel Import - Validation', () => {
 
   it('should accept valid member types', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age', 'Member 2 Name', 'Member 2 Type', 'Member 2 Age', 'Member 3 Name', 'Member 3 Type', 'Member 3 Age'],
-      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', 'John', 'ADULT', '30', 'Jane', 'CHILD', '10', 'Baby', 'INFANT', '1'],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age', 'Member 2 Name', 'Member 2 Type', 'Member 2 Age', 'Member 3 Name', 'Member 3 Type', 'Member 3 Age'],
+      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', '', 'John', 'ADULT', '30', 'Jane', 'CHILD', '10', 'Baby', 'INFANT', '1'],
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -289,8 +290,8 @@ describe('Excel Import - Validation', () => {
 
   it('should warn about invalid admin name', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
-      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', 'NonExistentAdmin', 'John', 'ADULT', '30'],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age'],
+      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', 'NonExistentAdmin', 'John', 'ADULT', '30'],
     ];
 
     const workbook = XLSX.utils.book_new();
