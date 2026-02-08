@@ -578,6 +578,14 @@
     }
   },
   "admin": {
+    "master": {
+      "weddings": {
+        "guestCount": "Número de Invitados"
+      }
+    },
+    "weddings": {
+      "attending": "Asistentes"
+    },
     "dashboard": {
       "title": "Panel de Administración de Boda",
       "welcome": "Bienvenido",
@@ -614,8 +622,44 @@
       "providersSubtitle": "Gestionar proveedores y regalos",
       "invitationBuilder": "Constructor de Invitaciones",
       "invitationBuilderSubtitle": "Diseña tu invitación de boda",
+      "reports": "Informes",
+      "reportsSubtitle": "Generar y exportar informes",
       "weddingNotFound": "Boda no encontrada",
       "contactPlanner": "Por favor contacta a tu organizador de bodas."
+    },
+    "reports": {
+      "title": "Informes",
+      "subtitle": "Genera y exporta varios informes para tu boda",
+      "viewReport": "Ver Informe",
+      "generating": "Generando...",
+      "downloadError": "Error al descargar el informe. Por favor, inténtalo de nuevo.",
+      "infoTitle": "Sobre los Informes",
+      "info1": "Todos los informes se generan en tiempo real con los datos más recientes",
+      "info2": "Exporta a Excel (.xlsx) para un análisis detallado o CSV para datos simples",
+      "info3": "Los informes utilizan consultas optimizadas para evitar impactar el rendimiento del sitio web",
+      "backToReports": "Volver a la Lista de Informes",
+      "attendeeList": {
+        "title": "Lista de Asistentes",
+        "description": "Lista completa de todos los invitados con detalles de contacto, estado de RSVP, restricciones dietéticas y asignaciones de mesas"
+      },
+      "guestsPerAdmin": {
+        "title": "Invitados por Administrador",
+        "description": "Resumen que muestra el número de invitados invitados por cada administrador de la boda"
+      },
+      "seatingPlan": {
+        "title": "Informe del Plan de Asientos",
+        "description": "Distribución detallada de los asientos con nombres de los invitados, mesas, restricciones dietéticas y necesidades especiales"
+      },
+      "ageAverage": {
+        "title": "Promedio de Edad de los Invitados",
+        "description": "Desglose de las edades de los invitados agrupados por quién los invitó y por su asignación de mesa",
+        "groupType": "Tipo de Grupo",
+        "groupName": "Nombre del Grupo",
+        "averageAge": "Edad Promedio",
+        "guestCount": "Número de Invitados",
+        "minAge": "Edad Mínima",
+        "maxAge": "Edad Máxima"
+      }
     },
     "providers": {
       "noWeddingAssigned": "Ninguna boda asignada."

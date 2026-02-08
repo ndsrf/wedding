@@ -576,6 +576,14 @@
     }
   },
   "admin": {
+    "master": {
+      "weddings": {
+        "guestCount": "Gästezahl"
+      }
+    },
+    "weddings": {
+      "attending": "Teilnehmend"
+    },
     "dashboard": {
       "title": "Hochzeits-Admin-Dashboard",
       "welcome": "Willkommen",
@@ -610,8 +618,44 @@
       "providersSubtitle": "Anbieter und Geschenke verwalten",
       "invitationBuilder": "Einladungsgenerator",
       "invitationBuilderSubtitle": "Gestalten Sie Ihre Hochzeitseinladung",
+      "reports": "Berichte",
+      "reportsSubtitle": "Generieren und exportieren Sie verschiedene Berichte für Ihre Hochzeit",
       "weddingNotFound": "Hochzeit nicht gefunden",
       "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner."
+    },
+    "reports": {
+      "title": "Berichte",
+      "subtitle": "Generieren und exportieren Sie verschiedene Berichte für Ihre Hochzeit",
+      "viewReport": "Bericht anzeigen",
+      "generating": "Wird generiert...",
+      "downloadError": "Fehler beim Herunterladen des Berichts. Bitte versuchen Sie es erneut.",
+      "infoTitle": "Über Berichte",
+      "info1": "Alle Berichte werden in Echtzeit mit den neuesten Daten generiert",
+      "info2": "Exportieren Sie nach Excel (.xlsx) für detaillierte Analysen oder CSV für einfache Daten",
+      "info3": "Berichte verwenden optimierte Abfragen, um die Leistung der Website nicht zu beeinträchtigen",
+      "backToReports": "Zurück zur Berichtsliste",
+      "attendeeList": {
+        "title": "Teilnehmerliste",
+        "description": "Vollständige Liste aller Gäste mit Kontaktdaten, RSVP-Status, Ernährungsbeschränkungen und Tischzuweisungen"
+      },
+      "guestsPerAdmin": {
+        "title": "Gäste pro Administrator",
+        "description": "Zusammenfassung der Anzahl der von jedem Hochzeitsadministrator eingeladenen Gäste"
+      },
+      "seatingPlan": {
+        "title": "Sitzplan-Bericht",
+        "description": "Detaillierte Sitzordnung mit Gästenamen, Tischen, Ernährungsbeschränkungen und besonderen Bedürfnissen"
+      },
+      "ageAverage": {
+        "title": "Durchschnittsalter der Gäste",
+        "description": "Aufschlüsselung des Gästealters, gruppiert danach, wer sie eingeladen hat, und nach ihrer Tischzuweisung",
+        "groupType": "Gruppentyp",
+        "groupName": "Gruppenname",
+        "averageAge": "Durchschnittsalter",
+        "guestCount": "Anzahl der Gäste",
+        "minAge": "Min. Alter",
+        "maxAge": "Max. Alter"
+      }
     },
     "providers": {
       "noWeddingAssigned": "Keine Hochzeit zugewiesen."

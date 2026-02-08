@@ -582,6 +582,14 @@
     }
   },
   "admin": {
+    "master": {
+      "weddings": {
+        "guestCount": "Guest Count"
+      }
+    },
+    "weddings": {
+      "attending": "Attending"
+    },
     "dashboard": {
       "title": "Wedding Admin Dashboard",
       "welcome": "Welcome",
@@ -618,8 +626,44 @@
       "providersSubtitle": "Manage providers and gifts",
       "invitationBuilder": "Invitation Builder",
       "invitationBuilderSubtitle": "Design your wedding invitation",
+      "reports": "Reports",
+      "reportsSubtitle": "Generate and export reports",
       "weddingNotFound": "Wedding not found",
       "contactPlanner": "Please contact your wedding planner."
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Generate and export various reports for your wedding",
+      "viewReport": "View Report",
+      "generating": "Generating...",
+      "downloadError": "Failed to download report. Please try again.",
+      "infoTitle": "About Reports",
+      "info1": "All reports are generated in real-time with the latest data",
+      "info2": "Export to Excel (.xlsx) for detailed analysis or CSV for simple data",
+      "info3": "Reports use optimized queries to avoid impacting website performance",
+      "backToReports": "Back to Reports List",
+      "attendeeList": {
+        "title": "Attendee List",
+        "description": "Complete list of all guests with contact details, RSVP status, dietary restrictions, and table assignments"
+      },
+      "guestsPerAdmin": {
+        "title": "Guests Per Administrator",
+        "description": "Summary showing the number of guests invited by each wedding administrator"
+      },
+      "seatingPlan": {
+        "title": "Seating Plan Report",
+        "description": "Detailed seating arrangement with guest names, tables, dietary restrictions, and special needs"
+      },
+      "ageAverage": {
+        "title": "Guest Age Average",
+        "description": "Breakdown of guest ages grouped by who invited them and by their table assignment",
+        "groupType": "Group Type",
+        "groupName": "Group Name",
+        "averageAge": "Average Age",
+        "guestCount": "Guest Count",
+        "minAge": "Min Age",
+        "maxAge": "Max Age"
+      }
     },
     "providers": {
       "noWeddingAssigned": "No wedding assigned."

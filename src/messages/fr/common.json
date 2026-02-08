@@ -576,6 +576,14 @@
     }
   },
   "admin": {
+    "master": {
+      "weddings": {
+        "guestCount": "Nombre d'Invités"
+      }
+    },
+    "weddings": {
+      "attending": "Présents"
+    },
     "dashboard": {
       "title": "Tableau de Bord Admin Mariage",
       "welcome": "Bienvenue",
@@ -610,8 +618,44 @@
       "providersSubtitle": "Gérer les prestataires et les cadeaux",
       "invitationBuilder": "Créateur d'Invitations",
       "invitationBuilderSubtitle": "Concevez votre invitation de mariage",
+      "reports": "Rapports",
+      "reportsSubtitle": "Générer et exporter divers rapports pour votre mariage",
       "weddingNotFound": "Mariage introuvable",
       "contactPlanner": "Veuillez contacter votre organisateur de mariage."
+    },
+    "reports": {
+      "title": "Rapports",
+      "subtitle": "Générer et exporter divers rapports pour votre mariage",
+      "viewReport": "Voir le Rapport",
+      "generating": "Génération...",
+      "downloadError": "Échec du téléchargement du rapport. Veuillez réessayer.",
+      "infoTitle": "À propos des rapports",
+      "info1": "Tous les rapports sont générés en temps réel avec les dernières données",
+      "info2": "Exportez vers Excel (.xlsx) pour une analyse détaillée ou CSV pour des données simples",
+      "info3": "Les rapports utilisent des requêtes optimisées pour éviter d'impacter les performances du site",
+      "backToReports": "Retour à la liste des rapports",
+      "attendeeList": {
+        "title": "Liste des Participants",
+        "description": "Liste complète de tous les invités avec coordonnées, statut RSVP, restrictions alimentaires et attributions de tables"
+      },
+      "guestsPerAdmin": {
+        "title": "Invités par Administrateur",
+        "description": "Résumé montrant le nombre d'invités invités par chaque administrateur du mariage"
+      },
+      "seatingPlan": {
+        "title": "Rapport du Plan de Table",
+        "description": "Disposition détaillée des places avec noms des invités, tables, restrictions alimentaires et besoins spéciaux"
+      },
+      "ageAverage": {
+        "title": "Moyenne d'Âge des Invités",
+        "description": "Répartition des âges des invités groupés par personne les ayant invités et par attribution de table",
+        "groupType": "Type de Groupe",
+        "groupName": "Nom du Groupe",
+        "averageAge": "Âge Moyen",
+        "guestCount": "Nombre d'Invités",
+        "minAge": "Âge Min",
+        "maxAge": "Âge Max"
+      }
     },
     "providers": {
       "noWeddingAssigned": "Aucun mariage assigné."

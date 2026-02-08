@@ -576,6 +576,14 @@
     }
   },
   "admin": {
+    "master": {
+      "weddings": {
+        "guestCount": "Numero Ospiti"
+      }
+    },
+    "weddings": {
+      "attending": "Presenti"
+    },
     "dashboard": {
       "title": "Dashboard Amministrazione Matrimonio",
       "welcome": "Benvenuto",
@@ -610,8 +618,44 @@
       "providersSubtitle": "Gestire fornitori e regali",
       "invitationBuilder": "Creatore di Inviti",
       "invitationBuilderSubtitle": "Progetta il tuo invito matrimoniale",
+      "reports": "Report",
+      "reportsSubtitle": "Genera ed esporta vari report per il tuo matrimonio",
       "weddingNotFound": "Matrimonio non trovato",
       "contactPlanner": "Contatta il tuo organizzatore di matrimoni."
+    },
+    "reports": {
+      "title": "Report",
+      "subtitle": "Genera ed esporta vari report per il tuo matrimonio",
+      "viewReport": "Visualizza Report",
+      "generating": "Generazione in corso...",
+      "downloadError": "Impossibile scaricare il report. Riprova.",
+      "infoTitle": "Informazioni sui Report",
+      "info1": "Tutti i report sono generati in tempo reale con i dati più recenti",
+      "info2": "Esporta in Excel (.xlsx) per analisi dettagliate o CSV per dati semplici",
+      "info3": "I report utilizzano query ottimizzate per evitare di impattare sulle prestazioni del sito",
+      "backToReports": "Torna all'elenco dei report",
+      "attendeeList": {
+        "title": "Elenco Partecipanti",
+        "description": "Elenco completo di tutti gli ospiti con dettagli di contatto, stato RSVP, restrizioni alimentari e assegnazioni dei tavoli"
+      },
+      "guestsPerAdmin": {
+        "title": "Ospiti per Amministratore",
+        "description": "Riepilogo che mostra il numero di ospiti invitati da ciascun amministratore del matrimonio"
+      },
+      "seatingPlan": {
+        "title": "Report Piano dei Posti",
+        "description": "Disposizione dettagliata dei posti con nomi degli ospiti, tavoli, restrizioni alimentari ed esigenze speciali"
+      },
+      "ageAverage": {
+        "title": "Media Età Ospiti",
+        "description": "Ripartizione dell'età degli ospiti raggruppata per chi li ha invitati e per l'assegnazione del tavolo",
+        "groupType": "Tipo Gruppo",
+        "groupName": "Nome Gruppo",
+        "averageAge": "Età Media",
+        "guestCount": "Numero Ospiti",
+        "minAge": "Età Min",
+        "maxAge": "Età Max"
+      }
     },
     "providers": {
       "noWeddingAssigned": "Nessun matrimonio assegnato."

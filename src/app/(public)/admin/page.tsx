@@ -433,13 +433,38 @@ export default async function AdminDashboardPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    d="M21 13.255A23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
               </div>
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.providers')}</h3>
                 <p className="mt-1 text-sm text-gray-500">{t('admin.dashboard.providersSubtitle')}</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/reports"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
+            >
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-emerald-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-sm font-medium text-gray-900">{t('admin.dashboard.reports')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{t('admin.dashboard.reportsSubtitle')}</p>
               </div>
             </Link>
           </div>
