@@ -1,3 +1,25 @@
+# [0.9.0](https://github.com/ndsrf/wedding/compare/v0.8.3...v0.9.0) (2026-02-08)
+
+
+### Bug Fixes
+
+* enhance logging configuration and update middleware routes ([d70aef8](https://github.com/ndsrf/wedding/commit/d70aef8d927e275cd5a3fa7d1cc9ce199df24fb3))
+* improve email service configuration in contact route ([c0ddcad](https://github.com/ndsrf/wedding/commit/c0ddcad70d5772b7b86e80aab50d5bc80437d405))
+* improve locale validation and error handling across pages ([f18f084](https://github.com/ndsrf/wedding/commit/f18f0842f97dfdfb989230116e8c2a33ec875994))
+
+
+### Features
+
+* add reports feature with multi-language support ([da6652d](https://github.com/ndsrf/wedding/commit/da6652dcaed1cc05f9fcca19c3c1da049e9fcb1c))
+* General landing page ([e692aea](https://github.com/ndsrf/wedding/commit/e692aead6f403df3ba61b3db1fce1f870bbbbd24))
+* implement bulk actions for guest management ([d1da3e9](https://github.com/ndsrf/wedding/commit/d1da3e9b7d9c806d3047654d8ce918360b76bfbe))
+* refactor middleware and update routing for internationalization and short URL handling ([d20171f](https://github.com/ndsrf/wedding/commit/d20171fc0f0b421f4276d6fbcc5c6a91ff6127b3))
+* remove apple auth ([992fcef](https://github.com/ndsrf/wedding/commit/992fcefcd7941a6589d7f5171511c42c7631f558))
+* SEO optiomisation ([cd90b8d](https://github.com/ndsrf/wedding/commit/cd90b8df4982d81bcfa9fc38d0e219f0fea794d7))
+* update email sender name to support dynamic wedding name ([1c0a20a](https://github.com/ndsrf/wedding/commit/1c0a20ae8751ce673bfdbb0d2cf46d403a9b22aa))
+
+
+
 ## [0.8.3](https://github.com/ndsrf/wedding/compare/v0.8.2...v0.8.3) (2026-02-06)
 
 
