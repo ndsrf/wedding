@@ -1,3 +1,12 @@
+## [0.9.1](https://github.com/ndsrf/wedding/compare/v0.9.0...v0.9.1) (2026-02-08)
+
+
+### Bug Fixes
+
+* Fix unit test, due to new field on Excel template (channel) ([55b89c1](https://github.com/ndsrf/wedding/commit/55b89c1b8dd0ab8c68f60ff2420a9fc03f74364d))
+
+
+
 # [0.9.0](https://github.com/ndsrf/wedding/compare/v0.8.3...v0.9.0) (2026-02-08)
 
 
