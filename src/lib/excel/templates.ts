@@ -45,6 +45,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     'Phone',
     'WhatsApp',
     'Language *',
+    'Channel',
     'Invited By',
     'Member 1 Name *',
     'Member 1 Type *',
@@ -91,6 +92,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
         '+34612345678',
         '+34612345678',
         'ES',
+        'WHATSAPP',
         '',
         'Juan García',
         'ADULT',
@@ -130,6 +132,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
         '+441234567890',
         '+441234567890',
         'EN',
+        'EMAIL',
         '',
         'John Smith',
         'ADULT',
@@ -182,6 +185,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     ['- Email: Contact email (recommended for email invitations)'],
     ['- Phone: Contact phone number'],
     ['- WhatsApp: WhatsApp number (recommended for WhatsApp invitations)'],
+    ['- Channel: Preferred communication channel (WHATSAPP, EMAIL, or SMS - leave blank to auto-select)'],
     ['- Invited By: Name or email of the admin who invited this guest (leave blank to default to the first admin)'],
     ['- Member X Age: Age of family member (optional)'],
     [''],
@@ -196,6 +200,11 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     ['- FR: French (Français)'],
     ['- IT: Italian (Italiano)'],
     ['- DE: German (Deutsch)'],
+    [''],
+    ['Supported Channels:'],
+    ['- WHATSAPP: Send notifications via WhatsApp'],
+    ['- EMAIL: Send notifications via Email'],
+    ['- SMS: Send notifications via SMS'],
     [''],
     ['Notes:'],
     ['- You can add up to 10 members per family'],
@@ -221,6 +230,7 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     { wch: 15 }, // Phone
     { wch: 15 }, // WhatsApp
     { wch: 10 }, // Language
+    { wch: 12 }, // Channel
     { wch: 20 }, // Invited By
   ];
 
@@ -264,6 +274,7 @@ export function generatePrefilledTemplate(
     phone: string | null;
     whatsapp_number: string | null;
     preferred_language: Language;
+    channel_preference?: string | null;
     invitedByAdmin?: string;
     members: Array<{
       name: string;
@@ -280,6 +291,7 @@ export function generatePrefilledTemplate(
     'Phone',
     'WhatsApp',
     'Language *',
+    'Channel',
     'Invited By',
     'Member 1 Name *',
     'Member 1 Type *',
@@ -325,6 +337,7 @@ export function generatePrefilledTemplate(
       family.phone || '',
       family.whatsapp_number || '',
       family.preferred_language,
+      family.channel_preference || '',
       family.invitedByAdmin || '',
     ];
 
@@ -353,6 +366,7 @@ export function generatePrefilledTemplate(
     { wch: 15 }, // Phone
     { wch: 15 }, // WhatsApp
     { wch: 10 }, // Language
+    { wch: 12 }, // Channel
     { wch: 20 }, // Invited By
   ];
 

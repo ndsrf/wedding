@@ -17,6 +17,7 @@ import { GuestFormModal } from '@/components/admin/GuestFormModal';
 import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
 import { ReminderModal } from '@/components/admin/ReminderModal';
 import { GuestTimelineModal } from '@/components/admin/GuestTimelineModal';
+import { BulkEditModal, type BulkEditUpdates } from '@/components/admin/BulkEditModal';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
 import type { FamilyWithMembers, GiftStatus, Language, Channel } from '@/types/models';
 import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
@@ -489,6 +490,65 @@ export default function GuestsPage() {
     setIsReminderModalOpen(true);
   };
 
+  // Handle bulk delete
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+
+  // Handle bulk edit
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+
+  const handleBulkEdit = async (updates: BulkEditUpdates) => {
+    if (selectedGuestIds.length === 0) return;
+
+    try {
+      const response = await fetch('/api/admin/guests/bulk-update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ family_ids: selectedGuestIds, updates }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('admin.guests.bulkEdit.updateSuccess', { count: data.data.updated_families }));
+        setIsBulkEditModalOpen(false);
+        fetchGuests();
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      console.error('Error bulk updating guests:', error);
+      throw error;
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedGuestIds.length === 0) return;
+
+    setBulkDeleteLoading(true);
+    try {
+      const response = await fetch('/api/admin/guests/bulk-delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ family_ids: selectedGuestIds }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('admin.guests.deleteSuccess', { count: data.data.deleted_count }));
+        setIsBulkDeleteDialogOpen(false);
+        setSelectedGuestIds([]);
+        fetchGuests();
+      } else {
+        showNotification('error', data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      console.error('Error bulk deleting guests:', error);
+      showNotification('error', t('common.errors.generic'));
+    } finally {
+      setBulkDeleteLoading(false);
+    }
+  };
+
   // Handle form submit
   const handleFormSubmit = async (formData: {
     name: string;
@@ -651,13 +711,13 @@ export default function GuestsPage() {
             {/* Filters */}
             <GuestFilters filters={filters} admins={admins} onFilterChange={setFilters} />
 
-            {/* Bulk Reminder Section */}
+            {/* Bulk Actions Section */}
             {!isReadOnly && (
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <h3 className="text-sm font-medium text-gray-900">
-                      {t('admin.reminders.bulkSend')}
+                      {t('admin.guests.bulkActions')}
                     </h3>
                     {selectedGuestIds.length > 0 && (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
@@ -665,17 +725,33 @@ export default function GuestsPage() {
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={handleOpenBulkReminderModal}
-                    disabled={selectedGuestIds.length === 0}
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {t('admin.reminders.send')}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIsBulkDeleteDialogOpen(true)}
+                      disabled={selectedGuestIds.length === 0}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('admin.guests.deleteSelected')}
+                    </button>
+                    <button
+                      onClick={() => setIsBulkEditModalOpen(true)}
+                      disabled={selectedGuestIds.length === 0}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('admin.guests.bulkEdit.button')}
+                    </button>
+                    <button
+                      onClick={handleOpenBulkReminderModal}
+                      disabled={selectedGuestIds.length === 0}
+                      className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('admin.reminders.send')}
+                    </button>
+                  </div>
                 </div>
                 {selectedGuestIds.length === 0 && (
                   <p className="mt-2 text-xs text-gray-500">
-                    {t('admin.reminders.selectGuestsHint')}
+                    {t('admin.guests.selectGuestsHint')}
                   </p>
                 )}
               </div>
@@ -824,6 +900,66 @@ export default function GuestsPage() {
           setSelectedTimelineFamilyName(null);
         }}
       />
+
+      {/* Bulk Edit Modal */}
+      <BulkEditModal
+        isOpen={isBulkEditModalOpen}
+        onClose={() => setIsBulkEditModalOpen(false)}
+        selectedCount={selectedGuestIds.length}
+        admins={admins}
+        onSave={handleBulkEdit}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      {isBulkDeleteDialogOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => !bulkDeleteLoading && setIsBulkDeleteDialogOpen(false)} />
+
+            <span className="hidden sm:inline-block sm:h-screen sm:align-middle">&#8203;</span>
+
+            <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">
+                      {t('admin.guests.bulkDeleteTitle')}
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        {t('admin.guests.bulkDeleteConfirm', { count: selectedGuestIds.length })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <button
+                  type="button"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteLoading}
+                  className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteLoading ? t('common.buttons.deleting') : t('common.buttons.delete')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsBulkDeleteDialogOpen(false)}
+                  disabled={bulkDeleteLoading}
+                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('common.buttons.cancel')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Notification Toast */}
       {notification && (

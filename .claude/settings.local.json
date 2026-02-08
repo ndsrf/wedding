@@ -71,7 +71,15 @@
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_close",
       "Bash(curl:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(python3:*)",
+      "Bash(for lang in en es fr it de)",
+      "Bash(do echo \"=== $lang ===\")",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(for lang in en fr it de)",
+      "Bash(/tmp/update_locales.py:*)",
+      "Bash(__NEW_LINE_2553bfe6c121b673__ python3 /tmp/update_locales.py)"
     ]
   }
 }

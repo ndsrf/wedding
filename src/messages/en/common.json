@@ -4,6 +4,7 @@
       "save": "Save",
       "cancel": "Cancel",
       "delete": "Delete",
+      "deleting": "Deleting...",
       "edit": "Edit",
       "add": "Add",
       "create": "Create",
@@ -770,7 +771,26 @@
         "rsvpAnswers": "RSVP Answers"
       },
       "importSuccess": "Guest list imported successfully",
-      "importError": "Import error. Please check the file."
+      "importError": "Import error. Please check the file.",
+      "bulkActions": "Bulk Actions",
+      "deleteSelected": "Delete Selected",
+      "selectGuestsHint": "Select guests from the list to perform bulk actions",
+      "bulkDeleteTitle": "Delete Selected Guests",
+      "bulkDeleteConfirm": "Are you sure you want to delete {count} {count, plural, one {selected guest} other {selected guests}}? This action cannot be undone.",
+      "deleteSuccess": "{count} {count, plural, one {guest deleted} other {guests deleted}} successfully",
+      "bulkEdit": {
+        "button": "Edit Properties",
+        "title": "Bulk Edit Guest Properties",
+        "subtitle": "Edit properties for {count} {count, plural, one {selected guest} other {selected guests}}",
+        "noChange": "-- No change --",
+        "clearValue": "-- Clear value --",
+        "attendanceStatus": "Set Attendance Status",
+        "setAllAttending": "Mark all members as attending",
+        "setAllNotAttending": "Mark all members as not attending",
+        "attendanceNote": "This will update all family members of the selected guests",
+        "noChanges": "Please select at least one property to update",
+        "updateSuccess": "{count} {count, plural, one {guest updated} other {guests updated}} successfully"
+      }
     },
     "notifications": {
       "title": "Notifications and Activity",
@@ -982,6 +1002,15 @@
         "save": "Save Configuration",
         "saving": "Saving...",
         "submitError": "Failed to save configuration. Please try again."
+      },
+      "dangerZone": {
+        "title": "Danger Zone",
+        "description": "Destructive actions that cannot be undone.",
+        "deleteAllGuests": "Delete All Guests",
+        "deleteAllConfirmTitle": "Delete All Guests?",
+        "deleteAllConfirmMessage": "This will permanently delete all guest families and their members from your wedding. This action cannot be undone.",
+        "deleteAllWarning": "This action is irreversible!",
+        "confirmDelete": "Yes, Delete All Guests"
       }
     },
     "checklist": {

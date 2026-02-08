@@ -4,6 +4,7 @@
       "save": "Salva",
       "cancel": "Annulla",
       "delete": "Elimina",
+      "deleting": "Eliminazione...",
       "edit": "Modifica",
       "add": "Aggiungi",
       "create": "Crea",
@@ -762,7 +763,26 @@
         "rsvpAnswers": "Risposte RSVP"
       },
       "importSuccess": "Lista ospiti importata con successo",
-      "importError": "Errore di importazione. Controlla il file."
+      "importError": "Errore di importazione. Controlla il file.",
+      "bulkActions": "Azioni di massa",
+      "deleteSelected": "Elimina selezionati",
+      "selectGuestsHint": "Seleziona gli ospiti dalla lista per eseguire azioni di massa",
+      "bulkDeleteTitle": "Elimina ospiti selezionati",
+      "bulkDeleteConfirm": "Sei sicuro di voler eliminare {count} {count, plural, one {ospite selezionato} other {ospiti selezionati}}? Questa azione non può essere annullata.",
+      "deleteSuccess": "{count} {count, plural, one {ospite eliminato} other {ospiti eliminati}} con successo",
+      "bulkEdit": {
+        "button": "Modifica proprietà",
+        "title": "Modifica in massa le proprietà degli ospiti",
+        "subtitle": "Modifica proprietà per {count} {count, plural, one {ospite selezionato} other {ospiti selezionati}}",
+        "noChange": "-- Nessun cambiamento --",
+        "clearValue": "-- Cancella valore --",
+        "attendanceStatus": "Imposta stato di partecipazione",
+        "setAllAttending": "Segna tutti i membri come presenti",
+        "setAllNotAttending": "Segna tutti i membri come assenti",
+        "attendanceNote": "Questo aggiornerà tutti i membri della famiglia per gli ospiti selezionati",
+        "noChanges": "Seleziona almeno una proprietà da aggiornare",
+        "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo"
+      }
     },
     "notifications": {
       "title": "Notifiche e Attività",
@@ -961,6 +981,15 @@
         "save": "Salva Configurazione",
         "saving": "Salvataggio...",
         "submitError": "Impossibile salvare la configurazione. Riprova."
+      },
+      "dangerZone": {
+        "title": "Zona di Pericolo",
+        "description": "Azioni distruttive che non possono essere annullate.",
+        "deleteAllGuests": "Elimina Tutti gli Ospiti",
+        "deleteAllConfirmTitle": "Eliminare Tutti gli Ospiti?",
+        "deleteAllConfirmMessage": "Questo eliminerà permanentemente tutte le famiglie di ospiti e i loro membri dal tuo matrimonio. Questa azione non può essere annullata.",
+        "deleteAllWarning": "Questa azione è irreversibile!",
+        "confirmDelete": "Sì, Elimina Tutti gli Ospiti"
       }
     },
     "checklist": {

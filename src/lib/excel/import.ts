@@ -8,7 +8,7 @@
 import * as XLSX from 'xlsx';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
-import type { Language, MemberType, PaymentMode } from '@prisma/client';
+import type { Language, MemberType, PaymentMode, Channel } from '@prisma/client';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -21,6 +21,7 @@ export interface ImportRow {
   phone: string | null;
   whatsapp: string | null;
   language: Language;
+  channel: Channel | null;
   invitedBy: string | null;
   members: Array<{
     name: string;
@@ -56,6 +57,7 @@ export interface ImportResult {
 
 const VALID_LANGUAGES: Language[] = ['ES', 'EN', 'FR', 'IT', 'DE'];
 const VALID_MEMBER_TYPES: MemberType[] = ['ADULT', 'CHILD', 'INFANT'];
+const VALID_CHANNELS: Channel[] = ['WHATSAPP', 'EMAIL', 'SMS'];
 
 /**
  * Validate member type
@@ -66,6 +68,20 @@ function validateMemberType(value: string | undefined): MemberType | null {
   const type = value.trim().toUpperCase();
   if (VALID_MEMBER_TYPES.includes(type as MemberType)) {
     return type as MemberType;
+  }
+
+  return null;
+}
+
+/**
+ * Validate channel preference
+ */
+function validateChannel(value: string | undefined): Channel | null {
+  if (!value) return null;
+
+  const channel = value.trim().toUpperCase();
+  if (VALID_CHANNELS.includes(channel as Channel)) {
+    return channel as Channel;
   }
 
   return null;
@@ -144,15 +160,16 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
     const phone = row[3] ? String(row[3]).trim() : null;
     const whatsapp = row[4] ? String(row[4]).trim() : null;
     const language = String(row[5] || 'ES').trim().toUpperCase() as Language;
-    const invitedBy = row[6] ? String(row[6]).trim() : null;
+    const channel = row[6] ? String(row[6]).trim() : null;
+    const invitedBy = row[7] ? String(row[7]).trim() : null;
 
     // Parse members (up to 10)
     const members: ImportRow['members'] = [];
 
     for (let i = 0; i < 10; i++) {
-      const nameIndex = 7 + (i * 3);
-      const typeIndex = 8 + (i * 3);
-      const ageIndex = 9 + (i * 3);
+      const nameIndex = 8 + (i * 3);
+      const typeIndex = 9 + (i * 3);
+      const ageIndex = 10 + (i * 3);
 
       const memberName = row[nameIndex] ? String(row[nameIndex]).trim() : '';
       const memberType = row[typeIndex] ? String(row[typeIndex]).trim() : '';
@@ -174,6 +191,7 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
       phone: phone || null,
       whatsapp: whatsapp || null,
       language,
+      channel: validateChannel(channel || undefined),
       invitedBy: invitedBy || null,
       members,
     });
@@ -236,6 +254,16 @@ function validateImportData(
         message: `Invalid language '${row.language}', using default '${defaultLanguage}'`,
       });
       row.language = defaultLanguage;
+    }
+
+    // Validate channel (optional field)
+    if (row.channel && !VALID_CHANNELS.includes(row.channel)) {
+      warnings.push({
+        row: rowNum,
+        field: 'Channel',
+        message: `Invalid channel '${row.channel}', will be left empty`,
+      });
+      row.channel = null;
     }
 
     // Validate member types
@@ -435,6 +463,7 @@ export async function importGuestList(
             magic_token: magicToken,
             reference_code: referenceCode,
             preferred_language: row.language,
+            channel_preference: row.channel,
             invited_by_admin_id: resolvedAdminId,
           },
         });

@@ -4,6 +4,7 @@
       "save": "Guardar",
       "cancel": "Cancelar",
       "delete": "Eliminar",
+      "deleting": "Eliminando...",
       "edit": "Editar",
       "add": "Añadir",
       "create": "Crear",
@@ -767,8 +768,25 @@
         "saveChanges": "Guardar Cambios",
         "rsvpAnswers": "Respuestas RSVP"
       },
-      "importSuccess": "Lista de invitados importada exitosamente",
-      "importError": "Error de importación. Por favor verifica el archivo."
+      "bulkActions": "Acciones en lote",
+      "deleteSelected": "Eliminar seleccionados",
+      "selectGuestsHint": "Selecciona invitados de la lista para realizar acciones en lote",
+      "bulkDeleteTitle": "Eliminar invitados seleccionados",
+      "bulkDeleteConfirm": "¿Estás seguro de que quieres eliminar {count} {count, plural, one {invitado seleccionado} other {invitados seleccionados}}? Esta acción no se puede deshacer.",
+      "deleteSuccess": "{count} {count, plural, one {invitado eliminado} other {invitados eliminados}} exitosamente",
+      "bulkEdit": {
+        "button": "Editar propiedades",
+        "title": "Editar propiedades de invitados en lote",
+        "subtitle": "Editar propiedades para {count} {count, plural, one {invitado seleccionado} other {invitados seleccionados}}",
+        "noChange": "-- Sin cambios --",
+        "clearValue": "-- Borrar valor --",
+        "attendanceStatus": "Establecer estado de asistencia",
+        "setAllAttending": "Marcar todos los miembros como asistentes",
+        "setAllNotAttending": "Marcar todos los miembros como no asistentes",
+        "attendanceNote": "Esto actualizará todos los miembros familiares de los invitados seleccionados",
+        "noChanges": "Por favor selecciona al menos una propiedad para actualizar",
+        "updateSuccess": "{count} {count, plural, one {invitado actualizado} other {invitados actualizados}} exitosamente"
+      }
     },
     "notifications": {
       "title": "Notificaciones y Actividad",
@@ -969,6 +987,15 @@
         "save": "Guardar Configuración",
         "saving": "Guardando...",
         "submitError": "Error al guardar la configuración. Por favor inténtalo de nuevo."
+      },
+      "dangerZone": {
+        "title": "Zona de Peligro",
+        "description": "Acciones destructivas que no se pueden deshacer.",
+        "deleteAllGuests": "Eliminar Todos los Invitados",
+        "deleteAllConfirmTitle": "¿Eliminar Todos los Invitados?",
+        "deleteAllConfirmMessage": "Esto eliminará permanentemente todas las familias de invitados y sus miembros de tu boda. Esta acción no se puede deshacer.",
+        "deleteAllWarning": "¡Esta acción es irreversible!",
+        "confirmDelete": "Sí, Eliminar Todos los Invitados"
       }
     },
     "checklist": {

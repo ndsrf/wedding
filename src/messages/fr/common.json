@@ -24,7 +24,8 @@
       "clearFilters": "Effacer tous les filtres",
       "retry": "Réessayer",
       "continue": "Continuer",
-      "copy": "Copier"
+      "copy": "Copier",
+      "deleting": "Suppression..."
     },
     "status": {
       "pending": "En attente",
@@ -616,7 +617,42 @@
       "noWeddingAssigned": "Aucun mariage assigné."
     },
     "checklist": {
-      "loadError": "Impossible de charger la liste de contrôle"
+      "title": "Liste de Contrôle du Mariage",
+      "subtitle": "Gérez les tâches et suivez les progrès de votre mariage",
+      "loading": "Chargement de la liste...",
+      "saving": "Enregistrement...",
+      "error": "Erreur lors du chargement de la liste",
+      "retry": "Réessayer",
+      "emptyTitle": "Pas encore de tâches",
+      "emptyDesc": "Importez une liste ou attendez que votre organisateur ajoute des tâches.",
+      "import": "Importer depuis Excel",
+      "importing": "Importation...",
+      "export": "Exporter vers Excel",
+      "exporting": "Exportation...",
+      "delete": "Supprimer",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette tâche ?",
+      "markComplete": "Marquer comme terminée",
+      "markIncomplete": "Marquer comme incomplète",
+      "descriptionPlaceholder": "Ajouter une description...",
+      "columns": {
+        "done": "Fait",
+        "title": "Titre",
+        "description": "Description",
+        "assignedTo": "Assigné à",
+        "dueDate": "Date d'échéance",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "assignedTo": {
+        "planner": "Organisateur de Mariage",
+        "couple": "Couple",
+        "other": "Autre"
+      },
+      "status": {
+        "PENDING": "En attente",
+        "IN_PROGRESS": "En cours",
+        "COMPLETED": "Terminé"
+      }
     },
     "tasks": {
       "title": "Tâches à Venir",
@@ -762,7 +798,26 @@
         "rsvpAnswers": "Réponses RSVP"
       },
       "importSuccess": "Liste d'invités importée avec succès",
-      "importError": "Erreur d'importation. Veuillez vérifier le fichier."
+      "importError": "Erreur d'importation. Veuillez vérifier le fichier.",
+      "bulkActions": "Actions groupées",
+      "deleteSelected": "Supprimer la sélection",
+      "selectGuestsHint": "Sélectionnez les invités dans la liste pour effectuer des actions groupées",
+      "bulkDeleteTitle": "Supprimer les invités sélectionnés",
+      "bulkDeleteConfirm": "Êtes-vous sûr de vouloir supprimer {count} {count, plural, one {invité sélectionné} other {invités sélectionnés}} ? Cette action ne peut pas être annulée.",
+      "deleteSuccess": "{count} {count, plural, one {invité supprimé} other {invités supprimés}} avec succès",
+      "bulkEdit": {
+        "button": "Modifier les propriétés",
+        "title": "Modifier les propriétés des invités en masse",
+        "subtitle": "Modifier les propriétés pour {count} {count, plural, one {invité sélectionné} other {invités sélectionnés}}",
+        "noChange": "-- Aucun changement --",
+        "clearValue": "-- Effacer la valeur --",
+        "attendanceStatus": "Définir l'état de présence",
+        "setAllAttending": "Marquer tous les membres comme présents",
+        "setAllNotAttending": "Marquer tous les membres comme absents",
+        "attendanceNote": "Cela mettra à jour tous les membres de la famille des invités sélectionnés",
+        "noChanges": "Veuillez sélectionner au moins une propriété à mettre à jour",
+        "updateSuccess": "{count} {count, plural, one {invité mis à jour} other {invités mis à jour}} avec succès"
+      }
     },
     "notifications": {
       "title": "Notifications et Activité",
@@ -961,44 +1016,15 @@
         "save": "Enregistrer la Configuration",
         "saving": "Enregistrement...",
         "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer."
-      }
-    },
-    "checklist": {
-      "title": "Liste de Contrôle du Mariage",
-      "subtitle": "Gérez les tâches et suivez les progrès de votre mariage",
-      "loading": "Chargement de la liste...",
-      "saving": "Enregistrement...",
-      "error": "Erreur lors du chargement de la liste",
-      "retry": "Réessayer",
-      "emptyTitle": "Pas encore de tâches",
-      "emptyDesc": "Importez une liste ou attendez que votre organisateur ajoute des tâches.",
-      "import": "Importer depuis Excel",
-      "importing": "Importation...",
-      "export": "Exporter vers Excel",
-      "exporting": "Exportation...",
-      "delete": "Supprimer",
-      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette tâche ?",
-      "markComplete": "Marquer comme terminée",
-      "markIncomplete": "Marquer comme incomplète",
-      "descriptionPlaceholder": "Ajouter une description...",
-      "columns": {
-        "done": "Fait",
-        "title": "Titre",
-        "description": "Description",
-        "assignedTo": "Assigné à",
-        "dueDate": "Date d'échéance",
-        "status": "Statut",
-        "actions": "Actions"
       },
-      "assignedTo": {
-        "planner": "Organisateur de Mariage",
-        "couple": "Couple",
-        "other": "Autre"
-      },
-      "status": {
-        "PENDING": "En attente",
-        "IN_PROGRESS": "En cours",
-        "COMPLETED": "Terminé"
+      "dangerZone": {
+        "title": "Zone de danger",
+        "description": "Actions destructrices qui ne peuvent pas être annulées.",
+        "deleteAllGuests": "Supprimer tous les invités",
+        "deleteAllConfirmTitle": "Supprimer tous les invités ?",
+        "deleteAllConfirmMessage": "Cela supprimera définitivement toutes les familles d'invités et leurs membres de votre mariage. Cette action ne peut pas être annulée.",
+        "deleteAllWarning": "Cette action est irréversible !",
+        "confirmDelete": "Oui, supprimer tous les invités"
       }
     },
     "templates": {

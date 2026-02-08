@@ -4,6 +4,7 @@
       "save": "Speichern",
       "cancel": "Abbrechen",
       "delete": "Löschen",
+      "deleting": "Löschen...",
       "edit": "Bearbeiten",
       "add": "Hinzufügen",
       "create": "Erstellen",
@@ -762,7 +763,26 @@
         "rsvpAnswers": "RSVP-Antworten"
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
-      "importError": "Importfehler. Bitte überprüfen Sie die Datei."
+      "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
+      "bulkActions": "Massenaktionen",
+      "deleteSelected": "Ausgewählte löschen",
+      "selectGuestsHint": "Wählen Sie Gäste aus der Liste aus, um Massenaktionen durchzuführen",
+      "bulkDeleteTitle": "Ausgewählte Gäste löschen",
+      "bulkDeleteConfirm": "Sind Sie sicher, dass Sie {count} {count, plural, one {ausgewählten Gast} other {ausgewählte Gäste}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteSuccess": "{count} {count, plural, one {Gast} other {Gäste}} erfolgreich gelöscht",
+      "bulkEdit": {
+        "button": "Eigenschaften bearbeiten",
+        "title": "Gästeeigenschaften massenweise bearbeiten",
+        "subtitle": "Eigenschaften für {count} {count, plural, one {ausgewählten Gast} other {ausgewählte Gäste}} bearbeiten",
+        "noChange": "-- Keine Änderung --",
+        "clearValue": "-- Wert löschen --",
+        "attendanceStatus": "Anwesenheitsstatus festlegen",
+        "setAllAttending": "Alle Mitglieder als teilnehmend markieren",
+        "setAllNotAttending": "Alle Mitglieder als nicht teilnehmend markieren",
+        "attendanceNote": "Dies wird alle Familienmitglieder für die ausgewählten Gäste aktualisieren",
+        "noChanges": "Bitte wählen Sie mindestens eine zu aktualisierende Eigenschaft aus",
+        "updateSuccess": "{count} {count, plural, one {Gast} other {Gäste}} erfolgreich aktualisiert"
+      }
     },
     "notifications": {
       "title": "Benachrichtigungen und Aktivität",
@@ -961,6 +981,15 @@
         "save": "Konfiguration speichern",
         "saving": "Speichern...",
         "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut."
+      },
+      "dangerZone": {
+        "title": "Gefahrenzone",
+        "description": "Destruktive Aktionen, die nicht rückgängig gemacht werden können.",
+        "deleteAllGuests": "Alle Gäste Löschen",
+        "deleteAllConfirmTitle": "Alle Gäste Löschen?",
+        "deleteAllConfirmMessage": "Dies wird alle Gastfamilien und ihre Mitglieder dauerhaft von Ihrer Hochzeit löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "deleteAllWarning": "Diese Aktion ist unwiderruflich!",
+        "confirmDelete": "Ja, Alle Gäste Löschen"
       }
     },
     "checklist": {

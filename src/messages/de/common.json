@@ -24,7 +24,8 @@
       "clearFilters": "Alle Filter löschen",
       "retry": "Erneut versuchen",
       "continue": "Fortfahren",
-      "copy": "Kopieren"
+      "copy": "Kopieren",
+      "deleting": "Löschen..."
     },
     "status": {
       "pending": "Ausstehend",
@@ -616,7 +617,42 @@
       "noWeddingAssigned": "Keine Hochzeit zugewiesen."
     },
     "checklist": {
-      "loadError": "Checkliste konnte nicht geladen werden"
+      "title": "Hochzeits-Checkliste",
+      "subtitle": "Aufgaben verwalten und Fortschritt Ihrer Hochzeit verfolgen",
+      "loading": "Checkliste wird geladen...",
+      "saving": "Speichern...",
+      "error": "Fehler beim Laden der Checkliste",
+      "retry": "Erneut versuchen",
+      "emptyTitle": "Noch keine Aufgaben",
+      "emptyDesc": "Importieren Sie eine Checkliste oder warten Sie, bis Ihr Planer Aufgaben hinzufügt.",
+      "import": "Aus Excel importieren",
+      "importing": "Importiere...",
+      "export": "Nach Excel exportieren",
+      "exporting": "Exportiere...",
+      "delete": "Löschen",
+      "deleteConfirm": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?",
+      "markComplete": "Als erledigt markieren",
+      "markIncomplete": "Als nicht erledigt markieren",
+      "descriptionPlaceholder": "Beschreibung hinzufügen...",
+      "columns": {
+        "done": "Erledigt",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "assignedTo": "Zugewiesen an",
+        "dueDate": "Fälligkeitsdatum",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "assignedTo": {
+        "planner": "Hochzeitsplaner",
+        "couple": "Paar",
+        "other": "Andere"
+      },
+      "status": {
+        "PENDING": "Ausstehend",
+        "IN_PROGRESS": "In Bearbeitung",
+        "COMPLETED": "Abgeschlossen"
+      }
     },
     "tasks": {
       "title": "Bevorstehende Aufgaben",
@@ -762,7 +798,26 @@
         "rsvpAnswers": "RSVP-Antworten"
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
-      "importError": "Importfehler. Bitte überprüfen Sie die Datei."
+      "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
+      "bulkActions": "Massenaktionen",
+      "deleteSelected": "Ausgewählte löschen",
+      "selectGuestsHint": "Wählen Sie Gäste aus der Liste aus, um Massenaktionen durchzuführen",
+      "bulkDeleteTitle": "Ausgewählte Gäste löschen",
+      "bulkDeleteConfirm": "Sind Sie sicher, dass Sie {count} {count, plural, one {ausgewählten Gast} other {ausgewählte Gäste}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteSuccess": "{count} {count, plural, one {Gast gelöscht} other {Gäste gelöscht}} erfolgreich",
+      "bulkEdit": {
+        "button": "Eigenschaften bearbeiten",
+        "title": "Gast-Eigenschaften in großen Mengen bearbeiten",
+        "subtitle": "Eigenschaften für {count} {count, plural, one {ausgewählten Gast} other {ausgewählte Gäste}} bearbeiten",
+        "noChange": "-- Keine Änderung --",
+        "clearValue": "-- Wert löschen --",
+        "attendanceStatus": "Teilnahmestatus festlegen",
+        "setAllAttending": "Alle Mitglieder als teilnehmend markieren",
+        "setAllNotAttending": "Alle Mitglieder als nicht teilnehmend markieren",
+        "attendanceNote": "Dies wird alle Familienmitglieder der ausgewählten Gäste aktualisieren",
+        "noChanges": "Bitte wählen Sie mindestens eine Eigenschaft zum Aktualisieren aus",
+        "updateSuccess": "{count} {count, plural, one {Gast aktualisiert} other {Gäste aktualisiert}} erfolgreich"
+      }
     },
     "notifications": {
       "title": "Benachrichtigungen und Aktivität",
@@ -961,44 +1016,15 @@
         "save": "Konfiguration speichern",
         "saving": "Speichern...",
         "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut."
-      }
-    },
-    "checklist": {
-      "title": "Hochzeits-Checkliste",
-      "subtitle": "Aufgaben verwalten und Fortschritt Ihrer Hochzeit verfolgen",
-      "loading": "Checkliste wird geladen...",
-      "saving": "Speichern...",
-      "error": "Fehler beim Laden der Checkliste",
-      "retry": "Erneut versuchen",
-      "emptyTitle": "Noch keine Aufgaben",
-      "emptyDesc": "Importieren Sie eine Checkliste oder warten Sie, bis Ihr Planer Aufgaben hinzufügt.",
-      "import": "Aus Excel importieren",
-      "importing": "Importiere...",
-      "export": "Nach Excel exportieren",
-      "exporting": "Exportiere...",
-      "delete": "Löschen",
-      "deleteConfirm": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?",
-      "markComplete": "Als erledigt markieren",
-      "markIncomplete": "Als nicht erledigt markieren",
-      "descriptionPlaceholder": "Beschreibung hinzufügen...",
-      "columns": {
-        "done": "Erledigt",
-        "title": "Titel",
-        "description": "Beschreibung",
-        "assignedTo": "Zugewiesen an",
-        "dueDate": "Fälligkeitsdatum",
-        "status": "Status",
-        "actions": "Aktionen"
       },
-      "assignedTo": {
-        "planner": "Hochzeitsplaner",
-        "couple": "Paar",
-        "other": "Andere"
-      },
-      "status": {
-        "PENDING": "Ausstehend",
-        "IN_PROGRESS": "In Bearbeitung",
-        "COMPLETED": "Abgeschlossen"
+      "dangerZone": {
+        "title": "Gefahrenzone",
+        "description": "Destruktive Aktionen, die nicht rückgängig gemacht werden können.",
+        "deleteAllGuests": "Alle Gäste löschen",
+        "deleteAllConfirmTitle": "Alle Gäste löschen?",
+        "deleteAllConfirmMessage": "Dies wird alle Gastfamilien und ihre Mitglieder dauerhaft von Ihrer Hochzeit löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "deleteAllWarning": "Diese Aktion ist unumkehrbar!",
+        "confirmDelete": "Ja, alle Gäste löschen"
       }
     },
     "templates": {

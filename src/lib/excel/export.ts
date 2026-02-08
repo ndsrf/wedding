@@ -7,7 +7,7 @@
 
 import * as XLSX from 'xlsx';
 import { prisma } from '@/lib/db/prisma';
-import type { Language } from '@prisma/client';
+import type { Language, Channel } from '@prisma/client';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -34,6 +34,7 @@ interface FamilyExportData {
   phone: string;
   whatsapp: string;
   language: Language;
+  channel: Channel | null;
   invitedByAdmin: string;
   referenceCode: string;
   rsvpStatus: string;
@@ -119,6 +120,7 @@ async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
       phone: family.phone || '',
       whatsapp: family.whatsapp_number || '',
       language: family.preferred_language,
+      channel: family.channel_preference,
       invitedByAdmin: family.invited_by_admin_id ? (adminMap.get(family.invited_by_admin_id) || '') : '',
       referenceCode: family.reference_code || '',
       rsvpStatus,
@@ -173,6 +175,7 @@ export async function exportGuestData(
     'Phone',
     'WhatsApp',
     'Language',
+    'Channel',
     'Invited By',
     'Reference Code',
   ];
@@ -219,6 +222,7 @@ export async function exportGuestData(
       family.phone,
       family.whatsapp,
       family.language,
+      family.channel || '',
       family.invitedByAdmin,
       family.referenceCode,
     ];
@@ -270,6 +274,7 @@ export async function exportGuestData(
     { wch: 15 }, // Phone
     { wch: 15 }, // WhatsApp
     { wch: 10 }, // Language
+    { wch: 12 }, // Channel
     { wch: 20 }, // Invited By
     { wch: 15 }, // Reference Code
   ];
