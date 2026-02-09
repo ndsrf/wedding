@@ -751,6 +751,7 @@
         "payment": "Regalo",
         "language": "Idioma",
         "actions": "Acciones",
+        "contact": "Contacto",
         "loading": "Cargando invitados...",
         "emptyTitle": "No se encontraron invitados",
         "emptyDesc": "Intenta ajustar tus filtros o importa una lista de invitados.",

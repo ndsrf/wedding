@@ -703,6 +703,7 @@
         "payment": "Geschenk",
         "language": "Sprache",
         "actions": "Aktionen",
+        "contact": "Kontakt",
         "loading": "Lade Gäste...",
         "emptyTitle": "Keine Gäste gefunden",
         "emptyDesc": "Versuchen Sie, Ihre Filter anzupassen oder eine Gästeliste zu importieren.",

@@ -745,6 +745,7 @@
         "payment": "Gift",
         "language": "Language",
         "actions": "Actions",
+        "contact": "Contact",
         "loading": "Loading guests...",
         "emptyTitle": "No guests found",
         "emptyDesc": "Try adjusting your filters or import a guest list.",

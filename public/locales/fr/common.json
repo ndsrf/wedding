@@ -703,6 +703,7 @@
         "payment": "Cadeau",
         "language": "Langue",
         "actions": "Actions",
+        "contact": "Contact",
         "loading": "Chargement des invités...",
         "emptyTitle": "Aucun invité trouvé",
         "emptyDesc": "Essayez d'ajuster vos filtres ou importez une liste d'invités.",

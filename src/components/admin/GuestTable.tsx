@@ -79,11 +79,20 @@ export function GuestTable({
   showCheckboxes = false
 }: GuestTableProps) {
   const t = useTranslations();
+  const [expandedGuestIds, setExpandedGuestIds] = React.useState<string[]>([]);
 
   // Only count guests who can be selected (not confirmed)
   const selectableGuests = guests.filter(g => g.rsvp_status !== 'submitted');
   const allSelectableSelected = selectableGuests.length > 0 &&
     selectableGuests.every(g => selectedGuestIds.includes(g.id));
+
+  const toggleExpanded = (guestId: string) => {
+    setExpandedGuestIds(prev =>
+      prev.includes(guestId)
+        ? prev.filter(id => id !== guestId)
+        : [...prev, guestId]
+    );
+  };
 
   if (loading) {
     return (
@@ -276,86 +285,153 @@ export function GuestTable({
         {guests.map((guest) => {
           const isSelectable = guest.rsvp_status !== 'submitted';
           const isSelected = selectedGuestIds.includes(guest.id);
+          const isExpanded = expandedGuestIds.includes(guest.id);
 
           return (
             <div key={guest.id} className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-start gap-3 flex-1">
-                  {showCheckboxes && onSelectGuest && isSelectable && (
+              {/* Compact View - Always Visible */}
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => toggleExpanded(guest.id)}
+              >
+                {/* Checkbox */}
+                {showCheckboxes && onSelectGuest && isSelectable && (
+                  <div onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={(e) => onSelectGuest(guest.id, e.target.checked)}
-                      className="h-4 w-4 mt-0.5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                     />
-                  )}
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900">{guest.name}</h3>
-                    {getPreferredContact(guest) && (
-                      <p className="text-sm text-gray-600">{getPreferredContact(guest)}</p>
-                    )}
                   </div>
+                )}
+
+                {/* Family Name & Members */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-gray-900 truncate">{guest.name}</h3>
+                  <p className="text-xs text-gray-600">
+                    {guest.attending_count}/{guest.total_members} {t('admin.dashboard.metricTitles.attending').toLowerCase()}
+                  </p>
                 </div>
-              {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
-                <div className="flex gap-2 flex-wrap">
-                  {onViewTimeline && (
-                    <button
-                      onClick={() => onViewTimeline(guest.id, guest.name)}
-                      className="text-indigo-600 hover:text-indigo-900 text-sm"
-                    >
-                      {t('admin.guests.timeline.timeline')}
-                    </button>
+
+                {/* RSVP Status */}
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRsvpBadgeClass(guest.rsvp_status)}`}
+                >
+                  {guest.rsvp_status === 'submitted' ? t('admin.guests.filters.confirmed') : t('admin.guests.filters.pending')}
+                </span>
+
+                {/* Expand/Collapse Icon */}
+                <svg
+                  className={`h-5 w-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+
+              {/* Expanded View - Show on Click */}
+              {isExpanded && (
+                <div className="mt-4 space-y-3 border-t border-gray-200 pt-3">
+                  {/* Contact Info */}
+                  {getPreferredContact(guest) && (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 mb-1">{t('admin.guests.table.contact')}</p>
+                      <p className="text-sm text-gray-900">{getPreferredContact(guest)}</p>
+                    </div>
                   )}
-                  {onSendSaveTheDate && !guest.save_the_date_sent && !guest.invitation_sent && (
-                    <button
-                      onClick={() => onSendSaveTheDate(guest.id)}
-                      className="text-green-600 hover:text-green-900 text-sm"
+
+                  {/* Additional Info */}
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <p className="font-medium text-gray-500 mb-1">{t('admin.guests.table.channel')}</p>
+                      <p className="text-gray-900">
+                        {guest.channel_preference ? t(`common.channels.${guest.channel_preference}`) : t('common.channels.none')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-500 mb-1">{t('admin.guests.table.language')}</p>
+                      <p className="text-gray-900">{t(`common.languages.${guest.preferred_language}`)}</p>
+                    </div>
+                  </div>
+
+                  {/* Payment Status */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 mb-1">{t('admin.guests.table.payment')}</p>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentBadgeClass(guest.payment_status)}`}
                     >
-                      {t('admin.reminders.sendSaveTheDate')}
-                    </button>
-                  )}
-                  {onSendReminder && guest.rsvp_status !== 'submitted' && (
-                    <button
-                      onClick={() => onSendReminder(guest.id)}
-                      className="text-blue-600 hover:text-blue-900 text-sm"
-                    >
-                      {guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
-                    </button>
-                  )}
-                  {onEdit && (
-                    <button
-                      onClick={() => onEdit(guest.id)}
-                      className="text-purple-600 hover:text-purple-900 text-sm"
-                    >
-                      {t('common.buttons.edit')}
-                    </button>
-                  )}
-                  {onDelete && (
-                    <button
-                      onClick={() => onDelete(guest.id)}
-                      className="text-red-600 hover:text-red-900 text-sm"
-                    >
-                      {t('common.buttons.delete')}
-                    </button>
+                      {guest.payment_status ? t(`admin.payments.statuses.${guest.payment_status.toLowerCase()}`) : t('admin.guests.table.noPayment')}
+                    </span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
+                    <div className="pt-2 border-t border-gray-200">
+                      <p className="text-xs font-medium text-gray-500 mb-2">{t('admin.guests.table.actions')}</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {onViewTimeline && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewTimeline(guest.id, guest.name);
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900 text-sm"
+                          >
+                            {t('admin.guests.timeline.timeline')}
+                          </button>
+                        )}
+                        {onSendSaveTheDate && !guest.save_the_date_sent && !guest.invitation_sent && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSendSaveTheDate(guest.id);
+                            }}
+                            className="text-green-600 hover:text-green-900 text-sm"
+                          >
+                            {t('admin.reminders.sendSaveTheDate')}
+                          </button>
+                        )}
+                        {onSendReminder && guest.rsvp_status !== 'submitted' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSendReminder(guest.id);
+                            }}
+                            className="text-blue-600 hover:text-blue-900 text-sm"
+                          >
+                            {guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
+                          </button>
+                        )}
+                        {onEdit && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEdit(guest.id);
+                            }}
+                            className="text-purple-600 hover:text-purple-900 text-sm"
+                          >
+                            {t('common.buttons.edit')}
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete(guest.id);
+                            }}
+                            className="text-red-600 hover:text-red-900 text-sm"
+                          >
+                            {t('common.buttons.delete')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRsvpBadgeClass(guest.rsvp_status)}`}
-              >
-                {guest.rsvp_status === 'submitted' ? t('admin.guests.filters.confirmed') : t('admin.guests.filters.pending')}
-              </span>
-              <span className="text-xs text-gray-600">
-                {guest.attending_count}/{guest.total_members} {t('admin.dashboard.metricTitles.attending').toLowerCase()}
-              </span>
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentBadgeClass(guest.payment_status)}`}
-              >
-                {guest.payment_status ? t(`admin.payments.statuses.${guest.payment_status.toLowerCase()}`) : t('admin.guests.table.noPayment')}
-              </span>
-            </div>
             </div>
           );
         })}
