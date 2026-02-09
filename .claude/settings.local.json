@@ -81,7 +81,14 @@
       "Bash(/tmp/update_locales.py:*)",
       "Bash(__NEW_LINE_2553bfe6c121b673__ python3 /tmp/update_locales.py)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma db push:*)",
-      "Bash(PGPASSWORD=wedding psql:*)"
+      "Bash(PGPASSWORD=wedding psql:*)",
+      "mcp__playwright__browser_snapshot",
+      "Bash(wget:*)",
+      "Bash(do echo '=== Checking $lang ===' if python3 -m json.tool src/messages/$lang/common.json)",
+      "Bash(then echo '$lang: ✓ Valid JSON' else echo '$lang: ✗ Invalid JSON' python3 -m json.tool src/messages/$lang/common.json)",
+      "Bash(xargs echo 'Total articles:' echo echo Images: ls -lh public/images/news/*.jpg)",
+      "Bash(do if grep -q \"\"news\"\": src/messages/$lang/common.json)",
+      "Bash(then echo '✓ $lang translations added' else echo '✗ $lang translations missing' fi done)"
     ]
   }
 }

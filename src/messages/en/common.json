@@ -1455,5 +1455,15 @@
       "content": "Ready to streamline your wedding planning business? Start with our free 14-day trial to explore all features with your first wedding. No credit card required.",
       "button": "Request a Demo"
     }
+  },
+  "news": {
+    "title": "News & Resources",
+    "subtitle": "Expert advice and insights for wedding planners",
+    "readMore": "Read more",
+    "backToNews": "Back to News",
+    "cta": {
+      "title": "Ready to transform your wedding planning business?",
+      "button": "Get Started"
+    }
   }
 }

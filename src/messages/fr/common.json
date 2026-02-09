@@ -1419,5 +1419,15 @@
       "content": "Prêt à rationaliser votre activité d'organisation de mariages ? Commencez avec notre essai gratuit de 14 jours pour explorer toutes les fonctionnalités avec votre premier mariage. Aucune carte de crédit requise.",
       "button": "Demander une Démo"
     }
+  },
+  "news": {
+    "title": "Actualités et Ressources",
+    "subtitle": "Conseils d'experts et informations pour les wedding planners",
+    "readMore": "Lire la suite",
+    "backToNews": "Retour aux Actualités",
+    "cta": {
+      "title": "Prêt à transformer votre activité d'organisation de mariages ?",
+      "button": "Commencer"
+    }
   }
 }

@@ -5,6 +5,20 @@ import Image from 'next/image';
 import { getTranslations } from '@/lib/i18n/server';
 import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+  
+  return {
+    title: `Privacy Policy - ${commercialName}`,
+    description: `Privacy policy for ${commercialName}`,
+    alternates: {
+      canonical: `/${locale}/privacy`,
+    }
+  };
+}
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

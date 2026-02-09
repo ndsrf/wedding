@@ -8,7 +8,7 @@ import '../globals.css'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  
+
   // Basic validation for metadata as well
   if (!isValidLanguage(locale)) {
     return {};
@@ -18,6 +18,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('title'),
     description: t('description'),
+    // Performance optimizations
+    other: {
+      // Preconnect to external domains for faster resource loading
+      'link': [
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+        { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' },
+      ].map(l => `<${l.href}>; rel="${l.rel}"${l.crossOrigin ? `; crossorigin` : ''}`).join(', '),
+    },
   };
 }
 
@@ -46,6 +55,27 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        {/* Preload critical fonts for optimal FCP */}
+        <link
+          rel="preload"
+          href="/fonts/playfair/playfair-display-700.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/playfair/playfair-display-400.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        {/* Resource hints for external resources */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+      </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}

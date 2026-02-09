@@ -1,16 +1,21 @@
 import { Metadata } from 'next';
+import { generateAMPMetadata } from '@/lib/amp';
+import { getTranslations } from '@/lib/i18n/server';
+import { Language } from '@/lib/i18n/config';
 
-const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await getTranslations(locale as Language);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
 
-export const metadata: Metadata = {
-  title: `Contact Us - ${commercialName}`,
-  description: `Get in touch with ${commercialName}. We're here to help you transform your wedding planning business.`,
-};
+  return generateAMPMetadata({
+    canonical: `${baseUrl}/${locale}/contact`,
+    title: t('contact.title'),
+    description: t('contact.subtitle'),
+    type: 'website',
+  });
+}
 
-export default function ContactLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return children;
+export default function ContactLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

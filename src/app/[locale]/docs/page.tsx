@@ -5,6 +5,23 @@ import Image from 'next/image';
 import { getTranslations } from '@/lib/i18n/server';
 import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+import { generateAMPMetadata } from '@/lib/amp';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
+  const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+  const title = `Documentation - ${commercialName}`;
+  const description = `Learn how to use ${commercialName} for wedding management. Complete documentation for planners, couples, and guests.`;
+
+  return generateAMPMetadata({
+    canonical: `${baseUrl}/${locale}/docs`,
+    title,
+    description,
+    type: 'website',
+  });
+}
 
 export default async function DocsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

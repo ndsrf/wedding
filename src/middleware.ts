@@ -157,20 +157,26 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Internationalization
-  // This handles /about, /docs, etc. and redirects / to /[locale]
+  // This handles /about, /docs, /news, etc. and redirects / to /[locale]
   // if not authenticated.
-  const isSeoFriendlyPath = pathname === '/' || 
-    pathname === '/about' || 
-    pathname === '/docs' || 
+  const isSeoFriendlyPath = pathname === '/' ||
+    pathname === '/about' ||
+    pathname === '/docs' ||
     pathname === '/privacy' ||
     pathname === '/contact' ||
+    pathname === '/news' ||
+    pathname.startsWith('/news/') ||
+    pathname.endsWith('/amp') ||
     routing.locales.some(locale => {
       const localePath = `/${locale}`;
-      return pathname === localePath || 
+      return pathname === localePath ||
              pathname === `${localePath}/about` ||
              pathname === `${localePath}/docs` ||
              pathname === `${localePath}/privacy` ||
-             pathname === `${localePath}/contact`;
+             pathname === `${localePath}/contact` ||
+             pathname === `${localePath}/news` ||
+             pathname.startsWith(`${localePath}/news/`) ||
+             pathname.endsWith('/amp');
     });
 
   if (isSeoFriendlyPath) {

@@ -1419,5 +1419,15 @@
       "content": "Bereit, Ihr Hochzeitsplanungsgeschäft zu optimieren? Beginnen Sie mit unserer 14-tägigen kostenlosen Testversion, um alle Funktionen mit Ihrer ersten Hochzeit zu erkunden. Keine Kreditkarte erforderlich.",
       "button": "Demo anfordern"
     }
+  },
+  "news": {
+    "title": "Neuigkeiten und Ressourcen",
+    "subtitle": "Expertenrat und Einblicke für Hochzeitsplaner",
+    "readMore": "Mehr lesen",
+    "backToNews": "Zurück zu Neuigkeiten",
+    "cta": {
+      "title": "Bereit, Ihr Hochzeitsplanungsgeschäft zu transformieren?",
+      "button": "Loslegen"
+    }
   }
 }

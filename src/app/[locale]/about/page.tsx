@@ -5,6 +5,20 @@ import Image from 'next/image';
 import { getTranslations } from '@/lib/i18n/server';
 import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+  
+  return {
+    title: `About ${commercialName}`,
+    description: `Learn about ${commercialName}`,
+    alternates: {
+      canonical: `/${locale}/about`,
+    }
+  };
+}
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -18,7 +32,8 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,6 +164,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           <p className="text-gray-400">© 2026 {commercialName}. {t('landing.footer.rights')}</p>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

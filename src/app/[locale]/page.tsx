@@ -9,10 +9,15 @@ import { notFound } from 'next/navigation';
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  
   return {
-    title: `${commercialName} - Wedding Management Platform for Planners`,
-    description: `Transform your wedding planning business with ${commercialName}. Manage multiple weddings, track RSVPs, and communicate with guests across WhatsApp, Email, and SMS.`,
+    title: `${commercialName} - Wedding Management Platform`,
+    description: `Transform your wedding planning business with ${commercialName}`,
+    alternates: {
+      canonical: `/${locale}`,
+    }
   };
 }
 
@@ -27,7 +32,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   const { t } = await getTranslations(locale as Language);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,6 +51,9 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <a href="#testimonials" className="text-gray-700 hover:text-rose-600 transition-colors">
                 {t('landing.nav.testimonials')}
               </a>
+              <Link href={`/${locale}/news`} className="text-gray-700 hover:text-rose-600 transition-colors">
+                {t('news.title')}
+              </Link>
               <LanguageSelector />
               <Link
                 href="/auth/signin"
@@ -101,6 +110,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                     height={343}
                     className="w-full h-auto object-cover"
                     priority
+                    fetchPriority="high"
                   />
                 </div>
               </div>
@@ -134,6 +144,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                   height={533}
                   className="w-full h-auto"
                   priority
+                  fetchPriority="high"
                 />
               </div>
             </div>
@@ -518,6 +529,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <h4 className="font-semibold mb-4">{t('landing.footer.company')}</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="/about" className="hover:text-white transition-colors">{t('landing.footer.about')}</Link></li>
+                <li><Link href="/news" className="hover:text-white transition-colors">{t('news.title')}</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition-colors">{t('landing.footer.contact')}</Link></li>
                 <li><Link href="/privacy" className="hover:text-white transition-colors">{t('landing.footer.privacy')}</Link></li>
               </ul>
@@ -535,6 +547,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

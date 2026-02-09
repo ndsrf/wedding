@@ -1431,5 +1431,15 @@
       "content": "¿Listo para optimizar tu negocio de planificación de bodas? Comienza con nuestra prueba gratuita de 14 días para explorar todas las funciones con tu primera boda. No se requiere tarjeta de crédito.",
       "button": "Solicita una Demo"
     }
+  },
+  "news": {
+    "title": "Noticias y Recursos",
+    "subtitle": "Consejos expertos e información para wedding planners",
+    "readMore": "Leer más",
+    "backToNews": "Volver a Noticias",
+    "cta": {
+      "title": "¿Listo para transformar tu negocio de planificación de bodas?",
+      "button": "Comenzar"
+    }
   }
 }

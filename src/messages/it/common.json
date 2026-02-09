@@ -1419,5 +1419,15 @@
       "content": "Pronto a semplificare la tua attività di organizzazione matrimoni? Inizia con la nostra prova gratuita di 14 giorni per esplorare tutte le funzionalità con il tuo primo matrimonio. Nessuna carta di credito richiesta.",
       "button": "Richiedi una Demo"
     }
+  },
+  "news": {
+    "title": "Notizie e Risorse",
+    "subtitle": "Consigli esperti e informazioni per wedding planner",
+    "readMore": "Leggi di più",
+    "backToNews": "Torna alle Notizie",
+    "cta": {
+      "title": "Pronto a trasformare la tua attività di organizzazione matrimoni?",
+      "button": "Inizia"
+    }
   }
 }
