@@ -208,6 +208,7 @@ export async function GET(request: NextRequest) {
         preferred_language: family.preferred_language,
         invited_by_admin_id: family.invited_by_admin_id,
         invited_by_admin_name: invitedByAdmin ? (invitedByAdmin.name || invitedByAdmin.email) : null,
+        private_notes: family.private_notes,
         save_the_date_sent: family.save_the_date_sent,
         created_at: family.created_at,
         // RSVP Question Answers

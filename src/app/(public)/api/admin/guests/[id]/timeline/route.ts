@@ -45,6 +45,7 @@ export async function GET(_request: NextRequest, context: RouteParams) {
       select: {
         id: true,
         name: true,
+        created_at: true,
       },
     });
 
@@ -92,6 +93,21 @@ export async function GET(_request: NextRequest, context: RouteParams) {
       ...event,
       family_name: family.name,
     }));
+
+    // Add a synthetic "GUEST_CREATED" event at the beginning (last chronologically)
+    const guestCreatedEvent = {
+      id: `created-${family.id}`,
+      family_id: family.id,
+      event_type: 'GUEST_CREATED',
+      channel: null,
+      metadata: null,
+      admin_triggered: true,
+      timestamp: family.created_at,
+      family_name: family.name,
+    };
+
+    // Add the created event to the end (it's the oldest event)
+    eventsWithFamily.push(guestCreatedEvent);
 
     const response: APIResponse = {
       success: true,

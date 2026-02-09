@@ -794,7 +794,8 @@
         "timeline": "Chronologie",
         "viewTimeline": "Voir la Chronologie d'Activité",
         "noEvents": "Aucune activité enregistrée pour cet invité pour le moment.",
-        "loading": "Chargement de la chronologie..."
+        "loading": "Chargement de la chronologie...",
+        "guestCreated": "Invit\u00e9 ajout\u00e9 au syst\u00e8me"
       },
       "import": "Importer depuis Excel",
       "export": "Exporter vers Excel",
@@ -840,7 +841,10 @@
         "saving": "Enregistrement...",
         "addGuest": "Ajouter Invité",
         "saveChanges": "Enregistrer les Modifications",
-        "rsvpAnswers": "Réponses RSVP"
+        "rsvpAnswers": "Réponses RSVP",
+        "privateNotes": "Notes Priv\u00e9es",
+        "privateNotesPlaceholder": "Ajouter des notes internes sur cet invit\u00e9 (pr\u00e9f\u00e9rences alimentaires, pr\u00e9f\u00e9rences de si\u00e8ge, demandes sp\u00e9ciales, etc.)",
+        "privateNotesHelp": "Ces notes ne sont visibles que pour les administrateurs du mariage et ne seront pas partag\u00e9es avec les invit\u00e9s."
       },
       "importSuccess": "Liste d'invités importée avec succès",
       "importError": "Erreur d'importation. Veuillez vérifier le fichier.",

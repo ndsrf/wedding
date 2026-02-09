@@ -13,7 +13,7 @@ import type { EventType, Channel } from '@/types/models';
 interface TrackingEventWithFamily {
   id: string;
   family_id: string;
-  event_type: EventType;
+  event_type: EventType | 'GUEST_CREATED';
   channel: Channel | null;
   metadata: Record<string, unknown> | null;
   admin_triggered: boolean;
@@ -28,13 +28,14 @@ interface GuestTimelineModalProps {
   onClose: () => void;
 }
 
-const getEventIcon = (eventType: EventType): string => {
-  const icons: Record<EventType, string> = {
+const getEventIcon = (eventType: EventType | 'GUEST_CREATED'): string => {
+  const icons: Record<EventType | 'GUEST_CREATED', string> = {
     LINK_OPENED: '🔗',
     RSVP_STARTED: '📝',
     RSVP_SUBMITTED: '✅',
     RSVP_UPDATED: '✏️',
     GUEST_ADDED: '👤',
+    GUEST_CREATED: '➕',
     PAYMENT_RECEIVED: '💰',
     REMINDER_SENT: '🔔',
     INVITATION_SENT: '💌',
@@ -48,13 +49,14 @@ const getEventIcon = (eventType: EventType): string => {
   return icons[eventType] || '📌';
 };
 
-const getEventColor = (eventType: EventType): string => {
-  const colors: Record<EventType, string> = {
+const getEventColor = (eventType: EventType | 'GUEST_CREATED'): string => {
+  const colors: Record<EventType | 'GUEST_CREATED', string> = {
     LINK_OPENED: 'bg-blue-100 text-blue-800',
     RSVP_STARTED: 'bg-yellow-100 text-yellow-800',
     RSVP_SUBMITTED: 'bg-green-100 text-green-800',
     RSVP_UPDATED: 'bg-purple-100 text-purple-800',
     GUEST_ADDED: 'bg-indigo-100 text-indigo-800',
+    GUEST_CREATED: 'bg-gray-100 text-gray-800',
     PAYMENT_RECEIVED: 'bg-green-100 text-green-800',
     REMINDER_SENT: 'bg-orange-100 text-orange-800',
     INVITATION_SENT: 'bg-pink-100 text-pink-800',
@@ -224,7 +226,9 @@ export function GuestTimelineModal({
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="text-sm font-medium text-gray-900">
-                            {t(`admin.notifications.eventTypes.${event.event_type}`)}
+                            {event.event_type === 'GUEST_CREATED'
+                              ? t('admin.guests.timeline.guestCreated')
+                              : t(`admin.notifications.eventTypes.${event.event_type}`)}
                           </h3>
                           <p className="mt-1 text-xs text-gray-500">
                             {formatTimestamp(event.timestamp)}

@@ -714,7 +714,7 @@ export default function GuestsPage() {
             {/* Bulk Actions Section */}
             {!isReadOnly && (
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <h3 className="text-sm font-medium text-gray-900">
                       {t('admin.guests.bulkActions')}
@@ -725,7 +725,7 @@ export default function GuestsPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <button
                       onClick={() => setIsBulkDeleteDialogOpen(true)}
                       disabled={selectedGuestIds.length === 0}
@@ -822,6 +822,7 @@ export default function GuestsPage() {
                 channel_preference: selectedGuest.channel_preference,
                 preferred_language: selectedGuest.preferred_language,
                 invited_by_admin_id: selectedGuest.invited_by_admin_id || null,
+                private_notes: selectedGuest.private_notes || null,
                 members: selectedGuest.members.map((m) => ({
                   id: m.id,
                   name: m.name,

@@ -46,6 +46,7 @@ export const createFamilySchema = z.object({
   channel_preference: channelSchema.nullable().optional(),
   preferred_language: languageSchema.default('ES'),
   invited_by_admin_id: z.string().uuid().nullable().optional(),
+  private_notes: z.string().nullable().optional(),
   members: z.array(createMemberSchema).default([]),
 });
 
@@ -58,6 +59,7 @@ export const updateFamilySchema = z.object({
   channel_preference: channelSchema.nullable().optional(),
   preferred_language: languageSchema.optional(),
   invited_by_admin_id: z.string().uuid().nullable().optional(),
+  private_notes: z.string().nullable().optional(),
   members: z.array(updateMemberSchema).optional(),
   // RSVP Question Answers
   transportation_answer: z.boolean().nullable().optional(),

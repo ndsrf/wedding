@@ -794,7 +794,8 @@
         "timeline": "Cronologia",
         "viewTimeline": "Visualizza Cronologia Attività",
         "noEvents": "Nessuna attività registrata per questo ospite.",
-        "loading": "Caricamento cronologia..."
+        "loading": "Caricamento cronologia...",
+        "guestCreated": "Ospite aggiunto al sistema"
       },
       "import": "Importa da Excel",
       "export": "Esporta in Excel",
@@ -840,7 +841,10 @@
         "saving": "Salvataggio...",
         "addGuest": "Aggiungi Ospite",
         "saveChanges": "Salva Modifiche",
-        "rsvpAnswers": "Risposte RSVP"
+        "rsvpAnswers": "Risposte RSVP",
+        "privateNotes": "Note Private",
+        "privateNotesPlaceholder": "Aggiungi note interne su questo ospite (preferenze alimentari, preferenze di posti, richieste speciali, ecc.)",
+        "privateNotesHelp": "Queste note sono visibili solo agli amministratori del matrimonio e non saranno condivise con gli ospiti."
       },
       "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file.",

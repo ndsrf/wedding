@@ -19,6 +19,7 @@ interface GuestFormData {
   channel_preference?: Channel | null;
   preferred_language: Language;
   invited_by_admin_id?: string | null;
+  private_notes?: string | null;
   members: FamilyMemberFormData[];
   // RSVP Question Answers
   transportation_answer?: boolean | null;
@@ -65,6 +66,7 @@ const defaultFormData: GuestFormData = {
   channel_preference: null,
   preferred_language: 'ES',
   invited_by_admin_id: null,
+  private_notes: null,
   members: [],
   // RSVP Question Answers
   transportation_answer: null,
@@ -298,6 +300,26 @@ export function GuestFormModal({
                   </select>
                 </div>
               )}
+
+              {/* Private Notes */}
+              <div>
+                <label htmlFor="guest-private-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('admin.guests.form.privateNotes')}
+                </label>
+                <textarea
+                  id="guest-private-notes"
+                  rows={3}
+                  value={formData.private_notes || ''}
+                  onChange={(e) =>
+                    setFormData({ ...formData, private_notes: e.target.value || null })
+                  }
+                  placeholder={t('admin.guests.form.privateNotesPlaceholder')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t('admin.guests.form.privateNotesHelp')}
+                </p>
+              </div>
 
               {/* RSVP Question Answers - Only show in edit mode when questions are configured */}
               {mode === 'edit' && weddingConfig && (

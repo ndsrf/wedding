@@ -95,6 +95,7 @@ export async function createFamily(
         channel_preference: validatedInput.channel_preference || null,
         preferred_language: validatedInput.preferred_language,
         invited_by_admin_id,
+        private_notes: validatedInput.private_notes || null,
       },
       include: {
         members: true,
@@ -210,6 +211,8 @@ export async function updateFamily(
       familyUpdateData.preferred_language = validatedInput.preferred_language;
     if (validatedInput.invited_by_admin_id !== undefined)
       familyUpdateData.invited_by_admin_id = validatedInput.invited_by_admin_id;
+    if (validatedInput.private_notes !== undefined)
+      familyUpdateData.private_notes = validatedInput.private_notes;
     // RSVP Question Answers
     if (validatedInput.transportation_answer !== undefined)
       familyUpdateData.transportation_answer = validatedInput.transportation_answer;

@@ -180,6 +180,7 @@ export interface Family {
   channel_preference: Channel | null;
   preferred_language: Language;
   invited_by_admin_id: string | null;
+  private_notes: string | null;
   save_the_date_sent: Date | null;
   created_at: Date;
 

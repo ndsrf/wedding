@@ -65,6 +65,46 @@ const getPreferredContact = (guest: GuestWithStatus): string | null => {
   }
 };
 
+const getLanguageFlag = (language: string): string => {
+  const flags: Record<string, string> = {
+    'ES': '🇪🇸',
+    'EN': '🇬🇧',
+    'FR': '🇫🇷',
+    'IT': '🇮🇹',
+    'DE': '🇩🇪',
+  };
+  return flags[language] || language;
+};
+
+const getChannelIcon = (channel: string | null): React.ReactElement => {
+  if (!channel) {
+    return <span className="text-gray-400 text-xs">-</span>;
+  }
+
+  switch (channel) {
+    case 'WHATSAPP':
+      return (
+        <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+      );
+    case 'EMAIL':
+      return (
+        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      );
+    case 'SMS':
+      return (
+        <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      );
+    default:
+      return <span className="text-gray-400 text-xs">-</span>;
+  }
+};
+
 export function GuestTable({
   guests,
   onEdit,
@@ -145,26 +185,26 @@ export function GuestTable({
                   />
                 </th>
               )}
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.family')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.members')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.rsvp')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.guests.table.channel')}
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <span title={t('admin.guests.table.channel')}>📢</span>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.guests.table.payment')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.guests.table.language')}
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <span title={t('admin.guests.table.language')}>🌐</span>
               </th>
-              {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {(onEdit || onDelete || onSendReminder || onSendSaveTheDate) && (
+                <th className="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('admin.guests.table.actions')}
                 </th>
               )}
@@ -191,83 +231,99 @@ export function GuestTable({
                       )}
                     </td>
                   )}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">{guest.name}</span>
-                      {getPreferredContact(guest) && (
-                        <span className="text-sm text-gray-500">{getPreferredContact(guest)}</span>
-                      )}
-                    </div>
-                  </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm text-gray-900">
-                    {guest.attending_count} / {guest.total_members}
-                  </span>
-                  <span className="text-sm text-gray-500 ml-1">{t('admin.dashboard.metricTitles.attending').toLowerCase()}</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRsvpBadgeClass(guest.rsvp_status)}`}
-                  >
-                    {guest.rsvp_status === 'submitted' ? t('admin.guests.filters.confirmed') : t('admin.guests.filters.pending')}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {guest.channel_preference ? t(`common.channels.${guest.channel_preference}`) : t('common.channels.none')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentBadgeClass(guest.payment_status)}`}
-                  >
-                    {guest.payment_status ? t(`admin.payments.statuses.${guest.payment_status.toLowerCase()}`) : 'None'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {t(`common.languages.${guest.preferred_language}`)}
-                </td>
-                {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end gap-2">
+                  <td className="px-3 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
                       {onViewTimeline && (
                         <button
                           onClick={() => onViewTimeline(guest.id, guest.name)}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="p-0.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded flex-shrink-0"
                           title={t('admin.guests.timeline.viewTimeline')}
                         >
-                          {t('admin.guests.timeline.timeline')}
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
                         </button>
                       )}
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-medium text-gray-900 truncate">{guest.name}</span>
+                        {getPreferredContact(guest) && (
+                          <span className="text-xs text-gray-500 truncate">{getPreferredContact(guest)}</span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                  {guest.attending_count} / {guest.total_members}
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getRsvpBadgeClass(guest.rsvp_status)}`}
+                  >
+                    {guest.rsvp_status === 'submitted' ? '✓' : '⏳'}
+                  </span>
+                </td>
+                <td className="px-2 py-4 whitespace-nowrap text-center">
+                  <span title={guest.channel_preference ? t(`common.channels.${guest.channel_preference}`) : t('common.channels.none')}>
+                    {getChannelIcon(guest.channel_preference)}
+                  </span>
+                </td>
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getPaymentBadgeClass(guest.payment_status)}`}
+                  >
+                    {guest.payment_status ? '💰' : '-'}
+                  </span>
+                </td>
+                <td className="px-2 py-4 whitespace-nowrap text-center text-lg">
+                  <span title={t(`common.languages.${guest.preferred_language}`)}>
+                    {getLanguageFlag(guest.preferred_language)}
+                  </span>
+                </td>
+                {(onEdit || onDelete || onSendReminder || onSendSaveTheDate) && (
+                  <td className="px-2 py-4 whitespace-nowrap text-right">
+                    <div className="flex justify-end gap-0.5">
                       {onSendSaveTheDate && !guest.save_the_date_sent && !guest.invitation_sent && (
                         <button
                           onClick={() => onSendSaveTheDate(guest.id)}
-                          className="text-green-600 hover:text-green-900"
+                          className="p-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded"
                           title={t('admin.reminders.sendSaveTheDate')}
                         >
-                          {t('admin.reminders.sendSaveTheDate')}
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
                         </button>
                       )}
                       {onSendReminder && guest.rsvp_status !== 'submitted' && (
                         <button
                           onClick={() => onSendReminder(guest.id)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded"
+                          title={guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
                         >
-                          {guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                          </svg>
                         </button>
                       )}
                       {onEdit && (
                         <button
                           onClick={() => onEdit(guest.id)}
-                          className="text-purple-600 hover:text-purple-900"
+                          className="p-1 text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded"
+                          title={t('common.buttons.edit')}
                         >
-                          {t('common.buttons.edit')}
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
                         </button>
                       )}
                       {onDelete && (
                         <button
                           onClick={() => onDelete(guest.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded"
+                          title={t('common.buttons.delete')}
                         >
-                          {t('common.buttons.delete')}
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                         </button>
                       )}
                     </div>
@@ -306,11 +362,27 @@ export function GuestTable({
                   </div>
                 )}
 
+                {/* Timeline Icon */}
+                {onViewTimeline && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewTimeline(guest.id, guest.name);
+                    }}
+                    className="p-1 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded flex-shrink-0"
+                    title={t('admin.guests.timeline.viewTimeline')}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </button>
+                )}
+
                 {/* Family Name & Members */}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium text-gray-900 truncate">{guest.name}</h3>
                   <p className="text-xs text-gray-600">
-                    {guest.attending_count}/{guest.total_members} {t('admin.dashboard.metricTitles.attending').toLowerCase()}
+                    {guest.attending_count}/{guest.total_members}
                   </p>
                 </div>
 
@@ -347,13 +419,17 @@ export function GuestTable({
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
                       <p className="font-medium text-gray-500 mb-1">{t('admin.guests.table.channel')}</p>
-                      <p className="text-gray-900">
-                        {guest.channel_preference ? t(`common.channels.${guest.channel_preference}`) : t('common.channels.none')}
-                      </p>
+                      <div title={guest.channel_preference ? t(`common.channels.${guest.channel_preference}`) : t('common.channels.none')}>
+                        {getChannelIcon(guest.channel_preference)}
+                      </div>
                     </div>
                     <div>
                       <p className="font-medium text-gray-500 mb-1">{t('admin.guests.table.language')}</p>
-                      <p className="text-gray-900">{t(`common.languages.${guest.preferred_language}`)}</p>
+                      <p className="text-gray-900 text-lg">
+                        <span title={t(`common.languages.${guest.preferred_language}`)}>
+                          {getLanguageFlag(guest.preferred_language)}
+                        </span>
+                      </p>
                     </div>
                   </div>
 
@@ -368,30 +444,22 @@ export function GuestTable({
                   </div>
 
                   {/* Action Buttons */}
-                  {(onEdit || onDelete || onSendReminder || onSendSaveTheDate || onViewTimeline) && (
+                  {(onEdit || onDelete || onSendReminder || onSendSaveTheDate) && (
                     <div className="pt-2 border-t border-gray-200">
                       <p className="text-xs font-medium text-gray-500 mb-2">{t('admin.guests.table.actions')}</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {onViewTimeline && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onViewTimeline(guest.id, guest.name);
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900 text-sm"
-                          >
-                            {t('admin.guests.timeline.timeline')}
-                          </button>
-                        )}
+                      <div className="flex gap-1 flex-wrap">
                         {onSendSaveTheDate && !guest.save_the_date_sent && !guest.invitation_sent && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onSendSaveTheDate(guest.id);
                             }}
-                            className="text-green-600 hover:text-green-900 text-sm"
+                            className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded"
+                            title={t('admin.reminders.sendSaveTheDate')}
                           >
-                            {t('admin.reminders.sendSaveTheDate')}
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                           </button>
                         )}
                         {onSendReminder && guest.rsvp_status !== 'submitted' && (
@@ -400,9 +468,12 @@ export function GuestTable({
                               e.stopPropagation();
                               onSendReminder(guest.id);
                             }}
-                            className="text-blue-600 hover:text-blue-900 text-sm"
+                            className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded"
+                            title={guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
                           >
-                            {guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
                           </button>
                         )}
                         {onEdit && (
@@ -411,9 +482,12 @@ export function GuestTable({
                               e.stopPropagation();
                               onEdit(guest.id);
                             }}
-                            className="text-purple-600 hover:text-purple-900 text-sm"
+                            className="p-2 text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded"
+                            title={t('common.buttons.edit')}
                           >
-                            {t('common.buttons.edit')}
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
                         )}
                         {onDelete && (
@@ -422,9 +496,12 @@ export function GuestTable({
                               e.stopPropagation();
                               onDelete(guest.id);
                             }}
-                            className="text-red-600 hover:text-red-900 text-sm"
+                            className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded"
+                            title={t('common.buttons.delete')}
                           >
-                            {t('common.buttons.delete')}
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         )}
                       </div>

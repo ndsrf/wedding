@@ -768,7 +768,8 @@
         "timeline": "Timeline",
         "viewTimeline": "View Activity Timeline",
         "noEvents": "No activity recorded for this guest yet.",
-        "loading": "Loading timeline..."
+        "loading": "Loading timeline...",
+        "guestCreated": "Guest added to system"
       },
       "export": "Export to Excel",
       "template": "Download Template",
@@ -813,7 +814,10 @@
         "saving": "Saving...",
         "addGuest": "Add Guest",
         "saveChanges": "Save Changes",
-        "rsvpAnswers": "RSVP Answers"
+        "rsvpAnswers": "RSVP Answers",
+        "privateNotes": "Private Notes",
+        "privateNotesPlaceholder": "Add internal notes about this guest (dietary preferences, seating preferences, special requests, etc.)",
+        "privateNotesHelp": "These notes are only visible to wedding administrators and will not be shared with guests."
       },
       "importSuccess": "Guest list imported successfully",
       "importError": "Import error. Please check the file.",

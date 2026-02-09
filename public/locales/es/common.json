@@ -792,7 +792,8 @@
                 "timeline": "Cronolog\u00eda",
                 "viewTimeline": "Ver Cronolog\u00eda de Actividad",
                 "noEvents": "A\u00fan no se ha registrado actividad para este invitado.",
-                "loading": "Cargando cronolog\u00eda..."
+                "loading": "Cargando cronolog\u00eda...",
+                "guestCreated": "Invitado agregado al sistema"
             },
             "import": "Importar desde Excel",
             "export": "Exportar a Excel",
@@ -840,7 +841,10 @@
                 "saving": "Guardando...",
                 "addGuest": "A\u00f1adir Invitado",
                 "saveChanges": "Guardar Cambios",
-                "rsvpAnswers": "Respuestas RSVP"
+                "rsvpAnswers": "Respuestas RSVP",
+                "privateNotes": "Notas Privadas",
+                "privateNotesPlaceholder": "Agregar notas internas sobre este invitado (preferencias diet\u00e9ticas, preferencias de asientos, solicitudes especiales, etc.)",
+                "privateNotesHelp": "Estas notas solo son visibles para los administradores de la boda y no se compartir\u00e1n con los invitados."
             },
             "bulkActions": "Acciones en lote",
             "deleteSelected": "Eliminar seleccionados",

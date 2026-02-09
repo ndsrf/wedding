@@ -63,16 +63,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-gray-700">{t('guest.members.title')}</label>
-        <button
-          type="button"
-          onClick={addMember}
-          className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-        >
-          + {t('guest.members.addMember')}
-        </button>
-      </div>
+      <label className="block text-sm font-medium text-gray-700">{t('guest.members.title')}</label>
 
       {members.filter((m) => !m._delete).length === 0 && (
         <p className="text-sm text-gray-500 italic">{t('guest.members.noMembers')}</p>
@@ -219,6 +210,14 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
           </div>
         );
       })}
+
+      <button
+        type="button"
+        onClick={addMember}
+        className="w-full mt-4 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+      >
+        + {t('guest.members.addMember')}
+      </button>
     </div>
   );
 }

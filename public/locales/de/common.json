@@ -715,7 +715,8 @@
         "timeline": "Zeitverlauf",
         "viewTimeline": "Aktivitätsverlauf anzeigen",
         "noEvents": "Für diesen Gast wurde noch keine Aktivität aufgezeichnet.",
-        "loading": "Lade Zeitverlauf..."
+        "loading": "Lade Zeitverlauf...",
+        "guestCreated": "Gast zum System hinzugef\u00fcgt"
       },
       "import": "Aus Excel importieren",
       "export": "Nach Excel exportieren",
@@ -761,7 +762,10 @@
         "saving": "Speichern...",
         "addGuest": "Gast hinzufügen",
         "saveChanges": "Änderungen speichern",
-        "rsvpAnswers": "RSVP-Antworten"
+        "rsvpAnswers": "RSVP-Antworten",
+        "privateNotes": "Private Notizen",
+        "privateNotesPlaceholder": "Interne Notizen zu diesem Gast hinzuf\u00fcgen (Ern\u00e4hrungsvorlieben, Sitzplatzpr\u00e4ferenzen, besondere W\u00fcnsche usw.)",
+        "privateNotesHelp": "Diese Notizen sind nur f\u00fcr Hochzeitsadministratoren sichtbar und werden nicht mit den G\u00e4sten geteilt."
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
