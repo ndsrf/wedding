@@ -33,7 +33,7 @@ export async function getArticle(slug: string, locale: string): Promise<Article>
   // Convert markdown to HTML
   const processedContent = await remark()
     .use(gfm)
-    .use(html)
+    .use(html, { sanitize: false })
     .process(content)
 
   const contentHtml = processedContent.toString()
