@@ -72,3 +72,35 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Rich Text Editor Styles */
+[contenteditable] {
+  outline: none;
+}
+
+[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: #9CA3AF;
+  pointer-events: none;
+  display: block;
+}
+
+/* Ensure rich text formatting is visible */
+[contenteditable] b,
+[contenteditable] strong {
+  font-weight: bold;
+}
+
+[contenteditable] i,
+[contenteditable] em {
+  font-style: italic;
+}
+
+[contenteditable] u {
+  text-decoration: underline;
+}
+
+[contenteditable] s,
+[contenteditable] strike {
+  text-decoration: line-through;
+}

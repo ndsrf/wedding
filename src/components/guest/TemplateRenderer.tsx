@@ -165,9 +165,6 @@ function TemplateBlock({
           fontSize: textBlock.style.fontSize,
           color: textBlock.style.color,
           textAlign: textBlock.style.textAlign,
-          fontWeight: textBlock.style.fontWeight || 'normal',
-          fontStyle: textBlock.style.fontStyle || 'normal',
-          textDecoration: textBlock.style.textDecoration || 'none',
           whiteSpace: 'pre-line',
           padding: '1rem',
         }}
@@ -183,7 +180,7 @@ function TemplateBlock({
             }}
           />
         )}
-        {textContent}
+        <div dangerouslySetInnerHTML={{ __html: textContent }} />
       </div>
     );
   }

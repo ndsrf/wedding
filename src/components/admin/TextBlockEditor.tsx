@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import type { TextBlock, SupportedLanguage } from '@/types/invitation-template';
 import { loadFont } from '@/lib/fonts';
@@ -62,6 +62,7 @@ export function TextBlockEditor({
 }: TextBlockEditorProps) {
   const languageContent = block.content[activeLanguage];
   const [isBackgroundImageModalOpen, setIsBackgroundImageModalOpen] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   // Load all fonts when component mounts
   useEffect(() => {
@@ -74,6 +75,51 @@ export function TextBlockEditor({
         console.warn(`Failed to load font: ${fontName}`, e);
       }
     });
+  }, []);
+
+  // Sync contentEditable with content when language changes or on mount
+  useEffect(() => {
+    if (editorRef.current) {
+      const isEditorFocused = document.activeElement === editorRef.current;
+      if (!isEditorFocused) {
+        editorRef.current.innerHTML = languageContent || '';
+      }
+    }
+  }, [languageContent]);
+
+  // Apply formatting to selected text
+  const applyFormat = useCallback((command: string, value?: string) => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+      document.execCommand(command, false, value);
+      const html = editorRef.current.innerHTML;
+      onUpdate(block.id, {
+        content: {
+          ...block.content,
+          [activeLanguage]: html,
+        },
+      });
+    }
+  }, [block.id, block.content, activeLanguage, onUpdate]);
+
+  // Handle content change in contentEditable
+  const handleContentChange = useCallback(() => {
+    if (editorRef.current) {
+      const html = editorRef.current.innerHTML;
+      onUpdate(block.id, {
+        content: {
+          ...block.content,
+          [activeLanguage]: html,
+        },
+      });
+    }
+  }, [block.id, block.content, activeLanguage, onUpdate]);
+
+  // Prevent default paste behavior and paste as plain text with formatting
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
   }, []);
 
   // If in canvas mode, show preview with editing
@@ -101,19 +147,67 @@ export function TextBlockEditor({
           })}
         </div>
 
-        {/* Text Input */}
-        <textarea
-          value={languageContent}
-          onChange={(e) =>
-            onUpdate(block.id, {
-              content: {
-                ...block.content,
-                [activeLanguage]: e.target.value,
-              },
-            })
-          }
-          className="w-full p-3 border border-gray-300 rounded resize-none h-24 focus:outline-none focus:border-blue-500"
-          placeholder={`Enter ${activeLanguage} text...`}
+        {/* Rich Text Toolbar */}
+        <div className="flex gap-2 p-2 bg-gray-50 rounded border border-gray-300 flex-wrap">
+          <button
+            type="button"
+            onClick={() => applyFormat('bold')}
+            className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 font-bold text-sm"
+            title="Bold (Ctrl+B)"
+          >
+            B
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormat('italic')}
+            className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 italic text-sm"
+            title="Italic (Ctrl+I)"
+          >
+            I
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormat('underline')}
+            className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 underline text-sm"
+            title="Underline (Ctrl+U)"
+          >
+            U
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormat('strikeThrough')}
+            className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 line-through text-sm"
+            title="Strikethrough"
+          >
+            S
+          </button>
+          <div className="border-l border-gray-300 mx-1"></div>
+          <button
+            type="button"
+            onClick={() => applyFormat('removeFormat')}
+            className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
+            title="Clear Formatting"
+          >
+            Clear
+          </button>
+        </div>
+
+        {/* Rich Text Editor */}
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleContentChange}
+          onBlur={handleContentChange}
+          onPaste={handlePaste}
+          data-placeholder={`Enter ${activeLanguage} text...`}
+          suppressContentEditableWarning
+          className="w-full p-3 border border-gray-300 rounded min-h-24 focus:outline-none focus:border-blue-500 bg-white"
+          style={{
+            fontFamily: block.style.fontFamily,
+            fontSize: block.style.fontSize,
+            color: block.style.color,
+            textAlign: block.style.textAlign,
+          }}
         />
 
         {/* Text Preview */}
@@ -124,9 +218,6 @@ export function TextBlockEditor({
             fontSize: block.style.fontSize,
             color: block.style.color,
             textAlign: block.style.textAlign,
-            fontWeight: block.style.fontWeight || 'normal',
-            fontStyle: block.style.fontStyle || 'normal',
-            textDecoration: block.style.textDecoration || 'none',
             whiteSpace: 'pre-line',
           }}
         >
@@ -141,7 +232,7 @@ export function TextBlockEditor({
               }}
             />
           )}
-          <span className="relative z-10">{languageContent || '(empty)'}</span>
+          <span className="relative z-10" dangerouslySetInnerHTML={{ __html: languageContent || '(empty)' }} />
         </div>
       </div>
     );
@@ -175,20 +266,70 @@ export function TextBlockEditor({
         </div>
       </div>
 
-      {/* Text Content */}
+      {/* Rich Text Toolbar */}
+      <div className="mb-2">
+        <div className="flex gap-2 p-2 bg-gray-50 rounded border border-gray-300 flex-wrap">
+          <button
+            type="button"
+            onClick={() => applyFormat('bold')}
+            className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 font-bold text-xs"
+            title="Bold (Ctrl+B)"
+          >
+            B
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormat('italic')}
+            className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 italic text-xs"
+            title="Italic (Ctrl+I)"
+          >
+            I
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormat('underline')}
+            className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 underline text-xs"
+            title="Underline (Ctrl+U)"
+          >
+            U
+          </button>
+          <button
+            type="button"
+            onClick={() => applyFormat('strikeThrough')}
+            className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 line-through text-xs"
+            title="Strikethrough"
+          >
+            S
+          </button>
+          <div className="border-l border-gray-300"></div>
+          <button
+            type="button"
+            onClick={() => applyFormat('removeFormat')}
+            className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-xs"
+            title="Clear Formatting"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      {/* Text Content - Rich Text Editor */}
       <div className="mb-4">
-        <textarea
-          value={languageContent}
-          onChange={(e) =>
-            onUpdate(block.id, {
-              content: {
-                ...block.content,
-                [activeLanguage]: e.target.value,
-              },
-            })
-          }
-          className="w-full p-3 border border-gray-300 rounded resize-none h-20 focus:outline-none focus:border-blue-500 text-sm"
-          placeholder={`Enter ${activeLanguage} text...`}
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleContentChange}
+          onBlur={handleContentChange}
+          onPaste={handlePaste}
+          data-placeholder={`Enter ${activeLanguage} text...`}
+          suppressContentEditableWarning
+          className="w-full p-3 border border-gray-300 rounded min-h-20 focus:outline-none focus:border-blue-500 text-sm bg-white"
+          style={{
+            fontFamily: block.style.fontFamily,
+            fontSize: block.style.fontSize,
+            color: block.style.color,
+            textAlign: block.style.textAlign,
+          }}
         />
       </div>
 
@@ -270,58 +411,6 @@ export function TextBlockEditor({
               {align === 'right' && '➡'}
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Text Style */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Style</label>
-        <div className="flex gap-2">
-          <button
-            onClick={() =>
-              onUpdate(block.id, {
-                style: { ...block.style, fontWeight: block.style.fontWeight === 'bold' ? 'normal' : 'bold' },
-              })
-            }
-            className={`flex-1 px-3 py-2 rounded text-sm font-bold transition ${
-              block.style.fontWeight === 'bold'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            title="Bold"
-          >
-            B
-          </button>
-          <button
-            onClick={() =>
-              onUpdate(block.id, {
-                style: { ...block.style, fontStyle: block.style.fontStyle === 'italic' ? 'normal' : 'italic' },
-              })
-            }
-            className={`flex-1 px-3 py-2 rounded text-sm font-italic transition ${
-              block.style.fontStyle === 'italic'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            title="Italic"
-          >
-            <span className="italic">I</span>
-          </button>
-          <button
-            onClick={() =>
-              onUpdate(block.id, {
-                style: { ...block.style, textDecoration: block.style.textDecoration === 'underline' ? 'none' : 'underline' },
-              })
-            }
-            className={`flex-1 px-3 py-2 rounded text-sm font-medium transition ${
-              block.style.textDecoration === 'underline'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            title="Underline"
-          >
-            <span className="underline">U</span>
-          </button>
         </div>
       </div>
 
