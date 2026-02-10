@@ -428,6 +428,8 @@
       "location": "Ort",
       "rsvpCutoff": "RSVP-Frist",
       "defaultLanguage": "Standardsprache",
+      "weddingCountry": "Hochzeitsland",
+      "weddingCountryTooltip": "Legt die Standard-Telefonvorwahl für Gästenummern fest",
       "theme": "Thema",
       "noTheme": "Kein Thema",
       "paymentMode": "Zahlungsmodus",
@@ -773,6 +775,8 @@
       "title": "Gästeverwaltung",
       "list": "Gästeliste",
       "add": "Gast hinzufügen",
+      "import": "Aus Excel importieren",
+      "importVcf": "VCF-Familien importieren (Google, Apple)",
       "selected": "ausgewählt",
       "table": {
         "family": "Familie",

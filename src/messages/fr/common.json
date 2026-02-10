@@ -428,6 +428,8 @@
       "location": "Lieu",
       "rsvpCutoff": "Date Limite RSVP",
       "defaultLanguage": "Langue par Défaut",
+      "weddingCountry": "Pays du Mariage",
+      "weddingCountryTooltip": "Définit le préfixe téléphonique par défaut pour les numéros des invités",
       "theme": "Thème",
       "noTheme": "Aucun thème",
       "paymentMode": "Mode de Paiement",
@@ -773,6 +775,8 @@
       "title": "Gestion des Invités",
       "list": "Liste des Invités",
       "add": "Ajouter Invité",
+      "import": "Importer depuis Excel",
+      "importVcf": "Importer familles VCF (Google, Apple)",
       "selected": "sélectionnés",
       "table": {
         "family": "Famille",

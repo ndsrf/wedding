@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl';
 import type { CreateWeddingRequest } from '@/types/api';
 import type { Theme, Wedding } from '@/types/models';
 import { Language, PaymentMode, WhatsAppMode } from '@prisma/client';
+import { COUNTRIES } from '@/lib/phone-utils';
 
 interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'rsvp_cutoff_date'> {
   wedding_date: string;
@@ -46,6 +47,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
     payment_tracking_mode: initialData?.payment_tracking_mode || PaymentMode.MANUAL,
     allow_guest_additions: initialData?.allow_guest_additions ?? true,
     default_language: initialData?.default_language || Language.ES,
+    wedding_country: initialData?.wedding_country || 'ES',
     whatsapp_mode: initialData?.whatsapp_mode || WhatsAppMode.BUSINESS,
   });
 
@@ -242,6 +244,28 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           <option value={Language.FR}>{t('common.languages.FR')} (Français)</option>
           <option value={Language.IT}>{t('common.languages.IT')} (Italiano)</option>
           <option value={Language.DE}>{t('common.languages.DE')} (Deutsch)</option>
+        </select>
+      </div>
+
+      {/* Wedding Country */}
+      <div>
+        <label htmlFor="wedding_country" className="block text-sm font-medium text-gray-700 mb-1">
+          {t('planner.weddings.weddingCountry')} *
+          <span className="ml-2 text-xs text-gray-500" title={t('planner.weddings.weddingCountryTooltip')}>
+            ℹ️ {t('planner.weddings.weddingCountryTooltip')}
+          </span>
+        </label>
+        <select
+          id="wedding_country"
+          value={formData.wedding_country || 'ES'}
+          onChange={(e) => handleChange('wedding_country', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {COUNTRIES.map((country) => (
+            <option key={country.code} value={country.code}>
+              {country.name} ({country.prefix})
+            </option>
+          ))}
         </select>
       </div>
 

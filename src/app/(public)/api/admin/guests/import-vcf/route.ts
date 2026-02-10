@@ -1,12 +1,13 @@
 /**
- * Wedding Admin - Guest Import API Route
+ * Wedding Admin - VCF Import API Route
  *
- * POST /api/admin/guests/import - Upload and import guest list from Excel file
+ * POST /api/admin/guests/import-vcf - Upload and import guest list from VCF file
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
-import { importGuestList } from '@/lib/excel/import';
+import { importVCF } from '@/lib/vcf/import';
+import { validateVCF } from '@/lib/vcf/parser';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import { prisma } from '@/lib/db/prisma';
@@ -14,8 +15,8 @@ import { prisma } from '@/lib/db/prisma';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 /**
- * POST /api/admin/guests/import
- * Import guest list from Excel file
+ * POST /api/admin/guests/import-vcf
+ * Import guest list from VCF file
  */
 export async function POST(request: NextRequest) {
   try {
@@ -48,18 +49,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 });
     }
 
-    // Validate file type
-    const validTypes = [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel',
-    ];
+    // Validate file type (VCF files can be text/vcard, text/x-vcard, or text/plain)
+    const validTypes = ['text/vcard', 'text/x-vcard', 'text/plain', 'text/directory'];
 
-    if (!validTypes.includes(file.type)) {
+    if (!validTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.vcf')) {
       const response: APIResponse = {
         success: false,
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
-          message: 'Invalid file type. Please upload an Excel file (.xlsx)',
+          message: 'Invalid file type. Please upload a VCF file (.vcf)',
         },
       };
       return NextResponse.json(response, { status: 400 });
@@ -82,7 +80,6 @@ export async function POST(request: NextRequest) {
       where: { id: user.wedding_id },
       select: {
         id: true,
-        payment_tracking_mode: true,
         default_language: true,
         wedding_country: true,
       },
@@ -99,18 +96,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 404 });
     }
 
-    // Convert file to buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // Convert file to text
+    const vcfContent = await file.text();
 
-    // Import guest list
-    const result = await importGuestList(
-      wedding.id,
-      buffer,
-      wedding.payment_tracking_mode,
-      wedding.default_language,
-      wedding.wedding_country
-    );
+    // Validate VCF format
+    const validationError = validateVCF(vcfContent);
+    if (validationError) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.VALIDATION_ERROR,
+          message: validationError,
+        },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // Import VCF contacts
+    const result = await importVCF(vcfContent, {
+      weddingId: wedding.id,
+      adminId: user.id,
+      adminName: user.name,
+      defaultLanguage: wedding.default_language,
+      weddingCountry: wedding.wedding_country,
+    });
 
     if (!result.success) {
       const response: APIResponse = {
@@ -120,7 +129,6 @@ export async function POST(request: NextRequest) {
           message: result.message,
           details: {
             errors: result.errors,
-            warnings: result.warnings,
           },
         },
       };
@@ -132,14 +140,14 @@ export async function POST(request: NextRequest) {
       data: {
         familiesCreated: result.familiesCreated,
         membersCreated: result.membersCreated,
-        warnings: result.warnings,
+        errors: result.errors,
         message: result.message,
       },
     };
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error('Import error:', error);
+    console.error('VCF import error:', error);
 
     // Handle authentication/authorization errors
     if (error instanceof Error && error.message.startsWith('UNAUTHORIZED')) {
@@ -169,7 +177,7 @@ export async function POST(request: NextRequest) {
       success: false,
       error: {
         code: API_ERROR_CODES.INTERNAL_ERROR,
-        message: 'Failed to import guest list',
+        message: 'Failed to import VCF file',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
     };

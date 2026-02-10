@@ -95,6 +95,7 @@ export async function GET(request: NextRequest) {
       payment_tracking_mode: wedding.payment_tracking_mode,
       allow_guest_additions: wedding.allow_guest_additions,
       default_language: wedding.default_language,
+      wedding_country: wedding.wedding_country,
       status: wedding.status,
       created_at: wedding.created_at,
       created_by: wedding.created_by,

@@ -140,6 +140,7 @@ export interface MasterWeddingOverview {
   payment_tracking_mode: PaymentMode;
   allow_guest_additions: boolean;
   default_language: Language;
+  wedding_country: string;
   status: string;
   created_at: Date;
   created_by: string;
@@ -178,6 +179,7 @@ export interface CreateWeddingRequest {
   payment_tracking_mode: PaymentMode;
   allow_guest_additions: boolean;
   default_language: Language;
+  wedding_country?: string;
   whatsapp_mode?: import('@prisma/client').WhatsAppMode;
 }
 
@@ -298,6 +300,7 @@ export interface UpdateWeddingConfigRequest {
   allow_guest_additions?: boolean;
   dress_code?: string | null;
   additional_info?: string | null;
+  wedding_country?: string | null;
 
   // RSVP Configuration - Transportation question
   transportation_question_enabled?: boolean;

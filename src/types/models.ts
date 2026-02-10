@@ -107,6 +107,7 @@ export interface Wedding {
   gift_iban: string | null;
   allow_guest_additions: boolean;
   default_language: Language;
+  wedding_country: string;
   status: WeddingStatus;
   is_disabled: boolean;
   disabled_at: Date | null;

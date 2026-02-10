@@ -30,6 +30,7 @@ const updateWeddingConfigSchema = z.object({
   allow_guest_additions: z.boolean().optional(),
   dress_code: z.string().nullable().optional(),
   additional_info: z.string().nullable().optional(),
+  wedding_country: z.string().optional(),
   save_the_date_enabled: z.boolean().optional(),
 
   // RSVP Configuration - Transportation question
@@ -228,6 +229,7 @@ export async function GET() {
       gift_iban: wedding.gift_iban,
       allow_guest_additions: wedding.allow_guest_additions,
       default_language: wedding.default_language,
+      wedding_country: wedding.wedding_country,
       status: wedding.status,
       is_disabled: wedding.is_disabled,
       disabled_at: wedding.disabled_at,
@@ -365,6 +367,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (validatedData.additional_info !== undefined) {
       updateData.additional_info = validatedData.additional_info;
+    }
+    if (validatedData.wedding_country !== undefined) {
+      updateData.wedding_country = validatedData.wedding_country;
     }
     if (validatedData.save_the_date_enabled !== undefined) {
       updateData.save_the_date_enabled = validatedData.save_the_date_enabled;

@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
 import type { Language, MemberType, PaymentMode, Channel } from '@prisma/client';
+import { processPhoneNumber } from '@/lib/phone-utils';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -364,7 +365,8 @@ export async function importGuestList(
   wedding_id: string,
   file: Buffer,
   paymentMode: PaymentMode,
-  defaultLanguage: Language = 'ES'
+  defaultLanguage: Language = 'ES',
+  weddingCountry?: string | null
 ): Promise<ImportResult> {
   try {
     // Parse Excel file
@@ -452,14 +454,18 @@ export async function importGuestList(
           ? (adminLookup.get(row.invitedBy.toLowerCase()) || defaultAdminId)
           : defaultAdminId;
 
+        // Process phone numbers with country prefix
+        const processedPhone = processPhoneNumber(row.phone, weddingCountry);
+        const processedWhatsapp = processPhoneNumber(row.whatsapp, weddingCountry);
+
         // Create family
         const family = await tx.family.create({
           data: {
             wedding_id,
             name: row.familyName,
             email: row.email,
-            phone: row.phone,
-            whatsapp_number: row.whatsapp,
+            phone: processedPhone,
+            whatsapp_number: processedWhatsapp,
             magic_token: magicToken,
             reference_code: referenceCode,
             preferred_language: row.language,

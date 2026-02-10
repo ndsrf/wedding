@@ -428,6 +428,8 @@
       "location": "Location",
       "rsvpCutoff": "RSVP Cutoff Date",
       "defaultLanguage": "Default Language",
+      "weddingCountry": "Wedding Country",
+      "weddingCountryTooltip": "Sets the default phone prefix for guest phone numbers",
       "theme": "Theme",
       "noTheme": "No theme",
       "paymentMode": "Payment Mode",
@@ -747,6 +749,7 @@
       "list": "Guest List",
       "add": "Add Guest",
       "import": "Import from Excel",
+      "importVcf": "Import VCF (Google, Apple) families",
       "selected": "selected",
       "table": {
         "family": "Family",

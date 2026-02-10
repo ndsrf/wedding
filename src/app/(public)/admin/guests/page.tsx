@@ -661,6 +661,44 @@ export default function GuestsPage() {
               </label>
               )}
               {!isReadOnly && (
+                <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer text-center">
+                  {t('admin.guests.importVcf')}
+                  <input
+                    type="file"
+                    accept=".vcf"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      const formData = new FormData();
+                      formData.append('file', file);
+
+                      try {
+                        const response = await fetch('/api/admin/guests/import-vcf', {
+                          method: 'POST',
+                          body: formData,
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                          showNotification(
+                            'success',
+                            `${data.data.familiesCreated} ${data.data.familiesCreated === 1 ? 'family' : 'families'} imported successfully`
+                          );
+                          fetchGuests();
+                        } else {
+                          showNotification('error', data.error?.message || 'VCF import failed');
+                        }
+                      } catch (error) {
+                        console.error('VCF import error:', error);
+                        showNotification('error', 'VCF import failed');
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              )}
+              {!isReadOnly && (
                 <button
                   onClick={handleAddGuest}
                   className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
