@@ -6,6 +6,7 @@ import { Metadata } from 'next';
 import { getTranslations } from '@/lib/i18n/server';
 import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
+import MobileNav from '@/components/MobileNav';
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -62,15 +63,16 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 {t('landing.nav.login')}
               </Link>
             </nav>
-            <div className="md:hidden flex items-center gap-2">
-              <LanguageSelector />
-              <Link
-                href="/auth/signin"
-                className="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-sm"
-              >
-                {t('landing.nav.login')}
-              </Link>
-            </div>
+            <MobileNav
+              locale={locale}
+              translations={{
+                features: t('landing.nav.features'),
+                pricing: t('landing.nav.pricing'),
+                testimonials: t('landing.nav.testimonials'),
+                news: t('news.title'),
+                login: t('landing.nav.login'),
+              }}
+            />
           </div>
         </div>
       </header>
