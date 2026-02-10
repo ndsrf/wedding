@@ -1,3 +1,28 @@
+# [0.10.0](https://github.com/ndsrf/wedding/compare/v0.9.1...v0.10.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* Cosmetic issues ([a9a8470](https://github.com/ndsrf/wedding/commit/a9a8470f9f9e66977fd17657dbf37b85e3bdfc4a))
+* enable proper markdown rendering in news section ([2a62638](https://github.com/ndsrf/wedding/commit/2a62638364c772b762413945509d39ee2d762e1f))
+* enhance Facebook login integration and improve development environment settings for Windows WSL ([01a292c](https://github.com/ndsrf/wedding/commit/01a292c3b196caea188043b72e02d1cf20fa4e5e))
+* improve mobile readability with better text contrast ([599fe01](https://github.com/ndsrf/wedding/commit/599fe0130ccf2cc4eb8407e22a2cd00cb4e990e5))
+* update sign-out and sign-in behavior to include redirect option ([7bd1009](https://github.com/ndsrf/wedding/commit/7bd1009d1b374bf538b7e1c07e85aaa643b8239d))
+
+
+### Features
+
+* add news to public website ([aff3297](https://github.com/ndsrf/wedding/commit/aff3297f1d58825e292200ad95ad21edf3e3c833))
+* Add vercel speed insights ([064284c](https://github.com/ndsrf/wedding/commit/064284c551e6604dbd75dc97253ae8ad9d0636ba))
+* Add vercel speed insights + Vercel DB instructions ([b730aff](https://github.com/ndsrf/wedding/commit/b730aff21a90df80b80e25ce0a7411afdde6e779))
+* improvements to the guest list page ([6d482ea](https://github.com/ndsrf/wedding/commit/6d482ea9692c150885c617d40b34fa5c71bf3479))
+* invitation build improvements ([3bc7d89](https://github.com/ndsrf/wedding/commit/3bc7d890a5ebac4f5f502af713025109946a3a15))
+* invitation builder improvements ([6e40de0](https://github.com/ndsrf/wedding/commit/6e40de03db27b28d148ddb8a24a2d4a1fe35ff4c))
+* invitation builder: rich text editor for text blocks ([0f5156c](https://github.com/ndsrf/wedding/commit/0f5156c0503e7b9c7a7cb3f24315866454220e58))
+* reduced guest list view on mobile phones ([49d6674](https://github.com/ndsrf/wedding/commit/49d66745a1b27b15b5da5bbf1dfa83f80799e659))
+
+
+
 ## [0.9.1](https://github.com/ndsrf/wedding/compare/v0.9.0...v0.9.1) (2026-02-08)
 
 

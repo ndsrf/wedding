@@ -1,6 +1,6 @@
 {
   "name": "wedding-management-mvp",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "private": true,
   "scripts": {
     "dev": "NODE_OPTIONS='--dns-result-order=ipv4first' next dev",
