@@ -26,11 +26,18 @@ export function ImageBlockEditor({
   onOpenPicker,
   canvasMode,
 }: ImageBlockEditorProps) {
+  const alignment = block.alignment || 'center';
+
   if (canvasMode) {
+    const alignmentClass =
+      alignment === 'left' ? 'mr-auto' :
+      alignment === 'right' ? 'ml-auto' :
+      'mx-auto';
+
     return (
       <div className="p-4 space-y-4">
         {block.src ? (
-          <div className="relative w-full h-64 bg-gray-100 rounded overflow-hidden">
+          <div className={`relative w-full max-w-md h-64 bg-gray-100 rounded overflow-hidden ${alignmentClass}`}>
             <Image
               src={block.src}
               alt={block.alt || 'Block image'}
@@ -68,6 +75,27 @@ export function ImageBlockEditor({
               placeholder="Alt text..."
               className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
             />
+            {/* Alignment */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Alignment</label>
+              <div className="flex gap-2">
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    onClick={() => onUpdate(block.id, { alignment: align })}
+                    className={`flex-1 px-3 py-2 rounded text-sm font-medium transition ${
+                      alignment === align
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {align === 'left' && '⬅'}
+                    {align === 'center' && '⬆⬇'}
+                    {align === 'right' && '➡'}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -98,6 +126,28 @@ export function ImageBlockEditor({
             placeholder="Alt text..."
             className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 mb-3"
           />
+
+          {/* Alignment */}
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-2">Alignment</label>
+            <div className="flex gap-2">
+              {(['left', 'center', 'right'] as const).map((align) => (
+                <button
+                  key={align}
+                  onClick={() => onUpdate(block.id, { alignment: align })}
+                  className={`flex-1 px-3 py-2 rounded text-sm font-medium transition ${
+                    alignment === align
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {align === 'left' && '⬅'}
+                  {align === 'center' && '⬆⬇'}
+                  {align === 'right' && '➡'}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <button
             onClick={onOpenPicker}

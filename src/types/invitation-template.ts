@@ -48,6 +48,7 @@ export interface TextBlock {
     fontStyle?: 'normal' | 'italic';
     fontWeight?: 'normal' | 'bold';
     textDecoration?: 'none' | 'underline';
+    backgroundImage?: string; // optional background image URL
   };
 }
 
@@ -56,6 +57,7 @@ export interface ImageBlock {
   type: 'image';
   src: string; // e.g. '/uploads/invitation-images/invitation_abc_1234_xy.png'
   alt: string;
+  alignment?: 'left' | 'center' | 'right'; // optional alignment (default: center)
 }
 
 export interface LocationBlock {
@@ -92,7 +94,20 @@ export interface AddToCalendarBlock {
   type: 'add-to-calendar';
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock;
+export interface ButtonBlock {
+  id: string;
+  type: 'button';
+  text: LocalizedContent; // multilanguage button text
+  url: string; // button URL
+  style: {
+    buttonColor: string; // background color of button
+    textColor: string; // text color
+    fontFamily: string; // font family for button text
+    alignment?: 'left' | 'center' | 'right'; // button alignment (default: center)
+  };
+}
+
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

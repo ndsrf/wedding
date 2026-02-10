@@ -10,15 +10,18 @@ import type {
   ImageBlock,
   LocationBlock as LocationBlockType,
   CountdownBlock as CountdownBlockType,
+  ButtonBlock as ButtonBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
 import { ImageBlockEditor } from './ImageBlockEditor';
 import { LocationBlockEditor } from './LocationBlockEditor';
 import { CountdownBlockEditor } from './CountdownBlockEditor';
+import { ButtonBlockEditor } from './ButtonBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
+import { ButtonBlock } from '@/components/invitation/ButtonBlock';
 import { ImagePickerModal } from './ImagePickerModal';
 
 interface InvitationTemplateEditorProps {
@@ -68,6 +71,7 @@ export function InvitationTemplateEditor({
   const isSelectedBlockText = selectedBlock?.type === 'text';
   const isSelectedBlockLocation = selectedBlock?.type === 'location';
   const isSelectedBlockCountdown = selectedBlock?.type === 'countdown';
+  const isSelectedBlockButton = selectedBlock?.type === 'button';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -116,6 +120,19 @@ export function InvitationTemplateEditor({
         };
       } else if (type === 'add-to-calendar') {
         newBlock = { id: crypto.randomUUID(), type: 'add-to-calendar' };
+      } else if (type === 'button') {
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'button',
+          text: { ES: '', EN: '', FR: '', IT: '', DE: '' },
+          url: '',
+          style: {
+            buttonColor: '#D4AF37',
+            textColor: '#FFFFFF',
+            fontFamily: 'Inter, sans-serif',
+            alignment: 'center',
+          },
+        };
       } else {
         return;
       }
@@ -192,6 +209,16 @@ export function InvitationTemplateEditor({
       ...prev,
       blocks: prev.blocks.map((b) =>
         b.id === blockId && b.type === 'countdown' ? ({ ...b, ...updates } as CountdownBlockType) : b
+      ),
+    }));
+  }, []);
+
+  // Handle update button block
+  const handleUpdateButtonBlock = useCallback((blockId: string, updates: Partial<ButtonBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'button' ? ({ ...b, ...updates } as ButtonBlockType) : b
       ),
     }));
   }, []);
@@ -290,6 +317,12 @@ export function InvitationTemplateEditor({
             >
               + {t('blockAddToCalendar')}
             </button>
+            <button
+              onClick={() => handleAddBlock('button')}
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium"
+            >
+              + Button
+            </button>
           </div>
         </div>
 
@@ -314,6 +347,15 @@ export function InvitationTemplateEditor({
           <CountdownBlockEditor
             block={selectedBlock}
             onUpdate={handleUpdateCountdownBlock}
+          />
+        )}
+
+        {isSelectedBlockButton && selectedBlock && selectedBlock.type === 'button' && (
+          <ButtonBlockEditor
+            block={selectedBlock}
+            activeLanguage={activeLanguage}
+            onLanguageChange={setActiveLanguage}
+            onUpdate={handleUpdateButtonBlock}
           />
         )}
 
@@ -536,6 +578,15 @@ export function InvitationTemplateEditor({
                       time={weddingData.wedding_time}
                       location={weddingData.location}
                       description={`Join us as we celebrate our wedding day`}
+                    />
+                  )}
+
+                  {block.type === 'button' && (
+                    <ButtonBlock
+                      text={(block as ButtonBlockType).text}
+                      url={(block as ButtonBlockType).url}
+                      style={(block as ButtonBlockType).style}
+                      language={activeLanguage}
                     />
                   )}
                 </div>

@@ -1,6 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import type { TextBlock, SupportedLanguage } from '@/types/invitation-template';
+import { loadFont } from '@/lib/fonts';
+import { ImagePickerModal } from './ImagePickerModal';
 
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['ES', 'EN', 'FR', 'IT', 'DE'];
 
@@ -20,6 +24,11 @@ const FONT_FAMILIES = [
   'Sacramento, cursive',
   'Allura, cursive',
   'Tangerine, cursive',
+  'Nanum Pen Script, cursive',
+  'Dawning of a New Day, cursive',
+  'Homemade Apple, cursive',
+  'Cedarville Cursive, cursive',
+  'Licorice, cursive',
   // Modern Sans-Serif Fonts
   'Inter, sans-serif',
   'Poppins, sans-serif',
@@ -55,6 +64,20 @@ export function TextBlockEditor({
   canvasMode,
 }: TextBlockEditorProps) {
   const languageContent = block.content[activeLanguage];
+  const [isBackgroundImageModalOpen, setIsBackgroundImageModalOpen] = useState(false);
+
+  // Load all fonts when component mounts
+  useEffect(() => {
+    const fontNames = FONT_FAMILIES.map(f => f.split(',')[0].trim());
+    fontNames.forEach(fontName => {
+      try {
+        // @ts-expect-error - fontName is a string from our list
+        loadFont(fontName);
+      } catch (e) {
+        console.warn(`Failed to load font: ${fontName}`, e);
+      }
+    });
+  }, []);
 
   // If in canvas mode, show preview with editing
   if (canvasMode) {
@@ -98,7 +121,7 @@ export function TextBlockEditor({
 
         {/* Text Preview */}
         <div
-          className="p-4 rounded border border-gray-200 text-center min-h-12"
+          className="p-4 rounded border border-gray-200 text-center min-h-12 relative overflow-hidden"
           style={{
             fontFamily: block.style.fontFamily,
             fontSize: block.style.fontSize,
@@ -110,7 +133,18 @@ export function TextBlockEditor({
             whiteSpace: 'pre-line',
           }}
         >
-          {languageContent || '(empty)'}
+          {block.style.backgroundImage && (
+            <div
+              className="absolute inset-0 -z-10"
+              style={{
+                backgroundImage: `url(${block.style.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+          )}
+          <span className="relative z-10">{languageContent || '(empty)'}</span>
         </div>
       </div>
     );
@@ -293,6 +327,63 @@ export function TextBlockEditor({
           </button>
         </div>
       </div>
+
+      {/* Background Image */}
+      <div>
+        <label className="block text-sm font-medium mb-2">Background Image</label>
+        {block.style.backgroundImage ? (
+          <div className="space-y-2">
+            <div className="relative w-full h-24 bg-gray-100 rounded overflow-hidden">
+              <Image
+                src={block.style.backgroundImage}
+                alt="Background image"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsBackgroundImageModalOpen(true)}
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                Change
+              </button>
+              <button
+                onClick={() =>
+                  onUpdate(block.id, {
+                    style: { ...block.style, backgroundImage: undefined },
+                  })
+                }
+                className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsBackgroundImageModalOpen(true)}
+            className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-sm"
+          >
+            + Add Background
+          </button>
+        )}
+      </div>
+
+      {/* Background Image Picker Modal */}
+      {isBackgroundImageModalOpen && (
+        <ImagePickerModal
+          onClose={() => setIsBackgroundImageModalOpen(false)}
+          onSelectImage={(url) => {
+            onUpdate(block.id, {
+              style: { ...block.style, backgroundImage: url },
+            });
+            setIsBackgroundImageModalOpen(false);
+          }}
+          requireAspectRatio={false}
+        />
+      )}
     </div>
   );
 }

@@ -21,6 +21,11 @@ const FONT_URLS = {
   'Sacramento': 'https://fonts.googleapis.com/css2?family=Sacramento&display=swap',
   'Allura': 'https://fonts.googleapis.com/css2?family=Allura&display=swap',
   'Tangerine': 'https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&display=swap',
+  'Nanum Pen Script': 'https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap',
+  'Dawning of a New Day': 'https://fonts.googleapis.com/css2?family=Dawning+of+a+New+Day&display=swap',
+  'Homemade Apple': 'https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap',
+  'Cedarville Cursive': 'https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap',
+  'Licorice': 'https://fonts.googleapis.com/css2?family=Licorice&display=swap',
 
   // Modern Sans-Serif Fonts (for invitation templates)
   'Inter': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap',

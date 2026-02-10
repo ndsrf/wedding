@@ -254,7 +254,8 @@ export const authOptions: NextAuthConfig = {
   trustHost: true,
 
   // Skip CSRF check in development if it's causing issues after logout
-  skipCSRFCheck: process.env.NODE_ENV === 'development',
+  // NOTE: skipCSRFCheck has type issues in NextAuth v5 beta, commenting out for now
+  // skipCSRFCheck: process.env.NODE_ENV === 'development',
 
   // Force secure cookies ONLY in production/HTTPS (Cloudflare)
   // For localhost/HTTP, we let NextAuth use its defaults which work correctly
