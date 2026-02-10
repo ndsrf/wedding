@@ -188,7 +188,6 @@ async function importContact(
   }
 
   // Create private notes with import information
-  const importNoteKey = 'admin.guests.importedFromVCF'; // Translation key
   // Format: "Imported from VCF file by {adminName}"
   const privateNotes = getImportNote(weddingLanguage, options.adminName);
 
