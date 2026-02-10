@@ -120,6 +120,7 @@ export async function GET(request: NextRequest) {
           gift_iban: wedding.gift_iban,
           allow_guest_additions: wedding.allow_guest_additions,
           default_language: wedding.default_language,
+          wedding_country: wedding.wedding_country,
           status: wedding.status,
           is_disabled: wedding.is_disabled,
           disabled_at: wedding.disabled_at,

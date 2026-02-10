@@ -140,6 +140,7 @@ export interface MasterWeddingOverview {
   payment_tracking_mode: PaymentMode;
   allow_guest_additions: boolean;
   default_language: Language;
+  wedding_country: string;
   status: string;
   created_at: Date;
   created_by: string;
