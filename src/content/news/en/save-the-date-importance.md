@@ -10,7 +10,6 @@ readTime: "5 min read"
 locale: "en"
 ---
 
-# The Strategic Importance of Save-the-Date Announcements
 
 In the intricate choreography of wedding planning, save-the-date announcements might seem like a small detail. However, these early notifications play a crucial role in ensuring your loved ones can celebrate with you. Here's why they matter more than you might think.
 

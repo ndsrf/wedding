@@ -10,8 +10,6 @@ readTime: "5 min de lectura"
 locale: "es"
 ---
 
-# La Importancia Estratégica de los Save-the-Date
-
 En la intrincada coreografía de planificar una boda, los anuncios de save-the-date pueden parecer un pequeño detalle. Sin embargo, estas notificaciones tempranas juegan un papel crucial en asegurar que tus seres queridos puedan celebrar contigo. Aquí está por qué importan más de lo que podrías pensar.
 
 ## El Cronograma que Define la Asistencia

@@ -10,7 +10,6 @@ readTime: "5 min read"
 locale: "en"
 ---
 
-# 5 Essential Benefits of Hiring a Professional Wedding Planner
 
 Planning a wedding is one of the most exciting times in a couple's life, but it can also be overwhelming. With countless decisions to make and details to coordinate, many couples wonder if hiring a professional wedding planner is worth the investment. The answer is a resounding yes. Here's why.
 

@@ -10,7 +10,6 @@ readTime: "5 min de lecture"
 locale: "fr"
 ---
 
-# L'Importance Stratégique des Save-the-Date
 
 Dans la chorégraphie complexe de la planification d'un mariage, les annonces de save-the-date peuvent sembler un petit détail. Cependant, ces notifications précoces jouent un rôle crucial pour s'assurer que vos proches peuvent célébrer avec vous. Voici pourquoi elles comptent plus que vous ne le pensez.
 

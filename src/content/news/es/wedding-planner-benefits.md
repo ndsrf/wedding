@@ -10,8 +10,6 @@ readTime: "5 min de lectura"
 locale: "es"
 ---
 
-# 5 Beneficios Esenciales de Contratar un Wedding Planner Profesional
-
 Planificar una boda es uno de los momentos más emocionantes en la vida de una pareja, pero también puede ser abrumador. Con innumerables decisiones que tomar y detalles que coordinar, muchas parejas se preguntan si contratar un wedding planner profesional vale la inversión. La respuesta es un rotundo sí. Aquí está el porqué.
 
 ## 1. Ahorro de Tiempo que Marca la Diferencia

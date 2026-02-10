@@ -10,7 +10,6 @@ readTime: "5 min de lecture"
 locale: "fr"
 ---
 
-# 5 Avantages Essentiels d'Engager un Wedding Planner Professionnel
 
 Planifier un mariage est l'un des moments les plus excitants dans la vie d'un couple, mais cela peut aussi être accablant. Avec d'innombrables décisions à prendre et des détails à coordonner, de nombreux couples se demandent si engager un wedding planner professionnel vaut l'investissement. La réponse est un oui retentissant. Voici pourquoi.
 
