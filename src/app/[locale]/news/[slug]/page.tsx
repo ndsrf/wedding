@@ -137,44 +137,49 @@ export default async function ArticlePage({ params }: Props) {
               />
             </div>
 
-            {/* Metadata */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
-              <span className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full">
-                {frontmatter.category}
-              </span>
-              <span>{frontmatter.readTime}</span>
-              <span>•</span>
-              <span>
-                {new Date(frontmatter.date).toLocaleDateString(locale, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </span>
-              <span>•</span>
-              <span>{frontmatter.author}</span>
+            {/* Article Content Card */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-10">
+              {/* Metadata */}
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700 mb-6">
+                <span className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full font-medium">
+                  {frontmatter.category}
+                </span>
+                <span className="font-medium">{frontmatter.readTime}</span>
+                <span>•</span>
+                <span>
+                  {new Date(frontmatter.date).toLocaleDateString(locale, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+                <span>•</span>
+                <span>{frontmatter.author}</span>
+              </div>
+
+              {/* Title */}
+              <h1 className="font-serif text-4xl md:text-5xl font-bold text-gray-900 mb-8">
+                {frontmatter.title}
+              </h1>
+
+              {/* Content */}
+              <div
+                className="prose prose-lg prose-rose max-w-none
+                  prose-headings:font-serif prose-headings:font-bold prose-headings:text-gray-900
+                  prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
+                  prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
+                  prose-p:text-gray-900 prose-p:leading-relaxed prose-p:mb-6
+                  prose-a:text-rose-600 prose-a:no-underline hover:prose-a:underline prose-a:font-medium
+                  prose-strong:text-gray-900 prose-strong:font-bold
+                  prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6
+                  prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6
+                  prose-li:text-gray-900 prose-li:mb-2 prose-li:leading-relaxed
+                  prose-img:rounded-xl prose-img:shadow-lg
+                  prose-blockquote:text-gray-800 prose-blockquote:border-rose-500
+                  prose-code:text-gray-900 prose-code:bg-rose-50 prose-code:px-1 prose-code:rounded"
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
             </div>
-
-            {/* Title */}
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-              {frontmatter.title}
-            </h1>
-
-            {/* Content */}
-            <div
-              className="prose prose-lg prose-rose max-w-none
-                prose-headings:font-serif prose-headings:font-bold
-                prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
-                prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
-                prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
-                prose-a:text-rose-600 prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-gray-900 prose-strong:font-semibold
-                prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6
-                prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6
-                prose-li:text-gray-700 prose-li:mb-2
-                prose-img:rounded-xl prose-img:shadow-lg"
-              dangerouslySetInnerHTML={{ __html: content }}
-            />
           </div>
         </div>
       </article>
