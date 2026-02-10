@@ -40,10 +40,13 @@ export const authOptions: NextAuthConfig = {
       },
     }),
 
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-    }),
+    // Only enable Facebook if credentials are provided
+    ...(process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET ? [
+      FacebookProvider({
+        clientId: process.env.FACEBOOK_CLIENT_ID,
+        clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      })
+    ] : []),
 
     // E2E Testing Provider - ONLY enabled when NEXT_PUBLIC_IS_E2E=true
     // SECURITY: This provider MUST NEVER be enabled in production environments
