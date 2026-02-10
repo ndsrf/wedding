@@ -7,30 +7,27 @@ import { loadFont } from '@/lib/fonts';
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['ES', 'EN', 'FR', 'IT', 'DE'];
 
 const FONT_FAMILIES = [
-  // Elegant Serif Fonts
-  'Playfair Display, serif',
-  'Crimson Text, serif',
-  'Cormorant Garamond, serif',
-  'Lora, serif',
-  'EB Garamond, serif',
-  'Libre Baskerville, serif',
-  // Script & Cursive Fonts
   'Alex Brush, cursive',
-  'Great Vibes, cursive',
-  'Dancing Script, cursive',
-  'Parisienne, cursive',
-  'Sacramento, cursive',
   'Allura, cursive',
-  'Tangerine, cursive',
-  'Nanum Pen Script, cursive',
-  'Dawning of a New Day, cursive',
-  'Homemade Apple, cursive',
   'Cedarville Cursive, cursive',
-  'Licorice, cursive',
-  // Modern Sans-Serif Fonts
+  'Cormorant Garamond, serif',
+  'Crimson Text, serif',
+  'Dancing Script, cursive',
+  'Dawning of a New Day, cursive',
+  'EB Garamond, serif',
+  'Great Vibes, cursive',
+  'Homemade Apple, cursive',
   'Inter, sans-serif',
-  'Poppins, sans-serif',
+  'Licorice, cursive',
+  'Libre Baskerville, serif',
+  'Lora, serif',
   'Montserrat, sans-serif',
+  'Nanum Pen Script, cursive',
+  'Parisienne, cursive',
+  'Playfair Display, serif',
+  'Poppins, sans-serif',
+  'Sacramento, cursive',
+  'Tangerine, cursive',
 ];
 
 interface ButtonBlockEditorProps {

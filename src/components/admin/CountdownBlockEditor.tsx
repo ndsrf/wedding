@@ -4,13 +4,27 @@ import { useTranslations } from 'next-intl';
 import type { CountdownBlock } from '@/types/invitation-template';
 
 const FONT_FAMILIES = [
-  'Playfair Display, serif',
-  'Crimson Text, serif',
-  'Cormorant Garamond, serif',
-  'Lora, serif',
   'Alex Brush, cursive',
+  'Allura, cursive',
+  'Cedarville Cursive, cursive',
+  'Cormorant Garamond, serif',
+  'Crimson Text, serif',
+  'Dancing Script, cursive',
+  'Dawning of a New Day, cursive',
+  'EB Garamond, serif',
+  'Great Vibes, cursive',
+  'Homemade Apple, cursive',
   'Inter, sans-serif',
+  'Licorice, cursive',
+  'Libre Baskerville, serif',
+  'Lora, serif',
+  'Montserrat, sans-serif',
+  'Nanum Pen Script, cursive',
+  'Parisienne, cursive',
+  'Playfair Display, serif',
   'Poppins, sans-serif',
+  'Sacramento, cursive',
+  'Tangerine, cursive',
 ];
 
 const FONT_SIZES = ['0.875rem', '1rem', '1.25rem', '1.5rem', '2rem', '2.5rem', '3rem'];

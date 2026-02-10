@@ -1,11 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { useMemo } from 'react';
-import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType } from '@/types/invitation-template';
+import { useMemo, useEffect } from 'react';
+import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
+import { ButtonBlock } from '@/components/invitation/ButtonBlock';
+import { loadFont } from '@/lib/fonts';
 
 interface TemplateRendererProps {
   design: unknown; // TemplateDesign (stored as JSON)
@@ -15,6 +17,30 @@ interface TemplateRendererProps {
   coupleNames: string;
   language: SupportedLanguage;
 }
+
+const FONT_NAMES = [
+  'Alex Brush',
+  'Allura',
+  'Cedarville Cursive',
+  'Cormorant Garamond',
+  'Crimson Text',
+  'Dancing Script',
+  'Dawning of a New Day',
+  'EB Garamond',
+  'Great Vibes',
+  'Homemade Apple',
+  'Inter',
+  'Licorice',
+  'Libre Baskerville',
+  'Lora',
+  'Montserrat',
+  'Nanum Pen Script',
+  'Parisienne',
+  'Playfair Display',
+  'Poppins',
+  'Sacramento',
+  'Tangerine',
+];
 
 export default function TemplateRenderer({
   design,
@@ -34,6 +60,18 @@ export default function TemplateRenderer({
     if (!templateDesign?.blocks) return -1;
     return templateDesign.blocks.findIndex((block) => block.type === 'image');
   }, [templateDesign]);
+
+  // Load all fonts when component mounts
+  useEffect(() => {
+    FONT_NAMES.forEach(fontName => {
+      try {
+        // @ts-expect-error - fontName is a string from our list
+        loadFont(fontName);
+      } catch (e) {
+        console.warn(`Failed to load font: ${fontName}`, e);
+      }
+    });
+  }, []);
 
   if (!templateDesign || !templateDesign.blocks) {
     return null;
@@ -79,7 +117,7 @@ export default function TemplateRenderer({
       )}
 
       {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-6 space-y-6">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-6 space-y-1">
         {templateDesign.blocks.map((block, index) => (
           <TemplateBlock
             key={block.id}
@@ -120,7 +158,31 @@ function TemplateBlock({
     const textBlock = block as TextBlock;
     const textContent = textBlock.content[language] || textBlock.content['EN'] || '';
     return (
-      <div style={{ ...textBlock.style, whiteSpace: 'pre-line' }} className="text-center">
+      <div
+        className="relative"
+        style={{
+          fontFamily: textBlock.style.fontFamily,
+          fontSize: textBlock.style.fontSize,
+          color: textBlock.style.color,
+          textAlign: textBlock.style.textAlign,
+          fontWeight: textBlock.style.fontWeight || 'normal',
+          fontStyle: textBlock.style.fontStyle || 'normal',
+          textDecoration: textBlock.style.textDecoration || 'none',
+          whiteSpace: 'pre-line',
+          padding: '1rem',
+        }}
+      >
+        {textBlock.style.backgroundImage && (
+          <div
+            className="absolute inset-0 -z-10"
+            style={{
+              backgroundImage: `url(${textBlock.style.backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+        )}
         {textContent}
       </div>
     );
@@ -128,19 +190,28 @@ function TemplateBlock({
 
   if (block.type === 'image') {
     const imageBlock = block as ImageBlock;
+    const alignment = imageBlock.alignment || 'center';
+    const zoom = imageBlock.zoom || 100;
+    const alignmentClass =
+      alignment === 'left' ? 'justify-start' :
+      alignment === 'right' ? 'justify-end' :
+      'justify-center';
+
     return (
-      <div className="flex justify-center">
-        <Image
-          src={imageBlock.src}
-          alt={imageBlock.alt}
-          width={0}
-          height={0}
-          sizes="100vw"
-          className="max-w-full rounded-lg"
-          style={{ width: '100%', height: 'auto' }}
-          priority={isPriorityImage}
-          unoptimized
-        />
+      <div className={`flex ${alignmentClass}`}>
+        <div style={{ width: `${zoom}%`, maxWidth: '100%' }}>
+          <Image
+            src={imageBlock.src}
+            alt={imageBlock.alt}
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="w-full h-auto rounded-lg"
+            style={{ width: '100%', height: 'auto' }}
+            priority={isPriorityImage}
+            unoptimized
+          />
+        </div>
       </div>
     );
   }
@@ -175,6 +246,18 @@ function TemplateBlock({
         time={weddingTime}
         location={location}
         description={`You are invited to ${coupleNames}'s wedding`}
+      />
+    );
+  }
+
+  if (block.type === 'button') {
+    const buttonBlock = block as ButtonBlockType;
+    return (
+      <ButtonBlock
+        text={buttonBlock.text}
+        url={buttonBlock.url}
+        style={buttonBlock.style}
+        language={language}
       />
     );
   }

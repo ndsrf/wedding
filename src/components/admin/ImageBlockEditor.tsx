@@ -27,6 +27,7 @@ export function ImageBlockEditor({
   canvasMode,
 }: ImageBlockEditorProps) {
   const alignment = block.alignment || 'center';
+  const zoom = block.zoom || 100;
 
   if (canvasMode) {
     const alignmentClass =
@@ -37,7 +38,14 @@ export function ImageBlockEditor({
     return (
       <div className="p-4 space-y-4">
         {block.src ? (
-          <div className={`relative w-full max-w-md h-64 bg-gray-100 rounded overflow-hidden ${alignmentClass}`}>
+          <div
+            className={`relative bg-gray-100 rounded overflow-hidden ${alignmentClass}`}
+            style={{
+              width: `${zoom}%`,
+              maxWidth: '100%',
+              aspectRatio: '16/9'
+            }}
+          >
             <Image
               src={block.src}
               alt={block.alt || 'Block image'}
@@ -75,6 +83,20 @@ export function ImageBlockEditor({
               placeholder="Alt text..."
               className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
             />
+            {/* Zoom */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Zoom: {zoom}%
+              </label>
+              <input
+                type="range"
+                min="10"
+                max="200"
+                value={zoom}
+                onChange={(e) => onUpdate(block.id, { zoom: Number(e.target.value) })}
+                className="w-full"
+              />
+            </div>
             {/* Alignment */}
             <div>
               <label className="block text-sm font-medium mb-2">Alignment</label>
@@ -126,6 +148,21 @@ export function ImageBlockEditor({
             placeholder="Alt text..."
             className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 mb-3"
           />
+
+          {/* Zoom */}
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-2">
+              Zoom: {zoom}%
+            </label>
+            <input
+              type="range"
+              min="10"
+              max="200"
+              value={zoom}
+              onChange={(e) => onUpdate(block.id, { zoom: Number(e.target.value) })}
+              className="w-full"
+            />
+          </div>
 
           {/* Alignment */}
           <div className="mb-3">

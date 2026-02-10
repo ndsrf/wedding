@@ -58,6 +58,7 @@ export interface ImageBlock {
   src: string; // e.g. '/uploads/invitation-images/invitation_abc_1234_xy.png'
   alt: string;
   alignment?: 'left' | 'center' | 'right'; // optional alignment (default: center)
+  zoom?: number; // zoom level as percentage (default: 100, range: 10-200)
 }
 
 export interface LocationBlock {

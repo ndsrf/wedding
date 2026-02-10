@@ -96,6 +96,8 @@ export function InvitationTemplateEditor({
           type: 'image',
           src: '',
           alt: '',
+          alignment: 'center',
+          zoom: 100,
         };
       } else if (type === 'location') {
         newBlock = {
@@ -271,6 +273,25 @@ export function InvitationTemplateEditor({
     }
   }, [design, onSave]);
 
+  // Handle preview
+  const handlePreview = useCallback(() => {
+    try {
+      // Store preview data in sessionStorage
+      const previewData = {
+        design,
+        weddingData,
+        language: activeLanguage.toLowerCase(),
+      };
+      sessionStorage.setItem('invitation-preview-data', JSON.stringify(previewData));
+
+      // Open preview in new window
+      window.open('/admin/invitation-builder/preview', '_blank', 'width=1200,height=800');
+    } catch (err) {
+      console.error('Failed to open preview:', err);
+      alert('Failed to open preview. Please try again.');
+    }
+  }, [design, weddingData, activeLanguage]);
+
   // Check if location and countdown blocks exist
   const hasLocation = design.blocks.some((b) => b.type === 'location');
   const hasCountdown = design.blocks.some((b) => b.type === 'countdown');
@@ -432,14 +453,22 @@ export function InvitationTemplateEditor({
           </div>
         </div>
 
-        {/* Save Button */}
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-        >
-          {isSaving ? 'Saving...' : 'Save Template'}
-        </button>
+        {/* Action Buttons */}
+        <div className="space-y-2">
+          <button
+            onClick={handlePreview}
+            className="w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-medium"
+          >
+            👁️ Preview
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          >
+            {isSaving ? 'Saving...' : 'Save Template'}
+          </button>
+        </div>
       </div>
 
       {/* Right Canvas */}
@@ -486,7 +515,7 @@ export function InvitationTemplateEditor({
                     selectedBlockId === block.id
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-transparent hover:border-gray-300'
-                  } transition cursor-pointer mb-2`}
+                  } transition cursor-pointer mb-0`}
                   onClick={() => setSelectedBlockId(block.id)}
                 >
                   {/* Block Toolbar */}
