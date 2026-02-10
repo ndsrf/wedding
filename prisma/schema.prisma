@@ -74,6 +74,7 @@ model Wedding {
   payment_tracking_mode           PaymentMode        @default(MANUAL)
   allow_guest_additions           Boolean            @default(true)
   default_language                Language           @default(ES)
+  wedding_country                 String             @default("ES")
   status                          WeddingStatus      @default(ACTIVE)
   created_at                      DateTime           @default(now())
   created_by                      String

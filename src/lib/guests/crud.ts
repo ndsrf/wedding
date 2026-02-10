@@ -14,6 +14,7 @@ import {
 } from './validation';
 import type { Family, FamilyMember, Prisma } from '@prisma/client';
 import { assignShortCode } from '@/lib/short-url';
+import { processPhoneNumber } from '@/lib/phone-utils';
 
 export interface FamilyWithMembers extends Family {
   members: FamilyMember[];
@@ -50,10 +51,13 @@ export async function createFamily(
   // Validate input
   const validatedInput = createFamilySchema.parse(input);
 
-  // Check if wedding exists and get payment mode
+  // Check if wedding exists and get payment mode and country
   const wedding = await prisma.wedding.findUnique({
     where: { id: validatedInput.wedding_id },
-    select: { payment_tracking_mode: true },
+    select: {
+      payment_tracking_mode: true,
+      wedding_country: true,
+    },
   });
 
   if (!wedding) {
@@ -80,6 +84,13 @@ export async function createFamily(
   const reference_code =
     wedding.payment_tracking_mode === 'AUTOMATED' ? generateReferenceCode() : null;
 
+  // Process phone numbers with country prefix
+  const processedPhone = processPhoneNumber(validatedInput.phone, wedding.wedding_country);
+  const processedWhatsapp = processPhoneNumber(
+    validatedInput.whatsapp_number,
+    wedding.wedding_country
+  );
+
   // Create family with members in a transaction
   const family = await prisma.$transaction(async (tx) => {
     // Create family
@@ -88,8 +99,8 @@ export async function createFamily(
         wedding_id: validatedInput.wedding_id,
         name: validatedInput.name,
         email: validatedInput.email || null,
-        phone: validatedInput.phone || null,
-        whatsapp_number: validatedInput.whatsapp_number || null,
+        phone: processedPhone,
+        whatsapp_number: processedWhatsapp,
         magic_token,
         reference_code,
         channel_preference: validatedInput.channel_preference || null,
@@ -189,6 +200,9 @@ export async function updateFamily(
     },
     include: {
       members: true,
+      wedding: {
+        select: { wedding_country: true },
+      },
     },
   });
 
@@ -196,15 +210,25 @@ export async function updateFamily(
     throw new Error('Family not found');
   }
 
+  // Process phone numbers with country prefix if they are being updated
+  const processedPhone =
+    validatedInput.phone !== undefined
+      ? processPhoneNumber(validatedInput.phone, existingFamily.wedding.wedding_country)
+      : undefined;
+  const processedWhatsapp =
+    validatedInput.whatsapp_number !== undefined
+      ? processPhoneNumber(validatedInput.whatsapp_number, existingFamily.wedding.wedding_country)
+      : undefined;
+
   // Update family and members in a transaction
   const family = await prisma.$transaction(async (tx) => {
     // Update family fields
     const familyUpdateData: Prisma.FamilyUpdateInput = {};
     if (validatedInput.name !== undefined) familyUpdateData.name = validatedInput.name;
     if (validatedInput.email !== undefined) familyUpdateData.email = validatedInput.email;
-    if (validatedInput.phone !== undefined) familyUpdateData.phone = validatedInput.phone;
-    if (validatedInput.whatsapp_number !== undefined)
-      familyUpdateData.whatsapp_number = validatedInput.whatsapp_number;
+    if (processedPhone !== undefined) familyUpdateData.phone = processedPhone;
+    if (processedWhatsapp !== undefined)
+      familyUpdateData.whatsapp_number = processedWhatsapp;
     if (validatedInput.channel_preference !== undefined)
       familyUpdateData.channel_preference = validatedInput.channel_preference;
     if (validatedInput.preferred_language !== undefined)
