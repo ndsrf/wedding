@@ -73,27 +73,27 @@ export default function MobileNav({ locale, translations }: MobileNavProps) {
           {/* Menu Panel */}
           <div className="fixed top-16 left-0 right-0 bg-white shadow-lg z-50 border-b border-rose-100">
             <nav className="flex flex-col p-4 space-y-4">
-              <a
-                href="#features"
+              <Link
+                href={`/${locale}#features`}
                 className="text-gray-700 hover:text-rose-600 transition-colors py-2 px-4 rounded-lg hover:bg-rose-50"
                 onClick={() => setIsOpen(false)}
               >
                 {translations.features}
-              </a>
-              <a
-                href="#pricing"
+              </Link>
+              <Link
+                href={`/${locale}#pricing`}
                 className="text-gray-700 hover:text-rose-600 transition-colors py-2 px-4 rounded-lg hover:bg-rose-50"
                 onClick={() => setIsOpen(false)}
               >
                 {translations.pricing}
-              </a>
-              <a
-                href="#testimonials"
+              </Link>
+              <Link
+                href={`/${locale}#testimonials`}
                 className="text-gray-700 hover:text-rose-600 transition-colors py-2 px-4 rounded-lg hover:bg-rose-50"
                 onClick={() => setIsOpen(false)}
               >
                 {translations.testimonials}
-              </a>
+              </Link>
               <Link
                 href={`/${locale}/news`}
                 className="text-gray-700 hover:text-rose-600 transition-colors py-2 px-4 rounded-lg hover:bg-rose-50"
