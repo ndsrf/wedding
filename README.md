@@ -511,6 +511,22 @@ docker compose logs -f app
 
 The app automatically detects and applies any new migrations on startup.
 
+### Vercel Deployment
+
+When deploying to Vercel, the runtime environment is read-only, which prevents automatic migrations from running at startup. Follow these steps to handle migrations:
+
+1. **Set Environment Variables**: In your Vercel project settings, add:
+   - `DATABASE_URL`: Your production database connection string.
+   - `AUTO_MIGRATE`: `false` (optional, the app now auto-detects Vercel).
+
+2. **Update Build Command**: Change the default build command in Vercel settings to:
+   ```bash
+   npx prisma migrate deploy && npm run build
+   ```
+   This ensures migrations are applied *before* the new version of the app is built and deployed.
+
+3. **Prisma Client**: The `postinstall` hook in `package.json` will automatically run `prisma generate` during the Vercel build process.
+
 ### Environment Variables Reference
 
 #### Required Variables

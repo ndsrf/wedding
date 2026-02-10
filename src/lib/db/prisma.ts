@@ -32,7 +32,7 @@ if (!connectionString) {
 
 // Optimize pool configuration based on platform
 const platform = process.env.PLATFORM_OPTIMIZATION || 'standard'
-const isServerless = platform === 'vercel'
+const isServerless = platform === 'vercel' || process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1'
 
 const poolConfig: PoolConfig = {
   connectionString,

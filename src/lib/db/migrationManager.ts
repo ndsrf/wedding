@@ -34,6 +34,9 @@ export class MigrationManager {
    * Uses Prisma's built-in migration system with the _prisma_migrations table for versioning
    */
   async runMigrations(): Promise<MigrationResult> {
+    // Detect Vercel environment
+    const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1';
+
     // Prevent concurrent migration runs
     if (this.migrationInProgress) {
       return {
@@ -47,6 +50,18 @@ export class MigrationManager {
       return {
         success: true,
         message: 'Migrations already executed in this session',
+      };
+    }
+
+    // Skip automatic migrations on Vercel runtime
+    // Migrations on Vercel should be run during the build step
+    if (isVercel) {
+      console.log('[Migration] Skipping runtime migrations on Vercel environment');
+      console.log('[Migration] Ensure "npx prisma migrate deploy" is part of your build command');
+      this.hasRunMigrations = true;
+      return {
+        success: true,
+        message: 'Skipped runtime migrations on Vercel',
       };
     }
 

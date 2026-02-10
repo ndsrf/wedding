@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { getLanguageFromRequest } from '@/lib/i18n/server';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import '../globals.css'
 
 export default async function PublicLayout({
@@ -17,6 +18,7 @@ export default async function PublicLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
