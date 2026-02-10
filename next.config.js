@@ -24,6 +24,11 @@ const nextConfig = {
     // Automatically optimize imports from these packages
     optimizePackageImports: ['lucide-react', 'xlsx', 'zod'],
   },
+  env: {
+    // Automatically enable Facebook login if credentials are provided
+    // Can be manually overridden by setting NEXT_PUBLIC_FACEBOOK_ENABLED in .env
+    NEXT_PUBLIC_FACEBOOK_ENABLED: process.env.NEXT_PUBLIC_FACEBOOK_ENABLED || (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET ? 'true' : 'false'),
+  },
   images: {
     minimumCacheTTL: 60,
     remotePatterns: [
