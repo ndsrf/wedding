@@ -8,7 +8,7 @@ export default function SignOutPage() {
   const t = useTranslations();
 
   useEffect(() => {
-    signOut({ callbackUrl: '/auth/signin' });
+    signOut({ callbackUrl: '/auth/signin', redirect: true });
   }, []);
 
   return (

@@ -92,6 +92,9 @@ export const authOptions: NextAuthConfig = {
     error: '/auth/error',
   },
 
+  // Base path for auth API
+  basePath: '/api/auth',
+
   // Session configuration
   session: {
     strategy: 'jwt',
@@ -249,6 +252,9 @@ export const authOptions: NextAuthConfig = {
 
   // Trust host header (required for Docker/Proxy)
   trustHost: true,
+
+  // Skip CSRF check in development if it's causing issues after logout
+  skipCSRFCheck: process.env.NODE_ENV === 'development',
 
   // Force secure cookies ONLY in production/HTTPS (Cloudflare)
   // For localhost/HTTP, we let NextAuth use its defaults which work correctly

@@ -14,7 +14,7 @@ import { ShieldAlert } from 'lucide-react';
 
 export default function NoAccessPage() {
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/auth/signin' });
+    signOut({ callbackUrl: '/auth/signin', redirect: true });
   };
 
   return (

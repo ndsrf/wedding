@@ -49,9 +49,9 @@ function SignInContent() {
     setIsLoading(provider);
     try {
       if (provider === 'e2e-bypass') {
-        await signIn('e2e-bypass', { email, callbackUrl });
+        await signIn('e2e-bypass', { email, callbackUrl, redirect: true });
       } else {
-        await signIn(provider, { callbackUrl });
+        await signIn(provider, { callbackUrl, redirect: true });
       }
     } catch (error) {
       console.error('Sign-in error:', error);
