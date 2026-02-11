@@ -8,8 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { verifyTemplateOwnership, updateTemplate, getTemplateById } from '@/lib/templates/crud';
 import { processTemplateImage, isValidImageType } from '@/lib/images/processor';
-import { writeFile, unlink, mkdir, stat } from 'fs/promises';
-import path from 'path';
+import { uploadFile, deleteFile, getFileStats } from '@/lib/storage';
 import { prisma } from '@/lib/db/prisma';
 
 /**
@@ -100,26 +99,24 @@ export async function POST(
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 8);
     const filename = `template_${template.wedding_id}_${timestamp}_${randomString}.png`;
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'templates');
-    const filePath = path.join(uploadDir, filename);
+    const filepath = `uploads/templates/${filename}`;
 
-    console.log('[Upload] Writing file to:', filePath);
+    console.log('[Upload] Uploading file:', filepath);
 
-    // Ensure the upload directory exists
-    await mkdir(uploadDir, { recursive: true });
+    // Upload to storage (Vercel Blob or filesystem)
+    const uploadResult = await uploadFile(filepath, result.buffer, {
+      contentType: 'image/png',
+    });
 
-    // Save the processed image
-    await writeFile(filePath, result.buffer);
-
-    // Verify file existence and size
+    // Verify file upload
     try {
-      const stats = await stat(filePath);
-      console.log(`[Upload] File written successfully. Size: ${stats.size} bytes`);
+      const stats = await getFileStats(uploadResult.url);
+      console.log(`[Upload] File uploaded successfully. Size: ${stats.size} bytes`);
     } catch (e) {
-      console.error('[Upload] Error verifying file after write:', e);
+      console.error('[Upload] Error verifying file after upload:', e);
     }
 
-    const imageUrl = `/uploads/templates/${filename}`;
+    const imageUrl = uploadResult.url;
 
     // If applyToAll is true, check if there are existing images
     if (applyToAll) {
@@ -341,10 +338,9 @@ export async function DELETE(
     const removeFromAll = searchParams.get('removeFromAll') === 'true';
 
     if (template.image_url) {
-      // Delete the image file from disk
-      const imagePath = path.join(process.cwd(), 'public', template.image_url);
+      // Delete the image file from storage
       try {
-        await unlink(imagePath);
+        await deleteFile(template.image_url);
       } catch (error) {
         console.error('Failed to delete image file:', error);
         // Continue even if file deletion fails

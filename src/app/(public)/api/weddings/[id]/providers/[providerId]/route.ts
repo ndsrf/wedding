@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/auth/middleware';
-import { unlink } from 'fs/promises';
-import path from 'path';
+import { deleteFile } from '@/lib/storage';
 
 const updateWeddingProviderSchema = z.object({
   name: z.string().optional().nullable().or(z.literal('')),
@@ -110,8 +109,7 @@ export async function DELETE(
     // Delete provider's contract document
     if (provider?.contract_url) {
       try {
-        const filePath = path.join(process.cwd(), 'public', provider.contract_url);
-        await unlink(filePath);
+        await deleteFile(provider.contract_url);
       } catch (error) {
         console.error(`Failed to delete contract file for provider ${providerId}:`, error);
         // Continue - don't fail the request if file deletion fails
@@ -122,8 +120,7 @@ export async function DELETE(
     for (const payment of payments) {
       if (payment.document_url) {
         try {
-          const filePath = path.join(process.cwd(), 'public', payment.document_url);
-          await unlink(filePath);
+          await deleteFile(payment.document_url);
         } catch (error) {
           console.error(`Failed to delete document file for payment ${payment.id}:`, error);
           // Continue - don't fail the request if file deletion fails

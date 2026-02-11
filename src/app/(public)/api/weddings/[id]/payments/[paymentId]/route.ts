@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/auth/middleware';
-import { unlink } from 'fs/promises';
-import path from 'path';
+import { deleteFile } from '@/lib/storage';
 
 export async function DELETE(
   _request: NextRequest,
@@ -43,8 +42,7 @@ export async function DELETE(
     const paymentWithDoc = payment as any;
     if (paymentWithDoc.document_url) {
       try {
-        const filePath = path.join(process.cwd(), 'public', paymentWithDoc.document_url);
-        await unlink(filePath);
+        await deleteFile(paymentWithDoc.document_url);
       } catch (error) {
         console.error('Failed to delete document file:', error);
         // Continue - don't fail the request if file deletion fails

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { uploadFile, generateUniqueFilename } from '@/lib/storage';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,20 +14,15 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Create unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    
-    // Ensure upload directory exists
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadDir, { recursive: true });
-    
-    const path = join(uploadDir, filename);
+    const filename = generateUniqueFilename(file.name.replace(/[^a-zA-Z0-9.-]/g, '_'));
+    const filepath = `uploads/${filename}`;
 
-    await writeFile(path, buffer);
-    
-    const url = `/uploads/${filename}`;
+    // Upload to storage (Vercel Blob or filesystem)
+    const result = await uploadFile(filepath, buffer, {
+      contentType: file.type,
+    });
 
-    return NextResponse.json({ url });
+    return NextResponse.json({ url: result.url });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });

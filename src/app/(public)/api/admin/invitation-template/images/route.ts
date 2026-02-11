@@ -11,6 +11,8 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { requireRole } from '@/lib/auth/middleware';
 import { processTemplateImage, isValidImageType } from '@/lib/images/processor';
+import { uploadFile, isUsingBlobStorage } from '@/lib/storage';
+import { list } from '@vercel/blob';
 import type { ImageFile } from '@/types/invitation-template';
 
 // ============================================================================
@@ -28,20 +30,34 @@ export async function GET() {
       );
     }
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'invitation-images', user.wedding_id);
+    let images: ImageFile[] = [];
 
-    let files: string[] = [];
-    try {
-      files = await fs.readdir(uploadDir);
-    } catch {
-      // Directory doesn't exist yet, return empty list
-      files = [];
+    if (isUsingBlobStorage()) {
+      // List files from Vercel Blob Storage
+      const prefix = `uploads/invitation-images/${user.wedding_id}/`;
+      const { blobs } = await list({ prefix });
+
+      images = blobs.map((blob) => ({
+        url: blob.url,
+        filename: blob.pathname.split('/').pop() || '',
+      }));
+    } else {
+      // List files from local filesystem
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'invitation-images', user.wedding_id);
+
+      let files: string[] = [];
+      try {
+        files = await fs.readdir(uploadDir);
+      } catch {
+        // Directory doesn't exist yet, return empty list
+        files = [];
+      }
+
+      images = files.map((filename) => ({
+        url: `/uploads/invitation-images/${user.wedding_id}/${filename}`,
+        filename,
+      }));
     }
-
-    const images: ImageFile[] = files.map((filename) => ({
-      url: `/uploads/invitation-images/${user.wedding_id}/${filename}`,
-      filename,
-    }));
 
     return NextResponse.json(images);
   } catch (error) {
@@ -105,22 +121,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create directory if needed
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'invitation-images', user.wedding_id);
-    await fs.mkdir(uploadDir, { recursive: true });
-
     // Generate filename
     const timestamp = Date.now();
     const randomId = randomUUID().split('-')[0];
     const filename = `invitation_${user.wedding_id}_${timestamp}_${randomId}.png`;
-    const filePath = path.join(uploadDir, filename);
+    const filepath = `uploads/invitation-images/${user.wedding_id}/${filename}`;
 
-    // Write file
-    await fs.writeFile(filePath, result.buffer);
+    // Upload to storage (Vercel Blob or filesystem)
+    const uploadResult = await uploadFile(filepath, result.buffer, {
+      contentType: 'image/png',
+    });
 
     return NextResponse.json(
       {
-        url: `/uploads/invitation-images/${user.wedding_id}/${filename}`,
+        url: uploadResult.url,
       },
       { status: 201 }
     );
