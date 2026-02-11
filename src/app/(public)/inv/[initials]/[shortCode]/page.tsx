@@ -1,16 +1,18 @@
 /**
  * Short URL redirect page
- * /inv/{INITIALS}/{SHORT_CODE}  →  307  →  /rsvp/{magic_token}[?query…]
+ * /inv/{INITIALS}/{SHORT_CODE}  →  /rsvp/{magic_token}[?query…]
  *
- * Resolves the short URL against the database and issues a server-side
- * redirect.  Any query-string parameters (e.g. ?channel=sms) are forwarded
- * to the destination so that channel-attribution tracking is preserved.
+ * Resolves the short URL against the database and shows a loading spinner
+ * before redirecting to the RSVP page. Any query-string parameters
+ * (e.g. ?channel=sms) are forwarded to the destination so that
+ * channel-attribution tracking is preserved.
  *
  * Returns 404 (via notFound()) when the initials/code pair does not exist.
  */
 
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { resolveShortUrl } from '@/lib/short-url';
+import RedirectWithSpinner from './RedirectWithSpinner';
 
 // Initials: 2-3 uppercase ASCII letters, optionally followed by digits (LJ, LJ1, AB12…)
 const INITIALS_RE = /^[A-Z]{2,3}\d*$/;
@@ -47,5 +49,7 @@ export default async function ShortUrlPage({ params, searchParams }: Props) {
   }
 
   const qsSuffix = qs.toString();
-  redirect(`/rsvp/${magicToken}${qsSuffix ? `?${qsSuffix}` : ''}`);
+  const destinationUrl = `/rsvp/${magicToken}${qsSuffix ? `?${qsSuffix}` : ''}`;
+
+  return <RedirectWithSpinner destinationUrl={destinationUrl} />;
 }
