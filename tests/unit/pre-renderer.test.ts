@@ -58,7 +58,7 @@ describe('Invitation Template Pre-renderer', () => {
     const textHtml = result.EN['1'];
     const imageHtml = result.EN['2'];
 
-    expect(textHtml).toContain('font-family: Playfair Display');
+    expect(textHtml).toContain('font-family:Playfair Display');
     expect(imageHtml).toContain('src="/images/couple.jpg"');
     expect(imageHtml).toContain('alt="The Couple"');
   });
@@ -74,10 +74,10 @@ describe('Invitation Template Pre-renderer', () => {
     const result = preRenderTemplate(mockDesign);
     const html = result.EN['1'];
 
-    expect(html).toContain('font-family: Playfair Display');
-    expect(html).toContain('font-size: 2rem');
-    expect(html).toContain('color: #000000');
-    expect(html).toContain('text-align: center');
-    expect(html).toContain('padding: 0 1rem');
+    expect(html).toContain('font-family:Playfair Display');
+    expect(html).toContain('font-size:2rem');
+    expect(html).toContain('color:#000000');
+    expect(html).toContain('text-align:center');
+    expect(html).toContain('padding:0 1rem');
   });
 });

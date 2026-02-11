@@ -23,6 +23,8 @@ jest.mock('@/lib/db/prisma', () => ({
 describe('RSVP Page Revalidation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset revalidatePath to default mock (no-op)
+    (revalidatePath as jest.Mock).mockImplementation(() => {});
     // Suppress console logs in tests
     jest.spyOn(console, 'log').mockImplementation();
     jest.spyOn(console, 'error').mockImplementation();

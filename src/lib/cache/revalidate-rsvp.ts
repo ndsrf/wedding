@@ -28,13 +28,20 @@ export async function revalidateWeddingRSVPPages(weddingId: string): Promise<voi
 
     // Revalidate each family's RSVP page
     // This tells Next.js to regenerate these pages on next request
+    let revalidatedCount = 0;
     for (const family of families) {
       if (family.magic_token) {
-        revalidatePath(`/rsvp/${family.magic_token}`);
+        try {
+          revalidatePath(`/rsvp/${family.magic_token}`);
+          revalidatedCount++;
+        } catch (error) {
+          // Log but continue processing remaining families
+          console.error(`[Revalidation] Failed to revalidate page for token ${family.magic_token}:`, error);
+        }
       }
     }
 
-    console.log(`[Revalidation] Successfully revalidated ${families.length} RSVP pages for wedding ${weddingId}`);
+    console.log(`[Revalidation] Successfully revalidated ${revalidatedCount} RSVP pages for wedding ${weddingId}`);
   } catch (error) {
     console.error(`[Revalidation] Failed to revalidate RSVP pages for wedding ${weddingId}:`, error);
     // Don't throw - revalidation failures shouldn't break the main request
