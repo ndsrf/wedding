@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import RSVPForm from '@/components/guest/RSVPForm';
 import PaymentInfo from '@/components/guest/PaymentInfo';
@@ -29,6 +29,12 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
 
   const [data, setData] = useState<GuestRSVPPageData>(initialData);
   const [rsvpSubmitted, setRsvpSubmitted] = useState(initialData.has_submitted_rsvp);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Set loading to false once the component is mounted and hydrated
+    setIsLoading(false);
+  }, []);
 
   async function handleRSVPSuccess() {
     setRsvpSubmitted(true);
@@ -53,6 +59,18 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
   const templateLanguage = (family.preferred_language.toUpperCase()) as SupportedLanguage;
 
   // Content to be wrapped in envelope or displayed normally
+  // Show loading spinner while component is initializing
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const mainContent = (
     <>
       {/* Custom Invitation Template or Standard Welcome Section */}
