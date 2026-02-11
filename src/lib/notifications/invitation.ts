@@ -17,6 +17,7 @@ import type { Channel } from "@prisma/client";
 import { formatDateByLanguage } from "@/lib/date-formatter";
 import { buildWhatsAppLink } from "@/lib/notifications/whatsapp-links";
 import { getShortUrlPath } from "@/lib/short-url";
+import { toAbsoluteUrl } from "@/lib/images/processor";
 
 export interface SendInvitationOptions {
   family_id: string;
@@ -126,9 +127,7 @@ export async function sendInvitation(
     const renderedBody = renderTemplate(template.body, variables);
 
     // Convert relative image URL to absolute URL
-    const absoluteImageUrl = template.image_url
-      ? `${process.env.APP_URL || "http://localhost:3000"}${template.image_url}`
-      : undefined;
+    const absoluteImageUrl = toAbsoluteUrl(template.image_url);
 
     // Send message based on channel
     let messageResult: { success: boolean; messageId?: string; error?: string };

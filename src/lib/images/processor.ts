@@ -149,3 +149,27 @@ export function getFileExtension(mimeType: string): string {
   };
   return extensions[mimeType.toLowerCase()] || 'png';
 }
+
+/**
+ * Converts a relative or absolute URL to an absolute URL
+ * If the URL is already absolute (starts with http:// or https://), returns it as-is
+ * Otherwise, prepends the base URL
+ *
+ * @param url - The URL to convert (can be relative or absolute)
+ * @param baseUrl - The base URL to prepend if the URL is relative (default: process.env.APP_URL || 'http://localhost:3000')
+ * @returns The absolute URL
+ */
+export function toAbsoluteUrl(url: string | null | undefined, baseUrl?: string): string | null {
+  if (!url) {
+    return null;
+  }
+
+  // If the URL is already absolute, return it as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // Otherwise, prepend the base URL
+  const base = baseUrl || process.env.APP_URL || 'http://localhost:3000';
+  return `${base}${url}`;
+}
