@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
+import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { Prisma } from '@prisma/client';
 
 // ============================================================================
@@ -156,7 +157,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       data: updateData,
     });
 
+    // Invalidate in-memory cache
     invalidateWeddingPageCache(template.wedding_id);
+
+    // Revalidate ISR cached pages (fire-and-forget for performance)
+    void revalidateWeddingRSVPPages(template.wedding_id);
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -213,7 +218,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
       where: { id },
     });
 
+    // Invalidate in-memory cache
     invalidateWeddingPageCache(template.wedding_id);
+
+    // Revalidate ISR cached pages (fire-and-forget for performance)
+    void revalidateWeddingRSVPPages(template.wedding_id);
 
     return NextResponse.json({ success: true }, { status: 204 });
   } catch (error) {

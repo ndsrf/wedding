@@ -26,6 +26,9 @@ const ACCEPTED_GHSAS = [
 
   // lodash - MODERATE severity
   'GHSA-xxjr-mmjv-4gpg', // Prototype Pollution
+
+  // undici - MODERATE severity
+  'GHSA-g9mf-h72j-4rw9', // Unbounded decompression chain
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];

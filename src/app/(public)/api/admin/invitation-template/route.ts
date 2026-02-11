@@ -10,6 +10,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { getAllSystemSeeds } from '@/lib/invitation-template/seeds';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
+import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { Prisma } from '@prisma/client';
 
 // ============================================================================
@@ -129,7 +130,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Invalidate in-memory cache
     invalidateWeddingPageCache(user.wedding_id);
+
+    // Revalidate ISR cached pages (fire-and-forget for performance)
+    void revalidateWeddingRSVPPages(user.wedding_id);
 
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
