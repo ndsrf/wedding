@@ -7,6 +7,7 @@
  * - Server-side data fetching (no double-load)
  * - Server-side locale synchronization (no client-side reload)
  * - Lightweight initial payload
+ * - ISR with on-demand revalidation (cached at CDN edge)
  */
 
 import { Suspense } from 'react';
@@ -17,6 +18,39 @@ import { getTranslations as getI18n } from '@/lib/i18n/server';
 import { Language } from '@/lib/i18n/config';
 import RSVPPageClient from './RSVPPageClient';
 import { Metadata } from 'next';
+
+// ============================================================================
+// ISR Configuration - Revalidate cached pages hourly
+// Pages are cached at the CDN edge for fast loading, and revalidated
+// on-demand when templates are updated via revalidatePath()
+// ============================================================================
+export const revalidate = 3600; // Revalidate every hour (in seconds)
+
+// ============================================================================
+// Dynamic Params - Generate static pages on-demand for each token
+// This enables ISR for dynamic routes with infinite possible tokens
+// ============================================================================
+export const dynamicParams = true;
+
+// ============================================================================
+// Edge Runtime Configuration (Optional - see below for setup)
+//
+// To enable Edge Runtime for even faster cold starts (50-200ms improvement):
+// 1. Set PLATFORM_OPTIMIZATION=vercel in your .env file
+// 2. Configure Prisma Accelerate (https://www.prisma.io/accelerate)
+// 3. Update DATABASE_URL to use prisma:// protocol
+// 4. Uncomment the line below:
+//
+// export const runtime = 'edge';
+//
+// Benefits of Edge Runtime:
+// - Faster cold starts (< 100ms vs 200-500ms)
+// - Global distribution (served from nearest region)
+// - Lower memory usage
+//
+// Note: Standard Node.js runtime works great for most use cases.
+// Only enable Edge if you need maximum performance at scale.
+// ============================================================================
 
 interface Props {
   params: Promise<{ token: string }>;
