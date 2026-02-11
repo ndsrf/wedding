@@ -95,12 +95,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Pre-render HTML for all languages
+    let pre_rendered_html = null;
+    try {
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: user.wedding_id },
+        select: {
+          couple_names: true,
+          wedding_date: true,
+          wedding_time: true,
+          location: true,
+        },
+      });
+
+      if (wedding) {
+        const { preRenderTemplate } = await import('@/lib/invitation-template/pre-renderer');
+        pre_rendered_html = preRenderTemplate(design);
+      }
+    } catch (err) {
+      console.error('Failed to pre-render template:', err);
+      // Don't fail the whole request if pre-rendering fails
+    }
+
     // Create template
     const template = await prisma.invitationTemplate.create({
       data: {
         wedding_id: user.wedding_id,
         name: name.trim(),
         design: design as unknown as Prisma.InputJsonValue,
+        pre_rendered_html: pre_rendered_html as unknown as Prisma.InputJsonValue,
         based_on_preset: based_on_preset || null,
         is_system_template: false,
       },

@@ -28,7 +28,7 @@ export function ButtonBlock({ text, url, style, language }: ButtonBlockProps) {
   }
 
   return (
-    <div className={`flex ${alignmentClass} p-4`}>
+    <div className={`flex ${alignmentClass} p-1`}>
       <a
         href={url}
         target="_blank"

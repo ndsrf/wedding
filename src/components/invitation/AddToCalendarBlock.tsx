@@ -94,7 +94,7 @@ END:VCALENDAR`;
   };
 
   return (
-    <div className="py-4 px-4">
+    <div className="py-1 px-4">
       <div className="max-w-4xl mx-auto text-center">
         <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
           {/* Google Calendar Button */}

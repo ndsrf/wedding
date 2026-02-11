@@ -26,7 +26,7 @@ export function LocationBlock({ location, style }: LocationBlockProps) {
   const isGrayscale = style?.mapStyle === 'grayscale';
 
   return (
-    <div className="py-16 px-4">
+    <div className="py-1 px-4">
       <div className="max-w-4xl mx-auto text-center">
         {/* Clickable Location Icon and Name */}
         <a

@@ -547,6 +547,7 @@ export interface GuestRSVPPageData {
     id: string;
     name: string;
     design: unknown; // TemplateDesign (stored as JSON in DB)
+    pre_rendered_html?: Record<string, string>;
   };
   rsvp_cutoff_passed: boolean;
   has_submitted_rsvp: boolean;

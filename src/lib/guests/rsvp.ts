@@ -72,12 +72,12 @@ export const getRSVPPageData = cache(async (
         };
       }
 
-      let invitationTemplate: { id: string; name: string; design: unknown } | undefined;
+      let invitationTemplate: { id: string; name: string; design: unknown; pre_rendered_html: unknown } | undefined;
       if (wedding.invitation_template_id) {
         try {
           const template = await prisma.invitationTemplate.findUnique({
             where: { id: wedding.invitation_template_id },
-            select: { id: true, name: true, design: true },
+            select: { id: true, name: true, design: true, pre_rendered_html: true },
           });
           if (template) {
             invitationTemplate = template;
@@ -159,7 +159,14 @@ export const getRSVPPageData = cache(async (
           extra_info_3_label: wedding.extra_info_3_label,
         },
         theme: themeData,
-        ...(invitationTemplate && { invitation_template: invitationTemplate }),
+        ...(invitationTemplate && { 
+          invitation_template: {
+            id: invitationTemplate.id,
+            name: invitationTemplate.name,
+            design: invitationTemplate.design,
+            pre_rendered_html: invitationTemplate.pre_rendered_html as Record<string, string>,
+          } 
+        }),
       };
 
       setWeddingPageCache(weddingId, cachedData);

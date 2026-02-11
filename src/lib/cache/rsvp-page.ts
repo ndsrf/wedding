@@ -21,6 +21,7 @@ export interface CachedInvitationTemplate {
   id: string;
   name: string;
   design: unknown;
+  pre_rendered_html?: Record<string, string>;
 }
 
 export interface CachedWeddingPageData {

@@ -122,6 +122,26 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         );
       }
       updateData.design = design as unknown as Prisma.InputJsonValue;
+
+      // Pre-render HTML for all languages
+      try {
+        const wedding = await prisma.wedding.findUnique({
+          where: { id: user.wedding_id },
+          select: {
+            couple_names: true,
+            wedding_date: true,
+            wedding_time: true,
+            location: true,
+          },
+        });
+
+        if (wedding) {
+          const { preRenderTemplate } = await import('@/lib/invitation-template/pre-renderer');
+          updateData.pre_rendered_html = preRenderTemplate(design) as unknown as Prisma.InputJsonValue;
+        }
+      } catch (err) {
+        console.error('Failed to pre-render template during update:', err);
+      }
     }
 
     if (Object.keys(updateData).length === 0) {

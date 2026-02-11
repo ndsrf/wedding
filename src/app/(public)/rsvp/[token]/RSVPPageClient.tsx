@@ -59,6 +59,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
       {hasTemplate ? (
         <TemplateRenderer
           design={invitation_template.design}
+          preRenderedHtml={invitation_template.pre_rendered_html}
           weddingDate={wedding.wedding_date}
           weddingTime={wedding.wedding_time}
           location={wedding.location}
@@ -163,16 +164,14 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
               onLanguageChange={() => window.location.reload()}
             />
           </div>
-          <div className="space-y-6">
-            {mainContent}
-          </div>
+          {mainContent}
         </EnvelopeReveal>
       ) : (
         // Standard template layout
         <>
           {/* Header */}
           <div className="bg-white shadow-sm border-b border-gray-200">
-            <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="max-w-4xl mx-auto px-4 py-1 flex justify-between items-center">
               <h1 className="text-xl font-bold text-gray-900">
                 {wedding.couple_names}
               </h1>
@@ -185,12 +184,12 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           </div>
 
           {/* Main Content */}
-          <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+          <div>
             {mainContent}
           </div>
 
           {/* Footer */}
-          <div className="max-w-4xl mx-auto px-4 py-8 text-center text-gray-500">
+          <div className="max-w-4xl mx-auto px-4 py-2 text-center text-gray-500">
             <p className="text-base">
               {t('guest.footer.contactCouple')}
             </p>

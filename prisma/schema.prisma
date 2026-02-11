@@ -176,6 +176,7 @@ model InvitationTemplate {
   is_system_template  Boolean  @default(false)
   based_on_preset     String?  // ThemePreset id if forked from a system seed; null if blank
   design              Json     // TemplateDesign
+  pre_rendered_html   Json?    // Pre-rendered HTML for each language: { ES: "...", EN: "...", ... }
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
   wedding             Wedding  @relation(fields: [wedding_id], references: [id], onDelete: Cascade)

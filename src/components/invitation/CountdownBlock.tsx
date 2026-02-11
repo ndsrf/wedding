@@ -71,7 +71,7 @@ export function CountdownBlock({ weddingDate, weddingTime, language = 'EN', styl
   }, [weddingDate, weddingTime]);
 
   return (
-    <div className="py-12 px-4">
+    <div className="py-1 px-4">
       <div className="max-w-4xl mx-auto text-center">
 
         <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">

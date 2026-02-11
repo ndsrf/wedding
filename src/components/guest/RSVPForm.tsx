@@ -227,7 +227,7 @@ export default function RSVPForm({
       <h3 className="text-2xl font-bold text-gray-900 mb-4">
         {t('guest.rsvp.title')}
       </h3>
-      <p className="text-lg text-gray-600 mb-6">
+      <p className="text-lg text-gray-600 mb-2">
         {t('guest.rsvp.instructions')}
       </p>
 
@@ -239,7 +239,7 @@ export default function RSVPForm({
       )}
 
       {/* Family Members */}
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4">
         {family.members.map((member) => {
           const memberUpdate = members.find((m) => m.id === member.id);
           if (!memberUpdate) return null;
@@ -267,7 +267,7 @@ export default function RSVPForm({
 
       {/* Add Member Section */}
       {wedding.allow_guest_additions && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="mb-2 p-4 bg-gray-50 rounded-lg">
           {!showAddMember ? (
             <button
               type="button"
@@ -346,7 +346,7 @@ export default function RSVPForm({
         wedding.extra_info_1_enabled ||
         wedding.extra_info_2_enabled ||
         wedding.extra_info_3_enabled) && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
+        <div className="mb-2 p-4 bg-gray-50 rounded-lg space-y-4">
           <h4 className="text-xl font-bold text-gray-900">
             {t('guest.rsvp.additionalQuestions')}
           </h4>

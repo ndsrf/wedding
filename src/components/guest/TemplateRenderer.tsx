@@ -1,7 +1,7 @@
 'use client';
 
+import React, { useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { useMemo, useEffect } from 'react';
 import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
@@ -11,6 +11,7 @@ import { loadFont } from '@/lib/fonts';
 
 interface TemplateRendererProps {
   design: unknown; // TemplateDesign (stored as JSON)
+  preRenderedHtml?: Record<string, string>;
   weddingDate: string;
   weddingTime: string;
   location: string;
@@ -44,6 +45,7 @@ const FONT_NAMES = [
 
 export default function TemplateRenderer({
   design,
+  preRenderedHtml,
   weddingDate,
   weddingTime,
   location,
@@ -77,9 +79,12 @@ export default function TemplateRenderer({
     return null;
   }
 
+  // Use pre-rendered blocks if available for this language
+  const staticBlocks = preRenderedHtml ? (preRenderedHtml[language] || preRenderedHtml['EN']) as unknown as Record<string, string> : null;
+
   return (
     <div
-      className="w-full relative min-h-screen"
+      className="w-full relative"
       style={{
         backgroundColor: templateDesign.globalStyle.backgroundColor,
       }}
@@ -117,19 +122,36 @@ export default function TemplateRenderer({
       )}
 
       {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-6 space-y-1">
-        {templateDesign.blocks.map((block, index) => (
-          <TemplateBlock
-            key={block.id}
-            block={block}
-            weddingDate={weddingDate}
-            weddingTime={weddingTime}
-            location={location}
-            coupleNames={coupleNames}
-            language={language}
-            isPriorityImage={index === firstImageIndex}
-          />
-        ))}
+      <div className="relative z-10 max-w-4xl mx-auto">
+        {templateDesign.blocks.map((block, index) => {
+          // If we have pre-rendered HTML for this specific block, use it for instant paint
+          const blockHtml = staticBlocks?.[block.id];
+          
+          if (blockHtml && (block.type === 'text' || block.type === 'image')) {
+            return (
+              <React.Fragment key={block.id}>
+                <div 
+                  style={{ margin: 0, padding: 0 }}
+                  dangerouslySetInnerHTML={{ __html: blockHtml }} 
+                />
+              </React.Fragment>
+            );
+          }
+
+          // Otherwise render the dynamic block
+          return (
+            <TemplateBlock
+              key={block.id}
+              block={block}
+              weddingDate={weddingDate}
+              weddingTime={weddingTime}
+              location={location}
+              coupleNames={coupleNames}
+              language={language}
+              isPriorityImage={index === firstImageIndex}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -166,7 +188,8 @@ function TemplateBlock({
           color: textBlock.style.color,
           textAlign: textBlock.style.textAlign,
           whiteSpace: 'pre-line',
-          padding: '1rem',
+          padding: '0 1rem',
+          margin: 0,
         }}
       >
         {textBlock.style.backgroundImage && (
@@ -180,7 +203,7 @@ function TemplateBlock({
             }}
           />
         )}
-        <div dangerouslySetInnerHTML={{ __html: textContent }} />
+        <span dangerouslySetInnerHTML={{ __html: textContent }} />
       </div>
     );
   }
