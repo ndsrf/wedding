@@ -719,6 +719,10 @@
       "columnSection": "Sezione",
       "columnDueDate": "Data di Scadenza",
       "columnStatus": "Stato",
+      "tableHeaderTask": "Attività",
+      "tableHeaderSection": "Sezione",
+      "tableHeaderDueDate": "Data di Scadenza",
+      "tableHeaderStatus": "Stato",
       "noSection": "Nessuna sezione"
     },
     "seating": {

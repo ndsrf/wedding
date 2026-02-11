@@ -719,6 +719,10 @@
       "columnSection": "Section",
       "columnDueDate": "Date d'Échéance",
       "columnStatus": "Statut",
+      "tableHeaderTask": "Tâche",
+      "tableHeaderSection": "Section",
+      "tableHeaderDueDate": "Date d'Échéance",
+      "tableHeaderStatus": "Statut",
       "noSection": "Aucune section"
     },
     "seating": {

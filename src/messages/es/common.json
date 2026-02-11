@@ -688,6 +688,10 @@
       "columnSection": "Sección",
       "columnDueDate": "Fecha de Vencimiento",
       "columnStatus": "Estado",
+      "tableHeaderTask": "Tarea",
+      "tableHeaderSection": "Sección",
+      "tableHeaderDueDate": "Fecha de Vencimiento",
+      "tableHeaderStatus": "Estado",
       "noSection": "Sin sección"
     },
     "seating": {

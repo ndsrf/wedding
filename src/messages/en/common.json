@@ -692,6 +692,10 @@
       "columnSection": "Section",
       "columnDueDate": "Due Date",
       "columnStatus": "Status",
+      "tableHeaderTask": "Task",
+      "tableHeaderSection": "Section",
+      "tableHeaderDueDate": "Due Date",
+      "tableHeaderStatus": "Status",
       "noSection": "No section"
     },
     "seating": {

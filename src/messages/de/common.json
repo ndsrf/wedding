@@ -719,6 +719,10 @@
       "columnSection": "Abschnitt",
       "columnDueDate": "Fälligkeitsdatum",
       "columnStatus": "Status",
+      "tableHeaderTask": "Aufgabe",
+      "tableHeaderSection": "Abschnitt",
+      "tableHeaderDueDate": "Fälligkeitsdatum",
+      "tableHeaderStatus": "Status",
       "noSection": "Kein Abschnitt"
     },
     "seating": {
