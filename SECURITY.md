@@ -6,7 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
-Last updated: 2026-02-06
+Last updated: 2026-02-11
 
 ### Current Vulnerabilities
 
@@ -72,6 +72,24 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Not included in production builds
   - Low risk
 - **Mitigation**: Development-only dependency, not included in production bundles
+
+##### undici - Unbounded Decompression Chain
+- **Package**: undici < 6.23.0 (via @vercel/blob@0.27.3)
+- **CVE**: [GHSA-g9mf-h72j-4rw9](https://github.com/advisories/GHSA-g9mf-h72j-4rw9)
+- **Status**: Fix requires major version update to @vercel/blob@2.x (breaking changes)
+- **Usage**: HTTP client for Vercel Blob Storage (optional file upload feature)
+- **Risk Assessment**:
+  - Attack requires high complexity (CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H)
+  - Only affects applications that process untrusted HTTP responses with Content-Encoding
+  - Vercel Blob Storage API is trusted first-party service
+  - Limited exposure: only used for file uploads by authenticated admins
+  - Severity: Moderate (CVSS 5.9)
+- **Mitigation**:
+  - Blob storage is optional (can be disabled via BLOB_READ_WRITE_TOKEN)
+  - Only used by authenticated admins for trusted file uploads
+  - Vercel Blob API is a trusted first-party service
+  - Rate limiting and file size restrictions in place
+- **Future Plan**: Upgrade to @vercel/blob@2.x when stable and breaking changes are assessed
 
 ### Recently Fixed
 

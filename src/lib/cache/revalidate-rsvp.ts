@@ -20,17 +20,17 @@ import { prisma } from '@/lib/db/prisma';
  */
 export async function revalidateWeddingRSVPPages(weddingId: string): Promise<void> {
   try {
-    // Fetch all families with their magic links for this wedding
+    // Fetch all families with their magic tokens for this wedding
     const families = await prisma.family.findMany({
       where: { wedding_id: weddingId },
-      select: { magic_link: true },
+      select: { magic_token: true },
     });
 
     // Revalidate each family's RSVP page
     // This tells Next.js to regenerate these pages on next request
     for (const family of families) {
-      if (family.magic_link) {
-        revalidatePath(`/rsvp/${family.magic_link}`);
+      if (family.magic_token) {
+        revalidatePath(`/rsvp/${family.magic_token}`);
       }
     }
 
