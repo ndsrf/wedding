@@ -1,14 +1,14 @@
 /**
- * Admin Template Management Page
- * /admin/templates
+ * Planner Wedding Template Management Page
+ * /planner/weddings/[id]/templates
  *
- * Allows wedding admins to view, edit, and preview message templates
- * for invitations and reminders in all supported languages
+ * Allows planners to view, edit, and preview message templates
+ * for a specific wedding in all supported languages
  */
 
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -21,7 +21,12 @@ import { getAvailablePlaceholders } from '@/lib/templates';
 type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE';
 type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
 
-export default function TemplatesPage() {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function PlannerWeddingTemplatesPage({ params }: PageProps) {
+  const { id: weddingId } = use(params);
   const router = useRouter();
   const { status } = useSession();
   const t = useTranslations('admin.templates');
@@ -35,6 +40,9 @@ export default function TemplatesPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [placeholders] = useState(getAvailablePlaceholders());
   const [saveTheDateEnabled, setSaveTheDateEnabled] = useState(false);
+  const [weddingName, setWeddingName] = useState<string>('');
+
+  const apiBaseUrl = `/api/planner/weddings/${weddingId}`;
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -47,11 +55,12 @@ export default function TemplatesPage() {
   useEffect(() => {
     const fetchWeddingConfig = async () => {
       try {
-        const response = await fetch('/api/admin/wedding');
+        const response = await fetch(`/api/planner/weddings/${weddingId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.success) {
             setSaveTheDateEnabled(data.data.save_the_date_enabled);
+            setWeddingName(data.data.couple_names);
           }
         }
       } catch (err) {
@@ -62,14 +71,14 @@ export default function TemplatesPage() {
     if (status === 'authenticated') {
       fetchWeddingConfig();
     }
-  }, [status]);
+  }, [status, weddingId]);
 
   // Fetch templates
   const fetchTemplates = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/admin/templates?limit=100');
+      const response = await fetch(`${apiBaseUrl}/templates?limit=100`);
 
       if (!response.ok) {
         throw new Error(t('error'));
@@ -86,17 +95,17 @@ export default function TemplatesPage() {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, apiBaseUrl]);
 
   useEffect(() => {
     if (status === 'authenticated') {
       fetchTemplates();
     }
-  }, [status, fetchTemplates, selectedLanguage, selectedChannel, activeTab]);
+  }, [status, fetchTemplates]);
 
   // Get templates for current filter
   const filteredTemplates = templates.filter(
-    (t) => t.type === activeTab && t.language === selectedLanguage && t.channel === selectedChannel
+    (tmpl) => tmpl.type === activeTab && tmpl.language === selectedLanguage && tmpl.channel === selectedChannel
   );
 
   // Get single template for editing
@@ -142,7 +151,7 @@ export default function TemplatesPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center">
-            <Link href="/admin" className="text-gray-600 hover:text-gray-700 mr-4">
+            <Link href={`/planner/weddings/${weddingId}`} className="text-gray-600 hover:text-gray-700 mr-4">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -150,7 +159,7 @@ export default function TemplatesPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
               <p className="mt-1 text-sm text-gray-600">
-                {t('description')}
+                {weddingName ? `${weddingName} - ` : ''}{t('description')}
               </p>
             </div>
           </div>
@@ -248,13 +257,14 @@ export default function TemplatesPage() {
           <div className="lg:col-span-2">
             {currentTemplate ? (
               <TemplateEditor
-                key={currentTemplate.id}
+                key={`${currentTemplate.id}`}
                 template={currentTemplate}
                 channel={selectedChannel}
+                apiBaseUrl={apiBaseUrl}
                 onSave={async (subject, body, contentTemplateId) => {
                   try {
                     const response = await fetch(
-                      `/api/admin/templates/${currentTemplate.id}`,
+                      `${apiBaseUrl}/templates/${currentTemplate.id}`,
                       {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
@@ -311,6 +321,8 @@ export default function TemplatesPage() {
         <TemplatePreview
           templateId={currentTemplate.id}
           language={selectedLanguage}
+          apiBaseUrl={apiBaseUrl}
+          weddingId={weddingId}
           onClose={() => setPreviewOpen(false)}
         />
       )}

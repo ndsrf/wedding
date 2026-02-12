@@ -14,12 +14,16 @@ interface TemplatePreviewProps {
   templateId: string;
   language?: string;
   onClose: () => void;
+  apiBaseUrl?: string;
+  weddingId?: string;
 }
 
 export function TemplatePreview({
   templateId,
   language,
   onClose,
+  apiBaseUrl = '/api/admin',
+  weddingId,
 }: TemplatePreviewProps) {
   const { data: session } = useSession();
   const t = useTranslations('admin.templates.preview');
@@ -34,8 +38,10 @@ export function TemplatePreview({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const effectiveWeddingId = weddingId || session?.user?.wedding_id;
+
     const fetchPreview = async () => {
-      if (!session?.user?.wedding_id) {
+      if (!effectiveWeddingId) {
         setError('Wedding ID not found');
         setLoading(false);
         return;
@@ -44,13 +50,13 @@ export function TemplatePreview({
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('/api/admin/templates/preview', {
+        const response = await fetch(`${apiBaseUrl}/templates/preview`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             template_id: templateId,
             language: language,
-            wedding_id: session.user.wedding_id,
+            wedding_id: effectiveWeddingId,
           }),
         });
 
@@ -72,7 +78,7 @@ export function TemplatePreview({
     };
 
     fetchPreview();
-  }, [templateId, language, session?.user?.wedding_id]);
+  }, [templateId, language, session?.user?.wedding_id, apiBaseUrl, weddingId]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

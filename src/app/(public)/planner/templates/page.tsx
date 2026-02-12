@@ -234,6 +234,7 @@ export default function PlannerTemplatesPage() {
                   image_url: currentTemplate.image_url || null,
                 } as MessageTemplate}
                 channel={selectedChannel}
+                apiBaseUrl="/api/planner"
                 onSave={async (subject, body, contentTemplateId) => {
                   try {
                     const response = await fetch(

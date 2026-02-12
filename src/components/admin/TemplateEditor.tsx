@@ -16,6 +16,7 @@ interface TemplateEditorProps {
   onSave: (subject: string, body: string, contentTemplateId?: string | null) => Promise<void>;
   onPreview: () => void;
   onImageUpdate?: () => void;
+  apiBaseUrl?: string;
 }
 
 export function TemplateEditor({
@@ -24,6 +25,7 @@ export function TemplateEditor({
   onSave,
   onPreview,
   onImageUpdate,
+  apiBaseUrl = '/api/admin',
 }: TemplateEditorProps) {
   const t = useTranslations('admin.templates.editor');
   const tChannel = useTranslations('admin.templates.channel');
@@ -104,7 +106,7 @@ export function TemplateEditor({
       formData.append('file', file);
       formData.append('applyToAll', applyToAll.toString());
 
-      const response = await fetch(`/api/admin/templates/${template.id}/image`, {
+      const response = await fetch(`${apiBaseUrl}/templates/${template.id}/image`, {
         method: 'POST',
         body: formData,
       });
@@ -141,7 +143,7 @@ export function TemplateEditor({
 
     setIsUploadingImage(true);
     try {
-      const response = await fetch(`/api/admin/templates/${template.id}/image`, {
+      const response = await fetch(`${apiBaseUrl}/templates/${template.id}/image`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -188,7 +190,7 @@ export function TemplateEditor({
 
     try {
       const queryParams = applyToAll ? '?removeFromAll=true' : '';
-      const response = await fetch(`/api/admin/templates/${template.id}/image${queryParams}`, {
+      const response = await fetch(`${apiBaseUrl}/templates/${template.id}/image${queryParams}`, {
         method: 'DELETE',
       });
 
