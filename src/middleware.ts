@@ -141,7 +141,7 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
-      secureCookie: process.env.NEXTAUTH_URL?.startsWith('https://'),
+      secureCookie: request.url.startsWith('https://'),
     });
 
     if (token?.user?.role) {
@@ -193,7 +193,7 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
-    secureCookie: process.env.NEXTAUTH_URL?.startsWith('https://'),
+    secureCookie: request.url.startsWith('https://'),
   });
 
   const user = token?.user as AuthenticatedUser | undefined;
