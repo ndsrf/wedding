@@ -316,6 +316,8 @@
       "checklistTemplateSubtitle": "Gérer les modèles de tâches pour vos mariages",
       "providers": "Prestataires",
       "providersSubtitle": "Gérez votre bibliothèque de prestataires",
+      "templates": "Modèles par Défaut",
+      "templatesSubtitle": "Personnaliser les modèles de messages pour tous les mariages",
       "noWeddings": "Pas encore de mariages",
       "noWeddingsSubtitle": "Commencez par créer votre premier mariage."
     },

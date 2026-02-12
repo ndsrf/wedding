@@ -318,6 +318,8 @@
       "checklistTemplateSubtitle": "Gestionar plantillas de tareas para tus bodas",
       "providers": "Proveedores",
       "providersSubtitle": "Administra tu biblioteca de proveedores",
+      "templates": "Plantillas Predeterminadas",
+      "templatesSubtitle": "Personalizar plantillas de mensajes para todas las bodas",
       "noWeddings": "Aún no hay bodas",
       "noWeddingsSubtitle": "Empieza creando tu primera boda."
     },

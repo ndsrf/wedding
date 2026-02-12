@@ -322,6 +322,8 @@
       "checklistTemplateSubtitle": "Manage task templates for your weddings",
       "providers": "Providers",
       "providersSubtitle": "Manage your provider library",
+      "templates": "Default Templates",
+      "templatesSubtitle": "Customize default message templates for all weddings",
       "noWeddings": "No weddings yet",
       "noWeddingsSubtitle": "Get started by creating your first wedding."
     },

@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { seedPlannerTemplatesFromMaster } from '@/lib/templates/planner-seed';
 import type {
   APIResponse,
   ListPlannersResponse,
@@ -192,6 +193,14 @@ export async function POST(request: NextRequest) {
         created_by: user.id,
       },
     });
+
+    // Seed default templates for the new planner from master templates
+    try {
+      await seedPlannerTemplatesFromMaster(planner.id);
+    } catch (error) {
+      console.error('Failed to seed templates for planner:', error);
+      // Don't fail the whole operation if template seeding fails
+    }
 
     const response: CreatePlannerResponse = {
       success: true,

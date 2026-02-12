@@ -17,17 +17,17 @@ model MasterAdmin {
 }
 
 model WeddingPlanner {
-  id                  String               @id @default(uuid())
-  email               String               @unique
+  id                  String                     @id @default(uuid())
+  email               String                     @unique
   name                String
-  google_id           String?              @unique
+  google_id           String?                    @unique
   auth_provider       AuthProvider
   last_login_provider AuthProvider?
-  preferred_language  Language             @default(EN)
+  preferred_language  Language                   @default(EN)
   logo_url            String?
-  enabled             Boolean              @default(true)
-  subscription_status SubscriptionStatus   @default(ACTIVE)
-  created_at          DateTime             @default(now())
+  enabled             Boolean                    @default(true)
+  subscription_status SubscriptionStatus         @default(ACTIVE)
+  created_at          DateTime                   @default(now())
   created_by          String
   last_login_at       DateTime?
   checklist_template  ChecklistTemplate?
@@ -35,6 +35,7 @@ model WeddingPlanner {
   weddings            Wedding[]
   provider_categories ProviderCategory[]
   providers           Provider[]
+  message_templates   PlannerMessageTemplate[]
 
   @@index([enabled])
   @@map("wedding_planners")
@@ -167,6 +168,41 @@ model MessageTemplate {
   @@index([wedding_id])
   @@index([type])
   @@map("message_templates")
+}
+
+model PlannerMessageTemplate {
+  id                 String          @id @default(uuid())
+  planner_id         String
+  type               TemplateType
+  language           Language
+  channel            Channel
+  subject            String
+  body               String
+  image_url          String?
+  content_template_id String?        // Twilio Content Template SID for WhatsApp
+  created_at         DateTime        @default(now())
+  updated_at         DateTime        @updatedAt
+  planner            WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+
+  @@unique([planner_id, type, language, channel])
+  @@index([planner_id])
+  @@index([type])
+  @@map("planner_message_templates")
+}
+
+model MasterMessageTemplate {
+  id                 String       @id @default(uuid())
+  type               TemplateType
+  language           Language
+  channel            Channel
+  subject            String
+  body               String
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+
+  @@unique([type, language, channel])
+  @@index([type])
+  @@map("master_message_templates")
 }
 
 model InvitationTemplate {

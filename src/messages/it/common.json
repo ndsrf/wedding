@@ -316,6 +316,8 @@
       "checklistTemplateSubtitle": "Gestisci i modelli di attività per i tuoi matrimoni",
       "providers": "Fornitori",
       "providersSubtitle": "Gestisci la tua libreria di fornitori",
+      "templates": "Modelli Predefiniti",
+      "templatesSubtitle": "Personalizza i modelli di messaggio per tutti i matrimoni",
       "noWeddings": "Ancora nessun matrimonio",
       "noWeddingsSubtitle": "Inizia creando il tuo primo matrimonio."
     },

@@ -316,6 +316,8 @@
       "checklistTemplateSubtitle": "Aufgabenvorlagen für Ihre Hochzeiten verwalten",
       "providers": "Dienstleister",
       "providersSubtitle": "Verwalten Sie Ihre Dienstleister-Bibliothek",
+      "templates": "Standardvorlagen",
+      "templatesSubtitle": "Nachrichtenvorlagen für alle Hochzeiten anpassen",
       "noWeddings": "Noch keine Hochzeiten",
       "noWeddingsSubtitle": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit."
     },

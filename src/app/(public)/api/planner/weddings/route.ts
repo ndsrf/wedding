@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import { seedTemplatesForWedding } from '@/lib/templates/seed';
+import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
 import type {
   APIResponse,
@@ -351,9 +351,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Seed default message templates for the new wedding
+    // Copy planner's default templates to the new wedding
     try {
-      await seedTemplatesForWedding(wedding.id);
+      await seedWeddingTemplatesFromPlanner(wedding.id, user.planner_id);
     } catch (error) {
       console.error('Failed to seed templates for wedding:', error);
       // Don't fail the whole operation if template seeding fails
