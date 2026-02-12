@@ -26,6 +26,7 @@ interface GuestTimelineModalProps {
   familyId: string | null;
   familyName: string | null;
   onClose: () => void;
+  apiBase?: string;
 }
 
 const getEventIcon = (eventType: EventType | 'GUEST_CREATED'): string => {
@@ -86,6 +87,7 @@ export function GuestTimelineModal({
   familyId,
   familyName,
   onClose,
+  apiBase = '/api/admin',
 }: GuestTimelineModalProps) {
   const t = useTranslations();
   const [events, setEvents] = useState<TrackingEventWithFamily[]>([]);
@@ -99,7 +101,7 @@ export function GuestTimelineModal({
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/guests/${familyId}/timeline`);
+      const response = await fetch(`${apiBase}/guests/${familyId}/timeline`);
       if (!response.ok) {
         throw new Error('Failed to fetch timeline');
       }
@@ -112,7 +114,7 @@ export function GuestTimelineModal({
     } finally {
       setLoading(false);
     }
-  }, [familyId]);
+  }, [familyId, apiBase]);
 
   useEffect(() => {
     if (isOpen && familyId) {

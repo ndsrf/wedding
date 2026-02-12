@@ -13,34 +13,19 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import type { Language } from '@prisma/client';
+import type { Language, PlannerMessageTemplate, MessageTemplate, TemplateType, Channel } from '@prisma/client';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
 import { getAvailablePlaceholders } from '@/lib/templates';
 
-type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE';
-type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
-
-// Planner template type (similar to MessageTemplate but for planner)
-interface PlannerTemplate {
-  id: string;
-  planner_id: string;
-  type: string;
-  language: string;
-  channel: string;
-  subject: string;
-  body: string;
-  image_url?: string | null;
-  content_template_id?: string | null;
-  created_at: Date;
-  updated_at: Date;
-}
+type TemplateTypeTab = TemplateType;
+type TemplateChannel = Channel;
 
 export default function PlannerTemplatesPage() {
   const router = useRouter();
   const { status } = useSession();
   const t = useTranslations('admin.templates');
   const commonT = useTranslations('common');
-  const [templates, setTemplates] = useState<PlannerTemplate[]>([]);
+  const [templates, setTemplates] = useState<PlannerMessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TemplateTypeTab>('INVITATION');
@@ -246,7 +231,8 @@ export default function PlannerTemplatesPage() {
                   ...currentTemplate,
                   wedding_id: '', // Not used in planner context
                   content_template_id: currentTemplate.content_template_id || null,
-                } as any}
+                  image_url: currentTemplate.image_url || null,
+                } as MessageTemplate}
                 channel={selectedChannel}
                 onSave={async (subject, body, contentTemplateId) => {
                   try {

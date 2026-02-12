@@ -7,9 +7,10 @@ import type { Table } from '@/types/models';
 interface SeatingConfigProps {
   tables: Table[];
   onUpdate: () => void;
+  apiBase?: string;
 }
 
-export function SeatingConfig({ tables, onUpdate }: SeatingConfigProps) {
+export function SeatingConfig({ tables, onUpdate, apiBase = '/api/admin' }: SeatingConfigProps) {
   const t = useTranslations();
   const [localTables, setLocalTables] = useState<Partial<Table>[]>(
     tables.length > 0 ? tables : [{ number: 1, capacity: 10 }]
@@ -39,7 +40,7 @@ export function SeatingConfig({ tables, onUpdate }: SeatingConfigProps) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch('/api/admin/seating/tables', {
+      const response = await fetch(`${apiBase}/seating/tables`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

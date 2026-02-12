@@ -8,9 +8,10 @@ import type { SeatingPlanData } from '@/types/api';
 interface SeatingAssignmentProps {
   data: SeatingPlanData;
   onUpdate: () => void;
+  apiBase?: string;
 }
 
-export function SeatingAssignment({ data, onUpdate }: SeatingAssignmentProps) {
+export function SeatingAssignment({ data, onUpdate, apiBase = '/api/admin' }: SeatingAssignmentProps) {
   const t = useTranslations();
   const [search, setSearch] = useState('');
   const [assigning, setAssigning] = useState(false);
@@ -37,7 +38,7 @@ export function SeatingAssignment({ data, onUpdate }: SeatingAssignmentProps) {
   const handleAssign = async (guestId: string, tableId: string | null) => {
     setAssigning(true);
     try {
-      const response = await fetch('/api/admin/seating', {
+      const response = await fetch(`${apiBase}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,7 +62,7 @@ export function SeatingAssignment({ data, onUpdate }: SeatingAssignmentProps) {
 
     setAssigning(true);
     try {
-      const response = await fetch('/api/admin/seating', {
+      const response = await fetch(`${apiBase}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -88,7 +89,7 @@ export function SeatingAssignment({ data, onUpdate }: SeatingAssignmentProps) {
 
     setAssigning(true);
     try {
-      const response = await fetch('/api/admin/seating', {
+      const response = await fetch(`${apiBase}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,7 +112,7 @@ export function SeatingAssignment({ data, onUpdate }: SeatingAssignmentProps) {
     
     setRandomAssigning(true);
     try {
-      const response = await fetch('/api/admin/seating/random', {
+      const response = await fetch(`${apiBase}/random`, {
         method: 'POST',
       });
       const result = await response.json();
@@ -144,6 +145,7 @@ export function SeatingAssignment({ data, onUpdate }: SeatingAssignmentProps) {
           members={splittingFamily.members}
           onClose={() => setSplittingFamily(null)}
           onUpdate={onUpdate}
+          apiBase={apiBase}
         />
       )}
       <div className="flex justify-end">

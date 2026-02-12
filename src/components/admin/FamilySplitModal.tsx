@@ -10,6 +10,7 @@ interface FamilySplitModalProps {
   members: FamilyMember[];
   onClose: () => void;
   onUpdate: () => void;
+  apiBase?: string;
 }
 
 export function FamilySplitModal({
@@ -18,6 +19,7 @@ export function FamilySplitModal({
   members,
   onClose,
   onUpdate,
+  apiBase = '/api/admin',
 }: FamilySplitModalProps) {
   const t = useTranslations();
   const [saving, setSaving] = useState(false);
@@ -46,7 +48,7 @@ export function FamilySplitModal({
           .map(([id]) => id),
       }));
 
-      const response = await fetch('/api/admin/seating/split', {
+      const response = await fetch(`${apiBase}/split`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import type { ImageFile } from '@/types/invitation-template';
 
@@ -8,6 +8,7 @@ interface ImagePickerModalProps {
   onClose: () => void;
   onSelectImage: (url: string) => void;
   requireAspectRatio?: boolean; // If true, validates aspect ratio on selection (for image blocks)
+  apiBase?: string;
 }
 
 /**
@@ -21,22 +22,22 @@ interface ImagePickerModalProps {
  *
  * @component
  */
-export function ImagePickerModal({ onClose, onSelectImage, requireAspectRatio = false }: ImagePickerModalProps) {
+export function ImagePickerModal({
+  onClose,
+  onSelectImage,
+  requireAspectRatio = false,
+  apiBase = '/api/admin',
+}: ImagePickerModalProps) {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load images on mount
-  useEffect(() => {
-    loadImages();
-  }, []);
-
-  const loadImages = async () => {
+  const loadImages = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/admin/invitation-template/images');
+      const res = await fetch(`${apiBase}/invitation-template/images`);
       if (!res.ok) throw new Error('Failed to load images');
       const data = await res.json();
       setImages(data);
@@ -45,7 +46,12 @@ export function ImagePickerModal({ onClose, onSelectImage, requireAspectRatio = 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [apiBase]);
+
+  // Load images on mount
+  useEffect(() => {
+    loadImages();
+  }, [loadImages]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
@@ -56,7 +62,7 @@ export function ImagePickerModal({ onClose, onSelectImage, requireAspectRatio = 
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('/api/admin/invitation-template/images', {
+      const res = await fetch(`${apiBase}/invitation-template/images`, {
         method: 'POST',
         body: formData,
       });

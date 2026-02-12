@@ -26,6 +26,7 @@ interface ReminderModalProps {
   loading?: boolean;
   weddingGiftIban?: string | null;
   mode?: 'reminder' | 'save_the_date';
+  apiBase?: string;
 }
 
 export function ReminderModal({
@@ -36,6 +37,7 @@ export function ReminderModal({
   loading,
   weddingGiftIban,
   mode = 'reminder',
+  apiBase = '/api/admin',
 }: ReminderModalProps) {
   const t = useTranslations();
   const [selectedChannel, setSelectedChannel] = useState<Channel | 'PREFERRED'>('PREFERRED');
@@ -51,7 +53,7 @@ export function ReminderModal({
   const validateChannel = async () => {
     setError(null);
     try {
-      const response = await fetch('/api/admin/reminders/validate', {
+      const response = await fetch(`${apiBase}/reminders/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

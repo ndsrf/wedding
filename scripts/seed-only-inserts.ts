@@ -28,11 +28,11 @@ async function main() {
 
   // Remove the CREATE TABLE and extension statements
   const cleanedSQL = seedStatements
-    .replace(/CREATE EXTENSION[^;]+;/gs, '')
-    .replace(/CREATE TABLE[^;]+;/gs, '')
-    .replace(/CREATE UNIQUE INDEX[^;]+;/gs, '')
-    .replace(/CREATE INDEX[^;]+;/gs, '')
-    .replace(/ALTER TABLE[^;]+;/gs, '')
+    .replace(/CREATE EXTENSION[^;]+;/g, '')
+    .replace(/CREATE TABLE[^;]+;/g, '')
+    .replace(/CREATE UNIQUE INDEX[^;]+;/g, '')
+    .replace(/CREATE INDEX[^;]+;/g, '')
+    .replace(/ALTER TABLE[^;]+;/g, '')
     .replace(/uuid_generate_v4\(\)/g, 'gen_random_uuid()'); // Use built-in function
 
   console.log('Executing seed statements...');

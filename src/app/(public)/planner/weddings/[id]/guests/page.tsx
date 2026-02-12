@@ -1,0 +1,1067 @@
+/**
+ * Wedding Planner - Guest Management Page
+ *
+ * Page for managing guests with table, filters, and import/export
+ */
+
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { useSearchParams, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { GuestTable } from '@/components/admin/GuestTable';
+import { GuestFilters } from '@/components/admin/GuestFilters';
+import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
+import { GuestFormModal } from '@/components/admin/GuestFormModal';
+import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
+import { ReminderModal } from '@/components/admin/ReminderModal';
+import { GuestTimelineModal } from '@/components/admin/GuestTimelineModal';
+import { BulkEditModal, type BulkEditUpdates } from '@/components/admin/BulkEditModal';
+import type { FamilyWithMembers, GiftStatus, Language, Channel } from '@/types/models';
+import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
+
+interface ReminderFamily {
+  id: string;
+  name: string;
+  preferred_language: Language;
+  channel_preference: Channel | null;
+}
+
+interface GuestWithStatus extends FamilyWithMembers {
+  rsvp_status: string;
+  attending_count: number;
+  total_members: number;
+  payment_status: GiftStatus | null;
+  invitation_sent: boolean;
+}
+
+interface GuestAddition {
+  id: string;
+  family_id: string;
+  name: string;
+  type: 'ADULT' | 'CHILD' | 'INFANT';
+  attending: boolean | null;
+  age: number | null;
+  dietary_restrictions: string | null;
+  accessibility_needs: string | null;
+  added_by_guest: boolean;
+  created_at: Date;
+  family_name: string;
+  is_new: boolean;
+}
+
+interface Filters {
+  rsvp_status?: string;
+  attendance?: string;
+  channel?: string;
+  payment_status?: string;
+  invited_by_admin_id?: string;
+  search?: string;
+}
+
+interface WeddingQuestionConfig {
+  save_the_date_enabled: boolean;
+  transportation_question_enabled: boolean;
+  transportation_question_text: string | null;
+  extra_question_1_enabled: boolean;
+  extra_question_1_text: string | null;
+  extra_question_2_enabled: boolean;
+  extra_question_2_text: string | null;
+  extra_question_3_enabled: boolean;
+  extra_question_3_text: string | null;
+  extra_info_1_enabled: boolean;
+  extra_info_1_label: string | null;
+  extra_info_2_enabled: boolean;
+  extra_info_2_label: string | null;
+  extra_info_3_enabled: boolean;
+  extra_info_3_label: string | null;
+}
+
+export default function GuestsPage() {
+  const t = useTranslations();
+  const params = useParams();
+  const weddingId = params.id as string;
+  const isReadOnly = false; // Planners can always edit weddings they manage
+  const searchParams = useSearchParams();
+  const [guests, setGuests] = useState<GuestWithStatus[]>([]);
+  const [guestAdditions, setGuestAdditions] = useState<GuestAddition[]>([]);
+  const [guestAdditionsEnabled, setGuestAdditionsEnabled] = useState(false);
+  const [filters, setFilters] = useState<Filters>({});
+  const [loading, setLoading] = useState(true);
+  const [additionsLoading, setAdditionsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [activeTab, setActiveTab] = useState<'guests' | 'additions'>('guests');
+  const [weddingConfig, setWeddingConfig] = useState<WeddingQuestionConfig | null>(null);
+  const [weddingGiftIban, setWeddingGiftIban] = useState<string | null>(null);
+  const [admins, setAdmins] = useState<Array<{ id: string; name: string; email: string }>>([]);
+
+  // Modal states
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
+  const [selectedGuest, setSelectedGuest] = useState<GuestWithStatus | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [guestToDelete, setGuestToDelete] = useState<GuestWithStatus | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+
+  // Reminder modal state
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [reminderFamily, setReminderFamily] = useState<ReminderFamily | null>(null);
+  const [reminderLoading, setReminderLoading] = useState(false);
+  const [reminderMode, setReminderMode] = useState<'reminder' | 'save_the_date'>('reminder');
+
+  // Timeline modal state
+  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
+  const [selectedTimelineFamilyId, setSelectedTimelineFamilyId] = useState<string | null>(null);
+  const [selectedTimelineFamilyName, setSelectedTimelineFamilyName] = useState<string | null>(null);
+
+  // Bulk reminder state
+  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
+
+  const fetchGuests = useCallback(async () => {
+    setLoading(true);
+    try {
+      const qParams = new URLSearchParams();
+      qParams.set('page', page.toString());
+      if (filters.rsvp_status) qParams.set('rsvp_status', filters.rsvp_status);
+      if (filters.attendance) qParams.set('attendance', filters.attendance);
+      if (filters.channel) qParams.set('channel', filters.channel);
+      if (filters.payment_status) qParams.set('payment_status', filters.payment_status);
+      if (filters.invited_by_admin_id) qParams.set('invited_by_admin_id', filters.invited_by_admin_id);
+      if (filters.search) qParams.set('search', filters.search);
+
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guests?${qParams.toString()}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setGuests(data.data.items);
+        setTotalPages(data.data.pagination.totalPages);
+      }
+    } catch (error) {
+      console.error('Error fetching guests:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [weddingId, page, filters]);
+
+  const fetchGuestAdditions = useCallback(async () => {
+    setAdditionsLoading(true);
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guest-additions`);
+      // If endpoint doesn't exist yet, it might return 404
+      if (!response.ok) {
+        setGuestAdditions([]);
+        setGuestAdditionsEnabled(false);
+        return;
+      }
+      const data = await response.json();
+
+      if (data.success) {
+        setGuestAdditions(data.data);
+        setGuestAdditionsEnabled(data.meta?.feature_enabled ?? true);
+      }
+    } catch (error) {
+      console.error('Error fetching guest additions:', error);
+      setGuestAdditions([]);
+      setGuestAdditionsEnabled(false);
+    } finally {
+      setAdditionsLoading(false);
+    }
+  }, [weddingId]);
+
+  const fetchWeddingConfig = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setWeddingConfig({
+          save_the_date_enabled: data.data.save_the_date_enabled || false,
+          transportation_question_enabled: data.data.transportation_question_enabled,
+          transportation_question_text: data.data.transportation_question_text,
+          extra_question_1_enabled: data.data.extra_question_1_enabled,
+          extra_question_1_text: data.data.extra_question_1_text,
+          extra_question_2_enabled: data.data.extra_question_2_enabled,
+          extra_question_2_text: data.data.extra_question_2_text,
+          extra_question_3_enabled: data.data.extra_question_3_enabled,
+          extra_question_3_text: data.data.extra_question_3_text,
+          extra_info_1_enabled: data.data.extra_info_1_enabled,
+          extra_info_1_label: data.data.extra_info_1_label,
+          extra_info_2_enabled: data.data.extra_info_2_enabled,
+          extra_info_2_label: data.data.extra_info_2_label,
+          extra_info_3_enabled: data.data.extra_info_3_enabled,
+          extra_info_3_label: data.data.extra_info_3_label,
+        });
+        setWeddingGiftIban(data.data.gift_iban || null);
+      }
+    } catch (error) {
+      console.error('Error fetching wedding config:', error);
+    }
+  }, [weddingId]);
+
+  const fetchAdmins = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/admins`);
+      const data = await response.json();
+      if (data.success) {
+        setAdmins(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching admins:', error);
+    }
+  }, [weddingId]);
+
+  // Initialize filters from URL search params
+  useEffect(() => {
+    const search = searchParams.get('search');
+    if (search) {
+      setFilters((prev) => ({ ...prev, search }));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    fetchGuests();
+  }, [fetchGuests]);
+
+  useEffect(() => {
+    fetchGuestAdditions();
+  }, [fetchGuestAdditions]);
+
+  useEffect(() => {
+    fetchWeddingConfig();
+  }, [fetchWeddingConfig]);
+
+  useEffect(() => {
+    fetchAdmins();
+  }, [fetchAdmins]);
+
+  const handleExport = async () => {
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guests/export`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `guests-${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error exporting guests:', error);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guests/template`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'guest-import-template.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading template:', error);
+    }
+  };
+
+  const handleMarkAdditionReviewed = async (memberId: string) => {
+    try {
+      await fetch(`/api/planner/weddings/${weddingId}/guest-additions/${memberId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mark_reviewed: true }),
+      });
+      fetchGuestAdditions();
+    } catch (error) {
+      console.error('Error marking addition reviewed:', error);
+    }
+  };
+
+  const newAdditionsCount = guestAdditions.filter((a) => a.is_new).length;
+
+  // Show notification
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  // Handle add guest
+  const handleAddGuest = () => {
+    setFormMode('add');
+    setSelectedGuest(null);
+    setIsFormModalOpen(true);
+  };
+
+  // Handle edit guest
+  const handleEditGuest = async (guestId: string) => {
+    try {
+      // Fetch full guest details with members
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guests/${guestId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setFormMode('edit');
+        setSelectedGuest(data.data);
+        setIsFormModalOpen(true);
+      } else {
+        showNotification('error', t('common.errors.generic'));
+      }
+    } catch (error) {
+      console.error('Error loading guest:', error);
+      showNotification('error', t('common.errors.generic'));
+    }
+  };
+
+  // Handle delete guest
+  const handleDeleteGuest = (guestId: string) => {
+    const guest = guests.find((g) => g.id === guestId);
+    if (guest) {
+      setGuestToDelete(guest);
+      setIsDeleteDialogOpen(true);
+    }
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    if (!guestToDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guests/${guestToDelete.id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('common.success.deleted'));
+        setIsDeleteDialogOpen(false);
+        setGuestToDelete(null);
+        fetchGuests();
+      } else {
+        showNotification('error', data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      console.error('Error deleting guest:', error);
+      showNotification('error', t('common.errors.generic'));
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Handle send reminder for a specific family
+  const handleSendReminder = (guestId: string) => {
+    const guest = guests.find((g) => g.id === guestId);
+    if (guest) {
+      setReminderFamily({
+        id: guest.id,
+        name: guest.name,
+        preferred_language: guest.preferred_language,
+        channel_preference: guest.channel_preference,
+      });
+      setReminderMode('reminder');
+      setIsReminderModalOpen(true);
+    }
+  };
+
+  // Handle view timeline
+  const handleViewTimeline = (guestId: string, guestName: string) => {
+    setSelectedTimelineFamilyId(guestId);
+    setSelectedTimelineFamilyName(guestName);
+    setIsTimelineModalOpen(true);
+  };
+
+  // Handle send save the date
+  const handleSendSaveTheDate = async (guestId: string) => {
+    const guest = guests.find((g) => g.id === guestId);
+    if (guest) {
+      setReminderFamily({
+        id: guest.id,
+        name: guest.name,
+        preferred_language: guest.preferred_language,
+        channel_preference: guest.channel_preference,
+      });
+      setReminderMode('save_the_date');
+      setIsReminderModalOpen(true);
+    }
+  };
+
+  // Send reminders for the selected family
+  const handleSendReminders = async (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => {
+    if (!reminderFamily) return;
+
+    setReminderLoading(true);
+    try {
+      const endpoint = reminderMode === 'save_the_date' ? `/api/planner/weddings/${weddingId}/save-the-date` : `/api/planner/weddings/${weddingId}/reminders`;
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel,
+          family_ids: validFamilyIds || [reminderFamily.id],
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        // Open wa.me links in new tabs when WhatsApp Links mode is active
+        if (data.data.wa_links && data.data.wa_links.length > 0) {
+          data.data.wa_links.forEach((item: { wa_link: string }) => {
+            window.open(item.wa_link, '_blank');
+          });
+        }
+        if (reminderMode === 'save_the_date') {
+          showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
+          fetchGuests(); // Refresh the guest list
+        } else {
+          showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
+        }
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setReminderLoading(false);
+    }
+  };
+
+  // Handle bulk reminder sending
+  const handleBulkReminderSend = async (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => {
+    setReminderLoading(true);
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/reminders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel,
+          family_ids: validFamilyIds || selectedGuestIds,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        // Open wa.me links in new tabs when WhatsApp Links mode is active
+        if (data.data.wa_links && data.data.wa_links.length > 0) {
+          data.data.wa_links.forEach((item: { wa_link: string }) => {
+            window.open(item.wa_link, '_blank');
+          });
+        }
+        showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
+        setSelectedGuestIds([]);
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setReminderLoading(false);
+    }
+  };
+
+  // Handle guest selection
+  const handleSelectGuest = (guestId: string, selected: boolean) => {
+    setSelectedGuestIds(prev =>
+      selected ? [...prev, guestId] : prev.filter(id => id !== guestId)
+    );
+  };
+
+  // Handle select all / unselect all
+  const handleSelectAll = (selected: boolean) => {
+    if (selected) {
+      const selectableIds = guests
+        .filter(g => g.rsvp_status !== 'submitted')
+        .map(g => g.id);
+      setSelectedGuestIds(selectableIds);
+    } else {
+      setSelectedGuestIds([]);
+    }
+  };
+
+  // Open bulk reminder modal
+  const handleOpenBulkReminderModal = () => {
+    setReminderFamily(null);
+    setReminderMode('reminder');
+    setIsReminderModalOpen(true);
+  };
+
+  // Handle bulk delete
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+
+  // Handle bulk edit
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+
+  const handleBulkEdit = async (updates: BulkEditUpdates) => {
+    if (selectedGuestIds.length === 0) return;
+
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guests/bulk-update`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ family_ids: selectedGuestIds, updates }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('admin.guests.bulkEdit.updateSuccess', { count: data.data.updated_families }));
+        setIsBulkEditModalOpen(false);
+        fetchGuests();
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      console.error('Error bulk updating guests:', error);
+      throw error;
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedGuestIds.length === 0) return;
+
+    setBulkDeleteLoading(true);
+    try {
+      const response = await fetch(`/api/planner/weddings/${weddingId}/guests/bulk-delete`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ family_ids: selectedGuestIds }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', t('admin.guests.deleteSuccess', { count: data.data.deleted_count }));
+        setIsBulkDeleteDialogOpen(false);
+        setSelectedGuestIds([]);
+        fetchGuests();
+      } else {
+        showNotification('error', data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      console.error('Error bulk deleting guests:', error);
+      showNotification('error', t('common.errors.generic'));
+    } finally {
+      setBulkDeleteLoading(false);
+    }
+  };
+
+  // Handle form submit
+  const handleFormSubmit = async (formData: {
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    whatsapp_number?: string | null;
+    channel_preference?: string | null;
+    preferred_language: string;
+    members: FamilyMemberFormData[];
+  }) => {
+    try {
+      const url =
+        formMode === 'add'
+          ? `/api/planner/weddings/${weddingId}/guests`
+          : `/api/planner/weddings/${weddingId}/guests/${selectedGuest?.id}`;
+      const method = formMode === 'add' ? 'POST' : 'PATCH';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification(
+          'success',
+          formMode === 'add' ? t('common.success.created') : t('common.success.updated')
+        );
+        setIsFormModalOpen(false);
+        setSelectedGuest(null);
+        fetchGuests();
+      } else {
+        throw new Error(data.error?.message || t('common.errors.generic'));
+      }
+    } catch (error) {
+      throw error; // Re-throw to let modal handle it
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center">
+              <Link href={`/planner/weddings/${weddingId}`} className="text-gray-600 hover:text-gray-900 mr-4">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{t('admin.guests.title')}</h1>
+                <p className="mt-1 text-sm text-gray-600">
+                  {guests.length} guests • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
+              <button
+                onClick={handleDownloadTemplate}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                {t('admin.guests.template')}
+              </button>
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                {t('common.buttons.export')}
+              </button>
+              {!isReadOnly && (
+                <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer text-center">
+                  {t('common.buttons.import')}
+                  <input
+                    type="file"
+                    accept=".xlsx"
+                    className="hidden"
+                    onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    try {
+                      const response = await fetch(`/api/planner/weddings/${weddingId}/guests/import`, {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      const data = await response.json();
+                      if (data.success) {
+                        showNotification(
+                          'success',
+                          t('admin.guests.importSuccess')
+                        );
+                        fetchGuests();
+                      } else {
+                        showNotification('error', data.error?.message || t('admin.guests.importError'));
+                      }
+                    } catch (error) {
+                      console.error('Import error:', error);
+                      showNotification('error', t('admin.guests.importError'));
+                    }
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              )}
+              {!isReadOnly && (
+                <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer text-center">
+                  {t('admin.guests.importVcf')}
+                  <input
+                    type="file"
+                    accept=".vcf"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      const formData = new FormData();
+                      formData.append('file', file);
+
+                      try {
+                        const response = await fetch(`/api/planner/weddings/${weddingId}/guests/import-vcf`, {
+                          method: 'POST',
+                          body: formData,
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                          showNotification(
+                            'success',
+                            `${data.data.familiesCreated} ${data.data.familiesCreated === 1 ? 'family' : 'families'} imported successfully`
+                          );
+                          fetchGuests();
+                        } else {
+                          showNotification('error', data.error?.message || 'VCF import failed');
+                        }
+                      } catch (error) {
+                        console.error('VCF import error:', error);
+                        showNotification('error', 'VCF import failed');
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              )}
+              {!isReadOnly && (
+                <button
+                  onClick={handleAddGuest}
+                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+                >
+                  {t('admin.guests.add')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('guests')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'guests'
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {t('admin.guests.list')}
+            </button>
+            <button
+              onClick={() => setActiveTab('additions')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
+                activeTab === 'additions'
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {t('admin.guestAdditions.title')}
+              {newAdditionsCount > 0 && (
+                <span className="ml-2 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
+                  {newAdditionsCount}
+                </span>
+              )}
+            </button>
+          </nav>
+        </div>
+
+        {activeTab === 'guests' ? (
+          <>
+            {/* Filters */}
+            <GuestFilters filters={filters} admins={admins} onFilterChange={setFilters} />
+
+            {/* Bulk Actions Section */}
+            {!isReadOnly && (
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-sm font-medium text-gray-900">
+                      {t('admin.guests.bulkActions')}
+                    </h3>
+                    {selectedGuestIds.length > 0 && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {selectedGuestIds.length} {t('admin.guests.selected')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={() => setIsBulkDeleteDialogOpen(true)}
+                      disabled={selectedGuestIds.length === 0}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('admin.guests.deleteSelected')}
+                    </button>
+                    <button
+                      onClick={() => setIsBulkEditModalOpen(true)}
+                      disabled={selectedGuestIds.length === 0}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('admin.guests.bulkEdit.button')}
+                    </button>
+                    <button
+                      onClick={handleOpenBulkReminderModal}
+                      disabled={selectedGuestIds.length === 0}
+                      className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('admin.reminders.send')}
+                    </button>
+                  </div>
+                </div>
+                {selectedGuestIds.length === 0 && (
+                  <p className="mt-2 text-xs text-gray-500">
+                    {t('admin.guests.selectGuestsHint')}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Guest Table */}
+            <GuestTable
+              guests={guests}
+              loading={loading}
+              onEdit={handleEditGuest}
+              onDelete={handleDeleteGuest}
+              onSendReminder={handleSendReminder}
+              onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
+              onViewTimeline={handleViewTimeline}
+              showCheckboxes={!isReadOnly}
+              selectedGuestIds={selectedGuestIds}
+              onSelectGuest={handleSelectGuest}
+              onSelectAll={handleSelectAll}
+            />
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex justify-center">
+                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {t('common.buttons.previous')}
+                  </button>
+                  <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {t('common.buttons.next')}
+                  </button>
+                </nav>
+              </div>
+            )}
+          </>
+        ) : (
+          <GuestAdditionsReview
+            additions={guestAdditions}
+            featureEnabled={guestAdditionsEnabled}
+            onMarkReviewed={handleMarkAdditionReviewed}
+            loading={additionsLoading}
+          />
+        )}
+      </main>
+
+      {/* Guest Form Modal */}
+      <GuestFormModal
+        isOpen={isFormModalOpen}
+        mode={formMode}
+        admins={admins}
+        initialData={
+          selectedGuest
+            ? {
+                name: selectedGuest.name,
+                email: selectedGuest.email,
+                phone: selectedGuest.phone,
+                whatsapp_number: selectedGuest.whatsapp_number,
+                channel_preference: selectedGuest.channel_preference,
+                preferred_language: selectedGuest.preferred_language,
+                invited_by_admin_id: selectedGuest.invited_by_admin_id || null,
+                private_notes: selectedGuest.private_notes || null,
+                members: selectedGuest.members.map((m) => ({
+                  id: m.id,
+                  name: m.name,
+                  type: m.type,
+                  age: m.age,
+                  attending: m.attending,
+                  dietary_restrictions: m.dietary_restrictions,
+                  accessibility_needs: m.accessibility_needs,
+                })),
+                // RSVP Question Answers
+                transportation_answer: selectedGuest.transportation_answer,
+                extra_question_1_answer: selectedGuest.extra_question_1_answer,
+                extra_question_2_answer: selectedGuest.extra_question_2_answer,
+                extra_question_3_answer: selectedGuest.extra_question_3_answer,
+                extra_info_1_value: selectedGuest.extra_info_1_value,
+                extra_info_2_value: selectedGuest.extra_info_2_value,
+                extra_info_3_value: selectedGuest.extra_info_3_value,
+              }
+            : undefined
+        }
+        weddingConfig={weddingConfig || undefined}
+        onSubmit={handleFormSubmit}
+        onCancel={() => {
+          setIsFormModalOpen(false);
+          setSelectedGuest(null);
+        }}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <GuestDeleteDialog
+        isOpen={isDeleteDialogOpen}
+        familyName={guestToDelete?.name || ''}
+        memberCount={guestToDelete?.total_members || 0}
+        hasRsvp={guestToDelete?.rsvp_status === 'submitted'}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setIsDeleteDialogOpen(false);
+          setGuestToDelete(null);
+        }}
+        loading={deleteLoading}
+      />
+
+      {/* Reminder Modal */}
+      <ReminderModal
+        isOpen={isReminderModalOpen}
+        onClose={() => {
+          setIsReminderModalOpen(false);
+          setReminderFamily(null);
+        }}
+        eligibleFamilies={
+          reminderFamily
+            ? [reminderFamily]
+            : guests
+                .filter(g => selectedGuestIds.includes(g.id))
+                .map(g => ({
+                  id: g.id,
+                  name: g.name,
+                  preferred_language: g.preferred_language,
+                  channel_preference: g.channel_preference,
+                }))
+        }
+        onSendReminders={reminderFamily ? handleSendReminders : handleBulkReminderSend}
+        loading={reminderLoading}
+        weddingGiftIban={weddingGiftIban}
+        mode={reminderMode}
+        apiBase={`/api/planner/weddings/${weddingId}`}
+      />
+
+      {/* Timeline Modal */}
+      <GuestTimelineModal
+        isOpen={isTimelineModalOpen}
+        familyId={selectedTimelineFamilyId}
+        familyName={selectedTimelineFamilyName}
+        onClose={() => {
+          setIsTimelineModalOpen(false);
+          setSelectedTimelineFamilyId(null);
+          setSelectedTimelineFamilyName(null);
+        }}
+        apiBase={`/api/planner/weddings/${weddingId}`}
+      />
+
+      {/* Bulk Edit Modal */}
+      <BulkEditModal
+        isOpen={isBulkEditModalOpen}
+        onClose={() => setIsBulkEditModalOpen(false)}
+        selectedCount={selectedGuestIds.length}
+        admins={admins}
+        onSave={handleBulkEdit}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      {isBulkDeleteDialogOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => !bulkDeleteLoading && setIsBulkDeleteDialogOpen(false)} />
+
+            <span className="hidden sm:inline-block sm:h-screen sm:align-middle">&#8203;</span>
+
+            <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">
+                      {t('admin.guests.bulkDeleteTitle')}
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        {t('admin.guests.bulkDeleteConfirm', { count: selectedGuestIds.length })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <button
+                  type="button"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteLoading}
+                  className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteLoading ? t('common.buttons.deleting') : t('common.buttons.delete')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsBulkDeleteDialogOpen(false)}
+                  disabled={bulkDeleteLoading}
+                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('common.buttons.cancel')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+          <div
+            className={`rounded-lg shadow-lg p-4 ${
+              notification.type === 'success'
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}
+          >
+            <div className="flex items-start">
+              {notification.type === 'success' ? (
+                <svg
+                  className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+              <p
+                className={`text-sm ${
+                  notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+                }`}
+              >
+                {notification.message}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

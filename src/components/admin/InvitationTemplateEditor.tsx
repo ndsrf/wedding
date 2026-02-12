@@ -37,6 +37,8 @@ interface InvitationTemplateEditorProps {
     location: string;
   };
   onSave: (design: TemplateDesign) => Promise<void>;
+  apiBase?: string;
+  previewUrl?: string;
 }
 
 /**
@@ -52,6 +54,8 @@ export function InvitationTemplateEditor({
   template,
   weddingData,
   onSave,
+  apiBase = '/api/admin',
+  previewUrl = '/admin/invitation-builder/preview',
 }: InvitationTemplateEditorProps) {
   const t = useTranslations('admin.invitationBuilder');
   const [design, setDesign] = useState<TemplateDesign>(template.design);
@@ -285,12 +289,12 @@ export function InvitationTemplateEditor({
       sessionStorage.setItem('invitation-preview-data', JSON.stringify(previewData));
 
       // Open preview in new window
-      window.open('/admin/invitation-builder/preview', '_blank', 'width=1200,height=800');
+      window.open(previewUrl, '_blank', 'width=1200,height=800');
     } catch (err) {
       console.error('Failed to open preview:', err);
       alert('Failed to open preview. Please try again.');
     }
-  }, [design, weddingData, activeLanguage]);
+  }, [design, weddingData, activeLanguage, previewUrl]);
 
   // Check if location and countdown blocks exist
   const hasLocation = design.blocks.some((b) => b.type === 'location');
@@ -634,6 +638,7 @@ export function InvitationTemplateEditor({
           }}
           onSelectImage={handleSelectImage}
           requireAspectRatio={false}
+          apiBase={apiBase}
         />
       )}
 
@@ -643,6 +648,7 @@ export function InvitationTemplateEditor({
           onClose={() => setIsPaperBackgroundModalOpen(false)}
           onSelectImage={handleSelectPaperBackground}
           requireAspectRatio={false}
+          apiBase={apiBase}
         />
       )}
     </div>
