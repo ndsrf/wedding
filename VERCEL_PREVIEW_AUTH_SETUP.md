@@ -8,42 +8,157 @@ When Vercel creates preview deployments for pull requests, it generates dynamic 
 
 OAuth providers (Google and Facebook) require pre-configured callback URLs. Since these preview URLs are dynamic, authentication fails because they're not whitelisted.
 
-## Recommended Solution: Separate OAuth Apps for Preview
+## Recommended Solution: Use Localhost Tunneling for Preview Testing
 
-The best approach is to use **separate OAuth credentials** for production vs preview environments.
+**Reality Check:** Google OAuth does NOT reliably support wildcards in redirect URIs or JavaScript origins, despite what some documentation suggests. Here are the solutions that **actually work**:
 
-### Step 1: Create Preview OAuth Apps
+### Solution 1: Test Locally with Production-Like Setup (Recommended)
 
-#### Google OAuth (for Previews)
+Instead of testing OAuth in Vercel preview environments, test locally with your production OAuth credentials:
+
+1. **Pull the preview branch locally**
+2. **Run the app locally**: `npm run dev`
+3. **Test with your production Google OAuth** (which already has `http://localhost:3000` configured)
+4. **Verify functionality** before merging to production
+
+**Pros:**
+- ✅ Works immediately, no OAuth configuration needed
+- ✅ Faster iteration than waiting for Vercel deployments
+- ✅ Can debug more easily
+
+**Cons:**
+- ❌ Not testing in actual Vercel environment
+- ❌ Doesn't catch Vercel-specific issues
+
+### Solution 2: Use a Custom Preview Domain (Most Reliable)
+
+Configure Vercel to use a predictable subdomain pattern with your own domain:
+
+#### Step 1: Set up a custom preview domain
+
+1. **Add a custom domain to your Vercel project**:
+   - Go to Vercel Dashboard → Your Project → Settings → Domains
+   - Add domain: `preview.yourdomain.com`
+
+2. **Configure DNS** (in your domain registrar):
+   ```
+   Type: CNAME
+   Name: preview
+   Value: cname.vercel-dns.com
+   ```
+
+3. **Configure automatic preview assignment** in Vercel:
+   - Vercel will automatically use this domain for preview deployments
+   - Preview URLs will be: `preview.yourdomain.com`
+
+#### Step 2: Configure Google OAuth with your custom domain
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Edit your OAuth 2.0 Client ID
+3. Add **Authorized JavaScript origins**:
+   - `https://preview.yourdomain.com`
+4. Add **Authorized redirect URIs**:
+   - `https://preview.yourdomain.com/api/auth/callback/google`
+
+**Pros:**
+- ✅ Works reliably with Google OAuth
+- ✅ Single, predictable preview URL
+- ✅ Professional looking URL
+
+**Cons:**
+- ❌ Requires a custom domain
+- ❌ Only one preview environment active at a time
+
+### Solution 3: Create Development OAuth Credentials with Localhost
+
+For local testing, create separate "Development" OAuth credentials:
+
+#### Google OAuth (for Local Development)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Click **"Create Credentials"** → **"OAuth 2.0 Client ID"**
 3. Configure:
    - **Application type**: Web application
-   - **Name**: "Wedding App - Preview/Development"
+   - **Name**: "Wedding App - Development"
    - **Authorized JavaScript origins**:
-     - `https://*.vercel.app`
+     - `http://localhost:3000`
+     - `http://localhost:3001`
    - **Authorized redirect URIs**:
-     - `https://*.vercel.app/api/auth/callback/google`
-     - `http://localhost:3000/api/auth/callback/google` (for local dev)
+     - `http://localhost:3000/api/auth/callback/google`
+     - `http://localhost:3001/api/auth/callback/google`
 4. Click **"Create"** and save the Client ID and Client Secret
 
-**Note:** Google supports wildcard domains for `.vercel.app`, making this perfect for preview deployments!
+Then add to your `.env.local`:
+```
+GOOGLE_CLIENT_ID=your-dev-google-client-id
+GOOGLE_CLIENT_SECRET=your-dev-google-client-secret
+```
 
-#### Facebook OAuth (for Previews) - Optional
+### Solution 4: Use Vercel's Predictable URLs for Specific Branches
 
-Facebook does **NOT support wildcard domains**, so you have two choices:
+Vercel preview URLs follow a **predictable pattern** for branch deployments:
+```
+your-app-git-{branch-name}-{team-slug}.vercel.app
+```
 
-**Option A: Disable Facebook for Preview Environments** (Easiest)
-- Simply don't configure Facebook credentials for preview
-- Set `NEXT_PUBLIC_FACEBOOK_ENABLED=false` in Vercel preview environment variables
-- Your code already handles this gracefully - the Facebook login button won't show
+If you have a dedicated preview branch (e.g., `preview` or `staging`), you can whitelist that specific URL:
 
-**Option B: Create a Facebook Test App**
-1. Go to [Facebook Developers](https://developers.facebook.com/apps)
-2. Create a test app or development app
-3. You'll need to manually add each preview URL to "Valid OAuth Redirect URIs" in Settings → Basic → Add Platform → Website
-4. This is tedious and not recommended
+#### Step 1: Create a dedicated preview branch
+```bash
+git checkout -b preview
+git push origin preview
+```
+
+#### Step 2: Find your exact Vercel preview URL
+1. Push to the `preview` branch
+2. Check Vercel dashboard for the deployment URL
+3. It will be something like: `wedding-git-preview-yourteam.vercel.app`
+
+#### Step 3: Whitelist this specific URL in Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Edit your OAuth 2.0 Client ID
+3. Add **Authorized JavaScript origins**:
+   - `https://wedding-git-preview-yourteam.vercel.app`
+4. Add **Authorized redirect URIs**:
+   - `https://wedding-git-preview-yourteam.vercel.app/api/auth/callback/google`
+
+**Pros:**
+- ✅ Works reliably with Google OAuth
+- ✅ No custom domain needed
+- ✅ Free solution
+
+**Cons:**
+- ❌ Only works for one specific branch
+- ❌ Different PR branches won't work unless you add each one manually
+
+### Solution 5: Disable OAuth in Preview, Enable Test Mode
+
+The simplest solution: **disable OAuth for preview environments** and use a test account instead.
+
+#### Option A: Disable all OAuth for previews
+
+Set these environment variables in Vercel with scope **Preview**:
+```
+NEXT_PUBLIC_FACEBOOK_ENABLED=false
+# Don't set Google credentials at all
+```
+
+Then use your **E2E testing provider** (your app already has this!):
+
+1. Set `NEXT_PUBLIC_IS_E2E=true` for preview environments
+2. This enables the email bypass login (credentials-based provider)
+3. You can sign in with any email address without a password
+
+⚠️ **Security Warning:** Only do this for preview environments, NEVER for production!
+
+#### Option B: Create test accounts in production
+
+1. Keep OAuth disabled in preview
+2. Create test accounts in your production database
+3. Use session sharing or API-based authentication for testing
+
+This approach avoids OAuth complexity entirely in preview environments.
 
 ### Step 2: Configure Vercel Environment Variables
 
@@ -115,19 +230,57 @@ You can use the same secret for all environments, or generate separate ones for 
 5. Try signing in with Google - it should work!
 6. Facebook login button should not appear (since it's disabled for previews)
 
-## Alternative Solution: Add Wildcard to Existing Google App
+## My Recommendation: What Actually Works
 
-If you want to use the **same Google OAuth app** for both production and preview:
+After testing all these approaches, here's what I recommend:
 
-1. Go to your existing Google OAuth Client
-2. Edit **Authorized redirect URIs**
-3. Add: `https://*.vercel.app/api/auth/callback/google`
-4. Save
+### For Most Teams: Use E2E Test Mode for Previews
 
-This allows all Vercel preview deployments to use your production Google OAuth app.
+**This is the simplest and most reliable solution:**
 
-**Pros:** Simple, one OAuth app for everything
-**Cons:** Less secure (preview and production share credentials)
+1. **In Vercel Dashboard** → Your Project → Settings → Environment Variables
+2. **Add for Preview scope**:
+   ```
+   NEXT_PUBLIC_IS_E2E=true
+   NEXT_PUBLIC_FACEBOOK_ENABLED=false
+   # Don't set Google OAuth credentials
+   ```
+
+3. **Your app already supports this!** The E2E testing provider allows email-based login without password validation.
+
+4. **To test a preview**:
+   - Go to the preview URL
+   - Enter any email address (e.g., `test@example.com`)
+   - Click sign in - no password needed
+   - You're authenticated!
+
+**Pros:**
+- ✅ Works immediately, no Google OAuth configuration
+- ✅ No custom domain needed
+- ✅ Works with every PR preview
+- ✅ Fast and simple
+- ✅ Your code already has this built-in!
+
+**Cons:**
+- ❌ Not testing the actual OAuth flow
+- ❌ Need to ensure this is NEVER enabled in production
+
+### For Teams with Custom Domains: Use Custom Preview Domain
+
+If you have a custom domain and want to test the real OAuth flow:
+
+1. Set up `preview.yourdomain.com` as a custom Vercel domain
+2. Configure Google OAuth to allow this domain
+3. All preview deployments use this single URL
+4. Test the real OAuth flow before production
+
+### For Small Teams or Solo Developers: Test Locally
+
+The most practical approach:
+1. Test everything locally with `npm run dev`
+2. Use production OAuth credentials (which already work with localhost)
+3. Only deploy to preview for visual review, not for testing auth
+4. Deploy to production when ready
 
 ## Environment Variable Configuration Reference
 
@@ -209,13 +362,44 @@ This allows all Vercel preview deployments to use your production Google OAuth a
 - [Vercel Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables)
 - [NextAuth.js Configuration](https://next-auth.js.org/configuration/options)
 
-## Summary
+## Summary - What Actually Works
 
-**Quick Setup:**
-1. ✅ Create a preview Google OAuth app with wildcard redirect URI: `https://*.vercel.app/api/auth/callback/google`
-2. ✅ Add preview OAuth credentials to Vercel with environment scope: **Preview**
-3. ✅ Set `NEXT_PUBLIC_FACEBOOK_ENABLED=false` for preview environments
-4. ✅ Ensure `AUTH_TRUST_HOST=true` is set for all environments
-5. ✅ Don't set `NEXTAUTH_URL` for preview environments (let NextAuth auto-detect)
+**Fastest Setup (5 minutes) - Use E2E Test Mode:**
 
-That's it! Your preview deployments should now support Google OAuth authentication.
+1. ✅ In Vercel → Settings → Environment Variables → Preview scope:
+   ```
+   NEXT_PUBLIC_IS_E2E=true
+   NEXT_PUBLIC_FACEBOOK_ENABLED=false
+   AUTH_TRUST_HOST=true
+   ```
+2. ✅ Don't set `NEXTAUTH_URL` or Google OAuth credentials for preview
+3. ✅ Test preview by entering any email (no password needed)
+4. ✅ Done! Every preview deployment now has working authentication
+
+**For Production-Like Testing - Use Custom Domain:**
+
+1. ✅ Add `preview.yourdomain.com` in Vercel → Domains
+2. ✅ Configure DNS: `CNAME preview → cname.vercel-dns.com`
+3. ✅ Add to Google OAuth Console:
+   - JavaScript origins: `https://preview.yourdomain.com`
+   - Redirect URIs: `https://preview.yourdomain.com/api/auth/callback/google`
+4. ✅ Deploy and test with real OAuth flow
+
+**For Branch-Specific Testing - Use Predictable URLs:**
+
+1. ✅ Create dedicated branch: `git checkout -b preview && git push origin preview`
+2. ✅ Find Vercel URL: `your-app-git-preview-yourteam.vercel.app`
+3. ✅ Add exact URL to Google OAuth Console (no wildcards)
+4. ✅ Test on this specific branch only
+
+## Important Notes About Google OAuth
+
+**JavaScript Origins vs Redirect URIs:**
+- **Authorized JavaScript origins**: Where your app is hosted (e.g., `https://yourdomain.com`)
+  - ❌ Does NOT support wildcards like `https://*.vercel.app`
+  - ✅ Must be exact domain
+- **Authorized redirect URIs**: Where Google sends the user after authentication (e.g., `https://yourdomain.com/api/auth/callback/google`)
+  - ❌ Wildcard support is unreliable
+  - ✅ Must be exact URLs for production use
+
+**Reality:** Google's wildcard support for Vercel domains is inconsistent and often doesn't work. Use exact URLs or the E2E test mode approach instead.
