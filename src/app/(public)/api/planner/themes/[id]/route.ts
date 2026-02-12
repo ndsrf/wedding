@@ -12,6 +12,9 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { validateThemeConfig } from '@/lib/theme/engine';
 import { isSystemTheme } from '@/lib/theme/presets';
+import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
+import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
+import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import type {
   APIResponse,
   UpdateThemeResponse,
@@ -245,6 +248,20 @@ export async function PATCH(
       where: { id },
       data: updateData,
     });
+
+    // If config was updated, re-render all weddings using this theme
+    if (config !== undefined) {
+      const affectedWeddings = await prisma.wedding.findMany({
+        where: { theme_id: id },
+        select: { id: true },
+      });
+
+      for (const wedding of affectedWeddings) {
+        await reRenderWeddingTemplates(wedding.id);
+        invalidateWeddingPageCache(wedding.id);
+        void revalidateWeddingRSVPPages(wedding.id);
+      }
+    }
 
     return NextResponse.json({
       success: true,

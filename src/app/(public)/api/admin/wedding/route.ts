@@ -11,6 +11,8 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { getAllSystemThemes } from '@/lib/theme/presets';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
+import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
+import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import type { ThemeConfig } from '@/types/theme';
 import type { Theme } from '@/types/models';
 import type {
@@ -338,6 +340,23 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const validatedData = updateWeddingConfigSchema.parse(body);
 
+    // Fetch current wedding to check for changes
+    const currentWedding = await prisma.wedding.findUnique({
+      where: { id: user.wedding_id },
+      select: { theme_id: true },
+    });
+
+    if (!currentWedding) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.NOT_FOUND,
+          message: 'Wedding not found',
+        },
+      };
+      return NextResponse.json(response, { status: 404 });
+    }
+
     // Build update data object
     const updateData: Record<string, unknown> = {
       updated_by: user.id,
@@ -434,7 +453,14 @@ export async function PATCH(request: NextRequest) {
       data: updateData,
     });
 
-    invalidateWeddingPageCache(user.wedding_id);
+    // If theme changed, re-render all invitation templates and invalidate caches
+    if (validatedData.theme_id !== undefined && validatedData.theme_id !== currentWedding.theme_id) {
+      await reRenderWeddingTemplates(user.wedding_id);
+      invalidateWeddingPageCache(user.wedding_id);
+      void revalidateWeddingRSVPPages(user.wedding_id);
+    } else {
+      invalidateWeddingPageCache(user.wedding_id);
+    }
 
     const response: UpdateWeddingConfigResponse = {
       success: true,

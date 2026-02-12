@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
+import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
+import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import type {
   APIResponse,
   GetWeddingResponse,
@@ -362,6 +365,13 @@ export async function PATCH(
       where: { id: weddingId },
       data: updateData,
     });
+
+    // If theme changed, re-render all invitation templates and invalidate caches
+    if (validatedData.theme_id !== undefined && validatedData.theme_id !== existingWedding.theme_id) {
+      await reRenderWeddingTemplates(weddingId);
+      invalidateWeddingPageCache(weddingId);
+      void revalidateWeddingRSVPPages(weddingId);
+    }
 
     const response: UpdateWeddingResponse = {
       success: true,
