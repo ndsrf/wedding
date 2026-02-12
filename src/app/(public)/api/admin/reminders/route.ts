@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
             const renderedBody = renderTemplate(template.body, variables);
 
             // Convert relative image URL to absolute URL for email clients
-            const absoluteImageUrl = toAbsoluteUrl(template.image_url, baseUrl);
+            const absoluteImageUrl = toAbsoluteUrl(template.image_url, baseUrl) ?? null;
             console.log('[REMINDER DEBUG] Absolute image URL:', absoluteImageUrl);
 
             result = await sendDynamicEmail(

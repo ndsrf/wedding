@@ -157,11 +157,11 @@ export function getFileExtension(mimeType: string): string {
  *
  * @param url - The URL to convert (can be relative or absolute)
  * @param baseUrl - The base URL to prepend if the URL is relative (default: process.env.APP_URL || 'http://localhost:3000')
- * @returns The absolute URL
+ * @returns The absolute URL, or undefined if input is null/undefined
  */
-export function toAbsoluteUrl(url: string | null | undefined, baseUrl?: string): string | null {
+export function toAbsoluteUrl(url: string | null | undefined, baseUrl?: string): string | undefined {
   if (!url) {
-    return null;
+    return undefined;
   }
 
   // If the URL is already absolute, return it as-is
