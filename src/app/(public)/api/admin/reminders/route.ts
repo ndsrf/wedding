@@ -27,6 +27,7 @@ import type { Channel } from '@prisma/client';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 import { buildWhatsAppLink } from '@/lib/notifications/whatsapp-links';
 import { getShortUrlPath } from '@/lib/short-url';
+import { toAbsoluteUrl } from '@/lib/images/processor';
 
 // Validation schema for send reminders request
 const sendRemindersSchema = z.object({
@@ -250,9 +251,7 @@ export async function POST(request: NextRequest) {
             const renderedBody = renderTemplate(template.body, variables);
 
             // Convert relative image URL to absolute URL for email clients
-            const absoluteImageUrl = template.image_url
-              ? `${baseUrl}${template.image_url}`
-              : null;
+            const absoluteImageUrl = toAbsoluteUrl(template.image_url, baseUrl) ?? null;
             console.log('[REMINDER DEBUG] Absolute image URL:', absoluteImageUrl);
 
             result = await sendDynamicEmail(
@@ -411,8 +410,8 @@ export async function POST(request: NextRequest) {
             console.log('[REMINDER DEBUG] LINKS mode – wa.me link generated for', family.name);
             result = { success: true };
           } else if (template) {
-            const absoluteImageUrl = template.image_url && targetChannel === 'WHATSAPP'
-              ? `${baseUrl}${template.image_url}`
+            const absoluteImageUrl = targetChannel === 'WHATSAPP'
+              ? toAbsoluteUrl(template.image_url, baseUrl)
               : undefined;
             result = await sendDynamicMessage(
               contactInfo,
