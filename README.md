@@ -527,6 +527,115 @@ When deploying to Vercel, the runtime environment is read-only, which prevents a
 
 3. **Prisma Client**: The `postinstall` hook in `package.json` will automatically run `prisma generate` during the Vercel build process.
 
+### Configuring Environment Variables for Preview vs Production
+
+When deploying to Vercel, you need to configure environment variables differently for **Production** and **Preview** environments to handle OAuth callbacks and dynamic URLs correctly.
+
+#### Setting Environment Variables in Vercel
+
+1. Go to your [Vercel Dashboard](https://vercel.com/dashboard)
+2. Select your project → **Settings** → **Environment Variables**
+3. For each variable, select the appropriate **Environment Scope**: Production, Preview, or Development
+
+#### Production Environment Variables
+
+Set these with **Environment Scope: Production**
+
+```bash
+# Authentication
+NEXTAUTH_URL=https://your-production-domain.com
+NEXTAUTH_SECRET=your-production-nextauth-secret  # Generate with: openssl rand -base64 32
+AUTH_TRUST_HOST=true
+
+# Google OAuth (Production credentials)
+GOOGLE_CLIENT_ID=your-production-google-client-id
+GOOGLE_CLIENT_SECRET=your-production-google-client-secret
+
+# Facebook OAuth (Production credentials)
+FACEBOOK_CLIENT_ID=your-production-facebook-app-id
+FACEBOOK_CLIENT_SECRET=your-production-facebook-app-secret
+NEXT_PUBLIC_FACEBOOK_ENABLED=true
+
+# Database
+DATABASE_URL=your-production-database-url
+```
+
+#### Preview Environment Variables
+
+Set these with **Environment Scope: Preview**
+
+```bash
+# Authentication
+# ⚠️ DO NOT SET NEXTAUTH_URL - NextAuth will auto-detect the preview URL
+NEXTAUTH_SECRET=your-preview-nextauth-secret  # Can be same as production or different
+AUTH_TRUST_HOST=true
+
+# Google OAuth (Preview credentials - separate from production!)
+GOOGLE_CLIENT_ID=your-preview-google-client-id
+GOOGLE_CLIENT_SECRET=your-preview-google-client-secret
+
+# Facebook OAuth - Disabled for preview (doesn't support dynamic URLs)
+NEXT_PUBLIC_FACEBOOK_ENABLED=false
+# ❌ Do NOT set FACEBOOK_CLIENT_ID or FACEBOOK_CLIENT_SECRET for preview
+
+# Database
+DATABASE_URL=your-preview-database-url
+```
+
+#### Key Differences: Production vs Preview
+
+| Variable | Production | Preview | Notes |
+|----------|-----------|---------|-------|
+| `NEXTAUTH_URL` | ✅ Set to production domain | ❌ **Do not set** | Preview URLs are dynamic and auto-detected |
+| `GOOGLE_CLIENT_ID` | Production credentials | **Separate preview credentials** | Use different OAuth apps for each environment |
+| `FACEBOOK_*` | ✅ Enabled | ❌ Disabled | Facebook doesn't support wildcard redirect URIs |
+| `NEXT_PUBLIC_FACEBOOK_ENABLED` | `true` | `false` | Hides Facebook login in preview |
+| `DATABASE_URL` | Production DB | Preview/staging DB | Always use separate databases |
+
+#### Setting Up Google OAuth for Preview Environments
+
+Since Vercel preview URLs are dynamic (e.g., `your-app-git-branch-team.vercel.app`), you need to create separate OAuth credentials:
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Click **"Create Credentials"** → **"OAuth 2.0 Client ID"**
+3. Configure:
+   - **Application type**: Web application
+   - **Name**: "Wedding App - Preview/Staging"
+   - **Authorized JavaScript origins**:
+     - `https://*.vercel.app` (if your Google project allows wildcards)
+     - OR add specific preview URLs manually
+   - **Authorized redirect URIs**:
+     - `https://*.vercel.app/api/auth/callback/google` (if supported)
+     - OR add specific URLs like `https://wedding-git-main-yourteam.vercel.app/api/auth/callback/google`
+4. Save the **Client ID** and **Client Secret**
+5. Add them to Vercel with **Preview** scope
+
+**Note:** Google's wildcard support is inconsistent. For reliable testing, consider using a [custom preview domain](https://vercel.com/docs/concepts/projects/custom-domains) like `preview.yourdomain.com`.
+
+#### Alternative: Use E2E Test Mode for Previews
+
+For simpler preview testing without OAuth setup, enable test mode:
+
+```bash
+# Preview environment variables
+NEXT_PUBLIC_IS_E2E=true
+NEXT_PUBLIC_FACEBOOK_ENABLED=false
+# Don't set Google OAuth credentials
+```
+
+This enables email-based login (credentials provider) for testing without password validation.
+⚠️ **Security Warning:** Only use this for preview/staging, NEVER for production!
+
+#### Generating NEXTAUTH_SECRET
+
+Generate a strong secret key:
+
+```bash
+openssl rand -base64 32
+```
+
+You can use the same secret for all environments or generate separate ones for better security isolation.
+
 ### Environment Variables Reference
 
 #### Required Variables
