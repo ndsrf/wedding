@@ -37,7 +37,8 @@
       "dashboard": "Tableau de Bord",
       "settings": "Paramètres",
       "logout": "Déconnexion",
-      "profile": "Profil"
+      "profile": "Profil",
+      "back": "Retour"
     },
     "forms": {
       "required": "Ce champ est obligatoire",

@@ -37,7 +37,8 @@
       "dashboard": "Dashboard",
       "settings": "Settings",
       "logout": "Logout",
-      "profile": "Profile"
+      "profile": "Profile",
+      "back": "Back"
     },
     "forms": {
       "required": "This field is required",

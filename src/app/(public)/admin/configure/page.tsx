@@ -8,9 +8,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
 import { WeddingConfigForm } from '@/components/admin/WeddingConfigForm';
+import PrivateHeader from '@/components/PrivateHeader';
 import type { UpdateWeddingConfigRequest, WeddingDetails } from '@/types/api';
 
 export default function ConfigureWeddingPage() {
@@ -143,50 +143,24 @@ export default function ConfigureWeddingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/admin"
-                  className="text-gray-600 hover:text-gray-700"
-                >
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </Link>
-                <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-              </div>
-              <p className="mt-1 text-sm text-gray-600">
-                {wedding.couple_names} • {format.dateTime(new Date(wedding.wedding_date), {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </p>
+    <div className="min-h-screen">
+      <PrivateHeader
+        title={t('title')}
+        subtitle={`${wedding.couple_names} • ${format.dateTime(new Date(wedding.wedding_date), {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}`}
+        backUrl="/admin"
+        additionalContent={
+          saveSuccess && (
+            <div className="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm font-medium">
+              {t('saveSuccess')}
             </div>
-            {saveSuccess && (
-              <div className="bg-green-50 text-green-700 px-4 py-2 rounded-md text-sm font-medium">
-                {t('saveSuccess')}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+          )
+        }
+      />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -37,7 +37,8 @@
       "dashboard": "Panel de Control",
       "settings": "Configuración",
       "logout": "Cerrar Sesión",
-      "profile": "Perfil"
+      "profile": "Perfil",
+      "back": "Volver"
     },
     "forms": {
       "required": "Este campo es obligatorio",

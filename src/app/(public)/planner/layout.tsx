@@ -2,16 +2,16 @@
 
 import { SessionProvider } from 'next-auth/react';
 import type { ReactNode } from 'react';
-import { VersionDisplay } from '@/components/shared/VersionDisplay';
+import Footer from '@/components/Footer';
 
 export default function PlannerLayout({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-rose-50 via-white to-pink-50">
         <div className="flex-grow">
           {children}
         </div>
-        <VersionDisplay />
+        <Footer />
       </div>
     </SessionProvider>
   );
