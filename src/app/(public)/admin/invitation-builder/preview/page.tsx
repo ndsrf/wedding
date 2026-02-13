@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import TemplateRenderer from '@/components/guest/TemplateRenderer';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { TemplateDesign } from '@/types/invitation-template';
 
 interface PreviewData {
@@ -64,7 +65,7 @@ export default function InvitationPreviewPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <WeddingSpinner size="lg" className="mx-auto mb-4" />
           <p className="text-gray-600">Loading preview...</p>
         </div>
       </div>

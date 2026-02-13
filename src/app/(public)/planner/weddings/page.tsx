@@ -15,6 +15,7 @@ import { WeddingCard } from '@/components/planner/WeddingCard';
 import { WeddingForm } from '@/components/planner/WeddingForm';
 import type { WeddingWithStats, Theme } from '@/types/models';
 import type { CreateWeddingRequest } from '@/types/api';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 function PlannerWeddingsContent() {
   const t = useTranslations();
@@ -181,7 +182,7 @@ function PlannerWeddingsContent() {
         {/* Loading State */}
         {loading && (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <WeddingSpinner size="md" />
             <p className="mt-2 text-sm text-gray-600">{t('planner.weddings.loading')}</p>
           </div>
         )}
@@ -251,7 +252,7 @@ export default function PlannerWeddingsPage() {
       fallback={
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <WeddingSpinner size="md" />
             <p className="mt-2 text-sm text-gray-600">Loading...</p>
           </div>
         </div>

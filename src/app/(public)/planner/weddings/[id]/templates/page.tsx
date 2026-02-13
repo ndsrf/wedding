@@ -8,15 +8,8 @@
 
 'use client';
 
-import { useEffect, useState, useCallback, use } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
-import type { MessageTemplate, Language } from '@prisma/client';
-import { TemplateEditor } from '@/components/admin/TemplateEditor';
-import { TemplatePreview } from '@/components/admin/TemplatePreview';
-import { getAvailablePlaceholders } from '@/lib/templates';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
+
 
 type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE';
 type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
@@ -134,7 +127,7 @@ export default function PlannerWeddingTemplatesPage({ params }: PageProps) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <WeddingSpinner size="lg" className="mb-4" />
           <p className="mt-4 text-gray-600">{t('loading')}</p>
         </div>
       </div>

@@ -13,6 +13,7 @@ import { WeddingCard } from '@/components/planner/WeddingCard';
 import { Info, ArrowLeft } from 'lucide-react';
 import type { WeddingWithStats } from '@/types/models';
 import type { UpdateWeddingStatusRequest } from '@/types/api';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 export default function DeletedWeddingsPage() {
   const t = useTranslations();
@@ -115,7 +116,7 @@ export default function DeletedWeddingsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading && (
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <WeddingSpinner size="md" />
             <p className="mt-2 text-sm text-gray-500">{t('planner.weddings.loading')}</p>
           </div>
         )}

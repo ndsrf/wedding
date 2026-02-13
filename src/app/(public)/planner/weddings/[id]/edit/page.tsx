@@ -14,6 +14,7 @@ import { WeddingForm } from '@/components/planner/WeddingForm';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import type { Wedding, Theme } from '@/types/models';
 import type { CreateWeddingRequest, UpdateWeddingStatusRequest } from '@/types/api';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface EditWeddingPageProps {
   params: Promise<{ id: string }>;
@@ -190,7 +191,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <WeddingSpinner size="md" />
           <p className="mt-2 text-sm text-gray-500">{t('planner.weddings.loadingDetails')}</p>
         </div>
       </div>
