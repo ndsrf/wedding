@@ -8,6 +8,7 @@
 'use client';
 
 import { useState } from 'react';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { useTranslations } from 'next-intl';
 import { FileText, Users, LayoutGrid, Download, Eye, ChevronLeft, Calendar } from 'lucide-react';
 
@@ -317,7 +318,7 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
 
           {loadingData ? (
             <div className="p-12 flex flex-col items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+              <WeddingSpinner size="lg" className="mx-auto mb-4" />
               <p className="text-gray-500">{t('admin.reports.generating')}</p>
             </div>
           ) : (

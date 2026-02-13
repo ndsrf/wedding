@@ -14,6 +14,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { useTranslations } from 'next-intl';
 import type {
   ChecklistSectionWithTasks,
@@ -634,7 +635,7 @@ export function ChecklistEditor({
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+        <WeddingSpinner size="md" className="mx-auto" />
         <p className="mt-4 text-gray-500">{t('loading') || 'Loading...'}</p>
       </div>
     );

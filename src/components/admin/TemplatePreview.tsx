@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -98,7 +99,7 @@ export function TemplatePreview({
         <div className="p-6">
           {loading && (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <WeddingSpinner size="md" className="mx-auto" />
               <p className="mt-2 text-gray-600">{t('loading')}</p>
             </div>
           )}

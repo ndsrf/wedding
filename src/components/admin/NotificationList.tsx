@@ -10,6 +10,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useFormatter } from 'next-intl';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { EventType, Channel } from '@/types/models';
 
 interface NotificationItem {
@@ -164,7 +165,7 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+        <WeddingSpinner size="md" className="mx-auto" />
         <p className="mt-4 text-gray-500">{t('admin.notifications.loading')}</p>
       </div>
     );

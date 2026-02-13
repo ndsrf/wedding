@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { GiftStatus } from '@/types/models';
 
 interface PaymentItem {
@@ -49,7 +50,7 @@ export function PaymentList({ payments, onUpdateStatus, loading }: PaymentListPr
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+        <WeddingSpinner size="md" className="mx-auto" />
         <p className="mt-4 text-gray-500">{t('admin.payments.loading')}</p>
       </div>
     );

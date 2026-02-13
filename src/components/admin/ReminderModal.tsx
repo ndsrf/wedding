@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Language, Channel } from '@/types/models';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { ValidateRemindersResult } from '@/types/api';
 
 interface ReminderFamily {
@@ -187,7 +188,7 @@ export function ReminderModal({
 
           {loading ? (
             <div className="py-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+              <WeddingSpinner size="md" className="mx-auto" />
               <p className="mt-4 text-gray-500">{t('admin.reminders.loadingPreview')}</p>
             </div>
           ) : success ? (
