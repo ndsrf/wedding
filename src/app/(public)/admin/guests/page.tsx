@@ -7,9 +7,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import PrivateHeader from '@/components/PrivateHeader';
 import { GuestTable } from '@/components/admin/GuestTable';
 import { GuestFilters } from '@/components/admin/GuestFilters';
 import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
@@ -591,23 +591,22 @@ export default function GuestsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <PrivateHeader
+        title={t('admin.guests.title')}
+        backUrl="/admin"
+      />
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Info and Actions Bar */}
+        <div className="bg-white shadow-sm rounded-lg p-4 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center">
-              <Link href="/admin" className="text-gray-600 hover:text-gray-900 mr-4">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{t('admin.guests.title')}</h1>
-                <p className="mt-1 text-sm text-gray-600">
-                  {guests.length} guests • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
-                </p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">
+                {guests.length} guests • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
+              </p>
             </div>
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
               <button
@@ -701,7 +700,7 @@ export default function GuestsPage() {
               {!isReadOnly && (
                 <button
                   onClick={handleAddGuest}
-                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700"
                 >
                   {t('admin.guests.add')}
                 </button>
@@ -709,10 +708,6 @@ export default function GuestsPage() {
             </div>
           </div>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
@@ -720,7 +715,7 @@ export default function GuestsPage() {
               onClick={() => setActiveTab('guests')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'guests'
-                  ? 'border-purple-500 text-purple-600'
+                  ? 'border-rose-500 text-rose-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -730,13 +725,13 @@ export default function GuestsPage() {
               onClick={() => setActiveTab('additions')}
               className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
                 activeTab === 'additions'
-                  ? 'border-purple-500 text-purple-600'
+                  ? 'border-rose-500 text-rose-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               {t('admin.guestAdditions.title')}
               {newAdditionsCount > 0 && (
-                <span className="ml-2 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
+                <span className="ml-2 bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full text-xs">
                   {newAdditionsCount}
                 </span>
               )}
@@ -758,7 +753,7 @@ export default function GuestsPage() {
                       {t('admin.guests.bulkActions')}
                     </h3>
                     {selectedGuestIds.length > 0 && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
                         {selectedGuestIds.length} {t('admin.guests.selected')}
                       </span>
                     )}
@@ -781,7 +776,7 @@ export default function GuestsPage() {
                     <button
                       onClick={handleOpenBulkReminderModal}
                       disabled={selectedGuestIds.length === 0}
-                      className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {t('admin.reminders.send')}
                     </button>

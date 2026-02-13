@@ -11,8 +11,8 @@ import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 import { StatsCard } from '@/components/planner/StatsCard';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
+import PrivateHeader from '@/components/PrivateHeader';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface WeddingStats {
@@ -124,29 +124,12 @@ export default async function AdminDashboardPage() {
   const language = await getLanguageFromRequest();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{stats.couple_names}</h1>
-              <p className="mt-1 text-sm text-gray-600">
-                {formatDateByLanguage(stats.wedding_date, language)} • {stats.location}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
-              <LanguageSwitcher />
-              <Link
-                href="/api/auth/signout"
-                className="px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center sm:text-left"
-              >
-                {t('common.navigation.logout')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen">
+      <PrivateHeader
+        title={stats.couple_names}
+        subtitle={`${formatDateByLanguage(stats.wedding_date, language)} • ${stats.location}`}
+        hideBackButton={true}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

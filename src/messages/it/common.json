@@ -37,7 +37,8 @@
       "dashboard": "Dashboard",
       "settings": "Impostazioni",
       "logout": "Esci",
-      "profile": "Profilo"
+      "profile": "Profilo",
+      "back": "Indietro"
     },
     "forms": {
       "required": "Questo campo è obbligatorio",
