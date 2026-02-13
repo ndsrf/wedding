@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
+import packageJson from '@/../package.json';
 
 export default function Footer() {
   const t = useTranslations();
@@ -80,6 +81,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
           <p>© 2026 {commercialName}. {t('landing.footer.rights')}</p>
+          <p className="text-xs mt-2">v{packageJson.version}</p>
         </div>
       </div>
     </footer>

@@ -110,7 +110,7 @@
     },
     "hero": {
       "title": "Potencia Tu Negocio de Organización de Bodas",
-      "subtitle": "{commercialName} es la plataforma todo-en-uno para organizadores de bodas para colaborar sin problemas con las parejas, gestionar invitados, diseñar invitaciones impresionantes y crear celebraciones inolvidables.",
+      "subtitle": "{commercialName} es la plataforma todo-en-uno para wedding planners para colaborar sin problemas con las parejas, gestionar invitados, diseñar invitaciones impresionantes y crear celebraciones inolvidables.",
       "cta": {
         "primary": "Prueba Gratuita",
         "secondary": "Saber Más"
@@ -119,7 +119,7 @@
     },
     "features": {
       "title": "Todo Lo Que Necesitas Para Planear Bodas Perfectas",
-      "subtitle": "Herramientas poderosas diseñadas para organizadores profesionales",
+      "subtitle": "Herramientas poderosas diseñadas para wedding planners profesionales",
       "items": {
         "guestManagement": {
           "title": "Gestión de Invitados",
@@ -148,13 +148,13 @@
       }
     },
     "testimonials": {
-      "title": "Amado por Organizadores de Bodas en Todo el Mundo",
+      "title": "Amado por Wedding Planners en Todo el Mundo",
       "subtitle": "Únete a miles de profesionales usando {commercialName}",
       "items": [
         {
           "text": "{commercialName} ha transformado cómo gestionamos nuestro negocio de organización de bodas. Las invitaciones multicanal y el seguimiento en tiempo real nos ahorran innumerables horas.",
           "name": "Sofía Martínez",
-          "role": "Organizadora de Bodas, Madrid"
+          "role": "Wedding Planner, Madrid"
         },
         {
           "text": "A nuestras parejas les encantan las funciones colaborativas. Solo el planificador de asientos ha hecho nuestro servicio mucho más valioso.",
@@ -164,7 +164,7 @@
         {
           "text": "Gestionar 3 bodas simultáneamente solía ser estresante. Con {commercialName}, todo está organizado y nuestros clientes están más felices que nunca.",
           "name": "Luca Romano",
-          "role": "Organizador de Bodas, Roma"
+          "role": "Wedding Planner, Roma"
         }
       ]
     },
@@ -209,11 +209,11 @@
     },
     "cta": {
       "title": "¿Listo Para Transformar Tu Negocio de Organización de Bodas?",
-      "subtitle": "Únete a cientos de organizadores que confían en {commercialName} para ofrecer experiencias excepcionales.",
+      "subtitle": "Únete a cientos de wedding planners que confían en {commercialName} para ofrecer experiencias excepcionales.",
       "button": "Comienza Tu Prueba Gratuita"
     },
     "footer": {
-      "tagline": "Empoderando a organizadores de bodas para crear celebraciones inolvidables.",
+      "tagline": "Empoderando a wedding planners para crear celebraciones inolvidables.",
       "product": "Producto",
       "company": "Empresa",
       "support": "Soporte",
@@ -270,16 +270,16 @@
       "overview": "Resumen de la Plataforma"
     },
     "analytics": {
-      "totalPlanners": "Total de Organizadores",
-      "activePlanners": "Organizadores Activos",
+      "totalPlanners": "Total de Wedding Planners",
+      "activePlanners": "Wedding Planners Activos",
       "totalWeddings": "Total de Bodas",
       "totalGuests": "Total de Invitados"
     },
     "planners": {
-      "title": "Gestión de Organizadores",
-      "list": "Lista de Organizadores",
-      "add": "Añadir Organizador",
-      "edit": "Editar Organizador",
+      "title": "Gestión de Wedding Planners",
+      "list": "Lista de Wedding Planners",
+      "add": "Añadir Wedding Planner",
+      "edit": "Editar Wedding Planner",
       "name": "Nombre",
       "email": "Correo Electrónico",
       "logo": "Logo",
@@ -290,7 +290,7 @@
       "lastLogin": "Último Acceso",
       "enable": "Habilitar",
       "disable": "Deshabilitar",
-      "confirmDisable": "¿Estás seguro de que quieres deshabilitar este organizador?",
+      "confirmDisable": "¿Estás seguro de que quieres deshabilitar este wedding planner?",
       "logoUrl": "URL del Logo"
     },
     "weddings": {
@@ -299,13 +299,13 @@
       "coupleName": "Nombres de la Pareja",
       "date": "Fecha",
       "location": "Ubicación",
-      "planner": "Organizador",
+      "planner": "Wedding Planner",
       "guestCount": "Número de Invitados"
     }
   },
   "planner": {
     "dashboard": {
-      "title": "Panel del Organizador",
+      "title": "Panel del Wedding Planner",
       "welcome": "Bienvenido, {name}",
       "myWeddings": "Mis Bodas",
       "subtitle": "Gestiona tus bodas y ver estadísticas",
@@ -371,7 +371,7 @@
         "dueDateExamples": "Ejemplos: WEDDING_DATE, WEDDING_DATE-90 (90 días antes), WEDDING_DATE+7 (7 días después)"
       },
       "assignment": {
-        "weddingPlanner": "Organizador de Bodas",
+        "weddingPlanner": "Wedding Planner",
         "couple": "Pareja",
         "other": "Otro"
       }
@@ -630,7 +630,7 @@
       "reports": "Informes",
       "reportsSubtitle": "Generar y exportar informes",
       "weddingNotFound": "Boda no encontrada",
-      "contactPlanner": "Por favor contacta a tu organizador de bodas."
+      "contactPlanner": "Por favor contacta a tu wedding planner."
     },
     "reports": {
       "title": "Informes",
@@ -744,8 +744,8 @@
       "details": "Detalles",
       "configuration": "Configuración",
       "updateSuccess": "Configuración actualizada exitosamente",
-      "disabledBanner": "Esta boda ha sido deshabilitada por el organizador. Puedes ver los datos pero no hacer cambios.",
-      "noAccess": "No tienes acceso a ninguna boda activa. Por favor contacta a tu organizador de bodas."
+      "disabledBanner": "Esta boda ha sido deshabilitada por el wedding planner. Puedes ver los datos pero no hacer cambios.",
+      "noAccess": "No tienes acceso a ninguna boda activa. Por favor contacta a tu wedding planner."
     },
     "guests": {
       "title": "Gestión de Invitados",
@@ -1002,7 +1002,7 @@
       "error": "Error al guardar la configuración",
       "loading": "Cargando configuración...",
       "notFound": "Boda no encontrada",
-      "contactPlanner": "Por favor contacta a tu organizador de bodas.",
+      "contactPlanner": "Por favor contacta a tu wedding planner.",
       "backToDashboard": "Volver al Panel",
       "tabs": {
         "basic": "Ajustes Básicos",
@@ -1068,7 +1068,7 @@
       "error": "Error al cargar la lista",
       "retry": "Reintentar",
       "emptyTitle": "Aún no hay tareas",
-      "emptyDesc": "Importa una lista o espera a que tu organizador agregue tareas.",
+      "emptyDesc": "Importa una lista o espera a que tu wedding planner agregue tareas.",
       "import": "Importar desde Excel",
       "importing": "Importando...",
       "export": "Exportar a Excel",
@@ -1098,7 +1098,7 @@
         "actions": "Acciones"
       },
       "assignedTo": {
-        "planner": "Organizador de Bodas",
+        "planner": "Wedding Planner",
         "couple": "Pareja",
         "other": "Otro"
       },
@@ -1241,7 +1241,7 @@
       "submit": "Confirmar Asistencia",
       "submitted": "¡Gracias por tu RSVP!",
       "confirmationMessage": "Hemos recibido tu confirmación. ¡Esperamos verte en la boda!",
-      "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los organizadores.",
+      "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los wedding planners.",
       "additionalQuestions": "Preguntas Adicionales",
       "defaultTransportationQuestion": "¿Necesitarás transporte al lugar del evento?",
       "emptyConfirmation": "Estás confirmando que nadie de tu grupo asistirá, ¿es eso lo que quieres confirmar? De lo contrario, cancela y selecciona a los que asistirán de tu grupo"
