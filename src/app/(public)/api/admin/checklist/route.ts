@@ -26,11 +26,11 @@ import type { TaskAssignment, TaskStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 
 // Lazy load DOMPurify to avoid ESM import issues
-let DOMPurify: any = null;
+let DOMPurify: typeof import('isomorphic-dompurify').default | null = null;
 const getDOMPurify = async () => {
   if (!DOMPurify) {
-    const module = await import('isomorphic-dompurify');
-    DOMPurify = module.default;
+    const dompurifyModule = await import('isomorphic-dompurify');
+    DOMPurify = dompurifyModule.default;
   }
   return DOMPurify;
 };
