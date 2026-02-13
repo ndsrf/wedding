@@ -218,6 +218,145 @@ export async function deleteTask(
 }
 
 // ============================================================================
+// SECTION CRUD OPERATIONS
+// ============================================================================
+
+/**
+ * Create a new section in a wedding checklist
+ *
+ * @param data - Section data including wedding_id, name, and order
+ * @returns The created section
+ */
+export async function createSection(data: {
+  wedding_id: string;
+  name: string;
+  order: number;
+}): Promise<ChecklistSectionWithTasks> {
+  const section = await prisma.checklistSection.create({
+    data: {
+      wedding_id: data.wedding_id,
+      name: data.name,
+      order: data.order,
+      template_id: null,
+    },
+    include: {
+      tasks: true,
+    },
+  });
+
+  return section as ChecklistSectionWithTasks;
+}
+
+/**
+ * Update an existing section in a wedding checklist
+ *
+ * @param section_id - The section ID to update
+ * @param wedding_id - The wedding ID (for validation)
+ * @param data - Partial section data to update
+ * @returns The updated section
+ */
+export async function updateSection(
+  section_id: string,
+  wedding_id: string,
+  data: { name?: string; order?: number }
+): Promise<ChecklistSectionWithTasks> {
+  // Verify section exists and belongs to the wedding
+  const existingSection = await prisma.checklistSection.findFirst({
+    where: {
+      id: section_id,
+      wedding_id,
+      template_id: null,
+    },
+  });
+
+  if (!existingSection) {
+    throw new Error('Section not found or does not belong to this wedding');
+  }
+
+  // Update the section
+  const section = await prisma.checklistSection.update({
+    where: { id: section_id },
+    data,
+    include: {
+      tasks: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  });
+
+  return section as ChecklistSectionWithTasks;
+}
+
+/**
+ * Delete a section from a wedding checklist
+ *
+ * Note: This will NOT delete tasks in the section by default in Prisma
+ * unless cascade delete is configured. In our schema, we should handle
+ * what happens to tasks. For now, we'll assume cascade delete or
+ * we can manually unassign tasks.
+ *
+ * @param section_id - The section ID to delete
+ * @param wedding_id - The wedding ID (for validation)
+ */
+export async function deleteSection(
+  section_id: string,
+  wedding_id: string
+): Promise<void> {
+  // Verify section exists and belongs to the wedding
+  const existingSection = await prisma.checklistSection.findFirst({
+    where: {
+      id: section_id,
+      wedding_id,
+      template_id: null,
+    },
+  });
+
+  if (!existingSection) {
+    throw new Error('Section not found or does not belong to this wedding');
+  }
+
+  // Use a transaction to ensure tasks are handled
+  await prisma.$transaction(async (tx) => {
+    // We'll delete the tasks in the section first to be safe
+    await tx.checklistTask.deleteMany({
+      where: {
+        section_id,
+        wedding_id,
+      },
+    });
+
+    // Then delete the section
+    await tx.checklistSection.delete({
+      where: { id: section_id },
+    });
+  });
+}
+
+/**
+ * Reorder sections within a wedding checklist
+ *
+ * @param wedding_id - The wedding ID
+ * @param sectionOrders - Array of section IDs with their new order values
+ */
+export async function reorderSections(
+  wedding_id: string,
+  sectionOrders: { id: string; order: number }[]
+): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    for (const sectionOrder of sectionOrders) {
+      await tx.checklistSection.updateMany({
+        where: {
+          id: sectionOrder.id,
+          wedding_id,
+          template_id: null,
+        },
+        data: { order: sectionOrder.order },
+      });
+    }
+  });
+}
+
+// ============================================================================
 // TASK REORDERING
 // ============================================================================
 

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/prisma';
 import { preRenderTemplate } from './pre-renderer';
 import { getSystemThemeById } from '@/lib/theme/presets';
 import type { TemplateDesign } from '@/types/invitation-template';
+import type { ThemeConfig } from '@/types/theme';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -27,9 +28,9 @@ export async function reRenderWeddingTemplates(weddingId: string): Promise<void>
     }
 
     // 2. Get theme configuration
-    let themeConfig: any = null;
+    let themeConfig: ThemeConfig | null = null;
     if (wedding.theme) {
-      themeConfig = wedding.theme.config;
+      themeConfig = wedding.theme.config as unknown as ThemeConfig;
     } else if (wedding.theme_id) {
       const systemTheme = getSystemThemeById(wedding.theme_id);
       if (systemTheme) {

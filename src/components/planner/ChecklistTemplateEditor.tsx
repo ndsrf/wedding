@@ -16,6 +16,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { TaskRow } from '@/components/ui/TaskRow';
 import type {
   ChecklistTemplateWithSections,
@@ -45,6 +46,7 @@ interface LocalTask extends CreateTemplateTaskData {
 }
 
 export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEditorProps) {
+  const t = useTranslations('planner.checklistTemplate');
   const [sections, setSections] = useState<LocalSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -196,7 +198,7 @@ export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEdi
   const addSection = useCallback(() => {
     const newSection: LocalSection = {
       id: `temp-section-${Date.now()}`,
-      name: 'New Section',
+      name: '',
       order: sections.length,
       tasks: [],
       isNew: true,
@@ -244,7 +246,7 @@ export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEdi
           const newTask: LocalTask = {
             id: `temp-task-${Date.now()}`,
             section_id: sectionId,
-            title: 'New Task',
+            title: '',
             description: null,
             assigned_to: TaskAssignment.WEDDING_PLANNER,
             due_date_relative: null,
@@ -677,7 +679,7 @@ export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEdi
                       value={section.name}
                       onChange={(e) => updateSectionName(section.id, e.target.value)}
                       className="flex-1 px-3 py-2 text-lg font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
-                      placeholder="Section name"
+                      placeholder={t('fields.taskTitle') || 'Section name'}
                       aria-label="Section name"
                       aria-required="true"
                     />
@@ -721,22 +723,22 @@ export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEdi
                       <thead className="bg-gray-50">
                         <tr role="row">
                           <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase w-10" role="columnheader">
-                            Drag
+                            {t('fields.drag') || 'Drag'}
                           </th>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[200px]" role="columnheader">
-                            Title
+                            {t('fields.title') || 'Title'}
                           </th>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[250px]" role="columnheader">
-                            Description
+                            {t('fields.description') || 'Description'}
                           </th>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[150px]" role="columnheader">
-                            Assigned To
+                            {t('fields.assignedTo') || 'Assigned To'}
                           </th>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[180px]" role="columnheader">
-                            Due Date (Relative)
+                            {t('fields.dueDate') || 'Due Date (Relative)'}
                           </th>
                           <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase w-14" role="columnheader">
-                            Actions
+                            {t('fields.actions') || 'Actions'}
                           </th>
                         </tr>
                       </thead>
@@ -811,44 +813,48 @@ export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEdi
 
                         {/* Title */}
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            {t('fields.title') || 'Title'}
+                          </label>
                           <input
                             type="text"
                             value={task.title}
                             onChange={(e) => updateTask(task.id, 'title', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
-                            placeholder="Task title"
+                            placeholder={t('fields.taskTitle') || 'Task title'}
                           />
                         </div>
 
                         {/* Assigned To */}
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Assigned To</label>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            {t('fields.assignedTo') || 'Assigned To'}
+                          </label>
                           <select
                             value={task.assigned_to}
                             onChange={(e) => updateTask(task.id, 'assigned_to', e.target.value as TaskAssignment)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
                           >
-                            <option value={TaskAssignment.WEDDING_PLANNER}>Wedding Planner</option>
-                            <option value={TaskAssignment.COUPLE}>Couple</option>
-                            <option value={TaskAssignment.OTHER}>Other</option>
+                            <option value={TaskAssignment.WEDDING_PLANNER}>{t('assignment.weddingPlanner') || 'Wedding Planner'}</option>
+                            <option value={TaskAssignment.COUPLE}>{t('assignment.couple') || 'Couple'}</option>
+                            <option value={TaskAssignment.OTHER}>{t('assignment.other') || 'Other'}</option>
                           </select>
                         </div>
 
                         {/* Due Date (Relative) */}
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Due Date (Relative)
+                            {t('fields.dueDate') || 'Due Date (Relative)'}
                           </label>
                           <input
                             type="text"
                             value={task.due_date_relative || ''}
                             onChange={(e) => updateTask(task.id, 'due_date_relative', e.target.value || null)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
-                            placeholder="e.g., WEDDING_DATE-90"
+                            placeholder={t('fields.dueDatePlaceholder') || 'e.g., WEDDING_DATE-90'}
                           />
                           <p className="mt-1 text-xs text-gray-500">
-                            Examples: WEDDING_DATE, WEDDING_DATE-90, WEDDING_DATE+7
+                            {t('fields.dueDateExamples') || 'Examples: WEDDING_DATE, WEDDING_DATE-90, WEDDING_DATE+7'}
                           </p>
                         </div>
                       </div>

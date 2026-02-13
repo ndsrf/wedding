@@ -32,7 +32,7 @@ import { prisma } from '@/lib/db/prisma';
 
 const createTaskSchema = z.object({
   section_id: z.string().uuid().nullable(),
-  title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
+  title: z.string().max(200, 'Title too long'),
   description: z
     .string()
     .max(2000, 'Description too long')
@@ -47,7 +47,7 @@ const createTaskSchema = z.object({
 const updateTaskSchema = z.object({
   task_id: z.string().uuid(),
   section_id: z.string().uuid().nullable().optional(),
-  title: z.string().min(1).max(200).optional(),
+  title: z.string().max(200).optional(),
   description: z.string().max(2000).nullable().optional(),
   assigned_to: z.enum(['WEDDING_PLANNER', 'COUPLE', 'OTHER']).optional(),
   due_date: z.string().datetime().nullable().optional(),
