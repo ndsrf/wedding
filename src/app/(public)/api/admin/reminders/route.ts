@@ -204,10 +204,12 @@ export async function POST(request: NextRequest) {
         });
 
         let result;
+        let isInvitation = false;
 
         if (!invitationSent) {
           // No invitation sent yet, send invitation email
           console.log('[REMINDER DEBUG] No invitation sent yet for', family.name, ', sending invitation');
+          isInvitation = true;
           result = await sendInvitation({
             family_id: family.id,
             wedding_id: user.wedding_id!,
@@ -281,42 +283,46 @@ export async function POST(request: NextRequest) {
         if (result.success) {
           console.log('[REMINDER DEBUG] Email sent successfully to', family.email);
 
-          // Create tracking event with message_sid if available
-          const rawLanguage = family.preferred_language || wedding.default_language;
-          const language = rawLanguage.toLowerCase() as I18nLanguage;
-          const messages = REMINDER_MESSAGES[language];
-          const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
-          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
-          const trackShortPath = await getShortUrlPath(family.id);
-          const trackMagicLink = `${baseUrl}${trackShortPath}?channel=email`;
+          // Only create REMINDER_SENT event if we sent a reminder, not an invitation
+          // (invitation service already creates INVITATION_SENT event)
+          if (!isInvitation) {
+            // Create tracking event with message_sid if available
+            const rawLanguage = family.preferred_language || wedding.default_language;
+            const language = rawLanguage.toLowerCase() as I18nLanguage;
+            const messages = REMINDER_MESSAGES[language];
+            const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
+            const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
+            const trackShortPath = await getShortUrlPath(family.id);
+            const trackMagicLink = `${baseUrl}${trackShortPath}?channel=email`;
 
-          const personalizedMessage = {
-            language,
-            subject: messages.subject,
-            greeting: messages.greeting(family.name),
-            body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
-            cta: messages.cta,
-            magic_link: trackMagicLink,
-          };
+            const personalizedMessage = {
+              language,
+              subject: messages.subject,
+              greeting: messages.greeting(family.name),
+              body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
+              cta: messages.cta,
+              magic_link: trackMagicLink,
+            };
 
-          await prisma.trackingEvent.create({
-            data: {
-              family_id: family.id,
-              wedding_id: user.wedding_id!,
-              event_type: 'REMINDER_SENT',
-              channel: 'EMAIL' as Channel,
-              metadata: {
-                admin_id: user.id,
+            await prisma.trackingEvent.create({
+              data: {
+                family_id: family.id,
+                wedding_id: user.wedding_id!,
+                event_type: 'REMINDER_SENT',
+                channel: 'EMAIL' as Channel,
+                metadata: {
+                  admin_id: user.id,
+                  admin_triggered: true,
+                  reminder_type: 'manual',
+                  personalized_message: personalizedMessage,
+                  family_language: language,
+                  channel_used: 'EMAIL',
+                  ...(result.messageId && { message_sid: result.messageId }),
+                },
                 admin_triggered: true,
-                reminder_type: 'manual',
-                personalized_message: personalizedMessage,
-                family_language: language,
-                channel_used: 'EMAIL',
-                ...(result.messageId && { message_sid: result.messageId }),
               },
-              admin_triggered: true,
-            },
-          });
+            });
+          }
 
           return true;
         } else {
@@ -351,10 +357,12 @@ export async function POST(request: NextRequest) {
         });
 
         let result;
+        let isInvitation = false;
 
         if (!invitationSent) {
           // No invitation sent yet, send invitation
           console.log('[REMINDER DEBUG] No invitation sent yet for', family.name, ', sending invitation');
+          isInvitation = true;
           result = await sendInvitation({
             family_id: family.id,
             wedding_id: user.wedding_id!,
@@ -431,42 +439,46 @@ export async function POST(request: NextRequest) {
         if (result.success) {
           console.log('[REMINDER DEBUG] Message sent successfully to', contactInfo);
 
-          // Create tracking event with message_sid
-          const rawLanguage = family.preferred_language || wedding.default_language;
-          const language = rawLanguage.toLowerCase() as I18nLanguage;
-          const messages = REMINDER_MESSAGES[language];
-          const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
-          const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
-          const smsTrackShortPath = await getShortUrlPath(family.id);
-          const smsTrackMagicLink = `${baseUrl}${smsTrackShortPath}?channel=${targetChannel.toLowerCase()}`;
+          // Only create REMINDER_SENT event if we sent a reminder, not an invitation
+          // (invitation service already creates INVITATION_SENT event)
+          if (!isInvitation) {
+            // Create tracking event with message_sid
+            const rawLanguage = family.preferred_language || wedding.default_language;
+            const language = rawLanguage.toLowerCase() as I18nLanguage;
+            const messages = REMINDER_MESSAGES[language];
+            const weddingDate = formatDateByLanguage(wedding.wedding_date, language);
+            const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, language);
+            const smsTrackShortPath = await getShortUrlPath(family.id);
+            const smsTrackMagicLink = `${baseUrl}${smsTrackShortPath}?channel=${targetChannel.toLowerCase()}`;
 
-          const personalizedMessage = {
-            language,
-            subject: messages.subject,
-            greeting: messages.greeting(family.name),
-            body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
-            cta: messages.cta,
-            magic_link: smsTrackMagicLink,
-          };
+            const personalizedMessage = {
+              language,
+              subject: messages.subject,
+              greeting: messages.greeting(family.name),
+              body: message_template || messages.body(wedding.couple_names, weddingDate, cutoffDate),
+              cta: messages.cta,
+              magic_link: smsTrackMagicLink,
+            };
 
-          await prisma.trackingEvent.create({
-            data: {
-              family_id: family.id,
-              wedding_id: user.wedding_id!,
-              event_type: 'REMINDER_SENT',
-              channel: targetChannel,
-              metadata: {
-                admin_id: user.id,
+            await prisma.trackingEvent.create({
+              data: {
+                family_id: family.id,
+                wedding_id: user.wedding_id!,
+                event_type: 'REMINDER_SENT',
+                channel: targetChannel,
+                metadata: {
+                  admin_id: user.id,
+                  admin_triggered: true,
+                  reminder_type: 'manual',
+                  personalized_message: personalizedMessage,
+                  family_language: language,
+                  channel_used: targetChannel,
+                  ...(result.messageId && { message_sid: result.messageId }),
+                },
                 admin_triggered: true,
-                reminder_type: 'manual',
-                personalized_message: personalizedMessage,
-                family_language: language,
-                channel_used: targetChannel,
-                ...(result.messageId && { message_sid: result.messageId }),
               },
-              admin_triggered: true,
-            },
-          });
+            });
+          }
 
           return true;
         } else {

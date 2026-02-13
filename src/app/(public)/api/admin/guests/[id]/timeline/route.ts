@@ -80,7 +80,59 @@ export async function GET(_request: NextRequest, context: RouteParams) {
       },
     });
 
-    // Add family name to each event for convenience
+    // Extract unique admin/user IDs from metadata to fetch user information
+    const adminIds = new Set<string>();
+    for (const event of events) {
+      if (event.metadata && typeof event.metadata === 'object' && 'admin_id' in event.metadata) {
+        const adminId = event.metadata.admin_id;
+        if (typeof adminId === 'string') {
+          adminIds.add(adminId);
+        }
+      }
+    }
+
+    // Fetch user information for all admin IDs
+    const userMap = new Map<string, { name: string; email: string }>();
+    if (adminIds.size > 0) {
+      const adminIdsArray = Array.from(adminIds);
+
+      // Fetch from WeddingAdmin table
+      const weddingAdmins = await prisma.weddingAdmin.findMany({
+        where: {
+          id: { in: adminIdsArray },
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      });
+
+      for (const admin of weddingAdmins) {
+        userMap.set(admin.id, { name: admin.name, email: admin.email });
+      }
+
+      // Fetch from WeddingPlanner table for IDs not found in WeddingAdmin
+      const remainingIds = adminIdsArray.filter(id => !userMap.has(id));
+      if (remainingIds.length > 0) {
+        const planners = await prisma.weddingPlanner.findMany({
+          where: {
+            id: { in: remainingIds },
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        });
+
+        for (const planner of planners) {
+          userMap.set(planner.id, { name: planner.name, email: planner.email });
+        }
+      }
+    }
+
+    // Add family name and user information to each event
     const eventsWithFamily = events.map((event: {
       id: string;
       family_id: string;
@@ -89,10 +141,21 @@ export async function GET(_request: NextRequest, context: RouteParams) {
       metadata: unknown;
       admin_triggered: boolean;
       timestamp: Date;
-    }) => ({
-      ...event,
-      family_name: family.name,
-    }));
+    }) => {
+      let triggeredByUser = null;
+      if (event.metadata && typeof event.metadata === 'object' && 'admin_id' in event.metadata) {
+        const adminId = event.metadata.admin_id;
+        if (typeof adminId === 'string' && userMap.has(adminId)) {
+          triggeredByUser = userMap.get(adminId);
+        }
+      }
+
+      return {
+        ...event,
+        family_name: family.name,
+        triggered_by_user: triggeredByUser,
+      };
+    });
 
     // Add a synthetic "GUEST_CREATED" event at the beginning (last chronologically)
     const guestCreatedEvent = {

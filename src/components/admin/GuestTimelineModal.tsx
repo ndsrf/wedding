@@ -19,6 +19,10 @@ interface TrackingEventWithFamily {
   admin_triggered: boolean;
   timestamp: Date;
   family_name: string;
+  triggered_by_user?: {
+    name: string;
+    email: string;
+  } | null;
 }
 
 interface GuestTimelineModalProps {
@@ -235,6 +239,11 @@ export function GuestTimelineModal({
                           <p className="mt-1 text-xs text-gray-500">
                             {formatTimestamp(event.timestamp)}
                           </p>
+                          {event.triggered_by_user && (
+                            <p className="mt-1 text-xs text-gray-600">
+                              <span className="font-medium">Triggered by:</span> {event.triggered_by_user.name}
+                            </p>
+                          )}
                         </div>
                         {event.channel && (
                           <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">

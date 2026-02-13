@@ -11,7 +11,6 @@ import {
 import { getTemplateForSending } from "@/lib/templates/crud";
 import { sendDynamicEmail } from "@/lib/email/resend";
 import { sendDynamicMessage, MessageType } from "@/lib/sms/twilio";
-import { trackEvent } from "@/lib/tracking/events";
 import type { Language as I18nLanguage } from "@/lib/i18n/config";
 import type { Channel } from "@prisma/client";
 import { formatDateByLanguage } from "@/lib/date-formatter";
@@ -185,22 +184,9 @@ export async function sendConfirmation(
       };
     }
 
-    // Track confirmation sent event (fire-and-forget for better performance)
-    void trackEvent({
-      family_id,
-      wedding_id,
-      event_type: "REMINDER_SENT",
-      channel,
-      metadata: {
-        template_id: template.id,
-        template_type: "CONFIRMATION",
-        language: family.preferred_language,
-        channel,
-        contact: channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number,
-        ...(messageResult.messageId && { message_sid: messageResult.messageId }),
-      },
-      admin_triggered: false,
-    });
+    // Note: We don't track a separate event for confirmations since RSVP_SUBMITTED
+    // is already tracked when the RSVP is submitted. Confirmations are automatic
+    // responses, not separate actionable events.
 
     const contactInfo = channel === "EMAIL" ? family.email : channel === "SMS" ? family.phone : family.whatsapp_number;
     console.log(
