@@ -783,7 +783,7 @@ In the Wedding Management App:
 
 #### 8. Configure Webhooks for Message Status Tracking
 
-Webhooks allow you to track the delivery status of your messages, including when they are sent, delivered, read, or failed. This is essential for monitoring message engagement and troubleshooting delivery issues.
+**Important**: Webhooks are already implemented in this application! The webhook endpoint at `/api/webhooks/twilio/status` tracks when messages are delivered and read (WhatsApp only).
 
 **What You Can Track:**
 - **SMS**: Sent, Delivered, Failed, Undelivered
@@ -791,154 +791,75 @@ Webhooks allow you to track the delivery status of your messages, including when
 
 ##### Setting Up Webhooks in Twilio Console
 
-**For SMS:**
+**For WhatsApp Senders:**
+
+1. Navigate to [Messaging > Senders > WhatsApp senders](https://console.twilio.com/us1/develop/sms/senders/whatsapp-senders)
+2. Click on your WhatsApp sender
+3. Configure the webhook fields as follows:
+
+| Field | Value | Notes |
+|-------|-------|-------|
+| **Webhook URL for incoming messages** | Leave blank (Optional) | Only needed if you want to receive replies from guests. Not required for one-way invitations. |
+| **Webhook method for incoming messages URL** | HTTP POST | Standard method (if you set an incoming URL) |
+| **Fallback URL for incoming messages** | Leave blank (Optional) | Backup URL if incoming messages webhook fails |
+| **Webhook method for fallback URL** | HTTP POST | Standard method (if you set a fallback URL) |
+| **Status callback URL** | `https://your-domain.com/api/webhooks/twilio/status` | **REQUIRED** - Replace `your-domain.com` with your actual domain |
+| **Webhook method for status callback URL** | HTTP POST | **Use POST** (required for this implementation) |
+
+**Important Notes:**
+- Replace `https://your-domain.com` with your actual production domain (e.g., `https://wedding.example.com`)
+- The status callback URL is **required** to track delivery and read receipts
+- The webhook method must be **HTTP POST** (not PUT)
+- Incoming message webhooks are optional and only needed if you want to process guest replies
+
+4. Click "Save" to apply the configuration
+
+**For SMS Numbers:**
 
 1. Navigate to [Phone Numbers > Manage > Active Numbers](https://console.twilio.com/us1/develop/phone-numbers/manage/incoming)
 2. Click on your SMS-enabled phone number
 3. Scroll down to the "Messaging" section
-4. Configure the status callback URL:
-   ```
-   https://your-domain.com/api/webhooks/twilio/sms-status
-   ```
+4. Configure:
+   - **A MESSAGE COMES IN**: Leave as default or set to handle replies (optional)
+   - **Messaging Status Callback URL**: `https://your-domain.com/api/webhooks/twilio/status`
 5. Click "Save Configuration"
 
-**For WhatsApp:**
+##### Webhook Endpoint Implementation (Already Implemented!)
 
-1. Navigate to [Messaging > Senders > WhatsApp senders](https://console.twilio.com/us1/develop/sms/senders/whatsapp-senders)
-2. Click on your WhatsApp sender
-3. Configure the status callback URL:
-   ```
-   https://your-domain.com/api/webhooks/twilio/whatsapp-status
-   ```
-4. Click "Save"
+The webhook endpoint is already implemented in this application at:
+- **File**: `src/app/(public)/api/webhooks/twilio/status/route.ts`
+- **Endpoint**: `POST /api/webhooks/twilio/status`
 
-##### Webhook Endpoint Implementation
+**What the webhook receives from Twilio:**
 
-The application should implement webhook endpoints to handle status callbacks from Twilio. Here's what the endpoints receive:
-
-**SMS Status Callback Parameters:**
+**SMS/WhatsApp Status Callback Parameters:**
 - `MessageSid`: Unique message identifier
-- `MessageStatus`: Current status (queued, sent, delivered, failed, undelivered)
+- `MessageStatus`: Current status (queued, sent, delivered, read, failed, undelivered)
 - `To`: Recipient phone number
 - `From`: Sender phone number
-- `ErrorCode`: Error code if failed
-- `ErrorMessage`: Error description if failed
+- `ErrorCode`: Error code if delivery failed
+- `ErrorMessage`: Error description if delivery failed
+- `X-Twilio-Signature`: HMAC-SHA1 signature header for validation
 
-**WhatsApp Status Callback Parameters:**
-- `MessageSid`: Unique message identifier
-- `MessageStatus`: Current status (sent, delivered, read, failed)
-- `To`: Recipient WhatsApp number
-- `From`: Sender WhatsApp number
-- `SmsStatus`: Legacy parameter, same as MessageStatus
-- `ErrorCode`: Error code if failed
-- `ErrorMessage`: Error description if failed
+**How it works:**
+1. ✅ Validates the Twilio signature using `TWILIO_AUTH_TOKEN` (prevents spoofing)
+2. ✅ Extracts `MessageSid` and `MessageStatus` from the webhook payload
+3. ✅ Finds the original message in the `TrackingEvent` table by `message_sid`
+4. ✅ Creates new tracking events: `MESSAGE_DELIVERED`, `MESSAGE_READ`, or `MESSAGE_FAILED`
+5. ✅ Implements idempotency checks to prevent duplicate events
+6. ✅ Stores error codes and messages for failed deliveries
 
-##### Example Webhook Handler
+**Tracking Events Created:**
+- `INVITATION_SENT` - When admin sends invitation
+- `MESSAGE_DELIVERED` - When message reaches recipient's device
+- `MESSAGE_READ` - When recipient reads the message (WhatsApp only)
+- `MESSAGE_FAILED` - When delivery fails
+- `LINK_OPENED` - When guest clicks the RSVP link
+- `RSVP_SUBMITTED` - When guest completes RSVP
 
-Create API routes to handle these webhooks:
+All events are stored in the `tracking_events` table with metadata including the message SID for correlation.
 
-**File: `src/app/api/webhooks/twilio/sms-status/route.ts`**
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-
-export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-
-  const messageSid = formData.get('MessageSid') as string;
-  const messageStatus = formData.get('MessageStatus') as string;
-  const errorCode = formData.get('ErrorCode') as string | null;
-  const errorMessage = formData.get('ErrorMessage') as string | null;
-
-  // Update message status in database
-  await prisma.messageLog.update({
-    where: { twilioSid: messageSid },
-    data: {
-      status: messageStatus,
-      errorCode: errorCode,
-      errorMessage: errorMessage,
-      lastUpdatedAt: new Date(),
-    },
-  });
-
-  // Log the status update
-  console.log(`SMS ${messageSid} status: ${messageStatus}`);
-
-  return NextResponse.json({ success: true });
-}
-```
-
-**File: `src/app/api/webhooks/twilio/whatsapp-status/route.ts`**
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-
-export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-
-  const messageSid = formData.get('MessageSid') as string;
-  const messageStatus = formData.get('MessageStatus') as string;
-  const errorCode = formData.get('ErrorCode') as string | null;
-  const errorMessage = formData.get('ErrorMessage') as string | null;
-
-  // Update message status in database
-  await prisma.messageLog.update({
-    where: { twilioSid: messageSid },
-    data: {
-      status: messageStatus,
-      errorCode: errorCode,
-      errorMessage: errorMessage,
-      deliveredAt: messageStatus === 'delivered' ? new Date() : undefined,
-      readAt: messageStatus === 'read' ? new Date() : undefined,
-      lastUpdatedAt: new Date(),
-    },
-  });
-
-  // Log read receipts for analytics
-  if (messageStatus === 'read') {
-    console.log(`WhatsApp message ${messageSid} was read`);
-    // You can trigger additional actions here, such as:
-    // - Updating engagement metrics
-    // - Sending follow-up messages
-    // - Notifying wedding planners
-  }
-
-  return NextResponse.json({ success: true });
-}
-```
-
-##### Database Schema for Message Tracking
-
-Ensure your database schema includes a table to track message status:
-
-```prisma
-model MessageLog {
-  id            String   @id @default(uuid())
-  twilioSid     String   @unique
-  weddingId     String
-  familyId      String
-  channel       String   // 'SMS', 'WHATSAPP', 'EMAIL'
-  to            String
-  from          String
-  body          String
-  status        String   // 'queued', 'sent', 'delivered', 'read', 'failed'
-  errorCode     String?
-  errorMessage  String?
-  sentAt        DateTime @default(now())
-  deliveredAt   DateTime?
-  readAt        DateTime?
-  lastUpdatedAt DateTime @default(now())
-
-  wedding       Wedding  @relation(fields: [weddingId], references: [id])
-  family        Family   @relation(fields: [familyId], references: [id])
-
-  @@index([weddingId])
-  @@index([familyId])
-  @@index([twilioSid])
-}
-```
+For more details on the implementation, see [`TWILIO_WEBHOOKS_IMPLEMENTATION.md`](./TWILIO_WEBHOOKS_IMPLEMENTATION.md).
 
 ##### Testing Webhooks Locally
 
@@ -961,57 +882,123 @@ For local development, use ngrok or a similar tool to expose your local server:
 
 4. Copy the ngrok URL (e.g., `https://abc123.ngrok.io`)
 
-5. Update your Twilio webhook URLs to use the ngrok URL:
+5. Update your Twilio WhatsApp sender's Status callback URL to:
    ```
-   https://abc123.ngrok.io/api/webhooks/twilio/sms-status
-   https://abc123.ngrok.io/api/webhooks/twilio/whatsapp-status
+   https://abc123.ngrok.io/api/webhooks/twilio/status
    ```
 
-6. Send a test message and watch your local console for webhook callbacks
+6. Send a test WhatsApp message and watch your local console for webhook callbacks:
+   ```
+   [TWILIO_WEBHOOK] Received status callback
+   [TWILIO_WEBHOOK] Created status event
+   ```
 
-##### Webhook Security (Optional but Recommended)
+7. Check the database for new `TrackingEvent` records with `event_type` of `MESSAGE_DELIVERED` or `MESSAGE_READ`
 
-To verify that webhook requests are genuinely from Twilio, validate the signature:
+##### Webhook Security (Already Implemented!)
 
-```typescript
-import { validateRequest } from 'twilio';
+The webhook endpoint automatically validates that requests are genuinely from Twilio using HMAC-SHA1 signature verification:
 
-export async function POST(request: NextRequest) {
-  const authToken = process.env.TWILIO_AUTH_TOKEN!;
-  const twilioSignature = request.headers.get('X-Twilio-Signature') || '';
-  const url = request.url;
+**Security Features:**
+- ✅ Validates `X-Twilio-Signature` header using `TWILIO_AUTH_TOKEN`
+- ✅ Uses constant-time comparison to prevent timing attacks
+- ✅ Rejects requests with invalid or missing signatures (403 Forbidden)
+- ✅ Prevents spoofed webhook requests from unauthorized sources
 
-  const formData = await request.formData();
-  const params: Record<string, string> = {};
-  formData.forEach((value, key) => {
-    params[key] = value.toString();
-  });
+**Implementation:**
+- **File**: `src/lib/webhooks/twilio-validator.ts`
+- **Function**: `validateTwilioSignature(url, params, signature, authToken)`
 
-  // Validate the request came from Twilio
-  const isValid = validateRequest(authToken, twilioSignature, url, params);
+No additional configuration needed - security is enabled automatically when `TWILIO_AUTH_TOKEN` is set in your environment variables.
 
-  if (!isValid) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
-  }
+##### Monitoring Message Status (Built-in Analytics)
 
-  // Process the webhook...
-}
-```
+The application includes built-in analytics to monitor message engagement:
 
-##### Monitoring Message Status
+**Tracking Events in Database:**
+- **INVITATION_SENT**: Message sent to Twilio
+- **MESSAGE_DELIVERED**: Message delivered to recipient's device
+- **MESSAGE_READ**: Recipient opened/read the message (WhatsApp only)
+- **MESSAGE_FAILED**: Message failed to send (includes error code)
+- **LINK_OPENED**: Guest clicked the RSVP link in the message
+- **RSVP_SUBMITTED**: Guest completed the RSVP form
 
-In your Wedding Management App, you can display message status to wedding planners:
+**Analytics Functions Available:**
+- `getGuestEngagementStatus(family_id, wedding_id)` - Full timeline for one family
+- `getWeddingEngagementStats(wedding_id)` - Aggregate stats for all families
+- `getChannelReadRates(wedding_id)` - Channel-specific delivery and read rates
+- `getFamiliesWithUnreadMessages(wedding_id)` - Identify guests who haven't read invitations
 
-- **Sent**: Message sent to Twilio
-- **Delivered**: Message delivered to recipient's device
-- **Read**: Recipient opened/read the message (WhatsApp only)
-- **Failed**: Message failed to send (check error code)
+**UI Components Available:**
+- `GuestEngagementTimeline` - Visual timeline for single family
+- `GuestEngagementList` - Summary list with status indicators
+- `EngagementStats` - Dashboard with aggregate metrics
+
+**Files:**
+- Analytics: `src/lib/tracking/engagement.ts`
+- Components: `src/components/admin/GuestEngagementTimeline.tsx`
+- Documentation: [`TWILIO_WEBHOOKS_IMPLEMENTATION.md`](./TWILIO_WEBHOOKS_IMPLEMENTATION.md)
 
 This helps planners:
-- Identify guests who haven't received invitations
-- Track engagement with WhatsApp messages
-- Troubleshoot delivery issues
-- Resend failed messages
+- ✅ Identify guests who haven't received invitations
+- ✅ Track engagement with WhatsApp messages (read receipts)
+- ✅ Troubleshoot delivery issues with error codes
+- ✅ Resend failed messages
+- ✅ Send follow-up reminders to guests who haven't read messages
+- ✅ Analyze which channels (WhatsApp, SMS, Email) have best engagement
+
+##### Quick Reference: Production Configuration
+
+**WhatsApp Sender Configuration in Twilio Console:**
+
+```
+Webhook URL for incoming messages: [Leave blank]
+Webhook method: HTTP POST
+Fallback URL: [Leave blank]
+Fallback method: HTTP POST
+
+Status callback URL: https://your-domain.com/api/webhooks/twilio/status
+Status callback method: HTTP POST ← IMPORTANT: Must be POST
+```
+
+**SMS Number Configuration in Twilio Console:**
+
+```
+A MESSAGE COMES IN: [Use default or leave blank]
+
+Messaging Status Callback URL: https://your-domain.com/api/webhooks/twilio/status
+```
+
+**Environment Variables Required:**
+
+```bash
+# .env file
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token_here          # Required for webhook signature validation
+TWILIO_PHONE_NUMBER=+1234567890                  # For SMS
+TWILIO_WHATSAPP_NUMBER=+1234567890               # For WhatsApp
+APP_URL=https://your-domain.com                  # Used to construct webhook callback URL
+```
+
+**Verify Webhooks Are Working:**
+
+1. Send a test WhatsApp message from the admin panel
+2. Check application logs for:
+   ```
+   [TWILIO_WEBHOOK] Received status callback
+   [TWILIO_WEBHOOK] Created status event
+   ```
+3. Query the database:
+   ```sql
+   SELECT event_type, timestamp, metadata
+   FROM tracking_events
+   WHERE family_id = 'test-family-id'
+   ORDER BY timestamp DESC;
+   ```
+4. You should see events in this order:
+   - `INVITATION_SENT`
+   - `MESSAGE_DELIVERED` (within seconds)
+   - `MESSAGE_READ` (when recipient opens WhatsApp)
 
 #### Troubleshooting
 
