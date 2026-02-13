@@ -8,8 +8,16 @@
 
 'use client';
 
+import { useEffect, useState, useCallback, use } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import type { MessageTemplate, Language } from '@prisma/client';
+import { TemplateEditor } from '@/components/admin/TemplateEditor';
+import { TemplatePreview } from '@/components/admin/TemplatePreview';
+import { getAvailablePlaceholders } from '@/lib/templates';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
-
 
 type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE';
 type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
