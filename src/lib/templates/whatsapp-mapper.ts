@@ -31,10 +31,29 @@ export function mapToWhatsAppVariables(
 ): Record<string, string> {
   const result: Record<string, string> = {};
 
+  // Determine if using Vercel Blob Storage
+  const isVercel =
+    process.env.PLATFORM_OPTIMIZATION?.toLowerCase() === "vercel" ||
+    !!process.env.BLOB_READ_WRITE_TOKEN;
+
   // Extract filename from image URL if provided
   let inviteImageName = "";
   if (imageUrl) {
-    inviteImageName = path.basename(imageUrl);
+    if (isVercel) {
+      // For Vercel: pass the full URL as-is (with query parameters)
+      inviteImageName = imageUrl;
+    } else {
+      // For non-Vercel: extract just the filename
+      try {
+        // Parse URL to handle query parameters correctly
+        const url = new URL(imageUrl);
+        // Get pathname and extract just the filename without query params
+        inviteImageName = path.basename(url.pathname);
+      } catch {
+        // Fallback to path.basename if URL parsing fails (for relative paths)
+        inviteImageName = path.basename(imageUrl);
+      }
+    }
   }
 
   // Map each variable to its position
