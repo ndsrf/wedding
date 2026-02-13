@@ -595,7 +595,7 @@ export default function GuestsPage() {
       {/* Header */}
       <PrivateHeader
         title={t('admin.guests.title')}
-        backHref="/admin"
+        backUrl="/admin"
       />
 
       {/* Main Content */}
