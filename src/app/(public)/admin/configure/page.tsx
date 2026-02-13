@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
 import { WeddingConfigForm } from '@/components/admin/WeddingConfigForm';
 import PrivateHeader from '@/components/PrivateHeader';
