@@ -1,12 +1,13 @@
 /**
  * Redirect with Loading Spinner
- * Shows a loading spinner before redirecting to the RSVP page
+ * Shows a wedding-themed loading spinner before redirecting to the RSVP page
  */
 
 'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface RedirectWithSpinnerProps {
   destinationUrl: string;
@@ -25,10 +26,10 @@ export default function RedirectWithSpinner({ destinationUrl }: RedirectWithSpin
   }, [destinationUrl, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-rose-50 p-4">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600 text-lg">Loading / Cargando / Caricamento / Laden / Chargement...</p>
+        <WeddingSpinner size="lg" className="mx-auto mb-8" />
+        <p className="text-gray-600 text-lg font-light">Loading / Cargando / Caricamento / Laden / Chargement...</p>
       </div>
     </div>
   );
