@@ -51,5 +51,5 @@ export default async function ShortUrlPage({ params, searchParams }: Props) {
   const qsSuffix = qs.toString();
   const destinationUrl = `/rsvp/${magicToken}${qsSuffix ? `?${qsSuffix}` : ''}`;
 
-  return <RedirectWithSpinner destinationUrl={destinationUrl} />;
+  return <RedirectWithSpinner destinationUrl={destinationUrl} initials={initials} />;
 }

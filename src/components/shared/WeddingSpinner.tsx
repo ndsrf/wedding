@@ -1,6 +1,6 @@
 /**
- * Wedding-themed Loading Spinner
- * An elegant spinner with rotating hearts for wedding-related loading states
+ * Discrete Loading Spinner
+ * A clean, minimal grayscale spinner for loading states
  */
 
 'use client';
@@ -8,47 +8,49 @@
 interface WeddingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  initials?: string;
 }
 
-export default function WeddingSpinner({ size = 'md', className = '' }: WeddingSpinnerProps) {
+export default function WeddingSpinner({ size = 'md', className = '', initials }: WeddingSpinnerProps) {
   const sizeClasses = {
     sm: 'w-8 h-8',
-    md: 'w-16 h-16',
-    lg: 'w-24 h-24',
+    md: 'w-12 h-12',
+    lg: 'w-16 h-16',
   };
 
-  const heartSizes = {
-    sm: 'text-2xl',
-    md: 'text-4xl',
-    lg: 'text-6xl',
+  const borderWidthClasses = {
+    sm: 'border-2',
+    md: 'border-3',
+    lg: 'border-4',
+  };
+
+  const centerDotSize = {
+    sm: 'w-1.5 h-1.5',
+    md: 'w-2 h-2',
+    lg: 'w-2.5 h-2.5',
+  };
+
+  const initialsFontSize = {
+    sm: 'text-xs',
+    md: 'text-sm',
+    lg: 'text-base',
   };
 
   return (
-    <div className={`relative inline-flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-      {/* Rotating ring with hearts */}
-      <div className="absolute inset-0 animate-spin" style={{ animationDuration: '2s' }}>
-        {/* Top heart */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <span className={`${heartSizes[size]}`} style={{ color: '#f472b6' }}>💕</span>
+    <div className={`relative inline-flex items-center justify-center ${className}`}>
+      {/* Spinning ring */}
+      <div
+        className={`rounded-full ${sizeClasses[size]} ${borderWidthClasses[size]} border-gray-200 border-t-gray-600 animate-spin`}
+        style={{ animationDuration: '0.8s' }}
+      />
+      {/* Center content: initials or subtle dot */}
+      {initials ? (
+        <div className={`absolute ${initialsFontSize[size]} font-semibold text-gray-600 tracking-wider`}>
+          {initials}
         </div>
-        {/* Right heart */}
-        <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2">
-          <span className={`${heartSizes[size]}`} style={{ color: '#ec4899' }}>💕</span>
-        </div>
-        {/* Bottom heart */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
-          <span className={`${heartSizes[size]}`} style={{ color: '#f472b6' }}>💕</span>
-        </div>
-        {/* Left heart */}
-        <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2">
-          <span className={`${heartSizes[size]}`} style={{ color: '#ec4899' }}>💕</span>
-        </div>
-      </div>
-
-      {/* Center ring */}
-      <div className="absolute inset-0 flex items-center justify-center animate-pulse">
-        <span className={`${heartSizes[size]}`} style={{ color: '#be185d' }}>💍</span>
-      </div>
+      ) : (
+        <div className={`absolute ${centerDotSize[size]} rounded-full bg-gray-400`} />
+      )}
     </div>
   );
 }
