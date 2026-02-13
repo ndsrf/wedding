@@ -23,10 +23,21 @@ export default function WeddingSpinner({ size = 'md', className = '' }: WeddingS
     lg: 'border-4',
   };
 
+  const centerDotSize = {
+    sm: 'w-1.5 h-1.5',
+    md: 'w-2 h-2',
+    lg: 'w-2.5 h-2.5',
+  };
+
   return (
-    <div
-      className={`inline-block rounded-full ${sizeClasses[size]} ${borderWidthClasses[size]} border-gray-200 border-t-gray-600 animate-spin ${className}`}
-      style={{ animationDuration: '0.8s' }}
-    />
+    <div className={`relative inline-flex items-center justify-center ${className}`}>
+      {/* Spinning ring */}
+      <div
+        className={`rounded-full ${sizeClasses[size]} ${borderWidthClasses[size]} border-gray-200 border-t-gray-600 animate-spin`}
+        style={{ animationDuration: '0.8s' }}
+      />
+      {/* Subtle center dot (represents a diamond) */}
+      <div className={`absolute ${centerDotSize[size]} rounded-full bg-gray-400`} />
+    </div>
   );
 }
