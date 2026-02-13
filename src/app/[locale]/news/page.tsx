@@ -7,6 +7,7 @@ import { generateAMPMetadata, generateStructuredData } from '@/lib/amp'
 import LanguageSelector from '@/components/LanguageSelector'
 import { Language } from '@/lib/i18n/config'
 import MobileNav from '@/components/MobileNav'
+import Footer from '@/components/Footer'
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -165,6 +166,8 @@ export default async function NewsPage({ params }: { params: Promise<{ locale: s
           </Link>
         </div>
       </section>
+
+      <Footer />
       </div>
     </>
   )

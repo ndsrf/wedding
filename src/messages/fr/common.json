@@ -1449,5 +1449,11 @@
       "title": "Prêt à transformer votre activité d'organisation de mariages ?",
       "button": "Commencer"
     }
+  },
+  "cookies": {
+    "title": "Politique de cookies",
+    "message": "Nous utilisons des cookies pour améliorer votre expérience. En continuant à naviguer, vous acceptez notre utilisation des cookies.",
+    "accept": "Accepter",
+    "privacy": "Politique de confidentialité"
   }
 }

@@ -1449,5 +1449,11 @@
       "title": "Bereit, Ihr Hochzeitsplanungsgeschäft zu transformieren?",
       "button": "Loslegen"
     }
+  },
+  "cookies": {
+    "title": "Cookie-Richtlinie",
+    "message": "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Durch das Fortsetzen des Surfens stimmen Sie der Verwendung von Cookies zu.",
+    "accept": "Akzeptieren",
+    "privacy": "Datenschutzrichtlinie"
   }
 }

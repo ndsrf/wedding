@@ -1484,5 +1484,11 @@
       "title": "Ready to transform your wedding planning business?",
       "button": "Get Started"
     }
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "message": "We use cookies to improve your experience. By continuing to browse, you agree to our use of cookies.",
+    "accept": "Accept",
+    "privacy": "Privacy Policy"
   }
 }

@@ -7,6 +7,7 @@ import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { generateAMPMetadata } from '@/lib/amp';
+import Footer from '@/components/Footer';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -173,12 +174,7 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-400">© 2026 {commercialName}. {t('landing.footer.rights')}</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

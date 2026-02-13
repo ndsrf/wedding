@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
+import Footer from '@/components/Footer';
 
 export default function ContactPage() {
   const t = useTranslations();
@@ -235,12 +236,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-400">© 2026 {commercialName}. {t('landing.footer.rights')}</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

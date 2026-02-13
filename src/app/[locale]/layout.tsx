@@ -5,6 +5,7 @@ import { routing } from '@/i18n/routing'
 import { notFound } from 'next/navigation'
 import { isValidLanguage } from '@/lib/i18n/config'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import CookieConsent from '@/components/CookieConsent'
 import '../globals.css'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -80,6 +81,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
+          <CookieConsent />
         </NextIntlClientProvider>
         <SpeedInsights />
       </body>

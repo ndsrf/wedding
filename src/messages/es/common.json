@@ -1461,5 +1461,11 @@
       "title": "¿Listo para transformar tu negocio de planificación de bodas?",
       "button": "Comenzar"
     }
+  },
+  "cookies": {
+    "title": "Política de Cookies",
+    "message": "Utilizamos cookies para mejorar tu experiencia. Al continuar navegando, aceptas nuestro uso de cookies.",
+    "accept": "Aceptar",
+    "privacy": "Política de Privacidad"
   }
 }
