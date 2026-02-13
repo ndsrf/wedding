@@ -167,6 +167,7 @@ export async function GET(_request: NextRequest, context: RouteParams) {
       admin_triggered: true,
       timestamp: family.created_at,
       family_name: family.name,
+      triggered_by_user: null,
     };
 
     // Add the created event to the end (it's the oldest event)
