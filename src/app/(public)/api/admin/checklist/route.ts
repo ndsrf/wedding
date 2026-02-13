@@ -9,7 +9,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import DOMPurify from 'isomorphic-dompurify';
 import { requireAnyRole } from '@/lib/auth/middleware';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
@@ -25,6 +24,16 @@ import {
 } from '@/lib/checklist/notifications';
 import type { TaskAssignment, TaskStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
+
+// Lazy load DOMPurify to avoid ESM import issues
+let DOMPurify: typeof import('isomorphic-dompurify').default | null = null;
+const getDOMPurify = async () => {
+  if (!DOMPurify) {
+    const dompurifyModule = await import('isomorphic-dompurify');
+    DOMPurify = dompurifyModule.default;
+  }
+  return DOMPurify;
+};
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -68,11 +77,13 @@ const deleteTaskSchema = z.object({
  * Sanitize rich text description to prevent XSS attacks
  * Strips all potentially dangerous HTML tags and attributes
  */
-function sanitizeDescription(description: string | null | undefined): string | null {
+async function sanitizeDescription(description: string | null | undefined): Promise<string | null> {
   if (!description) return null;
 
+  const purify = await getDOMPurify();
+
   // Allow only safe HTML tags for rich text
-  const clean = DOMPurify.sanitize(description, {
+  const clean = purify.sanitize(description, {
     ALLOWED_TAGS: [
       'p',
       'br',
@@ -267,7 +278,7 @@ export async function POST(request: NextRequest) {
     const validatedData = createTaskSchema.parse(body);
 
     // Sanitize description
-    const sanitizedDescription = sanitizeDescription(validatedData.description);
+    const sanitizedDescription = await sanitizeDescription(validatedData.description);
 
     // Create task
     const task = await createTask({
@@ -429,7 +440,7 @@ export async function PATCH(request: NextRequest) {
       updateData.title = validatedData.title;
     }
     if (validatedData.description !== undefined) {
-      updateData.description = sanitizeDescription(validatedData.description);
+      updateData.description = await sanitizeDescription(validatedData.description);
     }
     if (validatedData.assigned_to !== undefined) {
       updateData.assigned_to = validatedData.assigned_to;

@@ -23,6 +23,8 @@ const nextConfig = {
     },
     // Automatically optimize imports from these packages
     optimizePackageImports: ['lucide-react', 'xlsx', 'zod'],
+    // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
+    serverComponentsExternalPackages: ['@exodus/bytes'],
   },
   env: {
     // Automatically enable Facebook login if credentials are provided
