@@ -9,6 +9,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import type { MemberType } from '@/types/models';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface GuestAddition {
   id: string;
@@ -54,7 +55,7 @@ export function GuestAdditionsReview({
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-8 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+        <WeddingSpinner size="md" className="mx-auto" />
         <p className="mt-4 text-gray-500">{t('admin.guestAdditions.loading')}</p>
       </div>
     );

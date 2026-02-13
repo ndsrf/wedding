@@ -17,6 +17,7 @@ import type { MessageTemplate, Language } from '@prisma/client';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
 import { TemplatePreview } from '@/components/admin/TemplatePreview';
 import { getAvailablePlaceholders } from '@/lib/templates';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE';
 type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
@@ -125,7 +126,7 @@ export default function TemplatesPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <WeddingSpinner size="lg" />
           <p className="mt-4 text-gray-600">{t('loading')}</p>
         </div>
       </div>

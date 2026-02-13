@@ -8,6 +8,7 @@
 'use client';
 
 import { useState } from 'react';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { Language } from '@prisma/client';
 
 interface LanguageSelectorProps {
@@ -72,7 +73,7 @@ export default function LanguageSelector({
       </select>
       {updating && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+          <WeddingSpinner size="sm" />
         </div>
       )}
     </div>

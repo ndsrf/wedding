@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ChecklistEditor } from '@/components/admin/ChecklistEditor';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface ChecklistPageProps {
   params: Promise<{ id: string }>;
@@ -64,7 +65,7 @@ export default function ChecklistPage({ params }: ChecklistPageProps) {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white shadow rounded-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <WeddingSpinner size="md" className="mx-auto" />
             <p className="mt-4 text-gray-500">{t('common.loading') || 'Loading...'}</p>
           </div>
         </div>

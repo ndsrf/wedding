@@ -14,6 +14,7 @@ import { X } from 'lucide-react';
 import { AdminInviteForm } from '@/components/planner/AdminInviteForm';
 import type { WeddingWithStats } from '@/types/models';
 import type { WeddingAdmin } from '@prisma/client';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface WeddingDetailPageProps {
   params: Promise<{ id: string }>;
@@ -139,7 +140,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <WeddingSpinner size="md" />
           <p className="mt-2 text-sm text-gray-500">{t('planner.weddings.loadingDetails')}</p>
         </div>
       </div>

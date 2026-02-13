@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { WeddingProviders } from '@/components/shared/WeddingProviders';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface PageProps {
   params: Promise<{
@@ -59,7 +60,7 @@ export default function PlannerWeddingProvidersPage({ params }: PageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <WeddingSpinner size="md" />
           <p className="mt-2 text-sm text-gray-500">{t('common.loading') || 'Loading...'}</p>
         </div>
       </div>

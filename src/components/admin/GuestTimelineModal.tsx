@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import type { EventType, Channel } from '@/types/models';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface TrackingEventWithFamily {
   id: string;
@@ -167,7 +168,7 @@ export function GuestTimelineModal({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {loading && (
             <div className="flex justify-center items-center h-48">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              <WeddingSpinner size="md" className="mx-auto" />
             </div>
           )}
 

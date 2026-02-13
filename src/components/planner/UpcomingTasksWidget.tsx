@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { UpcomingTask } from '@/types/checklist';
 import type { APIResponse } from '@/types/api';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 type SortField = 'due_date' | 'title' | 'wedding';
 type SortDirection = 'asc' | 'desc';
@@ -156,7 +157,7 @@ export function UpcomingTasksWidget() {
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">{t('planner.upcomingTasks.title')}</h2>
         <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" aria-hidden="true"></div>
+          <WeddingSpinner size="md" aria-hidden="true" />
           <span className="ml-3 text-gray-500">{t('common.loading')}</span>
         </div>
       </div>

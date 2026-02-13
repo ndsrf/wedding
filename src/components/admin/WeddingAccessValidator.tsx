@@ -11,6 +11,7 @@
 'use client';
 
 import React, { useState, useEffect, ReactNode } from 'react';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -87,7 +88,7 @@ export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <WeddingSpinner size="lg" className="mx-auto" />
           <p className="mt-4 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>

@@ -14,6 +14,7 @@ import LanguageSelector from '@/components/guest/LanguageSelector';
 import ConfirmationMessage from '@/components/guest/ConfirmationMessage';
 import { EnvelopeReveal } from '@/components/guest/EnvelopeReveal';
 import TemplateRenderer from '@/components/guest/TemplateRenderer';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { GuestRSVPPageData } from '@/types/api';
 import type { SupportedLanguage } from '@/types/invitation-template';
 
@@ -64,7 +65,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <WeddingSpinner size="lg" className="mx-auto mb-4" />
           <p className="text-gray-600 text-lg">Loading...</p>
         </div>
       </div>

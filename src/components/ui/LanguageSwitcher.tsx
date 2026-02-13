@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 const LANGUAGES = [
   { code: 'es', name: 'Español', flag: '🇪🇸' },
@@ -63,7 +64,7 @@ export function LanguageSwitcher() {
         <span className="text-xl">{currentLanguage?.flag || '🌐'}</span>
         {isPending && (
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-white bg-opacity-50">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <WeddingSpinner size="sm" />
           </div>
         )}
       </button>

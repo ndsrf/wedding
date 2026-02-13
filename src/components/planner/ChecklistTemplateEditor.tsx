@@ -27,6 +27,7 @@ import type {
 import type { APIResponse } from '@/types/api';
 import { TaskAssignment, TaskStatus } from '@prisma/client';
 import { isValidRelativeDateFormat } from '@/types/checklist';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface ChecklistTemplateEditorProps {
   className?: string;
@@ -515,7 +516,7 @@ export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEdi
     return (
       <div className={`bg-white shadow rounded-lg p-6 ${className}`}>
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <WeddingSpinner size="lg" />
           <span className="ml-3 text-gray-600">Loading template...</span>
         </div>
       </div>
@@ -574,7 +575,7 @@ export function ChecklistTemplateEditor({ className = '' }: ChecklistTemplateEdi
             >
               {saving ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" aria-hidden="true"></div>
+                  <WeddingSpinner size="sm" className="mr-2" aria-hidden="true" />
                   <span>Saving...</span>
                 </>
               ) : (
