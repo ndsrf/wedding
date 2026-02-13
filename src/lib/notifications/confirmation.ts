@@ -15,6 +15,7 @@ import { trackEvent } from "@/lib/tracking/events";
 import type { Language as I18nLanguage } from "@/lib/i18n/config";
 import type { Channel } from "@prisma/client";
 import { formatDateByLanguage } from "@/lib/date-formatter";
+import { toAbsoluteUrl } from "@/lib/images/processor";
 
 export interface SendConfirmationOptions {
   family_id: string;
@@ -119,9 +120,7 @@ export async function sendConfirmation(
     const renderedBody = renderTemplate(template.body, variables);
 
     // Convert relative image URL to absolute URL
-    const absoluteImageUrl = template.image_url
-      ? `${process.env.APP_URL || "http://localhost:3000"}${template.image_url}`
-      : undefined;
+    const absoluteImageUrl = toAbsoluteUrl(template.image_url);
 
     // Send message based on channel
     let messageResult: { success: boolean; messageId?: string; error?: string };
