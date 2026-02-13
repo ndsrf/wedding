@@ -1,3 +1,31 @@
+# [1.0.0](https://github.com/ndsrf/wedding/compare/v0.10.0...v1.0.0) (2026-02-13)
+
+
+### Bug Fixes
+
+* correct magic_token field name and document undici vulnerability ([fc5f06d](https://github.com/ndsrf/wedding/commit/fc5f06d77db3a4d45e60569ba8dc8967d8213778))
+* Correct return type of toAbsoluteUrl to string | undefined ([ba8542e](https://github.com/ndsrf/wedding/commit/ba8542ef3f963eaf1194b6e4fb7f2bb179abb7f8))
+* enable pre render invalidation when wedding template changes ([355bf34](https://github.com/ndsrf/wedding/commit/355bf3422a3353d6abe54474841fba2b5a55aaf6))
+* Facebook login button was not appearing on the sign-in screen even when the facebook oauth details were entered in the .env file ([46bdfb9](https://github.com/ndsrf/wedding/commit/46bdfb94b30a5c8e8e8385f05bf60503eca48b57))
+* Handle absolute URLs in Vercel Blob storage for invitation images ([90ff906](https://github.com/ndsrf/wedding/commit/90ff906a79157df6a8dcf06113f12afb9afbcb07))
+* improve revalidation error handling and fix test assertions ([d8c32dd](https://github.com/ndsrf/wedding/commit/d8c32dd418ff68e58c0e161f1f04614d60cc3f4f))
+* Include themes in migration scripts ([5809607](https://github.com/ndsrf/wedding/commit/5809607dd446ea5e13465f702de26276389bb5b5))
+* translations issues ([0f279f5](https://github.com/ndsrf/wedding/commit/0f279f5b9896190224b5f3f2a7e333a048bce88b))
+
+
+### Features
+
+* add template screen for planners ([9543898](https://github.com/ndsrf/wedding/commit/954389869651cb1cfe2ca8faa396d35680051fcc))
+* Add Vercel blob storage support ([776a77b](https://github.com/ndsrf/wedding/commit/776a77b9af36526b41a69580d79a582492278a90))
+* checklist editable for existing weddings ([e51191f](https://github.com/ndsrf/wedding/commit/e51191fa76486e93397c811ad4ef35dc07c19985))
+* cookie consent ([5152e61](https://github.com/ndsrf/wedding/commit/5152e61f6ff956c8729fe4edd0da681111f2f415))
+* implement ISR with on-demand revalidation for RSVP pages ([a91c286](https://github.com/ndsrf/wedding/commit/a91c2863d49ef0c30d70c66095e66d0e5ccb711f))
+* planner screens to edit weddings ([3b6ee02](https://github.com/ndsrf/wedding/commit/3b6ee029998b231aeb1ef778be3b6583dfe49d0e))
+* rsvp pre-render to speed up rsvp generation ([85835ea](https://github.com/ndsrf/wedding/commit/85835ea6a3489a294fef092df9ccd3df92aae63a))
+* Template editor for wedding planner to set defaults for all their weddings ([b6ceaed](https://github.com/ndsrf/wedding/commit/b6ceaede56717a5b44792c5ce473b9ad5b1d10e3))
+
+
+
 # [0.10.0](https://github.com/ndsrf/wedding/compare/v0.9.1...v0.10.0) (2026-02-10)
 
 
