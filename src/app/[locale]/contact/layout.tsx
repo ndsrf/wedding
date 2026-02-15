@@ -3,6 +3,7 @@ import { generateAMPMetadata } from '@/lib/amp';
 import { getTranslations } from '@/lib/i18n/server';
 import { Language } from '@/lib/i18n/config';
 import AMPLink from '@/components/AMPLink';
+import ReCaptchaWrapper from './ReCaptchaWrapper';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -30,7 +31,9 @@ export default async function ContactLayout({
   return (
     <>
       <AMPLink ampUrl={`${baseUrl}/${locale}/contact/amp`} />
-      {children}
+      <ReCaptchaWrapper>
+        {children}
+      </ReCaptchaWrapper>
     </>
   );
 }
