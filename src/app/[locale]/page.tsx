@@ -8,12 +8,13 @@ import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
 import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
+import AMPLink from '@/components/AMPLink';
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  
+
   return {
     title: `${commercialName} - Wedding Management Platform`,
     description: `Transform your wedding planning business with ${commercialName}`,
@@ -32,9 +33,11 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
   setRequestLocale(locale);
   const { t } = await getTranslations(locale as Language);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
 
   return (
     <>
+      <AMPLink ampUrl={`${baseUrl}/${locale}/amp`} />
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">

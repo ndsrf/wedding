@@ -20,6 +20,7 @@ interface AMPConfig {
 /**
  * Generate AMP-compatible metadata for a page
  * Adds proper canonical links, structured data, and Open Graph tags
+ * Note: For amphtml link, add it directly in the layout <head> section
  */
 export function generateAMPMetadata(config: AMPConfig): Metadata {
   const {

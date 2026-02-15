@@ -8,6 +8,7 @@ import LanguageSelector from '@/components/LanguageSelector'
 import { Language } from '@/lib/i18n/config'
 import MobileNav from '@/components/MobileNav'
 import Footer from '@/components/Footer'
+import AMPLink from '@/components/AMPLink'
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -43,6 +44,7 @@ export default async function NewsPage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
+      <AMPLink ampUrl={`${baseUrl}/${locale}/news/amp`} />
       {/* Structured Data for SEO */}
       <script
         type="application/ld+json"
