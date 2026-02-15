@@ -7,6 +7,44 @@ interface ContactFormData {
   phone: string;
   reason: string;
   message: string;
+  recaptchaToken?: string;
+}
+
+async function verifyRecaptcha(token: string): Promise<boolean> {
+  try {
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    if (!secretKey) {
+      console.error('RECAPTCHA_SECRET_KEY environment variable is not set');
+      return false;
+    }
+
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `secret=${secretKey}&response=${token}`,
+    });
+
+    const data = await response.json();
+
+    // For reCAPTCHA v3, check the score (0.0 - 1.0)
+    // Scores closer to 1.0 indicate lower risk
+    if (data.success && data.score >= 0.5) {
+      return true;
+    }
+
+    console.warn('reCAPTCHA verification failed:', {
+      success: data.success,
+      score: data.score,
+      errorCodes: data['error-codes'],
+    });
+
+    return false;
+  } catch (error) {
+    console.error('Error verifying reCAPTCHA:', error);
+    return false;
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -23,7 +61,23 @@ export async function POST(request: NextRequest) {
 
     const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
     const body: ContactFormData = await request.json();
-    const { name, email, phone, reason, message } = body;
+    const { name, email, phone, reason, message, recaptchaToken } = body;
+
+    // Validate reCAPTCHA token
+    if (!recaptchaToken) {
+      return NextResponse.json(
+        { error: 'reCAPTCHA token is missing' },
+        { status: 400 }
+      );
+    }
+
+    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!isRecaptchaValid) {
+      return NextResponse.json(
+        { error: 'reCAPTCHA verification failed. Please try again.' },
+        { status: 400 }
+      );
+    }
 
     // Validate required fields
     if (!name || !email || !phone || !reason || !message) {

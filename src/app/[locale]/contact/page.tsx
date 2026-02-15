@@ -6,10 +6,12 @@ import Link from 'next/link';
 import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
 import Footer from '@/components/Footer';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 export default function ContactPage() {
   const t = useTranslations();
   const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
@@ -26,12 +28,25 @@ export default function ContactPage() {
     setSubmitStatus('idle');
 
     try {
+      // Execute reCAPTCHA
+      if (!executeRecaptcha) {
+        console.error('reCAPTCHA not available');
+        setSubmitStatus('error');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const recaptchaToken = await executeRecaptcha('contact_form_submit');
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          recaptchaToken,
+        }),
       });
 
       if (response.ok) {
