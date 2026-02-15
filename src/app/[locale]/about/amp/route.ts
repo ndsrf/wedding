@@ -58,7 +58,7 @@ export async function GET(
     description,
     content,
     styles,
-    scripts: ['amp-img'],
+    scripts: [], // amp-img is built-in, no script needed
   });
 
   return new NextResponse(html, {

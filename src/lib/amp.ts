@@ -117,6 +117,8 @@ export function isAMPCompatible(): boolean {
 /**
  * AMP Script component placeholder
  * Use this to mark where AMP scripts should be injected
+ *
+ * Note: amp-img is a built-in component and doesn't require a separate script tag
  */
 export const AMPScripts = {
   base: '<!doctype html><html amp lang="en">',
@@ -124,9 +126,10 @@ export const AMPScripts = {
     '<script async src="https://cdn.ampproject.org/v0.js"></script>',
   ],
   components: {
-    'amp-img': '<script async custom-element="amp-img" src="https://cdn.ampproject.org/v0/amp-img-0.1.js"></script>',
-    'amp-carousel': '<script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>',
+    'amp-carousel': '<script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>',
     'amp-video': '<script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>',
+    'amp-sidebar': '<script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>',
+    'amp-accordion': '<script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>',
   },
 };
 
