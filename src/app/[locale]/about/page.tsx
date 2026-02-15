@@ -7,6 +7,7 @@ import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Footer from '@/components/Footer';
+import AMPLink from '@/components/AMPLink';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -31,9 +32,11 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   setRequestLocale(locale);
   const { t } = await getTranslations(locale as Language);
   const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
 
   return (
     <>
+      <AMPLink ampUrl={`${baseUrl}/${locale}/about/amp`} />
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">

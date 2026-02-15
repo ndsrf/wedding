@@ -7,6 +7,7 @@ import { Language, isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Footer from '@/components/Footer';
+import AMPLink from '@/components/AMPLink';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -31,9 +32,12 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
   setRequestLocale(locale);
   const { t } = await getTranslations(locale as Language);
   const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+    <>
+      <AMPLink ampUrl={`${baseUrl}/${locale}/privacy/amp`} />
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -147,5 +151,6 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
 
       <Footer />
     </div>
+    </>
   );
 }

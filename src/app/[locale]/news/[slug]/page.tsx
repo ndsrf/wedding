@@ -7,6 +7,7 @@ import { Metadata } from 'next'
 import { generateAMPMetadata } from '@/lib/amp'
 import LanguageSelector from '@/components/LanguageSelector'
 import { Language } from '@/lib/i18n/config'
+import AMPLink from '@/components/AMPLink'
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -54,6 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ArticlePage({ params }: Props) {
   const { locale, slug } = await params
   const { t } = await getTranslations(locale as Language)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
 
   let article
   try {
@@ -65,7 +67,9 @@ export default async function ArticlePage({ params }: Props) {
   const { frontmatter, content } = article
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
+    <>
+      <AMPLink ampUrl={`${baseUrl}/${locale}/news/${slug}/amp`} />
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -198,6 +202,7 @@ export default async function ArticlePage({ params }: Props) {
           </Link>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   )
 }
