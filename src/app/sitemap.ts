@@ -4,6 +4,10 @@ import { getAllArticles } from '@/lib/news/markdown'
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com'
 const locales = ['en', 'es', 'fr', 'it', 'de']
 
+// Revalidate sitemap every hour (3600 seconds)
+// This ensures new articles appear in the sitemap within an hour of publishing
+export const revalidate = 3600
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes: MetadataRoute.Sitemap = []
 
