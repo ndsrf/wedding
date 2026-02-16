@@ -397,3 +397,109 @@ export async function exportGuestDataSimplified(wedding_id: string): Promise<Exp
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   };
 }
+
+/**
+ * Export guest data in import-compatible format
+ * This template can be re-imported using the importGuestList function
+ *
+ * @param wedding_id - Wedding ID to export guests for
+ * @returns Buffer containing the exported file in import-compatible format
+ */
+export async function exportGuestDataForImport(wedding_id: string): Promise<ExportResult> {
+  const familiesData = await fetchGuestData(wedding_id);
+
+  // Prepare export rows matching import template
+  const exportRows: (string | number)[][] = [];
+
+  // Header row - matches import template exactly
+  const headers = [
+    'Family Name',
+    'Contact Person',
+    'Email',
+    'Phone',
+    'WhatsApp',
+    'Language',
+    'Channel',
+    'Invited By',
+  ];
+
+  // Add member headers (up to 10 members with 3 columns each)
+  for (let i = 1; i <= 10; i++) {
+    headers.push(
+      `Member ${i} Name`,
+      `Member ${i} Type`,
+      `Member ${i} Age`
+    );
+  }
+
+  exportRows.push(headers);
+
+  // Add data rows
+  for (const family of familiesData) {
+    const row: (string | number)[] = [
+      family.familyName,
+      family.contactPerson,
+      family.email,
+      family.phone,
+      family.whatsapp,
+      family.language,
+      family.channel || '',
+      family.invitedByAdmin,
+    ];
+
+    // Add member data (up to 10 members, 3 columns each)
+    for (let i = 0; i < 10; i++) {
+      const member = family.members[i];
+      if (member) {
+        row.push(
+          member.name,
+          member.type,
+          member.age || ''
+        );
+      } else {
+        row.push('', '', '');
+      }
+    }
+
+    exportRows.push(row);
+  }
+
+  // Create workbook
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.aoa_to_sheet(exportRows);
+
+  // Set column widths
+  const columnWidths = [
+    { wch: 20 }, // Family Name
+    { wch: 20 }, // Contact Person
+    { wch: 25 }, // Email
+    { wch: 15 }, // Phone
+    { wch: 15 }, // WhatsApp
+    { wch: 10 }, // Language
+    { wch: 12 }, // Channel
+    { wch: 20 }, // Invited By
+  ];
+
+  // Add widths for member columns
+  for (let i = 0; i < 10; i++) {
+    columnWidths.push(
+      { wch: 20 }, // Member Name
+      { wch: 10 }, // Member Type
+      { wch: 8 }   // Member Age
+    );
+  }
+
+  worksheet['!cols'] = columnWidths;
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Guest List');
+
+  // Generate file
+  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+  const timestamp = new Date().toISOString().split('T')[0];
+
+  return {
+    buffer: Buffer.from(buffer),
+    filename: `guest-list-import-template-${timestamp}.xlsx`,
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  };
+}

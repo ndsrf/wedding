@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
-import { exportGuestData, exportGuestDataSimplified } from '@/lib/excel/export';
+import { exportGuestData, exportGuestDataSimplified, exportGuestDataForImport } from '@/lib/excel/export';
 import type { ExportFormat } from '@/lib/excel/export';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
@@ -18,6 +18,7 @@ import { API_ERROR_CODES } from '@/types/api';
  * Query parameters:
  * - format: 'xlsx' | 'csv' (default: 'xlsx')
  * - simplified: 'true' | 'false' (default: 'false')
+ * - forImport: 'true' | 'false' (default: 'false') - export in import-compatible format
  * - includePayment: 'true' | 'false' (default: 'true')
  * - includeRsvp: 'true' | 'false' (default: 'true')
  */
@@ -41,6 +42,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const format = (searchParams.get('format') || 'xlsx') as ExportFormat;
     const simplified = searchParams.get('simplified') === 'true';
+    const forImport = searchParams.get('forImport') === 'true';
     const includePayment = searchParams.get('includePayment') !== 'false';
     const includeRsvp = searchParams.get('includeRsvp') !== 'false';
 
@@ -57,13 +59,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Export guest data
-    const result = simplified
-      ? await exportGuestDataSimplified(user.wedding_id)
-      : await exportGuestData(user.wedding_id, {
-          format,
-          includePaymentInfo: includePayment,
-          includeRsvpStatus: includeRsvp,
-        });
+    let result;
+    if (forImport) {
+      result = await exportGuestDataForImport(user.wedding_id);
+    } else if (simplified) {
+      result = await exportGuestDataSimplified(user.wedding_id);
+    } else {
+      result = await exportGuestData(user.wedding_id, {
+        format,
+        includePaymentInfo: includePayment,
+        includeRsvpStatus: includeRsvp,
+      });
+    }
 
     // Return file as download
     return new NextResponse(new Uint8Array(result.buffer), {
