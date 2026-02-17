@@ -184,9 +184,9 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
         ['Ana García', 'CHILD', 8],
       ],
       [
-        ['', '', '', ''],
-        ['', 'Vegetarian', '', ''],
-        ['', '', '', ''],
+        ['Yes', '', '', ''],
+        ['Yes', 'Vegetarian', '', ''],
+        ['No', '', '', ''],
         ['', '', '', ''],
       ]
     ));
@@ -200,8 +200,8 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
         ['Emily Smith', 'INFANT', 2],
       ],
       [
-        ['', 'Gluten-free', 'Wheelchair access needed', ''],
-        ['', '', '', ''],
+        ['Yes', 'Gluten-free', 'Wheelchair access needed', ''],
+        ['Yes', '', '', ''],
         ['', '', '', ''],
       ]
     ));
@@ -233,12 +233,16 @@ export function generateTemplate(options: TemplateOptions = {}): TemplateResult 
     ['- Member X Age: Age of family member (optional)'],
     [''],
     ['Optional Fields — Member extra (cols AS onwards, 4 cols × 10 members):'],
+    ['- Member X Attending: RSVP status — Yes, No, or leave blank for Pending'],
     ['- Member X Dietary: Dietary restrictions or preferences (e.g. Vegetarian, Gluten-free)'],
     ['- Member X Accessibility: Accessibility requirements (e.g. Wheelchair access needed)'],
     [''],
-    ['Read-Only Fields (cols AM-AT — filled automatically on export, ignored on import):'],
-    ['- Reference Code, RSVP Status, Total Members, Attending, Not Attending, Pending, Payment Status, Payment Amount'],
-    ['- Member X Attending, Member X Added By Guest'],
+    ['Optional Fields — Extra family (col AM):'],
+    ['- Reference Code: If provided, used as-is; otherwise auto-generated for automated payment mode'],
+    [''],
+    ['Read-Only Fields (cols AN-AT — filled automatically on export, ignored on import):'],
+    ['- RSVP Status, Total Members, Attending count, Not Attending count, Pending count, Payment Status, Payment Amount'],
+    ['- Member X Added By Guest'],
     [''],
     ['Member Types:'],
     ['- ADULT: Adults (18+ years)'],
