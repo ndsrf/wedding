@@ -28,6 +28,8 @@ export interface ImportRow {
     name: string;
     type: MemberType;
     age: number | null;
+    dietaryRestrictions: string | null;
+    accessibilityNeeds: string | null;
   }>;
 }
 
@@ -165,22 +167,33 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
     const invitedBy = row[7] ? String(row[7]).trim() : null;
 
     // Parse members (up to 10)
+    // Unified column layout:
+    //   Cols  8-37: Member 1-10 basic info — Name (8+i*3), Type (9+i*3), Age (10+i*3)
+    //   Cols 38-45: Extra family summary (Reference Code, RSVP, Payment — ignored on import)
+    //   Cols 46-85: Member 1-10 extra info — Attending (46+i*4), Dietary (47+i*4),
+    //               Accessibility (48+i*4), Added By Guest (49+i*4)
     const members: ImportRow['members'] = [];
 
     for (let i = 0; i < 10; i++) {
       const nameIndex = 8 + (i * 3);
       const typeIndex = 9 + (i * 3);
       const ageIndex = 10 + (i * 3);
+      const dietaryIndex = 47 + (i * 4);
+      const accessibilityIndex = 48 + (i * 4);
 
       const memberName = row[nameIndex] ? String(row[nameIndex]).trim() : '';
       const memberType = row[typeIndex] ? String(row[typeIndex]).trim() : '';
       const memberAge = row[ageIndex] ? parseInt(String(row[ageIndex]), 10) : null;
+      const memberDietary = row[dietaryIndex] ? String(row[dietaryIndex]).trim() : null;
+      const memberAccessibility = row[accessibilityIndex] ? String(row[accessibilityIndex]).trim() : null;
 
       if (memberName && memberType) {
         members.push({
           name: memberName,
           type: memberType as MemberType,
           age: memberAge,
+          dietaryRestrictions: memberDietary,
+          accessibilityNeeds: memberAccessibility,
         });
       }
     }
@@ -485,6 +498,8 @@ export async function importGuestList(
               type: member.type,
               age: member.age,
               added_by_guest: false,
+              dietary_restrictions: member.dietaryRestrictions,
+              accessibility_needs: member.accessibilityNeeds,
             },
           });
 
