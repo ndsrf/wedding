@@ -29,6 +29,9 @@ const ACCEPTED_GHSAS = [
 
   // undici - MODERATE severity
   'GHSA-g9mf-h72j-4rw9', // Unbounded decompression chain
+
+  // ajv - MODERATE severity
+  'GHSA-2g4f-4pwh-qvx6', // ReDoS when using $data option (via eslint dev dependency)
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];

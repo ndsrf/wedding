@@ -6,7 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
-Last updated: 2026-02-11
+Last updated: 2026-02-18
 
 ### Current Vulnerabilities
 
@@ -71,6 +71,17 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Development-only dependency
   - Not included in production builds
   - Low risk
+- **Mitigation**: Development-only dependency, not included in production bundles
+
+##### ajv - ReDoS via $data Option
+- **Package**: ajv < 8.18.0 (via eslint@9.x → @eslint/eslintrc)
+- **CVE**: [GHSA-2g4f-4pwh-qvx6](https://github.com/advisories/GHSA-2g4f-4pwh-qvx6)
+- **Status**: Fix requires downgrading eslint from v9 to v4.1.1 (breaking change)
+- **Usage**: Development dependency only (ESLint validation tooling)
+- **Risk Assessment**:
+  - ReDoS only triggered by ajv's `$data` option, which eslint does not expose to user input
+  - Dev-only dependency, not included in production bundles
+  - Worst case impact: slow linting in CI, not a production security issue
 - **Mitigation**: Development-only dependency, not included in production bundles
 
 ##### undici - Unbounded Decompression Chain
