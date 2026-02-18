@@ -154,6 +154,8 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
       MESSAGE_DELIVERED: 'messageDelivered',
       MESSAGE_READ: 'messageRead',
       MESSAGE_FAILED: 'messageFailed',
+      MESSAGE_RECEIVED: 'messageReceived',
+      AI_REPLY_SENT: 'aiReplySent',
     };
 
     // For RSVP_STARTED, which isn't in our map explicitly, we could add it or fallback

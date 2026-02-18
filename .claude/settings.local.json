@@ -90,7 +90,9 @@
       "Bash(do if grep -q \"\"news\"\": src/messages/$lang/common.json)",
       "Bash(then echo '✓ $lang translations added' else echo '✗ $lang translations missing' fi done)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate resolve:*)",
-      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx tsx:*)"
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx tsx:*)",
+      "Bash(npm ls:*)",
+      "Bash(DATABASE_URL=postgresql://wedding:wedding@postgresql.lan:5432/wed1 npx prisma db push:*)"
     ]
   }
 }

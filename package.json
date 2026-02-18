@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@react-email/components": "^0.0.29",
@@ -42,6 +43,7 @@
     "next": "^15.1.6",
     "next-auth": "^5.0.0-beta.30",
     "next-intl": "^4.7.0",
+    "openai": "^6.22.0",
     "pg": "^8.17.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -51,6 +51,8 @@ const getEventIcon = (eventType: EventType | 'GUEST_CREATED'): string => {
     MESSAGE_DELIVERED: '📬',
     MESSAGE_READ: '👁️',
     MESSAGE_FAILED: '❌',
+    MESSAGE_RECEIVED: '💬',
+    AI_REPLY_SENT: '🤖',
   };
   return icons[eventType] || '📌';
 };
@@ -72,6 +74,8 @@ const getEventColor = (eventType: EventType | 'GUEST_CREATED'): string => {
     MESSAGE_DELIVERED: 'bg-blue-100 text-blue-800',
     MESSAGE_READ: 'bg-teal-100 text-teal-800',
     MESSAGE_FAILED: 'bg-red-100 text-red-800',
+    MESSAGE_RECEIVED: 'bg-violet-100 text-violet-800',
+    AI_REPLY_SENT: 'bg-sky-100 text-sky-800',
   };
   return colors[eventType] || 'bg-gray-100 text-gray-800';
 };

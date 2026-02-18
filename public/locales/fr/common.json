@@ -821,7 +821,9 @@
         "taskCompleted": "Tâche Terminée",
         "messageDelivered": "Message Livré",
         "messageRead": "Message Lu",
-        "messageFailed": "Message Échoué"
+        "messageFailed": "Message Échoué",
+        "messageReceived": "Message Reçu",
+        "aiReplySent": "Réponse IA Envoyée"
       },
       "eventTypes": {
         "LINK_OPENED": "Lien Ouvert",
@@ -836,7 +838,9 @@
         "TASK_COMPLETED": "Tâche Terminée",
         "MESSAGE_DELIVERED": "Message Livré",
         "MESSAGE_READ": "Message Lu",
-        "MESSAGE_FAILED": "Message Échoué"
+        "MESSAGE_FAILED": "Message Échoué",
+        "MESSAGE_RECEIVED": "Message Reçu",
+        "AI_REPLY_SENT": "Réponse IA Envoyée"
       }
     },
     "saveTheDate": {
