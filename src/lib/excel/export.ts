@@ -17,8 +17,8 @@ export type ExportFormat = 'xlsx' | 'csv';
 
 export interface ExportOptions {
   format?: ExportFormat;
+  /** Payment info is always included in the export; this option is accepted for compatibility. */
   includePaymentInfo?: boolean;
-  includeRsvpStatus?: boolean;
 }
 
 export interface ExportResult {
@@ -151,15 +151,23 @@ async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
 /**
  * Export guest data to Excel or CSV format
  *
+ * Unified column format (86 columns total):
+ *   Cols  0-7:  Family info (Family Name, Contact Person, Email, Phone, WhatsApp, Language, Channel, Invited By)
+ *   Cols  8-37: Member 1-10 basic info — Name, Type, Age (3 cols × 10 members)
+ *   Cols 38-45: Extra family info — Reference Code, RSVP Status, Total Members, Attending, Not Attending, Pending, Payment Status, Payment Amount
+ *   Cols 46-85: Member 1-10 extra info — Attending, Dietary, Accessibility, Added By Guest (4 cols × 10 members)
+ *
+ * This format matches the import template exactly so exported files can be re-imported.
+ *
  * @param wedding_id - Wedding ID to export guests for
- * @param options - Export options (format, inclusions)
+ * @param options - Export options (format)
  * @returns Buffer containing the exported file
  */
 export async function exportGuestData(
   wedding_id: string,
   options: ExportOptions = {}
 ): Promise<ExportResult> {
-  const { format = 'xlsx', includePaymentInfo = true, includeRsvpStatus = true } = options;
+  const { format = 'xlsx' } = options;
 
   // Fetch data
   const familiesData = await fetchGuestData(wedding_id);
@@ -167,8 +175,9 @@ export async function exportGuestData(
   // Prepare export rows
   const exportRows: (string | number)[][] = [];
 
-  // Add header row
-  const headers = [
+  // Build header row — unified format
+  const headers: string[] = [
+    // Cols 0-7: Family info
     'Family Name',
     'Contact Person',
     'Email',
@@ -177,33 +186,28 @@ export async function exportGuestData(
     'Language',
     'Channel',
     'Invited By',
-    'Reference Code',
   ];
 
-  if (includeRsvpStatus) {
-    headers.push('RSVP Status', 'Total Members', 'Attending', 'Not Attending', 'Pending');
+  // Cols 8-37: Member basic info (3 cols × 10 members)
+  for (let i = 1; i <= 10; i++) {
+    headers.push(`Member ${i} Name`, `Member ${i} Type`, `Member ${i} Age`);
   }
 
-  if (includePaymentInfo) {
-    headers.push('Payment Status', 'Payment Amount');
-  }
-
+  // Cols 38-45: Extra family summary
   headers.push(
-    'Member 1 Name',
-    'Member 1 Type',
-    'Member 1 Age',
-    'Member 1 Attending',
-    'Member 1 Dietary',
-    'Member 1 Accessibility',
-    'Member 1 Added By Guest'
+    'Reference Code',
+    'RSVP Status',
+    'Total Members',
+    'Attending',
+    'Not Attending',
+    'Pending',
+    'Payment Status',
+    'Payment Amount'
   );
 
-  // Add headers for up to 10 members
-  for (let i = 2; i <= 10; i++) {
+  // Cols 46-85: Member extra info (4 cols × 10 members)
+  for (let i = 1; i <= 10; i++) {
     headers.push(
-      `Member ${i} Name`,
-      `Member ${i} Type`,
-      `Member ${i} Age`,
       `Member ${i} Attending`,
       `Member ${i} Dietary`,
       `Member ${i} Accessibility`,
@@ -216,6 +220,7 @@ export async function exportGuestData(
   // Add data rows
   for (const family of familiesData) {
     const row: (string | number)[] = [
+      // Cols 0-7: Family info
       family.familyName,
       family.contactPerson,
       family.email,
@@ -224,38 +229,42 @@ export async function exportGuestData(
       family.language,
       family.channel || '',
       family.invitedByAdmin,
-      family.referenceCode,
     ];
 
-    if (includeRsvpStatus) {
-      row.push(
-        family.rsvpStatus,
-        family.totalMembers,
-        family.attendingCount,
-        family.notAttendingCount,
-        family.pendingCount
-      );
+    // Cols 8-37: Member basic info (3 cols × 10 members)
+    for (let i = 0; i < 10; i++) {
+      const member = family.members[i];
+      if (member) {
+        row.push(member.name, member.type, member.age || '');
+      } else {
+        row.push('', '', '');
+      }
     }
 
-    if (includePaymentInfo) {
-      row.push(family.paymentStatus, family.paymentAmount);
-    }
+    // Cols 38-45: Extra family summary
+    row.push(
+      family.referenceCode,
+      family.rsvpStatus,
+      family.totalMembers,
+      family.attendingCount,
+      family.notAttendingCount,
+      family.pendingCount,
+      family.paymentStatus,
+      family.paymentAmount
+    );
 
-    // Add member data (up to 10 members)
+    // Cols 46-85: Member extra info (4 cols × 10 members)
     for (let i = 0; i < 10; i++) {
       const member = family.members[i];
       if (member) {
         row.push(
-          member.name,
-          member.type,
-          member.age || '',
           member.attending,
           member.dietaryRestrictions,
           member.accessibilityNeeds,
           member.addedByGuest ? 'Yes' : 'No'
         );
       } else {
-        row.push('', '', '', '', '', '', '');
+        row.push('', '', '', '');
       }
     }
 
@@ -267,7 +276,7 @@ export async function exportGuestData(
   const worksheet = XLSX.utils.aoa_to_sheet(exportRows);
 
   // Set column widths
-  const columnWidths = [
+  const columnWidths: { wch: number }[] = [
     { wch: 20 }, // Family Name
     { wch: 20 }, // Contact Person
     { wch: 25 }, // Email
@@ -276,37 +285,28 @@ export async function exportGuestData(
     { wch: 10 }, // Language
     { wch: 12 }, // Channel
     { wch: 20 }, // Invited By
-    { wch: 15 }, // Reference Code
   ];
 
-  if (includeRsvpStatus) {
-    columnWidths.push(
-      { wch: 15 }, // RSVP Status
-      { wch: 12 }, // Total Members
-      { wch: 10 }, // Attending
-      { wch: 12 }, // Not Attending
-      { wch: 10 }  // Pending
-    );
-  }
-
-  if (includePaymentInfo) {
-    columnWidths.push(
-      { wch: 15 }, // Payment Status
-      { wch: 12 }  // Payment Amount
-    );
-  }
-
-  // Add widths for member columns
+  // Member basic info widths (3 cols × 10)
   for (let i = 0; i < 10; i++) {
-    columnWidths.push(
-      { wch: 20 }, // Member Name
-      { wch: 10 }, // Member Type
-      { wch: 8 },  // Member Age
-      { wch: 10 }, // Member Attending
-      { wch: 20 }, // Member Dietary
-      { wch: 20 }, // Member Accessibility
-      { wch: 15 }  // Member Added By Guest
-    );
+    columnWidths.push({ wch: 20 }, { wch: 10 }, { wch: 8 });
+  }
+
+  // Extra family summary widths
+  columnWidths.push(
+    { wch: 15 }, // Reference Code
+    { wch: 15 }, // RSVP Status
+    { wch: 12 }, // Total Members
+    { wch: 10 }, // Attending
+    { wch: 12 }, // Not Attending
+    { wch: 10 }, // Pending
+    { wch: 15 }, // Payment Status
+    { wch: 12 }  // Payment Amount
+  );
+
+  // Member extra info widths (4 cols × 10)
+  for (let i = 0; i < 10; i++) {
+    columnWidths.push({ wch: 10 }, { wch: 20 }, { wch: 20 }, { wch: 15 });
   }
 
   worksheet['!cols'] = columnWidths;
@@ -397,3 +397,5 @@ export async function exportGuestDataSimplified(wedding_id: string): Promise<Exp
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   };
 }
+
+

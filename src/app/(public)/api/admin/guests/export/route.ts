@@ -17,9 +17,7 @@ import { API_ERROR_CODES } from '@/types/api';
  *
  * Query parameters:
  * - format: 'xlsx' | 'csv' (default: 'xlsx')
- * - simplified: 'true' | 'false' (default: 'false')
- * - includePayment: 'true' | 'false' (default: 'true')
- * - includeRsvp: 'true' | 'false' (default: 'true')
+ * - simplified: 'true' | 'false' (default: 'false') - summary view without member details
  */
 export async function GET(request: NextRequest) {
   try {
@@ -41,8 +39,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const format = (searchParams.get('format') || 'xlsx') as ExportFormat;
     const simplified = searchParams.get('simplified') === 'true';
-    const includePayment = searchParams.get('includePayment') !== 'false';
-    const includeRsvp = searchParams.get('includeRsvp') !== 'false';
 
     // Validate format
     if (!['xlsx', 'csv'].includes(format)) {
@@ -59,11 +55,7 @@ export async function GET(request: NextRequest) {
     // Export guest data
     const result = simplified
       ? await exportGuestDataSimplified(user.wedding_id)
-      : await exportGuestData(user.wedding_id, {
-          format,
-          includePaymentInfo: includePayment,
-          includeRsvpStatus: includeRsvp,
-        });
+      : await exportGuestData(user.wedding_id, { format });
 
     // Return file as download
     return new NextResponse(new Uint8Array(result.buffer), {

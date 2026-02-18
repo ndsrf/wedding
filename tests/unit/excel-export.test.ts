@@ -128,13 +128,12 @@ describe('Excel Export', () => {
       expect(result.mimeType).toBe('text/csv');
     });
 
-    it('should include payment info when requested', async () => {
+    it('should always include payment info columns', async () => {
       (prisma.family.findMany as jest.Mock).mockResolvedValue(mockFamilyData);
       (prisma.weddingAdmin.findMany as jest.Mock).mockResolvedValue(mockAdmins);
 
-      const result = await exportGuestData('wedding1', { includePaymentInfo: true });
+      const result = await exportGuestData('wedding1');
 
-      // Parse workbook to check headers
       const workbook = XLSX.read(result.buffer, { type: 'buffer' });
       const worksheet = workbook.Sheets['Guest List'];
       const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][];
@@ -144,13 +143,12 @@ describe('Excel Export', () => {
       expect(headers).toContain('Payment Amount');
     });
 
-    it('should include RSVP status when requested', async () => {
+    it('should always include RSVP status columns', async () => {
       (prisma.family.findMany as jest.Mock).mockResolvedValue(mockFamilyData);
       (prisma.weddingAdmin.findMany as jest.Mock).mockResolvedValue(mockAdmins);
 
-      const result = await exportGuestData('wedding1', { includeRsvpStatus: true });
+      const result = await exportGuestData('wedding1');
 
-      // Parse workbook to check headers
       const workbook = XLSX.read(result.buffer, { type: 'buffer' });
       const worksheet = workbook.Sheets['Guest List'];
       const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][];
@@ -159,6 +157,42 @@ describe('Excel Export', () => {
       expect(headers).toContain('RSVP Status');
       expect(headers).toContain('Total Members');
       expect(headers).toContain('Attending');
+    });
+
+    it('should use unified column format (8 family + 30 member basic + 8 family extra + 40 member extra)', async () => {
+      (prisma.family.findMany as jest.Mock).mockResolvedValue(mockFamilyData);
+      (prisma.weddingAdmin.findMany as jest.Mock).mockResolvedValue(mockAdmins);
+
+      const result = await exportGuestData('wedding1');
+
+      const workbook = XLSX.read(result.buffer, { type: 'buffer' });
+      const worksheet = workbook.Sheets['Guest List'];
+      const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][];
+      const headers = data[0];
+
+      // Core family columns (0-7)
+      expect(headers[0]).toBe('Family Name');
+      expect(headers[7]).toBe('Invited By');
+
+      // Member basic columns start at 8 (Name, Type, Age)
+      expect(headers[8]).toBe('Member 1 Name');
+      expect(headers[9]).toBe('Member 1 Type');
+      expect(headers[10]).toBe('Member 1 Age');
+
+      // Extra family columns start at 38
+      expect(headers[38]).toBe('Reference Code');
+      expect(headers[39]).toBe('RSVP Status');
+      expect(headers[44]).toBe('Payment Status');
+      expect(headers[45]).toBe('Payment Amount');
+
+      // Extra member columns start at 46 (Attending, Dietary, Accessibility, Added By Guest)
+      expect(headers[46]).toBe('Member 1 Attending');
+      expect(headers[47]).toBe('Member 1 Dietary');
+      expect(headers[48]).toBe('Member 1 Accessibility');
+      expect(headers[49]).toBe('Member 1 Added By Guest');
+
+      // Total: 8 + 30 + 8 + 40 = 86 columns
+      expect(headers.length).toBe(86);
     });
 
     it('should correctly calculate RSVP status - Attending', async () => {
@@ -306,4 +340,5 @@ describe('Excel Export', () => {
       expect(smithRow![membersAttendingIndex]).toBe(2);
     });
   });
+
 });
