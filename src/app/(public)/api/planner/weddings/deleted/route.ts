@@ -113,6 +113,7 @@ export async function GET(request: NextRequest) {
           wedding_date: wedding.wedding_date,
           wedding_time: wedding.wedding_time,
           location: wedding.location,
+          main_event_location_id: wedding.main_event_location_id,
           rsvp_cutoff_date: wedding.rsvp_cutoff_date,
           dress_code: wedding.dress_code,
           additional_info: wedding.additional_info,

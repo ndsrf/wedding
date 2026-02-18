@@ -135,7 +135,7 @@ export async function sendSaveTheDate(
       coupleNames: family.wedding.couple_names,
       weddingDate,
       weddingTime: family.wedding.wedding_time,
-      location: family.wedding.location,
+      location: family.wedding.location ?? '',
       magicLink: `${baseUrl}${shortPath}`,
       rsvpCutoffDate,
       ...(family.reference_code && { referenceCode: family.reference_code }),

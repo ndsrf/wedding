@@ -7,14 +7,27 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import type { CreateWeddingRequest } from '@/types/api';
+import type { CreateWeddingRequest, ItineraryItemRequest } from '@/types/api';
 import type { Theme, Wedding } from '@/types/models';
 import { Language, PaymentMode, WhatsAppMode } from '@prisma/client';
 import { COUNTRIES } from '@/lib/phone-utils';
+import { Plus, Trash2 } from 'lucide-react';
 
-interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'rsvp_cutoff_date'> {
+interface LocationOption {
+  id: string;
+  name: string;
+  location_type: string;
+  address?: string | null;
+  google_maps_url?: string | null;
+}
+
+interface ItineraryEntry extends ItineraryItemRequest {
+  _key: string; // local-only unique key for React rendering
+}
+
+interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'rsvp_cutoff_date' | 'itinerary'> {
   wedding_date: string;
   rsvp_cutoff_date: string;
 }
@@ -22,12 +35,28 @@ interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'r
 interface WeddingFormProps {
   onSubmit: (data: CreateWeddingRequest) => Promise<void>;
   onCancel: () => void;
-  initialData?: Wedding;
+  initialData?: Wedding & { itinerary_items?: Array<{ id: string; location_id: string; date_time: Date | string; notes?: string | null; order: number }> };
   themes?: Theme[];
 }
 
 export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: WeddingFormProps) {
   const t = useTranslations();
+  const [locations, setLocations] = useState<LocationOption[]>([]);
+  const [itinerary, setItinerary] = useState<ItineraryEntry[]>(() => {
+    if (initialData?.itinerary_items) {
+      return initialData.itinerary_items.map((item) => ({
+        _key: item.id,
+        location_id: item.location_id,
+        date_time: typeof item.date_time === 'string'
+          ? item.date_time
+          : new Date(item.date_time).toISOString().slice(0, 16),
+        notes: item.notes ?? undefined,
+        order: item.order,
+      }));
+    }
+    return [];
+  });
+
   // Note: payment_tracking_mode, allow_guest_additions, dress_code, and additional_info
   // are now managed by the wedding admin in /admin/configure. Default values are set here
   // for wedding creation, but the wedding admin can change them later.
@@ -38,6 +67,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       : '',
     wedding_time: initialData?.wedding_time || '',
     location: initialData?.location || '',
+    main_event_location_id: initialData?.main_event_location_id || null,
     rsvp_cutoff_date: initialData?.rsvp_cutoff_date
       ? new Date(initialData.rsvp_cutoff_date).toISOString().split('T')[0]
       : '',
@@ -50,6 +80,13 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
     wedding_country: initialData?.wedding_country || 'ES',
     whatsapp_mode: initialData?.whatsapp_mode || WhatsAppMode.BUSINESS,
   });
+
+  useEffect(() => {
+    fetch('/api/planner/locations')
+      .then((r) => r.json())
+      .then((data) => setLocations(data.data || []))
+      .catch(() => {});
+  }, []);
 
   const [errors, setErrors] = useState<Partial<Record<keyof WeddingFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,8 +106,8 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       newErrors.wedding_time = t('planner.weddings.validation.weddingTimeRequired');
     }
 
-    if (!formData.location.trim()) {
-      newErrors.location = t('planner.weddings.validation.locationRequired');
+    if (formData.location !== undefined && formData.location !== null && !formData.location.trim()) {
+      // location is optional now; only validate if provided as non-empty string
     }
 
     if (!formData.rsvp_cutoff_date) {
@@ -95,13 +132,41 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      await onSubmit({
+        ...formData,
+        itinerary: itinerary.map(({ _key, ...rest }) => rest),
+      });
     } catch (error) {
       console.error('Form submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const addItineraryItem = () => {
+    setItinerary((prev) => [
+      ...prev,
+      {
+        _key: `new-${Date.now()}`,
+        location_id: '',
+        date_time: formData.wedding_date ? `${formData.wedding_date}T12:00` : '',
+        notes: '',
+        order: prev.length,
+      },
+    ]);
+  };
+
+  const removeItineraryItem = (key: string) => {
+    setItinerary((prev) => prev.filter((i) => i._key !== key));
+  };
+
+  const updateItineraryItem = (key: string, field: string, value: string) => {
+    setItinerary((prev) =>
+      prev.map((item) => (item._key === key ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const ceremonyLocations = locations.filter((l) => l.location_type === 'CEREMONY');
 
   const handleChange = (
     field: keyof WeddingFormData,
@@ -169,22 +234,105 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
         </div>
       </div>
 
-      {/* Location */}
+      {/* Main Event Location (Ceremony) */}
       <div>
-        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-          {t('planner.weddings.location')} *
+        <label htmlFor="main_event_location_id" className="block text-sm font-medium text-gray-700 mb-1">
+          Main Event Location
         </label>
-        <input
-          id="location"
-          type="text"
-          value={formData.location}
-          onChange={(e) => handleChange('location', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.location ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder={t('planner.weddings.placeholders.location')}
-        />
-        {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location}</p>}
+        {ceremonyLocations.length > 0 ? (
+          <select
+            id="main_event_location_id"
+            value={formData.main_event_location_id || ''}
+            onChange={(e) => setFormData((prev) => ({ ...prev, main_event_location_id: e.target.value || null }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">— None —</option>
+            {ceremonyLocations.map((loc) => (
+              <option key={loc.id} value={loc.id}>
+                {loc.name}{loc.address ? ` — ${loc.address}` : ''}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No ceremony locations set up yet.{' '}
+            <a href="/planner/locations" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+              Add locations
+            </a>{' '}
+            in the Locations section first.
+          </p>
+        )}
+      </div>
+
+      {/* Itinerary */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Itinerary
+          </label>
+          <button
+            type="button"
+            onClick={addItineraryItem}
+            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          >
+            <Plus className="h-3 w-3" />
+            Add stop
+          </button>
+        </div>
+        {itinerary.length === 0 ? (
+          <p className="text-sm text-gray-400 italic">No itinerary items yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {itinerary.map((item) => (
+              <div key={item._key} className="flex gap-2 items-start p-3 bg-gray-50 rounded-md border border-gray-200">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Location</label>
+                    <select
+                      value={item.location_id}
+                      onChange={(e) => updateItineraryItem(item._key, 'location_id', e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">— Select location —</option>
+                      {locations.map((loc) => (
+                        <option key={loc.id} value={loc.id}>
+                          {loc.name} ({loc.location_type.replace('_', ' ').toLowerCase()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      value={item.date_time}
+                      onChange={(e) => updateItineraryItem(item._key, 'date_time', e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs text-gray-500 mb-1">Notes (optional)</label>
+                    <input
+                      type="text"
+                      value={item.notes || ''}
+                      onChange={(e) => updateItineraryItem(item._key, 'notes', e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="e.g. Cocktail hour, Dinner, Speeches…"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeItineraryItem(item._key)}
+                  className="mt-5 p-1 text-gray-400 hover:text-red-500"
+                  title="Remove"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* RSVP Cutoff Date */}

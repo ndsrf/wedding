@@ -30,7 +30,7 @@ export interface CachedWeddingPageData {
     couple_names: string;
     wedding_date: string;
     wedding_time: string;
-    location: string;
+    location: string | null;
     rsvp_cutoff_date: string;
     dress_code: string | null;
     additional_info: string | null;

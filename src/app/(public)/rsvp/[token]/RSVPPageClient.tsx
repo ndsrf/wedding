@@ -81,7 +81,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           preRenderedHtml={invitation_template.pre_rendered_html}
           weddingDate={wedding.wedding_date}
           weddingTime={wedding.wedding_time}
-          location={wedding.location}
+          location={wedding.location ?? ''}
           coupleNames={wedding.couple_names}
           language={templateLanguage}
         />
@@ -104,7 +104,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
               <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
             </p>
             <p>
-              <strong>{t('guest.welcome.location', { location: wedding.location })}</strong>
+              <strong>{t('guest.welcome.location', { location: wedding.location ?? '' })}</strong>
             </p>
             {wedding.dress_code && (
               <p>
@@ -172,7 +172,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           coupleNames={wedding.couple_names}
           weddingDate={wedding.wedding_date}
           weddingTime={wedding.wedding_time}
-          location={wedding.location}
+          location={wedding.location ?? undefined}
           additionalInfo={wedding.additional_info || undefined}
         >
           {/* Language Selector in top right */}

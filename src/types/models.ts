@@ -24,6 +24,7 @@ import type {
   TranslationContext,
   SubscriptionStatus,
   WhatsAppMode,
+  LocationType,
 } from '@prisma/client';
 
 export type {
@@ -38,6 +39,7 @@ export type {
   TranslationContext,
   SubscriptionStatus,
   WhatsAppMode,
+  LocationType,
 };
 
 // ============================================================================
@@ -92,6 +94,31 @@ export type { ThemeConfig };
 // WEDDING MANAGEMENT MODELS
 // ============================================================================
 
+export interface Location {
+  id: string;
+  planner_id: string;
+  name: string;
+  location_type: LocationType;
+  url: string | null;
+  notes: string | null;
+  google_maps_url: string | null;
+  address: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface ItineraryItem {
+  id: string;
+  wedding_id: string;
+  location_id: string;
+  date_time: Date;
+  notes: string | null;
+  order: number;
+  created_at: Date;
+  updated_at: Date;
+  location?: Location;
+}
+
 export interface Wedding {
   id: string;
   planner_id: string;
@@ -99,7 +126,8 @@ export interface Wedding {
   couple_names: string;
   wedding_date: Date;
   wedding_time: string;
-  location: string;
+  location: string | null;
+  main_event_location_id: string | null;
   rsvp_cutoff_date: Date;
   dress_code: string | null;
   additional_info: string | null;

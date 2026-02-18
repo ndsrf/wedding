@@ -178,7 +178,10 @@ export const getRSVPPageData = cache(async (
       void trackLinkOpened(family.id, weddingId, channelEnum || undefined);
     }
 
-    const rsvp_cutoff_passed = new Date() > new Date(cachedData.wedding.rsvp_cutoff_date);
+    // cachedData is guaranteed to be set at this point (freshly built or from cache)
+    const resolvedCache = cachedData!;
+
+    const rsvp_cutoff_passed = new Date() > new Date(resolvedCache.wedding.rsvp_cutoff_date);
     const has_submitted_rsvp = family.members.some(
       (member) => member.attending !== null
     );
@@ -192,9 +195,9 @@ export const getRSVPPageData = cache(async (
           created_at: member.created_at,
         })),
       },
-      wedding: cachedData.wedding,
-      theme: cachedData.theme,
-      ...(cachedData.invitation_template && { invitation_template: cachedData.invitation_template }),
+      wedding: resolvedCache.wedding,
+      theme: resolvedCache.theme,
+      ...(resolvedCache.invitation_template && { invitation_template: resolvedCache.invitation_template }),
       rsvp_cutoff_passed,
       has_submitted_rsvp,
     };
