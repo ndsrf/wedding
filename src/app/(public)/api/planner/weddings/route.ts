@@ -18,7 +18,7 @@ import type {
   CreateWeddingRequest,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-import { Language, PaymentMode, WeddingStatus } from '@prisma/client';
+import { Language, LocationType, PaymentMode, WeddingStatus } from '@prisma/client';
 
 // Validation schema for creating a wedding
 const createWeddingSchema = z.object({
@@ -29,6 +29,7 @@ const createWeddingSchema = z.object({
   main_event_location_id: z.string().uuid().optional().nullable(),
   itinerary: z.array(z.object({
     location_id: z.string().uuid(),
+    item_type: z.nativeEnum(LocationType).default('EVENT'),
     date_time: z.string(),
     notes: z.string().optional(),
     order: z.number().int(),
@@ -366,6 +367,7 @@ export async function POST(request: NextRequest) {
         data: validatedData.itinerary.map((item) => ({
           wedding_id: wedding.id,
           location_id: item.location_id,
+          item_type: item.item_type ?? 'EVENT',
           date_time: new Date(item.date_time),
           notes: item.notes,
           order: item.order,

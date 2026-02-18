@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import { LocationType } from '@prisma/client';
 
 const updateLocationSchema = z.object({
   name: z.string().min(1, 'Location name is required'),
-  location_type: z.nativeEnum(LocationType),
   url: z.string().url().optional().or(z.literal('')),
   notes: z.string().optional(),
   google_maps_url: z.string().url().optional().or(z.literal('')),
@@ -70,7 +68,6 @@ export async function PATCH(
       where: { id },
       data: {
         name: validated.name,
-        location_type: validated.location_type,
         url: validated.url || null,
         notes: validated.notes,
         google_maps_url: validated.google_maps_url || null,

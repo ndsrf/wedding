@@ -11,17 +11,23 @@ import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import type { CreateWeddingRequest, ItineraryItemRequest } from '@/types/api';
 import type { Theme, Wedding } from '@/types/models';
-import { Language, PaymentMode, WhatsAppMode } from '@prisma/client';
+import { Language, LocationType, PaymentMode, WhatsAppMode } from '@prisma/client';
 import { COUNTRIES } from '@/lib/phone-utils';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface LocationOption {
   id: string;
   name: string;
-  location_type: string;
   address?: string | null;
   google_maps_url?: string | null;
 }
+
+const ITEM_TYPE_LABELS: Record<LocationType, string> = {
+  CEREMONY: 'Ceremony',
+  EVENT: 'Event',
+  PRE_EVENT: 'Pre-Event',
+  POST_EVENT: 'Post-Event',
+};
 
 interface ItineraryEntry extends ItineraryItemRequest {
   _key: string; // local-only unique key for React rendering
@@ -35,7 +41,7 @@ interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'r
 interface WeddingFormProps {
   onSubmit: (data: CreateWeddingRequest) => Promise<void>;
   onCancel: () => void;
-  initialData?: Wedding & { itinerary_items?: Array<{ id: string; location_id: string; date_time: Date | string; notes?: string | null; order: number }> };
+  initialData?: Wedding & { itinerary_items?: Array<{ id: string; location_id: string; item_type?: LocationType; date_time: Date | string; notes?: string | null; order: number }> };
   themes?: Theme[];
 }
 
@@ -47,6 +53,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       return initialData.itinerary_items.map((item) => ({
         _key: item.id,
         location_id: item.location_id,
+        item_type: (item.item_type ?? 'EVENT') as LocationType,
         date_time: typeof item.date_time === 'string'
           ? item.date_time
           : new Date(item.date_time).toISOString().slice(0, 16),
@@ -149,6 +156,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       {
         _key: `new-${Date.now()}`,
         location_id: '',
+        item_type: 'EVENT' as LocationType,
         date_time: formData.wedding_date ? `${formData.wedding_date}T12:00` : '',
         notes: '',
         order: prev.length,
@@ -165,8 +173,6 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       prev.map((item) => (item._key === key ? { ...item, [field]: value } : item))
     );
   };
-
-  const ceremonyLocations = locations.filter((l) => l.location_type === 'CEREMONY');
 
   const handleChange = (
     field: keyof WeddingFormData,
@@ -234,12 +240,12 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
         </div>
       </div>
 
-      {/* Main Event Location (Ceremony) */}
+      {/* Main Event Location */}
       <div>
         <label htmlFor="main_event_location_id" className="block text-sm font-medium text-gray-700 mb-1">
           Main Event Location
         </label>
-        {ceremonyLocations.length > 0 ? (
+        {locations.length > 0 ? (
           <select
             id="main_event_location_id"
             value={formData.main_event_location_id || ''}
@@ -247,7 +253,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">— None —</option>
-            {ceremonyLocations.map((loc) => (
+            {locations.map((loc) => (
               <option key={loc.id} value={loc.id}>
                 {loc.name}{loc.address ? ` — ${loc.address}` : ''}
               </option>
@@ -255,7 +261,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           </select>
         ) : (
           <p className="text-sm text-gray-500 italic">
-            No ceremony locations set up yet.{' '}
+            No locations set up yet.{' '}
             <a href="/planner/locations" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
               Add locations
             </a>{' '}
@@ -287,17 +293,29 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
               <div key={item._key} className="flex gap-2 items-start p-3 bg-gray-50 rounded-md border border-gray-200">
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Location</label>
+                    <label className="block text-xs text-gray-500 mb-1">Venue</label>
                     <select
                       value={item.location_id}
                       onChange={(e) => updateItineraryItem(item._key, 'location_id', e.target.value)}
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
-                      <option value="">— Select location —</option>
+                      <option value="">— Select venue —</option>
                       {locations.map((loc) => (
                         <option key={loc.id} value={loc.id}>
-                          {loc.name} ({loc.location_type.replace('_', ' ').toLowerCase()})
+                          {loc.name}{loc.address ? ` — ${loc.address}` : ''}
                         </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Event Type</label>
+                    <select
+                      value={item.item_type}
+                      onChange={(e) => updateItineraryItem(item._key, 'item_type', e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      {(Object.keys(ITEM_TYPE_LABELS) as LocationType[]).map((type) => (
+                        <option key={type} value={type}>{ITEM_TYPE_LABELS[type]}</option>
                       ))}
                     </select>
                   </div>

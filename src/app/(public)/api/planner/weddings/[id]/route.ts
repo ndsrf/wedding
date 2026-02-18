@@ -19,7 +19,7 @@ import type {
   UpdateWeddingRequest,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-import { Language, PaymentMode, WhatsAppMode } from '@prisma/client';
+import { Language, LocationType, PaymentMode, WhatsAppMode } from '@prisma/client';
 
 // Validation schema for updating a wedding
 const updateWeddingSchema = z
@@ -32,6 +32,7 @@ const updateWeddingSchema = z
     itinerary: z.array(z.object({
       id: z.string().optional(),
       location_id: z.string().uuid(),
+      item_type: z.nativeEnum(LocationType).default('EVENT'),
       date_time: z.string(),
       notes: z.string().optional(),
       order: z.number().int(),
@@ -391,6 +392,7 @@ export async function PATCH(
           data: itinerary.map((item) => ({
             wedding_id: weddingId,
             location_id: item.location_id,
+            item_type: item.item_type ?? 'EVENT',
             date_time: new Date(item.date_time),
             notes: item.notes,
             order: item.order,

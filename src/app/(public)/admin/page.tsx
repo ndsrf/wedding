@@ -17,7 +17,7 @@ import type { AuthenticatedUser } from '@/types/api';
 
 interface ItinerarySummaryItem {
   location_name: string;
-  location_type: string;
+  item_type: string;
   address: string | null;
   google_maps_url: string | null;
   date_time: Date;
@@ -112,7 +112,7 @@ async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | 
         : null,
       itinerary: wedding.itinerary_items.map((item) => ({
         location_name: item.location.name,
-        location_type: item.location.location_type,
+        item_type: item.item_type,
         address: item.location.address,
         google_maps_url: item.location.google_maps_url,
         date_time: item.date_time,

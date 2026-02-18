@@ -159,7 +159,6 @@ model Location {
   id                  String          @id @default(uuid())
   planner_id          String
   name                String
-  location_type       LocationType
   url                 String?
   notes               String?         @db.Text
   google_maps_url     String?
@@ -171,21 +170,21 @@ model Location {
   itinerary_items     ItineraryItem[]
 
   @@index([planner_id])
-  @@index([location_type])
   @@map("locations")
 }
 
 model ItineraryItem {
-  id          String    @id @default(uuid())
+  id          String        @id @default(uuid())
   wedding_id  String
   location_id String
+  item_type   LocationType  @default(EVENT)
   date_time   DateTime
-  notes       String?   @db.Text
+  notes       String?       @db.Text
   order       Int
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  wedding     Wedding   @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
-  location    Location  @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  wedding     Wedding       @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  location    Location      @relation(fields: [location_id], references: [id], onDelete: Restrict)
 
   @@index([wedding_id])
   @@index([location_id])

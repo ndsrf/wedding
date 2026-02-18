@@ -98,7 +98,6 @@ export interface Location {
   id: string;
   planner_id: string;
   name: string;
-  location_type: LocationType;
   url: string | null;
   notes: string | null;
   google_maps_url: string | null;
@@ -111,6 +110,7 @@ export interface ItineraryItem {
   id: string;
   wedding_id: string;
   location_id: string;
+  item_type: LocationType;
   date_time: Date;
   notes: string | null;
   order: number;

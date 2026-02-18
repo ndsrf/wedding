@@ -15,7 +15,6 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 interface Location {
   id: string;
   name: string;
-  location_type: 'CEREMONY' | 'EVENT' | 'PRE_EVENT' | 'POST_EVENT';
   url?: string | null;
   notes?: string | null;
   google_maps_url?: string | null;
@@ -28,13 +27,6 @@ interface Location {
 
 type LocationFormData = Omit<Location, 'id' | '_count'>;
 
-const LOCATION_TYPES = [
-  { value: 'CEREMONY', label: 'Ceremony', color: 'bg-purple-100 text-purple-800' },
-  { value: 'EVENT', label: 'Event', color: 'bg-blue-100 text-blue-800' },
-  { value: 'PRE_EVENT', label: 'Pre-Event', color: 'bg-green-100 text-green-800' },
-  { value: 'POST_EVENT', label: 'Post-Event', color: 'bg-orange-100 text-orange-800' },
-];
-
 export default function LocationsPage() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +34,6 @@ export default function LocationsPage() {
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
   const [formData, setFormData] = useState<LocationFormData>({
     name: '',
-    location_type: 'CEREMONY',
     url: '',
     notes: '',
     google_maps_url: '',
@@ -105,7 +96,6 @@ export default function LocationsPage() {
     setEditingLocation(location);
     setFormData({
       name: location.name,
-      location_type: location.location_type,
       url: location.url || '',
       notes: location.notes || '',
       google_maps_url: location.google_maps_url || '',
@@ -145,21 +135,12 @@ export default function LocationsPage() {
     setEditingLocation(null);
     setFormData({
       name: '',
-      location_type: 'CEREMONY',
       url: '',
       notes: '',
       google_maps_url: '',
       address: '',
     });
     setError(null);
-  };
-
-  const getLocationTypeLabel = (type: string) => {
-    return LOCATION_TYPES.find((t) => t.value === type)?.label || type;
-  };
-
-  const getLocationTypeColor = (type: string) => {
-    return LOCATION_TYPES.find((t) => t.value === type)?.color || 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -234,9 +215,6 @@ export default function LocationsPage() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-medium text-gray-900">{location.name}</h3>
-                    <span className={`inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full ${getLocationTypeColor(location.location_type)}`}>
-                      {getLocationTypeLabel(location.location_type)}
-                    </span>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -331,24 +309,6 @@ export default function LocationsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., Grand Ballroom, Garden Terrace"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location Type *
-                </label>
-                <select
-                  value={formData.location_type}
-                  onChange={(e) => setFormData({ ...formData, location_type: e.target.value as Location['location_type'] })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {LOCATION_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>

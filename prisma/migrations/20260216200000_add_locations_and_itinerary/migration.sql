@@ -10,7 +10,6 @@ CREATE TABLE "locations" (
     "id" TEXT NOT NULL,
     "planner_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "location_type" "LocationType" NOT NULL,
     "url" TEXT,
     "notes" TEXT,
     "google_maps_url" TEXT,
@@ -26,6 +25,7 @@ CREATE TABLE "itinerary_items" (
     "id" TEXT NOT NULL,
     "wedding_id" TEXT NOT NULL,
     "location_id" TEXT NOT NULL,
+    "item_type" "LocationType" NOT NULL DEFAULT 'EVENT',
     "date_time" TIMESTAMP(3) NOT NULL,
     "notes" TEXT,
     "order" INTEGER NOT NULL,
@@ -37,9 +37,6 @@ CREATE TABLE "itinerary_items" (
 
 -- CreateIndex
 CREATE INDEX "locations_planner_id_idx" ON "locations"("planner_id");
-
--- CreateIndex
-CREATE INDEX "locations_location_type_idx" ON "locations"("location_type");
 
 -- CreateIndex
 CREATE INDEX "itinerary_items_wedding_id_idx" ON "itinerary_items"("wedding_id");

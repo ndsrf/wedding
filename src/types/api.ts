@@ -168,6 +168,7 @@ export type MasterAnalyticsResponse = APIResponse<MasterAnalytics>;
 
 export interface ItineraryItemRequest {
   location_id: string;
+  item_type: import('@prisma/client').LocationType;
   date_time: string; // ISO datetime string
   notes?: string;
   order: number;
