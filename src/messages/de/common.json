@@ -919,7 +919,9 @@
         "taskCompleted": "Aufgabe abgeschlossen",
         "messageDelivered": "Nachricht zugestellt",
         "messageRead": "Nachricht gelesen",
-        "messageFailed": "Nachricht fehlgeschlagen"
+        "messageFailed": "Nachricht fehlgeschlagen",
+        "messageReceived": "Nachricht empfangen",
+        "aiReplySent": "KI-Antwort gesendet"
       },
       "eventTypes": {
         "LINK_OPENED": "Link geöffnet",

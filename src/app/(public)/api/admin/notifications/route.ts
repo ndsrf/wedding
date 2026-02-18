@@ -41,6 +41,8 @@ const listNotificationsQuerySchema = z.object({
       'MESSAGE_DELIVERED',
       'MESSAGE_READ',
       'MESSAGE_FAILED',
+      'MESSAGE_RECEIVED',
+      'AI_REPLY_SENT',
     ])
     .optional(),
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),

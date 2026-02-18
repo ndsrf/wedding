@@ -919,7 +919,9 @@
         "taskCompleted": "Compito Completato",
         "messageDelivered": "Messaggio Consegnato",
         "messageRead": "Messaggio Letto",
-        "messageFailed": "Messaggio Non Riuscito"
+        "messageFailed": "Messaggio Non Riuscito",
+        "messageReceived": "Messaggio Ricevuto",
+        "aiReplySent": "Risposta IA Inviata"
       },
       "eventTypes": {
         "LINK_OPENED": "Link Aperto",

@@ -882,7 +882,9 @@
         "taskCompleted": "Task Completed",
         "messageDelivered": "Message Delivered",
         "messageRead": "Message Read",
-        "messageFailed": "Message Failed"
+        "messageFailed": "Message Failed",
+        "messageReceived": "Message Received",
+        "aiReplySent": "AI Reply Sent"
       },
       "eventTypes": {
         "LINK_OPENED": "Link Opened",

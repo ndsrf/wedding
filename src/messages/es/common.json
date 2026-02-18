@@ -879,7 +879,9 @@
         "taskCompleted": "Tarea Completada",
         "messageDelivered": "Mensaje Entregado",
         "messageRead": "Mensaje Leído",
-        "messageFailed": "Mensaje Fallido"
+        "messageFailed": "Mensaje Fallido",
+        "messageReceived": "Mensaje Recibido",
+        "aiReplySent": "Respuesta IA Enviada"
       },
       "eventTypes": {
         "LINK_OPENED": "Enlace Abierto",
