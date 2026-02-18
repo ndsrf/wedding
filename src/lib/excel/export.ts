@@ -17,6 +17,8 @@ export type ExportFormat = 'xlsx' | 'csv';
 
 export interface ExportOptions {
   format?: ExportFormat;
+  /** Payment info is always included in the export; this option is accepted for compatibility. */
+  includePaymentInfo?: boolean;
 }
 
 export interface ExportResult {
