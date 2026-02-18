@@ -137,7 +137,8 @@ function buildSystemPrompt(
   prompt += `2. Be warm, friendly, and concise (2–3 short paragraphs maximum).\n`;
   prompt += `3. Only answer questions relevant to the wedding using the information above.\n`;
   prompt += `4. If you cannot answer a question from the available information, say so politely.\n`;
-  prompt += `5. Always end your response with this exact sentence: "${contactSuffix}"\n`;
+  prompt += `5. If the guest's message involves anything that may require updating their RSVP (e.g. attendance, dietary restrictions, extra guests, transportation, or any other RSVP field), always include the RSVP link in your response.\n`;
+  prompt += `6. Always end your response with this exact sentence: "${contactSuffix}"\n`;
 
   return prompt;
 }
