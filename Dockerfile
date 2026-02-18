@@ -95,6 +95,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=deps --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=deps /app/prisma.config.ts ./prisma.config.ts
 
+# Copy start script
+COPY --from=builder --chown=nextjs:nodejs /app/start.sh ./start.sh
+RUN chmod +x ./start.sh
+
 # Create uploads directory
 RUN mkdir -p ./public/uploads/templates && \
     chown -R nextjs:nodejs ./public/uploads
@@ -116,5 +120,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
-CMD ["node", "server.js"]
+# Run migrations then start the application
+CMD ["sh", "start.sh"]
