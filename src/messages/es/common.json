@@ -895,7 +895,9 @@
         "TASK_COMPLETED": "Tarea Completada",
         "MESSAGE_DELIVERED": "Mensaje Entregado",
         "MESSAGE_READ": "Mensaje Leído",
-        "MESSAGE_FAILED": "Mensaje Fallido"
+        "MESSAGE_FAILED": "Mensaje Fallido",
+        "MESSAGE_RECEIVED": "Mensaje Recibido",
+        "AI_REPLY_SENT": "Respuesta IA Enviada"
       }
     },
     "saveTheDate": {

@@ -216,6 +216,14 @@ export function GuestTimelineModal({
                   ? String(event.metadata.template_name)
                   : null;
 
+                const messageBody = event.event_type === 'MESSAGE_RECEIVED' && event.metadata && 'body' in event.metadata
+                  ? String(event.metadata.body)
+                  : null;
+
+                const aiReplyPreview = event.event_type === 'AI_REPLY_SENT' && event.metadata && 'reply_preview' in event.metadata
+                  ? String(event.metadata.reply_preview)
+                  : null;
+
                 return (
                 <div key={event.id} className="relative">
                   {/* Timeline connector line */}
@@ -269,6 +277,16 @@ export function GuestTimelineModal({
                             <span className="text-gray-500">
                               Template: {templateName}
                             </span>
+                          )}
+                          {messageBody && (
+                            <p className="mt-1 p-2 bg-violet-50 border border-violet-100 rounded text-gray-700 whitespace-pre-wrap">
+                              {messageBody}
+                            </p>
+                          )}
+                          {aiReplyPreview && (
+                            <p className="mt-1 p-2 bg-sky-50 border border-sky-100 rounded text-gray-700 whitespace-pre-wrap">
+                              {aiReplyPreview}
+                            </p>
                           )}
                         </div>
                       )}

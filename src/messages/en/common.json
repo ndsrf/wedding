@@ -898,7 +898,9 @@
         "TASK_COMPLETED": "Task Completed",
         "MESSAGE_DELIVERED": "Message Delivered",
         "MESSAGE_READ": "Message Read",
-        "MESSAGE_FAILED": "Message Failed"
+        "MESSAGE_FAILED": "Message Failed",
+        "MESSAGE_RECEIVED": "Message Received",
+        "AI_REPLY_SENT": "AI Reply Sent"
       }
     },
     "saveTheDate": {
