@@ -1,12 +1,27 @@
 -- CreateEnum
-CREATE TYPE "LocationType" AS ENUM ('CEREMONY', 'EVENT', 'PRE_EVENT', 'POST_EVENT');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'LocationType') THEN
+        CREATE TYPE "LocationType" AS ENUM ('CEREMONY', 'EVENT', 'PRE_EVENT', 'POST_EVENT');
+    END IF;
+END
+$$;
 
--- AlterTable
-ALTER TABLE "weddings" ADD COLUMN "main_event_location_id" TEXT,
-ALTER COLUMN "location" DROP NOT NULL;
+-- AlterTable: make location nullable and add main_event_location_id
+ALTER TABLE "weddings" ADD COLUMN IF NOT EXISTS "main_event_location_id" TEXT;
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'weddings' AND column_name = 'location' AND is_nullable = 'NO'
+    ) THEN
+        ALTER TABLE "weddings" ALTER COLUMN "location" DROP NOT NULL;
+    END IF;
+END
+$$;
 
--- CreateTable
-CREATE TABLE "locations" (
+-- CreateTable locations
+CREATE TABLE IF NOT EXISTS "locations" (
     "id" TEXT NOT NULL,
     "planner_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -20,8 +35,8 @@ CREATE TABLE "locations" (
     CONSTRAINT "locations_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "itinerary_items" (
+-- CreateTable itinerary_items
+CREATE TABLE IF NOT EXISTS "itinerary_items" (
     "id" TEXT NOT NULL,
     "wedding_id" TEXT NOT NULL,
     "location_id" TEXT NOT NULL,
@@ -36,28 +51,45 @@ CREATE TABLE "itinerary_items" (
 );
 
 -- CreateIndex
-CREATE INDEX "locations_planner_id_idx" ON "locations"("planner_id");
+CREATE INDEX IF NOT EXISTS "locations_planner_id_idx" ON "locations"("planner_id");
 
 -- CreateIndex
-CREATE INDEX "itinerary_items_wedding_id_idx" ON "itinerary_items"("wedding_id");
+CREATE INDEX IF NOT EXISTS "itinerary_items_wedding_id_idx" ON "itinerary_items"("wedding_id");
 
 -- CreateIndex
-CREATE INDEX "itinerary_items_location_id_idx" ON "itinerary_items"("location_id");
+CREATE INDEX IF NOT EXISTS "itinerary_items_location_id_idx" ON "itinerary_items"("location_id");
 
 -- CreateIndex
-CREATE INDEX "itinerary_items_wedding_id_order_idx" ON "itinerary_items"("wedding_id", "order");
+CREATE INDEX IF NOT EXISTS "itinerary_items_wedding_id_order_idx" ON "itinerary_items"("wedding_id", "order");
 
 -- CreateIndex
-CREATE INDEX "weddings_main_event_location_id_idx" ON "weddings"("main_event_location_id");
+CREATE INDEX IF NOT EXISTS "weddings_main_event_location_id_idx" ON "weddings"("main_event_location_id");
 
 -- AddForeignKey
-ALTER TABLE "weddings" ADD CONSTRAINT "weddings_main_event_location_id_fkey" FOREIGN KEY ("main_event_location_id") REFERENCES "locations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'weddings_main_event_location_id_fkey') THEN
+        ALTER TABLE "weddings" ADD CONSTRAINT "weddings_main_event_location_id_fkey" FOREIGN KEY ("main_event_location_id") REFERENCES "locations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "locations" ADD CONSTRAINT "locations_planner_id_fkey" FOREIGN KEY ("planner_id") REFERENCES "wedding_planners"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'locations_planner_id_fkey') THEN
+        ALTER TABLE "locations" ADD CONSTRAINT "locations_planner_id_fkey" FOREIGN KEY ("planner_id") REFERENCES "wedding_planners"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "itinerary_items" ADD CONSTRAINT "itinerary_items_wedding_id_fkey" FOREIGN KEY ("wedding_id") REFERENCES "weddings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'itinerary_items_wedding_id_fkey') THEN
+        ALTER TABLE "itinerary_items" ADD CONSTRAINT "itinerary_items_wedding_id_fkey" FOREIGN KEY ("wedding_id") REFERENCES "weddings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "itinerary_items" ADD CONSTRAINT "itinerary_items_location_id_fkey" FOREIGN KEY ("location_id") REFERENCES "locations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'itinerary_items_location_id_fkey') THEN
+        ALTER TABLE "itinerary_items" ADD CONSTRAINT "itinerary_items_location_id_fkey" FOREIGN KEY ("location_id") REFERENCES "locations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+    END IF;
+END $$;
