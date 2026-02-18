@@ -24,10 +24,14 @@ export interface ImportRow {
   language: Language;
   channel: Channel | null;
   invitedBy: string | null;
+  referenceCode: string | null;
   members: Array<{
     name: string;
     type: MemberType;
     age: number | null;
+    dietaryRestrictions: string | null;
+    accessibilityNeeds: string | null;
+    attending: boolean | null;
   }>;
 }
 
@@ -164,23 +168,46 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
     const channel = row[6] ? String(row[6]).trim() : null;
     const invitedBy = row[7] ? String(row[7]).trim() : null;
 
+    // Col 38: Reference Code (optional — preserve from export, otherwise auto-generated)
+    const referenceCode = row[38] ? String(row[38]).trim() : null;
+
     // Parse members (up to 10)
+    // Unified column layout:
+    //   Cols  8-37: Member 1-10 basic info — Name (8+i*3), Type (9+i*3), Age (10+i*3)
+    //   Cols 38-45: Extra family summary — Reference Code (38) imported; RSVP counts and
+    //               Payment (39-45) are computed/system-managed and ignored on import
+    //   Cols 46-85: Member 1-10 extra info — Attending (46+i*4) imported,
+    //               Dietary (47+i*4) imported, Accessibility (48+i*4) imported,
+    //               Added By Guest (49+i*4) system-managed, ignored on import
     const members: ImportRow['members'] = [];
 
     for (let i = 0; i < 10; i++) {
-      const nameIndex = 8 + (i * 3);
-      const typeIndex = 9 + (i * 3);
-      const ageIndex = 10 + (i * 3);
+      const nameIndex         = 8  + (i * 3);
+      const typeIndex         = 9  + (i * 3);
+      const ageIndex          = 10 + (i * 3);
+      const attendingIndex    = 46 + (i * 4);
+      const dietaryIndex      = 47 + (i * 4);
+      const accessibilityIndex = 48 + (i * 4);
 
       const memberName = row[nameIndex] ? String(row[nameIndex]).trim() : '';
       const memberType = row[typeIndex] ? String(row[typeIndex]).trim() : '';
-      const memberAge = row[ageIndex] ? parseInt(String(row[ageIndex]), 10) : null;
+      const memberAge  = row[ageIndex]  ? parseInt(String(row[ageIndex]), 10) : null;
+
+      const attendingRaw = row[attendingIndex] ? String(row[attendingIndex]).trim().toLowerCase() : '';
+      const attending: boolean | null =
+        attendingRaw === 'yes' ? true : attendingRaw === 'no' ? false : null;
+
+      const memberDietary      = row[dietaryIndex]       ? String(row[dietaryIndex]).trim()       : null;
+      const memberAccessibility = row[accessibilityIndex] ? String(row[accessibilityIndex]).trim() : null;
 
       if (memberName && memberType) {
         members.push({
           name: memberName,
           type: memberType as MemberType,
           age: memberAge,
+          attending,
+          dietaryRestrictions: memberDietary,
+          accessibilityNeeds: memberAccessibility,
         });
       }
     }
@@ -194,6 +221,7 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
       language,
       channel: validateChannel(channel || undefined),
       invitedBy: invitedBy || null,
+      referenceCode: referenceCode || null,
       members,
     });
   }
@@ -445,9 +473,10 @@ export async function importGuestList(
         // Generate magic token
         const magicToken = randomUUID();
 
-        // Generate reference code if automated payment mode
-        const referenceCode =
-          paymentMode === 'AUTOMATED' ? await ensureUniqueReferenceCode(wedding_id) : null;
+        // Use provided reference code from the file, or auto-generate for AUTOMATED payment mode
+        const referenceCode = row.referenceCode
+          ? row.referenceCode
+          : paymentMode === 'AUTOMATED' ? await ensureUniqueReferenceCode(wedding_id) : null;
 
         // Resolve invited_by_admin_id: match by name first, then email, then default
         const resolvedAdminId = row.invitedBy
@@ -484,7 +513,10 @@ export async function importGuestList(
               name: member.name,
               type: member.type,
               age: member.age,
+              attending: member.attending,
               added_by_guest: false,
+              dietary_restrictions: member.dietaryRestrictions,
+              accessibility_needs: member.accessibilityNeeds,
             },
           });
 
