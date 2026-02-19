@@ -54,9 +54,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
         _key: item.id,
         location_id: item.location_id,
         item_type: (item.item_type ?? 'EVENT') as LocationType,
-        date_time: typeof item.date_time === 'string'
-          ? item.date_time
-          : new Date(item.date_time).toISOString().slice(0, 16),
+        date_time: new Date(item.date_time).toISOString().slice(0, 16),
         notes: item.notes ?? undefined,
         order: item.order,
       }));
@@ -126,10 +124,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
             _key: item.id,
             location_id: item.location_id,
             item_type: (item.item_type ?? 'EVENT') as LocationType,
-            date_time:
-              typeof item.date_time === 'string'
-                ? item.date_time
-                : new Date(item.date_time).toISOString().slice(0, 16),
+            date_time: new Date(item.date_time).toISOString().slice(0, 16),
             notes: item.notes ?? undefined,
             order: item.order,
           }))
