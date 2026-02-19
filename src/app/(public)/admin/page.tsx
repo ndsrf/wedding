@@ -57,7 +57,7 @@ async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | 
         main_event_location: true,
         itinerary_items: {
           include: { location: true },
-          orderBy: { order: 'asc' },
+          orderBy: { date_time: 'asc' },
         },
       },
     });
@@ -213,7 +213,11 @@ export default async function AdminDashboardPage() {
                         : 'bg-gray-50 border-gray-200 text-gray-600'
                     }`}
                   >
-                    <span className="font-medium">{new Date(item.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className="font-medium">
+                      {new Date(item.date_time).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                      {' '}
+                      {new Date(item.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                     <span>·</span>
                     <span>{item.location_name}</span>
                     {item.notes && <span className="text-gray-400">({item.notes})</span>}

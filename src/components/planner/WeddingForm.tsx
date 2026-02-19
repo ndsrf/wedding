@@ -95,6 +95,49 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       .catch(() => {});
   }, []);
 
+  // Sync form data when initialData changes (important for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        couple_names: initialData.couple_names || '',
+        wedding_date: initialData.wedding_date
+          ? new Date(initialData.wedding_date).toISOString().split('T')[0]
+          : '',
+        wedding_time: initialData.wedding_time || '',
+        location: initialData.location || '',
+        main_event_location_id: initialData.main_event_location_id || null,
+        rsvp_cutoff_date: initialData.rsvp_cutoff_date
+          ? new Date(initialData.rsvp_cutoff_date).toISOString().split('T')[0]
+          : '',
+        dress_code: initialData.dress_code || '',
+        additional_info: initialData.additional_info || '',
+        theme_id: initialData.theme_id || undefined,
+        payment_tracking_mode: initialData.payment_tracking_mode || PaymentMode.MANUAL,
+        allow_guest_additions: initialData.allow_guest_additions ?? true,
+        default_language: initialData.default_language || Language.ES,
+        wedding_country: initialData.wedding_country || 'ES',
+        whatsapp_mode: initialData.whatsapp_mode || WhatsAppMode.BUSINESS,
+      });
+
+      // Update itinerary when initialData changes
+      if (initialData.itinerary_items) {
+        setItinerary(
+          initialData.itinerary_items.map((item) => ({
+            _key: item.id,
+            location_id: item.location_id,
+            item_type: (item.item_type ?? 'EVENT') as LocationType,
+            date_time:
+              typeof item.date_time === 'string'
+                ? item.date_time
+                : new Date(item.date_time).toISOString().slice(0, 16),
+            notes: item.notes ?? undefined,
+            order: item.order,
+          }))
+        );
+      }
+    }
+  }, [initialData]);
+
   const [errors, setErrors] = useState<Partial<Record<keyof WeddingFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
