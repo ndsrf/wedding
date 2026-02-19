@@ -134,10 +134,11 @@ export async function POST(request: NextRequest) {
     });
 
     // --- Track the incoming message ---------------------------------------
+    // We await creation so we can later update this event with the AI reply.
+    let messageReceivedEventId: string | null = null;
     if (family) {
-      // Fire-and-forget; tracking failure must not interrupt the reply
-      prisma.trackingEvent
-        .create({
+      try {
+        const messageEvent = await prisma.trackingEvent.create({
           data: {
             family_id: family.id,
             wedding_id: family.wedding_id,
@@ -146,13 +147,15 @@ export async function POST(request: NextRequest) {
             metadata: {
               message_sid: messageSid,
               from: fromPhone,
-              // Store up to 1000 chars; full message not needed for analytics
               body: body.substring(0, 1000),
             },
             admin_triggered: false,
           },
-        })
-        .catch(err => console.error('[TWILIO_INBOUND] Failed to track MESSAGE_RECEIVED:', err));
+        });
+        messageReceivedEventId = messageEvent.id;
+      } catch (err) {
+        console.error('[TWILIO_INBOUND] Failed to track MESSAGE_RECEIVED:', err);
+      }
     } else {
       console.warn('[TWILIO_INBOUND] No family found for phone', fromPhone);
     }
@@ -191,7 +194,25 @@ export async function POST(request: NextRequest) {
       return emptyTwiML();
     }
 
-    // --- Track the AI reply ----------------------------------------------
+    // --- Update MESSAGE_RECEIVED event with the AI reply -----------------
+    // This lets admins see the full conversation (message + reply) in one place.
+    if (messageReceivedEventId) {
+      prisma.trackingEvent
+        .update({
+          where: { id: messageReceivedEventId },
+          data: {
+            metadata: {
+              message_sid: messageSid,
+              from: fromPhone,
+              body: body.substring(0, 1000),
+              ai_reply: aiReply,
+            },
+          },
+        })
+        .catch(err => console.error('[TWILIO_INBOUND] Failed to update MESSAGE_RECEIVED with AI reply:', err));
+    }
+
+    // --- Track the AI reply as its own event (for engagement analytics) --
     prisma.trackingEvent
       .create({
         data: {
@@ -201,7 +222,6 @@ export async function POST(request: NextRequest) {
           channel: 'WHATSAPP',
           metadata: {
             message_sid: messageSid,
-            // Store a preview (first 300 chars) to keep metadata lightweight
             reply_preview: aiReply.substring(0, 300),
           },
           admin_triggered: false,

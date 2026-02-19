@@ -11,6 +11,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useFormatter } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import { WhatsAppMessageBubble } from '@/components/shared/WhatsAppMessageBubble';
 import type { EventType, Channel } from '@/types/models';
 
 interface NotificationItem {
@@ -243,14 +244,16 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
                   </p>
                 )}
                 {notification.event_type === 'MESSAGE_RECEIVED' && notification.details?.body ? (
-                  <p className="mt-1 text-xs text-gray-700 bg-violet-50 border border-violet-100 rounded px-2 py-1 whitespace-pre-wrap line-clamp-3">
-                    {String(notification.details.body)}
-                  </p>
+                  <WhatsAppMessageBubble
+                    message={String(notification.details.body)}
+                    aiReply={notification.details.ai_reply ? String(notification.details.ai_reply) : null}
+                  />
                 ) : null}
                 {notification.event_type === 'AI_REPLY_SENT' && notification.details?.reply_preview ? (
-                  <p className="mt-1 text-xs text-gray-700 bg-sky-50 border border-sky-100 rounded px-2 py-1 whitespace-pre-wrap line-clamp-3">
-                    {String(notification.details.reply_preview)}
-                  </p>
+                  <WhatsAppMessageBubble
+                    message={String(notification.details.reply_preview)}
+                    messageLabel="AI Reply"
+                  />
                 ) : null}
                 {!notification.read && onMarkRead && (
                   <button
