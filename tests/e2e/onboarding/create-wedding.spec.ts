@@ -51,10 +51,14 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
       await weddingTimeInput.fill('18:00');
     }
 
-    // Fill in location
-    const locationInput = page.getByLabel(/location|venue/i).first();
-    await expect(locationInput).toBeVisible();
-    await locationInput.fill('Grand Hotel Barcelona');
+    // Fill in location (now a dropdown of pre-configured locations; optional field)
+    const locationSelect = page.locator('#main_event_location_id');
+    if (await locationSelect.isVisible().catch(() => false)) {
+      const optionCount = await locationSelect.locator('option').count();
+      if (optionCount > 1) {
+        await locationSelect.selectOption({ index: 1 });
+      }
+    }
 
     // Fill in RSVP cutoff date (required)
     const rsvpCutoffInput = page.getByLabel(/rsvp cutoff/i).first();
