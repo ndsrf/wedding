@@ -1,3 +1,62 @@
+# 1.1.0 (2026-02-19)
+
+
+### Bug Fixes
+
+* add missing main_event_location_id field to test fixture ([53b94eb](http://127.0.0.1:26798/git/ndsrf/wedding/commits/53b94ebc37f7d2be8ecdd359aeca2ceea1d21847))
+* add missing planner reminders and save-the-date API routes ([44f4846](http://127.0.0.1:26798/git/ndsrf/wedding/commits/44f484607305eec721a1d3d695f8a41c989ca088))
+* add prisma migrate deploy to build script for Vercel ([4abd1d1](http://127.0.0.1:26798/git/ndsrf/wedding/commits/4abd1d1bf30e5f7ba93ff6fda7d9f3826eba92d4))
+* correct magic_token field name and document undici vulnerability ([fc5f06d](http://127.0.0.1:26798/git/ndsrf/wedding/commits/fc5f06d77db3a4d45e60569ba8dc8967d8213778))
+* Correct return type of toAbsoluteUrl to string | undefined ([ba8542e](http://127.0.0.1:26798/git/ndsrf/wedding/commits/ba8542ef3f963eaf1194b6e4fb7f2bb179abb7f8))
+* Cosmetic issues ([a9a8470](http://127.0.0.1:26798/git/ndsrf/wedding/commits/a9a8470f9f9e66977fd17657dbf37b85e3bdfc4a))
+* create new migration to apply locations and itinerary schema ([262a816](http://127.0.0.1:26798/git/ndsrf/wedding/commits/262a816b78fc4977354c8604fb9a3153b531dd99))
+* datetime-local format for itinerary on mobile ([1ddbddd](http://127.0.0.1:26798/git/ndsrf/wedding/commits/1ddbddd579079069de4905afc14e3244a384fbd5))
+* **e2e:** update create-wedding test for new location select field ([0ddbc90](http://127.0.0.1:26798/git/ndsrf/wedding/commits/0ddbc908601c41d19354c684151e665c40d11540))
+* enable pre render invalidation when wedding template changes ([355bf34](http://127.0.0.1:26798/git/ndsrf/wedding/commits/355bf3422a3353d6abe54474841fba2b5a55aaf6))
+* Facebook login button was not appearing on the sign-in screen even when the facebook oauth details were entered in the .env file ([46bdfb9](http://127.0.0.1:26798/git/ndsrf/wedding/commits/46bdfb94b30a5c8e8e8385f05bf60503eca48b57))
+* Handle absolute URLs in Vercel Blob storage for invitation images ([90ff906](http://127.0.0.1:26798/git/ndsrf/wedding/commits/90ff906a79157df6a8dcf06113f12afb9afbcb07))
+* improve revalidation error handling and fix test assertions ([d8c32dd](http://127.0.0.1:26798/git/ndsrf/wedding/commits/d8c32dd418ff68e58c0e161f1f04614d60cc3f4f))
+* Include themes in migration scripts ([5809607](http://127.0.0.1:26798/git/ndsrf/wedding/commits/5809607dd446ea5e13465f702de26276389bb5b5))
+* more fixes to track AI replies in the notifications screen ([6588a93](http://127.0.0.1:26798/git/ndsrf/wedding/commits/6588a93547060d783d3eea969e01df6d1dac0b45))
+* move event type from Location to ItineraryItem; fix location dropdown ([1540e67](http://127.0.0.1:26798/git/ndsrf/wedding/commits/1540e6782fd7908eed366689ca373f65b6da90fd))
+* rewrite migration as idempotent SQL; revert Dockerfile ([ba4e3ee](http://127.0.0.1:26798/git/ndsrf/wedding/commits/ba4e3ee16553c3c11ce7311bcbd4d698224805fd))
+* run prisma migrate deploy on container startup ([8a1fcde](http://127.0.0.1:26798/git/ndsrf/wedding/commits/8a1fcde77ee7a979eea1164ec9e82be079a91e6d))
+* Timeline for AI messages ([c6e2e45](http://127.0.0.1:26798/git/ndsrf/wedding/commits/c6e2e455f9779e4c1ddddcd6eb2c1380efc05474))
+* translations issues ([0f279f5](http://127.0.0.1:26798/git/ndsrf/wedding/commits/0f279f5b9896190224b5f3f2a7e333a048bce88b))
+* Update wedding assistant prompt for RSVP handling to include magic link ([d41b1a1](http://127.0.0.1:26798/git/ndsrf/wedding/commits/d41b1a1621f80b8af7e1cb371933916a45d947bb))
+* wedding edit form and admin itinerary display ([48b7a45](http://127.0.0.1:26798/git/ndsrf/wedding/commits/48b7a457d370be2b3175ebc3f50a1e05617fac6d))
+
+
+### Features
+
+* Add AI auto-reply functionality for WhatsApp messages ([1b94bfa](http://127.0.0.1:26798/git/ndsrf/wedding/commits/1b94bfa0f8b71830494b9774045a3fc0914eb82a))
+* add i18n translations for itinerary feature ([1a1dbf7](http://127.0.0.1:26798/git/ndsrf/wedding/commits/1a1dbf70124bc773c5c0cfe5d76af4d256544f32))
+* add itinerary display to wedding detail page ([c17adcf](http://127.0.0.1:26798/git/ndsrf/wedding/commits/c17adcf962de1966b62a8fe118ad9fb54a8fd2c8))
+* add ItineraryTimeline component with horizontal step layout ([96de5a4](http://127.0.0.1:26798/git/ndsrf/wedding/commits/96de5a474bbe81619e4b488dcb65d33a17b05816))
+* add location management, itinerary, and Google Maps support ([3cbed25](http://127.0.0.1:26798/git/ndsrf/wedding/commits/3cbed257d573af128aee80bf3140dfe9cc38bfc1))
+* add template screen for planners ([9543898](http://127.0.0.1:26798/git/ndsrf/wedding/commits/954389869651cb1cfe2ca8faa396d35680051fcc))
+* Add Vercel blob storage support ([776a77b](http://127.0.0.1:26798/git/ndsrf/wedding/commits/776a77b9af36526b41a69580d79a582492278a90))
+* Add vercel speed insights ([064284c](http://127.0.0.1:26798/git/ndsrf/wedding/commits/064284c551e6604dbd75dc97253ae8ad9d0636ba))
+* Add vercel speed insights + Vercel DB instructions ([b730aff](http://127.0.0.1:26798/git/ndsrf/wedding/commits/b730aff21a90df80b80e25ce0a7411afdde6e779))
+* checklist editable for existing weddings ([e51191f](http://127.0.0.1:26798/git/ndsrf/wedding/commits/e51191fa76486e93397c811ad4ef35dc07c19985))
+* complete i18n for itinerary and main event location ([0dabf59](http://127.0.0.1:26798/git/ndsrf/wedding/commits/0dabf598790d941c777a581d617ea6dbf5ea28e4))
+* cookie consent ([5152e61](http://127.0.0.1:26798/git/ndsrf/wedding/commits/5152e61f6ff956c8729fe4edd0da681111f2f415))
+* implement ISR with on-demand revalidation for RSVP pages ([a91c286](http://127.0.0.1:26798/git/ndsrf/wedding/commits/a91c2863d49ef0c30d70c66095e66d0e5ccb711f))
+* invitation build improvements ([3bc7d89](http://127.0.0.1:26798/git/ndsrf/wedding/commits/3bc7d890a5ebac4f5f502af713025109946a3a15))
+* invitation builder improvements ([6e40de0](http://127.0.0.1:26798/git/ndsrf/wedding/commits/6e40de03db27b28d148ddb8a24a2d4a1fe35ff4c))
+* invitation builder: rich text editor for text blocks ([0f5156c](http://127.0.0.1:26798/git/ndsrf/wedding/commits/0f5156c0503e7b9c7a7cb3f24315866454220e58))
+* planner screens to edit weddings ([3b6ee02](http://127.0.0.1:26798/git/ndsrf/wedding/commits/3b6ee029998b231aeb1ef778be3b6583dfe49d0e))
+* rsvp pre-render to speed up rsvp generation ([85835ea](http://127.0.0.1:26798/git/ndsrf/wedding/commits/85835ea6a3489a294fef092df9ccd3df92aae63a))
+* sort itinerary items by date and time ([ae17d4c](http://127.0.0.1:26798/git/ndsrf/wedding/commits/ae17d4cb5c0a7959e456f890667e61436b77ec15))
+* Template editor for wedding planner to set defaults for all their weddings ([b6ceaed](http://127.0.0.1:26798/git/ndsrf/wedding/commits/b6ceaede56717a5b44792c5ce473b9ad5b1d10e3))
+
+
+### Reverts
+
+* remove prisma migrate deploy from build script ([0460e4b](http://127.0.0.1:26798/git/ndsrf/wedding/commits/0460e4b4814832ce8c4ce12807e42f9d41ce339e))
+
+
+
 # [1.0.0](https://github.com/ndsrf/wedding/compare/v0.10.0...v1.0.0) (2026-02-13)
 
 
