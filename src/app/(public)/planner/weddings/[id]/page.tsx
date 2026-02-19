@@ -236,13 +236,13 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-900 flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-gray-500" />
-                  Itinerary
+                  {t('planner.weddings.itinerary.title')}
                 </h2>
                 <Link
                   href={`/planner/weddings/${weddingId}/edit`}
                   className="text-sm text-blue-600 hover:text-blue-700"
                 >
-                  Edit
+                  {t('planner.weddings.edit')}
                 </Link>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -275,7 +275,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                         </p>
                         {item.item_type && item.item_type !== 'EVENT' && (
                           <span className="inline-block px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded mb-2">
-                            {item.item_type.replace('_', ' ')}
+                            {t(`planner.weddings.itinerary.eventTypes.${item.item_type}`)}
                           </span>
                         )}
                         {item.notes && (
@@ -293,7 +293,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                         rel="noopener noreferrer"
                         className="text-xs text-blue-600 hover:text-blue-700 mt-2 inline-block"
                       >
-                        View on Google Maps →
+                        {t('planner.weddings.itinerary.viewOnMaps')}
                       </a>
                     )}
                   </div>

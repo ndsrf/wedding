@@ -488,7 +488,17 @@
       "deletedInfo": "Diese Hochzeiten wurden gelöscht. Administratoren können nicht darauf zugreifen.",
       "noDeletedWeddings": "Keine gelöschten Hochzeiten",
       "confirmRestore": "Diese Hochzeit wiederherstellen? Administratoren erhalten wieder Zugriff.",
-      "restoreSuccess": "Hochzeit erfolgreich wiederhergestellt"
+      "restoreSuccess": "Hochzeit erfolgreich wiederhergestellt",
+      "itinerary": {
+        "title": "Ablauf",
+        "viewOnMaps": "Auf Google Maps anzeigen →",
+        "eventTypes": {
+          "CEREMONY": "Zeremonie",
+          "EVENT": "Veranstaltung",
+          "PRE_EVENT": "Vor-Veranstaltung",
+          "POST_EVENT": "Nach-Veranstaltung"
+        }
+      }
     },
     "admins": {
       "invite": "Administrator einladen",

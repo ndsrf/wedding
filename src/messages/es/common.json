@@ -490,7 +490,17 @@
       "deletedInfo": "Estas bodas han sido eliminadas. Los administradores no pueden acceder a ellas.",
       "noDeletedWeddings": "No hay bodas eliminadas",
       "confirmRestore": "¿Restaurar esta boda? Los administradores recuperarán el acceso.",
-      "restoreSuccess": "Boda restaurada exitosamente"
+      "restoreSuccess": "Boda restaurada exitosamente",
+      "itinerary": {
+        "title": "Itinerario",
+        "viewOnMaps": "Ver en Google Maps →",
+        "eventTypes": {
+          "CEREMONY": "Ceremonia",
+          "EVENT": "Evento",
+          "PRE_EVENT": "Pre-Boda",
+          "POST_EVENT": "Post-Boda"
+        }
+      }
     },
     "admins": {
       "invite": "Invitar Administrador",

@@ -488,7 +488,17 @@
       "deletedInfo": "Questi matrimoni sono stati eliminati. Gli amministratori non possono accedervi.",
       "noDeletedWeddings": "Nessun matrimonio eliminato",
       "confirmRestore": "Ripristinare questo matrimonio? Gli amministratori recupereranno l'accesso.",
-      "restoreSuccess": "Matrimonio ripristinato con successo"
+      "restoreSuccess": "Matrimonio ripristinato con successo",
+      "itinerary": {
+        "title": "Itinerario",
+        "viewOnMaps": "Visualizza su Google Maps →",
+        "eventTypes": {
+          "CEREMONY": "Cerimonia",
+          "EVENT": "Evento",
+          "PRE_EVENT": "Pre-Evento",
+          "POST_EVENT": "Post-Evento"
+        }
+      }
     },
     "admins": {
       "invite": "Invita Amministratore",
