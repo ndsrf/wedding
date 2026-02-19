@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import type { EventType, Channel } from '@/types/models';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import { WhatsAppMessageBubble } from '@/components/shared/WhatsAppMessageBubble';
 
 interface TrackingEventWithFamily {
   id: string;
@@ -220,6 +221,10 @@ export function GuestTimelineModal({
                   ? String(event.metadata.body)
                   : null;
 
+                const aiReply = event.event_type === 'MESSAGE_RECEIVED' && event.metadata && 'ai_reply' in event.metadata
+                  ? String(event.metadata.ai_reply)
+                  : null;
+
                 const aiReplyPreview = event.event_type === 'AI_REPLY_SENT' && event.metadata && 'reply_preview' in event.metadata
                   ? String(event.metadata.reply_preview)
                   : null;
@@ -279,14 +284,16 @@ export function GuestTimelineModal({
                             </span>
                           )}
                           {messageBody && (
-                            <p className="mt-1 p-2 bg-violet-50 border border-violet-100 rounded text-gray-700 whitespace-pre-wrap">
-                              {messageBody}
-                            </p>
+                            <WhatsAppMessageBubble
+                              message={messageBody}
+                              aiReply={aiReply}
+                            />
                           )}
                           {aiReplyPreview && (
-                            <p className="mt-1 p-2 bg-sky-50 border border-sky-100 rounded text-gray-700 whitespace-pre-wrap">
-                              {aiReplyPreview}
-                            </p>
+                            <WhatsAppMessageBubble
+                              message={aiReplyPreview}
+                              messageLabel="AI Reply"
+                            />
                           )}
                         </div>
                       )}
