@@ -18,14 +18,22 @@ import type {
   CreateWeddingRequest,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-import { Language, PaymentMode, WeddingStatus } from '@prisma/client';
+import { Language, LocationType, PaymentMode, WeddingStatus } from '@prisma/client';
 
 // Validation schema for creating a wedding
 const createWeddingSchema = z.object({
   couple_names: z.string().min(1, 'Couple names are required'),
   wedding_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
   wedding_time: z.string().min(1, 'Wedding time is required'),
-  location: z.string().min(1, 'Location is required'),
+  location: z.string().optional(),
+  main_event_location_id: z.string().uuid().optional().nullable(),
+  itinerary: z.array(z.object({
+    location_id: z.string().uuid(),
+    item_type: z.nativeEnum(LocationType).default('EVENT'),
+    date_time: z.string(),
+    notes: z.string().optional(),
+    order: z.number().int(),
+  })).optional(),
   rsvp_cutoff_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
   dress_code: z.string().optional(),
   additional_info: z.string().optional(),
@@ -151,6 +159,7 @@ export async function GET(request: NextRequest) {
           wedding_date: wedding.wedding_date,
           wedding_time: wedding.wedding_time,
           location: wedding.location,
+          main_event_location_id: wedding.main_event_location_id,
           rsvp_cutoff_date: wedding.rsvp_cutoff_date,
           dress_code: wedding.dress_code,
           additional_info: wedding.additional_info,
@@ -338,6 +347,7 @@ export async function POST(request: NextRequest) {
         wedding_date: weddingDate,
         wedding_time: validatedData.wedding_time,
         location: validatedData.location,
+        main_event_location_id: validatedData.main_event_location_id ?? null,
         rsvp_cutoff_date: rsvpCutoffDate,
         dress_code: validatedData.dress_code,
         additional_info: validatedData.additional_info,
@@ -350,6 +360,20 @@ export async function POST(request: NextRequest) {
         created_by: user.id,
       },
     });
+
+    // Create itinerary items if provided
+    if (validatedData.itinerary && validatedData.itinerary.length > 0) {
+      await prisma.itineraryItem.createMany({
+        data: validatedData.itinerary.map((item) => ({
+          wedding_id: wedding.id,
+          location_id: item.location_id,
+          item_type: item.item_type ?? 'EVENT',
+          date_time: new Date(item.date_time),
+          notes: item.notes,
+          order: item.order,
+        })),
+      });
+    }
 
     // Copy planner's default templates to the new wedding
     try {

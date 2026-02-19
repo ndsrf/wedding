@@ -36,6 +36,7 @@ model WeddingPlanner {
   provider_categories ProviderCategory[]
   providers           Provider[]
   message_templates   PlannerMessageTemplate[]
+  locations           Location[]
 
   @@index([enabled])
   @@map("wedding_planners")
@@ -68,7 +69,8 @@ model Wedding {
   couple_names                    String
   wedding_date                    DateTime
   wedding_time                    String
-  location                        String
+  location                        String?
+  main_event_location_id          String?
   rsvp_cutoff_date                DateTime
   dress_code                      String?
   additional_info                 String?
@@ -116,8 +118,10 @@ model Wedding {
   tracking_events                 TrackingEvent[]
   wedding_admins                  WeddingAdmin[]
   providers                       WeddingProvider[]
+  itinerary_items                 ItineraryItem[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   theme                           Theme?             @relation(fields: [theme_id], references: [id])
+  main_event_location             Location?          @relation("MainEventLocation", fields: [main_event_location_id], references: [id], onDelete: SetNull)
 
   @@index([planner_id])
   @@index([theme_id])
@@ -125,6 +129,7 @@ model Wedding {
   @@index([wedding_date])
   @@index([is_disabled])
   @@index([status, is_disabled])
+  @@index([main_event_location_id])
   @@map("weddings")
 }
 
@@ -148,6 +153,43 @@ model WeddingAdmin {
   @@index([wedding_id])
   @@index([email])
   @@map("wedding_admins")
+}
+
+model Location {
+  id                  String          @id @default(uuid())
+  planner_id          String
+  name                String
+  url                 String?
+  notes               String?         @db.Text
+  google_maps_url     String?
+  address             String?
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+  planner             WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  weddings            Wedding[]       @relation("MainEventLocation")
+  itinerary_items     ItineraryItem[]
+
+  @@index([planner_id])
+  @@map("locations")
+}
+
+model ItineraryItem {
+  id          String        @id @default(uuid())
+  wedding_id  String
+  location_id String
+  item_type   LocationType  @default(EVENT)
+  date_time   DateTime
+  notes       String?       @db.Text
+  order       Int
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  wedding     Wedding       @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  location    Location      @relation(fields: [location_id], references: [id], onDelete: Restrict)
+
+  @@index([wedding_id])
+  @@index([location_id])
+  @@index([wedding_id, order])
+  @@map("itinerary_items")
 }
 
 model MessageTemplate {
@@ -643,4 +685,11 @@ enum PaymentMethod {
 enum WhatsAppMode {
   BUSINESS
   LINKS
+}
+
+enum LocationType {
+  CEREMONY
+  EVENT
+  PRE_EVENT
+  POST_EVENT
 }

@@ -488,7 +488,27 @@
       "deletedInfo": "Ces mariages ont été supprimés. Les administrateurs ne peuvent pas y accéder.",
       "noDeletedWeddings": "Aucun mariage supprimé",
       "confirmRestore": "Restaurer ce mariage? Les administrateurs récupéreront l'accès.",
-      "restoreSuccess": "Mariage restauré avec succès"
+      "restoreSuccess": "Mariage restauré avec succès",
+      "itinerary": {
+        "title": "Itinéraire",
+        "viewOnMaps": "Voir sur Google Maps →",
+        "addStop": "Ajouter une étape",
+        "noItems": "Aucun élément d'itinéraire pour le moment.",
+        "venue": "Lieu",
+        "selectVenue": "— Sélectionner un lieu —",
+        "eventTypeLabel": "Type d'Événement",
+        "dateTime": "Date et Heure",
+        "notesLabel": "Notes (facultatif)",
+        "notesPlaceholder": "ex. Cocktail, Dîner, Discours…",
+        "remove": "Supprimer",
+        "eventTypes": {
+          "CEREMONY": "Cérémonie",
+          "EVENT": "Événement",
+          "PRE_EVENT": "Pré-Événement",
+          "POST_EVENT": "Post-Événement"
+        }
+      },
+      "mainEventLocation": "Lieu de l'Événement Principal"
     },
     "admins": {
       "invite": "Inviter un Administrateur",

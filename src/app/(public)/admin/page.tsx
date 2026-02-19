@@ -13,12 +13,25 @@ import { formatDateByLanguage } from '@/lib/date-formatter';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
 import PrivateHeader from '@/components/PrivateHeader';
+import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
 import type { AuthenticatedUser } from '@/types/api';
+
+interface ItinerarySummaryItem {
+  location_name: string;
+  item_type: string;
+  address: string | null;
+  google_maps_url: string | null;
+  date_time: Date;
+  notes: string | null;
+  is_main: boolean;
+}
 
 interface WeddingStats {
   couple_names: string;
   wedding_date: Date;
-  location: string;
+  location: string | null;
+  main_event_location: { name: string; address: string | null; google_maps_url: string | null } | null;
+  itinerary: ItinerarySummaryItem[];
   guest_count: number;
   rsvp_count: number;
   rsvp_completion_percentage: number;
@@ -41,6 +54,11 @@ async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | 
             members: true,
             gifts: true,
           },
+        },
+        main_event_location: true,
+        itinerary_items: {
+          include: { location: true },
+          orderBy: { date_time: 'asc' },
         },
       },
     });
@@ -86,6 +104,22 @@ async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | 
       couple_names: wedding.couple_names,
       wedding_date: wedding.wedding_date,
       location: wedding.location,
+      main_event_location: wedding.main_event_location
+        ? {
+            name: wedding.main_event_location.name,
+            address: wedding.main_event_location.address,
+            google_maps_url: wedding.main_event_location.google_maps_url,
+          }
+        : null,
+      itinerary: wedding.itinerary_items.map((item) => ({
+        location_name: item.location.name,
+        item_type: item.item_type,
+        address: item.location.address,
+        google_maps_url: item.location.google_maps_url,
+        date_time: item.date_time,
+        notes: item.notes,
+        is_main: item.location_id === wedding.main_event_location_id,
+      })),
       guest_count: totalGuests,
       rsvp_count: rsvpCount,
       rsvp_completion_percentage: rsvpCompletionPercentage,
@@ -127,9 +161,28 @@ export default async function AdminDashboardPage() {
     <div className="min-h-screen">
       <PrivateHeader
         title={stats.couple_names}
-        subtitle={`${formatDateByLanguage(stats.wedding_date, language)} • ${stats.location}`}
+        subtitle={formatDateByLanguage(stats.wedding_date, language)}
         hideBackButton={true}
       />
+
+      {/* Itinerary Timeline */}
+      {stats.itinerary.length > 0 && (
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <ItineraryTimeline
+              items={stats.itinerary.map((item, idx) => ({
+                id: idx,
+                locationName: item.location_name,
+                dateTime: item.date_time.toISOString(),
+                itemType: item.item_type,
+                isMain: item.is_main,
+                googleMapsUrl: item.google_maps_url,
+                notes: item.notes,
+              }))}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

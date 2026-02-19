@@ -108,7 +108,7 @@ export async function sendConfirmation(
       coupleNames: family.wedding.couple_names,
       weddingDate,
       weddingTime: family.wedding.wedding_time,
-      location: family.wedding.location,
+      location: family.wedding.location ?? '',
       magicLink: `${process.env.APP_URL || "http://localhost:3000"}/rsvp/${family.magic_token}`,
       rsvpCutoffDate,
       ...(family.reference_code && { referenceCode: family.reference_code }),

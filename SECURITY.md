@@ -6,6 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
+Last updated: 2026-02-19
 Last updated: 2026-02-18
 
 ### Current Vulnerabilities
@@ -30,6 +31,22 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Input validation on uploaded files
   - File size limits enforced
 - **Future Plan**: Consider migrating to `exceljs` or similar maintained alternative in a future release
+
+##### minimatch - ReDoS via Repeated Wildcards
+- **Package**: minimatch < 10.2.1 (via eslint, jest, and related dev dependencies)
+- **CVE**: [GHSA-3ppc-4f35-3m26](https://github.com/advisories/GHSA-3ppc-4f35-3m26)
+- **Status**: Fix requires breaking changes to eslint ecosystem
+- **Usage**: Development dependencies only (linting, testing)
+- **Risk Assessment**:
+  - Development-only dependency, not included in production builds
+  - ReDoS vulnerability only affects pattern matching in dev tools
+  - Cannot be exploited in production environment
+  - Attack would only affect local development linting/testing
+- **Mitigation**:
+  - Development-only dependency, not in production bundles
+  - No untrusted input to glob patterns in development workflow
+  - Developers use trusted source code only
+- **Future Plan**: Will be resolved when eslint ecosystem updates to minimatch@10.2.1+
 
 #### MODERATE Severity - Accepted Risks
 

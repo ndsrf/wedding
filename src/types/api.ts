@@ -133,7 +133,7 @@ export interface MasterWeddingOverview {
   couple_names: string;
   wedding_date: Date;
   wedding_time: string;
-  location: string;
+  location: string | null;
   rsvp_cutoff_date: Date;
   dress_code: string | null;
   additional_info: string | null;
@@ -166,12 +166,22 @@ export type MasterAnalyticsResponse = APIResponse<MasterAnalytics>;
 // PLANNER API TYPES
 // ============================================================================
 
+export interface ItineraryItemRequest {
+  location_id: string;
+  item_type: import('@prisma/client').LocationType;
+  date_time: string; // ISO datetime string
+  notes?: string;
+  order: number;
+}
+
 // POST /api/planner/weddings
 export interface CreateWeddingRequest {
   couple_names: string;
   wedding_date: string; // ISO date string
   wedding_time: string;
-  location: string;
+  location?: string;
+  main_event_location_id?: string | null;
+  itinerary?: ItineraryItemRequest[];
   rsvp_cutoff_date: string; // ISO date string
   dress_code?: string;
   additional_info?: string;
@@ -510,7 +520,7 @@ export interface GuestRSVPPageData {
     couple_names: string;
     wedding_date: string;
     wedding_time: string;
-    location: string;
+    location: string | null;
     rsvp_cutoff_date: string;
     dress_code: string | null;
     additional_info: string | null;

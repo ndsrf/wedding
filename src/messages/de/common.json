@@ -488,7 +488,27 @@
       "deletedInfo": "Diese Hochzeiten wurden gelöscht. Administratoren können nicht darauf zugreifen.",
       "noDeletedWeddings": "Keine gelöschten Hochzeiten",
       "confirmRestore": "Diese Hochzeit wiederherstellen? Administratoren erhalten wieder Zugriff.",
-      "restoreSuccess": "Hochzeit erfolgreich wiederhergestellt"
+      "restoreSuccess": "Hochzeit erfolgreich wiederhergestellt",
+      "itinerary": {
+        "title": "Ablauf",
+        "viewOnMaps": "Auf Google Maps anzeigen →",
+        "addStop": "Station hinzufügen",
+        "noItems": "Noch keine Ablaufpunkte vorhanden.",
+        "venue": "Veranstaltungsort",
+        "selectVenue": "— Veranstaltungsort auswählen —",
+        "eventTypeLabel": "Veranstaltungstyp",
+        "dateTime": "Datum und Uhrzeit",
+        "notesLabel": "Notizen (optional)",
+        "notesPlaceholder": "z.B. Cocktailstunde, Abendessen, Reden…",
+        "remove": "Entfernen",
+        "eventTypes": {
+          "CEREMONY": "Zeremonie",
+          "EVENT": "Veranstaltung",
+          "PRE_EVENT": "Vor-Veranstaltung",
+          "POST_EVENT": "Nach-Veranstaltung"
+        }
+      },
+      "mainEventLocation": "Hauptveranstaltungsort"
     },
     "admins": {
       "invite": "Administrator einladen",

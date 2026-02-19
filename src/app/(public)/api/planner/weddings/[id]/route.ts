@@ -19,7 +19,7 @@ import type {
   UpdateWeddingRequest,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-import { Language, PaymentMode, WhatsAppMode } from '@prisma/client';
+import { Language, LocationType, PaymentMode, WhatsAppMode } from '@prisma/client';
 
 // Validation schema for updating a wedding
 const updateWeddingSchema = z
@@ -27,7 +27,16 @@ const updateWeddingSchema = z
     couple_names: z.string().min(1, 'Couple names are required').optional(),
     wedding_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional(),
     wedding_time: z.string().min(1, 'Wedding time is required').optional(),
-    location: z.string().min(1, 'Location is required').optional(),
+    location: z.string().optional(),
+    main_event_location_id: z.string().uuid().optional().nullable(),
+    itinerary: z.array(z.object({
+      id: z.string().optional(),
+      location_id: z.string().uuid(),
+      item_type: z.nativeEnum(LocationType).default('EVENT'),
+      date_time: z.string(),
+      notes: z.string().optional(),
+      order: z.number().int(),
+    })).optional(),
     rsvp_cutoff_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional(),
     dress_code: z.string().optional(),
     additional_info: z.string().optional(),
@@ -71,6 +80,11 @@ export async function GET(
         theme: true,
         planner: true,
         wedding_admins: true,
+        itinerary_items: {
+          include: { location: true },
+          orderBy: { order: 'asc' },
+        },
+        main_event_location: true,
         _count: {
           select: {
             families: true,
@@ -133,6 +147,7 @@ export async function GET(
       wedding_date: wedding.wedding_date,
       wedding_time: wedding.wedding_time,
       location: wedding.location,
+      main_event_location_id: wedding.main_event_location_id,
       rsvp_cutoff_date: wedding.rsvp_cutoff_date,
       dress_code: wedding.dress_code,
                 additional_info: wedding.additional_info,
@@ -175,6 +190,8 @@ export async function GET(
       attending_count,
       payment_received_count,
       wedding_admins: wedding.wedding_admins,
+      itinerary_items: wedding.itinerary_items,
+      main_event_location: wedding.main_event_location,
     };
 
     const response: GetWeddingResponse = {
@@ -331,13 +348,14 @@ export async function PATCH(
     }
 
     // Build update data - Convert date strings to Date objects for Prisma
-    const { wedding_date, rsvp_cutoff_date, ...restData } = validatedData;
+    const { wedding_date, rsvp_cutoff_date, itinerary, ...restData } = validatedData;
 
     const updateData: Partial<{
       couple_names: string;
       wedding_date: Date;
       wedding_time: string;
       location: string;
+      main_event_location_id: string | null;
       rsvp_cutoff_date: Date;
       dress_code: string;
       additional_info: string;
@@ -365,6 +383,23 @@ export async function PATCH(
       where: { id: weddingId },
       data: updateData,
     });
+
+    // Replace itinerary if provided
+    if (itinerary !== undefined) {
+      await prisma.itineraryItem.deleteMany({ where: { wedding_id: weddingId } });
+      if (itinerary.length > 0) {
+        await prisma.itineraryItem.createMany({
+          data: itinerary.map((item) => ({
+            wedding_id: weddingId,
+            location_id: item.location_id,
+            item_type: item.item_type ?? 'EVENT',
+            date_time: new Date(item.date_time),
+            notes: item.notes,
+            order: item.order,
+          })),
+        });
+      }
+    }
 
     // If theme changed, re-render all invitation templates and invalidate caches
     if (validatedData.theme_id !== undefined && validatedData.theme_id !== existingWedding.theme_id) {

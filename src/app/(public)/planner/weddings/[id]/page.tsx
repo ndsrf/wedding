@@ -10,9 +10,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { X } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import { AdminInviteForm } from '@/components/planner/AdminInviteForm';
-import type { WeddingWithStats } from '@/types/models';
+import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
+import type { WeddingWithStats, ItineraryItem, Location } from '@/types/models';
 import type { WeddingAdmin } from '@prisma/client';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
@@ -24,7 +25,11 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
   const t = useTranslations();
   const locale = useLocale();
   const [weddingId, setWeddingId] = useState<string | null>(null);
-  const [wedding, setWedding] = useState<(WeddingWithStats & { wedding_admins?: WeddingAdmin[] }) | null>(null);
+  const [wedding, setWedding] = useState<(WeddingWithStats & {
+    wedding_admins?: WeddingAdmin[];
+    itinerary_items?: (ItineraryItem & { location: Location })[];
+    main_event_location?: Location | null;
+  }) | null>(null);
   const [admins, setAdmins] = useState<WeddingAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -224,6 +229,37 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
             <p className="text-3xl font-bold text-gray-900">{wedding.payment_received_count}</p>
           </div>
         </div>
+
+        {/* Itinerary */}
+        {wedding.itinerary_items && wedding.itinerary_items.length > 0 && (
+          <div className="mb-8">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  {t('planner.weddings.itinerary.title')}
+                </h2>
+                <Link
+                  href={`/planner/weddings/${weddingId}/edit`}
+                  className="text-xs text-blue-600 hover:text-blue-700"
+                >
+                  {t('planner.weddings.edit')}
+                </Link>
+              </div>
+              <ItineraryTimeline
+                items={wedding.itinerary_items.map((item) => ({
+                  id: item.id,
+                  locationName: item.location.name,
+                  dateTime: item.date_time,
+                  itemType: item.item_type ?? 'EVENT',
+                  isMain: wedding.main_event_location_id === item.location_id,
+                  googleMapsUrl: item.location.google_maps_url,
+                  notes: item.notes,
+                }))}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mb-8">

@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { WeddingForm } from '@/components/planner/WeddingForm';
 import { AlertTriangle, Trash2 } from 'lucide-react';
-import type { Wedding, Theme } from '@/types/models';
+import type { Wedding, Theme, ItineraryItem } from '@/types/models';
 import type { CreateWeddingRequest, UpdateWeddingStatusRequest } from '@/types/api';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
@@ -25,7 +25,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
   const { id: weddingId } = use(params);
   const router = useRouter();
 
-  const [wedding, setWedding] = useState<Wedding | null>(null);
+  const [wedding, setWedding] = useState<(Wedding & { itinerary_items?: ItineraryItem[] }) | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +81,8 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
         wedding_date: formData.wedding_date,
         wedding_time: formData.wedding_time,
         location: formData.location,
+        main_event_location_id: formData.main_event_location_id ?? null,
+        itinerary: formData.itinerary ?? [],
         rsvp_cutoff_date: formData.rsvp_cutoff_date,
         default_language: formData.default_language,
         payment_tracking_mode: formData.payment_tracking_mode,
