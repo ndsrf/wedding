@@ -51,6 +51,8 @@ const getEventIcon = (eventType: EventType | 'GUEST_CREATED'): string => {
     MESSAGE_DELIVERED: '📬',
     MESSAGE_READ: '👁️',
     MESSAGE_FAILED: '❌',
+    MESSAGE_RECEIVED: '💬',
+    AI_REPLY_SENT: '🤖',
   };
   return icons[eventType] || '📌';
 };
@@ -72,6 +74,8 @@ const getEventColor = (eventType: EventType | 'GUEST_CREATED'): string => {
     MESSAGE_DELIVERED: 'bg-blue-100 text-blue-800',
     MESSAGE_READ: 'bg-teal-100 text-teal-800',
     MESSAGE_FAILED: 'bg-red-100 text-red-800',
+    MESSAGE_RECEIVED: 'bg-violet-100 text-violet-800',
+    AI_REPLY_SENT: 'bg-sky-100 text-sky-800',
   };
   return colors[eventType] || 'bg-gray-100 text-gray-800';
 };
@@ -212,6 +216,14 @@ export function GuestTimelineModal({
                   ? String(event.metadata.template_name)
                   : null;
 
+                const messageBody = event.event_type === 'MESSAGE_RECEIVED' && event.metadata && 'body' in event.metadata
+                  ? String(event.metadata.body)
+                  : null;
+
+                const aiReplyPreview = event.event_type === 'AI_REPLY_SENT' && event.metadata && 'reply_preview' in event.metadata
+                  ? String(event.metadata.reply_preview)
+                  : null;
+
                 return (
                 <div key={event.id} className="relative">
                   {/* Timeline connector line */}
@@ -265,6 +277,16 @@ export function GuestTimelineModal({
                             <span className="text-gray-500">
                               Template: {templateName}
                             </span>
+                          )}
+                          {messageBody && (
+                            <p className="mt-1 p-2 bg-violet-50 border border-violet-100 rounded text-gray-700 whitespace-pre-wrap">
+                              {messageBody}
+                            </p>
+                          )}
+                          {aiReplyPreview && (
+                            <p className="mt-1 p-2 bg-sky-50 border border-sky-100 rounded text-gray-700 whitespace-pre-wrap">
+                              {aiReplyPreview}
+                            </p>
                           )}
                         </div>
                       )}

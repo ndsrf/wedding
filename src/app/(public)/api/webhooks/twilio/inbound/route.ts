@@ -1,0 +1,219 @@
+/**
+ * Twilio Inbound WhatsApp Webhook
+ *
+ * Receives incoming WhatsApp messages sent by guests, records them as
+ * MESSAGE_RECEIVED tracking events, and auto-replies with an AI-generated
+ * response using the wedding's context.
+ *
+ * POST /api/webhooks/twilio/inbound
+ *
+ * Setup: In the Twilio console, set this URL as the "When a message comes in"
+ * webhook for your WhatsApp sender (Messaging → Senders → WhatsApp).
+ * The URL must be publicly accessible (not localhost).
+ *
+ * The response uses TwiML so Twilio sends the AI reply directly to the guest.
+ * AI calls typically complete in 2–5 s; Twilio's webhook timeout is 15 s.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
+import { generateWeddingReply } from '@/lib/ai/wedding-assistant';
+
+export const runtime = 'nodejs';
+
+// ============================================================================
+// TWIML HELPERS
+// ============================================================================
+
+/** Escape special XML characters in a string */
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+/** TwiML with no outbound message (acknowledge only) */
+function emptyTwiML(): NextResponse {
+  return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', {
+    status: 200,
+    headers: { 'Content-Type': 'text/xml' },
+  });
+}
+
+/** TwiML that sends a WhatsApp reply back to the sender */
+function messageTwiML(text: string): NextResponse {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(text)}</Message></Response>`;
+  return new NextResponse(xml, {
+    status: 200,
+    headers: { 'Content-Type': 'text/xml' },
+  });
+}
+
+// ============================================================================
+// PHONE NORMALISATION
+// ============================================================================
+
+/**
+ * Strip the "whatsapp:" prefix and any surrounding whitespace.
+ * Returns the E.164 phone number (e.g. "+34612345678").
+ */
+function extractPhone(raw: string): string {
+  return raw.replace(/^whatsapp:/i, '').trim();
+}
+
+// ============================================================================
+// WEBHOOK HANDLER
+// ============================================================================
+
+export async function POST(request: NextRequest) {
+  try {
+    // --- Parse form data -------------------------------------------------
+    const formData = await request.formData();
+    const params: Record<string, string> = {};
+    for (const [key, value] of formData.entries()) {
+      params[key] = value as string;
+    }
+
+    // --- Validate Twilio signature ----------------------------------------
+    const signature = request.headers.get('x-twilio-signature');
+    if (!signature) {
+      console.warn('[TWILIO_INBOUND] Missing X-Twilio-Signature header');
+      return NextResponse.json({ success: false }, { status: 400 });
+    }
+
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    if (!authToken) {
+      console.error('[TWILIO_INBOUND] TWILIO_AUTH_TOKEN not configured');
+      return emptyTwiML();
+    }
+
+    const isValid = validateTwilioSignature(request.url, params, signature, authToken);
+    if (!isValid) {
+      console.warn('[TWILIO_INBOUND] Invalid Twilio signature', {
+        messageSid: params.MessageSid,
+      });
+      return NextResponse.json({ success: false }, { status: 403 });
+    }
+
+    // --- Extract message fields -------------------------------------------
+    const fromPhone = extractPhone(params.From ?? '');
+    const body = (params.Body ?? '').trim();
+    const messageSid = params.MessageSid ?? '';
+
+    console.log('[TWILIO_INBOUND] Received message', {
+      from: fromPhone,
+      messageSid,
+      bodyLength: body.length,
+    });
+
+    if (!fromPhone || !body) {
+      return emptyTwiML();
+    }
+
+    // --- Look up family by phone number -----------------------------------
+    // We search both whatsapp_number and phone fields.
+    // Families are uniquely tied to a wedding, so a phone number should
+    // return at most one family in practice.
+    const family = await prisma.family.findFirst({
+      where: {
+        OR: [
+          { whatsapp_number: fromPhone },
+          { phone: fromPhone },
+        ],
+      },
+      include: {
+        wedding: true,
+        members: {
+          select: { id: true, name: true, attending: true },
+        },
+      },
+    });
+
+    // --- Track the incoming message ---------------------------------------
+    if (family) {
+      // Fire-and-forget; tracking failure must not interrupt the reply
+      prisma.trackingEvent
+        .create({
+          data: {
+            family_id: family.id,
+            wedding_id: family.wedding_id,
+            event_type: 'MESSAGE_RECEIVED',
+            channel: 'WHATSAPP',
+            metadata: {
+              message_sid: messageSid,
+              from: fromPhone,
+              // Store up to 1000 chars; full message not needed for analytics
+              body: body.substring(0, 1000),
+            },
+            admin_triggered: false,
+          },
+        })
+        .catch(err => console.error('[TWILIO_INBOUND] Failed to track MESSAGE_RECEIVED:', err));
+    } else {
+      console.warn('[TWILIO_INBOUND] No family found for phone', fromPhone);
+    }
+
+    // --- Check AI provider availability ----------------------------------
+    const hasOpenAI = !!process.env.OPENAI_API_KEY;
+    const hasGemini = !!process.env.GEMINI_API_KEY;
+
+    if (!hasOpenAI && !hasGemini) {
+      console.warn('[TWILIO_INBOUND] No AI provider configured – skipping auto-reply');
+      return emptyTwiML();
+    }
+
+    // --- Generate AI reply -----------------------------------------------
+    if (!family) {
+      // Cannot build a contextual reply without wedding info
+      return emptyTwiML();
+    }
+
+    const language = String(family.preferred_language ?? family.wedding.default_language ?? 'EN');
+
+    const aiReply = await generateWeddingReply(
+      body,
+      family.wedding,
+      {
+        name: family.name,
+        magic_token: family.magic_token,
+        preferred_language: family.preferred_language,
+        members: family.members,
+      },
+      language
+    );
+
+    if (!aiReply) {
+      console.warn('[TWILIO_INBOUND] AI returned no reply for family', family.id);
+      return emptyTwiML();
+    }
+
+    // --- Track the AI reply ----------------------------------------------
+    prisma.trackingEvent
+      .create({
+        data: {
+          family_id: family.id,
+          wedding_id: family.wedding_id,
+          event_type: 'AI_REPLY_SENT',
+          channel: 'WHATSAPP',
+          metadata: {
+            message_sid: messageSid,
+            // Store a preview (first 300 chars) to keep metadata lightweight
+            reply_preview: aiReply.substring(0, 300),
+          },
+          admin_triggered: false,
+        },
+      })
+      .catch(err => console.error('[TWILIO_INBOUND] Failed to track AI_REPLY_SENT:', err));
+
+    // --- Return TwiML reply ----------------------------------------------
+    return messageTwiML(aiReply);
+  } catch (error) {
+    console.error('[TWILIO_INBOUND] Unhandled error:', error);
+    // Always return 200 + empty TwiML so Twilio does not retry
+    return emptyTwiML();
+  }
+}

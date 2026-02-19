@@ -821,7 +821,9 @@
         "taskCompleted": "Aufgabe abgeschlossen",
         "messageDelivered": "Nachricht zugestellt",
         "messageRead": "Nachricht gelesen",
-        "messageFailed": "Nachricht fehlgeschlagen"
+        "messageFailed": "Nachricht fehlgeschlagen",
+        "messageReceived": "Nachricht empfangen",
+        "aiReplySent": "KI-Antwort gesendet"
       },
       "eventTypes": {
         "LINK_OPENED": "Link geöffnet",
@@ -836,7 +838,9 @@
         "TASK_COMPLETED": "Aufgabe abgeschlossen",
         "MESSAGE_DELIVERED": "Nachricht zugestellt",
         "MESSAGE_READ": "Nachricht gelesen",
-        "MESSAGE_FAILED": "Nachricht fehlgeschlagen"
+        "MESSAGE_FAILED": "Nachricht fehlgeschlagen",
+        "MESSAGE_RECEIVED": "Nachricht empfangen",
+        "AI_REPLY_SENT": "KI-Antwort gesendet"
       }
     },
     "saveTheDate": {

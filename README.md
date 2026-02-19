@@ -799,18 +799,18 @@ In the Wedding Management App:
 
 | Field | Value | Notes |
 |-------|-------|-------|
-| **Webhook URL for incoming messages** | Leave blank (Optional) | Only needed if you want to receive replies from guests. Not required for one-way invitations. |
-| **Webhook method for incoming messages URL** | HTTP POST | Standard method (if you set an incoming URL) |
+| **Webhook URL for incoming messages** | `https://your-domain.com/api/webhooks/twilio/inbound` | **REQUIRED for AI auto-replies** - enables the app to receive and respond to guest messages |
+| **Webhook method for incoming messages URL** | HTTP POST | Must be POST |
 | **Fallback URL for incoming messages** | Leave blank (Optional) | Backup URL if incoming messages webhook fails |
-| **Webhook method for fallback URL** | HTTP POST | Standard method (if you set a fallback URL) |
+| **Webhook method for fallback URL** | HTTP POST | Standard method |
 | **Status callback URL** | `https://your-domain.com/api/webhooks/twilio/status` | **REQUIRED** - Replace `your-domain.com` with your actual domain |
 | **Webhook method for status callback URL** | HTTP POST | **Use POST** (required for this implementation) |
 
 **Important Notes:**
 - Replace `https://your-domain.com` with your actual production domain (e.g., `https://wedding.example.com`)
 - The status callback URL is **required** to track delivery and read receipts
+- The inbound webhook URL is **required** for AI auto-replies to guest messages
 - The webhook method must be **HTTP POST** (not PUT)
-- Incoming message webhooks are optional and only needed if you want to process guest replies
 
 4. Click "Save" to apply the configuration
 
@@ -920,6 +920,8 @@ The application includes built-in analytics to monitor message engagement:
 - **MESSAGE_DELIVERED**: Message delivered to recipient's device
 - **MESSAGE_READ**: Recipient opened/read the message (WhatsApp only)
 - **MESSAGE_FAILED**: Message failed to send (includes error code)
+- **MESSAGE_RECEIVED**: Guest sent an inbound WhatsApp message to the number
+- **AI_REPLY_SENT**: Application auto-replied to the guest using AI
 - **LINK_OPENED**: Guest clicked the RSVP link in the message
 - **RSVP_SUBMITTED**: Guest completed the RSVP form
 
@@ -952,12 +954,12 @@ This helps planners:
 **WhatsApp Sender Configuration in Twilio Console:**
 
 ```
-Webhook URL for incoming messages: [Leave blank]
+Webhook URL for incoming messages: https://your-domain.com/api/webhooks/twilio/inbound  ← For AI auto-replies
 Webhook method: HTTP POST
 Fallback URL: [Leave blank]
 Fallback method: HTTP POST
 
-Status callback URL: https://your-domain.com/api/webhooks/twilio/status
+Status callback URL: https://your-domain.com/api/webhooks/twilio/status  ← For delivery/read tracking
 Status callback method: HTTP POST ← IMPORTANT: Must be POST
 ```
 
@@ -999,6 +1001,67 @@ APP_URL=https://your-domain.com                  # Used to construct webhook cal
    - `INVITATION_SENT`
    - `MESSAGE_DELIVERED` (within seconds)
    - `MESSAGE_READ` (when recipient opens WhatsApp)
+
+#### 9. Configure Inbound WhatsApp Messages and AI Auto-Replies
+
+When guests reply to WhatsApp messages, the application can:
+1. **Track the incoming message** — creates a `MESSAGE_RECEIVED` tracking event.
+2. **Auto-reply using AI** — generates a context-aware reply in the guest's language and sends it back immediately via TwiML.
+
+##### Prerequisites
+
+- An active AI provider API key (OpenAI or Google Gemini).
+- The inbound webhook URL configured in Twilio (see step 8 above).
+
+##### Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+# Choose your AI provider: "openai" (default) or "gemini"
+AI_PROVIDER=openai
+
+# OpenAI (recommended: gpt-4o-mini for speed and cost)
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini        # alternatives: gpt-4.1-mini, gpt-4.1-nano
+
+# Google Gemini (alternative)
+GEMINI_API_KEY=AI...
+GEMINI_MODEL=gemini-2.0-flash   # alternatives: gemini-2.5-pro, gemini-2.5-flash
+```
+
+If neither key is set, incoming messages are still tracked but no auto-reply is sent.
+
+##### Twilio Configuration
+
+In the [Twilio Console](https://console.twilio.com/):
+
+1. Navigate to **Messaging → Senders → WhatsApp senders**
+2. Click on your WhatsApp sender
+3. Set **Webhook URL for incoming messages** to:
+   ```
+   https://your-domain.com/api/webhooks/twilio/inbound
+   ```
+4. Set **Webhook method** to `HTTP POST`
+5. Click **Save**
+
+For local development, use [ngrok](https://ngrok.com/) to expose your local server and set the ngrok URL instead.
+
+##### What the AI Replies Include
+
+The AI assistant is given all wedding details:
+- Couple names, date, time and venue
+- RSVP deadline and guest-specific RSVP link
+- Dress code, gift IBAN/bank account, dietary restrictions, transportation
+- Guest's RSVP status (attending / not attending / pending) per family member
+
+The AI responds **in the guest's preferred language** (ES, EN, FR, IT, DE) and always ends with a note directing guests to contact the couple for more personal questions.
+
+##### Implementation Files
+
+- **AI Service**: `src/lib/ai/wedding-assistant.ts` — builds the wedding context prompt and calls OpenAI or Gemini
+- **Inbound Webhook**: `src/app/(public)/api/webhooks/twilio/inbound/route.ts` — receives Twilio POST, tracks events, returns TwiML reply
+- **Tracking Events**: `MESSAGE_RECEIVED` and `AI_REPLY_SENT` in the `tracking_events` table
 
 #### Troubleshooting
 

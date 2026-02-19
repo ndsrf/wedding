@@ -32,6 +32,8 @@ const ACCEPTED_GHSAS = [
 
   // minimatch - HIGH severity (dev dependencies only)
   'GHSA-3ppc-4f35-3m26', // ReDoS via repeated wildcards
+  // ajv - MODERATE severity
+  'GHSA-2g4f-4pwh-qvx6', // ReDoS when using $data option (via eslint dev dependency)
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];
