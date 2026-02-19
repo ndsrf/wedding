@@ -327,7 +327,9 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
           <p className="text-sm text-gray-400 italic">No itinerary items yet.</p>
         ) : (
           <div className="space-y-3">
-            {itinerary.map((item) => (
+            {[...itinerary]
+              .sort((a, b) => new Date(a.date_time).getTime() - new Date(b.date_time).getTime())
+              .map((item) => (
               <div key={item._key} className="flex gap-2 items-start p-3 bg-gray-50 rounded-md border border-gray-200">
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
@@ -386,7 +388,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-            ))}
+              ))}
           </div>
         )}
       </div>
