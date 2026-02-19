@@ -242,16 +242,16 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
                     )}
                   </p>
                 )}
-                {notification.event_type === 'MESSAGE_RECEIVED' && notification.details?.body && (
+                {notification.event_type === 'MESSAGE_RECEIVED' && notification.details?.body ? (
                   <p className="mt-1 text-xs text-gray-700 bg-violet-50 border border-violet-100 rounded px-2 py-1 whitespace-pre-wrap line-clamp-3">
                     {String(notification.details.body)}
                   </p>
-                )}
-                {notification.event_type === 'AI_REPLY_SENT' && notification.details?.reply_preview && (
+                ) : null}
+                {notification.event_type === 'AI_REPLY_SENT' && notification.details?.reply_preview ? (
                   <p className="mt-1 text-xs text-gray-700 bg-sky-50 border border-sky-100 rounded px-2 py-1 whitespace-pre-wrap line-clamp-3">
                     {String(notification.details.reply_preview)}
                   </p>
-                )}
+                ) : null}
                 {!notification.read && onMarkRead && (
                   <button
                     onClick={() => onMarkRead(notification.id)}
