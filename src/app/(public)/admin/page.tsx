@@ -13,6 +13,7 @@ import { formatDateByLanguage } from '@/lib/date-formatter';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
 import PrivateHeader from '@/components/PrivateHeader';
+import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface ItinerarySummaryItem {
@@ -164,70 +165,21 @@ export default async function AdminDashboardPage() {
         hideBackButton={true}
       />
 
-      {/* Location & Itinerary Banner */}
-      {(stats.main_event_location || stats.location || stats.itinerary.length > 0) && (
+      {/* Itinerary Timeline */}
+      {stats.itinerary.length > 0 && (
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            {/* Main Event Location — highlighted */}
-            {(stats.main_event_location || stats.location) && (
-              <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 text-sm font-semibold px-3 py-1 rounded-full">
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {t('planner.weddings.mainEventLocation')}
-                </span>
-                {stats.main_event_location ? (
-                  <span className="text-sm text-gray-700 font-medium">
-                    {stats.main_event_location.name}
-                    {stats.main_event_location.address && (
-                      <span className="text-gray-500 font-normal"> — {stats.main_event_location.address}</span>
-                    )}
-                    {stats.main_event_location.google_maps_url && (
-                      <a
-                        href={stats.main_event_location.google_maps_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-2 text-blue-600 hover:text-blue-800 text-xs underline"
-                      >
-                        Maps ↗
-                      </a>
-                    )}
-                  </span>
-                ) : (
-                  <span className="text-sm text-gray-700">{stats.location}</span>
-                )}
-              </div>
-            )}
-
-            {/* Itinerary */}
-            {stats.itinerary.length > 0 && (
-              <div className="flex flex-wrap gap-3 mt-1">
-                {stats.itinerary.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${
-                      item.is_main
-                        ? 'bg-purple-50 border-purple-300 text-purple-700'
-                        : 'bg-gray-50 border-gray-200 text-gray-600'
-                    }`}
-                  >
-                    <span className="font-medium">
-                      {new Date(item.date_time).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                      {' '}
-                      {new Date(item.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <span>·</span>
-                    <span>{item.location_name}</span>
-                    {item.notes && <span className="text-gray-400">({item.notes})</span>}
-                    {item.google_maps_url && (
-                      <a href={item.google_maps_url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">↗</a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+            <ItineraryTimeline
+              items={stats.itinerary.map((item, idx) => ({
+                id: idx,
+                locationName: item.location_name,
+                dateTime: item.date_time.toISOString(),
+                itemType: item.item_type,
+                isMain: item.is_main,
+                googleMapsUrl: item.google_maps_url,
+                notes: item.notes,
+              }))}
+            />
           </div>
         </div>
       )}
