@@ -29,6 +29,9 @@ const ACCEPTED_GHSAS = [
 
   // undici - MODERATE severity
   'GHSA-g9mf-h72j-4rw9', // Unbounded decompression chain
+
+  // minimatch - HIGH severity (dev dependencies only)
+  'GHSA-3ppc-4f35-3m26', // ReDoS via repeated wildcards
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];
