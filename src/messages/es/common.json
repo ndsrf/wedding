@@ -494,13 +494,23 @@
       "itinerary": {
         "title": "Itinerario",
         "viewOnMaps": "Ver en Google Maps →",
+        "addStop": "Añadir parada",
+        "noItems": "Aún no hay elementos en el itinerario.",
+        "venue": "Lugar",
+        "selectVenue": "— Seleccionar lugar —",
+        "eventTypeLabel": "Tipo de Evento",
+        "dateTime": "Fecha y Hora",
+        "notesLabel": "Notas (opcional)",
+        "notesPlaceholder": "ej. Cóctel, Cena, Discursos…",
+        "remove": "Eliminar",
         "eventTypes": {
           "CEREMONY": "Ceremonia",
           "EVENT": "Evento",
           "PRE_EVENT": "Pre-Boda",
           "POST_EVENT": "Post-Boda"
         }
-      }
+      },
+      "mainEventLocation": "Ubicación del Evento Principal"
     },
     "admins": {
       "invite": "Invitar Administrador",

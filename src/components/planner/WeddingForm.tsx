@@ -22,13 +22,6 @@ interface LocationOption {
   google_maps_url?: string | null;
 }
 
-const ITEM_TYPE_LABELS: Record<LocationType, string> = {
-  CEREMONY: 'Ceremony',
-  EVENT: 'Event',
-  PRE_EVENT: 'Pre-Event',
-  POST_EVENT: 'Post-Event',
-};
-
 interface ItineraryEntry extends ItineraryItemRequest {
   _key: string; // local-only unique key for React rendering
 }
@@ -281,7 +274,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       {/* Main Event Location */}
       <div>
         <label htmlFor="main_event_location_id" className="block text-sm font-medium text-gray-700 mb-1">
-          Main Event Location
+          {t('planner.weddings.mainEventLocation')}
         </label>
         {locations.length > 0 ? (
           <select
@@ -312,7 +305,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
-            Itinerary
+            {t('planner.weddings.itinerary.title')}
           </label>
           <button
             type="button"
@@ -320,11 +313,11 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
             className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
           >
             <Plus className="h-3 w-3" />
-            Add stop
+            {t('planner.weddings.itinerary.addStop')}
           </button>
         </div>
         {itinerary.length === 0 ? (
-          <p className="text-sm text-gray-400 italic">No itinerary items yet.</p>
+          <p className="text-sm text-gray-400 italic">{t('planner.weddings.itinerary.noItems')}</p>
         ) : (
           <div className="space-y-3">
             {[...itinerary]
@@ -333,13 +326,13 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
               <div key={item._key} className="flex gap-2 items-start p-3 bg-gray-50 rounded-md border border-gray-200">
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Venue</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('planner.weddings.itinerary.venue')}</label>
                     <select
                       value={item.location_id}
                       onChange={(e) => updateItineraryItem(item._key, 'location_id', e.target.value)}
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
-                      <option value="">— Select venue —</option>
+                      <option value="">{t('planner.weddings.itinerary.selectVenue')}</option>
                       {locations.map((loc) => (
                         <option key={loc.id} value={loc.id}>
                           {loc.name}{loc.address ? ` — ${loc.address}` : ''}
@@ -348,19 +341,19 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Event Type</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('planner.weddings.itinerary.eventTypeLabel')}</label>
                     <select
                       value={item.item_type}
                       onChange={(e) => updateItineraryItem(item._key, 'item_type', e.target.value)}
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
-                      {(Object.keys(ITEM_TYPE_LABELS) as LocationType[]).map((type) => (
-                        <option key={type} value={type}>{ITEM_TYPE_LABELS[type]}</option>
+                      {(['CEREMONY', 'EVENT', 'PRE_EVENT', 'POST_EVENT'] as LocationType[]).map((type) => (
+                        <option key={type} value={type}>{t(`planner.weddings.itinerary.eventTypes.${type}`)}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Date & Time</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('planner.weddings.itinerary.dateTime')}</label>
                     <input
                       type="datetime-local"
                       value={item.date_time}
@@ -369,13 +362,13 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs text-gray-500 mb-1">Notes (optional)</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('planner.weddings.itinerary.notesLabel')}</label>
                     <input
                       type="text"
                       value={item.notes || ''}
                       onChange={(e) => updateItineraryItem(item._key, 'notes', e.target.value)}
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      placeholder="e.g. Cocktail hour, Dinner, Speeches…"
+                      placeholder={t('planner.weddings.itinerary.notesPlaceholder')}
                     />
                   </div>
                 </div>
@@ -383,7 +376,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
                   type="button"
                   onClick={() => removeItineraryItem(item._key)}
                   className="mt-5 p-1 text-gray-400 hover:text-red-500"
-                  title="Remove"
+                  title={t('planner.weddings.itinerary.remove')}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

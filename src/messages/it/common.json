@@ -492,13 +492,23 @@
       "itinerary": {
         "title": "Itinerario",
         "viewOnMaps": "Visualizza su Google Maps →",
+        "addStop": "Aggiungi tappa",
+        "noItems": "Nessun elemento dell'itinerario ancora.",
+        "venue": "Luogo",
+        "selectVenue": "— Seleziona luogo —",
+        "eventTypeLabel": "Tipo di Evento",
+        "dateTime": "Data e Ora",
+        "notesLabel": "Note (facoltativo)",
+        "notesPlaceholder": "es. Cocktail, Cena, Discorsi…",
+        "remove": "Rimuovi",
         "eventTypes": {
           "CEREMONY": "Cerimonia",
           "EVENT": "Evento",
           "PRE_EVENT": "Pre-Evento",
           "POST_EVENT": "Post-Evento"
         }
-      }
+      },
+      "mainEventLocation": "Luogo dell'Evento Principale"
     },
     "admins": {
       "invite": "Invita Amministratore",

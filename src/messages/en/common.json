@@ -498,13 +498,23 @@
       "itinerary": {
         "title": "Itinerary",
         "viewOnMaps": "View on Google Maps →",
+        "addStop": "Add stop",
+        "noItems": "No itinerary items yet.",
+        "venue": "Venue",
+        "selectVenue": "— Select venue —",
+        "eventTypeLabel": "Event Type",
+        "dateTime": "Date & Time",
+        "notesLabel": "Notes (optional)",
+        "notesPlaceholder": "e.g. Cocktail hour, Dinner, Speeches…",
+        "remove": "Remove",
         "eventTypes": {
           "CEREMONY": "Ceremony",
           "EVENT": "Event",
           "PRE_EVENT": "Pre-Event",
           "POST_EVENT": "Post-Event"
         }
-      }
+      },
+      "mainEventLocation": "Main Event Location"
     },
     "admins": {
       "invite": "Invite Admin",
