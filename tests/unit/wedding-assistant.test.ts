@@ -81,6 +81,7 @@ const baseWedding = {
   is_disabled: false,
   gift_iban: 'ES91 2100 0418 4502 0005 1332',
   couple_table_id: null,
+  main_event_location_id: null,
 };
 
 const baseFamily = {
