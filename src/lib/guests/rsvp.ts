@@ -24,16 +24,40 @@ export interface RSVPPageDataResult {
 }
 
 /**
+ * Check if a User-Agent string appears to be a bot/crawler/prefetch
+ * WhatsApp and other platforms prefetch links to generate previews
+ */
+function isBotOrPrefetch(userAgent?: string | null): boolean {
+  if (!userAgent) return false;
+
+  const ua = userAgent.toLowerCase();
+
+  // WhatsApp link preview bots
+  if (ua.includes('whatsapp')) return true;
+
+  // Common crawlers and bots
+  const botPatterns = [
+    'bot', 'crawler', 'spider', 'preview', 'fetcher',
+    'linkedinbot', 'facebookexternalhit', 'twitterbot',
+    'slackbot', 'telegrambot', 'discordbot'
+  ];
+
+  return botPatterns.some(pattern => ua.includes(pattern));
+}
+
+/**
  * Fetch all data required for the RSVP page
- * 
+ *
  * @param token - Magic link token
  * @param channel - Attribution channel
  * @param skipTracking - Whether to skip tracking (useful for some server-side pre-fetches if any)
+ * @param userAgent - User-Agent header to detect bots/prefetch (optional)
  */
 export const getRSVPPageData = cache(async (
   token: string,
   channel?: string | null,
-  skipTracking = false
+  skipTracking = false,
+  userAgent?: string | null
 ): Promise<RSVPPageDataResult> => {
   try {
     // 1. Validate magic token (lightweight)
@@ -173,9 +197,16 @@ export const getRSVPPageData = cache(async (
     }
 
     // 3. Tracking (Fire-and-forget)
-    if (!skipTracking) {
+    // Skip tracking if explicitly disabled or if request is from a bot/prefetch
+    const isBot = isBotOrPrefetch(userAgent);
+    if (!skipTracking && !isBot) {
       const channelEnum = channel?.toUpperCase() as Channel | null;
       void trackLinkOpened(family.id, weddingId, channelEnum || undefined);
+    } else if (isBot) {
+      console.log('[RSVP] Skipping LINK_OPENED tracking for bot/prefetch request:', {
+        userAgent: userAgent?.substring(0, 100),
+        familyId: family.id,
+      });
     }
 
     // cachedData is guaranteed to be set at this point (freshly built or from cache)

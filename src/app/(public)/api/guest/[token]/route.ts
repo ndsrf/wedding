@@ -17,8 +17,9 @@ export async function GET(
   const params = await context.params;
   const token = params.token;
   const channel = request.nextUrl.searchParams.get('channel');
+  const userAgent = request.headers.get('user-agent');
 
-  const result = await getRSVPPageData(token, channel);
+  const result = await getRSVPPageData(token, channel, false, userAgent);
 
   if (!result.success) {
     return NextResponse.json<GetGuestRSVPPageResponse>(

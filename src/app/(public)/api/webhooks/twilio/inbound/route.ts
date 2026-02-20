@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply } from '@/lib/ai/wedding-assistant';
+import { getShortUrlPath } from '@/lib/short-url';
 
 export const runtime = 'nodejs';
 
@@ -63,6 +64,52 @@ function messageTwiML(text: string): NextResponse {
  */
 function extractPhone(raw: string): string {
   return raw.replace(/^whatsapp:/i, '').trim();
+}
+
+// ============================================================================
+// RETRY LOGIC FOR DATABASE OPERATIONS
+// ============================================================================
+
+/**
+ * Retry a database operation with exponential backoff.
+ * Useful for handling transient connection timeouts.
+ *
+ * @param operation - Async function to retry
+ * @param maxRetries - Maximum number of retry attempts (default: 2)
+ * @param baseDelay - Base delay in milliseconds (default: 100ms)
+ * @returns Result of the operation
+ */
+async function retryDbOperation<T>(
+  operation: () => Promise<T>,
+  maxRetries = 2,
+  baseDelay = 100
+): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+
+      // Check if error is a connection timeout that's worth retrying
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isRetryable = errorMessage.includes('timeout') ||
+                          errorMessage.includes('Connection terminated');
+
+      if (attempt < maxRetries && isRetryable) {
+        // Exponential backoff: 100ms, 200ms, 400ms, etc.
+        const delay = baseDelay * Math.pow(2, attempt);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      // If not retryable or max retries reached, throw the error
+      throw error;
+    }
+  }
+
+  throw lastError;
 }
 
 // ============================================================================
@@ -177,6 +224,16 @@ export async function POST(request: NextRequest) {
 
     const language = String(family.preferred_language ?? family.wedding.default_language ?? 'EN');
 
+    // Generate short URL for RSVP link in AI response
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    let shortRsvpUrl: string | null = null;
+    try {
+      const shortPath = await getShortUrlPath(family.id);
+      shortRsvpUrl = `${appUrl}${shortPath}`;
+    } catch (err) {
+      console.warn('[TWILIO_INBOUND] Failed to generate short URL, will use long URL:', err);
+    }
+
     const aiReply = await generateWeddingReply(
       body,
       family.wedding,
@@ -186,7 +243,8 @@ export async function POST(request: NextRequest) {
         preferred_language: family.preferred_language,
         members: family.members,
       },
-      language
+      language,
+      shortRsvpUrl
     );
 
     if (!aiReply) {
@@ -197,37 +255,45 @@ export async function POST(request: NextRequest) {
     // --- Update MESSAGE_RECEIVED event with the AI reply -----------------
     // This lets admins see the full conversation (message + reply) in one place.
     if (messageReceivedEventId) {
-      prisma.trackingEvent
-        .update({
-          where: { id: messageReceivedEventId },
-          data: {
-            metadata: {
-              message_sid: messageSid,
-              from: fromPhone,
-              body: body.substring(0, 1000),
-              ai_reply: aiReply,
+      try {
+        await retryDbOperation(() =>
+          prisma.trackingEvent.update({
+            where: { id: messageReceivedEventId },
+            data: {
+              metadata: {
+                message_sid: messageSid,
+                from: fromPhone,
+                body: body.substring(0, 1000),
+                ai_reply: aiReply,
+              },
             },
-          },
-        })
-        .catch(err => console.error('[TWILIO_INBOUND] Failed to update MESSAGE_RECEIVED with AI reply:', err));
+          })
+        );
+      } catch (err) {
+        console.error('[TWILIO_INBOUND] Failed to update MESSAGE_RECEIVED with AI reply after retries:', err);
+      }
     }
 
     // --- Track the AI reply as its own event (for engagement analytics) --
-    prisma.trackingEvent
-      .create({
-        data: {
-          family_id: family.id,
-          wedding_id: family.wedding_id,
-          event_type: 'AI_REPLY_SENT',
-          channel: 'WHATSAPP',
-          metadata: {
-            message_sid: messageSid,
-            reply_preview: aiReply.substring(0, 300),
+    try {
+      await retryDbOperation(() =>
+        prisma.trackingEvent.create({
+          data: {
+            family_id: family.id,
+            wedding_id: family.wedding_id,
+            event_type: 'AI_REPLY_SENT',
+            channel: 'WHATSAPP',
+            metadata: {
+              message_sid: messageSid,
+              reply_preview: aiReply.substring(0, 300),
+            },
+            admin_triggered: false,
           },
-          admin_triggered: false,
-        },
-      })
-      .catch(err => console.error('[TWILIO_INBOUND] Failed to track AI_REPLY_SENT:', err));
+        })
+      );
+    } catch (err) {
+      console.error('[TWILIO_INBOUND] Failed to track AI_REPLY_SENT after retries:', err);
+    }
 
     // --- Return TwiML reply ----------------------------------------------
     return messageTwiML(aiReply);
