@@ -82,6 +82,10 @@ const baseWedding = {
   gift_iban: 'ES91 2100 0418 4502 0005 1332',
   couple_table_id: null,
   main_event_location_id: null,
+  wizard_completed: false,
+  wizard_current_step: null,
+  wizard_completed_at: null,
+  wizard_skipped: false,
 };
 
 const baseFamily = {
