@@ -38,10 +38,16 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
     setError(null);
 
     try {
+      // Convert wedding_date to ISO datetime format
+      const dataToSend = {
+        ...formData,
+        wedding_date: formData.wedding_date ? new Date(formData.wedding_date).toISOString() : undefined,
+      };
+
       const response = await fetch(`/api/admin/wedding`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {

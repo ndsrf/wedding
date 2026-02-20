@@ -37,10 +37,16 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
     setError(null);
 
     try {
+      // Convert rsvp_cutoff_date to ISO datetime format
+      const dataToSend = {
+        ...formData,
+        rsvp_cutoff_date: formData.rsvp_cutoff_date ? new Date(formData.rsvp_cutoff_date).toISOString() : undefined,
+      };
+
       const response = await fetch(`/api/admin/wedding`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {
