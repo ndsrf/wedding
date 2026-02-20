@@ -15,7 +15,10 @@ export async function POST(request: Request): Promise<NextResponse<APIResponse<v
       return NextResponse.json(
         {
           success: false,
-          error: 'No wedding associated with this user',
+          error: {
+            code: 'NO_WEDDING',
+            message: 'No wedding associated with this user',
+          },
         },
         { status: 400 }
       );
@@ -45,7 +48,10 @@ export async function POST(request: Request): Promise<NextResponse<APIResponse<v
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to complete wizard',
+        error: {
+          code: 'WIZARD_COMPLETE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to complete wizard',
+        },
       },
       { status: 500 }
     );

@@ -61,7 +61,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Basic Wedding Information</h2>
         <p className="mt-2 text-gray-600">
-          Let's confirm the basic details about your wedding. You can always change these later.
+          Let&apos;s confirm the basic details about your wedding. You can always change these later.
         </p>
       </div>
 

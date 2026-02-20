@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Wedding, Theme, Family, FamilyMember, MessageTemplate, InvitationTemplate, Table, ChecklistTask } from '@prisma/client';
 import { WizardProgress } from './WizardProgress';
@@ -122,7 +122,7 @@ export function WeddingWizard({ wedding, currentStep: initialStep }: WeddingWiza
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Wedding Setup Wizard</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Let's get your wedding management set up in a few easy steps
+                Let&apos;s get your wedding management set up in a few easy steps
               </p>
             </div>
             {!isFirstStep && !isLastStep && (

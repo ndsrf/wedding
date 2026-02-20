@@ -15,7 +15,10 @@ export async function PATCH(request: Request): Promise<NextResponse<APIResponse<
       return NextResponse.json(
         {
           success: false,
-          error: 'No wedding associated with this user',
+          error: {
+            code: 'NO_WEDDING',
+            message: 'No wedding associated with this user',
+          },
         },
         { status: 400 }
       );
@@ -28,7 +31,10 @@ export async function PATCH(request: Request): Promise<NextResponse<APIResponse<
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid current step',
+          error: {
+            code: 'INVALID_STEP',
+            message: 'Invalid current step',
+          },
         },
         { status: 400 }
       );
@@ -53,7 +59,10 @@ export async function PATCH(request: Request): Promise<NextResponse<APIResponse<
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to update wizard progress',
+        error: {
+          code: 'WIZARD_PROGRESS_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to update wizard progress',
+        },
       },
       { status: 500 }
     );

@@ -32,12 +32,12 @@ export function WelcomeStep({ wedding, onNext }: WelcomeStepProps) {
           Congratulations on your upcoming wedding for <strong>{wedding.couple_names}</strong>!
         </p>
         <p className="mt-2 text-base text-gray-500">
-          We're excited to help you manage every detail of your special day.
+          We&apos;re excited to help you manage every detail of your special day.
         </p>
       </div>
 
       <div className="mt-10">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">What you'll set up:</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">What you&apos;ll set up:</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
