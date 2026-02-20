@@ -62,7 +62,8 @@ function buildSystemPrompt(
   wedding: Wedding,
   family: FamilyContext | null,
   language: string,
-  appUrl: string
+  appUrl: string,
+  rsvpUrl?: string | null
 ): string {
   const lang = language in LANGUAGE_NAMES ? language : 'EN';
   const languageName = LANGUAGE_NAMES[lang];
@@ -112,14 +113,15 @@ function buildSystemPrompt(
   }
 
   if (family) {
-    const rsvpUrl = `${appUrl}/rsvp/${family.magic_token}`;
+    // Use provided short URL if available, fallback to long URL
+    const finalRsvpUrl = rsvpUrl ?? `${appUrl}/rsvp/${family.magic_token}`;
     const attending = family.members.filter(m => m.attending === true);
     const notAttending = family.members.filter(m => m.attending === false);
     const pending = family.members.filter(m => m.attending === null);
 
     prompt += `\n## Guest Information\n`;
     prompt += `- Guest Family: ${family.name}\n`;
-    prompt += `- RSVP Link: ${rsvpUrl}\n`;
+    prompt += `- RSVP Link: ${finalRsvpUrl}\n`;
 
     if (attending.length > 0) {
       prompt += `- Confirmed attending (${attending.length}): ${attending.map(m => m.name).join(', ')}\n`;
@@ -205,16 +207,18 @@ async function generateWithGemini(systemPrompt: string, userMessage: string): Pr
  * @param wedding      - Full Wedding record from the database
  * @param family       - Family context (null if the sender was not found)
  * @param language     - Language code (ES, EN, FR, IT, DE)
+ * @param rsvpUrl      - Optional short RSVP URL to use instead of generating a long one
  * @returns AI-generated reply string, or null if no provider is available / call fails
  */
 export async function generateWeddingReply(
   guestMessage: string,
   wedding: Wedding,
   family: FamilyContext | null,
-  language = 'EN'
+  language = 'EN',
+  rsvpUrl?: string | null
 ): Promise<string | null> {
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl);
+  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl);
 
   // Determine provider: explicit env var → fallback to whichever key is present
   const provider =

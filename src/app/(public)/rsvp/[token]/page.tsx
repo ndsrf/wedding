@@ -13,6 +13,7 @@
 import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { getRSVPPageData } from '@/lib/guests/rsvp';
 import { getTranslations as getI18n } from '@/lib/i18n/server';
 import { Language } from '@/lib/i18n/config';
@@ -80,8 +81,12 @@ export default async function GuestRSVPPage({ params, searchParams }: Props) {
   const { token } = await params;
   const { channel } = await searchParams;
 
+  // Get User-Agent to detect bots/prefetch
+  const headersList = await headers();
+  const userAgent = headersList.get('user-agent');
+
   // 1. Fetch RSVP data on the server
-  const result = await getRSVPPageData(token, channel);
+  const result = await getRSVPPageData(token, channel, false, userAgent);
 
   if (!result.success || !result.data) {
     const errorMsg = result.error?.message || 'An error occurred while loading the RSVP page';

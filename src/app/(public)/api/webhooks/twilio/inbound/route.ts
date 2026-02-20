@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply } from '@/lib/ai/wedding-assistant';
+import { getShortUrlPath } from '@/lib/short-url';
 
 export const runtime = 'nodejs';
 
@@ -223,6 +224,16 @@ export async function POST(request: NextRequest) {
 
     const language = String(family.preferred_language ?? family.wedding.default_language ?? 'EN');
 
+    // Generate short URL for RSVP link in AI response
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    let shortRsvpUrl: string | null = null;
+    try {
+      const shortPath = await getShortUrlPath(family.id);
+      shortRsvpUrl = `${appUrl}${shortPath}`;
+    } catch (err) {
+      console.warn('[TWILIO_INBOUND] Failed to generate short URL, will use long URL:', err);
+    }
+
     const aiReply = await generateWeddingReply(
       body,
       family.wedding,
@@ -232,7 +243,8 @@ export async function POST(request: NextRequest) {
         preferred_language: family.preferred_language,
         members: family.members,
       },
-      language
+      language,
+      shortRsvpUrl
     );
 
     if (!aiReply) {
