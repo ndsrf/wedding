@@ -39,7 +39,9 @@ const poolConfig: PoolConfig = {
   // For serverless, we want fewer connections per function and faster timeout
   max: isServerless ? 2 : (platform === 'cloudflare' || platform === 'docker' ? 20 : 10),
   idleTimeoutMillis: isServerless ? 1000 : 30000,
-  connectionTimeoutMillis: 2000,
+  // Increased timeout for production to handle network latency and DB load
+  // (originally 2000ms, increased to 5000ms to prevent premature timeouts)
+  connectionTimeoutMillis: process.env.NODE_ENV === 'production' ? 5000 : 2000,
 }
 
 const pool = new Pool(poolConfig)
