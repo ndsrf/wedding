@@ -141,6 +141,22 @@ export default async function AdminDashboardPage() {
     redirect('/api/auth/signin');
   }
 
+  // Check if wizard should be shown
+  if (user.wedding_id) {
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: user.wedding_id },
+      select: {
+        wizard_completed: true,
+        wizard_skipped: true,
+      },
+    });
+
+    // Redirect to wizard if not completed and not skipped
+    if (wedding && !wedding.wizard_completed && !wedding.wizard_skipped) {
+      redirect('/admin/wizard');
+    }
+  }
+
   const { t } = await getTranslations();
   const stats = await getWeddingStats(user);
 
