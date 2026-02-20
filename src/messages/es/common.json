@@ -652,6 +652,290 @@
       "weddingNotFound": "Boda no encontrada",
       "contactPlanner": "Por favor contacta a tu wedding planner."
     },
+    "wizard": {
+      "title": "Asistente de Configuración de Boda",
+      "subtitle": "Configuremos la gestión de tu boda en unos sencillos pasos",
+      "skipWizard": "Saltar asistente e ir al panel",
+      "progress": {
+        "step": "Paso",
+        "of": "de",
+        "complete": "Completo"
+      },
+      "navigation": {
+        "back": "Atrás",
+        "continue": "Continuar",
+        "saveAndContinue": "Guardar y Continuar",
+        "saving": "Guardando...",
+        "skipForNow": "Omitir por Ahora",
+        "goToDashboard": "Ir al Panel"
+      },
+      "welcome": {
+        "title": "¡Bienvenido a tu Sistema de Gestión de Bodas!",
+        "congratulations": "¡Felicidades por tu próxima boda de",
+        "excited": "Estamos emocionados de ayudarte a gestionar cada detalle de tu día especial.",
+        "whatYouWillSetup": "Lo que configurarás:",
+        "features": {
+          "basicInfo": {
+            "title": "Información Básica de la Boda",
+            "description": "Fecha, ubicación y detalles clave"
+          },
+          "rsvpConfig": {
+            "title": "Configuración de RSVP",
+            "description": "Personaliza tus preguntas y configuración de RSVP"
+          },
+          "guestList": {
+            "title": "Lista de Invitados",
+            "description": "Importa o añade tus invitados"
+          },
+          "messageTemplates": {
+            "title": "Plantillas de Mensajes",
+            "description": "Configura plantillas de WhatsApp, SMS y correo"
+          },
+          "invitation": {
+            "title": "Diseño de Invitación",
+            "description": "Personaliza tu invitación digital"
+          },
+          "seating": {
+            "title": "Distribución de Asientos",
+            "description": "Organiza tu plan de asientos (opcional)"
+          },
+          "checklist": {
+            "title": "Lista de Tareas",
+            "description": "Revisa y gestiona tareas"
+          },
+          "payments": {
+            "title": "Seguimiento de Pagos y Regalos",
+            "description": "Configura la gestión de regalos y pagos"
+          }
+        },
+        "tip": "Consejo:",
+        "tipText": "Este asistente tarda unos 15-20 minutos en completarse. Puedes omitirlo e ir directamente al panel si prefieres configurar las cosas manualmente.",
+        "getStarted": "Comenzar"
+      },
+      "basicInfo": {
+        "title": "Información Básica de la Boda",
+        "subtitle": "Confirmemos los detalles básicos de tu boda. Siempre puedes cambiarlos más tarde.",
+        "coupleNames": "Nombres de la Pareja",
+        "coupleNamesPlaceholder": "ej., Juan y María",
+        "weddingDate": "Fecha de la Boda",
+        "weddingTime": "Hora de la Boda",
+        "venue": "Lugar / Ubicación",
+        "venuePlaceholder": "ej., Salón del Gran Hotel",
+        "venueNote": "Puedes configurar ubicaciones detalladas e itinerarios más tarde en el panel.",
+        "dressCode": "Código de Vestimenta",
+        "dressCodePlaceholder": "ej., Formal, Semi-formal, Casual",
+        "additionalInfo": "Información Adicional",
+        "additionalInfoPlaceholder": "Cualquier detalle adicional que quieras compartir con tus invitados...",
+        "errorSaving": "Error al guardar información de la boda"
+      },
+      "rsvpSettings": {
+        "title": "Configuración de RSVP",
+        "subtitle": "Configura cómo los invitados confirmarán su asistencia a tu boda.",
+        "cutoffDate": "Fecha Límite de RSVP",
+        "cutoffDateHelp": "La última fecha en que los invitados pueden enviar su RSVP.",
+        "allowGuestAdditions": "Permitir que los invitados añadan acompañantes adicionales",
+        "allowGuestAdditionsHelp": "Permite que los invitados añadan personas extra (ej., acompañantes) cuando confirmen.",
+        "transportationQuestion": "Preguntar sobre necesidades de transporte",
+        "transportationQuestionHelp": "Incluye una pregunta sobre si los invitados necesitan transporte.",
+        "dietaryRestrictions": "Preguntar sobre restricciones dietéticas",
+        "dietaryRestrictionsHelp": "Permite que los invitados especifiquen restricciones o preferencias dietéticas.",
+        "advancedSettings": "Puedes configurar ajustes avanzados de RSVP (preguntas personalizadas, campos de información extra) más tarde en la página de Configuración.",
+        "errorSaving": "Error al guardar configuración de RSVP"
+      },
+      "guests": {
+        "title": "Lista de Invitados",
+        "subtitle": "Añade tus invitados de boda. Puedes importarlos desde un archivo o añadirlos manualmente.",
+        "currentGuestCount": "Número Actual de Invitados",
+        "families": "familias",
+        "family": "familia",
+        "howToAdd": "Cómo añadir invitados:",
+        "importFromFile": {
+          "title": "Importar desde Archivo",
+          "description": "Sube un archivo CSV o VCF con tu lista de invitados. Ideal para importar desde hojas de cálculo o contactos.",
+          "action": "Abrir página de importación"
+        },
+        "addManually": {
+          "title": "Añadir Invitados Manualmente",
+          "description": "Añade invitados uno por uno o en grupos familiares. Perfecto para listas pequeñas o añadir invitados faltantes.",
+          "action": "Abrir página de lista de invitados"
+        },
+        "tip": "Consejo:",
+        "tipWithGuests": "Puedes continuar al siguiente paso y añadir más invitados después.",
+        "tipNoGuests": "Puedes omitir añadir invitados ahora y hacerlo después, pero recomendamos añadir al menos algunos para empezar."
+      },
+      "messageTemplates": {
+        "title": "Plantillas de Mensajes",
+        "subtitle": "Configura plantillas para comunicarte con tus invitados vía WhatsApp, SMS y correo electrónico.",
+        "configuredTemplates": "Plantillas Configuradas",
+        "noTemplates": "Aún no hay plantillas configuradas",
+        "templatesSetUp": "Plantillas de mensajes configuradas",
+        "templateTypes": "Tipos de Plantillas",
+        "types": {
+          "saveTheDate": {
+            "title": "Save the Date",
+            "description": "Anuncio inicial"
+          },
+          "invitation": {
+            "title": "Invitación",
+            "description": "Invitación formal"
+          },
+          "reminder": {
+            "title": "Recordatorio",
+            "description": "Recordatorio de RSVP"
+          },
+          "confirmation": {
+            "title": "Confirmación",
+            "description": "Confirmación de RSVP"
+          }
+        },
+        "configure": {
+          "title": "Configurar Plantillas de Mensajes",
+          "description": "Crea y personaliza plantillas para todos los canales de comunicación e idiomas.",
+          "action": "Abrir página de plantillas"
+        },
+        "tip": "Consejo:",
+        "tipText": "Las plantillas pueden configurarse más tarde. Se usarán plantillas predeterminadas si omites este paso."
+      },
+      "invitation": {
+        "title": "Invitación Digital",
+        "subtitle": "Diseña tu invitación digital que los invitados verán al abrir su enlace de RSVP.",
+        "status": "Estado de la Invitación",
+        "configured": "Configurada",
+        "notSet": "No Configurada",
+        "customTemplate": "Plantilla de invitación personalizada creada",
+        "usingDefault": "Usando plantilla predeterminada",
+        "builder": {
+          "title": "Abrir Constructor de Invitaciones",
+          "description": "Personaliza tu invitación con texto, imágenes, temporizadores de cuenta regresiva, mapas de ubicación y más.",
+          "action": "Lanzar constructor de invitaciones"
+        },
+        "features": "Lo que puedes incluir:",
+        "featuresList": {
+          "customText": "Texto y mensajes personalizados",
+          "photoGallery": "Galería de fotos",
+          "countdown": "Temporizador de cuenta regresiva",
+          "locationMap": "Mapa de ubicación",
+          "actionButtons": "Botones de acción",
+          "multiLanguage": "Soporte multiidioma"
+        },
+        "tip": "Consejo:",
+        "tipText": "Se usará una invitación predeterminada si omites este paso. Puedes personalizarla en cualquier momento desde el panel."
+      },
+      "seating": {
+        "title": "Distribución de Asientos (Opcional)",
+        "subtitle": "Configura mesas y asigna invitados a asientos. Puedes omitir este paso y configurarlo más tarde.",
+        "tablesConfigured": "Mesas Configuradas",
+        "seatingStarted": "Plan de asientos iniciado",
+        "noTables": "Aún no hay mesas configuradas",
+        "configure": {
+          "title": "Configurar Plan de Asientos",
+          "description": "Crea mesas, asigna invitados y usa nuestro algoritmo automático de asientos para distribuciones óptimas.",
+          "action": "Abrir planificador de asientos"
+        },
+        "features": "Características de asientos:",
+        "featuresList": {
+          "manageTables": "Crear y gestionar mesas",
+          "assignGuests": "Asignar invitados a asientos",
+          "autoAlgorithm": "Algoritmo automático de asientos",
+          "seatingGroups": "Grupos de asientos"
+        },
+        "note": "Nota:",
+        "noteText": "Los asientos son completamente opcionales. Muchas parejas prefieren configurar esto más cerca de la fecha de la boda una vez que tienen las confirmaciones finales de RSVP."
+      },
+      "checklist": {
+        "title": "Lista de Tareas de Planificación",
+        "subtitle": "Lleva un registro de todas tus tareas de planificación de boda y mantente organizado.",
+        "progress": "Progreso de la Lista",
+        "tasksCompleted": "tareas completadas",
+        "taskCompleted": "tarea completada",
+        "manage": {
+          "title": "Ver y Gestionar Lista",
+          "description": "Revisa tus tareas de planificación, marca elementos como completados y añade tareas personalizadas.",
+          "action": "Abrir lista de tareas"
+        },
+        "commonTasks": "Las tareas de planificación comunes incluyen:",
+        "tasksList": {
+          "venue": "Reserva y confirmación del lugar",
+          "catering": "Catering y selección de menú",
+          "photography": "Fotografía y videografía",
+          "music": "Música y entretenimiento",
+          "flowers": "Flores y decoraciones",
+          "attire": "Vestimenta de boda"
+        },
+        "tip": "Consejo:",
+        "tipText": "Tu wedding planner puede haberte proporcionado una lista preconfigurada. Puedes personalizarla según tus necesidades específicas."
+      },
+      "paymentGifts": {
+        "title": "Seguimiento de Pagos y Regalos",
+        "subtitle": "Configura cómo quieres hacer seguimiento de los regalos y pagos de tus invitados.",
+        "trackingMode": "Modo de Seguimiento de Pagos",
+        "modes": {
+          "manual": "Manual - Haré seguimiento de pagos manualmente",
+          "automated": "Automatizado - Auto-coincidir pagos por código de referencia"
+        },
+        "modeHelp": {
+          "automated": "Cada invitado recibirá un código de referencia único para transferencias bancarias. Los pagos se coincidirán automáticamente.",
+          "manual": "Puedes registrar pagos y regalos manualmente a medida que lleguen."
+        },
+        "bankAccount": "Cuenta Bancaria (IBAN) para Regalos",
+        "bankAccountPlaceholder": "ES12 1234 5678 9012 3456 7890",
+        "bankAccountHelp": "Tu número de cuenta bancaria para recibir regalos monetarios. Se mostrará a los invitados.",
+        "howItWorks": "Cómo funciona el seguimiento de pagos:",
+        "features": {
+          "trackGuests": "Rastrea qué invitados han enviado regalos o pagos",
+          "recordAmounts": "Registra montos y métodos de pago",
+          "viewReports": "Ver informes y análisis de pagos",
+          "sendThanks": "Enviar mensajes de agradecimiento a remitentes de regalos"
+        },
+        "managePayments": {
+          "title": "Gestionar Pagos",
+          "description": "Ver y registrar pagos en la página de Pagos",
+          "action": "Abrir página de pagos"
+        },
+        "errorSaving": "Error al guardar configuración de pagos"
+      },
+      "completion": {
+        "title": "¡Configuración Completa!",
+        "congratulations": "¡Felicidades! Tu sistema de gestión de bodas está listo para usar.",
+        "summary": "Lo que has configurado:",
+        "items": {
+          "basicInfo": "Información Básica de la Boda",
+          "rsvpSettings": "Configuración de RSVP",
+          "guestList": "Lista de Invitados",
+          "messageTemplates": "Plantillas de Mensajes",
+          "invitation": "Invitación Digital",
+          "seating": "Plan de Asientos",
+          "checklist": "Lista de Tareas",
+          "paymentGifts": "Seguimiento de Pagos y Regalos"
+        },
+        "status": {
+          "completed": "Completado",
+          "canAddLater": "Puedes añadir después",
+          "guests": "invitados",
+          "configured": "Configurado",
+          "usingDefaults": "Usando predeterminados",
+          "customized": "Personalizado",
+          "usingDefault": "Usando predeterminado",
+          "tables": "mesas",
+          "optional": "Opcional"
+        },
+        "nextSteps": "Próximos Pasos:",
+        "nextStepsList": {
+          "sendInvitations": "Comienza a enviar invitaciones a tus invitados vía WhatsApp, SMS o correo electrónico",
+          "monitorRsvp": "Monitorea las respuestas de RSVP y rastrea la asistencia de invitados",
+          "trackPayments": "Rastrea pagos y regalos a medida que lleguen",
+          "workChecklist": "Trabaja en tu lista de tareas de planificación",
+          "viewReports": "Ver análisis e informes para rastrear tu progreso"
+        },
+        "quickLinks": "Enlaces Rápidos:",
+        "links": {
+          "manageGuests": "Gestionar Invitados",
+          "viewActivity": "Ver Actividad",
+          "viewChecklist": "Ver Lista de Tareas",
+          "viewReports": "Ver Informes"
+        }
+      }
+    },
     "reports": {
       "title": "Informes",
       "subtitle": "Genera y exporta varios informes para tu boda",

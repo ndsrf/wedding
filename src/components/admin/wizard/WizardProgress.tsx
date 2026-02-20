@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface Step {
   id: number;
   title: string;
@@ -12,6 +14,8 @@ interface WizardProgressProps {
 }
 
 export function WizardProgress({ steps, currentStep }: WizardProgressProps) {
+  const t = useTranslations('admin.wizard.progress');
+  const tCommon = useTranslations('common');
   const progressPercentage = ((currentStep + 1) / steps.length) * 100;
 
   return (
@@ -26,8 +30,8 @@ export function WizardProgress({ steps, currentStep }: WizardProgressProps) {
             />
           </div>
           <div className="flex justify-between mt-2 text-xs text-gray-600">
-            <span>Step {currentStep + 1} of {steps.length}</span>
-            <span>{Math.round(progressPercentage)}% Complete</span>
+            <span>{t('step')} {currentStep + 1} {t('of')} {steps.length}</span>
+            <span>{Math.round(progressPercentage)}% {t('complete')}</span>
           </div>
         </div>
 
@@ -69,7 +73,7 @@ export function WizardProgress({ steps, currentStep }: WizardProgressProps) {
                     {step.title}
                   </div>
                   {step.optional && (
-                    <div className="text-xs text-gray-400 italic">Optional</div>
+                    <div className="text-xs text-gray-400 italic">{tCommon('optional')}</div>
                   )}
                 </div>
                 {index < steps.length - 1 && (
