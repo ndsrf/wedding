@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import type { Wedding, Theme, Family, FamilyMember, MessageTemplate, InvitationTemplate, Table, ChecklistTask } from '@prisma/client';
 import { WizardProgress } from './WizardProgress';
 import { WelcomeStep } from './steps/WelcomeStep';
@@ -29,23 +30,35 @@ interface WeddingWizardProps {
   currentStep: number;
 }
 
-const WIZARD_STEPS = [
-  { id: 0, title: 'Welcome', component: WelcomeStep },
-  { id: 1, title: 'Basic Info', component: BasicInfoStep },
-  { id: 2, title: 'RSVP Settings', component: RsvpSettingsStep },
-  { id: 3, title: 'Guests', component: GuestsStep },
-  { id: 4, title: 'Message Templates', component: MessageTemplatesStep },
-  { id: 5, title: 'Invitation', component: InvitationStep },
-  { id: 6, title: 'Seating', component: SeatingStep, optional: true },
-  { id: 7, title: 'Checklist', component: ChecklistStep },
-  { id: 8, title: 'Payments & Gifts', component: PaymentGiftsStep },
-  { id: 9, title: 'Complete', component: CompletionStep },
+const STEP_COMPONENTS = [
+  { id: 0, component: WelcomeStep, titleKey: 'welcome.title' },
+  { id: 1, component: BasicInfoStep, titleKey: 'basicInfo.title' },
+  { id: 2, component: RsvpSettingsStep, titleKey: 'rsvpSettings.title' },
+  { id: 3, component: GuestsStep, titleKey: 'guests.title' },
+  { id: 4, component: MessageTemplatesStep, titleKey: 'messageTemplates.title' },
+  { id: 5, component: InvitationStep, titleKey: 'invitation.title' },
+  { id: 6, component: SeatingStep, titleKey: 'seating.title', optional: true },
+  { id: 7, component: ChecklistStep, titleKey: 'checklist.title' },
+  { id: 8, component: PaymentGiftsStep, titleKey: 'paymentGifts.title' },
+  { id: 9, component: CompletionStep, titleKey: 'completion.title' },
 ];
 
 export function WeddingWizard({ wedding, currentStep: initialStep }: WeddingWizardProps) {
   const router = useRouter();
+  const t = useTranslations('admin.wizard');
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Build wizard steps with translated titles
+  const WIZARD_STEPS = useMemo(() =>
+    STEP_COMPONENTS.map(step => ({
+      id: step.id,
+      title: t(step.titleKey),
+      component: step.component,
+      optional: step.optional,
+    })),
+    [t]
+  );
 
   const CurrentStepComponent = WIZARD_STEPS[currentStep]?.component || WelcomeStep;
 
@@ -120,9 +133,9 @@ export function WeddingWizard({ wedding, currentStep: initialStep }: WeddingWiza
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Wedding Setup Wizard</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Let&apos;s get your wedding management set up in a few easy steps
+                {t('subtitle')}
               </p>
             </div>
             {!isFirstStep && !isLastStep && (
@@ -130,7 +143,7 @@ export function WeddingWizard({ wedding, currentStep: initialStep }: WeddingWiza
                 onClick={handleSkip}
                 className="text-sm text-gray-600 hover:text-gray-900 underline"
               >
-                Skip wizard and go to dashboard
+                {t('skipWizard')}
               </button>
             )}
           </div>

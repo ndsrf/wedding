@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface MessageTemplatesStepProps {
@@ -13,15 +14,17 @@ interface MessageTemplatesStepProps {
 }
 
 export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplatesStepProps) {
+  const t = useTranslations('admin.wizard.messageTemplates');
+  const tNav = useTranslations('admin.wizard.navigation');
   const templateCount = wedding.message_templates.length;
   const hasTemplates = templateCount > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Message Templates</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-2 text-gray-600">
-          Configure templates for communicating with your guests via WhatsApp, SMS, and Email.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -29,10 +32,10 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
       <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700">Configured Templates</p>
+            <p className="text-sm font-medium text-gray-700">{t('configuredTemplates')}</p>
             <p className="mt-1 text-3xl font-bold text-purple-600">{templateCount}</p>
             <p className="mt-1 text-sm text-gray-500">
-              {hasTemplates ? 'Message templates set up' : 'No templates configured yet'}
+              {hasTemplates ? t('templatesSetUp') : t('noTemplates')}
             </p>
           </div>
           <svg className="h-16 w-16 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,7 +51,7 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
 
       {/* Template Types */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Template Types</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('templateTypes')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center">
@@ -58,8 +61,8 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
                 </svg>
               </div>
               <div className="ml-3">
-                <h4 className="text-sm font-medium text-gray-900">Save the Date</h4>
-                <p className="text-xs text-gray-500">Initial announcement</p>
+                <h4 className="text-sm font-medium text-gray-900">{t('types.saveTheDate.title')}</h4>
+                <p className="text-xs text-gray-500">{t('types.saveTheDate.description')}</p>
               </div>
             </div>
           </div>
@@ -72,8 +75,8 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
                 </svg>
               </div>
               <div className="ml-3">
-                <h4 className="text-sm font-medium text-gray-900">Invitation</h4>
-                <p className="text-xs text-gray-500">Formal invitation</p>
+                <h4 className="text-sm font-medium text-gray-900">{t('types.invitation.title')}</h4>
+                <p className="text-xs text-gray-500">{t('types.invitation.description')}</p>
               </div>
             </div>
           </div>
@@ -86,8 +89,8 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
                 </svg>
               </div>
               <div className="ml-3">
-                <h4 className="text-sm font-medium text-gray-900">Reminder</h4>
-                <p className="text-xs text-gray-500">RSVP reminder</p>
+                <h4 className="text-sm font-medium text-gray-900">{t('types.reminder.title')}</h4>
+                <p className="text-xs text-gray-500">{t('types.reminder.description')}</p>
               </div>
             </div>
           </div>
@@ -100,8 +103,8 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
                 </svg>
               </div>
               <div className="ml-3">
-                <h4 className="text-sm font-medium text-gray-900">Confirmation</h4>
-                <p className="text-xs text-gray-500">RSVP confirmation</p>
+                <h4 className="text-sm font-medium text-gray-900">{t('types.confirmation.title')}</h4>
+                <p className="text-xs text-gray-500">{t('types.confirmation.description')}</p>
               </div>
             </div>
           </div>
@@ -127,13 +130,13 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
           </div>
           <div className="ml-4 flex-1">
             <h4 className="text-lg font-medium text-gray-900 group-hover:text-purple-600">
-              Configure Message Templates
+              {t('configure.title')}
             </h4>
             <p className="mt-1 text-sm text-gray-600">
-              Create and customize templates for all communication channels and languages.
+              {t('configure.description')}
             </p>
             <div className="mt-2 flex items-center text-sm text-purple-600 group-hover:underline">
-              <span>Open templates page</span>
+              <span>{t('configure.action')}</span>
               <svg className="ml-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                 <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
@@ -156,7 +159,7 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
           </div>
           <div className="ml-3">
             <p className="text-sm text-blue-700">
-              <strong>Tip:</strong> Templates can be configured later. Default templates will be used if you skip this step.
+              <strong>{t('tip')}</strong> {t('tipText')}
             </p>
           </div>
         </div>
@@ -175,13 +178,13 @@ export function MessageTemplatesStep({ wedding, onNext, onBack }: MessageTemplat
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={onNext}
           className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
-          Continue
+          {tNav('continue')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

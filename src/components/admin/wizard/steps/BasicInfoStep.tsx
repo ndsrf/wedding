@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface BasicInfoStepProps {
@@ -13,6 +14,8 @@ interface BasicInfoStepProps {
 }
 
 export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
+  const t = useTranslations('admin.wizard.basicInfo');
+  const tNav = useTranslations('admin.wizard.navigation');
   const [formData, setFormData] = useState({
     couple_names: wedding.couple_names || '',
     wedding_date: wedding.wedding_date
@@ -51,7 +54,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save wedding information');
+        throw new Error(t('errorSaving'));
       }
 
       onNext();
@@ -65,9 +68,9 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Basic Wedding Information</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-2 text-gray-600">
-          Let&apos;s confirm the basic details about your wedding. You can always change these later.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -81,7 +84,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
         {/* Couple Names */}
         <div>
           <label htmlFor="couple_names" className="block text-sm font-medium text-gray-700">
-            Couple Names <span className="text-red-500">*</span>
+            {t('coupleNames')} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -90,7 +93,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
             required
             value={formData.couple_names}
             onChange={handleChange}
-            placeholder="e.g., John & Jane"
+            placeholder={t('coupleNamesPlaceholder')}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-4 py-2 border"
           />
         </div>
@@ -98,7 +101,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
         {/* Wedding Date */}
         <div>
           <label htmlFor="wedding_date" className="block text-sm font-medium text-gray-700">
-            Wedding Date <span className="text-red-500">*</span>
+            {t('weddingDate')} <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -114,7 +117,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
         {/* Wedding Time */}
         <div>
           <label htmlFor="wedding_time" className="block text-sm font-medium text-gray-700">
-            Wedding Time <span className="text-red-500">*</span>
+            {t('weddingTime')} <span className="text-red-500">*</span>
           </label>
           <input
             type="time"
@@ -130,7 +133,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
         {/* Location */}
         <div>
           <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-            Venue / Location
+            {t('venue')}
           </label>
           <input
             type="text"
@@ -138,18 +141,18 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
             name="location"
             value={formData.location}
             onChange={handleChange}
-            placeholder="e.g., Grand Hotel Ballroom"
+            placeholder={t('venuePlaceholder')}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-4 py-2 border"
           />
           <p className="mt-1 text-sm text-gray-500">
-            You can configure detailed locations and itinerary items later in the dashboard.
+            {t('venueNote')}
           </p>
         </div>
 
         {/* Dress Code */}
         <div>
           <label htmlFor="dress_code" className="block text-sm font-medium text-gray-700">
-            Dress Code
+            {t('dressCode')}
           </label>
           <input
             type="text"
@@ -157,7 +160,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
             name="dress_code"
             value={formData.dress_code}
             onChange={handleChange}
-            placeholder="e.g., Formal, Semi-Formal, Casual"
+            placeholder={t('dressCodePlaceholder')}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-4 py-2 border"
           />
         </div>
@@ -165,7 +168,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
         {/* Additional Info */}
         <div>
           <label htmlFor="additional_info" className="block text-sm font-medium text-gray-700">
-            Additional Information
+            {t('additionalInfo')}
           </label>
           <textarea
             id="additional_info"
@@ -173,7 +176,7 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
             rows={4}
             value={formData.additional_info}
             onChange={handleChange}
-            placeholder="Any additional details you'd like to share with your guests..."
+            placeholder={t('additionalInfoPlaceholder')}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-4 py-2 border"
           />
         </div>
@@ -192,14 +195,14 @@ export function BasicInfoStep({ wedding, onNext, onBack }: BasicInfoStepProps) {
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={handleSave}
           disabled={isSaving || !formData.couple_names || !formData.wedding_date || !formData.wedding_time}
           className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSaving ? 'Saving...' : 'Save & Continue'}
+          {isSaving ? tNav('saving') : tNav('saveAndContinue')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

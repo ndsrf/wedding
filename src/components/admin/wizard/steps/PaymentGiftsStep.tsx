@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface PaymentGiftsStepProps {

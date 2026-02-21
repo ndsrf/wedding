@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface SeatingStepProps {
@@ -13,15 +14,17 @@ interface SeatingStepProps {
 }
 
 export function SeatingStep({ wedding, onNext, onBack }: SeatingStepProps) {
+  const t = useTranslations('admin.wizard.seating');
+  const tNav = useTranslations('admin.wizard.navigation');
   const tableCount = wedding.tables.length;
   const hasSeating = tableCount > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Seating Arrangements (Optional)</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-2 text-gray-600">
-          Set up tables and assign guests to seats. You can skip this step and configure it later.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -29,10 +32,10 @@ export function SeatingStep({ wedding, onNext, onBack }: SeatingStepProps) {
       <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700">Tables Configured</p>
+            <p className="text-sm font-medium text-gray-700">{t('tablesConfigured')}</p>
             <p className="mt-1 text-3xl font-bold text-purple-600">{tableCount}</p>
             <p className="mt-1 text-sm text-gray-500">
-              {hasSeating ? 'Seating plan started' : 'No tables configured yet'}
+              {hasSeating ? t('seatingStarted') : t('noTables')}
             </p>
           </div>
           <svg className="h-16 w-16 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,13 +68,13 @@ export function SeatingStep({ wedding, onNext, onBack }: SeatingStepProps) {
           </div>
           <div className="ml-4 flex-1">
             <h4 className="text-lg font-medium text-gray-900 group-hover:text-purple-600">
-              Configure Seating Plan
+              {t('configure.title')}
             </h4>
             <p className="mt-1 text-sm text-gray-600">
-              Create tables, assign guests, and use our automatic seating algorithm for optimal arrangements.
+              {t('configure.description')}
             </p>
             <div className="mt-2 flex items-center text-sm text-purple-600 group-hover:underline">
-              <span>Open seating planner</span>
+              <span>{t('configure.action')}</span>
               <svg className="ml-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                 <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
@@ -83,31 +86,31 @@ export function SeatingStep({ wedding, onNext, onBack }: SeatingStepProps) {
 
       {/* Features */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Seating features:</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('features')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Create and manage tables</span>
+            <span>{t('featuresList.manageTables')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Assign guests to seats</span>
+            <span>{t('featuresList.assignGuests')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Automatic seating algorithm</span>
+            <span>{t('featuresList.autoAlgorithm')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Seating groups</span>
+            <span>{t('featuresList.seatingGroups')}</span>
           </div>
         </div>
       </div>
@@ -125,7 +128,7 @@ export function SeatingStep({ wedding, onNext, onBack }: SeatingStepProps) {
           </div>
           <div className="ml-3">
             <p className="text-sm text-yellow-700">
-              <strong>Note:</strong> Seating is completely optional. Many couples prefer to set this up closer to the wedding date once they have final RSVP confirmations.
+              <strong>{t('note')}</strong> {t('noteText')}
             </p>
           </div>
         </div>
@@ -144,13 +147,13 @@ export function SeatingStep({ wedding, onNext, onBack }: SeatingStepProps) {
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={onNext}
           className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
-          {hasSeating ? 'Continue' : 'Skip for Now'}
+          {hasSeating ? tNav('continue') : tNav('skipForNow')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

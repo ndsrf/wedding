@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface InvitationStepProps {
@@ -13,14 +14,16 @@ interface InvitationStepProps {
 }
 
 export function InvitationStep({ wedding, onNext, onBack }: InvitationStepProps) {
+  const t = useTranslations('admin.wizard.invitation');
+  const tNav = useTranslations('admin.wizard.navigation');
   const hasInvitation = wedding.invitation_templates.length > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Digital Invitation</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-2 text-gray-600">
-          Design your digital invitation that guests will see when they open their RSVP link.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -28,12 +31,12 @@ export function InvitationStep({ wedding, onNext, onBack }: InvitationStepProps)
       <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700">Invitation Status</p>
+            <p className="text-sm font-medium text-gray-700">{t('status')}</p>
             <p className="mt-1 text-3xl font-bold text-purple-600">
-              {hasInvitation ? 'Configured' : 'Not Set'}
+              {hasInvitation ? t('configured') : t('notSet')}
             </p>
             <p className="mt-1 text-sm text-gray-500">
-              {hasInvitation ? 'Custom invitation template created' : 'Using default template'}
+              {hasInvitation ? t('customTemplate') : t('usingDefault')}
             </p>
           </div>
           <svg className="h-16 w-16 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,13 +69,13 @@ export function InvitationStep({ wedding, onNext, onBack }: InvitationStepProps)
           </div>
           <div className="ml-4 flex-1">
             <h4 className="text-lg font-medium text-gray-900 group-hover:text-purple-600">
-              Open Invitation Builder
+              {t('builder.title')}
             </h4>
             <p className="mt-1 text-sm text-gray-600">
-              Customize your invitation with text, images, countdown timers, location maps, and more.
+              {t('builder.description')}
             </p>
             <div className="mt-2 flex items-center text-sm text-purple-600 group-hover:underline">
-              <span>Launch invitation builder</span>
+              <span>{t('builder.action')}</span>
               <svg className="ml-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                 <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
@@ -84,43 +87,43 @@ export function InvitationStep({ wedding, onNext, onBack }: InvitationStepProps)
 
       {/* Features */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">What you can include:</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('features')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Custom text and messages</span>
+            <span>{t('featuresList.customText')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Photo gallery</span>
+            <span>{t('featuresList.photoGallery')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Countdown timer</span>
+            <span>{t('featuresList.countdown')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Location map</span>
+            <span>{t('featuresList.locationMap')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Action buttons</span>
+            <span>{t('featuresList.actionButtons')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-700">
             <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Multi-language support</span>
+            <span>{t('featuresList.multiLanguage')}</span>
           </div>
         </div>
       </div>
@@ -138,7 +141,7 @@ export function InvitationStep({ wedding, onNext, onBack }: InvitationStepProps)
           </div>
           <div className="ml-3">
             <p className="text-sm text-blue-700">
-              <strong>Tip:</strong> A default invitation will be used if you skip this step. You can customize it anytime from the dashboard.
+              <strong>{t('tip')}</strong> {t('tipText')}
             </p>
           </div>
         </div>
@@ -157,13 +160,13 @@ export function InvitationStep({ wedding, onNext, onBack }: InvitationStepProps)
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={onNext}
           className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
-          Continue
+          {tNav('continue')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

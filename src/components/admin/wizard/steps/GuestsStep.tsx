@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface GuestsStepProps {
@@ -13,15 +14,17 @@ interface GuestsStepProps {
 }
 
 export function GuestsStep({ wedding, onNext, onBack }: GuestsStepProps) {
+  const t = useTranslations('admin.wizard.guests');
+  const tNav = useTranslations('admin.wizard.navigation');
   const guestCount = wedding.families.reduce((sum, family) => sum + family.members.length, 0);
   const hasGuests = guestCount > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Guest List</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-2 text-gray-600">
-          Add your wedding guests. You can import them from a file or add them manually.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -29,10 +32,10 @@ export function GuestsStep({ wedding, onNext, onBack }: GuestsStepProps) {
       <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700">Current Guest Count</p>
+            <p className="text-sm font-medium text-gray-700">{t('currentGuestCount')}</p>
             <p className="mt-1 text-3xl font-bold text-purple-600">{guestCount}</p>
             <p className="mt-1 text-sm text-gray-500">
-              {wedding.families.length} {wedding.families.length === 1 ? 'family' : 'families'}
+              {wedding.families.length} {wedding.families.length === 1 ? t('family') : t('families')}
             </p>
           </div>
           <svg className="h-16 w-16 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,7 +51,7 @@ export function GuestsStep({ wedding, onNext, onBack }: GuestsStepProps) {
 
       {/* Guest Management Options */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">How to add guests:</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('howToAdd')}</h3>
 
         {/* Import Guests */}
         <Link
@@ -69,13 +72,13 @@ export function GuestsStep({ wedding, onNext, onBack }: GuestsStepProps) {
             </div>
             <div className="ml-4 flex-1">
               <h4 className="text-lg font-medium text-gray-900 group-hover:text-purple-600">
-                Import from File
+                {t('importFromFile.title')}
               </h4>
               <p className="mt-1 text-sm text-gray-600">
-                Upload a CSV or VCF file with your guest list. Great for importing from spreadsheets or contacts.
+                {t('importFromFile.description')}
               </p>
               <div className="mt-2 flex items-center text-sm text-purple-600 group-hover:underline">
-                <span>Open import page</span>
+                <span>{t('importFromFile.action')}</span>
                 <svg className="ml-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                   <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
@@ -104,13 +107,13 @@ export function GuestsStep({ wedding, onNext, onBack }: GuestsStepProps) {
             </div>
             <div className="ml-4 flex-1">
               <h4 className="text-lg font-medium text-gray-900 group-hover:text-purple-600">
-                Add Guests Manually
+                {t('addManually.title')}
               </h4>
               <p className="mt-1 text-sm text-gray-600">
-                Add guests one by one or in family groups. Perfect for smaller guest lists or adding missing guests.
+                {t('addManually.description')}
               </p>
               <div className="mt-2 flex items-center text-sm text-purple-600 group-hover:underline">
-                <span>Open guest list page</span>
+                <span>{t('addManually.action')}</span>
                 <svg className="ml-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                   <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
@@ -134,7 +137,7 @@ export function GuestsStep({ wedding, onNext, onBack }: GuestsStepProps) {
           </div>
           <div className="ml-3">
             <p className="text-sm text-blue-700">
-              <strong>Tip:</strong> {hasGuests ? "You can continue to the next step and add more guests later." : "You can skip adding guests now and do it later, but we recommend adding at least a few to get started."}
+              <strong>{t('tip')}</strong> {hasGuests ? t('tipWithGuests') : t('tipNoGuests')}
             </p>
           </div>
         </div>
@@ -153,13 +156,13 @@ export function GuestsStep({ wedding, onNext, onBack }: GuestsStepProps) {
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={onNext}
           className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
-          Continue
+          {tNav('continue')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

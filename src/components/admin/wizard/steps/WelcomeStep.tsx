@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface WelcomeStepProps {
@@ -12,6 +13,8 @@ interface WelcomeStepProps {
 }
 
 export function WelcomeStep({ wedding, onNext }: WelcomeStepProps) {
+  const t = useTranslations('admin.wizard.welcome');
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-8 md:p-12">
       <div className="text-center">
@@ -26,146 +29,45 @@ export function WelcomeStep({ wedding, onNext }: WelcomeStepProps) {
           </svg>
         </div>
         <h2 className="mt-6 text-3xl font-bold text-gray-900">
-          Welcome to Your Wedding Management System!
+          {t('title')}
         </h2>
         <p className="mt-4 text-lg text-gray-600">
-          Congratulations on your upcoming wedding for <strong>{wedding.couple_names}</strong>!
+          {t('congratulations')} <strong>{wedding.couple_names}</strong>!
         </p>
         <p className="mt-2 text-base text-gray-500">
-          We&apos;re excited to help you manage every detail of your special day.
+          {t('excited')}
         </p>
       </div>
 
       <div className="mt-10">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">What you&apos;ll set up:</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('whatYouWillSetup')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
+          {[
+            'basicInfo',
+            'rsvpConfig',
+            'guestList',
+            'messageTemplates',
+            'invitation',
+            'seating',
+            'checklist',
+            'payments'
+          ].map((feature) => (
+            <div key={feature} className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{t(`features.${feature}.title`)}</p>
+                <p className="text-sm text-gray-500">{t(`features.${feature}.description`)}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Basic Wedding Information</p>
-              <p className="text-sm text-gray-500">Date, location, and key details</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">RSVP Configuration</p>
-              <p className="text-sm text-gray-500">Customize your RSVP questions and settings</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Guest List</p>
-              <p className="text-sm text-gray-500">Import or add your guests</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Message Templates</p>
-              <p className="text-sm text-gray-500">Configure WhatsApp, SMS, and email templates</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Invitation Design</p>
-              <p className="text-sm text-gray-500">Customize your digital invitation</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Seating Arrangements</p>
-              <p className="text-sm text-gray-500">Organize your seating plan (optional)</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Planning Checklist</p>
-              <p className="text-sm text-gray-500">Review and manage tasks</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Payment & Gift Tracking</p>
-              <p className="text-sm text-gray-500">Set up gift and payment management</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
@@ -182,8 +84,7 @@ export function WelcomeStep({ wedding, onNext }: WelcomeStepProps) {
           </div>
           <div className="ml-3">
             <p className="text-sm text-blue-700">
-              <strong>Tip:</strong> This wizard takes about 15-20 minutes to complete. You can skip it and go
-              directly to the dashboard if you prefer to configure things manually.
+              <strong>{t('tip')}</strong> {t('tipText')}
             </p>
           </div>
         </div>
@@ -194,7 +95,7 @@ export function WelcomeStep({ wedding, onNext }: WelcomeStepProps) {
           onClick={onNext}
           className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
         >
-          Get Started
+          {t('getStarted')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

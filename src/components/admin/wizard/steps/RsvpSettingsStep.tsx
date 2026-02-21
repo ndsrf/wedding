@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface RsvpSettingsStepProps {
@@ -13,6 +14,9 @@ interface RsvpSettingsStepProps {
 }
 
 export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepProps) {
+  const t = useTranslations('admin.wizard.rsvpSettings');
+  const tNav = useTranslations('admin.wizard.navigation');
+
   const [formData, setFormData] = useState({
     rsvp_cutoff_date: wedding.rsvp_cutoff_date
       ? new Date(wedding.rsvp_cutoff_date).toISOString().split('T')[0]
@@ -50,7 +54,7 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save RSVP settings');
+        throw new Error(t('errorSaving'));
       }
 
       onNext();
@@ -64,9 +68,9 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">RSVP Settings</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-2 text-gray-600">
-          Configure how guests will RSVP to your wedding.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -80,7 +84,7 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
         {/* RSVP Cutoff Date */}
         <div>
           <label htmlFor="rsvp_cutoff_date" className="block text-sm font-medium text-gray-700">
-            RSVP Cutoff Date <span className="text-red-500">*</span>
+            {t('cutoffDate')} <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -92,7 +96,7 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-4 py-2 border"
           />
           <p className="mt-1 text-sm text-gray-500">
-            The last date guests can submit their RSVP.
+            {t('cutoffDateHelp')}
           </p>
         </div>
 
@@ -111,10 +115,10 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
             </div>
             <div className="ml-3 text-sm">
               <label htmlFor="allow_guest_additions" className="font-medium text-gray-700">
-                Allow guests to add additional attendees
+                {t('allowGuestAdditions')}
               </label>
               <p className="text-gray-500">
-                Let guests add extra people (e.g., plus-ones) when they RSVP.
+                {t('allowGuestAdditionsHelp')}
               </p>
             </div>
           </div>
@@ -132,10 +136,10 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
             </div>
             <div className="ml-3 text-sm">
               <label htmlFor="transportation_question_enabled" className="font-medium text-gray-700">
-                Ask about transportation needs
+                {t('transportationQuestion')}
               </label>
               <p className="text-gray-500">
-                Include a question asking if guests need transportation.
+                {t('transportationQuestionHelp')}
               </p>
             </div>
           </div>
@@ -153,10 +157,10 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
             </div>
             <div className="ml-3 text-sm">
               <label htmlFor="dietary_restrictions_enabled" className="font-medium text-gray-700">
-                Ask about dietary restrictions
+                {t('dietaryRestrictions')}
               </label>
               <p className="text-gray-500">
-                Let guests specify any dietary restrictions or preferences.
+                {t('dietaryRestrictionsHelp')}
               </p>
             </div>
           </div>
@@ -175,7 +179,7 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
             </div>
             <div className="ml-3">
               <p className="text-sm text-blue-700">
-                You can configure more advanced RSVP settings (custom questions, extra info fields) later in the Configure page.
+                {t('advancedSettings')}
               </p>
             </div>
           </div>
@@ -195,14 +199,14 @@ export function RsvpSettingsStep({ wedding, onNext, onBack }: RsvpSettingsStepPr
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={handleSave}
           disabled={isSaving || !formData.rsvp_cutoff_date}
           className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSaving ? 'Saving...' : 'Save & Continue'}
+          {isSaving ? tNav('saving') : tNav('saveAndContinue')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
