@@ -625,6 +625,8 @@
         "paymentsReceived": "Regalos Recibidos"
       },
       "manageWedding": "Gestionar Boda",
+      "setupWizard": "Asistente de Configuración",
+      "setupWizardSubtitle": "Configura tu boda paso a paso",
       "guestList": "Lista de Invitados",
       "guestListSubtitle": "Ver y gestionar invitados",
       "activity": "Actividad",

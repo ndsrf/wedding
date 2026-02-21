@@ -629,6 +629,8 @@
         "paymentsReceived": "Gifts Received"
       },
       "manageWedding": "Manage Wedding",
+      "setupWizard": "Setup Wizard",
+      "setupWizardSubtitle": "Configure your wedding step by step",
       "guestList": "Guest List",
       "guestListSubtitle": "View and manage guests",
       "activity": "Activity",
