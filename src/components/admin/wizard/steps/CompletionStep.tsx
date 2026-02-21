@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface CompletionStepProps {
@@ -13,6 +14,9 @@ interface CompletionStepProps {
 }
 
 export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepProps) {
+  const t = useTranslations('admin.wizard.completion');
+  const tNav = useTranslations('admin.wizard.navigation');
+
   const guestCount = wedding.families.reduce((sum, family) => sum + family.members.length, 0);
   const hasGuests = guestCount > 0;
   const hasInvitation = wedding.invitation_templates.length > 0;
@@ -32,15 +36,15 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
             />
           </svg>
         </div>
-        <h2 className="mt-6 text-3xl font-bold text-gray-900">Setup Complete!</h2>
+        <h2 className="mt-6 text-3xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-4 text-lg text-gray-600">
-          Congratulations! Your wedding management system is ready to use.
+          {t('congratulations')}
         </p>
       </div>
 
       {/* Summary */}
       <div className="mb-8">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">What you&apos;ve configured:</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('summary')}</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center">
@@ -51,9 +55,9 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-900">Basic Wedding Information</span>
+              <span className="text-sm font-medium text-gray-900">{t('items.basicInfo')}</span>
             </div>
-            <span className="text-sm text-gray-500">Completed</span>
+            <span className="text-sm text-gray-500">{t('status.completed')}</span>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -65,9 +69,9 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-900">RSVP Settings</span>
+              <span className="text-sm font-medium text-gray-900">{t('items.rsvpSettings')}</span>
             </div>
-            <span className="text-sm text-gray-500">Completed</span>
+            <span className="text-sm text-gray-500">{t('status.completed')}</span>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -83,10 +87,10 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-900">Guest List</span>
+              <span className="text-sm font-medium text-gray-900">{t('items.guestList')}</span>
             </div>
             <span className="text-sm text-gray-500">
-              {hasGuests ? `${guestCount} guests` : 'Can add later'}
+              {hasGuests ? `${guestCount} ${t('status.guests')}` : t('status.canAddLater')}
             </span>
           </div>
 
@@ -103,10 +107,10 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-900">Message Templates</span>
+              <span className="text-sm font-medium text-gray-900">{t('items.messageTemplates')}</span>
             </div>
             <span className="text-sm text-gray-500">
-              {hasTemplates ? 'Configured' : 'Using defaults'}
+              {hasTemplates ? t('status.configured') : t('status.usingDefaults')}
             </span>
           </div>
 
@@ -123,10 +127,10 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-900">Digital Invitation</span>
+              <span className="text-sm font-medium text-gray-900">{t('items.invitation')}</span>
             </div>
             <span className="text-sm text-gray-500">
-              {hasInvitation ? 'Customized' : 'Using default'}
+              {hasInvitation ? t('status.customized') : t('status.usingDefault')}
             </span>
           </div>
 
@@ -143,10 +147,10 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-900">Seating Plan</span>
+              <span className="text-sm font-medium text-gray-900">{t('items.seating')}</span>
             </div>
             <span className="text-sm text-gray-500">
-              {hasSeating ? `${wedding.tables.length} tables` : 'Optional'}
+              {hasSeating ? `${wedding.tables.length} ${t('status.tables')}` : t('status.optional')}
             </span>
           </div>
 
@@ -159,53 +163,53 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-900">Payment & Gift Tracking</span>
+              <span className="text-sm font-medium text-gray-900">{t('items.paymentGifts')}</span>
             </div>
-            <span className="text-sm text-gray-500">Completed</span>
+            <span className="text-sm text-gray-500">{t('status.completed')}</span>
           </div>
         </div>
       </div>
 
       {/* Next Steps */}
       <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Next Steps:</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('nextSteps')}</h3>
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex items-start">
             <svg className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-            <span>Start sending invitations to your guests via WhatsApp, SMS, or Email</span>
+            <span>{t('nextStepsList.sendInvitations')}</span>
           </li>
           <li className="flex items-start">
             <svg className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-            <span>Monitor RSVP responses and track guest attendance</span>
+            <span>{t('nextStepsList.monitorRsvp')}</span>
           </li>
           <li className="flex items-start">
             <svg className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-            <span>Track payments and gifts as they come in</span>
+            <span>{t('nextStepsList.trackPayments')}</span>
           </li>
           <li className="flex items-start">
             <svg className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-            <span>Work through your planning checklist</span>
+            <span>{t('nextStepsList.workChecklist')}</span>
           </li>
           <li className="flex items-start">
             <svg className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-            <span>View analytics and reports to track your progress</span>
+            <span>{t('nextStepsList.viewReports')}</span>
           </li>
         </ul>
       </div>
 
       {/* Quick Links */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Links:</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('quickLinks')}</h3>
         <div className="grid grid-cols-2 gap-3">
           <Link
             href="/admin/guests"
@@ -214,7 +218,7 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
             <svg className="h-5 w-5 text-purple-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            Manage Guests
+            {t('links.manageGuests')}
           </Link>
           <Link
             href="/admin/notifications"
@@ -223,7 +227,7 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
             <svg className="h-5 w-5 text-purple-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            View Activity
+            {t('links.viewActivity')}
           </Link>
           <Link
             href="/admin/checklist"
@@ -232,7 +236,7 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
             <svg className="h-5 w-5 text-purple-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            View Checklist
+            {t('links.viewChecklist')}
           </Link>
           <Link
             href="/admin/reports"
@@ -241,7 +245,7 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
             <svg className="h-5 w-5 text-purple-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            View Reports
+            {t('links.viewReports')}
           </Link>
         </div>
       </div>
@@ -259,13 +263,13 @@ export function CompletionStep({ wedding, onBack, onComplete }: CompletionStepPr
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={onComplete}
           className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
-          Go to Dashboard
+          {tNav('goToDashboard')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

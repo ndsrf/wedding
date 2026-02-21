@@ -15,6 +15,8 @@ interface PaymentGiftsStepProps {
 }
 
 export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepProps) {
+  const t = useTranslations('admin.wizard.paymentGifts');
+  const tNav = useTranslations('admin.wizard.navigation');
   const [formData, setFormData] = useState({
     payment_tracking_mode: wedding.payment_tracking_mode || 'MANUAL',
     gift_iban: wedding.gift_iban || '',
@@ -46,7 +48,7 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
 
       onNext();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('errorSaving'));
     } finally {
       setIsSaving(false);
     }
@@ -55,9 +57,9 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Payment & Gift Tracking</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
         <p className="mt-2 text-gray-600">
-          Configure how you want to track gifts and payments from your guests.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -71,7 +73,7 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
         {/* Payment Tracking Mode */}
         <div>
           <label htmlFor="payment_tracking_mode" className="block text-sm font-medium text-gray-700">
-            Payment Tracking Mode
+            {t('trackingMode')}
           </label>
           <select
             id="payment_tracking_mode"
@@ -80,20 +82,20 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-4 py-2 border"
           >
-            <option value="MANUAL">Manual - I&apos;ll track payments manually</option>
-            <option value="AUTOMATED">Automated - Auto-match payments by reference code</option>
+            <option value="MANUAL">{t('modes.manual')}</option>
+            <option value="AUTOMATED">{t('modes.automated')}</option>
           </select>
           <p className="mt-1 text-sm text-gray-500">
             {formData.payment_tracking_mode === 'AUTOMATED'
-              ? 'Each guest will receive a unique reference code for bank transfers. Payments will be auto-matched.'
-              : 'You can manually record payments and gifts as they arrive.'}
+              ? t('modeHelp.automated')
+              : t('modeHelp.manual')}
           </p>
         </div>
 
         {/* Gift IBAN */}
         <div>
           <label htmlFor="gift_iban" className="block text-sm font-medium text-gray-700">
-            Bank Account (IBAN) for Gifts
+            {t('bankAccount')}
             {formData.payment_tracking_mode === 'AUTOMATED' && (
               <span className="text-red-500 ml-1">*</span>
             )}
@@ -104,42 +106,26 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
             name="gift_iban"
             value={formData.gift_iban}
             onChange={handleChange}
-            placeholder="ES12 1234 5678 9012 3456 7890"
+            placeholder={t('bankAccountPlaceholder')}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-4 py-2 border"
           />
           <p className="mt-1 text-sm text-gray-500">
-            Your bank account number for receiving monetary gifts. This will be shown to guests.
+            {t('bankAccountHelp')}
           </p>
         </div>
 
         {/* Payment Tracking Info */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-gray-900 mb-2">How payment tracking works:</h4>
+          <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('howItWorks')}</h4>
           <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex items-start">
-              <svg className="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Track which guests have sent gifts or payments</span>
-            </li>
-            <li className="flex items-start">
-              <svg className="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Record payment amounts and methods</span>
-            </li>
-            <li className="flex items-start">
-              <svg className="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>View payment reports and analytics</span>
-            </li>
-            <li className="flex items-start">
-              <svg className="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Send thank you messages to gift senders</span>
-            </li>
+            {['trackGuests', 'recordAmounts', 'viewReports', 'sendThanks'].map((feature) => (
+              <li key={feature} className="flex items-start">
+                <svg className="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>{t(`features.${feature}`)}</span>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -162,13 +148,13 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
             </div>
             <div className="ml-3 flex-1">
               <h4 className="text-sm font-medium text-gray-900 group-hover:text-purple-600">
-                Manage Payments
+                {t('managePayments.title')}
               </h4>
               <p className="mt-1 text-xs text-gray-600">
-                View and record payments in the Payments page
+                {t('managePayments.description')}
               </p>
               <div className="mt-1 flex items-center text-xs text-purple-600 group-hover:underline">
-                <span>Open payments page</span>
+                <span>{t('managePayments.action')}</span>
                 <svg className="ml-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                   <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
@@ -192,14 +178,14 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
               clipRule="evenodd"
             />
           </svg>
-          Back
+          {tNav('back')}
         </button>
         <button
           onClick={handleSave}
           disabled={isSaving || (formData.payment_tracking_mode === 'AUTOMATED' && !formData.gift_iban)}
           className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSaving ? 'Saving...' : 'Save & Continue'}
+          {isSaving ? tNav('saving') : tNav('saveAndContinue')}
           <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
