@@ -646,7 +646,9 @@
       "reports": "Report",
       "reportsSubtitle": "Genera ed esporta vari report per il tuo matrimonio",
       "weddingNotFound": "Matrimonio non trovato",
-      "contactPlanner": "Contatta il tuo organizzatore di matrimoni."
+      "contactPlanner": "Contatta il tuo organizzatore di matrimoni.",
+      "setupWizard": "Procedura Guidata di Configurazione",
+      "setupWizardSubtitle": "Configura il tuo matrimonio passo dopo passo"
     },
     "reports": {
       "title": "Report",
@@ -838,7 +840,6 @@
         "loading": "Caricamento cronologia...",
         "guestCreated": "Ospite aggiunto al sistema"
       },
-      "import": "Importa da Excel",
       "export": "Esporta in Excel",
       "template": "Scarica Modello",
       "familyName": "Cognome Famiglia",
@@ -1228,6 +1229,290 @@
       "mapStyle": "Stile Mappa",
       "colorMap": "Colore",
       "grayscaleMap": "Scala di Grigi"
+    },
+    "wizard": {
+      "title": "Procedura Guidata per la Configurazione del Matrimonio",
+      "subtitle": "Configuriamo la gestione del tuo matrimonio in pochi semplici passaggi",
+      "skipWizard": "Salta la procedura guidata e vai alla dashboard",
+      "progress": {
+        "step": "Passaggio",
+        "of": "di",
+        "complete": "Completato"
+      },
+      "navigation": {
+        "back": "Indietro",
+        "continue": "Continua",
+        "saveAndContinue": "Salva & Continua",
+        "saving": "Salvataggio...",
+        "skipForNow": "Salta per Ora",
+        "goToDashboard": "Vai alla Dashboard"
+      },
+      "welcome": {
+        "title": "Benvenuto nel Tuo Sistema di Gestione Matrimoni!",
+        "congratulations": "Congratulazioni per il tuo prossimo matrimonio per",
+        "excited": "Siamo entusiasti di aiutarti a gestire ogni dettaglio del tuo giorno speciale.",
+        "whatYouWillSetup": "Cosa configurerai:",
+        "features": {
+          "basicInfo": {
+            "title": "Informazioni di Base sul Matrimonio",
+            "description": "Data, luogo e dettagli chiave"
+          },
+          "rsvpConfig": {
+            "title": "Configurazione RSVP",
+            "description": "Personalizza le tue domande e impostazioni RSVP"
+          },
+          "guestList": {
+            "title": "Lista degli Invitati",
+            "description": "Importa o aggiungi i tuoi invitati"
+          },
+          "messageTemplates": {
+            "title": "Modelli di Messaggio",
+            "description": "Configura i modelli WhatsApp, SMS ed email"
+          },
+          "invitation": {
+            "title": "Design dell'Invito",
+            "description": "Personalizza il tuo invito digitale"
+          },
+          "seating": {
+            "title": "Disposizione dei Posti",
+            "description": "Organizza il tuo piano dei posti (opzionale)"
+          },
+          "checklist": {
+            "title": "Lista di Controllo per la Pianificazione",
+            "description": "Rivedi e gestisci le attività"
+          },
+          "payments": {
+            "title": "Pagamento & Tracciamento Regali",
+            "description": "Configura la gestione di regali e pagamenti"
+          }
+        },
+        "tip": "Suggerimento:",
+        "tipText": "Questa procedura guidata richiede circa 15-20 minuti per essere completata. Puoi saltarla e andare direttamente alla dashboard se preferisci configurare le cose manualmente.",
+        "getStarted": "Inizia"
+      },
+      "basicInfo": {
+        "title": "Informazioni di Base sul Matrimonio",
+        "subtitle": "Confermiamo i dettagli di base del tuo matrimonio. Potrai sempre modificarli in seguito.",
+        "coupleNames": "Nomi della Coppia",
+        "coupleNamesPlaceholder": "es. Giovanni & Giovanna",
+        "weddingDate": "Data del Matrimonio",
+        "weddingTime": "Ora del Matrimonio",
+        "venue": "Luogo / Località",
+        "venuePlaceholder": "es. Grand Hotel Sala da Ballo",
+        "venueNote": "Puoi configurare luoghi dettagliati ed elementi dell'itinerario più tardi nella dashboard.",
+        "dressCode": "Codice di Abbigliamento",
+        "dressCodePlaceholder": "es. Formale, Semi-formale, Casual",
+        "additionalInfo": "Informazioni Aggiuntive",
+        "additionalInfoPlaceholder": "Qualsiasi dettaglio aggiuntivo che desideri condividere con i tuoi invitati...",
+        "errorSaving": "Impossibile salvare le informazioni del matrimonio"
+      },
+      "rsvpSettings": {
+        "title": "Impostazioni RSVP",
+        "subtitle": "Configura come gli invitati risponderanno al tuo matrimonio.",
+        "cutoffDate": "Data Limite RSVP",
+        "cutoffDateHelp": "L'ultima data in cui gli invitati possono inviare il loro RSVP.",
+        "allowGuestAdditions": "Consenti agli invitati di aggiungere partecipanti aggiuntivi",
+        "allowGuestAdditionsHelp": "Lascia che gli invitati aggiungano persone extra (es. accompagnatori) quando rispondono.",
+        "transportationQuestion": "Chiedi esigenze di trasporto",
+        "transportationQuestionHelp": "Includi una domanda che chiede se gli invitati hanno bisogno di trasporto.",
+        "dietaryRestrictions": "Chiedi restrizioni alimentari",
+        "dietaryRestrictionsHelp": "Lascia che gli invitati specifichino eventuali restrizioni o preferenze alimentari.",
+        "advancedSettings": "Puoi configurare impostazioni RSVP più avanzate (domande personalizzate, campi informativi extra) più tardi nella pagina Configura.",
+        "errorSaving": "Impossibile salvare le impostazioni RSVP"
+      },
+      "guests": {
+        "title": "Lista degli Invitati",
+        "subtitle": "Aggiungi i tuoi invitati al matrimonio. Puoi importarli da un file o aggiungerli manualmente.",
+        "currentGuestCount": "Numero Attuale di Invitati",
+        "families": "famiglie",
+        "family": "famiglia",
+        "howToAdd": "Come aggiungere invitati:",
+        "importFromFile": {
+          "title": "Importa da File",
+          "description": "Carica un file CSV o VCF con la tua lista di invitati. Ottimo per importare da fogli di calcolo o contatti.",
+          "action": "Apri pagina di importazione"
+        },
+        "addManually": {
+          "title": "Aggiungi Invitati Manualmente",
+          "description": "Aggiungi invitati uno alla volta o in gruppi familiari. Perfetto per liste di invitati più piccole o per aggiungere invitati mancanti.",
+          "action": "Apri pagina lista invitati"
+        },
+        "tip": "Suggerimento:",
+        "tipWithGuests": "Puoi continuare al prossimo passaggio e aggiungere più invitati in seguito.",
+        "tipNoGuests": "Puoi saltare l'aggiunta di invitati ora e farlo più tardi, ma ti consigliamo di aggiungerne almeno alcuni per iniziare."
+      },
+      "messageTemplates": {
+        "title": "Modelli di Messaggio",
+        "subtitle": "Configura i modelli per comunicare con i tuoi invitati via WhatsApp, SMS ed Email.",
+        "configuredTemplates": "Modelli Configurati",
+        "noTemplates": "Nessun modello configurato ancora",
+        "templatesSetUp": "Modelli di messaggio configurati",
+        "templateTypes": "Tipi di Modelli",
+        "types": {
+          "saveTheDate": {
+            "title": "Salva la Data",
+            "description": "Annuncio iniziale"
+          },
+          "invitation": {
+            "title": "Invito",
+            "description": "Invito formale"
+          },
+          "reminder": {
+            "title": "Promemoria",
+            "description": "Promemoria RSVP"
+          },
+          "confirmation": {
+            "title": "Conferma",
+            "description": "Conferma RSVP"
+          }
+        },
+        "configure": {
+          "title": "Configura Modelli di Messaggio",
+          "description": "Crea e personalizza i modelli per tutti i canali di comunicazione e lingue.",
+          "action": "Apri pagina modelli"
+        },
+        "tip": "Suggerimento:",
+        "tipText": "I modelli possono essere configurati più tardi. I modelli predefiniti verranno utilizzati se salti questo passaggio."
+      },
+      "invitation": {
+        "title": "Invito Digitale",
+        "subtitle": "Progetta il tuo invito digitale che gli invitati vedranno quando apriranno il loro link RSVP.",
+        "status": "Stato Invito",
+        "configured": "Configurato",
+        "notSet": "Non Impostato",
+        "customTemplate": "Modello di invito personalizzato creato",
+        "usingDefault": "Utilizzo del modello predefinito",
+        "builder": {
+          "title": "Apri Creatore di Inviti",
+          "description": "Personalizza il tuo invito con testo, immagini, timer per il conto alla rovescia, mappe della posizione e altro.",
+          "action": "Avvia creatore di inviti"
+        },
+        "features": "Cosa puoi includere:",
+        "featuresList": {
+          "customText": "Testo e messaggi personalizzati",
+          "photoGallery": "Galleria fotografica",
+          "countdown": "Timer per il conto alla rovescia",
+          "locationMap": "Mappa della posizione",
+          "actionButtons": "Pulsanti di azione",
+          "multiLanguage": "Supporto multilingue"
+        },
+        "tip": "Suggerimento:",
+        "tipText": "Un invito predefinito verrà utilizzato se salti questo passaggio. Puoi personalizzarlo in qualsiasi momento dalla dashboard."
+      },
+      "seating": {
+        "title": "Disposizione dei Posti (Opzionale)",
+        "subtitle": "Configura i tavoli e assegna i posti agli invitati. Puoi saltare questo passaggio e configurarlo più tardi.",
+        "tablesConfigured": "Tavoli Configurati",
+        "seatingStarted": "Piano dei posti iniziato",
+        "noTables": "Nessun tavolo configurato ancora",
+        "configure": {
+          "title": "Configura Piano dei Posti",
+          "description": "Crea tavoli, assegna invitati e usa il nostro algoritmo di disposizione automatica per arrangiamenti ottimali.",
+          "action": "Apri pianificatore posti"
+        },
+        "features": "Funzionalità di disposizione:",
+        "featuresList": {
+          "manageTables": "Crea e gestisci tavoli",
+          "assignGuests": "Assegna invitati ai posti",
+          "autoAlgorithm": "Algoritmo di disposizione automatica",
+          "seatingGroups": "Gruppi di posti"
+        },
+        "note": "Nota:",
+        "noteText": "La disposizione dei posti è completamente opzionale. Molte coppie preferiscono configurarla più vicino alla data del matrimonio una volta che hanno le conferme RSVP finali."
+      },
+      "checklist": {
+        "title": "Lista di Controllo per la Pianificazione",
+        "subtitle": "Tieni traccia di tutti i tuoi compiti di pianificazione del matrimonio e rimani organizzato.",
+        "progress": "Progresso della Lista di Controllo",
+        "tasksCompleted": "attività completate",
+        "taskCompleted": "attività completata",
+        "manage": {
+          "title": "Visualizza & Gestisci Lista di Controllo",
+          "description": "Rivedi i tuoi compiti di pianificazione, segna gli elementi come completati e aggiungi compiti personalizzati.",
+          "action": "Apri lista di controllo"
+        },
+        "commonTasks": "I compiti di pianificazione comuni includono:",
+        "tasksList": {
+          "venue": "Prenotazione e conferma del luogo",
+          "catering": "Catering e selezione del menu",
+          "photography": "Fotografia e videografia",
+          "music": "Musica e intrattenimento",
+          "flowers": "Fiori e decorazioni",
+          "attire": "Abito da sposa"
+        },
+        "tip": "Suggerimento:",
+        "tipText": "Il tuo wedding planner potrebbe averti fornito una lista di controllo preconfigurata. Puoi personalizzarla per adattarla alle tue esigenze specifiche."
+      },
+      "paymentGifts": {
+        "title": "Pagamento & Tracciamento Regali",
+        "subtitle": "Configura come desideri tracciare regali e pagamenti dai tuoi invitati.",
+        "trackingMode": "Modalità di Tracciamento Pagamenti",
+        "modes": {
+          "manual": "Manuale - Traccerò i pagamenti manualmente",
+          "automated": "Automatizzato - Abbinamento automatico dei pagamenti tramite codice di riferimento"
+        },
+        "modeHelp": {
+          "automated": "Ogni invitato riceverà un codice di riferimento univoco per i bonifici bancari. I pagamenti verranno abbinati automaticamente.",
+          "manual": "Puoi registrare manualmente pagamenti e regali man mano che arrivano."
+        },
+        "bankAccount": "Conto Bancario (IBAN) per i Regali",
+        "bankAccountPlaceholder": "IT12 1234 5678 9012 3456 7890",
+        "bankAccountHelp": "Il tuo numero di conto bancario per ricevere regali in denaro. Questo verrà mostrato agli invitati.",
+        "howItWorks": "Come funziona il tracciamento dei pagamenti:",
+        "features": {
+          "trackGuests": "Traccia quali invitati hanno inviato regali o pagamenti",
+          "recordAmounts": "Registra importi e metodi di pagamento",
+          "viewReports": "Visualizza report e analisi dei pagamenti",
+          "sendThanks": "Invia messaggi di ringraziamento ai donatori di regali"
+        },
+        "managePayments": {
+          "title": "Gestisci Pagamenti",
+          "description": "Visualizza e registra i pagamenti nella pagina Pagamenti",
+          "action": "Apri pagina pagamenti"
+        },
+        "errorSaving": "Impossibile salvare le impostazioni di pagamento"
+      },
+      "completion": {
+        "title": "Configurazione Completata!",
+        "congratulations": "Congratulazioni! Il tuo sistema di gestione matrimoni è pronto all'uso.",
+        "summary": "Cosa hai configurato:",
+        "items": {
+          "basicInfo": "Informazioni di Base sul Matrimonio",
+          "rsvpSettings": "Impostazioni RSVP",
+          "guestList": "Lista degli Invitati",
+          "messageTemplates": "Modelli di Messaggio",
+          "invitation": "Invito Digitale",
+          "seating": "Piano dei Posti",
+          "checklist": "Lista di Controllo",
+          "paymentGifts": "Pagamento & Tracciamento Regali"
+        },
+        "status": {
+          "completed": "Completato",
+          "canAddLater": "Può aggiungere più tardi",
+          "guests": "invitati",
+          "configured": "Configurato",
+          "usingDefaults": "Utilizzo dei valori predefiniti",
+          "customized": "Personalizzato",
+          "usingDefault": "Utilizzo del valore predefinito",
+          "tables": "tavoli",
+          "optional": "Opzionale"
+        },
+        "nextSteps": "Prossimi Passi:",
+        "nextStepsList": {
+          "sendInvitations": "Inizia a inviare inviti ai tuoi ospiti via WhatsApp, SMS o Email",
+          "monitorRsvp": "Monitora le risposte RSVP e traccia la partecipazione degli invitati",
+          "trackPayments": "Traccia pagamenti e regali man mano che arrivano",
+          "workChecklist": "Lavora attraverso la tua lista di controllo per la pianificazione",
+          "viewReports": "Visualizza analisi e report per tracciare i tuoi progressi"
+        },
+        "quickLinks": "Link Rapidi:",
+        "links": {
+          "manageGuests": "Gestisci Invitati",
+          "viewActivity": "Visualizza Attività",
+          "viewChecklist": "Visualizza Lista di Controllo",
+          "viewReports": "Visualizza Report"
+        }
+      }
     }
   },
   "guest": {
