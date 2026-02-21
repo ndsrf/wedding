@@ -646,7 +646,9 @@
       "reports": "Berichte",
       "reportsSubtitle": "Generieren und exportieren Sie verschiedene Berichte für Ihre Hochzeit",
       "weddingNotFound": "Hochzeit nicht gefunden",
-      "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner."
+      "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner.",
+      "setupWizard": "Einrichtungs-Assistent",
+      "setupWizardSubtitle": "Konfigurieren Sie Ihre Hochzeit Schritt für Schritt"
     },
     "reports": {
       "title": "Berichte",
@@ -836,9 +838,8 @@
         "viewTimeline": "Aktivitätsverlauf anzeigen",
         "noEvents": "Für diesen Gast wurde noch keine Aktivität aufgezeichnet.",
         "loading": "Lade Zeitverlauf...",
-        "guestCreated": "Gast zum System hinzugef\u00fcgt"
+        "guestCreated": "Gast zum System hinzugefügt"
       },
-      "import": "Aus Excel importieren",
       "export": "Nach Excel exportieren",
       "template": "Vorlage herunterladen",
       "familyName": "Familienname",
@@ -884,8 +885,8 @@
         "saveChanges": "Änderungen speichern",
         "rsvpAnswers": "RSVP-Antworten",
         "privateNotes": "Private Notizen",
-        "privateNotesPlaceholder": "Interne Notizen zu diesem Gast hinzuf\u00fcgen (Ern\u00e4hrungsvorlieben, Sitzplatzpr\u00e4ferenzen, besondere W\u00fcnsche usw.)",
-        "privateNotesHelp": "Diese Notizen sind nur f\u00fcr Hochzeitsadministratoren sichtbar und werden nicht mit den G\u00e4sten geteilt."
+        "privateNotesPlaceholder": "Interne Notizen zu diesem Gast hinzufügen (Ernährungsvorlieben, Sitzplatzpräferenzen, besondere Wünsche usw.)",
+        "privateNotesHelp": "Diese Notizen sind nur für Hochzeitsadministratoren sichtbar und werden nicht mit den Gästen geteilt."
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
@@ -1228,6 +1229,290 @@
       "mapStyle": "Kartenstil",
       "colorMap": "Farbe",
       "grayscaleMap": "Graustufen"
+    },
+    "wizard": {
+      "title": "Hochzeit-Einrichtungsassistent",
+      "subtitle": "Lassen Sie uns Ihre Hochzeitsverwaltung in wenigen einfachen Schritten einrichten",
+      "skipWizard": "Assistent überspringen und zum Dashboard gehen",
+      "progress": {
+        "step": "Schritt",
+        "of": "von",
+        "complete": "Fertig"
+      },
+      "navigation": {
+        "back": "Zurück",
+        "continue": "Weiter",
+        "saveAndContinue": "Speichern & Weiter",
+        "saving": "Speichern...",
+        "skipForNow": "Vorerst überspringen",
+        "goToDashboard": "Zum Dashboard"
+      },
+      "welcome": {
+        "title": "Willkommen zu Ihrem Hochzeits-Verwaltungssystem!",
+        "congratulations": "Herzlichen Glückwunsch zu Ihrer bevorstehenden Hochzeit für",
+        "excited": "Wir freuen uns, Ihnen bei der Verwaltung aller Details Ihres besonderen Tages zu helfen.",
+        "whatYouWillSetup": "Was Sie einrichten werden:",
+        "features": {
+          "basicInfo": {
+            "title": "Grundlegende Hochzeitsinformationen",
+            "description": "Datum, Ort und wichtige Details"
+          },
+          "rsvpConfig": {
+            "title": "RSVP-Konfiguration",
+            "description": "Passen Sie Ihre RSVP-Fragen und Einstellungen an"
+          },
+          "guestList": {
+            "title": "Gästeliste",
+            "description": "Importieren oder fügen Sie Ihre Gäste hinzu"
+          },
+          "messageTemplates": {
+            "title": "Nachrichtenvorlagen",
+            "description": "Konfigurieren Sie WhatsApp-, SMS- und E-Mail-Vorlagen"
+          },
+          "invitation": {
+            "title": "Einladungsdesign",
+            "description": "Passen Sie Ihre digitale Einladung an"
+          },
+          "seating": {
+            "title": "Sitzordnung",
+            "description": "Organisieren Sie Ihren Sitzplan (optional)"
+          },
+          "checklist": {
+            "title": "Planungscheckliste",
+            "description": "Überprüfen und verwalten Sie Aufgaben"
+          },
+          "payments": {
+            "title": "Zahlung & Geschenkverfolgung",
+            "description": "Richten Sie die Geschenk- und Zahlungsverwaltung ein"
+          }
+        },
+        "tip": "Tipp:",
+        "tipText": "Dieser Assistent dauert etwa 15-20 Minuten. Sie können ihn überspringen und direkt zum Dashboard gehen, wenn Sie die Dinge lieber manuell konfigurieren möchten.",
+        "getStarted": "Jetzt beginnen"
+      },
+      "basicInfo": {
+        "title": "Grundlegende Hochzeitsinformationen",
+        "subtitle": "Lassen Sie uns die grundlegenden Details zu Ihrer Hochzeit bestätigen. Sie können diese später jederzeit ändern.",
+        "coupleNames": "Namen des Paares",
+        "coupleNamesPlaceholder": "z.B. Max & Maria",
+        "weddingDate": "Hochzeitsdatum",
+        "weddingTime": "Hochzeitszeit",
+        "venue": "Veranstaltungsort / Ort",
+        "venuePlaceholder": "z.B. Grand Hotel Ballsaal",
+        "venueNote": "Sie können detaillierte Standorte und Reiserouten später im Dashboard konfigurieren.",
+        "dressCode": "Kleiderordnung",
+        "dressCodePlaceholder": "z.B. Formell, Halbformell, Leger",
+        "additionalInfo": "Zusätzliche Informationen",
+        "additionalInfoPlaceholder": "Alle zusätzlichen Details, die Sie Ihren Gästen mitteilen möchten...",
+        "errorSaving": "Fehler beim Speichern der Hochzeitsinformationen"
+      },
+      "rsvpSettings": {
+        "title": "RSVP-Einstellungen",
+        "subtitle": "Konfigurieren Sie, wie Gäste auf Ihre Hochzeit zusagen werden.",
+        "cutoffDate": "RSVP-Frist",
+        "cutoffDateHelp": "Das letzte Datum, an dem Gäste ihre RSVP einreichen können.",
+        "allowGuestAdditions": "Gästen erlauben, zusätzliche Teilnehmer hinzuzufügen",
+        "allowGuestAdditionsHelp": "Lassen Sie Gäste zusätzliche Personen (z.B. Begleitpersonen) hinzufügen, wenn sie zusagen.",
+        "transportationQuestion": "Nach Transportbedarf fragen",
+        "transportationQuestionHelp": "Fügen Sie eine Frage hinzu, ob Gäste Transport benötigen.",
+        "dietaryRestrictions": "Nach Ernährungseinschränkungen fragen",
+        "dietaryRestrictionsHelp": "Lassen Sie Gäste Ernährungseinschränkungen oder Präferenzen angeben.",
+        "advancedSettings": "Sie können erweiterte RSVP-Einstellungen (benutzerdefinierte Fragen, zusätzliche Infofelder) später auf der Konfigurationsseite festlegen.",
+        "errorSaving": "Fehler beim Speichern der RSVP-Einstellungen"
+      },
+      "guests": {
+        "title": "Gästeliste",
+        "subtitle": "Fügen Sie Ihre Hochzeitsgäste hinzu. Sie können sie aus einer Datei importieren oder manuell hinzufügen.",
+        "currentGuestCount": "Aktuelle Gästezahl",
+        "families": "Familien",
+        "family": "Familie",
+        "howToAdd": "So fügen Sie Gäste hinzu:",
+        "importFromFile": {
+          "title": "Aus Datei importieren",
+          "description": "Laden Sie eine CSV- oder VCF-Datei mit Ihrer Gästeliste hoch. Ideal zum Importieren aus Tabellenkalkulationen oder Kontakten.",
+          "action": "Importseite öffnen"
+        },
+        "addManually": {
+          "title": "Gäste manuell hinzufügen",
+          "description": "Fügen Sie Gäste einzeln oder in Familiengruppen hinzu. Perfekt für kleinere Gästelisten oder fehlende Gäste.",
+          "action": "Gästelistenseite öffnen"
+        },
+        "tip": "Tipp:",
+        "tipWithGuests": "Sie können zum nächsten Schritt weitergehen und später weitere Gäste hinzufügen.",
+        "tipNoGuests": "Sie können das Hinzufügen von Gästen jetzt überspringen und es später tun, aber wir empfehlen, zumindest einige hinzuzufügen, um zu beginnen."
+      },
+      "messageTemplates": {
+        "title": "Nachrichtenvorlagen",
+        "subtitle": "Konfigurieren Sie Vorlagen für die Kommunikation mit Ihren Gästen über WhatsApp, SMS und E-Mail.",
+        "configuredTemplates": "Konfigurierte Vorlagen",
+        "noTemplates": "Noch keine Vorlagen konfiguriert",
+        "templatesSetUp": "Nachrichtenvorlagen eingerichtet",
+        "templateTypes": "Vorlagentypen",
+        "types": {
+          "saveTheDate": {
+            "title": "Save the Date",
+            "description": "Erste Ankündigung"
+          },
+          "invitation": {
+            "title": "Einladung",
+            "description": "Formelle Einladung"
+          },
+          "reminder": {
+            "title": "Erinnerung",
+            "description": "RSVP-Erinnerung"
+          },
+          "confirmation": {
+            "title": "Bestätigung",
+            "description": "RSVP-Bestätigung"
+          }
+        },
+        "configure": {
+          "title": "Nachrichtenvorlagen konfigurieren",
+          "description": "Erstellen und passen Sie Vorlagen für alle Kommunikationskanäle und Sprachen an.",
+          "action": "Vorlagenseite öffnen"
+        },
+        "tip": "Tipp:",
+        "tipText": "Vorlagen können später konfiguriert werden. Standardvorlagen werden verwendet, wenn Sie diesen Schritt überspringen."
+      },
+      "invitation": {
+        "title": "Digitale Einladung",
+        "subtitle": "Gestalten Sie Ihre digitale Einladung, die Gäste sehen, wenn sie ihren RSVP-Link öffnen.",
+        "status": "Einladungsstatus",
+        "configured": "Konfiguriert",
+        "notSet": "Nicht festgelegt",
+        "customTemplate": "Benutzerdefinierte Einladungsvorlage erstellt",
+        "usingDefault": "Standardvorlage verwenden",
+        "builder": {
+          "title": "Einladungsgenerator öffnen",
+          "description": "Passen Sie Ihre Einladung mit Text, Bildern, Countdown-Timern, Ortskarten und mehr an.",
+          "action": "Einladungsgenerator starten"
+        },
+        "features": "Was Sie hinzufügen können:",
+        "featuresList": {
+          "customText": "Benutzerdefinierter Text und Nachrichten",
+          "photoGallery": "Fotogalerie",
+          "countdown": "Countdown-Timer",
+          "locationMap": "Ortskarte",
+          "actionButtons": "Aktionsschaltflächen",
+          "multiLanguage": "Mehrsprachige Unterstützung"
+        },
+        "tip": "Tipp:",
+        "tipText": "Eine Standardeinladung wird verwendet, wenn Sie diesen Schritt überspringen. Sie können sie jederzeit vom Dashboard aus anpassen."
+      },
+      "seating": {
+        "title": "Sitzordnung (Optional)",
+        "subtitle": "Richten Sie Tische ein und weisen Sie Gästen Plätze zu. Sie können diesen Schritt überspringen und später konfigurieren.",
+        "tablesConfigured": "Tische konfiguriert",
+        "seatingStarted": "Sitzplan begonnen",
+        "noTables": "Noch keine Tische konfiguriert",
+        "configure": {
+          "title": "Sitzplan konfigurieren",
+          "description": "Erstellen Sie Tische, weisen Sie Gäste zu und verwenden Sie unseren automatischen Sitzalgorithmus für optimale Arrangements.",
+          "action": "Sitzplaner öffnen"
+        },
+        "features": "Sitzfunktionen:",
+        "featuresList": {
+          "manageTables": "Tische erstellen und verwalten",
+          "assignGuests": "Gäste Plätzen zuweisen",
+          "autoAlgorithm": "Automatischer Sitzalgorithmus",
+          "seatingGroups": "Sitzgruppen"
+        },
+        "note": "Hinweis:",
+        "noteText": "Die Sitzordnung ist völlig optional. Viele Paare ziehen es vor, dies näher am Hochzeitsdatum einzurichten, sobald sie endgültige RSVP-Bestätigungen haben."
+      },
+      "checklist": {
+        "title": "Planungscheckliste",
+        "subtitle": "Behalten Sie den Überblick über alle Ihre Hochzeitsplanungsaufgaben und bleiben Sie organisiert.",
+        "progress": "Checklisten-Fortschritt",
+        "tasksCompleted": "Aufgaben abgeschlossen",
+        "taskCompleted": "Aufgabe abgeschlossen",
+        "manage": {
+          "title": "Checkliste anzeigen & verwalten",
+          "description": "Überprüfen Sie Ihre Planungsaufgaben, markieren Sie Elemente als erledigt und fügen Sie benutzerdefinierte Aufgaben hinzu.",
+          "action": "Checkliste öffnen"
+        },
+        "commonTasks": "Übliche Planungsaufgaben umfassen:",
+        "tasksList": {
+          "venue": "Veranstaltungsort buchen und bestätigen",
+          "catering": "Catering und Menüauswahl",
+          "photography": "Fotografie und Videografie",
+          "music": "Musik und Unterhaltung",
+          "flowers": "Blumen und Dekoration",
+          "attire": "Hochzeitskleidung"
+        },
+        "tip": "Tipp:",
+        "tipText": "Ihr Hochzeitsplaner hat Ihnen möglicherweise eine vorkonfigurierte Checkliste zur Verfügung gestellt. Sie können sie an Ihre spezifischen Bedürfnisse anpassen."
+      },
+      "paymentGifts": {
+        "title": "Zahlung & Geschenkverfolgung",
+        "subtitle": "Konfigurieren Sie, wie Sie Geschenke und Zahlungen von Ihren Gästen verfolgen möchten.",
+        "trackingMode": "Zahlungsverfolgungsmodus",
+        "modes": {
+          "manual": "Manuell - Ich verfolge Zahlungen manuell",
+          "automated": "Automatisiert - Automatische Zuordnung von Zahlungen nach Referenzcode"
+        },
+        "modeHelp": {
+          "automated": "Jeder Gast erhält einen eindeutigen Referenzcode für Banküberweisungen. Zahlungen werden automatisch zugeordnet.",
+          "manual": "Sie können Zahlungen und Geschenke manuell erfassen, wenn sie ankommen."
+        },
+        "bankAccount": "Bankkonto (IBAN) für Geschenke",
+        "bankAccountPlaceholder": "DE12 1234 5678 9012 3456 7890",
+        "bankAccountHelp": "Ihre Bankkontonummer für den Empfang von Geldgeschenken. Dies wird den Gästen angezeigt.",
+        "howItWorks": "So funktioniert die Zahlungsverfolgung:",
+        "features": {
+          "trackGuests": "Verfolgen Sie, welche Gäste Geschenke oder Zahlungen gesendet haben",
+          "recordAmounts": "Zahlungsbeträge und -methoden erfassen",
+          "viewReports": "Zahlungsberichte und Analysen anzeigen",
+          "sendThanks": "Dankesbotschaften an Geschenkgeber senden"
+        },
+        "managePayments": {
+          "title": "Zahlungen verwalten",
+          "description": "Zahlungen auf der Zahlungsseite anzeigen und erfassen",
+          "action": "Zahlungsseite öffnen"
+        },
+        "errorSaving": "Fehler beim Speichern der Zahlungseinstellungen"
+      },
+      "completion": {
+        "title": "Einrichtung abgeschlossen!",
+        "congratulations": "Herzlichen Glückwunsch! Ihr Hochzeitsverwaltungssystem ist einsatzbereit.",
+        "summary": "Was Sie konfiguriert haben:",
+        "items": {
+          "basicInfo": "Grundlegende Hochzeitsinformationen",
+          "rsvpSettings": "RSVP-Einstellungen",
+          "guestList": "Gästeliste",
+          "messageTemplates": "Nachrichtenvorlagen",
+          "invitation": "Digitale Einladung",
+          "seating": "Sitzplan",
+          "checklist": "Checkliste",
+          "paymentGifts": "Zahlung & Geschenkverfolgung"
+        },
+        "status": {
+          "completed": "Abgeschlossen",
+          "canAddLater": "Kann später hinzugefügt werden",
+          "guests": "Gäste",
+          "configured": "Konfiguriert",
+          "usingDefaults": "Standardwerte verwenden",
+          "customized": "Angepasst",
+          "usingDefault": "Standardwert verwenden",
+          "tables": "Tische",
+          "optional": "Optional"
+        },
+        "nextSteps": "Nächste Schritte:",
+        "nextStepsList": {
+          "sendInvitations": "Beginnen Sie damit, Einladungen an Ihre Gäste per WhatsApp, SMS oder E-Mail zu senden",
+          "monitorRsvp": "Überwachen Sie RSVP-Antworten und verfolgen Sie die Gästeteilnahme",
+          "trackPayments": "Verfolgen Sie Zahlungen und Geschenke, sobald sie eintreffen",
+          "workChecklist": "Arbeiten Sie Ihre Planungscheckliste durch",
+          "viewReports": "Sehen Sie sich Analysen und Berichte an, um Ihren Fortschritt zu verfolgen"
+        },
+        "quickLinks": "Schnellzugriffe:",
+        "links": {
+          "manageGuests": "Gäste verwalten",
+          "viewActivity": "Aktivität anzeigen",
+          "viewChecklist": "Checkliste anzeigen",
+          "viewReports": "Berichte anzeigen"
+        }
+      }
     }
   },
   "guest": {

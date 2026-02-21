@@ -108,6 +108,10 @@ model Wedding {
   is_disabled                     Boolean            @default(false)
   gift_iban                       String?
   couple_table_id                 String?
+  wizard_completed                Boolean            @default(false)
+  wizard_current_step             Int?
+  wizard_completed_at             DateTime?
+  wizard_skipped                  Boolean            @default(false)
   checklist_sections              ChecklistSection[]
   checklist_tasks                 ChecklistTask[]
   families                        Family[]

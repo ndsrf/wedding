@@ -24,6 +24,12 @@ import { API_ERROR_CODES } from '@/types/api';
 
 // Validation schema for updating wedding config
 const updateWeddingConfigSchema = z.object({
+  // Basic wedding info (for wizard)
+  couple_names: z.string().optional(),
+  wedding_date: z.string().datetime().optional(),
+  wedding_time: z.string().optional(),
+  location: z.string().nullable().optional(),
+
   rsvp_cutoff_date: z.string().datetime().optional(),
   payment_tracking_mode: z.enum(['AUTOMATED', 'MANUAL']).optional(),
   gift_iban: z.string().nullable().optional(),
@@ -362,6 +368,20 @@ export async function PATCH(request: NextRequest) {
     const updateData: Record<string, unknown> = {
       updated_by: user.id,
     };
+
+    // Basic wedding info fields (for wizard)
+    if (validatedData.couple_names !== undefined) {
+      updateData.couple_names = validatedData.couple_names;
+    }
+    if (validatedData.wedding_date) {
+      updateData.wedding_date = new Date(validatedData.wedding_date);
+    }
+    if (validatedData.wedding_time !== undefined) {
+      updateData.wedding_time = validatedData.wedding_time;
+    }
+    if (validatedData.location !== undefined) {
+      updateData.location = validatedData.location;
+    }
 
     // Basic config fields
     if (validatedData.rsvp_cutoff_date) {

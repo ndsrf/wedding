@@ -6,6 +6,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { navigateToAdminPage } from '../helpers';
 
 // Use wedding admin authentication
 test.use({
@@ -16,13 +17,9 @@ test.use({
 
 test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
   test('should successfully add a new guest family from guests page', async ({ page }) => {
-    // Navigate to admin guests page
-    await page.goto('/admin/guests');
+    // Navigate to admin guests page and handle wizard if present
+    await navigateToAdminPage(page, '/admin/guests');
     console.log('Navigated to /admin/guests');
-
-    // Wait for initial page load
-    await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
-    console.log('DOM loaded, current URL:', page.url());
 
     // Additional wait for networkidle
     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
@@ -152,8 +149,8 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
   });
 
   test('should show validation errors when adding guest with invalid data', async ({ page }) => {
-    // Navigate to admin guests page
-    await page.goto('/admin/guests');
+    // Navigate to admin guests page and handle wizard if present
+    await navigateToAdminPage(page, '/admin/guests');
     await page.waitForLoadState('networkidle');
 
     // Click add guest button
@@ -177,8 +174,8 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
   });
 
   test('should allow canceling guest addition', async ({ page }) => {
-    // Navigate to admin guests page
-    await page.goto('/admin/guests');
+    // Navigate to admin guests page and handle wizard if present
+    await navigateToAdminPage(page, '/admin/guests');
     await page.waitForLoadState('networkidle');
 
     // Wait for table to be visible to get accurate count
@@ -218,8 +215,8 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
   });
 
   test('should display existing guests in the table', async ({ page }) => {
-    // Navigate to admin guests page
-    await page.goto('/admin/guests');
+    // Navigate to admin guests page and handle wizard if present
+    await navigateToAdminPage(page, '/admin/guests');
     await page.waitForLoadState('networkidle');
 
     // Should see guests table with data (from EXISTING_WEDDING seed)

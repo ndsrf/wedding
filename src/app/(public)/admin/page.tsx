@@ -14,6 +14,7 @@ import { StatsCard } from '@/components/planner/StatsCard';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
 import PrivateHeader from '@/components/PrivateHeader';
 import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
+import { WizardButton } from '@/components/admin/WizardButton';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface ItinerarySummaryItem {
@@ -141,6 +142,22 @@ export default async function AdminDashboardPage() {
     redirect('/api/auth/signin');
   }
 
+  // Check if wizard should be shown
+  if (user.wedding_id) {
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: user.wedding_id },
+      select: {
+        wizard_completed: true,
+        wizard_skipped: true,
+      },
+    });
+
+    // Redirect to wizard if not completed and not skipped
+    if (wedding && !wedding.wizard_completed && !wedding.wizard_skipped) {
+      redirect('/admin/wizard');
+    }
+  }
+
   const { t } = await getTranslations();
   const stats = await getWeddingStats(user);
 
@@ -223,6 +240,8 @@ export default async function AdminDashboardPage() {
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('admin.dashboard.manageWedding')}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <WizardButton />
+
             <Link
               href="/admin/guests"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"

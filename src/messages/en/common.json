@@ -629,6 +629,8 @@
         "paymentsReceived": "Gifts Received"
       },
       "manageWedding": "Manage Wedding",
+      "setupWizard": "Setup Wizard",
+      "setupWizardSubtitle": "Configure your wedding step by step",
       "guestList": "Guest List",
       "guestListSubtitle": "View and manage guests",
       "activity": "Activity",
@@ -655,6 +657,290 @@
       "reportsSubtitle": "Generate and export reports",
       "weddingNotFound": "Wedding not found",
       "contactPlanner": "Please contact your wedding planner."
+    },
+    "wizard": {
+      "title": "Wedding Setup Wizard",
+      "subtitle": "Let's get your wedding management set up in a few easy steps",
+      "skipWizard": "Skip wizard and go to dashboard",
+      "progress": {
+        "step": "Step",
+        "of": "of",
+        "complete": "Complete"
+      },
+      "navigation": {
+        "back": "Back",
+        "continue": "Continue",
+        "saveAndContinue": "Save & Continue",
+        "saving": "Saving...",
+        "skipForNow": "Skip for Now",
+        "goToDashboard": "Go to Dashboard"
+      },
+      "welcome": {
+        "title": "Welcome to Your Wedding Management System!",
+        "congratulations": "Congratulations on your upcoming wedding for",
+        "excited": "We're excited to help you manage every detail of your special day.",
+        "whatYouWillSetup": "What you'll set up:",
+        "features": {
+          "basicInfo": {
+            "title": "Basic Wedding Information",
+            "description": "Date, location, and key details"
+          },
+          "rsvpConfig": {
+            "title": "RSVP Configuration",
+            "description": "Customize your RSVP questions and settings"
+          },
+          "guestList": {
+            "title": "Guest List",
+            "description": "Import or add your guests"
+          },
+          "messageTemplates": {
+            "title": "Message Templates",
+            "description": "Configure WhatsApp, SMS, and email templates"
+          },
+          "invitation": {
+            "title": "Invitation Design",
+            "description": "Customize your digital invitation"
+          },
+          "seating": {
+            "title": "Seating Arrangements",
+            "description": "Organize your seating plan (optional)"
+          },
+          "checklist": {
+            "title": "Planning Checklist",
+            "description": "Review and manage tasks"
+          },
+          "payments": {
+            "title": "Payment & Gift Tracking",
+            "description": "Set up gift and payment management"
+          }
+        },
+        "tip": "Tip:",
+        "tipText": "This wizard takes about 15-20 minutes to complete. You can skip it and go directly to the dashboard if you prefer to configure things manually.",
+        "getStarted": "Get Started"
+      },
+      "basicInfo": {
+        "title": "Basic Wedding Information",
+        "subtitle": "Let's confirm the basic details about your wedding. You can always change these later.",
+        "coupleNames": "Couple Names",
+        "coupleNamesPlaceholder": "e.g., John & Jane",
+        "weddingDate": "Wedding Date",
+        "weddingTime": "Wedding Time",
+        "venue": "Venue / Location",
+        "venuePlaceholder": "e.g., Grand Hotel Ballroom",
+        "venueNote": "You can configure detailed locations and itinerary items later in the dashboard.",
+        "dressCode": "Dress Code",
+        "dressCodePlaceholder": "e.g., Formal, Semi-Formal, Casual",
+        "additionalInfo": "Additional Information",
+        "additionalInfoPlaceholder": "Any additional details you'd like to share with your guests...",
+        "errorSaving": "Failed to save wedding information"
+      },
+      "rsvpSettings": {
+        "title": "RSVP Settings",
+        "subtitle": "Configure how guests will RSVP to your wedding.",
+        "cutoffDate": "RSVP Cutoff Date",
+        "cutoffDateHelp": "The last date guests can submit their RSVP.",
+        "allowGuestAdditions": "Allow guests to add additional attendees",
+        "allowGuestAdditionsHelp": "Let guests add extra people (e.g., plus-ones) when they RSVP.",
+        "transportationQuestion": "Ask about transportation needs",
+        "transportationQuestionHelp": "Include a question asking if guests need transportation.",
+        "dietaryRestrictions": "Ask about dietary restrictions",
+        "dietaryRestrictionsHelp": "Let guests specify any dietary restrictions or preferences.",
+        "advancedSettings": "You can configure more advanced RSVP settings (custom questions, extra info fields) later in the Configure page.",
+        "errorSaving": "Failed to save RSVP settings"
+      },
+      "guests": {
+        "title": "Guest List",
+        "subtitle": "Add your wedding guests. You can import them from a file or add them manually.",
+        "currentGuestCount": "Current Guest Count",
+        "families": "families",
+        "family": "family",
+        "howToAdd": "How to add guests:",
+        "importFromFile": {
+          "title": "Import from File",
+          "description": "Upload a CSV or VCF file with your guest list. Great for importing from spreadsheets or contacts.",
+          "action": "Open import page"
+        },
+        "addManually": {
+          "title": "Add Guests Manually",
+          "description": "Add guests one by one or in family groups. Perfect for smaller guest lists or adding missing guests.",
+          "action": "Open guest list page"
+        },
+        "tip": "Tip:",
+        "tipWithGuests": "You can continue to the next step and add more guests later.",
+        "tipNoGuests": "You can skip adding guests now and do it later, but we recommend adding at least a few to get started."
+      },
+      "messageTemplates": {
+        "title": "Message Templates",
+        "subtitle": "Configure templates for communicating with your guests via WhatsApp, SMS, and Email.",
+        "configuredTemplates": "Configured Templates",
+        "noTemplates": "No templates configured yet",
+        "templatesSetUp": "Message templates set up",
+        "templateTypes": "Template Types",
+        "types": {
+          "saveTheDate": {
+            "title": "Save the Date",
+            "description": "Initial announcement"
+          },
+          "invitation": {
+            "title": "Invitation",
+            "description": "Formal invitation"
+          },
+          "reminder": {
+            "title": "Reminder",
+            "description": "RSVP reminder"
+          },
+          "confirmation": {
+            "title": "Confirmation",
+            "description": "RSVP confirmation"
+          }
+        },
+        "configure": {
+          "title": "Configure Message Templates",
+          "description": "Create and customize templates for all communication channels and languages.",
+          "action": "Open templates page"
+        },
+        "tip": "Tip:",
+        "tipText": "Templates can be configured later. Default templates will be used if you skip this step."
+      },
+      "invitation": {
+        "title": "Digital Invitation",
+        "subtitle": "Design your digital invitation that guests will see when they open their RSVP link.",
+        "status": "Invitation Status",
+        "configured": "Configured",
+        "notSet": "Not Set",
+        "customTemplate": "Custom invitation template created",
+        "usingDefault": "Using default template",
+        "builder": {
+          "title": "Open Invitation Builder",
+          "description": "Customize your invitation with text, images, countdown timers, location maps, and more.",
+          "action": "Launch invitation builder"
+        },
+        "features": "What you can include:",
+        "featuresList": {
+          "customText": "Custom text and messages",
+          "photoGallery": "Photo gallery",
+          "countdown": "Countdown timer",
+          "locationMap": "Location map",
+          "actionButtons": "Action buttons",
+          "multiLanguage": "Multi-language support"
+        },
+        "tip": "Tip:",
+        "tipText": "A default invitation will be used if you skip this step. You can customize it anytime from the dashboard."
+      },
+      "seating": {
+        "title": "Seating Arrangements (Optional)",
+        "subtitle": "Set up tables and assign guests to seats. You can skip this step and configure it later.",
+        "tablesConfigured": "Tables Configured",
+        "seatingStarted": "Seating plan started",
+        "noTables": "No tables configured yet",
+        "configure": {
+          "title": "Configure Seating Plan",
+          "description": "Create tables, assign guests, and use our automatic seating algorithm for optimal arrangements.",
+          "action": "Open seating planner"
+        },
+        "features": "Seating features:",
+        "featuresList": {
+          "manageTables": "Create and manage tables",
+          "assignGuests": "Assign guests to seats",
+          "autoAlgorithm": "Automatic seating algorithm",
+          "seatingGroups": "Seating groups"
+        },
+        "note": "Note:",
+        "noteText": "Seating is completely optional. Many couples prefer to set this up closer to the wedding date once they have final RSVP confirmations."
+      },
+      "checklist": {
+        "title": "Planning Checklist",
+        "subtitle": "Keep track of all your wedding planning tasks and stay organized.",
+        "progress": "Checklist Progress",
+        "tasksCompleted": "tasks completed",
+        "taskCompleted": "task completed",
+        "manage": {
+          "title": "View & Manage Checklist",
+          "description": "Review your planning tasks, mark items as complete, and add custom tasks.",
+          "action": "Open checklist"
+        },
+        "commonTasks": "Common planning tasks include:",
+        "tasksList": {
+          "venue": "Venue booking and confirmation",
+          "catering": "Catering and menu selection",
+          "photography": "Photography and videography",
+          "music": "Music and entertainment",
+          "flowers": "Flowers and decorations",
+          "attire": "Wedding attire"
+        },
+        "tip": "Tip:",
+        "tipText": "Your wedding planner may have provided you with a pre-configured checklist. You can customize it to fit your specific needs."
+      },
+      "paymentGifts": {
+        "title": "Payment & Gift Tracking",
+        "subtitle": "Configure how you want to track gifts and payments from your guests.",
+        "trackingMode": "Payment Tracking Mode",
+        "modes": {
+          "manual": "Manual - I'll track payments manually",
+          "automated": "Automated - Auto-match payments by reference code"
+        },
+        "modeHelp": {
+          "automated": "Each guest will receive a unique reference code for bank transfers. Payments will be auto-matched.",
+          "manual": "You can manually record payments and gifts as they arrive."
+        },
+        "bankAccount": "Bank Account (IBAN) for Gifts",
+        "bankAccountPlaceholder": "ES12 1234 5678 9012 3456 7890",
+        "bankAccountHelp": "Your bank account number for receiving monetary gifts. This will be shown to guests.",
+        "howItWorks": "How payment tracking works:",
+        "features": {
+          "trackGuests": "Track which guests have sent gifts or payments",
+          "recordAmounts": "Record payment amounts and methods",
+          "viewReports": "View payment reports and analytics",
+          "sendThanks": "Send thank you messages to gift senders"
+        },
+        "managePayments": {
+          "title": "Manage Payments",
+          "description": "View and record payments in the Payments page",
+          "action": "Open payments page"
+        },
+        "errorSaving": "Failed to save payment settings"
+      },
+      "completion": {
+        "title": "Setup Complete!",
+        "congratulations": "Congratulations! Your wedding management system is ready to use.",
+        "summary": "What you've configured:",
+        "items": {
+          "basicInfo": "Basic Wedding Information",
+          "rsvpSettings": "RSVP Settings",
+          "guestList": "Guest List",
+          "messageTemplates": "Message Templates",
+          "invitation": "Digital Invitation",
+          "seating": "Seating Plan",
+          "checklist": "Checklist",
+          "paymentGifts": "Payment & Gift Tracking"
+        },
+        "status": {
+          "completed": "Completed",
+          "canAddLater": "Can add later",
+          "guests": "guests",
+          "configured": "Configured",
+          "usingDefaults": "Using defaults",
+          "customized": "Customized",
+          "usingDefault": "Using default",
+          "tables": "tables",
+          "optional": "Optional"
+        },
+        "nextSteps": "Next Steps:",
+        "nextStepsList": {
+          "sendInvitations": "Start sending invitations to your guests via WhatsApp, SMS, or Email",
+          "monitorRsvp": "Monitor RSVP responses and track guest attendance",
+          "trackPayments": "Track payments and gifts as they come in",
+          "workChecklist": "Work through your planning checklist",
+          "viewReports": "View analytics and reports to track your progress"
+        },
+        "quickLinks": "Quick Links:",
+        "links": {
+          "manageGuests": "Manage Guests",
+          "viewActivity": "View Activity",
+          "viewChecklist": "View Checklist",
+          "viewReports": "View Reports"
+        }
+      }
     },
     "reports": {
       "title": "Reports",
