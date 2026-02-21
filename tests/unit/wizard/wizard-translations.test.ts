@@ -18,43 +18,7 @@ describe('Wizard Translations', () => {
     it: { name: 'Italian', messages: itMessages },
   };
 
-  const requiredWizardKeys = [
-    'admin.dashboard.setupWizard',
-    'admin.dashboard.setupWizardSubtitle',
-    'admin.wizard.title',
-    'admin.wizard.subtitle',
-    'admin.wizard.skipWizard',
-    'admin.wizard.progress.step',
-    'admin.wizard.progress.of',
-    'admin.wizard.progress.complete',
-    'admin.wizard.navigation.back',
-    'admin.wizard.navigation.continue',
-    'admin.wizard.navigation.saveAndContinue',
-    'admin.wizard.navigation.saving',
-    'admin.wizard.navigation.skipForNow',
-    'admin.wizard.navigation.goToDashboard',
-    'admin.wizard.welcome.title',
-    'admin.wizard.welcome.congratulations',
-    'admin.wizard.welcome.excited',
-    'admin.wizard.basicInfo.title',
-    'admin.wizard.basicInfo.subtitle',
-    'admin.wizard.rsvpSettings.title',
-    'admin.wizard.rsvpSettings.subtitle',
-    'admin.wizard.guests.title',
-    'admin.wizard.guests.subtitle',
-    'admin.wizard.messageTemplates.title',
-    'admin.wizard.messageTemplates.subtitle',
-    'admin.wizard.invitation.title',
-    'admin.wizard.invitation.subtitle',
-    'admin.wizard.seating.title',
-    'admin.wizard.seating.subtitle',
-    'admin.wizard.checklist.title',
-    'admin.wizard.checklist.subtitle',
-    'admin.wizard.paymentGifts.title',
-    'admin.wizard.paymentGifts.subtitle',
-    'admin.wizard.completion.title',
-    'admin.wizard.completion.congratulations',
-  ];
+  // Note: requiredWizardKeys variable removed as it was unused
 
   describe('Translation Completeness', () => {
     Object.entries(languages).forEach(([code, { name, messages }]) => {
@@ -173,7 +137,7 @@ describe('Wizard Translations', () => {
     it('should have same structure across all languages', () => {
       const englishKeys = Object.keys(enMessages.admin.wizard);
 
-      Object.entries(languages).forEach(([code, { name, messages }]) => {
+      Object.entries(languages).forEach(([code, { name: _name, messages }]) => {
         if (code === 'en') return; // Skip English itself
 
         const languageKeys = Object.keys(messages.admin.wizard);
@@ -196,7 +160,7 @@ describe('Wizard Translations', () => {
         'completion',
       ];
 
-      Object.entries(languages).forEach(([code, { name, messages }]) => {
+      Object.entries(languages).forEach(([_code, { name: _name, messages }]) => {
         stepSections.forEach((section) => {
           expect(messages?.admin?.wizard?.[section as keyof typeof messages.admin.wizard]).toBeDefined();
         });
@@ -204,7 +168,7 @@ describe('Wizard Translations', () => {
     });
 
     it('should have no empty translations', () => {
-      Object.entries(languages).forEach(([code, { name, messages }]) => {
+      Object.entries(languages).forEach(([code, { name: _name, messages }]) => {
         const checkNotEmpty = (obj: any, path: string = '') => {
           Object.entries(obj).forEach(([key, value]) => {
             const currentPath = path ? `${path}.${key}` : key;
@@ -231,7 +195,7 @@ describe('Wizard Translations', () => {
     it('should not have English text in non-English translations for setupWizard', () => {
       const nonEnglishLanguages = Object.entries(languages).filter(([code]) => code !== 'en');
 
-      nonEnglishLanguages.forEach(([code, { name, messages }]) => {
+      nonEnglishLanguages.forEach(([_code, { name: _name, messages }]) => {
         const setupWizard = messages?.admin?.dashboard?.setupWizard;
 
         // Should not contain exact English text
@@ -243,7 +207,7 @@ describe('Wizard Translations', () => {
     it('should not have English text in non-English translations for wizard sections', () => {
       const nonEnglishLanguages = Object.entries(languages).filter(([code]) => code !== 'en');
 
-      nonEnglishLanguages.forEach(([code, { name, messages }]) => {
+      nonEnglishLanguages.forEach(([_code, { name: _name, messages }]) => {
         const wizardTitle = messages?.admin?.wizard?.title;
 
         // Should not be exactly English
