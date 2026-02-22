@@ -23,10 +23,16 @@ import RedirectWithSpinner from './RedirectWithSpinner';
 // ============================================================================
 // ISR Configuration
 // Short URL → magic token mappings are effectively permanent, so we can cache
-// aggressively.  TTL is driven by SHORT_URL_CACHE_TTL_HOURS (default 24 h).
-// On Vercel this page is served from the CDN edge after the first visit.
+// aggressively.  On Vercel this page is served from the CDN edge after the
+// first visit, eliminating any cold-start DB round-trip for repeat visitors.
+//
+// Next.js requires a static literal here (read at build time by the analyser).
+// Set this to match your SHORT_URL_CACHE_TTL_HOURS value × 3600.
+// Runtime-configurable knobs:
+//   • SHORT_URL_CACHE_TTL_HOURS – server in-memory cache TTL (lib/short-url.ts)
+//   • Cache-Control headers      – set per-platform in next.config.js
 // ============================================================================
-export const revalidate = (Number(process.env.SHORT_URL_CACHE_TTL_HOURS) || 24) * 3600;
+export const revalidate = 86400; // 24 hours – keep in sync with SHORT_URL_CACHE_TTL_HOURS
 export const dynamicParams = true;
 
 // Initials: 2-3 uppercase ASCII letters, optionally followed by digits (LJ, LJ1, AB12…)
