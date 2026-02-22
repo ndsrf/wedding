@@ -1060,6 +1060,7 @@
       "import": "Importar desde Excel",
       "importVcf": "Importar familias VCF (Google, Apple)",
       "selected": "seleccionados",
+      "copyInvLink": "Copiar enlace de invitación",
       "table": {
         "family": "Familia",
         "members": "Miembros",

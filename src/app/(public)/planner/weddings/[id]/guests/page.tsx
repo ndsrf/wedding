@@ -326,6 +326,14 @@ export default function GuestsPage() {
     }
   };
 
+  // Handle copy invitation link
+  const handleCopyInvLink = async (guestId: string): Promise<string> => {
+    const response = await fetch(`/api/planner/weddings/${weddingId}/guests/${guestId}/inv-link`);
+    const data = await response.json();
+    if (!data.success) throw new Error('Failed to fetch invitation link');
+    return data.data.path as string;
+  };
+
   // Handle delete guest
   const handleDeleteGuest = (guestId: string) => {
     const guest = guests.find((g) => g.id === guestId);
@@ -813,6 +821,7 @@ export default function GuestsPage() {
               onSendReminder={handleSendReminder}
               onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
+              onCopyInvLink={handleCopyInvLink}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
               onSelectGuest={handleSelectGuest}

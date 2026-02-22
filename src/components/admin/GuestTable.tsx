@@ -7,7 +7,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { FamilyWithMembers, GiftStatus } from '@/types/models';
@@ -27,6 +27,7 @@ interface GuestTableProps {
   onSendReminder?: (guestId: string) => void;
   onSendSaveTheDate?: (guestId: string) => void;
   onViewTimeline?: (guestId: string, guestName: string) => void;
+  onCopyInvLink?: (guestId: string) => Promise<string>;
   loading?: boolean;
   selectedGuestIds?: string[];
   onSelectGuest?: (guestId: string, selected: boolean) => void;
@@ -113,6 +114,7 @@ export function GuestTable({
   onSendReminder,
   onSendSaveTheDate,
   onViewTimeline,
+  onCopyInvLink,
   loading,
   selectedGuestIds = [],
   onSelectGuest,
@@ -121,6 +123,26 @@ export function GuestTable({
 }: GuestTableProps) {
   const t = useTranslations();
   const [expandedGuestIds, setExpandedGuestIds] = React.useState<string[]>([]);
+  const [copyingIds, setCopyingIds] = useState<Set<string>>(new Set());
+  const [copiedIds, setCopiedIds] = useState<Set<string>>(new Set());
+
+  const handleCopyInvLink = useCallback(async (guestId: string) => {
+    if (!onCopyInvLink || copyingIds.has(guestId)) return;
+    setCopyingIds(prev => new Set(prev).add(guestId));
+    try {
+      const path = await onCopyInvLink(guestId);
+      const url = `${window.location.origin}${path}`;
+      await navigator.clipboard.writeText(url);
+      setCopiedIds(prev => new Set(prev).add(guestId));
+      setTimeout(() => {
+        setCopiedIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
+      }, 2000);
+    } catch {
+      // silently ignore clipboard errors
+    } finally {
+      setCopyingIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
+    }
+  }, [onCopyInvLink, copyingIds]);
 
   // Only count guests who can be selected (not confirmed)
   const selectableGuests = guests.filter(g => g.rsvp_status !== 'submitted');
@@ -316,6 +338,24 @@ export function GuestTable({
                           </svg>
                         </button>
                       )}
+                      {onCopyInvLink && (
+                        <button
+                          onClick={() => handleCopyInvLink(guest.id)}
+                          disabled={copyingIds.has(guest.id)}
+                          className="p-1 text-teal-600 hover:text-teal-900 hover:bg-teal-50 rounded disabled:opacity-50"
+                          title={t('admin.guests.copyInvLink')}
+                        >
+                          {copiedIds.has(guest.id) ? (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          )}
+                        </button>
+                      )}
                       {onDelete && (
                         <button
                           onClick={() => onDelete(guest.id)}
@@ -489,6 +529,27 @@ export function GuestTable({
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
+                          </button>
+                        )}
+                        {onCopyInvLink && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyInvLink(guest.id);
+                            }}
+                            disabled={copyingIds.has(guest.id)}
+                            className="p-2 text-teal-600 hover:text-teal-900 hover:bg-teal-50 rounded disabled:opacity-50"
+                            title={t('admin.guests.copyInvLink')}
+                          >
+                            {copiedIds.has(guest.id) ? (
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            )}
                           </button>
                         )}
                         {onDelete && (

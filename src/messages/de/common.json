@@ -817,6 +817,7 @@
       "import": "Aus Excel importieren",
       "importVcf": "VCF-Familien importieren (Google, Apple)",
       "selected": "ausgewählt",
+      "copyInvLink": "Einladungslink kopieren",
       "table": {
         "family": "Familie",
         "members": "Mitglieder",
