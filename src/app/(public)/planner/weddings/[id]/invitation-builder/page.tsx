@@ -31,6 +31,7 @@ interface UserTemplate {
 }
 
 interface WeddingData {
+  id: string;
   couple_names: string;
   wedding_date: Date;
   wedding_time: string;
@@ -87,6 +88,7 @@ export default function InvitationBuilderPage() {
         throw new Error('Invalid wedding date from server');
       }
       setWeddingData({
+        id: wedding.id,
         couple_names: wedding.couple_names,
         wedding_date: weddingDate,
         wedding_time: wedding.wedding_time,
