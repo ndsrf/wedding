@@ -78,7 +78,7 @@ export async function GET() {
 // POST – start OAuth flow
 // ============================================================================
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const user = await requireAnyRole(['wedding_admin', 'planner', 'master_admin']);
 

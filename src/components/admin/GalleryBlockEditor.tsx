@@ -91,7 +91,7 @@ export function GalleryBlockEditor({ block, onUpdate }: GalleryBlockEditorProps)
             }`}
           />
         </div>
-        <span className="text-sm">Botón "Añadir foto" para invitados</span>
+        <span className="text-sm">Bot&oacute;n &ldquo;A&ntilde;adir foto&rdquo; para invitados</span>
       </label>
 
       {/* Border radius */}

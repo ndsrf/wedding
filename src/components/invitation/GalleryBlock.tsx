@@ -100,7 +100,7 @@ export function GalleryBlock({
     if (touchStartX === null) return;
     const diff = touchStartX - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) {
-      diff > 0 ? next() : prev();
+      if (diff > 0) { next(); } else { prev(); }
     }
     setTouchStartX(null);
   };
