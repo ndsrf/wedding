@@ -1331,7 +1331,8 @@
       "backToDashboard": "Back to Dashboard",
       "tabs": {
         "basic": "Basic Settings",
-        "rsvp": "RSVP Settings"
+        "rsvp": "RSVP Settings",
+        "gallery": "Gallery"
       },
       "form": {
         "basicSettings": "Basic Settings",

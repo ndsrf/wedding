@@ -108,7 +108,20 @@ export interface ButtonBlock {
   };
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock;
+export interface GalleryBlock {
+  id: string;
+  type: 'gallery';
+  columns?: 1 | 2 | 3; // photos visible at once
+  showCaptions?: boolean; // show photo captions
+  showUploadButton?: boolean; // show "Add photo" button for guests
+  autoPlayMs?: number; // 0 = manual, >0 = auto-advance interval in ms
+  style?: {
+    borderRadius?: string;
+    gap?: string;
+  };
+}
+
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

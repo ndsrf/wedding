@@ -112,6 +112,13 @@ model Wedding {
   wizard_current_step             Int?
   wizard_completed_at             DateTime?
   wizard_skipped                  Boolean            @default(false)
+  // Google Photos integration
+  google_photos_album_id          String?            // Google Photos album ID
+  google_photos_album_url         String?            // Album browse URL (for admin)
+  google_photos_share_url         String?            // Contributor share URL (for guests)
+  google_photos_refresh_token     String?            // OAuth refresh token (encrypted in practice)
+  google_photos_access_token      String?            // Current access token (short-lived)
+  google_photos_token_expiry      DateTime?          // When the access token expires
   checklist_sections              ChecklistSection[]
   checklist_tasks                 ChecklistTask[]
   families                        Family[]
@@ -123,6 +130,7 @@ model Wedding {
   wedding_admins                  WeddingAdmin[]
   providers                       WeddingProvider[]
   itinerary_items                 ItineraryItem[]
+  photos                          WeddingPhoto[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   theme                           Theme?             @relation(fields: [theme_id], references: [id])
   main_event_location             Location?          @relation("MainEventLocation", fields: [main_event_location_id], references: [id], onDelete: SetNull)
@@ -579,6 +587,28 @@ model Payment {
 }
 
 // -----------------------------------------------------------------------------
+// PHOTO GALLERY — Per-wedding photo collection
+// -----------------------------------------------------------------------------
+
+model WeddingPhoto {
+  id            String      @id @default(uuid())
+  wedding_id    String
+  url           String      // Storage URL of the full photo
+  thumbnail_url String?     // Optional smaller thumbnail
+  source        PhotoSource @default(UPLOAD)
+  sender_name   String?     // Display name (guest name from WhatsApp, uploader name, etc.)
+  caption       String?
+  approved      Boolean     @default(true)  // Admin can hide individual photos
+  created_at    DateTime    @default(now())
+  wedding       Wedding     @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@index([wedding_id])
+  @@index([wedding_id, approved])
+  @@index([created_at])
+  @@map("wedding_photos")
+}
+
+// -----------------------------------------------------------------------------
 // Enums
 // -----------------------------------------------------------------------------
 
@@ -696,4 +726,10 @@ enum LocationType {
   EVENT
   PRE_EVENT
   POST_EVENT
+}
+
+enum PhotoSource {
+  WHATSAPP
+  UPLOAD
+  GOOGLE_PHOTOS
 }

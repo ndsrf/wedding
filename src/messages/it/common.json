@@ -1071,7 +1071,8 @@
       "backToDashboard": "Torna alla Dashboard",
       "tabs": {
         "basic": "Impostazioni di Base",
-        "rsvp": "Impostazioni RSVP"
+        "rsvp": "Impostazioni RSVP",
+        "gallery": "Galleria"
       },
       "form": {
         "basicSettings": "Impostazioni di Base",

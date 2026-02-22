@@ -1317,7 +1317,8 @@
       "backToDashboard": "Volver al Panel",
       "tabs": {
         "basic": "Ajustes Básicos",
-        "rsvp": "Ajustes de RSVP"
+        "rsvp": "Ajustes de RSVP",
+        "gallery": "Galería"
       },
       "form": {
         "basicSettings": "Ajustes Básicos",

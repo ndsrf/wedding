@@ -1071,7 +1071,8 @@
       "backToDashboard": "Retour au Tableau de Bord",
       "tabs": {
         "basic": "Paramètres de Base",
-        "rsvp": "Paramètres RSVP"
+        "rsvp": "Paramètres RSVP",
+        "gallery": "Galerie"
       },
       "form": {
         "basicSettings": "Paramètres de Base",

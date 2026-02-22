@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
@@ -165,12 +165,14 @@ export default function ConfigureWeddingPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <WeddingConfigForm
-          wedding={wedding}
-          themes={wedding.available_themes}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-        />
+        <Suspense fallback={<div className="animate-pulse h-64 bg-gray-200 rounded-lg" />}>
+          <WeddingConfigForm
+            wedding={wedding}
+            themes={wedding.available_themes}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+          />
+        </Suspense>
 
         {/* Danger Zone */}
         <div className="mt-8 border-2 border-red-300 rounded-lg p-6 bg-red-50">

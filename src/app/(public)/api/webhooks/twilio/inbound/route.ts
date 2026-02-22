@@ -20,6 +20,7 @@ import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply } from '@/lib/ai/wedding-assistant';
 import { getShortUrlPath } from '@/lib/short-url';
+import { uploadFile, generateUniqueFilename } from '@/lib/storage';
 
 export const runtime = 'nodejs';
 
@@ -150,14 +151,85 @@ export async function POST(request: NextRequest) {
     const fromPhone = extractPhone(params.From ?? '');
     const body = (params.Body ?? '').trim();
     const messageSid = params.MessageSid ?? '';
+    const numMedia = parseInt(params.NumMedia ?? '0', 10);
 
     console.log('[TWILIO_INBOUND] Received message', {
       from: fromPhone,
       messageSid,
       bodyLength: body.length,
+      numMedia,
     });
 
-    if (!fromPhone || !body) {
+    if (!fromPhone) {
+      return emptyTwiML();
+    }
+
+    // --- Handle media attachments (photos sent via WhatsApp) --------------
+    if (numMedia > 0) {
+      // Find the family first so we know the wedding_id
+      const mediaFamily = await prisma.family.findFirst({
+        where: { OR: [{ whatsapp_number: fromPhone }, { phone: fromPhone }] },
+        select: { id: true, wedding_id: true, name: true },
+      });
+
+      if (mediaFamily) {
+        for (let i = 0; i < numMedia; i++) {
+          const mediaUrl = params[`MediaUrl${i}`];
+          const mediaContentType = params[`MediaContentType${i}`] ?? 'image/jpeg';
+
+          if (!mediaUrl || !mediaContentType.startsWith('image/')) continue;
+
+          try {
+            // Fetch the media from Twilio (requires Twilio auth)
+            const accountSid = process.env.TWILIO_ACCOUNT_SID;
+            const authToken = process.env.TWILIO_AUTH_TOKEN;
+            const fetchRes = await fetch(mediaUrl, {
+              headers: {
+                Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
+              },
+            });
+
+            if (!fetchRes.ok) {
+              console.warn('[TWILIO_INBOUND] Failed to fetch media:', mediaUrl);
+              continue;
+            }
+
+            const buffer = Buffer.from(await fetchRes.arrayBuffer());
+            const ext = mediaContentType.split('/')[1]?.split(';')[0] ?? 'jpg';
+            const filename = generateUniqueFilename(`whatsapp-photo.${ext}`);
+            const storagePath = `gallery/${mediaFamily.wedding_id}/${filename}`;
+
+            const { url: photoUrl } = await uploadFile(storagePath, buffer, {
+              contentType: mediaContentType,
+            });
+
+            await prisma.weddingPhoto.create({
+              data: {
+                wedding_id: mediaFamily.wedding_id,
+                url: photoUrl,
+                source: 'WHATSAPP',
+                sender_name: mediaFamily.name,
+                approved: true,
+              },
+            });
+
+            console.log('[TWILIO_INBOUND] Saved WhatsApp photo to gallery', {
+              wedding_id: mediaFamily.wedding_id,
+              family: mediaFamily.name,
+            });
+          } catch (err) {
+            console.error('[TWILIO_INBOUND] Error saving WhatsApp photo:', err);
+          }
+        }
+      }
+
+      // If the message has only media and no text body, acknowledge and return
+      if (!body) {
+        return messageTwiML('¡Gracias por compartir tu foto! 📸 La hemos añadido a la galería de la boda.');
+      }
+    }
+
+    if (!body) {
       return emptyTwiML();
     }
 

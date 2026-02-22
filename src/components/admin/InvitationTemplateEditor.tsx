@@ -11,6 +11,7 @@ import type {
   LocationBlock as LocationBlockType,
   CountdownBlock as CountdownBlockType,
   ButtonBlock as ButtonBlockType,
+  GalleryBlock as GalleryBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
@@ -18,10 +19,12 @@ import { ImageBlockEditor } from './ImageBlockEditor';
 import { LocationBlockEditor } from './LocationBlockEditor';
 import { CountdownBlockEditor } from './CountdownBlockEditor';
 import { ButtonBlockEditor } from './ButtonBlockEditor';
+import { GalleryBlockEditor } from './GalleryBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
 import { ButtonBlock } from '@/components/invitation/ButtonBlock';
+import { GalleryBlock } from '@/components/invitation/GalleryBlock';
 import { ImagePickerModal } from './ImagePickerModal';
 
 interface InvitationTemplateEditorProps {
@@ -31,6 +34,7 @@ interface InvitationTemplateEditorProps {
     name: string;
   };
   weddingData: {
+    id: string;
     couple_names: string;
     wedding_date: Date;
     wedding_time: string;
@@ -76,6 +80,7 @@ export function InvitationTemplateEditor({
   const isSelectedBlockLocation = selectedBlock?.type === 'location';
   const isSelectedBlockCountdown = selectedBlock?.type === 'countdown';
   const isSelectedBlockButton = selectedBlock?.type === 'button';
+  const isSelectedBlockGallery = selectedBlock?.type === 'gallery';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -138,6 +143,16 @@ export function InvitationTemplateEditor({
             fontFamily: 'Inter, sans-serif',
             alignment: 'center',
           },
+        };
+      } else if (type === 'gallery') {
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'gallery',
+          columns: 1,
+          showCaptions: false,
+          showUploadButton: true,
+          autoPlayMs: 4000,
+          style: { borderRadius: '0.75rem' },
         };
       } else {
         return;
@@ -229,6 +244,16 @@ export function InvitationTemplateEditor({
     }));
   }, []);
 
+  // Handle update gallery block
+  const handleUpdateGalleryBlock = useCallback((blockId: string, updates: Partial<GalleryBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'gallery' ? ({ ...b, ...updates } as GalleryBlockType) : b
+      ),
+    }));
+  }, []);
+
   // Handle open image modal
   const handleOpenImageModal = useCallback((blockId: string) => {
     setImageModalBlockId(blockId);
@@ -300,6 +325,7 @@ export function InvitationTemplateEditor({
   const hasLocation = design.blocks.some((b) => b.type === 'location');
   const hasCountdown = design.blocks.some((b) => b.type === 'countdown');
   const hasAddToCalendar = design.blocks.some((b) => b.type === 'add-to-calendar');
+  const hasGallery = design.blocks.some((b) => b.type === 'gallery');
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -348,6 +374,13 @@ export function InvitationTemplateEditor({
             >
               + Button
             </button>
+            <button
+              onClick={() => handleAddBlock('gallery')}
+              disabled={hasGallery}
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              + Galería de fotos
+            </button>
           </div>
         </div>
 
@@ -381,6 +414,13 @@ export function InvitationTemplateEditor({
             activeLanguage={activeLanguage}
             onLanguageChange={setActiveLanguage}
             onUpdate={handleUpdateButtonBlock}
+          />
+        )}
+
+        {isSelectedBlockGallery && selectedBlock && selectedBlock.type === 'gallery' && (
+          <GalleryBlockEditor
+            block={selectedBlock}
+            onUpdate={handleUpdateGalleryBlock}
           />
         )}
 
@@ -620,6 +660,17 @@ export function InvitationTemplateEditor({
                       url={(block as ButtonBlockType).url}
                       style={(block as ButtonBlockType).style}
                       language={activeLanguage}
+                    />
+                  )}
+
+                  {block.type === 'gallery' && (
+                    <GalleryBlock
+                      weddingId={weddingData.id}
+                      columns={(block as GalleryBlockType).columns ?? 1}
+                      showCaptions={(block as GalleryBlockType).showCaptions ?? false}
+                      showUploadButton={(block as GalleryBlockType).showUploadButton ?? true}
+                      autoPlayMs={(block as GalleryBlockType).autoPlayMs ?? 4000}
+                      style={(block as GalleryBlockType).style}
                     />
                   )}
                 </div>
