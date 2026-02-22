@@ -8,11 +8,26 @@
  * channel-attribution tracking is preserved.
  *
  * Returns 404 (via notFound()) when the initials/code pair does not exist.
+ *
+ * Performance:
+ * - Short URL resolution is served from an in-memory cache (see lib/short-url.ts)
+ * - ISR (export const revalidate) caches the rendered page at the CDN edge
+ *   on Vercel, eliminating cold-start latency for repeat visitors.
+ * - The TTL is controlled by SHORT_URL_CACHE_TTL_HOURS (default 24 h).
  */
 
 import { notFound } from 'next/navigation';
 import { resolveShortUrl } from '@/lib/short-url';
 import RedirectWithSpinner from './RedirectWithSpinner';
+
+// ============================================================================
+// ISR Configuration
+// Short URL → magic token mappings are effectively permanent, so we can cache
+// aggressively.  TTL is driven by SHORT_URL_CACHE_TTL_HOURS (default 24 h).
+// On Vercel this page is served from the CDN edge after the first visit.
+// ============================================================================
+export const revalidate = (Number(process.env.SHORT_URL_CACHE_TTL_HOURS) || 24) * 3600;
+export const dynamicParams = true;
 
 // Initials: 2-3 uppercase ASCII letters, optionally followed by digits (LJ, LJ1, AB12…)
 const INITIALS_RE = /^[A-Z]{2,3}\d*$/;

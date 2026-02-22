@@ -82,6 +82,40 @@ const nextConfig = {
       });
     }
 
+    if (process.env.PLATFORM_OPTIMIZATION === 'vercel') {
+      // Vercel CDN caching for the two guest-facing hot paths.
+      //
+      // /inv/  – short URL resolver.  Codes are permanent so we cache for the
+      //          full SHORT_URL_CACHE_TTL_HOURS window (default 24 h).
+      //          stale-while-revalidate lets Vercel serve the cached page
+      //          while silently regenerating it in the background, so guests
+      //          never wait for a cold render after the TTL expires.
+      const shortUrlTtlSeconds = (Number(process.env.SHORT_URL_CACHE_TTL_HOURS) || 24) * 3600;
+      headers.push({
+        source: '/inv/:initials/:shortCode',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: `public, s-maxage=${shortUrlTtlSeconds}, stale-while-revalidate=${shortUrlTtlSeconds}`,
+          },
+        ],
+      });
+
+      // /rsvp/ – RSVP page.  Cached for RSVP_CACHE_TTL_HOURS (default 1 h).
+      //          On-demand revalidation via revalidatePath() keeps the cache
+      //          fresh whenever an admin updates the template or wedding data.
+      const rsvpTtlSeconds = (Number(process.env.RSVP_CACHE_TTL_HOURS) || 1) * 3600;
+      headers.push({
+        source: '/rsvp/:token',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: `public, s-maxage=${rsvpTtlSeconds}, stale-while-revalidate=${rsvpTtlSeconds}`,
+          },
+        ],
+      });
+    }
+
     return headers;
   },
   async rewrites() {

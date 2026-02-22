@@ -22,11 +22,12 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { Metadata } from 'next';
 
 // ============================================================================
-// ISR Configuration - Revalidate cached pages hourly
+// ISR Configuration
 // Pages are cached at the CDN edge for fast loading, and revalidated
-// on-demand when templates are updated via revalidatePath()
+// on-demand when templates are updated via revalidatePath().
+// TTL is controlled by RSVP_CACHE_TTL_HOURS (default 1 h).
 // ============================================================================
-export const revalidate = 3600; // Revalidate every hour (in seconds)
+export const revalidate = (Number(process.env.RSVP_CACHE_TTL_HOURS) || 1) * 3600;
 
 // ============================================================================
 // Dynamic Params - Generate static pages on-demand for each token
