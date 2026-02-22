@@ -86,6 +86,12 @@ const baseWedding = {
   wizard_current_step: null,
   wizard_completed_at: null,
   wizard_skipped: false,
+  google_photos_album_id: null,
+  google_photos_album_url: null,
+  google_photos_share_url: null,
+  google_photos_refresh_token: null,
+  google_photos_access_token: null,
+  google_photos_token_expiry: null,
 };
 
 const baseFamily = {
