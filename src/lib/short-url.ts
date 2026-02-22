@@ -14,6 +14,30 @@
 import { prisma } from '@/lib/db/prisma';
 
 // ---------------------------------------------------------------------------
+// Short URL resolution cache
+// ---------------------------------------------------------------------------
+// Short URL codes are essentially permanent (a code→token mapping only
+// changes if an admin regenerates a family's magic link, which is rare).
+// Caching aggressively eliminates the DB round-trip on every /inv/ hit.
+//
+// TTL is driven by SHORT_URL_CACHE_TTL_HOURS (default 24 h).
+// Changing the env var requires a process restart to take effect.
+
+const SHORT_URL_CACHE_TTL_MS =
+  (Number(process.env.SHORT_URL_CACHE_TTL_HOURS) || 24) * 3_600_000;
+
+interface ShortUrlCacheEntry {
+  token: string | null;
+  cached_at: number;
+}
+
+const shortUrlCache = new Map<string, ShortUrlCacheEntry>();
+
+function getShortUrlCacheKey(initials: string, code: string): string {
+  return `${initials}:${code}`;
+}
+
+// ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
@@ -165,9 +189,21 @@ export async function getShortUrlPath(familyId: string): Promise<string> {
  * Resolve a short-URL pair back to the current magic_token of the family.
  * Returns null when no match is found.
  *
- * Single joined query – avoids a round-trip for the wedding lookup.
+ * Results are cached in-memory for SHORT_URL_CACHE_TTL_HOURS (default 24 h)
+ * to eliminate DB round-trips on repeat /inv/ visits, which are the hot path
+ * for every guest who opens their invitation link.
  */
 export async function resolveShortUrl(initials: string, code: string): Promise<string | null> {
+  const cacheKey = getShortUrlCacheKey(initials, code);
+  const now = Date.now();
+
+  // Cache hit
+  const cached = shortUrlCache.get(cacheKey);
+  if (cached && now - cached.cached_at < SHORT_URL_CACHE_TTL_MS) {
+    return cached.token;
+  }
+
+  // Cache miss – hit the DB
   const family = await prisma.family.findFirst({
     where: {
       short_url_code: code,
@@ -176,7 +212,18 @@ export async function resolveShortUrl(initials: string, code: string): Promise<s
     select: { magic_token: true },
   });
 
-  return family?.magic_token ?? null;
+  const token = family?.magic_token ?? null;
+  shortUrlCache.set(cacheKey, { token, cached_at: now });
+
+  return token;
+}
+
+/**
+ * Invalidate the short-URL cache entry for a family when its magic token
+ * is regenerated (e.g. admin resets the magic link).
+ */
+export function invalidateShortUrlCache(initials: string, code: string): void {
+  shortUrlCache.delete(getShortUrlCacheKey(initials, code));
 }
 
 /**

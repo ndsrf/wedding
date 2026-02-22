@@ -22,11 +22,17 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { Metadata } from 'next';
 
 // ============================================================================
-// ISR Configuration - Revalidate cached pages hourly
+// ISR Configuration
 // Pages are cached at the CDN edge for fast loading, and revalidated
-// on-demand when templates are updated via revalidatePath()
+// on-demand when templates are updated via revalidatePath().
+//
+// Next.js requires a static literal here (read at build time by the analyser).
+// Set this to match your RSVP_CACHE_TTL_HOURS value × 3600.
+// Runtime-configurable knobs:
+//   • RSVP_CACHE_TTL_HOURS  – server in-memory cache TTL (lib/cache/rsvp-page.ts)
+//   • Cache-Control headers – set per-platform in next.config.js
 // ============================================================================
-export const revalidate = 3600; // Revalidate every hour (in seconds)
+export const revalidate = 3600; // 1 hour – keep in sync with RSVP_CACHE_TTL_HOURS
 
 // ============================================================================
 // Dynamic Params - Generate static pages on-demand for each token

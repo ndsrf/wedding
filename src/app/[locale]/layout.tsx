@@ -5,6 +5,7 @@ import { routing } from '@/i18n/routing'
 import { notFound } from 'next/navigation'
 import { isValidLanguage } from '@/lib/i18n/config'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 import CookieConsent from '@/components/CookieConsent'
 import '../globals.css'
 
@@ -84,6 +85,7 @@ export default async function RootLayout({
           <CookieConsent />
         </NextIntlClientProvider>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )

@@ -8,11 +8,32 @@
  * channel-attribution tracking is preserved.
  *
  * Returns 404 (via notFound()) when the initials/code pair does not exist.
+ *
+ * Performance:
+ * - Short URL resolution is served from an in-memory cache (see lib/short-url.ts)
+ * - ISR (export const revalidate) caches the rendered page at the CDN edge
+ *   on Vercel, eliminating cold-start latency for repeat visitors.
+ * - The TTL is controlled by SHORT_URL_CACHE_TTL_HOURS (default 24 h).
  */
 
 import { notFound } from 'next/navigation';
 import { resolveShortUrl } from '@/lib/short-url';
 import RedirectWithSpinner from './RedirectWithSpinner';
+
+// ============================================================================
+// ISR Configuration
+// Short URL → magic token mappings are effectively permanent, so we can cache
+// aggressively.  On Vercel this page is served from the CDN edge after the
+// first visit, eliminating any cold-start DB round-trip for repeat visitors.
+//
+// Next.js requires a static literal here (read at build time by the analyser).
+// Set this to match your SHORT_URL_CACHE_TTL_HOURS value × 3600.
+// Runtime-configurable knobs:
+//   • SHORT_URL_CACHE_TTL_HOURS – server in-memory cache TTL (lib/short-url.ts)
+//   • Cache-Control headers      – set per-platform in next.config.js
+// ============================================================================
+export const revalidate = 86400; // 24 hours – keep in sync with SHORT_URL_CACHE_TTL_HOURS
+export const dynamicParams = true;
 
 // Initials: 2-3 uppercase ASCII letters, optionally followed by digits (LJ, LJ1, AB12…)
 const INITIALS_RE = /^[A-Z]{2,3}\d*$/;
