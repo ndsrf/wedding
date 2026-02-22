@@ -290,7 +290,7 @@ export async function uploadPhotoToAlbum(
       'X-Goog-Upload-Protocol': 'raw',
       'X-Goog-Upload-File-Name': filename,
     },
-    body: buffer,
+    body: buffer as unknown as BodyInit,
   });
 
   if (!uploadRes.ok) {
