@@ -187,8 +187,17 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
           </label>
           <select
             id="wedding_day_theme_id"
-            value={formData.wedding_day_theme_id}
-            onChange={(e) => handleChange('wedding_day_theme_id', e.target.value)}
+            value={formData.invitation_template_id || formData.wedding_day_theme_id}
+            onChange={(e) => {
+              const theme = themes.find(t => t.id === e.target.value);
+              if ((theme as unknown as Record<string, unknown>)?._type === 'invitation_template') {
+                handleChange('invitation_template_id', e.target.value);
+                handleChange('wedding_day_theme_id', '');
+              } else {
+                handleChange('wedding_day_theme_id', e.target.value);
+                handleChange('invitation_template_id', '');
+              }
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
           >
             <option value="">{t('noWeddingDayTheme')}</option>
