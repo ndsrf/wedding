@@ -308,6 +308,7 @@ export interface UpdateWeddingConfigRequest {
   gift_iban?: string | null;
   theme_id?: string | null;
   wedding_day_theme_id?: string | null;
+  wedding_day_invitation_template_id?: string | null;
   allow_guest_additions?: boolean;
   dress_code?: string | null;
   additional_info?: string | null;

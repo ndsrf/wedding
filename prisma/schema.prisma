@@ -67,6 +67,7 @@ model Wedding {
   planner_id                      String
   theme_id                        String?
   wedding_day_theme_id            String?            // Optional override theme for the day of the wedding
+  wedding_day_invitation_template_id String?         // Optional override invitation template for the day of the wedding
   invitation_template_id          String?
   couple_names                    String
   wedding_date                    DateTime
@@ -136,11 +137,13 @@ model Wedding {
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   theme                           Theme?             @relation("WeddingTheme", fields: [theme_id], references: [id])
   wedding_day_theme               Theme?             @relation("WeddingDayTheme", fields: [wedding_day_theme_id], references: [id])
+  wedding_day_invitation_template InvitationTemplate? @relation("WeddingDayInvitationTemplate", fields: [wedding_day_invitation_template_id], references: [id])
   main_event_location             Location?          @relation("MainEventLocation", fields: [main_event_location_id], references: [id], onDelete: SetNull)
 
   @@index([planner_id])
   @@index([theme_id])
   @@index([wedding_day_theme_id])
+  @@index([wedding_day_invitation_template_id])
   @@index([status])
   @@index([wedding_date])
   @@index([is_disabled])
@@ -274,6 +277,7 @@ model InvitationTemplate {
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
   wedding             Wedding  @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  wedding_day_weddings Wedding[] @relation("WeddingDayInvitationTemplate")
 
   @@index([wedding_id])
   @@map("invitation_templates")

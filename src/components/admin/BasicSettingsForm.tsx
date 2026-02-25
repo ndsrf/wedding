@@ -17,6 +17,7 @@ interface BasicSettingsFormData {
   gift_iban: string;
   theme_id: string;
   wedding_day_theme_id: string;
+  wedding_day_invitation_template_id: string;
   invitation_template_id: string;
   allow_guest_additions: boolean;
   dress_code: string;
@@ -53,6 +54,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
     gift_iban: wedding.gift_iban || '',
     theme_id: wedding.theme_id || '',
     wedding_day_theme_id: (wedding as unknown as { wedding_day_theme_id?: string }).wedding_day_theme_id || '',
+    wedding_day_invitation_template_id: (wedding as unknown as { wedding_day_invitation_template_id?: string }).wedding_day_invitation_template_id || '',
     invitation_template_id: (wedding as unknown as { invitation_template_id?: string }).invitation_template_id || '',
     allow_guest_additions: wedding.allow_guest_additions,
     dress_code: wedding.dress_code || '',
@@ -84,11 +86,12 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
     setError(null);
 
     try {
-      const updateData: UpdateWeddingConfigRequest & { invitation_template_id?: string | null; wedding_day_theme_id?: string | null } = {
+      const updateData: UpdateWeddingConfigRequest & { invitation_template_id?: string | null; wedding_day_theme_id?: string | null; wedding_day_invitation_template_id?: string | null } = {
         payment_tracking_mode: formData.payment_tracking_mode,
         gift_iban: formData.gift_iban || null,
         theme_id: formData.theme_id || null,
         wedding_day_theme_id: formData.wedding_day_theme_id || null,
+        wedding_day_invitation_template_id: formData.wedding_day_invitation_template_id || null,
         invitation_template_id: formData.invitation_template_id || null,
         allow_guest_additions: formData.allow_guest_additions,
         dress_code: formData.dress_code || null,
@@ -187,15 +190,15 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
           </label>
           <select
             id="wedding_day_theme_id"
-            value={formData.invitation_template_id || formData.wedding_day_theme_id}
+            value={formData.wedding_day_invitation_template_id || formData.wedding_day_theme_id}
             onChange={(e) => {
               const theme = themes.find(t => t.id === e.target.value);
               if ((theme as unknown as Record<string, unknown>)?._type === 'invitation_template') {
-                handleChange('invitation_template_id', e.target.value);
+                handleChange('wedding_day_invitation_template_id', e.target.value);
                 handleChange('wedding_day_theme_id', '');
               } else {
                 handleChange('wedding_day_theme_id', e.target.value);
-                handleChange('invitation_template_id', '');
+                handleChange('wedding_day_invitation_template_id', '');
               }
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"

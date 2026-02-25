@@ -35,6 +35,7 @@ const updateWeddingConfigSchema = z.object({
   gift_iban: z.string().nullable().optional(),
   theme_id: z.string().nullable().optional(),
   wedding_day_theme_id: z.string().nullable().optional(),
+  wedding_day_invitation_template_id: z.string().nullable().optional(),
   invitation_template_id: z.string().nullable().optional(),
   allow_guest_additions: z.boolean().optional(),
   dress_code: z.string().nullable().optional(),
@@ -227,6 +228,7 @@ export async function GET() {
       planner_id: wedding.planner_id,
       theme_id: wedding.theme_id,
       wedding_day_theme_id: (wedding as unknown as { wedding_day_theme_id: string | null }).wedding_day_theme_id || null,
+      wedding_day_invitation_template_id: (wedding as unknown as { wedding_day_invitation_template_id: string | null }).wedding_day_invitation_template_id || null,
       invitation_template_id: (wedding as unknown as { invitation_template_id: string | null }).invitation_template_id || null,
       couple_names: wedding.couple_names,
       wedding_date: wedding.wedding_date,
@@ -400,6 +402,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (validatedData.wedding_day_theme_id !== undefined) {
       updateData.wedding_day_theme_id = validatedData.wedding_day_theme_id;
+    }
+    if (validatedData.wedding_day_invitation_template_id !== undefined) {
+      updateData.wedding_day_invitation_template_id = validatedData.wedding_day_invitation_template_id;
     }
     if (validatedData.invitation_template_id !== undefined) {
       updateData.invitation_template_id = validatedData.invitation_template_id;
