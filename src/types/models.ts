@@ -124,6 +124,7 @@ export interface Wedding {
   planner_id: string;
   theme_id: string | null;
   wedding_day_theme_id: string | null;
+  wedding_day_invitation_template_id: string | null;
   couple_names: string;
   wedding_date: Date;
   wedding_time: string;

@@ -40,6 +40,7 @@ const baseWedding = {
   planner_id: 'planner-1',
   theme_id: null,
   wedding_day_theme_id: null,
+  wedding_day_invitation_template_id: null,
   invitation_template_id: null,
   couple_names: 'Alice & Bob',
   wedding_date: new Date('2026-09-15T00:00:00Z'),

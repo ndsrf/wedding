@@ -1,0 +1,12 @@
+{
+  "name": "object.fromentries",
+  "version": "2.0.8",
+  "main": "index.js",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./polyfill": "./polyfill.js",
+    "./shim": "./polyfill.js",
+    "./implementation": "./index.js"
+  }
+}

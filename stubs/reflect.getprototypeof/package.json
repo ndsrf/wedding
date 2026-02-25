@@ -1,0 +1,6 @@
+{
+  "name": "reflect.getprototypeof",
+  "version": "1.0.10",
+  "main": "index.js",
+  "license": "MIT"
+}

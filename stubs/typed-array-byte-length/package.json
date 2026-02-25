@@ -1,0 +1,6 @@
+{
+  "name": "typed-array-byte-length",
+  "version": "1.0.3",
+  "main": "index.js",
+  "license": "MIT"
+}
