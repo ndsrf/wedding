@@ -1013,6 +1013,8 @@
       "step3": "Les invités peuvent contribuer des photos directement à l'album.",
       "step4": "Les photos se synchronisent ici pour que vous puissiez les approuver et les gérer.",
       "connectButton": "Connecter avec Google Photos",
+      "connecting": "Connexion en cours...",
+      "connectError": "Échec du démarrage de la connexion Google Photos. Veuillez réessayer.",
       "viewAlbum": "Voir l'Album",
       "copyLink": "Copier le Lien",
       "copied": "Copié !",

@@ -1092,6 +1092,8 @@
             "step3": "Los invitados pueden contribuir fotos directamente al \u00e1lbum.",
             "step4": "Las fotos se sincronizan aqu\u00ed para que puedas aprobarlas y gestionarlas.",
             "connectButton": "Conectar con Google Fotos",
+            "connecting": "Conectando...",
+            "connectError": "Error al iniciar la conexi\u00f3n con Google Fotos. Por favor, int\u00e9ntalo de nuevo.",
             "viewAlbum": "Ver \u00c1lbum",
             "copyLink": "Copiar Enlace",
             "copied": "\u00a1Copiado!",

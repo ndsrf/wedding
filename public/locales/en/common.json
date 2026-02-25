@@ -1067,6 +1067,8 @@
       "step3": "Guests can contribute photos directly to the album.",
       "step4": "Photos sync back here so you can approve and manage them.",
       "connectButton": "Connect with Google Photos",
+      "connecting": "Connecting...",
+      "connectError": "Failed to start Google Photos connection. Please try again.",
       "viewAlbum": "View Album",
       "copyLink": "Copy Link",
       "copied": "Copied!",
