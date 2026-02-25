@@ -55,7 +55,7 @@ export function WeddingConfigForm({ wedding, themes, onSubmit, onCancel }: Weddi
             {t('tabs.rsvp')}
           </button>
           <button onClick={() => setActiveTab('gallery')} className={tabClass('gallery')}>
-            📷 Galería
+            📷 {t('tabs.gallery')}
           </button>
         </nav>
       </div>

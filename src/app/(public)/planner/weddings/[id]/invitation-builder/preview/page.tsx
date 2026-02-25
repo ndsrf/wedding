@@ -8,6 +8,7 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 interface PreviewData {
   design: TemplateDesign;
   weddingData: {
+    id?: string;
     couple_names: string;
     wedding_date: Date | string;
     wedding_time: string;
@@ -98,6 +99,7 @@ export default function InvitationPreviewPage() {
         location={weddingData.location}
         coupleNames={weddingData.couple_names}
         language={(language.toUpperCase() as 'ES' | 'EN' | 'FR' | 'IT' | 'DE')}
+        weddingId={weddingData.id}
       />
     </div>
   );

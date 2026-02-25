@@ -2,11 +2,12 @@
 
 import React, { useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType } from '@/types/invitation-template';
+import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType, GalleryBlock as GalleryBlockType } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
 import { ButtonBlock } from '@/components/invitation/ButtonBlock';
+import { GalleryBlock } from '@/components/invitation/GalleryBlock';
 import { loadFont } from '@/lib/fonts';
 
 interface TemplateRendererProps {
@@ -17,6 +18,7 @@ interface TemplateRendererProps {
   location: string;
   coupleNames: string;
   language: SupportedLanguage;
+  weddingId?: string;
 }
 
 const FONT_NAMES = [
@@ -51,6 +53,7 @@ export default function TemplateRenderer({
   location,
   coupleNames,
   language,
+  weddingId,
 }: TemplateRendererProps) {
   const templateDesign = useMemo(() => {
     if (!design || typeof design !== 'object') return null;
@@ -149,6 +152,7 @@ export default function TemplateRenderer({
               coupleNames={coupleNames}
               language={language}
               isPriorityImage={index === firstImageIndex}
+              weddingId={weddingId}
             />
           );
         })}
@@ -165,6 +169,7 @@ interface TemplateBlockProps {
   coupleNames: string;
   language: SupportedLanguage;
   isPriorityImage?: boolean;
+  weddingId?: string;
 }
 
 function TemplateBlock({
@@ -175,6 +180,7 @@ function TemplateBlock({
   coupleNames,
   language,
   isPriorityImage = false,
+  weddingId,
 }: TemplateBlockProps) {
   if (block.type === 'text') {
     const textBlock = block as TextBlock;
@@ -278,6 +284,20 @@ function TemplateBlock({
         url={buttonBlock.url}
         style={buttonBlock.style}
         language={language}
+      />
+    );
+  }
+
+  if (block.type === 'gallery' && weddingId) {
+    const galleryBlock = block as GalleryBlockType;
+    return (
+      <GalleryBlock
+        weddingId={weddingId}
+        columns={galleryBlock.columns ?? 1}
+        showCaptions={galleryBlock.showCaptions ?? false}
+        showUploadButton={galleryBlock.showUploadButton ?? true}
+        autoPlayMs={galleryBlock.autoPlayMs ?? 4000}
+        style={galleryBlock.style}
       />
     );
   }

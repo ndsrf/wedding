@@ -84,6 +84,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           location={wedding.location ?? ''}
           coupleNames={wedding.couple_names}
           language={templateLanguage}
+          weddingId={wedding.id}
         />
       ) : (
         <div className="bg-white rounded-lg shadow-md p-6">
