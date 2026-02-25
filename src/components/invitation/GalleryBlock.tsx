@@ -298,7 +298,6 @@ export function GalleryBlock({
       {/* Upload modal */}
       {showUploadModal && (
         <UploadModal
-          t={t}
           uploading={uploading}
           uploadSuccess={uploadSuccess}
           uploadError={uploadError}

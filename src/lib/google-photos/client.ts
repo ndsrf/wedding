@@ -278,6 +278,7 @@ export async function uploadPhotoToAlbum(
   albumId: string,
   buffer: Buffer,
   filename: string,
+  mimeType?: string,
   description?: string
 ): Promise<GooglePhotosMediaItem> {
   // Step 1: Upload raw bytes
@@ -286,7 +287,7 @@ export async function uploadPhotoToAlbum(
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/octet-stream',
-      'X-Goog-Upload-Content-Type': 'image/jpeg',
+      'X-Goog-Upload-Content-Type': mimeType ?? 'image/jpeg',
       'X-Goog-Upload-Protocol': 'raw',
       'X-Goog-Upload-File-Name': filename,
     },

@@ -12,7 +12,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { uploadFile, generateUniqueFilename } from '@/lib/storage';
+import { uploadFile, deleteFile, generateUniqueFilename } from '@/lib/storage';
+import { uploadToWeddingGooglePhotos } from '@/lib/google-photos/upload-helper';
 import type { APIResponse } from '@/types/api';
 
 export const runtime = 'nodejs';
@@ -104,18 +105,57 @@ export async function POST(
     const filename = generateUniqueFilename(file.name);
     const storagePath = `gallery/${weddingId}/${filename}`;
 
-    const { url } = await uploadFile(storagePath, buffer, { contentType: file.type });
+    // Upload to blob storage as temporary holding area
+    const { url: blobUrl } = await uploadFile(storagePath, buffer, { contentType: file.type });
+
+    // Best-effort: try to forward the photo to the wedding's Google Photos album
+    let photoUrl = blobUrl;
+    let thumbnailUrl: string | null = null;
+    let deleteBlobUrl: string | null = blobUrl;
+
+    try {
+      const gPhotos = await uploadToWeddingGooglePhotos(
+        weddingId,
+        buffer,
+        filename,
+        file.type,
+        caption ?? senderName ?? undefined
+      );
+
+      if (gPhotos) {
+        // Use Google Photos CDN URL for display; thumbnail is a cropped variant
+        photoUrl = gPhotos.baseUrl;
+        thumbnailUrl = `${gPhotos.baseUrl}=w400-h400-c`;
+        console.log('[PUBLIC_GALLERY_UPLOAD] Uploaded photo to Google Photos', { weddingId });
+      } else {
+        // Google Photos not configured – keep blob URL, do not delete
+        deleteBlobUrl = null;
+      }
+    } catch (gErr) {
+      console.error('[PUBLIC_GALLERY_UPLOAD] Google Photos upload failed, keeping blob URL:', gErr);
+      deleteBlobUrl = null;
+    }
 
     const photo = await prisma.weddingPhoto.create({
       data: {
         wedding_id: weddingId,
-        url,
+        url: photoUrl,
+        thumbnail_url: thumbnailUrl,
         source: 'UPLOAD',
         sender_name: senderName,
         caption,
         approved: true,
       },
     });
+
+    // Clean up blob now that the photo is safely in Google Photos
+    if (deleteBlobUrl) {
+      try {
+        await deleteFile(deleteBlobUrl);
+      } catch (delErr) {
+        console.warn('[PUBLIC_GALLERY_UPLOAD] Failed to delete temp blob after Google Photos upload:', delErr);
+      }
+    }
 
     return NextResponse.json<APIResponse>({ success: true, data: photo }, { status: 201 });
   } catch (err) {

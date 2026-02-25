@@ -20,7 +20,8 @@ import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply } from '@/lib/ai/wedding-assistant';
 import { getShortUrlPath } from '@/lib/short-url';
-import { uploadFile, generateUniqueFilename } from '@/lib/storage';
+import { uploadFile, deleteFile, generateUniqueFilename } from '@/lib/storage';
+import { uploadToWeddingGooglePhotos } from '@/lib/google-photos/upload-helper';
 
 export const runtime = 'nodejs';
 
@@ -199,23 +200,66 @@ export async function POST(request: NextRequest) {
             const filename = generateUniqueFilename(`whatsapp-photo.${ext}`);
             const storagePath = `gallery/${mediaFamily.wedding_id}/${filename}`;
 
-            const { url: photoUrl } = await uploadFile(storagePath, buffer, {
+            // Upload to blob storage as temporary holding area
+            const { url: blobUrl } = await uploadFile(storagePath, buffer, {
               contentType: mediaContentType,
             });
+
+            // Attempt to forward the photo to the wedding's Google Photos album
+            let photoUrl = blobUrl;
+            let thumbnailUrl: string | null = null;
+            let deleteBlobUrl: string | null = blobUrl;
+
+            try {
+              const gPhotos = await uploadToWeddingGooglePhotos(
+                mediaFamily.wedding_id,
+                buffer,
+                filename,
+                mediaContentType,
+                mediaFamily.name ?? undefined
+              );
+
+              if (gPhotos) {
+                // Use Google Photos CDN URL for display; thumbnail is a cropped variant
+                photoUrl = gPhotos.baseUrl;
+                thumbnailUrl = `${gPhotos.baseUrl}=w400-h400-c`;
+                console.log('[TWILIO_INBOUND] Uploaded WhatsApp photo to Google Photos', {
+                  wedding_id: mediaFamily.wedding_id,
+                  family: mediaFamily.name,
+                });
+              } else {
+                // Google Photos not configured – keep blob URL, do not delete
+                deleteBlobUrl = null;
+              }
+            } catch (gErr) {
+              console.error('[TWILIO_INBOUND] Google Photos upload failed, keeping blob URL:', gErr);
+              deleteBlobUrl = null;
+            }
 
             await prisma.weddingPhoto.create({
               data: {
                 wedding_id: mediaFamily.wedding_id,
                 url: photoUrl,
+                thumbnail_url: thumbnailUrl,
                 source: 'WHATSAPP',
                 sender_name: mediaFamily.name,
                 approved: true,
               },
             });
 
+            // Clean up blob now that the photo is safely in Google Photos
+            if (deleteBlobUrl) {
+              try {
+                await deleteFile(deleteBlobUrl);
+              } catch (delErr) {
+                console.warn('[TWILIO_INBOUND] Failed to delete temp blob after Google Photos upload:', delErr);
+              }
+            }
+
             console.log('[TWILIO_INBOUND] Saved WhatsApp photo to gallery', {
               wedding_id: mediaFamily.wedding_id,
               family: mediaFamily.name,
+              storage: deleteBlobUrl ? 'google-photos' : 'blob',
             });
           } catch (err) {
             console.error('[TWILIO_INBOUND] Error saving WhatsApp photo:', err);
