@@ -379,7 +379,7 @@ export function InvitationTemplateEditor({
               disabled={hasGallery}
               className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              + Galería de fotos
+              + {t('blockGallery')}
             </button>
           </div>
         </div>

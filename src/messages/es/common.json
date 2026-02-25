@@ -1527,7 +1527,26 @@
       "alignment": "Alineación",
       "mapStyle": "Estilo de Mapa",
       "colorMap": "Color",
-      "grayscaleMap": "Escala de Grises"
+      "grayscaleMap": "Escala de Grises",
+      "blockGallery": "Galería de fotos",
+      "galleryTitle": "Galería de fotos",
+      "galleryColumns": "Columnas (fotos visibles)",
+      "galleryAutoPlay": "Avance automático (segundos)",
+      "galleryNoAutoPlay": "Sin avance automático",
+      "gallery3s": "3 segundos",
+      "gallery4s": "4 segundos",
+      "gallery6s": "6 segundos",
+      "gallery10s": "10 segundos",
+      "galleryShowCaptions": "Mostrar descripciones",
+      "galleryUploadButton": "Botón \"Añadir foto\" para invitados",
+      "galleryCornerRadius": "Radio de esquinas",
+      "galleryNoRounding": "Sin redondeo",
+      "gallerySmall": "Pequeño",
+      "galleryMedium": "Mediano",
+      "galleryLarge": "Grande",
+      "galleryCircular": "Circular",
+      "galleryHint": "Las fotos se cargan automáticamente desde la galería de la boda. Puedes gestionar las fotos en",
+      "galleryHintPath": "Configuración → Galería de fotos"
     }
   },
   "guest": {

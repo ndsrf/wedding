@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { GalleryBlock } from '@/types/invitation-template';
 
 interface GalleryBlockEditorProps {
@@ -14,16 +15,17 @@ interface GalleryBlockEditorProps {
  * auto-play speed, and corner radius.
  */
 export function GalleryBlockEditor({ block, onUpdate }: GalleryBlockEditorProps) {
+  const t = useTranslations('admin.invitationBuilder');
   const update = (updates: Partial<GalleryBlock>) => onUpdate(block.id, updates);
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6 space-y-4">
-      <h3 className="text-lg font-semibold">Galería de fotos</h3>
+      <h3 className="text-lg font-semibold">{t('galleryTitle')}</h3>
 
       {/* Columns */}
       <div>
         <label className="block text-sm font-medium mb-1">
-          Columnas (fotos visibles)
+          {t('galleryColumns')}
         </label>
         <div className="flex gap-2">
           {([1, 2, 3] as const).map((n) => (
@@ -45,18 +47,18 @@ export function GalleryBlockEditor({ block, onUpdate }: GalleryBlockEditorProps)
       {/* Auto-play */}
       <div>
         <label className="block text-sm font-medium mb-1">
-          Avance automático (segundos)
+          {t('galleryAutoPlay')}
         </label>
         <select
           value={block.autoPlayMs ?? 4000}
           onChange={(e) => update({ autoPlayMs: parseInt(e.target.value) })}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
-          <option value={0}>Sin avance automático</option>
-          <option value={3000}>3 segundos</option>
-          <option value={4000}>4 segundos</option>
-          <option value={6000}>6 segundos</option>
-          <option value={10000}>10 segundos</option>
+          <option value={0}>{t('galleryNoAutoPlay')}</option>
+          <option value={3000}>{t('gallery3s')}</option>
+          <option value={4000}>{t('gallery4s')}</option>
+          <option value={6000}>{t('gallery6s')}</option>
+          <option value={10000}>{t('gallery10s')}</option>
         </select>
       </div>
 
@@ -74,7 +76,7 @@ export function GalleryBlockEditor({ block, onUpdate }: GalleryBlockEditorProps)
             }`}
           />
         </div>
-        <span className="text-sm">Mostrar descripciones</span>
+        <span className="text-sm">{t('galleryShowCaptions')}</span>
       </label>
 
       {/* Show upload button */}
@@ -91,13 +93,13 @@ export function GalleryBlockEditor({ block, onUpdate }: GalleryBlockEditorProps)
             }`}
           />
         </div>
-        <span className="text-sm">Bot&oacute;n &ldquo;A&ntilde;adir foto&rdquo; para invitados</span>
+        <span className="text-sm">{t('galleryUploadButton')}</span>
       </label>
 
       {/* Border radius */}
       <div>
         <label className="block text-sm font-medium mb-1">
-          Radio de esquinas
+          {t('galleryCornerRadius')}
         </label>
         <select
           value={block.style?.borderRadius ?? '0.75rem'}
@@ -106,17 +108,17 @@ export function GalleryBlockEditor({ block, onUpdate }: GalleryBlockEditorProps)
           }
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
-          <option value="0">Sin redondeo</option>
-          <option value="0.375rem">Pequeño</option>
-          <option value="0.75rem">Mediano</option>
-          <option value="1.25rem">Grande</option>
-          <option value="9999px">Circular</option>
+          <option value="0">{t('galleryNoRounding')}</option>
+          <option value="0.375rem">{t('gallerySmall')}</option>
+          <option value="0.75rem">{t('galleryMedium')}</option>
+          <option value="1.25rem">{t('galleryLarge')}</option>
+          <option value="9999px">{t('galleryCircular')}</option>
         </select>
       </div>
 
       <p className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
-        Las fotos se cargan automáticamente desde la galería de la boda. Puedes gestionar las fotos en{' '}
-        <strong>Configuración → Galería de fotos</strong>.
+        {t('galleryHint')}{' '}
+        <strong>{t('galleryHintPath')}</strong>.
       </p>
     </div>
   );

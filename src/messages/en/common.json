@@ -1541,7 +1541,26 @@
       "alignment": "Alignment",
       "mapStyle": "Map Style",
       "colorMap": "Color",
-      "grayscaleMap": "Grayscale"
+      "grayscaleMap": "Grayscale",
+      "blockGallery": "Photo Gallery",
+      "galleryTitle": "Photo Gallery",
+      "galleryColumns": "Columns (visible photos)",
+      "galleryAutoPlay": "Auto-advance (seconds)",
+      "galleryNoAutoPlay": "No auto-advance",
+      "gallery3s": "3 seconds",
+      "gallery4s": "4 seconds",
+      "gallery6s": "6 seconds",
+      "gallery10s": "10 seconds",
+      "galleryShowCaptions": "Show captions",
+      "galleryUploadButton": "\"Add photo\" button for guests",
+      "galleryCornerRadius": "Corner radius",
+      "galleryNoRounding": "No rounding",
+      "gallerySmall": "Small",
+      "galleryMedium": "Medium",
+      "galleryLarge": "Large",
+      "galleryCircular": "Circular",
+      "galleryHint": "Photos are automatically loaded from the wedding gallery. You can manage them in",
+      "galleryHintPath": "Settings → Photo Gallery"
     }
   },
   "guest": {
