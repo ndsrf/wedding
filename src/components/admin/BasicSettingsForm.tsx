@@ -193,7 +193,6 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
           >
             <option value="">{t('noWeddingDayTheme')}</option>
             {themes
-              .filter((theme) => (theme as unknown as Record<string, unknown>)?._type !== 'invitation_template')
               .map((theme) => (
                 <option key={theme.id} value={theme.id}>
                   {theme.name} {theme.is_system_theme ? `(${t('systemTheme')})` : ''}
