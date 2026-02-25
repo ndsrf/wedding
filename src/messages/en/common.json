@@ -980,7 +980,54 @@
       "noWeddingAssigned": "No wedding assigned."
     },
     "checklist": {
-      "loadError": "Unable to load checklist"
+      "title": "Wedding Checklist",
+      "subtitle": "Manage tasks and track progress for your wedding",
+      "loading": "Loading checklist...",
+      "saving": "Saving...",
+      "save": "Save Changes",
+      "unsavedChanges": "You have unsaved changes",
+      "error": "Error loading checklist",
+      "retry": "Retry",
+      "emptyTitle": "No tasks yet",
+      "emptyDesc": "Import a checklist or wait for your planner to add tasks.",
+      "import": "Import from Excel",
+      "importing": "Importing...",
+      "export": "Export to Excel",
+      "exporting": "Exporting...",
+      "addSection": "Add Section",
+      "newSectionName": "New Section",
+      "sectionPlaceholder": "Section name...",
+      "deleteSection": "Delete Section",
+      "deleteSectionConfirm": "Are you sure you want to delete this section and ALL its tasks? This action cannot be undone.",
+      "addTask": "Add Task",
+      "newTaskTitle": "New Task",
+      "taskPlaceholder": "Task title...",
+      "uncategorized": "Uncategorized Tasks",
+      "noTasks": "No tasks in this section",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete this task?",
+      "markComplete": "Mark as complete",
+      "markIncomplete": "Mark as incomplete",
+      "descriptionPlaceholder": "Add description...",
+      "columns": {
+        "done": "Done",
+        "title": "Title",
+        "description": "Description",
+        "assignedTo": "Assigned To",
+        "dueDate": "Due Date",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "assignedTo": {
+        "planner": "Wedding Planner",
+        "couple": "Couple",
+        "other": "Other"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "IN_PROGRESS": "In Progress",
+        "COMPLETED": "Completed"
+      }
     },
     "tasks": {
       "title": "Upcoming Tasks",
@@ -1384,56 +1431,6 @@
         "confirmDelete": "Yes, Delete All Guests"
       }
     },
-    "checklist": {
-      "title": "Wedding Checklist",
-      "subtitle": "Manage tasks and track progress for your wedding",
-      "loading": "Loading checklist...",
-      "saving": "Saving...",
-      "save": "Save Changes",
-      "unsavedChanges": "You have unsaved changes",
-      "error": "Error loading checklist",
-      "retry": "Retry",
-      "emptyTitle": "No tasks yet",
-      "emptyDesc": "Import a checklist or wait for your planner to add tasks.",
-      "import": "Import from Excel",
-      "importing": "Importing...",
-      "export": "Export to Excel",
-      "exporting": "Exporting...",
-      "addSection": "Add Section",
-      "newSectionName": "New Section",
-      "sectionPlaceholder": "Section name...",
-      "deleteSection": "Delete Section",
-      "deleteSectionConfirm": "Are you sure you want to delete this section and ALL its tasks? This action cannot be undone.",
-      "addTask": "Add Task",
-      "newTaskTitle": "New Task",
-      "taskPlaceholder": "Task title...",
-      "uncategorized": "Uncategorized Tasks",
-      "noTasks": "No tasks in this section",
-      "delete": "Delete",
-      "deleteConfirm": "Are you sure you want to delete this task?",
-      "markComplete": "Mark as complete",
-      "markIncomplete": "Mark as incomplete",
-      "descriptionPlaceholder": "Add description...",
-      "columns": {
-        "done": "Done",
-        "title": "Title",
-        "description": "Description",
-        "assignedTo": "Assigned To",
-        "dueDate": "Due Date",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "assignedTo": {
-        "planner": "Wedding Planner",
-        "couple": "Couple",
-        "other": "Other"
-      },
-      "status": {
-        "PENDING": "Pending",
-        "IN_PROGRESS": "In Progress",
-        "COMPLETED": "Completed"
-      }
-    },
     "templates": {
       "title": "Message Templates",
       "description": "Manage invitation and reminder templates for your wedding in all supported languages.",
@@ -1561,6 +1558,39 @@
       "galleryCircular": "Circular",
       "galleryHint": "Photos are automatically loaded from the wedding gallery. You can manage them in",
       "galleryHintPath": "Settings → Photo Gallery"
+    },
+    "gallery": {
+      "googlePhotosTitle": "Google Photos",
+      "googlePhotosDesc": "Connect a shared album so guests can add photos.",
+      "connected": "✓ Connected",
+      "howItWorksTitle": "How does it work?",
+      "step1": "We connect your Google account and create a shared album.",
+      "step2": "Anyone with the link can add photos to the album.",
+      "step3": "Import photos to the wedding gallery with one click.",
+      "step4": "The gallery block in the invitation shows all approved photos.",
+      "connectButton": "Connect with Google Photos",
+      "albumLabel": "Album in Google Photos",
+      "guestLinkLabel": "Link for guests to add photos",
+      "copied": "✓ Copied",
+      "copyLink": "Copy link",
+      "syncing": "Syncing...",
+      "syncButton": "↻ Sync photos from Google Photos",
+      "disconnect": "Disconnect",
+      "disconnectConfirm": "Disconnect Google Photos? Synced photos will remain in the gallery.",
+      "uploadTitle": "Upload photo manually",
+      "uploadDesc": "Upload photos directly from your device to the gallery.",
+      "uploading": "Uploading...",
+      "selectPhoto": "+ Select photo",
+      "galleryCount": "Gallery ({count, plural, one {# photo} other {# photos}})",
+      "noPhotos": "No photos yet. Connect Google Photos or upload a photo to get started.",
+      "weddingPhoto": "Wedding photo",
+      "hide": "Hide",
+      "show": "Show",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this photo from the gallery?",
+      "manualUpload": "Manual upload",
+      "syncSuccess": "{synced} new photo(s) imported (total in album: {total})",
+      "syncError": "Connection error"
     }
   },
   "guest": {
@@ -1663,6 +1693,24 @@
       "googleCalendar": "Google Calendar",
       "appleCalendar": "Apple Calendar",
       "getDirections": "Get Directions"
+    },
+    "gallery": {
+      "noPhotosYet": "No photos yet",
+      "addFirstPhoto": "Add first photo",
+      "photoAlt": "Photo from {name}",
+      "previous": "Previous",
+      "next": "Next",
+      "goToPhoto": "Go to photo {n}",
+      "addYourPhoto": "Add your photo",
+      "photoAdded": "Photo added!",
+      "thankYou": "Thank you for sharing this moment.",
+      "modalTitle": "Add your photo",
+      "close": "Close",
+      "tapToSelect": "Tap to select or take a photo",
+      "yourName": "Your name (optional)",
+      "description": "Description (optional)",
+      "uploading": "Uploading...",
+      "sendPhoto": "Send photo"
     }
   },
   "auth": {

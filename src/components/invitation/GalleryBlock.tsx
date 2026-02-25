@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface GalleryPhoto {
   id: string;
@@ -42,6 +43,7 @@ export function GalleryBlock({
   autoPlayMs = 4000,
   style,
 }: GalleryBlockProps) {
+  const t = useTranslations('guest.gallery');
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -167,17 +169,18 @@ export function GalleryBlock({
   if (!loading && photos.length === 0) {
     return (
       <div className="py-8 px-4 text-center">
-        <p className="text-sm opacity-60 mb-3">No hay fotos todavía</p>
+        <p className="text-sm opacity-60 mb-3">{t('noPhotosYet')}</p>
         {showUploadButton && (
           <button
             onClick={() => setShowUploadModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-black/10 hover:bg-black/20 transition"
           >
-            📷 Añadir primera foto
+            📷 {t('addFirstPhoto')}
           </button>
         )}
         {showUploadModal && (
           <UploadModal
+            t={t}
             uploading={uploading}
             uploadSuccess={uploadSuccess}
             uploadError={uploadError}
@@ -225,7 +228,7 @@ export function GalleryBlock({
             >
               <Image
                 src={photo.thumbnail_url ?? photo.url}
-                alt={photo.caption ?? `Foto de ${photo.sender_name ?? 'invitado'}`}
+                alt={photo.caption ?? t('photoAlt', { name: photo.sender_name ?? '' })}
                 fill
                 className="object-cover"
                 unoptimized
@@ -248,7 +251,7 @@ export function GalleryBlock({
             <button
               onClick={prev}
               disabled={currentIndex === 0}
-              aria-label="Anterior"
+              aria-label={t('previous')}
               className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 disabled:opacity-20 transition"
             >
               ‹
@@ -256,7 +259,7 @@ export function GalleryBlock({
             <button
               onClick={next}
               disabled={currentIndex >= maxIndex}
-              aria-label="Siguiente"
+              aria-label={t('next')}
               className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 disabled:opacity-20 transition"
             >
               ›
@@ -272,7 +275,7 @@ export function GalleryBlock({
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              aria-label={`Ir a foto ${i + 1}`}
+              aria-label={t('goToPhoto', { n: i + 1 })}
               className={`w-2 h-2 rounded-full transition ${
                 i === currentIndex ? 'bg-current opacity-100' : 'bg-current opacity-30'
               }`}
@@ -288,7 +291,7 @@ export function GalleryBlock({
             onClick={() => setShowUploadModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-black/10 hover:bg-black/20 transition"
           >
-            📷 Añadir tu foto
+            📷 {t('addYourPhoto')}
           </button>
         </div>
       )}
@@ -296,6 +299,7 @@ export function GalleryBlock({
       {/* Upload modal */}
       {showUploadModal && (
         <UploadModal
+          t={t}
           uploading={uploading}
           uploadSuccess={uploadSuccess}
           uploadError={uploadError}
@@ -316,6 +320,7 @@ export function GalleryBlock({
 // ─── Upload Modal ─────────────────────────────────────────────────────────────
 
 function UploadModal({
+  t,
   uploading,
   uploadSuccess,
   uploadError,
@@ -328,6 +333,8 @@ function UploadModal({
   onUpload,
   onClose,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: (key: string, values?: Record<string, unknown>) => any;
   uploading: boolean;
   uploadSuccess: boolean;
   uploadError: string | null;
@@ -346,17 +353,17 @@ function UploadModal({
         {uploadSuccess ? (
           <div className="text-center py-4">
             <p className="text-2xl mb-2">🎉</p>
-            <p className="font-semibold text-gray-800">¡Foto añadida!</p>
-            <p className="text-sm text-gray-500">Gracias por compartir este momento.</p>
+            <p className="font-semibold text-gray-800">{t('photoAdded')}</p>
+            <p className="text-sm text-gray-500">{t('thankYou')}</p>
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">Añadir tu foto</h3>
+              <h3 className="font-semibold text-gray-900">{t('modalTitle')}</h3>
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 text-xl leading-none"
-                aria-label="Cerrar"
+                aria-label={t('close')}
               >
                 ×
               </button>
@@ -372,7 +379,7 @@ function UploadModal({
                 ) : (
                   <>
                     <p className="text-2xl mb-1">📷</p>
-                    <p className="text-sm text-gray-600">Toca para seleccionar o tomar una foto</p>
+                    <p className="text-sm text-gray-600">{t('tapToSelect')}</p>
                   </>
                 )}
               </div>
@@ -388,7 +395,7 @@ function UploadModal({
             {/* Sender name */}
             <input
               type="text"
-              placeholder="Tu nombre (opcional)"
+              placeholder={t('yourName')}
               value={senderName}
               onChange={(e) => onSenderNameChange(e.target.value)}
               maxLength={100}
@@ -398,7 +405,7 @@ function UploadModal({
             {/* Caption */}
             <input
               type="text"
-              placeholder="Descripción (opcional)"
+              placeholder={t('description')}
               value={caption}
               onChange={(e) => onCaptionChange(e.target.value)}
               maxLength={300}
@@ -414,7 +421,7 @@ function UploadModal({
               disabled={!uploadFile || uploading}
               className="w-full py-2.5 rounded-xl font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
-              {uploading ? 'Subiendo...' : 'Enviar foto'}
+              {uploading ? t('uploading') : t('sendPhoto')}
             </button>
           </>
         )}

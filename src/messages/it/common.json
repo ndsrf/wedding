@@ -1534,6 +1534,39 @@
           "viewReports": "Visualizza Report"
         }
       }
+    },
+    "gallery": {
+      "googlePhotosTitle": "Google Photos",
+      "googlePhotosDesc": "Connetti un album condiviso per consentire agli ospiti di aggiungere foto.",
+      "connected": "✓ Connesso",
+      "howItWorksTitle": "Come funziona?",
+      "step1": "Colleghiamo il tuo account Google e creiamo un album condiviso.",
+      "step2": "Chiunque abbia il link può aggiungere foto all'album.",
+      "step3": "Importa le foto nella galleria del matrimonio con un clic.",
+      "step4": "Il blocco galleria nell'invito mostra tutte le foto approvate.",
+      "connectButton": "Connetti con Google Photos",
+      "albumLabel": "Album in Google Photos",
+      "guestLinkLabel": "Link per gli ospiti per aggiungere foto",
+      "copied": "✓ Copiato",
+      "copyLink": "Copia link",
+      "syncing": "Sincronizzazione...",
+      "syncButton": "↻ Sincronizza foto da Google Photos",
+      "disconnect": "Disconnetti",
+      "disconnectConfirm": "Disconnettere Google Photos? Le foto sincronizzate rimarranno nella galleria.",
+      "uploadTitle": "Carica foto manualmente",
+      "uploadDesc": "Carica foto direttamente dal tuo dispositivo nella galleria.",
+      "uploading": "Caricamento...",
+      "selectPhoto": "+ Seleziona foto",
+      "galleryCount": "Galleria ({count, plural, one {# foto} other {# foto}})",
+      "noPhotos": "Ancora nessuna foto. Connetti Google Photos o carica una foto per iniziare.",
+      "weddingPhoto": "Foto di matrimonio",
+      "hide": "Nascondi",
+      "show": "Mostra",
+      "delete": "Elimina",
+      "deleteConfirm": "Eliminare questa foto dalla galleria?",
+      "manualUpload": "Caricamento manuale",
+      "syncSuccess": "{synced} nuova/e foto importata/e (totale nell'album: {total})",
+      "syncError": "Errore di connessione"
     }
   },
   "guest": {
@@ -1635,6 +1668,24 @@
       "googleCalendar": "Google Calendar",
       "appleCalendar": "Apple Calendar",
       "getDirections": "Ottieni Indicazioni"
+    },
+    "gallery": {
+      "noPhotosYet": "Ancora nessuna foto",
+      "addFirstPhoto": "Aggiungi prima foto",
+      "photoAlt": "Foto di {name}",
+      "previous": "Precedente",
+      "next": "Successiva",
+      "goToPhoto": "Vai alla foto {n}",
+      "addYourPhoto": "Aggiungi la tua foto",
+      "photoAdded": "Foto aggiunta!",
+      "thankYou": "Grazie per condividere questo momento.",
+      "modalTitle": "Aggiungi la tua foto",
+      "close": "Chiudi",
+      "tapToSelect": "Tocca per selezionare o scattare una foto",
+      "yourName": "Il tuo nome (opzionale)",
+      "description": "Descrizione (opzionale)",
+      "uploading": "Caricamento...",
+      "sendPhoto": "Invia foto"
     }
   },
   "auth": {

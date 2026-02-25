@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface GalleryPhoto {
   id: string;
@@ -32,6 +33,7 @@ interface GooglePhotosStatus {
  * - Upload photos manually
  */
 export function GooglePhotosSettings() {
+  const t = useTranslations('admin.gallery');
   const [status, setStatus] = useState<GooglePhotosStatus | null>(null);
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,7 @@ export function GooglePhotosSettings() {
   // ── Disconnect ────────────────────────────────────────────────────────────
 
   const handleDisconnect = async () => {
-    if (!confirm('¿Desconectar Google Photos? Las fotos sincronizadas permanecerán en la galería.')) return;
+    if (!confirm(t('disconnectConfirm'))) return;
     setDisconnecting(true);
     try {
       await fetch('/api/admin/gallery/google-photos', { method: 'DELETE' });
@@ -98,13 +100,13 @@ export function GooglePhotosSettings() {
       const res = await fetch('/api/admin/gallery/google-photos/sync', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        setSyncResult(`${data.data.synced} foto(s) nuevas importadas (total en álbum: ${data.data.total})`);
+        setSyncResult(t('syncSuccess', { synced: data.data.synced, total: data.data.total }));
         await loadData();
       } else {
         setSyncResult(`Error: ${data.error?.message}`);
       }
     } catch {
-      setSyncResult('Error de conexión');
+      setSyncResult(t('syncError'));
     } finally {
       setSyncing(false);
     }
@@ -135,7 +137,7 @@ export function GooglePhotosSettings() {
   // ── Delete photo ─────────────────────────────────────────────────────────
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar esta foto de la galería?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     const res = await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
@@ -187,15 +189,15 @@ export function GooglePhotosSettings() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <span>📷</span> Google Photos
+              <span>📷</span> {t('googlePhotosTitle')}
             </h3>
             <p className="text-sm text-gray-500 mt-0.5">
-              Conecta un álbum compartido para que los invitados puedan añadir fotos.
+              {t('googlePhotosDesc')}
             </p>
           </div>
           {status?.connected && (
             <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-              ✓ Conectado
+              {t('connected')}
             </span>
           )}
         </div>
@@ -203,12 +205,12 @@ export function GooglePhotosSettings() {
         {!status?.connected ? (
           <div className="space-y-3">
             <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-700 space-y-1">
-              <p className="font-medium">¿Cómo funciona?</p>
+              <p className="font-medium">{t('howItWorksTitle')}</p>
               <ul className="list-disc list-inside space-y-0.5 text-blue-600">
-                <li>Conectamos tu cuenta de Google y creamos un álbum compartido.</li>
-                <li>Cualquier persona con el enlace puede añadir fotos al álbum.</li>
-                <li>Importa las fotos a la galería de la boda con un clic.</li>
-                <li>El bloque galería en la invitación muestra todas las fotos aprobadas.</li>
+                <li>{t('step1')}</li>
+                <li>{t('step2')}</li>
+                <li>{t('step3')}</li>
+                <li>{t('step4')}</li>
               </ul>
             </div>
             <button
@@ -221,7 +223,7 @@ export function GooglePhotosSettings() {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Conectar con Google Photos
+              {t('connectButton')}
             </button>
           </div>
         ) : (
@@ -229,7 +231,7 @@ export function GooglePhotosSettings() {
             {/* Album URL */}
             {status.album_url && (
               <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Álbum en Google Photos</p>
+                <p className="text-xs font-medium text-gray-500 mb-1">{t('albumLabel')}</p>
                 <a
                   href={status.album_url}
                   target="_blank"
@@ -246,7 +248,7 @@ export function GooglePhotosSettings() {
               <div className="bg-purple-50 rounded-lg p-4 space-y-3">
                 <div>
                   <p className="text-xs font-medium text-purple-700 mb-1">
-                    Enlace para que los invitados añadan fotos
+                    {t('guestLinkLabel')}
                   </p>
                   <p className="text-xs text-purple-600 break-all font-mono">
                     {status.share_url}
@@ -256,7 +258,7 @@ export function GooglePhotosSettings() {
                   onClick={() => handleCopy(status.share_url!)}
                   className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 transition"
                 >
-                  {copied ? '✓ Copiado' : 'Copiar enlace'}
+                  {copied ? t('copied') : t('copyLink')}
                 </button>
               </div>
             )}
@@ -268,14 +270,14 @@ export function GooglePhotosSettings() {
                 disabled={syncing}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 disabled:opacity-50 transition"
               >
-                {syncing ? 'Sincronizando...' : '↻ Sincronizar fotos de Google Photos'}
+                {syncing ? t('syncing') : t('syncButton')}
               </button>
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
                 className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
               >
-                Desconectar
+                {t('disconnect')}
               </button>
             </div>
 
@@ -290,12 +292,12 @@ export function GooglePhotosSettings() {
 
       {/* ── Manual upload ──────────────────────────────────────────────────── */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-3">
-        <h3 className="text-base font-semibold text-gray-900">Subir foto manualmente</h3>
+        <h3 className="text-base font-semibold text-gray-900">{t('uploadTitle')}</h3>
         <p className="text-sm text-gray-500">
-          Sube fotos directamente desde tu dispositivo a la galería.
+          {t('uploadDesc')}
         </p>
         <label className="inline-flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition">
-          {uploadingPhoto ? 'Subiendo...' : '+ Seleccionar foto'}
+          {uploadingPhoto ? t('uploading') : t('selectPhoto')}
           <input
             type="file"
             accept="image/*"
@@ -313,13 +315,13 @@ export function GooglePhotosSettings() {
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-gray-900">
-            Galería ({photos.length} foto{photos.length !== 1 ? 's' : ''})
+            {t('galleryCount', { count: photos.length })}
           </h3>
         </div>
 
         {photos.length === 0 ? (
           <p className="text-sm text-gray-500 py-4 text-center">
-            No hay fotos todavía. Conecta Google Photos o sube una foto para empezar.
+            {t('noPhotos')}
           </p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -327,7 +329,7 @@ export function GooglePhotosSettings() {
               <div key={photo.id} className="relative group rounded-lg overflow-hidden bg-gray-100 aspect-square">
                 <Image
                   src={photo.thumbnail_url ?? photo.url}
-                  alt={photo.caption ?? 'Foto de boda'}
+                  alt={photo.caption ?? t('weddingPhoto')}
                   fill
                   className={`object-cover transition ${!photo.approved ? 'opacity-40' : ''}`}
                   unoptimized
@@ -359,13 +361,13 @@ export function GooglePhotosSettings() {
                         : 'bg-green-400 text-green-900 hover:bg-green-500'
                     } transition`}
                   >
-                    {photo.approved ? 'Ocultar' : 'Mostrar'}
+                    {photo.approved ? t('hide') : t('show')}
                   </button>
                   <button
                     onClick={() => handleDelete(photo.id)}
                     className="text-xs px-2 py-1 rounded-full font-medium bg-red-500 text-white hover:bg-red-600 transition"
                   >
-                    Eliminar
+                    {t('delete')}
                   </button>
                 </div>
               </div>
@@ -381,7 +383,7 @@ export function GooglePhotosSettings() {
             <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" /> Google Photos
           </span>
           <span className="inline-flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-gray-500 inline-block" /> Subida manual
+            <span className="w-2 h-2 rounded-full bg-gray-500 inline-block" /> {t('manualUpload')}
           </span>
         </p>
       </div>
