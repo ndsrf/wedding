@@ -54,7 +54,8 @@ model Theme {
   created_at        DateTime        @default(now())
   updated_at        DateTime        @updatedAt
   planner           WeddingPlanner? @relation(fields: [planner_id], references: [id])
-  weddings          Wedding[]
+  weddings          Wedding[]       @relation("WeddingTheme")
+  wedding_day_weddings Wedding[]    @relation("WeddingDayTheme")
 
   @@index([planner_id])
   @@index([is_system_theme])
@@ -65,6 +66,7 @@ model Wedding {
   id                              String             @id @default(uuid())
   planner_id                      String
   theme_id                        String?
+  wedding_day_theme_id            String?            // Optional override theme for the day of the wedding
   invitation_template_id          String?
   couple_names                    String
   wedding_date                    DateTime
@@ -132,11 +134,13 @@ model Wedding {
   itinerary_items                 ItineraryItem[]
   photos                          WeddingPhoto[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
-  theme                           Theme?             @relation(fields: [theme_id], references: [id])
+  theme                           Theme?             @relation("WeddingTheme", fields: [theme_id], references: [id])
+  wedding_day_theme               Theme?             @relation("WeddingDayTheme", fields: [wedding_day_theme_id], references: [id])
   main_event_location             Location?          @relation("MainEventLocation", fields: [main_event_location_id], references: [id], onDelete: SetNull)
 
   @@index([planner_id])
   @@index([theme_id])
+  @@index([wedding_day_theme_id])
   @@index([status])
   @@index([wedding_date])
   @@index([is_disabled])

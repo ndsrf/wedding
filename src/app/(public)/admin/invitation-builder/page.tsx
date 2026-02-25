@@ -198,6 +198,22 @@ export default function InvitationBuilderPage() {
     }
   };
 
+  const handleDuplicateTemplate = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/invitation-template/${id}/duplicate`, {
+        method: 'POST',
+      });
+
+      if (!res.ok) throw new Error('Failed to duplicate template');
+
+      const duplicate = await res.json();
+      setUserTemplates((prev) => [duplicate, ...prev]);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to duplicate template');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -300,6 +316,13 @@ export default function InvitationBuilderPage() {
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
                       >
                         {t('editTemplate')}
+                      </button>
+                      <button
+                        onClick={() => handleDuplicateTemplate(template.id)}
+                        className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition text-sm font-medium"
+                        title={t('duplicateTemplate')}
+                      >
+                        {t('duplicateTemplate')}
                       </button>
                       <button
                         onClick={() => handleDeleteTemplate(template.id)}

@@ -83,7 +83,7 @@ export const getRSVPPageData = cache(async (
       // invitation template, assemble, and populate the cache.
       const wedding = await prisma.wedding.findUnique({
         where: { id: weddingId },
-        include: { theme: true },
+        include: { theme: true, wedding_day_theme: true },
       });
 
       if (!wedding) {
@@ -111,17 +111,28 @@ export const getRSVPPageData = cache(async (
         }
       }
 
-      const themeData = wedding.theme ? {
-        id: wedding.theme.id,
-        planner_id: wedding.theme.planner_id,
-        name: wedding.theme.name,
-        description: wedding.theme.description,
-        is_default: wedding.theme.is_default,
-        is_system_theme: wedding.theme.is_system_theme,
-        config: wedding.theme.config as unknown as ThemeConfig,
-        preview_image_url: wedding.theme.preview_image_url,
-        created_at: wedding.theme.created_at,
-        updated_at: wedding.theme.updated_at,
+      // Use wedding_day_theme if today is the wedding day and a day-of theme is set
+      const today = new Date();
+      const weddingDate = new Date(wedding.wedding_date);
+      const isWeddingDay =
+        today.getFullYear() === weddingDate.getFullYear() &&
+        today.getMonth() === weddingDate.getMonth() &&
+        today.getDate() === weddingDate.getDate();
+      const activeTheme = isWeddingDay && wedding.wedding_day_theme
+        ? wedding.wedding_day_theme
+        : wedding.theme;
+
+      const themeData = activeTheme ? {
+        id: activeTheme.id,
+        planner_id: activeTheme.planner_id,
+        name: activeTheme.name,
+        description: activeTheme.description,
+        is_default: activeTheme.is_default,
+        is_system_theme: activeTheme.is_system_theme,
+        config: activeTheme.config as unknown as ThemeConfig,
+        preview_image_url: activeTheme.preview_image_url,
+        created_at: activeTheme.created_at,
+        updated_at: activeTheme.updated_at,
       } : {
         id: 'default',
         planner_id: null,
