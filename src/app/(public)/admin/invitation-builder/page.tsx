@@ -147,6 +147,7 @@ export default function InvitationBuilderPage() {
 
       const template = await res.json();
       setCurrentTemplate(template);
+      setUserTemplates((prev) => [template, ...prev]);
       setView('editor');
       setNewTemplateName('');
       setSelectedSeed(null);
