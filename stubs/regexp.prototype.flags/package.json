@@ -1,0 +1,6 @@
+{
+  "name": "regexp.prototype.flags",
+  "version": "1.5.4",
+  "main": "index.js",
+  "license": "MIT"
+}

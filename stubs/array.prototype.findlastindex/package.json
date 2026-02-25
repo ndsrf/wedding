@@ -1,0 +1,6 @@
+{
+  "name": "array.prototype.findlastindex",
+  "version": "1.2.6",
+  "main": "index.js",
+  "license": "MIT"
+}

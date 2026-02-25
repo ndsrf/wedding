@@ -1,0 +1,6 @@
+{
+  "name": "object.assign",
+  "version": "4.1.7",
+  "main": "index.js",
+  "license": "MIT"
+}

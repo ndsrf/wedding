@@ -2,6 +2,9 @@
   "name": "wedding-management-mvp",
   "version": "1.1.0",
   "private": true,
+  "workspaces": [
+    "stubs/*"
+  ],
   "scripts": {
     "dev": "NODE_OPTIONS='--dns-result-order=ipv4first' next dev",
     "build": "next build",
