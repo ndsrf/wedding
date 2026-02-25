@@ -180,7 +180,6 @@ export function GalleryBlock({
         )}
         {showUploadModal && (
           <UploadModal
-            t={t}
             uploading={uploading}
             uploadSuccess={uploadSuccess}
             uploadError={uploadError}
@@ -320,7 +319,6 @@ export function GalleryBlock({
 // ─── Upload Modal ─────────────────────────────────────────────────────────────
 
 function UploadModal({
-  t,
   uploading,
   uploadSuccess,
   uploadError,
@@ -333,8 +331,6 @@ function UploadModal({
   onUpload,
   onClose,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: (key: string, values?: Record<string, unknown>) => any;
   uploading: boolean;
   uploadSuccess: boolean;
   uploadError: string | null;
@@ -347,6 +343,7 @@ function UploadModal({
   onUpload: () => void;
   onClose: () => void;
 }) {
+  const t = useTranslations('guest.gallery');
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60">
       <div className="bg-white rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
