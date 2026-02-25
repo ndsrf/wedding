@@ -18,7 +18,7 @@ import {
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const appUrl = process.env.APP_URL || 'http://localhost:3000';
+  const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
   const configureUrl = `${appUrl}/admin/configure`;
 
   try {
