@@ -1071,7 +1071,8 @@
       "backToDashboard": "Retour au Tableau de Bord",
       "tabs": {
         "basic": "Paramètres de Base",
-        "rsvp": "Paramètres RSVP"
+        "rsvp": "Paramètres RSVP",
+        "gallery": "Galerie"
       },
       "form": {
         "basicSettings": "Paramètres de Base",
@@ -1229,7 +1230,26 @@
       "alignment": "Alignement",
       "mapStyle": "Style de Carte",
       "colorMap": "Couleur",
-      "grayscaleMap": "Niveaux de Gris"
+      "grayscaleMap": "Niveaux de Gris",
+      "blockGallery": "Galerie de photos",
+      "galleryTitle": "Galerie de photos",
+      "galleryColumns": "Colonnes (photos visibles)",
+      "galleryAutoPlay": "Avance automatique (secondes)",
+      "galleryNoAutoPlay": "Sans avance automatique",
+      "gallery3s": "3 secondes",
+      "gallery4s": "4 secondes",
+      "gallery6s": "6 secondes",
+      "gallery10s": "10 secondes",
+      "galleryShowCaptions": "Afficher les légendes",
+      "galleryUploadButton": "Bouton \"Ajouter une photo\" pour les invités",
+      "galleryCornerRadius": "Rayon des coins",
+      "galleryNoRounding": "Sans arrondi",
+      "gallerySmall": "Petit",
+      "galleryMedium": "Moyen",
+      "galleryLarge": "Grand",
+      "galleryCircular": "Circulaire",
+      "galleryHint": "Les photos sont automatiquement chargées depuis la galerie du mariage. Vous pouvez les gérer dans",
+      "galleryHintPath": "Paramètres → Galerie de photos"
     },
     "wizard": {
       "title": "Assistant de Configuration du Mariage",
@@ -1514,6 +1534,39 @@
           "viewReports": "Voir les Rapports"
         }
       }
+    },
+    "gallery": {
+      "googlePhotosTitle": "Google Photos",
+      "googlePhotosDesc": "Connectez un album partagé pour que les invités puissent ajouter des photos.",
+      "connected": "✓ Connecté",
+      "howItWorksTitle": "Comment ça marche ?",
+      "step1": "Nous connectons votre compte Google et créons un album partagé.",
+      "step2": "Toute personne avec le lien peut ajouter des photos à l'album.",
+      "step3": "Importez les photos dans la galerie du mariage en un clic.",
+      "step4": "Le bloc galerie dans l'invitation affiche toutes les photos approuvées.",
+      "connectButton": "Connecter avec Google Photos",
+      "albumLabel": "Album dans Google Photos",
+      "guestLinkLabel": "Lien pour que les invités ajoutent des photos",
+      "copied": "✓ Copié",
+      "copyLink": "Copier le lien",
+      "syncing": "Synchronisation...",
+      "syncButton": "↻ Synchroniser les photos de Google Photos",
+      "disconnect": "Déconnecter",
+      "disconnectConfirm": "Déconnecter Google Photos ? Les photos synchronisées resteront dans la galerie.",
+      "uploadTitle": "Télécharger une photo manuellement",
+      "uploadDesc": "Téléchargez des photos directement depuis votre appareil vers la galerie.",
+      "uploading": "Téléchargement...",
+      "selectPhoto": "+ Sélectionner une photo",
+      "galleryCount": "Galerie ({count, plural, one {# photo} other {# photos}})",
+      "noPhotos": "Pas encore de photos. Connectez Google Photos ou téléchargez une photo pour commencer.",
+      "weddingPhoto": "Photo de mariage",
+      "hide": "Masquer",
+      "show": "Afficher",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette photo de la galerie ?",
+      "manualUpload": "Téléchargement manuel",
+      "syncSuccess": "{synced} nouvelle(s) photo(s) importée(s) (total dans l'album : {total})",
+      "syncError": "Erreur de connexion"
     }
   },
   "guest": {
@@ -1615,6 +1668,24 @@
       "googleCalendar": "Google Calendar",
       "appleCalendar": "Apple Calendar",
       "getDirections": "Obtenir les Directions"
+    },
+    "gallery": {
+      "noPhotosYet": "Pas encore de photos",
+      "addFirstPhoto": "Ajouter la première photo",
+      "photoAlt": "Photo de {name}",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "goToPhoto": "Aller à la photo {n}",
+      "addYourPhoto": "Ajouter votre photo",
+      "photoAdded": "Photo ajoutée !",
+      "thankYou": "Merci de partager ce moment.",
+      "modalTitle": "Ajouter votre photo",
+      "close": "Fermer",
+      "tapToSelect": "Appuyez pour sélectionner ou prendre une photo",
+      "yourName": "Votre nom (optionnel)",
+      "description": "Description (optionnel)",
+      "uploading": "Envoi en cours...",
+      "sendPhoto": "Envoyer la photo"
     }
   },
   "auth": {

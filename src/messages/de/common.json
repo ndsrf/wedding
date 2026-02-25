@@ -1071,7 +1071,8 @@
       "backToDashboard": "Zurück zum Dashboard",
       "tabs": {
         "basic": "Grundeinstellungen",
-        "rsvp": "RSVP-Einstellungen"
+        "rsvp": "RSVP-Einstellungen",
+        "gallery": "Galerie"
       },
       "form": {
         "basicSettings": "Grundeinstellungen",
@@ -1229,7 +1230,26 @@
       "alignment": "Ausrichtung",
       "mapStyle": "Kartenstil",
       "colorMap": "Farbe",
-      "grayscaleMap": "Graustufen"
+      "grayscaleMap": "Graustufen",
+      "blockGallery": "Fotogalerie",
+      "galleryTitle": "Fotogalerie",
+      "galleryColumns": "Spalten (sichtbare Fotos)",
+      "galleryAutoPlay": "Automatisches Weiterblättern (Sekunden)",
+      "galleryNoAutoPlay": "Kein automatisches Weiterblättern",
+      "gallery3s": "3 Sekunden",
+      "gallery4s": "4 Sekunden",
+      "gallery6s": "6 Sekunden",
+      "gallery10s": "10 Sekunden",
+      "galleryShowCaptions": "Beschreibungen anzeigen",
+      "galleryUploadButton": "\"Foto hinzufügen\"-Schaltfläche für Gäste",
+      "galleryCornerRadius": "Eckenradius",
+      "galleryNoRounding": "Keine Abrundung",
+      "gallerySmall": "Klein",
+      "galleryMedium": "Mittel",
+      "galleryLarge": "Groß",
+      "galleryCircular": "Kreisförmig",
+      "galleryHint": "Fotos werden automatisch aus der Hochzeitsgalerie geladen. Sie können sie verwalten unter",
+      "galleryHintPath": "Einstellungen → Fotogalerie"
     },
     "wizard": {
       "title": "Hochzeit-Einrichtungsassistent",
@@ -1514,6 +1534,39 @@
           "viewReports": "Berichte anzeigen"
         }
       }
+    },
+    "gallery": {
+      "googlePhotosTitle": "Google Photos",
+      "googlePhotosDesc": "Verbinde ein geteiltes Album, damit Gäste Fotos hinzufügen können.",
+      "connected": "✓ Verbunden",
+      "howItWorksTitle": "Wie funktioniert es?",
+      "step1": "Wir verbinden Ihr Google-Konto und erstellen ein geteiltes Album.",
+      "step2": "Jeder mit dem Link kann Fotos zum Album hinzufügen.",
+      "step3": "Importieren Sie Fotos mit einem Klick in die Hochzeitsgalerie.",
+      "step4": "Der Galerie-Block in der Einladung zeigt alle genehmigten Fotos.",
+      "connectButton": "Mit Google Photos verbinden",
+      "albumLabel": "Album in Google Photos",
+      "guestLinkLabel": "Link für Gäste zum Hinzufügen von Fotos",
+      "copied": "✓ Kopiert",
+      "copyLink": "Link kopieren",
+      "syncing": "Synchronisierung...",
+      "syncButton": "↻ Fotos von Google Photos synchronisieren",
+      "disconnect": "Trennen",
+      "disconnectConfirm": "Google Photos trennen? Synchronisierte Fotos verbleiben in der Galerie.",
+      "uploadTitle": "Foto manuell hochladen",
+      "uploadDesc": "Laden Sie Fotos direkt von Ihrem Gerät in die Galerie hoch.",
+      "uploading": "Wird hochgeladen...",
+      "selectPhoto": "+ Foto auswählen",
+      "galleryCount": "Galerie ({count, plural, one {# Foto} other {# Fotos}})",
+      "noPhotos": "Noch keine Fotos. Verbinden Sie Google Photos oder laden Sie ein Foto hoch.",
+      "weddingPhoto": "Hochzeitsfoto",
+      "hide": "Verbergen",
+      "show": "Anzeigen",
+      "delete": "Löschen",
+      "deleteConfirm": "Dieses Foto aus der Galerie löschen?",
+      "manualUpload": "Manuelles Hochladen",
+      "syncSuccess": "{synced} neue(s) Foto(s) importiert (Gesamt im Album: {total})",
+      "syncError": "Verbindungsfehler"
     }
   },
   "guest": {
@@ -1615,6 +1668,24 @@
       "googleCalendar": "Google Calendar",
       "appleCalendar": "Apple Calendar",
       "getDirections": "Richtungen Abrufen"
+    },
+    "gallery": {
+      "noPhotosYet": "Noch keine Fotos",
+      "addFirstPhoto": "Erstes Foto hinzufügen",
+      "photoAlt": "Foto von {name}",
+      "previous": "Vorherige",
+      "next": "Nächste",
+      "goToPhoto": "Zu Foto {n} gehen",
+      "addYourPhoto": "Ihr Foto hinzufügen",
+      "photoAdded": "Foto hinzugefügt!",
+      "thankYou": "Danke, dass Sie diesen Moment teilen.",
+      "modalTitle": "Ihr Foto hinzufügen",
+      "close": "Schließen",
+      "tapToSelect": "Tippen Sie, um ein Foto auszuwählen oder aufzunehmen",
+      "yourName": "Ihr Name (optional)",
+      "description": "Beschreibung (optional)",
+      "uploading": "Wird hochgeladen...",
+      "sendPhoto": "Foto senden"
     }
   },
   "auth": {

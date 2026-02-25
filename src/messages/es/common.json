@@ -976,7 +976,54 @@
       "noWeddingAssigned": "Ninguna boda asignada."
     },
     "checklist": {
-      "loadError": "No se pudo cargar la lista de tareas"
+      "title": "Lista de Tareas",
+      "subtitle": "Gestiona tareas y haz seguimiento del progreso de tu boda",
+      "loading": "Cargando lista...",
+      "saving": "Guardando...",
+      "save": "Guardar Cambios",
+      "unsavedChanges": "Tienes cambios sin guardar",
+      "error": "Error al cargar la lista",
+      "retry": "Reintentar",
+      "emptyTitle": "Aún no hay tareas",
+      "emptyDesc": "Importa una lista o espera a que tu wedding planner agregue tareas.",
+      "import": "Importar desde Excel",
+      "importing": "Importando...",
+      "export": "Exportar a Excel",
+      "exporting": "Exportando...",
+      "addSection": "Añadir Sección",
+      "newSectionName": "Nueva Sección",
+      "sectionPlaceholder": "Nombre de la sección...",
+      "deleteSection": "Eliminar Sección",
+      "deleteSectionConfirm": "¿Estás seguro de que quieres eliminar esta sección y TODAS sus tareas? Esta acción no se puede deshacer.",
+      "addTask": "Añadir Tarea",
+      "newTaskTitle": "Nueva Tarea",
+      "taskPlaceholder": "Título de la tarea...",
+      "uncategorized": "Tareas sin clasificar",
+      "noTasks": "No hay tareas en esta sección",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Estás seguro de que quieres eliminar esta tarea?",
+      "markComplete": "Marcar como completada",
+      "markIncomplete": "Marcar como incompleta",
+      "descriptionPlaceholder": "Agregar descripción...",
+      "columns": {
+        "done": "Hecho",
+        "title": "Título",
+        "description": "Descripción",
+        "assignedTo": "Asignado a",
+        "dueDate": "Fecha límite",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "assignedTo": {
+        "planner": "Wedding Planner",
+        "couple": "Pareja",
+        "other": "Otro"
+      },
+      "status": {
+        "PENDING": "Pendiente",
+        "IN_PROGRESS": "En Progreso",
+        "COMPLETED": "Completado"
+      }
     },
     "tasks": {
       "title": "Tareas Próximas",
@@ -1084,7 +1131,6 @@
         "loading": "Cargando cronología...",
         "guestCreated": "Invitado agregado al sistema"
       },
-      "import": "Importar desde Excel",
       "export": "Exportar a Excel",
       "template": "Descargar Plantilla",
       "familyName": "Nombre de Familia",
@@ -1132,8 +1178,8 @@
         "saveChanges": "Guardar Cambios",
         "rsvpAnswers": "Respuestas RSVP",
         "privateNotes": "Notas Privadas",
-        "privateNotesPlaceholder": "Agregar notas internas sobre este invitado (preferencias diet\u00e9ticas, preferencias de asientos, solicitudes especiales, etc.)",
-        "privateNotesHelp": "Estas notas solo son visibles para los administradores de la boda y no se compartir\u00e1n con los invitados."
+        "privateNotesPlaceholder": "Agregar notas internas sobre este invitado (preferencias dietéticas, preferencias de asientos, solicitudes especiales, etc.)",
+        "privateNotesHelp": "Estas notas solo son visibles para los administradores de la boda y no se compartirán con los invitados."
       },
       "bulkActions": "Acciones en lote",
       "deleteSelected": "Eliminar seleccionados",
@@ -1317,7 +1363,8 @@
       "backToDashboard": "Volver al Panel",
       "tabs": {
         "basic": "Ajustes Básicos",
-        "rsvp": "Ajustes de RSVP"
+        "rsvp": "Ajustes de RSVP",
+        "gallery": "Galería"
       },
       "form": {
         "basicSettings": "Ajustes Básicos",
@@ -1367,56 +1414,6 @@
         "deleteAllConfirmMessage": "Esto eliminará permanentemente todas las familias de invitados y sus miembros de tu boda. Esta acción no se puede deshacer.",
         "deleteAllWarning": "¡Esta acción es irreversible!",
         "confirmDelete": "Sí, Eliminar Todos los Invitados"
-      }
-    },
-    "checklist": {
-      "title": "Lista de Tareas",
-      "subtitle": "Gestiona tareas y haz seguimiento del progreso de tu boda",
-      "loading": "Cargando lista...",
-      "saving": "Guardando...",
-      "save": "Guardar Cambios",
-      "unsavedChanges": "Tienes cambios sin guardar",
-      "error": "Error al cargar la lista",
-      "retry": "Reintentar",
-      "emptyTitle": "Aún no hay tareas",
-      "emptyDesc": "Importa una lista o espera a que tu wedding planner agregue tareas.",
-      "import": "Importar desde Excel",
-      "importing": "Importando...",
-      "export": "Exportar a Excel",
-      "exporting": "Exportando...",
-      "addSection": "Añadir Sección",
-      "newSectionName": "Nueva Sección",
-      "sectionPlaceholder": "Nombre de la sección...",
-      "deleteSection": "Eliminar Sección",
-      "deleteSectionConfirm": "¿Estás seguro de que quieres eliminar esta sección y TODAS sus tareas? Esta acción no se puede deshacer.",
-      "addTask": "Añadir Tarea",
-      "newTaskTitle": "Nueva Tarea",
-      "taskPlaceholder": "Título de la tarea...",
-      "uncategorized": "Tareas sin clasificar",
-      "noTasks": "No hay tareas en esta sección",
-      "delete": "Eliminar",
-      "deleteConfirm": "¿Estás seguro de que quieres eliminar esta tarea?",
-      "markComplete": "Marcar como completada",
-      "markIncomplete": "Marcar como incompleta",
-      "descriptionPlaceholder": "Agregar descripción...",
-      "columns": {
-        "done": "Hecho",
-        "title": "Título",
-        "description": "Descripción",
-        "assignedTo": "Asignado a",
-        "dueDate": "Fecha límite",
-        "status": "Estado",
-        "actions": "Acciones"
-      },
-      "assignedTo": {
-        "planner": "Wedding Planner",
-        "couple": "Pareja",
-        "other": "Otro"
-      },
-      "status": {
-        "PENDING": "Pendiente",
-        "IN_PROGRESS": "En Progreso",
-        "COMPLETED": "Completado"
       }
     },
     "templates": {
@@ -1526,7 +1523,59 @@
       "alignment": "Alineación",
       "mapStyle": "Estilo de Mapa",
       "colorMap": "Color",
-      "grayscaleMap": "Escala de Grises"
+      "grayscaleMap": "Escala de Grises",
+      "blockGallery": "Galería de fotos",
+      "galleryTitle": "Galería de fotos",
+      "galleryColumns": "Columnas (fotos visibles)",
+      "galleryAutoPlay": "Avance automático (segundos)",
+      "galleryNoAutoPlay": "Sin avance automático",
+      "gallery3s": "3 segundos",
+      "gallery4s": "4 segundos",
+      "gallery6s": "6 segundos",
+      "gallery10s": "10 segundos",
+      "galleryShowCaptions": "Mostrar descripciones",
+      "galleryUploadButton": "Botón \"Añadir foto\" para invitados",
+      "galleryCornerRadius": "Radio de esquinas",
+      "galleryNoRounding": "Sin redondeo",
+      "gallerySmall": "Pequeño",
+      "galleryMedium": "Mediano",
+      "galleryLarge": "Grande",
+      "galleryCircular": "Circular",
+      "galleryHint": "Las fotos se cargan automáticamente desde la galería de la boda. Puedes gestionar las fotos en",
+      "galleryHintPath": "Configuración → Galería de fotos"
+    },
+    "gallery": {
+      "googlePhotosTitle": "Google Photos",
+      "googlePhotosDesc": "Conecta un álbum compartido para que los invitados puedan añadir fotos.",
+      "connected": "✓ Conectado",
+      "howItWorksTitle": "¿Cómo funciona?",
+      "step1": "Conectamos tu cuenta de Google y creamos un álbum compartido.",
+      "step2": "Cualquier persona con el enlace puede añadir fotos al álbum.",
+      "step3": "Importa las fotos a la galería de la boda con un clic.",
+      "step4": "El bloque galería en la invitación muestra todas las fotos aprobadas.",
+      "connectButton": "Conectar con Google Photos",
+      "albumLabel": "Álbum en Google Photos",
+      "guestLinkLabel": "Enlace para que los invitados añadan fotos",
+      "copied": "✓ Copiado",
+      "copyLink": "Copiar enlace",
+      "syncing": "Sincronizando...",
+      "syncButton": "↻ Sincronizar fotos de Google Photos",
+      "disconnect": "Desconectar",
+      "disconnectConfirm": "¿Desconectar Google Photos? Las fotos sincronizadas permanecerán en la galería.",
+      "uploadTitle": "Subir foto manualmente",
+      "uploadDesc": "Sube fotos directamente desde tu dispositivo a la galería.",
+      "uploading": "Subiendo...",
+      "selectPhoto": "+ Seleccionar foto",
+      "galleryCount": "Galería ({count, plural, one {# foto} other {# fotos}})",
+      "noPhotos": "No hay fotos todavía. Conecta Google Photos o sube una foto para empezar.",
+      "weddingPhoto": "Foto de boda",
+      "hide": "Ocultar",
+      "show": "Mostrar",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar esta foto de la galería?",
+      "manualUpload": "Subida manual",
+      "syncSuccess": "{synced} foto(s) nuevas importadas (total en álbum: {total})",
+      "syncError": "Error de conexión"
     }
   },
   "guest": {
@@ -1628,6 +1677,24 @@
       "googleCalendar": "Google Calendar",
       "appleCalendar": "Apple Calendar",
       "getDirections": "Obtener Direcciones"
+    },
+    "gallery": {
+      "noPhotosYet": "No hay fotos todavía",
+      "addFirstPhoto": "Añadir primera foto",
+      "photoAlt": "Foto de {name}",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "goToPhoto": "Ir a foto {n}",
+      "addYourPhoto": "Añadir tu foto",
+      "photoAdded": "¡Foto añadida!",
+      "thankYou": "Gracias por compartir este momento.",
+      "modalTitle": "Añadir tu foto",
+      "close": "Cerrar",
+      "tapToSelect": "Toca para seleccionar o tomar una foto",
+      "yourName": "Tu nombre (opcional)",
+      "description": "Descripción (opcional)",
+      "uploading": "Subiendo...",
+      "sendPhoto": "Enviar foto"
     }
   },
   "auth": {

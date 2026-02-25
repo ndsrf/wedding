@@ -1101,6 +1101,128 @@ The AI responds **in the guest's preferred language** (ES, EN, FR, IT, DE) and a
 - [WhatsApp Message Templates](https://www.twilio.com/docs/whatsapp/tutorial/send-whatsapp-notification-messages-templates)
 - [Meta WhatsApp Business Policy](https://www.whatsapp.com/legal/business-policy/)
 
+### Google Photos Integration
+
+Each wedding can be linked to a dedicated Google Photos shared album. Guests receive a contributor link to upload their own photos, and the admin panel syncs those photos into the gallery carousel displayed on the invitation page.
+
+#### How It Works
+
+1. The wedding admin clicks **Connect Google Photos** in the Configure → Gallery tab.
+2. The app redirects to Google's OAuth consent screen requesting Photos Library access.
+3. After the admin grants permission, the app automatically creates a shared album titled `Boda <couple names>` and stores the OAuth tokens and album URLs against the wedding record.
+4. The admin copies the contributor share URL and distributes it to guests (or the invitation page surfaces it directly).
+5. The admin triggers a **Sync** to pull any new photos from the album into the `WeddingPhoto` table for display in the gallery carousel.
+
+#### 1. Enable the Google Photos Library API
+
+1. Open the [Google Cloud Console](https://console.cloud.google.com/) and select the project that hosts your OAuth credentials.
+2. Go to **APIs & Services → Library**.
+3. Search for **"Photos Library API"** and click **Enable**.
+
+> **Note:** The Photos Library API is separate from other Google APIs. It must be explicitly enabled even if Google Drive or other APIs are already active.
+
+#### 2. Configure the OAuth 2.0 Credentials
+
+The integration reuses the same `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` used for Google Sign-In. You only need to add the Google Photos callback URL as an additional authorized redirect URI.
+
+1. Go to **APIs & Services → Credentials**.
+2. Click your existing **OAuth 2.0 Client ID** (Web application type).
+3. Under **Authorized redirect URIs**, add:
+   ```
+   https://your-domain.com/api/admin/gallery/google-photos/callback
+   ```
+   Replace `your-domain.com` with your actual domain. For local development also add:
+   ```
+   http://localhost:3000/api/admin/gallery/google-photos/callback
+   ```
+4. Click **Save**.
+
+No new environment variables are required — the integration uses the existing `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` from your `.env` file.
+
+#### 3. Connect a Wedding to Google Photos
+
+1. Log in as a wedding admin or planner.
+2. Navigate to **Admin → Configure → Gallery** tab.
+3. Click **Connect Google Photos**.
+4. You will be redirected to Google's consent screen. Sign in with the Google account that will own the album and grant the requested permissions:
+   - View and manage your Google Photos library
+   - Share albums
+5. After granting access, you are redirected back to the Configure page. The app will have:
+   - Created a shared album named `Boda <couple names>` in the connected Google account.
+   - Stored the OAuth refresh token and album URLs in the database.
+
+> **Important:** The consent screen must be completed with `prompt=consent` so that a refresh token is issued. If you accidentally skip or deny the refresh token, disconnect and reconnect to repeat the flow.
+
+#### 4. Share the Album with Guests
+
+After connecting, two album URLs are available in the Configure → Gallery tab:
+
+| URL | Purpose |
+|-----|---------|
+| **Album URL** (`google_photos_album_url`) | Opens the album in Google Photos — for the planner's own use |
+| **Share URL** (`google_photos_share_url`) | Contributor link — share this with guests so they can upload photos |
+
+The share URL can be embedded in WhatsApp messages or shown on the RSVP confirmation page.
+
+#### 5. Sync Photos
+
+The sync step pulls the latest media items from Google Photos into the local `WeddingPhoto` table so they appear in the invitation gallery carousel.
+
+- Click **Sync Photos** in the Configure → Gallery tab.
+- New items (identified by their stable Google Photos `productUrl`) are added; existing records are not duplicated.
+- Up to 100 photos are fetched per sync.
+- Access tokens are refreshed automatically if expired.
+
+Sync as often as needed — for example, after the wedding day to pull guest uploads.
+
+#### 6. Disconnect Google Photos
+
+Click **Disconnect** in the Configure → Gallery tab. This clears all stored tokens and album references from the database. The Google Photos album itself is not deleted. Reconnecting will reuse the existing album if one was already created for the wedding.
+
+#### Troubleshooting
+
+**"Google Photos not connected" error during sync:**
+- Ensure the OAuth flow completed successfully and a refresh token was stored.
+- Disconnect and reconnect to repeat the OAuth flow.
+
+**OAuth callback redirects to an error page:**
+- `google_photos_denied` — the admin declined the consent screen. Try again and grant all requested permissions.
+- `no_refresh_token` — Google did not return a refresh token. Revoke app access in your [Google Account permissions](https://myaccount.google.com/permissions) and reconnect to force a new consent prompt.
+- `connection_failed` — a server-side error occurred. Check application logs for details.
+
+**Photos not appearing in the gallery after sync:**
+- Confirm the photos have been added to the album (check the Album URL directly in Google Photos).
+- Check that the Photos Library API is enabled in Google Cloud Console.
+- Verify `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are correctly set.
+
+**OAuth credentials rejected:**
+- Confirm the callback URL `https://your-domain.com/api/admin/gallery/google-photos/callback` is listed as an authorized redirect URI in the Google Cloud Console credentials.
+- Ensure `APP_URL` in your `.env` matches the domain used to access the app.
+
+#### Required OAuth Scopes
+
+The app requests the following scopes during the Google Photos OAuth flow:
+
+```
+https://www.googleapis.com/auth/photoslibrary
+https://www.googleapis.com/auth/photoslibrary.sharing
+```
+
+These are requested with `access_type=offline` and `prompt=consent` to ensure a refresh token is always returned.
+
+#### Environment Variables
+
+No new variables are needed beyond what is already required for Google OAuth login:
+
+```bash
+# Already required for Google Sign-In — also used for Google Photos
+GOOGLE_CLIENT_ID=your-google-oauth-client-id
+GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+
+# Must match the domain registered in Google Cloud Console redirect URIs
+APP_URL=https://your-domain.com
+```
+
 ### Building and Pushing Images (CI/CD)
 
 For maintainers building new versions:

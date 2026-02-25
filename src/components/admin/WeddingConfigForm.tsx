@@ -7,12 +7,14 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import type { UpdateWeddingConfigRequest } from '@/types/api';
 import type { Theme, Wedding } from '@/types/models';
 import { BasicSettingsForm } from './BasicSettingsForm';
 import { RsvpSettingsForm } from './RsvpSettingsForm';
+import { GooglePhotosSettings } from './GooglePhotosSettings';
 
 interface WeddingConfigFormProps {
   wedding: Wedding;
@@ -21,34 +23,39 @@ interface WeddingConfigFormProps {
   onCancel: () => void;
 }
 
+type Tab = 'basic' | 'rsvp' | 'gallery';
+
 export function WeddingConfigForm({ wedding, themes, onSubmit, onCancel }: WeddingConfigFormProps) {
   const t = useTranslations('admin.configure');
-  const [activeTab, setActiveTab] = useState<'basic' | 'rsvp'>('basic');
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>('basic');
+
+  // Support ?tab=gallery query param (used after OAuth redirect)
+  useEffect(() => {
+    const tab = searchParams.get('tab') as Tab | null;
+    if (tab === 'gallery' || tab === 'basic' || tab === 'rsvp') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const tabClass = (tab: Tab) =>
+    activeTab === tab
+      ? 'px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600'
+      : 'px-4 py-2 font-medium text-gray-600 border-b-2 border-transparent hover:text-gray-900 cursor-pointer';
 
   return (
     <div className="space-y-8">
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-0">
-          <button
-            onClick={() => setActiveTab('basic')}
-            className={`${
-              activeTab === 'basic'
-                ? 'px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600'
-                : 'px-4 py-2 font-medium text-gray-600 border-b-2 border-transparent hover:text-gray-900 cursor-pointer'
-            }`}
-          >
+          <button onClick={() => setActiveTab('basic')} className={tabClass('basic')}>
             {t('tabs.basic')}
           </button>
-          <button
-            onClick={() => setActiveTab('rsvp')}
-            className={`${
-              activeTab === 'rsvp'
-                ? 'px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600'
-                : 'px-4 py-2 font-medium text-gray-600 border-b-2 border-transparent hover:text-gray-900 cursor-pointer'
-            }`}
-          >
+          <button onClick={() => setActiveTab('rsvp')} className={tabClass('rsvp')}>
             {t('tabs.rsvp')}
+          </button>
+          <button onClick={() => setActiveTab('gallery')} className={tabClass('gallery')}>
+            📷 {t('tabs.gallery')}
           </button>
         </nav>
       </div>
@@ -69,6 +76,10 @@ export function WeddingConfigForm({ wedding, themes, onSubmit, onCancel }: Weddi
           onSubmit={onSubmit}
           onCancel={onCancel}
         />
+      )}
+
+      {activeTab === 'gallery' && (
+        <GooglePhotosSettings />
       )}
     </div>
   );
