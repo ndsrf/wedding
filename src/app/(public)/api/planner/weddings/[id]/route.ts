@@ -184,6 +184,7 @@ export async function GET(
       extra_info_2_label: wedding.extra_info_2_label,
       extra_info_3_enabled: wedding.extra_info_3_enabled,
       extra_info_3_label: wedding.extra_info_3_label,
+      wedding_day_theme_id: (wedding as unknown as { wedding_day_theme_id?: string | null }).wedding_day_theme_id ?? null,
       guest_count,
       rsvp_count,
       rsvp_completion_percentage,
