@@ -5,6 +5,16 @@ import TemplateRenderer from '@/components/guest/TemplateRenderer';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { TemplateDesign } from '@/types/invitation-template';
 
+type Language = 'ES' | 'EN' | 'FR' | 'IT' | 'DE';
+
+const LANGUAGES: { code: Language; name: string; flag: string }[] = [
+  { code: 'ES', name: 'Español', flag: '🇪🇸' },
+  { code: 'EN', name: 'English', flag: '🇬🇧' },
+  { code: 'FR', name: 'Français', flag: '🇫🇷' },
+  { code: 'IT', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'DE', name: 'Deutsch', flag: '🇩🇪' },
+];
+
 interface PreviewData {
   design: TemplateDesign;
   weddingData: {
@@ -25,6 +35,7 @@ interface PreviewData {
  */
 export default function InvitationPreviewPage() {
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
+  const [activeLanguage, setActiveLanguage] = useState<Language>('EN');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,6 +49,7 @@ export default function InvitationPreviewPage() {
 
       const data = JSON.parse(storedData) as PreviewData;
       setPreviewData(data);
+      setActiveLanguage((data.language.toUpperCase() as Language) || 'EN');
     } catch (err) {
       console.error('Failed to load preview data:', err);
       setError('Failed to load preview data.');
@@ -73,23 +85,44 @@ export default function InvitationPreviewPage() {
     );
   }
 
-  const { design, weddingData, language } = previewData;
+  const { design, weddingData } = previewData;
   const weddingDate = weddingData.wedding_date instanceof Date
     ? weddingData.wedding_date.toISOString()
     : weddingData.wedding_date;
 
   return (
     <div className="min-h-screen relative">
-      {/* Close button overlay */}
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => window.close()}
-          className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition shadow-lg flex items-center gap-2"
-        >
-          <span>×</span>
-          <span>Close Preview</span>
-        </button>
+      {/* Header bar with language selector and close button */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 py-2 flex justify-between items-center">
+          <h1 className="text-sm font-medium text-gray-600">
+            {weddingData.couple_names}
+          </h1>
+          <div className="flex items-center gap-3">
+            <select
+              value={activeLanguage}
+              onChange={(e) => setActiveLanguage(e.target.value as Language)}
+              className="appearance-none px-3 py-1.5 pr-8 text-sm font-semibold border-2 border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:border-blue-500 focus:outline-none cursor-pointer"
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.flag} {lang.name}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => window.close()}
+              className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition shadow-sm flex items-center gap-2 text-sm"
+            >
+              <span>×</span>
+              <span>Close Preview</span>
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Spacer for fixed header */}
+      <div className="h-12" />
 
       {/* Template Renderer */}
       <TemplateRenderer
@@ -98,7 +131,7 @@ export default function InvitationPreviewPage() {
         weddingTime={weddingData.wedding_time}
         location={weddingData.location}
         coupleNames={weddingData.couple_names}
-        language={(language.toUpperCase() as 'ES' | 'EN' | 'FR' | 'IT' | 'DE')}
+        language={activeLanguage}
         weddingId={weddingData.id}
       />
     </div>

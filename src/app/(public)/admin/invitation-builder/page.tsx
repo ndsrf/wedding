@@ -147,6 +147,7 @@ export default function InvitationBuilderPage() {
 
       const template = await res.json();
       setCurrentTemplate(template);
+      setUserTemplates((prev) => [template, ...prev]);
       setView('editor');
       setNewTemplateName('');
       setSelectedSeed(null);
@@ -179,6 +180,7 @@ export default function InvitationBuilderPage() {
 
       const updated = await res.json();
       setCurrentTemplate(updated);
+      setUserTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save template');

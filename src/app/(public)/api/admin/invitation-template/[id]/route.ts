@@ -224,7 +224,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     // Revalidate ISR cached pages (fire-and-forget for performance)
     void revalidateWeddingRSVPPages(template.wedding_id);
 
-    return NextResponse.json({ success: true }, { status: 204 });
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error('Error deleting invitation template:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
