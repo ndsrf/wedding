@@ -84,6 +84,7 @@ export async function GET(request: NextRequest) {
       planner_name: wedding.planner.name,
       planner_email: wedding.planner.email,
       theme_id: wedding.theme_id,
+      wedding_day_theme_id: wedding.wedding_day_theme_id,
       theme_name: wedding.theme?.name || null,
       couple_names: wedding.couple_names,
       wedding_date: wedding.wedding_date,

@@ -225,6 +225,7 @@ export async function GET() {
       id: wedding.id,
       planner_id: wedding.planner_id,
       theme_id: wedding.theme_id,
+      wedding_day_theme_id: wedding.wedding_day_theme_id,
       invitation_template_id: (wedding as unknown as { invitation_template_id: string | null }).invitation_template_id || null,
       couple_names: wedding.couple_names,
       wedding_date: wedding.wedding_date,

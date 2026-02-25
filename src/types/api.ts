@@ -129,6 +129,7 @@ export interface MasterWeddingOverview {
   planner_name: string;
   planner_email: string;
   theme_id: string | null;
+  wedding_day_theme_id: string | null;
   theme_name: string | null;
   couple_names: string;
   wedding_date: Date;
