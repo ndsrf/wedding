@@ -58,6 +58,10 @@ export default function InvitationBuilderPage() {
   const [selectedSeed, setSelectedSeed] = useState<string | null>(null);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
 
+  // Rename state
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+
   // Load initial data
   useEffect(() => {
     loadData();
@@ -198,6 +202,60 @@ export default function InvitationBuilderPage() {
     }
   };
 
+  const handleDuplicateTemplate = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/invitation-template/${id}/duplicate`, {
+        method: 'POST',
+      });
+
+      if (!res.ok) throw new Error('Failed to duplicate template');
+
+      const duplicate = await res.json();
+      setUserTemplates((prev) => [duplicate, ...prev]);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to duplicate template');
+    }
+  };
+
+  const handlePreviewTemplate = (template: UserTemplate) => {
+    if (!weddingData) return;
+    try {
+      const previewData = {
+        design: template.design,
+        weddingData,
+        language: 'en',
+      };
+      sessionStorage.setItem('invitation-preview-data', JSON.stringify(previewData));
+      window.open('/admin/invitation-builder/preview', '_blank', 'width=1200,height=800');
+    } catch (err) {
+      console.error('Failed to open preview:', err);
+    }
+  };
+
+  const handleRenameTemplate = async (id: string) => {
+    const name = renameValue.trim();
+    if (!name) return;
+
+    try {
+      const res = await fetch(`/api/admin/invitation-template/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!res.ok) throw new Error('Failed to rename template');
+
+      const updated = await res.json() as UserTemplate;
+      setUserTemplates((prev) => prev.map((tpl) => (tpl.id === id ? updated : tpl)));
+      setRenamingId(null);
+      setRenameValue('');
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to rename template');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -285,21 +343,71 @@ export default function InvitationBuilderPage() {
 
                   {/* Content */}
                   <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {template.name}
-                    </h3>
+                    {renamingId === template.id ? (
+                      <div className="flex gap-2 mb-4">
+                        <input
+                          type="text"
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleRenameTemplate(template.id);
+                            if (e.key === 'Escape') { setRenamingId(null); setRenameValue(''); }
+                          }}
+                          placeholder={t('renameTemplatePlaceholder')}
+                          className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleRenameTemplate(template.id)}
+                          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium"
+                        >
+                          {t('confirmRename')}
+                        </button>
+                        <button
+                          onClick={() => { setRenamingId(null); setRenameValue(''); }}
+                          className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm font-medium"
+                        >
+                          {tCommon('buttons.cancel')}
+                        </button>
+                      </div>
+                    ) : (
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {template.name}
+                      </h3>
+                    )}
                     {template.based_on_preset && (
                       <p className="text-sm text-gray-600 mb-4">
                         {t('basedOn')}: {systemSeeds.find((s) => s.id === template.based_on_preset)?.name}
                       </p>
                     )}
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleEditTemplate(template)}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
                       >
                         {t('editTemplate')}
+                      </button>
+                      <button
+                        onClick={() => handlePreviewTemplate(template)}
+                        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition text-sm font-medium"
+                        title={t('previewTemplate')}
+                      >
+                        {t('previewTemplate')}
+                      </button>
+                      <button
+                        onClick={() => { setRenamingId(template.id); setRenameValue(template.name); }}
+                        className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition text-sm font-medium"
+                        title={t('renameTemplate')}
+                      >
+                        {t('renameTemplate')}
+                      </button>
+                      <button
+                        onClick={() => handleDuplicateTemplate(template.id)}
+                        className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition text-sm font-medium"
+                        title={t('duplicateTemplate')}
+                      >
+                        {t('duplicateTemplate')}
                       </button>
                       <button
                         onClick={() => handleDeleteTemplate(template.id)}
