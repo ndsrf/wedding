@@ -41,10 +41,51 @@ const nextConfig = {
     ],
   },
   async headers() {
+    // Build Content-Security-Policy directives
+    // - unsafe-inline required for Next.js hydration scripts and Tailwind inline styles
+    // - unsafe-eval required for Next.js dev mode source maps (omitted in production)
+    const scriptSrcDirectives = [
+      "'self'",
+      "'unsafe-inline'",
+      // Google OAuth, reCAPTCHA
+      'https://accounts.google.com',
+      'https://www.google.com',
+      'https://www.gstatic.com',
+      // Facebook OAuth
+      'https://connect.facebook.net',
+      // AMP runtime
+      'https://cdn.ampproject.org',
+      // Vercel Analytics / Speed Insights
+      'https://va.vercel-scripts.com',
+      'https://vitals.vercel-insights.com',
+    ];
+    if (process.env.NODE_ENV !== 'production') {
+      scriptSrcDirectives.push("'unsafe-eval'");
+    }
+
+    const cspDirectives = [
+      "default-src 'self'",
+      `script-src ${scriptSrcDirectives.join(' ')}`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https:",
+      "frame-src 'self' https://accounts.google.com https://www.facebook.com https://www.google.com",
+      "frame-ancestors 'self'",
+      "form-action 'self' https://accounts.google.com https://www.facebook.com",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "worker-src 'self' blob:",
+    ].join('; ');
+
     const headers = [
       {
         source: '/:path*',
         headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspDirectives,
+          },
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
@@ -58,8 +99,12 @@ const nextConfig = {
             value: 'nosniff',
           },
           {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
           },
         ],
       },

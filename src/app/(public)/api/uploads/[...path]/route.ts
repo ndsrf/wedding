@@ -38,6 +38,9 @@ export async function GET(
     // Determine content type
     const contentType = mime.getType(filePath) || 'application/octet-stream';
 
+    // Restrict CORS to the application's own origin only
+    const allowedOrigin = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || '';
+
     // Create response with appropriate headers
     return new NextResponse(fileBuffer, {
       headers: {
@@ -45,8 +48,8 @@ export async function GET(
         'Content-Length': stats.size.toString(),
         // Cache for 1 year, immutable
         'Cache-Control': 'public, max-age=31536000, immutable',
-        // Allow cross-origin (optional but good for images)
-        'Access-Control-Allow-Origin': '*',
+        // Restrict cross-origin access to the app's own origin
+        ...(allowedOrigin ? { 'Access-Control-Allow-Origin': allowedOrigin } : {}),
       },
     });
   } catch (error) {
