@@ -89,7 +89,7 @@ export async function POST(_request: NextRequest) {
       }, { status: 403 });
     }
 
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
     const redirectUri = `${appUrl}/api/admin/gallery/google-photos/callback`;
 
     // State encodes the wedding_id so the callback knows which wedding to update
