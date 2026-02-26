@@ -1,21 +1,20 @@
 /**
- * Google Photos Integration API
+ * Google Photos Album Link API
  *
- * GET    /api/admin/gallery/google-photos  - Get current Google Photos connection status
- * DELETE /api/admin/gallery/google-photos  - Disconnect Google Photos
- * POST   /api/admin/gallery/google-photos  - Start OAuth flow (returns redirect URL)
+ * GET    /api/admin/gallery/google-photos  - Get current album link
+ * POST   /api/admin/gallery/google-photos  - Save album share link
+ * DELETE /api/admin/gallery/google-photos  - Remove album link
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAnyRole } from '@/lib/auth/middleware';
-import { buildGooglePhotosAuthUrl } from '@/lib/google-photos/client';
 import type { APIResponse } from '@/types/api';
 
 export const runtime = 'nodejs';
 
 // ============================================================================
-// GET – connection status
+// GET – current album link
 // ============================================================================
 
 export async function GET() {
@@ -31,12 +30,7 @@ export async function GET() {
 
     const wedding = await prisma.wedding.findUnique({
       where: { id: user.wedding_id },
-      select: {
-        google_photos_album_id: true,
-        google_photos_album_url: true,
-        google_photos_share_url: true,
-        google_photos_token_expiry: true,
-      },
+      select: { google_photos_share_url: true },
     });
 
     if (!wedding) {
@@ -46,16 +40,11 @@ export async function GET() {
       }, { status: 404 });
     }
 
-    const connected = !!wedding.google_photos_album_id;
-
     return NextResponse.json<APIResponse>({
       success: true,
       data: {
-        connected,
-        album_id: wedding.google_photos_album_id,
-        album_url: wedding.google_photos_album_url,
+        connected: !!wedding.google_photos_share_url,
         share_url: wedding.google_photos_share_url,
-        token_expiry: wedding.google_photos_token_expiry,
       },
     });
   } catch (err) {
@@ -75,10 +64,10 @@ export async function GET() {
 }
 
 // ============================================================================
-// POST – start OAuth flow
+// POST – save album share link
 // ============================================================================
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const user = await requireAnyRole(['wedding_admin', 'planner', 'master_admin']);
 
@@ -89,15 +78,35 @@ export async function POST(_request: NextRequest) {
       }, { status: 403 });
     }
 
-    const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
-    const redirectUri = `${appUrl}/api/admin/gallery/google-photos/callback`;
+    const body = await request.json();
+    const shareUrl = (body?.share_url ?? '').trim();
 
-    // State encodes the wedding_id so the callback knows which wedding to update
-    const state = Buffer.from(JSON.stringify({ wedding_id: user.wedding_id })).toString('base64');
+    if (!shareUrl) {
+      return NextResponse.json<APIResponse>({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'share_url is required' },
+      }, { status: 400 });
+    }
 
-    const authUrl = buildGooglePhotosAuthUrl(redirectUri, state);
+    // Basic URL validation
+    try {
+      new URL(shareUrl);
+    } catch {
+      return NextResponse.json<APIResponse>({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Invalid URL' },
+      }, { status: 400 });
+    }
 
-    return NextResponse.json<APIResponse>({ success: true, data: { auth_url: authUrl } });
+    await prisma.wedding.update({
+      where: { id: user.wedding_id },
+      data: { google_photos_share_url: shareUrl },
+    });
+
+    return NextResponse.json<APIResponse>({
+      success: true,
+      data: { connected: true, share_url: shareUrl },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     if (message.startsWith('UNAUTHORIZED') || message.startsWith('FORBIDDEN')) {
@@ -109,13 +118,13 @@ export async function POST(_request: NextRequest) {
     console.error('[GOOGLE_PHOTOS_POST]', err);
     return NextResponse.json<APIResponse>({
       success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to start Google Photos OAuth flow' },
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to save album link' },
     }, { status: 500 });
   }
 }
 
 // ============================================================================
-// DELETE – disconnect Google Photos
+// DELETE – remove album link
 // ============================================================================
 
 export async function DELETE() {
@@ -131,14 +140,7 @@ export async function DELETE() {
 
     await prisma.wedding.update({
       where: { id: user.wedding_id },
-      data: {
-        google_photos_album_id: null,
-        google_photos_album_url: null,
-        google_photos_share_url: null,
-        google_photos_refresh_token: null,
-        google_photos_access_token: null,
-        google_photos_token_expiry: null,
-      },
+      data: { google_photos_share_url: null },
     });
 
     return NextResponse.json<APIResponse>({ success: true, data: { connected: false } });
@@ -153,7 +155,7 @@ export async function DELETE() {
     console.error('[GOOGLE_PHOTOS_DELETE]', err);
     return NextResponse.json<APIResponse>({
       success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to disconnect Google Photos' },
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to remove album link' },
     }, { status: 500 });
   }
 }

@@ -115,13 +115,8 @@ model Wedding {
   wizard_current_step             Int?
   wizard_completed_at             DateTime?
   wizard_skipped                  Boolean            @default(false)
-  // Google Photos integration
-  google_photos_album_id          String?            // Google Photos album ID
-  google_photos_album_url         String?            // Album browse URL (for admin)
-  google_photos_share_url         String?            // Contributor share URL (for guests)
-  google_photos_refresh_token     String?            // OAuth refresh token (encrypted in practice)
-  google_photos_access_token      String?            // Current access token (short-lived)
-  google_photos_token_expiry      DateTime?          // When the access token expires
+  // Google Photos integration (admin pastes album share link manually)
+  google_photos_share_url         String?            // Album share link pasted by admin
   checklist_sections              ChecklistSection[]
   checklist_tasks                 ChecklistTask[]
   families                        Family[]
