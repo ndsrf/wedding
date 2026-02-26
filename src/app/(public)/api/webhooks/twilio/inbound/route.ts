@@ -213,9 +213,10 @@ export async function POST(request: NextRequest) {
             let photoUrl = blobUrl;
             let thumbnailUrl: string | null = null;
             let deleteBlobUrl: string | null = blobUrl;
+            let gPhotos: Awaited<ReturnType<typeof uploadToWeddingGooglePhotos>> = null;
 
             try {
-              const gPhotos = await uploadToWeddingGooglePhotos(
+              gPhotos = await uploadToWeddingGooglePhotos(
                 mediaFamily.wedding_id,
                 buffer,
                 filename,
