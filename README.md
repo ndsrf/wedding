@@ -1054,8 +1054,11 @@ The AI assistant is given all wedding details:
 - RSVP deadline and guest-specific RSVP link
 - Dress code, gift IBAN/bank account, dietary restrictions, transportation
 - Guest's RSVP status (attending / not attending / pending) per family member
+- **All text blocks from the active wedding invitation theme** — every `TextBlock` and `ButtonBlock` in the current invitation template is included verbatim in the AI context so the assistant can answer questions about any content shown on the invitation page (e.g. welcome messages, schedule descriptions, special instructions, CTA button labels)
 
 The AI responds **in the guest's preferred language** (ES, EN, FR, IT, DE) and always ends with a note directing guests to contact the couple for more personal questions.
+
+> **Active template selection**: on the day of the wedding the `wedding_day_invitation_template_id` override is used (if set); on all other days the standard `invitation_template_id` is used. This mirrors the same logic applied to the guest-facing RSVP page.
 
 ##### Implementation Files
 

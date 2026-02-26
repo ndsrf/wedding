@@ -15,6 +15,7 @@
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { Wedding, Family, FamilyMember } from '@prisma/client';
+import type { TemplateDesign, SupportedLanguage } from '@/types/invitation-template';
 
 // ============================================================================
 // TYPES
@@ -22,6 +23,10 @@ import type { Wedding, Family, FamilyMember } from '@prisma/client';
 
 export interface FamilyContext extends Pick<Family, 'name' | 'magic_token' | 'preferred_language'> {
   members: Pick<FamilyMember, 'name' | 'attending'>[];
+}
+
+export interface InvitationTemplateContext {
+  design: TemplateDesign;
 }
 
 // ============================================================================
@@ -58,12 +63,35 @@ function formatDate(date: Date, locale = 'en-GB'): string {
   });
 }
 
+/**
+ * Extract all visible text from an invitation template design.
+ * Collects TextBlock content and ButtonBlock labels in the guest's language.
+ * Falls back to English when the requested language is not available.
+ */
+function extractInvitationText(design: TemplateDesign, language: string): string[] {
+  const lang = language as SupportedLanguage;
+  const texts: string[] = [];
+
+  for (const block of design.blocks) {
+    if (block.type === 'text') {
+      const text = (block.content[lang] || block.content['EN'])?.trim();
+      if (text) texts.push(text);
+    } else if (block.type === 'button') {
+      const text = (block.text[lang] || block.text['EN'])?.trim();
+      if (text) texts.push(text);
+    }
+  }
+
+  return texts;
+}
+
 function buildSystemPrompt(
   wedding: Wedding,
   family: FamilyContext | null,
   language: string,
   appUrl: string,
-  rsvpUrl?: string | null
+  rsvpUrl?: string | null,
+  invitationTemplate?: InvitationTemplateContext | null
 ): string {
   const lang = language in LANGUAGE_NAMES ? language : 'EN';
   const languageName = LANGUAGE_NAMES[lang];
@@ -131,6 +159,17 @@ function buildSystemPrompt(
     }
     if (pending.length > 0) {
       prompt += `- Pending RSVP (${pending.length}): ${pending.map(m => m.name).join(', ')}\n`;
+    }
+  }
+
+  if (invitationTemplate) {
+    const invitationTexts = extractInvitationText(invitationTemplate.design, lang);
+    if (invitationTexts.length > 0) {
+      prompt += `\n## Invitation Content\n`;
+      prompt += `The following text blocks appear in the wedding invitation and may be referenced by guests:\n`;
+      for (const text of invitationTexts) {
+        prompt += `- ${text}\n`;
+      }
     }
   }
 
@@ -203,11 +242,12 @@ async function generateWithGemini(systemPrompt: string, userMessage: string): Pr
 /**
  * Generate an AI reply to a guest's WhatsApp message.
  *
- * @param guestMessage - The text sent by the guest
- * @param wedding      - Full Wedding record from the database
- * @param family       - Family context (null if the sender was not found)
- * @param language     - Language code (ES, EN, FR, IT, DE)
- * @param rsvpUrl      - Optional short RSVP URL to use instead of generating a long one
+ * @param guestMessage       - The text sent by the guest
+ * @param wedding            - Full Wedding record from the database
+ * @param family             - Family context (null if the sender was not found)
+ * @param language           - Language code (ES, EN, FR, IT, DE)
+ * @param rsvpUrl            - Optional short RSVP URL to use instead of generating a long one
+ * @param invitationTemplate - Optional active invitation template whose text blocks are added to the AI context
  * @returns AI-generated reply string, or null if no provider is available / call fails
  */
 export async function generateWeddingReply(
@@ -215,10 +255,11 @@ export async function generateWeddingReply(
   wedding: Wedding,
   family: FamilyContext | null,
   language = 'EN',
-  rsvpUrl?: string | null
+  rsvpUrl?: string | null,
+  invitationTemplate?: InvitationTemplateContext | null
 ): Promise<string | null> {
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl);
+  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate);
 
   // Determine provider: explicit env var → fallback to whichever key is present
   const provider =
