@@ -90,7 +90,7 @@ export async function refreshGoogleAccessToken(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to refresh Google token: ${text}`);
+    throw new Error(`Failed to refresh Google token (HTTP ${res.status}): ${text}`);
   }
 
   const data = await res.json();
@@ -132,7 +132,7 @@ export async function exchangeCodeForTokens(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to exchange Google auth code: ${text}`);
+    throw new Error(`Failed to exchange Google auth code (HTTP ${res.status}): ${text}`);
   }
 
   const data = await res.json();
@@ -203,7 +203,7 @@ export async function createAlbum(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to create Google Photos album: ${text}`);
+    throw new Error(`Failed to create Google Photos album (HTTP ${res.status}): ${text}`);
   }
 
   return res.json();
@@ -229,7 +229,7 @@ export async function shareAlbum(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to share Google Photos album: ${text}`);
+    throw new Error(`Failed to share Google Photos album (HTTP ${res.status}): ${text}`);
   }
 
   const data = await res.json();
@@ -258,7 +258,7 @@ export async function listAlbumMediaItems(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to list Google Photos media items: ${text}`);
+    throw new Error(`Failed to list Google Photos media items (HTTP ${res.status}): ${text}`);
   }
 
   const data = await res.json();
