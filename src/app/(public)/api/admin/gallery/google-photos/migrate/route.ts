@@ -63,10 +63,6 @@ export async function POST(request: NextRequest) {
       select: { id: true, url: true, caption: true, sender_name: true },
     });
 
-    const remaining = await prisma.weddingPhoto.count({
-      where: { wedding_id: user.wedding_id, google_photos_media_id: null },
-    });
-
     const errors: string[] = [];
     let migrated = 0;
 

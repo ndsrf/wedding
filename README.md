@@ -1106,15 +1106,20 @@ The AI responds **in the guest's preferred language** (ES, EN, FR, IT, DE) and a
 
 ### Google Photos Integration
 
-Each wedding can be linked to a dedicated Google Photos shared album. Guests receive a contributor link to upload their own photos, and the admin panel syncs those photos into the gallery carousel displayed on the invitation page.
+Each wedding can optionally be linked to a Google Photos album. The app uploads photos directly to the album whenever guests share images (via the invitation gallery upload or WhatsApp). Blob storage is used only as a temporary staging area — once a photo is safely in Google Photos the blob copy is deleted.
+
+> **API scope note (post-April 2025):** Google shut down the broad `photoslibrary` and `photoslibrary.sharing` scopes. This integration uses only the two scopes that remain active:
+> - `photoslibrary.appendonly` — create albums and upload media
+> - `photoslibrary.readonly.appcreateddata` — read back media items the app created
 
 #### How It Works
 
-1. The wedding admin clicks **Connect Google Photos** in the Configure → Gallery tab.
-2. The app redirects to Google's OAuth consent screen requesting Photos Library access.
-3. After the admin grants permission, the app automatically creates a shared album titled `Boda <couple names>` and stores the OAuth tokens and album URLs against the wedding record.
-4. The admin copies the contributor share URL and distributes it to guests (or the invitation page surfaces it directly).
-5. The admin triggers a **Sync** to pull any new photos from the album into the `WeddingPhoto` table for display in the gallery carousel.
+1. The admin connects the wedding to a Google account via OAuth (Configure → Gallery tab).
+2. The app creates a Google Photos album named `Boda <couple names>` in that account.
+3. From that point on, **every new photo** sent via WhatsApp or uploaded through the invitation gallery is forwarded to Google Photos automatically. The blob copy is deleted once the upload succeeds.
+4. **Existing blob photos** can be migrated to Google Photos in bulk using the **Migrate to Google Photos** button in the admin panel (processes 10 photos per batch).
+5. The invitation gallery carousel fetches photos in pages of 20 with cursor-based pagination. Google Photos CDN URLs expire after ~60 minutes; the gallery API refreshes them lazily in the background so guests always see valid image URLs.
+6. Optionally, the admin can paste a Google Photos share URL (obtained manually from the album) so guests can browse and contribute photos directly in the Google Photos app.
 
 #### 1. Enable the Google Photos Library API
 
@@ -1122,9 +1127,9 @@ Each wedding can be linked to a dedicated Google Photos shared album. Guests rec
 2. Go to **APIs & Services → Library**.
 3. Search for **"Photos Library API"** and click **Enable**.
 
-> **Note:** The Photos Library API is separate from other Google APIs. It must be explicitly enabled even if Google Drive or other APIs are already active.
+> **Note:** The Photos Library API is separate from other Google APIs. It must be explicitly enabled even if Drive or other APIs are already active.
 
-#### 2. Configure the OAuth 2.0 Credentials
+#### 2. Configure OAuth 2.0 Credentials
 
 The integration reuses the same `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` used for Google Sign-In. You only need to add the Google Photos callback URL as an additional authorized redirect URI.
 
@@ -1134,84 +1139,86 @@ The integration reuses the same `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` us
    ```
    https://your-domain.com/api/admin/gallery/google-photos/callback
    ```
-   Replace `your-domain.com` with your actual domain. For local development also add:
+   For local development also add:
    ```
    http://localhost:3000/api/admin/gallery/google-photos/callback
    ```
 4. Click **Save**.
 
-No new environment variables are required — the integration uses the existing `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` from your `.env` file.
+No new environment variables are required — the integration uses the existing `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `APP_URL`.
 
 #### 3. Connect a Wedding to Google Photos
 
 1. Log in as a wedding admin or planner.
 2. Navigate to **Admin → Configure → Gallery** tab.
 3. Click **Connect Google Photos**.
-4. You will be redirected to Google's consent screen. Sign in with the Google account that will own the album and grant the requested permissions:
-   - View and manage your Google Photos library
-   - Share albums
+4. You are redirected to Google's consent screen. Sign in with the Google account that will own the album and grant the requested permissions:
+   - **Add to your Google Photos library** (`photoslibrary.appendonly`)
+   - **View Google Photos library items created by this app** (`photoslibrary.readonly.appcreateddata`)
 5. After granting access, you are redirected back to the Configure page. The app will have:
-   - Created a shared album named `Boda <couple names>` in the connected Google account.
-   - Stored the OAuth refresh token and album URLs in the database.
+   - Created an album named `Boda <couple names>` in the connected Google account.
+   - Stored the OAuth access and refresh tokens in the database.
 
-> **Important:** The consent screen must be completed with `prompt=consent` so that a refresh token is issued. If you accidentally skip or deny the refresh token, disconnect and reconnect to repeat the flow.
+> **Important:** Complete the consent screen with `prompt=consent` so a refresh token is issued. If Google doesn't return a refresh token, revoke app access at [myaccount.google.com/permissions](https://myaccount.google.com/permissions) and reconnect.
 
-#### 4. Share the Album with Guests
+#### 4. Migrate Existing Photos to Google Photos
 
-After connecting, two album URLs are available in the Configure → Gallery tab:
+If photos were uploaded before Google Photos was connected (stored in blob storage), use the migration tool to move them:
 
-| URL | Purpose |
-|-----|---------|
-| **Album URL** (`google_photos_album_url`) | Opens the album in Google Photos — for the planner's own use |
-| **Share URL** (`google_photos_share_url`) | Contributor link — share this with guests so they can upload photos |
+1. After connecting Google Photos, an amber **Migrate to Google Photos** card appears in the Configure → Gallery tab.
+2. The card shows how many photos remain in blob storage.
+3. Click **Start migration**. The app processes 10 photos per batch, showing a progress bar as it works.
+4. Each migrated photo is uploaded to Google Photos and deleted from blob storage.
+5. The migration button disappears once all photos are migrated.
 
-The share URL can be embedded in WhatsApp messages or shown on the RSVP confirmation page.
+You can run migration at any time — it is safe to interrupt and resume.
 
-#### 5. Sync Photos
+#### 5. Share the Album with Guests (Optional)
 
-The sync step pulls the latest media items from Google Photos into the local `WeddingPhoto` table so they appear in the invitation gallery carousel.
+If you want guests to browse or contribute photos directly in the Google Photos app:
 
-- Click **Sync Photos** in the Configure → Gallery tab.
-- New items (identified by their stable Google Photos `productUrl`) are added; existing records are not duplicated.
-- Up to 100 photos are fetched per sync.
-- Access tokens are refreshed automatically if expired.
+1. Open the album in Google Photos and copy the share link.
+2. Paste it into the **Share URL** field in Configure → Gallery tab and click **Save**.
 
-Sync as often as needed — for example, after the wedding day to pull guest uploads.
+The share URL is stored but not automatically distributed — add it to WhatsApp messages or the RSVP confirmation page as needed.
 
 #### 6. Disconnect Google Photos
 
-Click **Disconnect** in the Configure → Gallery tab. This clears all stored tokens and album references from the database. The Google Photos album itself is not deleted. Reconnecting will reuse the existing album if one was already created for the wedding.
+Click **Disconnect** in the Configure → Gallery tab. This clears all stored tokens and album references from the database. The Google Photos album itself is not deleted. Photos already migrated remain in Google Photos and continue to be served from there (the `google_photos_media_id` in the database is preserved). New uploads will fall back to blob storage until the wedding is reconnected.
 
 #### Troubleshooting
 
-**"Google Photos not connected" error during sync:**
-- Ensure the OAuth flow completed successfully and a refresh token was stored.
-- Disconnect and reconnect to repeat the OAuth flow.
+**OAuth callback shows an error:**
+- `oauth_denied` — the admin declined the consent screen. Try again and grant all permissions.
+- `token_exchange_failed` — server-side error exchanging the code for tokens. Check application logs and verify `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are correct.
+- `invalid_state` — the OAuth state parameter didn't match (possible CSRF or expired session). Try connecting again.
 
-**OAuth callback redirects to an error page:**
-- `google_photos_denied` — the admin declined the consent screen. Try again and grant all requested permissions.
-- `no_refresh_token` — Google did not return a refresh token. Revoke app access in your [Google Account permissions](https://myaccount.google.com/permissions) and reconnect to force a new consent prompt.
-- `connection_failed` — a server-side error occurred. Check application logs for details.
-
-**Photos not appearing in the gallery after sync:**
-- Confirm the photos have been added to the album (check the Album URL directly in Google Photos).
+**Photos not appearing in the gallery:**
 - Check that the Photos Library API is enabled in Google Cloud Console.
 - Verify `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are correctly set.
+- Confirm Google Photos is connected (check Configure → Gallery tab shows "Connected").
+
+**Migration stalls or shows errors:**
+- Check application logs for per-photo error messages.
+- Errors during migration are shown in an expandable list in the admin UI.
+- Photos that fail to migrate remain in blob storage and will be retried on the next migration run.
+- If the access token is expired, the helper refreshes it automatically using the stored refresh token.
+
+**Gallery images show broken links:**
+- Google Photos CDN URLs (`baseUrl`) expire after ~60 minutes. The gallery API refreshes them automatically using the stored `google_photos_media_id`. If images still break, check that `photoslibrary.readonly.appcreateddata` scope was granted during OAuth.
 
 **OAuth credentials rejected:**
-- Confirm the callback URL `https://your-domain.com/api/admin/gallery/google-photos/callback` is listed as an authorized redirect URI in the Google Cloud Console credentials.
+- Confirm the callback URL `https://your-domain.com/api/admin/gallery/google-photos/callback` is listed as an authorized redirect URI in Google Cloud Console.
 - Ensure `APP_URL` in your `.env` matches the domain used to access the app.
 
 #### Required OAuth Scopes
 
-The app requests the following scopes during the Google Photos OAuth flow:
-
 ```
-https://www.googleapis.com/auth/photoslibrary
-https://www.googleapis.com/auth/photoslibrary.sharing
+https://www.googleapis.com/auth/photoslibrary.appendonly
+https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata
 ```
 
-These are requested with `access_type=offline` and `prompt=consent` to ensure a refresh token is always returned.
+Requested with `access_type=offline` and `prompt=consent` to ensure a refresh token is always issued.
 
 #### Environment Variables
 
