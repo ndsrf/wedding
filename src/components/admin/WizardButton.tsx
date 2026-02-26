@@ -37,9 +37,9 @@ export function WizardButton() {
     <button
       onClick={handleClick}
       disabled={isLoading}
-      className="flex items-center w-full p-4 border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg hover:border-purple-400 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="group flex items-center w-full gap-4 bg-white rounded-xl border border-purple-200 shadow-sm p-4 hover:shadow-md hover:border-purple-400 hover:bg-purple-50/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center group-hover:bg-purple-100 transition-colors">
         <svg
           className="h-6 w-6 text-purple-600"
           fill="none"
@@ -54,11 +54,11 @@ export function WizardButton() {
           />
         </svg>
       </div>
-      <div className="ml-4">
-        <h3 className="text-sm font-medium text-purple-900">
+      <div className="text-left">
+        <h3 className="text-sm font-semibold text-purple-900">
           {isLoading ? 'Loading...' : t('setupWizard')}
         </h3>
-        <p className="mt-1 text-sm text-purple-700">{t('setupWizardSubtitle')}</p>
+        <p className="mt-0.5 text-xs text-purple-700">{t('setupWizardSubtitle')}</p>
       </div>
     </button>
   );
