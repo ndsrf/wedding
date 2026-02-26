@@ -1,17 +1,15 @@
 /**
  * Google Photos Library API client
  *
- * Handles OAuth 2.0 token management and Google Photos API calls:
- * - Creating shared albums
- * - Getting the contributor share URL
- * - Listing media items in an album
- * - Uploading a photo to an album
+ * Scope changes effective April 1 2025:
+ *   - photoslibrary (full access)  → REMOVED
+ *   - photoslibrary.readonly       → REMOVED
+ *   - photoslibrary.sharing        → REMOVED
+ *   - photoslibrary.appendonly     → STILL WORKS (upload + create albums)
+ *   - photoslibrary.readonly.appcreateddata → STILL WORKS (read app-created items)
  *
- * Docs: https://developers.google.com/photos/library/reference/rest
- *
- * Required OAuth 2.0 scopes:
- *   https://www.googleapis.com/auth/photoslibrary
- *   https://www.googleapis.com/auth/photoslibrary.sharing
+ * This client only uses the two scopes above. Apps can read back media items
+ * they uploaded but cannot access the user's full photo library.
  */
 
 export interface GoogleTokens {
@@ -23,18 +21,7 @@ export interface GoogleTokens {
 export interface GooglePhotosAlbum {
   id: string;
   title: string;
-  productUrl: string; // URL to open in Google Photos
-  shareInfo?: {
-    sharedAlbumOptions?: {
-      isCollaborative?: boolean;
-      isCommentable?: boolean;
-    };
-    shareableUrl?: string;
-    shareToken?: string;
-    isJoined?: boolean;
-    isOwned?: boolean;
-    isJoinable?: boolean;
-  };
+  productUrl: string;
   mediaItemsCount?: string;
   coverPhotoBaseUrl?: string;
 }
@@ -43,10 +30,10 @@ export interface GooglePhotosMediaItem {
   id: string;
   description?: string;
   productUrl: string;
-  baseUrl: string; // Short-lived (expires ~60 min), use =w<width>-h<height> suffix
+  baseUrl: string; // Short-lived (expires ~60 min), append =w<N>-h<N> for sizing
   mimeType: string;
   mediaMetadata: {
-    creationTime: string; // RFC 3339
+    creationTime: string;
     width?: string;
     height?: string;
     photo?: Record<string, unknown>;
@@ -61,78 +48,50 @@ export interface GooglePhotosMediaItem {
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const PHOTOS_API_BASE = 'https://photoslibrary.googleapis.com/v1';
 
-/**
- * Refresh an expired Google access token using the refresh token.
- * Returns new tokens (the refresh_token is typically unchanged).
- */
-export async function refreshGoogleAccessToken(
-  refreshToken: string
-): Promise<GoogleTokens> {
+// OAuth scopes that remain active after the April 2025 API changes
+export const GOOGLE_PHOTOS_SCOPES = [
+  'https://www.googleapis.com/auth/photoslibrary.appendonly',
+  'https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata',
+].join(' ');
+
+// ============================================================================
+// OAuth helpers
+// ============================================================================
+
+export function buildGooglePhotosAuthUrl(redirectUri: string, state: string): string {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  if (!clientId) throw new Error('GOOGLE_CLIENT_ID must be set');
 
-  if (!clientId || !clientSecret) {
-    throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
-  }
-
-  const body = new URLSearchParams({
+  const params = new URLSearchParams({
     client_id: clientId,
-    client_secret: clientSecret,
-    refresh_token: refreshToken,
-    grant_type: 'refresh_token',
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: GOOGLE_PHOTOS_SCOPES,
+    access_type: 'offline',
+    prompt: 'consent',
+    state,
   });
 
-  const res = await fetch(GOOGLE_TOKEN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to refresh Google token: ${text}`);
-  }
-
-  const data = await res.json();
-  return {
-    access_token: data.access_token,
-    refresh_token: data.refresh_token ?? refreshToken,
-    expiry_date: Date.now() + data.expires_in * 1000,
-  };
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
-/**
- * Exchange an authorization code for tokens.
- * Used in the OAuth callback route.
- */
-export async function exchangeCodeForTokens(
-  code: string,
-  redirectUri: string
-): Promise<GoogleTokens> {
+export async function exchangeCodeForTokens(code: string, redirectUri: string): Promise<GoogleTokens> {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
-  }
-
-  const body = new URLSearchParams({
-    code,
-    client_id: clientId,
-    client_secret: clientSecret,
-    redirect_uri: redirectUri,
-    grant_type: 'authorization_code',
-  });
+  if (!clientId || !clientSecret) throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
 
   const res = await fetch(GOOGLE_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
+    body: new URLSearchParams({
+      code, client_id: clientId, client_secret: clientSecret,
+      redirect_uri: redirectUri, grant_type: 'authorization_code',
+    }).toString(),
   });
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to exchange Google auth code: ${text}`);
+    throw new Error(`Failed to exchange Google auth code (HTTP ${res.status}): ${text}`);
   }
 
   const data = await res.json();
@@ -143,43 +102,39 @@ export async function exchangeCodeForTokens(
   };
 }
 
-/**
- * Build the Google OAuth authorization URL for Google Photos scopes.
- */
-export function buildGooglePhotosAuthUrl(
-  redirectUri: string,
-  state: string
-): string {
+export async function refreshGoogleAccessToken(refreshToken: string): Promise<GoogleTokens> {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  if (!clientId) throw new Error('GOOGLE_CLIENT_ID must be set');
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret) throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
 
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: 'code',
-    scope: [
-      'https://www.googleapis.com/auth/photoslibrary',
-      'https://www.googleapis.com/auth/photoslibrary.sharing',
-    ].join(' '),
-    access_type: 'offline',
-    prompt: 'consent', // Force consent screen to always get refresh_token
-    state,
+  const res = await fetch(GOOGLE_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId, client_secret: clientSecret,
+      refresh_token: refreshToken, grant_type: 'refresh_token',
+    }).toString(),
   });
 
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to refresh Google token (HTTP ${res.status}): ${text}`);
+  }
+
+  const data = await res.json();
+  return {
+    access_token: data.access_token,
+    refresh_token: data.refresh_token ?? refreshToken,
+    expiry_date: Date.now() + data.expires_in * 1000,
+  };
 }
 
 // ============================================================================
-// Google Photos API calls (authenticated)
+// Authenticated API helper
 // ============================================================================
 
-async function photosApiRequest(
-  accessToken: string,
-  path: string,
-  options?: RequestInit
-): Promise<Response> {
-  const url = `${PHOTOS_API_BASE}${path}`;
-  return fetch(url, {
+async function photosApiRequest(accessToken: string, path: string, options?: RequestInit): Promise<Response> {
+  return fetch(`${PHOTOS_API_BASE}${path}`, {
     ...options,
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -189,13 +144,11 @@ async function photosApiRequest(
   });
 }
 
-/**
- * Create a new Google Photos album with the given title.
- */
-export async function createAlbum(
-  accessToken: string,
-  title: string
-): Promise<GooglePhotosAlbum> {
+// ============================================================================
+// Albums  (appendonly scope)
+// ============================================================================
+
+export async function createAlbum(accessToken: string, title: string): Promise<GooglePhotosAlbum> {
   const res = await photosApiRequest(accessToken, '/albums', {
     method: 'POST',
     body: JSON.stringify({ album: { title } }),
@@ -203,75 +156,19 @@ export async function createAlbum(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to create Google Photos album: ${text}`);
+    throw new Error(`Failed to create Google Photos album (HTTP ${res.status}): ${text}`);
   }
 
   return res.json();
 }
 
-/**
- * Share an album so that anyone with the link can contribute.
- * Returns the share info including the shareableUrl.
- */
-export async function shareAlbum(
-  accessToken: string,
-  albumId: string
-): Promise<GooglePhotosAlbum['shareInfo']> {
-  const res = await photosApiRequest(accessToken, `/albums/${albumId}:share`, {
-    method: 'POST',
-    body: JSON.stringify({
-      sharedAlbumOptions: {
-        isCollaborative: true,
-        isCommentable: true,
-      },
-    }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to share Google Photos album: ${text}`);
-  }
-
-  const data = await res.json();
-  return data.shareInfo;
-}
-
-/**
- * List media items in an album (up to maxResults, default 50).
- */
-export async function listAlbumMediaItems(
-  accessToken: string,
-  albumId: string,
-  maxResults = 50,
-  pageToken?: string
-): Promise<{ mediaItems: GooglePhotosMediaItem[]; nextPageToken?: string }> {
-  const body: Record<string, unknown> = {
-    albumId,
-    pageSize: maxResults,
-  };
-  if (pageToken) body.pageToken = pageToken;
-
-  const res = await photosApiRequest(accessToken, '/mediaItems:search', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to list Google Photos media items: ${text}`);
-  }
-
-  const data = await res.json();
-  return {
-    mediaItems: data.mediaItems ?? [],
-    nextPageToken: data.nextPageToken,
-  };
-}
+// ============================================================================
+// Media items – upload  (appendonly scope)
+// ============================================================================
 
 /**
  * Upload a photo buffer to Google Photos and add it to an album.
- * Step 1: Upload bytes to get an upload token.
- * Step 2: Create media item using the upload token.
+ * Returns the created media item including its permanent ID and a fresh baseUrl.
  */
 export async function uploadPhotoToAlbum(
   accessToken: string,
@@ -281,7 +178,7 @@ export async function uploadPhotoToAlbum(
   mimeType?: string,
   description?: string
 ): Promise<GooglePhotosMediaItem> {
-  // Step 1: Upload raw bytes
+  // Step 1: upload raw bytes → receive upload token
   const uploadRes = await fetch(`${PHOTOS_API_BASE}/uploads`, {
     method: 'POST',
     headers: {
@@ -296,28 +193,26 @@ export async function uploadPhotoToAlbum(
 
   if (!uploadRes.ok) {
     const text = await uploadRes.text();
-    throw new Error(`Failed to upload photo to Google: ${text}`);
+    throw new Error(`Failed to upload photo bytes to Google (HTTP ${uploadRes.status}): ${text}`);
   }
 
   const uploadToken = await uploadRes.text();
 
-  // Step 2: Create media item in album
+  // Step 2: create media item in album
   const createRes = await photosApiRequest(accessToken, '/mediaItems:batchCreate', {
     method: 'POST',
     body: JSON.stringify({
       albumId,
-      newMediaItems: [
-        {
-          description: description ?? filename,
-          simpleMediaItem: { uploadToken, fileName: filename },
-        },
-      ],
+      newMediaItems: [{
+        description: description ?? filename,
+        simpleMediaItem: { uploadToken, fileName: filename },
+      }],
     }),
   });
 
   if (!createRes.ok) {
     const text = await createRes.text();
-    throw new Error(`Failed to create Google Photos media item: ${text}`);
+    throw new Error(`Failed to create Google Photos media item (HTTP ${createRes.status}): ${text}`);
   }
 
   const data = await createRes.json();
@@ -328,4 +223,64 @@ export async function uploadPhotoToAlbum(
   }
 
   return result?.mediaItem;
+}
+
+// ============================================================================
+// Media items – read  (readonly.appcreateddata scope)
+// ============================================================================
+
+/**
+ * Fetch fresh baseUrls for up to 50 media items by their permanent IDs.
+ * Call this whenever stored baseUrls are expired or about to expire.
+ */
+export async function batchGetMediaItems(
+  accessToken: string,
+  mediaItemIds: string[]
+): Promise<GooglePhotosMediaItem[]> {
+  if (mediaItemIds.length === 0) return [];
+  if (mediaItemIds.length > 50) throw new Error('batchGetMediaItems: max 50 IDs per call');
+
+  const params = new URLSearchParams();
+  for (const id of mediaItemIds) params.append('mediaItemIds', id);
+
+  const res = await fetch(`${PHOTOS_API_BASE}/mediaItems:batchGet?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to batch-get Google Photos media items (HTTP ${res.status}): ${text}`);
+  }
+
+  const data = await res.json();
+  return (data.mediaItemResults ?? [])
+    .filter((r: { mediaItem?: GooglePhotosMediaItem }) => r.mediaItem)
+    .map((r: { mediaItem: GooglePhotosMediaItem }) => r.mediaItem);
+}
+
+/**
+ * List media items created by this app in a specific album.
+ * Requires readonly.appcreateddata scope — only returns items this app uploaded.
+ */
+export async function listAlbumMediaItems(
+  accessToken: string,
+  albumId: string,
+  maxResults = 50,
+  pageToken?: string
+): Promise<{ mediaItems: GooglePhotosMediaItem[]; nextPageToken?: string }> {
+  const body: Record<string, unknown> = { albumId, pageSize: maxResults };
+  if (pageToken) body.pageToken = pageToken;
+
+  const res = await photosApiRequest(accessToken, '/mediaItems:search', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to list Google Photos media items (HTTP ${res.status}): ${text}`);
+  }
+
+  const data = await res.json();
+  return { mediaItems: data.mediaItems ?? [], nextPageToken: data.nextPageToken };
 }

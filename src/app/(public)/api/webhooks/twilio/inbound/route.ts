@@ -213,9 +213,10 @@ export async function POST(request: NextRequest) {
             let photoUrl = blobUrl;
             let thumbnailUrl: string | null = null;
             let deleteBlobUrl: string | null = blobUrl;
+            let gPhotos: Awaited<ReturnType<typeof uploadToWeddingGooglePhotos>> = null;
 
             try {
-              const gPhotos = await uploadToWeddingGooglePhotos(
+              gPhotos = await uploadToWeddingGooglePhotos(
                 mediaFamily.wedding_id,
                 buffer,
                 filename,
@@ -248,6 +249,10 @@ export async function POST(request: NextRequest) {
                 source: 'WHATSAPP',
                 sender_name: mediaFamily.name,
                 approved: true,
+                ...(gPhotos ? {
+                  google_photos_media_id: gPhotos.mediaId,
+                  url_expires_at: new Date(gPhotos.expiresAt),
+                } : {}),
               },
             });
 

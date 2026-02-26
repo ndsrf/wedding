@@ -3,106 +3,111 @@
  *
  * GET /api/admin/gallery/google-photos/callback
  *
- * Exchanges the authorization code for tokens, creates a shared Google Photos
- * album for the wedding, and redirects back to the configure page.
+ * Handles the redirect from Google after the user grants permission.
+ * Exchanges the auth code for tokens, creates a wedding album, and persists
+ * everything to the wedding record.
+ *
+ * Note: the sharing scope was removed by Google on April 1 2025.
+ * We use appendonly + readonly.appcreateddata instead.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import {
-  exchangeCodeForTokens,
-  createAlbum,
-  shareAlbum,
-} from '@/lib/google-photos/client';
+import { exchangeCodeForTokens, createAlbum } from '@/lib/google-photos/client';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const appUrl = process.env.APP_URL || 'http://localhost:3000';
   const configureUrl = `${appUrl}/admin/configure`;
 
   try {
     const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
-    const stateRaw = searchParams.get('state');
     const error = searchParams.get('error');
 
     if (error) {
-      console.warn('[GOOGLE_PHOTOS_CALLBACK] OAuth error:', error);
+      console.warn('[GOOGLE_PHOTOS_CALLBACK] OAuth error from Google:', error);
       return NextResponse.redirect(`${configureUrl}?tab=gallery&error=google_photos_denied`);
     }
 
+    const code = searchParams.get('code');
+    const stateRaw = searchParams.get('state');
+
     if (!code || !stateRaw) {
+      console.warn('[GOOGLE_PHOTOS_CALLBACK] Missing code or state');
       return NextResponse.redirect(`${configureUrl}?tab=gallery&error=invalid_callback`);
     }
 
-    // Decode state to get wedding_id
-    let weddingId: string;
+    let weddingId: string | undefined;
     try {
       const decoded = JSON.parse(Buffer.from(stateRaw, 'base64').toString('utf-8'));
       weddingId = decoded.wedding_id;
     } catch {
+      console.warn('[GOOGLE_PHOTOS_CALLBACK] Failed to decode state');
       return NextResponse.redirect(`${configureUrl}?tab=gallery&error=invalid_state`);
     }
 
     if (!weddingId) {
+      console.warn('[GOOGLE_PHOTOS_CALLBACK] No wedding_id in state');
       return NextResponse.redirect(`${configureUrl}?tab=gallery&error=invalid_state`);
     }
 
     const redirectUri = `${appUrl}/api/admin/gallery/google-photos/callback`;
+    console.log('[GOOGLE_PHOTOS_CALLBACK] Exchanging code for tokens');
 
-    // Exchange code for tokens
-    const tokens = await exchangeCodeForTokens(code, redirectUri);
+    let tokens;
+    try {
+      tokens = await exchangeCodeForTokens(code, redirectUri);
+    } catch (err) {
+      console.error('[GOOGLE_PHOTOS_CALLBACK] Token exchange failed:', err);
+      return NextResponse.redirect(`${configureUrl}?tab=gallery&error=token_exchange_failed`);
+    }
 
     if (!tokens.refresh_token) {
-      // Shouldn't happen if we used prompt=consent, but guard anyway
+      console.warn('[GOOGLE_PHOTOS_CALLBACK] No refresh_token in response');
       return NextResponse.redirect(`${configureUrl}?tab=gallery&error=no_refresh_token`);
     }
 
-    // Fetch wedding to get couple names for album title
     const wedding = await prisma.wedding.findUnique({
       where: { id: weddingId },
-      select: { couple_names: true, google_photos_album_id: true },
+      select: { id: true, couple_names: true, google_photos_album_id: true },
     });
 
     if (!wedding) {
+      console.warn('[GOOGLE_PHOTOS_CALLBACK] Wedding not found:', weddingId);
       return NextResponse.redirect(`${configureUrl}?tab=gallery&error=wedding_not_found`);
     }
 
-    let albumId = wedding.google_photos_album_id;
-    let albumUrl: string | undefined;
-    let shareUrl: string | undefined;
+    // Reuse existing album if already created; otherwise create a new one
+    let albumId = wedding.google_photos_album_id ?? null;
 
     if (!albumId) {
-      // Create a new shared album
-      const albumTitle = `Boda ${wedding.couple_names}`;
-      const album = await createAlbum(tokens.access_token, albumTitle);
-      albumId = album.id;
-      albumUrl = album.productUrl;
-
-      // Share the album so anyone with the link can contribute
-      const shareInfo = await shareAlbum(tokens.access_token, albumId);
-      shareUrl = shareInfo?.shareableUrl;
+      try {
+        const albumTitle = `Boda ${wedding.couple_names}`;
+        console.log('[GOOGLE_PHOTOS_CALLBACK] Creating album:', albumTitle);
+        const album = await createAlbum(tokens.access_token, albumTitle);
+        albumId = album.id;
+        console.log('[GOOGLE_PHOTOS_CALLBACK] Album created:', albumId);
+      } catch (albumErr) {
+        // Album creation failure is non-fatal — tokens are still valid
+        console.warn('[GOOGLE_PHOTOS_CALLBACK] Album creation failed:', albumErr);
+      }
     }
 
-    // Persist tokens and album data
     await prisma.wedding.update({
       where: { id: weddingId },
       data: {
-        google_photos_refresh_token: tokens.refresh_token,
         google_photos_access_token: tokens.access_token,
-        google_photos_token_expiry: tokens.expiry_date
-          ? new Date(tokens.expiry_date)
-          : null,
-        google_photos_album_id: albumId,
-        ...(albumUrl ? { google_photos_album_url: albumUrl } : {}),
-        ...(shareUrl ? { google_photos_share_url: shareUrl } : {}),
+        google_photos_refresh_token: tokens.refresh_token,
+        google_photos_token_expiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        ...(albumId ? { google_photos_album_id: albumId } : {}),
       },
     });
 
-    return NextResponse.redirect(`${configureUrl}?tab=gallery&success=google_photos_connected`);
+    console.log('[GOOGLE_PHOTOS_CALLBACK] Connected successfully for wedding:', weddingId);
+    return NextResponse.redirect(`${configureUrl}?tab=gallery&connected=true`);
   } catch (err) {
-    console.error('[GOOGLE_PHOTOS_CALLBACK] Error:', err);
+    console.error('[GOOGLE_PHOTOS_CALLBACK] Unexpected error:', err);
     return NextResponse.redirect(`${configureUrl}?tab=gallery&error=connection_failed`);
   }
 }

@@ -23,9 +23,9 @@ const nextConfig = {
     },
     // Automatically optimize imports from these packages
     optimizePackageImports: ['lucide-react', 'xlsx', 'zod'],
-    // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
-    serverComponentsExternalPackages: ['@exodus/bytes'],
   },
+  // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
+  serverExternalPackages: ['@exodus/bytes'],
   env: {
     // Automatically enable Facebook login if credentials are provided
     // Can be manually overridden by setting NEXT_PUBLIC_FACEBOOK_ENABLED in .env
