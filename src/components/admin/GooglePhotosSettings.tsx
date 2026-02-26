@@ -17,8 +17,6 @@ interface GalleryPhoto {
 
 interface GooglePhotosStatus {
   connected: boolean;
-  album_id: string | null;
-  album_url: string | null;
   share_url: string | null;
 }
 
@@ -26,9 +24,8 @@ interface GooglePhotosStatus {
  * GooglePhotosSettings – "Galería de fotos" tab in admin/configure.
  *
  * Features:
- * - Connect/disconnect Google Photos (OAuth flow)
- * - Show shareable album link + QR code
- * - Sync photos from Google Photos album
+ * - Paste a Google Photos shared album link (no OAuth required)
+ * - Show the album link + copy button
  * - View, approve/hide, and delete gallery photos
  * - Upload photos manually
  */
@@ -37,12 +34,11 @@ export function GooglePhotosSettings() {
   const [status, setStatus] = useState<GooglePhotosStatus | null>(null);
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [linkInput, setLinkInput] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [disconnecting, setDisconnecting] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [connectError, setConnectError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -68,57 +64,43 @@ export function GooglePhotosSettings() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // ── Google Photos connect ──────────────────────────────────────────────────
+  // ── Save album link ────────────────────────────────────────────────────────
 
-  const handleConnect = async () => {
-    setConnecting(true);
-    setConnectError(null);
+  const handleSave = async () => {
+    const url = linkInput.trim();
+    if (!url) return;
+    setSaving(true);
+    setSaveError(null);
     try {
-      const res = await fetch('/api/admin/gallery/google-photos', { method: 'POST' });
-      const data = await res.json();
-      if (data.success && data.data?.auth_url) {
-        window.location.href = data.data.auth_url;
-      } else {
-        setConnectError(data.error?.message ?? t('connectError'));
-      }
-    } catch {
-      setConnectError(t('connectError'));
-    } finally {
-      setConnecting(false);
-    }
-  };
-
-  // ── Disconnect ────────────────────────────────────────────────────────────
-
-  const handleDisconnect = async () => {
-    if (!confirm(t('disconnectConfirm'))) return;
-    setDisconnecting(true);
-    try {
-      await fetch('/api/admin/gallery/google-photos', { method: 'DELETE' });
-      setStatus((s) => s ? { ...s, connected: false, album_id: null, album_url: null, share_url: null } : s);
-    } finally {
-      setDisconnecting(false);
-    }
-  };
-
-  // ── Sync from Google Photos ───────────────────────────────────────────────
-
-  const handleSync = async () => {
-    setSyncing(true);
-    setSyncResult(null);
-    try {
-      const res = await fetch('/api/admin/gallery/google-photos/sync', { method: 'POST' });
+      const res = await fetch('/api/admin/gallery/google-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ share_url: url }),
+      });
       const data = await res.json();
       if (data.success) {
-        setSyncResult(t('syncSuccess', { synced: data.data.synced, total: data.data.total }));
-        await loadData();
+        setStatus(data.data);
+        setLinkInput('');
       } else {
-        setSyncResult(`Error: ${data.error?.message}`);
+        setSaveError(data.error?.message ?? t('saveError'));
       }
     } catch {
-      setSyncResult(t('syncError'));
+      setSaveError(t('saveError'));
     } finally {
-      setSyncing(false);
+      setSaving(false);
+    }
+  };
+
+  // ── Remove album link ─────────────────────────────────────────────────────
+
+  const handleRemove = async () => {
+    if (!confirm(t('removeConfirm'))) return;
+    setRemoving(true);
+    try {
+      await fetch('/api/admin/gallery/google-photos', { method: 'DELETE' });
+      setStatus({ connected: false, share_url: null });
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -194,7 +176,7 @@ export function GooglePhotosSettings() {
   return (
     <div className="space-y-8">
 
-      {/* ── Google Photos connection card ──────────────────────────────────── */}
+      {/* ── Google Photos album link card ───────────────────────────────────── */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -213,99 +195,112 @@ export function GooglePhotosSettings() {
         </div>
 
         {!status?.connected ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* Instructions */}
             <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-700 space-y-1">
               <p className="font-medium">{t('howItWorksTitle')}</p>
-              <ul className="list-disc list-inside space-y-0.5 text-blue-600">
+              <ol className="list-decimal list-inside space-y-0.5 text-blue-600">
                 <li>{t('step1')}</li>
                 <li>{t('step2')}</li>
                 <li>{t('step3')}</li>
                 <li>{t('step4')}</li>
-              </ul>
+              </ol>
             </div>
-            <button
-              onClick={handleConnect}
-              disabled={connecting}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition text-sm"
-            >
-              {connecting ? (
-                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              ) : (
+
+            {/* Paste link input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                {t('albumLinkLabel')}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={linkInput}
+                  onChange={(e) => setLinkInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
+                  placeholder="https://photos.google.com/share/..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !linkInput.trim()}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition"
+                >
+                  {saving ? t('saving') : t('saveButton')}
+                </button>
+              </div>
+              {saveError && (
+                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                  {saveError}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Current album link */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <a
+                href={status.share_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition text-sm"
+              >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-              )}
-              {connecting ? t('connecting') : t('connectButton')}
-            </button>
-            {connectError && (
-              <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
-                {connectError}
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Album link with copy button */}
-            {status.album_url && (
-              <div className="flex items-center gap-3 flex-wrap">
-                <a
-                  href={status.album_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition text-sm"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                  </svg>
-                  {t('viewAlbum')}
-                </a>
-                <button
-                  onClick={() => handleCopy(status.album_url!)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                  {copied ? t('copied') : t('copyLink')}
-                </button>
-              </div>
-            )}
-
-            {/* Sync button */}
-            <div className="flex items-center gap-3 flex-wrap">
+                {t('viewAlbum')}
+              </a>
               <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 disabled:opacity-50 transition"
+                onClick={() => handleCopy(status.share_url!)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition"
               >
-                {syncing ? t('syncing') : t('syncButton')}
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+                {copied ? t('copied') : t('copyLink')}
               </button>
             </div>
 
-            {syncResult && (
-              <p className="text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
-                {syncResult}
-              </p>
-            )}
+            {/* Change / remove link */}
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500">{t('changeLinkHint')}</p>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={linkInput}
+                  onChange={(e) => setLinkInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
+                  placeholder="https://photos.google.com/share/..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !linkInput.trim()}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition"
+                >
+                  {saving ? t('saving') : t('updateButton')}
+                </button>
+              </div>
+              {saveError && (
+                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                  {saveError}
+                </p>
+              )}
+            </div>
 
-            {/* Disconnect button */}
+            {/* Remove link */}
             <div className="pt-2 border-t border-gray-100">
               <button
-                onClick={handleDisconnect}
-                disabled={disconnecting}
+                onClick={handleRemove}
+                disabled={removing}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition"
               >
-                {t('disconnectButton')}
+                {t('removeButton')}
               </button>
             </div>
           </div>
@@ -362,11 +357,9 @@ export function GooglePhotosSettings() {
                   <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
                     photo.source === 'WHATSAPP'
                       ? 'bg-green-500 text-white'
-                      : photo.source === 'GOOGLE_PHOTOS'
-                      ? 'bg-blue-500 text-white'
                       : 'bg-gray-600 text-white'
                   }`}>
-                    {photo.source === 'WHATSAPP' ? 'WA' : photo.source === 'GOOGLE_PHOTOS' ? 'GP' : '↑'}
+                    {photo.source === 'WHATSAPP' ? 'WA' : '↑'}
                   </span>
                 </div>
 
@@ -400,9 +393,6 @@ export function GooglePhotosSettings() {
         <p className="text-xs text-gray-400">
           <span className="inline-flex items-center gap-1 mr-3">
             <span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> WhatsApp
-          </span>
-          <span className="inline-flex items-center gap-1 mr-3">
-            <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" /> Google Photos
           </span>
           <span className="inline-flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-gray-500 inline-block" /> {t('manualUpload')}
