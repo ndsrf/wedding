@@ -24,6 +24,8 @@ import { isWeddingDay } from '@/lib/date-formatter';
 import type { TemplateDesign } from '@/types/invitation-template';
 import { uploadFile, deleteFile, generateUniqueFilename } from '@/lib/storage';
 import { uploadToWeddingGooglePhotos } from '@/lib/google-photos/upload-helper';
+import { t as translate } from '@/lib/i18n/server';
+import type { Language } from '@/lib/i18n/config';
 
 export const runtime = 'nodejs';
 
@@ -172,7 +174,7 @@ export async function POST(request: NextRequest) {
       // Find the family first so we know the wedding_id
       const mediaFamily = await prisma.family.findFirst({
         where: { OR: [{ whatsapp_number: fromPhone }, { phone: fromPhone }] },
-        select: { id: true, wedding_id: true, name: true },
+        select: { id: true, wedding_id: true, name: true, preferred_language: true },
       });
 
       if (mediaFamily) {
@@ -271,7 +273,9 @@ export async function POST(request: NextRequest) {
 
       // If the message has only media and no text body, acknowledge and return
       if (!body) {
-        return messageTwiML('¡Gracias por compartir tu foto! 📸 La hemos añadido a la galería de la boda.');
+        const guestLanguage = (mediaFamily?.preferred_language.toLowerCase() ?? 'es') as Language;
+        const photoSharedMsg = await translate('guest.gallery.whatsappPhotoShared', guestLanguage);
+        return messageTwiML(photoSharedMsg);
       }
     }
 
