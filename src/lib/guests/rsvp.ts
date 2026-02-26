@@ -10,6 +10,7 @@ import { cache } from 'react';
 import { validateMagicLinkLite } from '@/lib/auth/magic-link';
 import { trackLinkOpened } from '@/lib/tracking/events';
 import { getWeddingPageCache, setWeddingPageCache } from '@/lib/cache/rsvp-page';
+import { isWeddingDay } from '@/lib/date-formatter';
 import type { GuestRSVPPageData } from '@/types/api';
 import type { Channel } from '@prisma/client';
 import type { ThemeConfig } from '@/types/theme';
@@ -112,13 +113,7 @@ export const getRSVPPageData = cache(async (
       }
 
       // Use wedding_day_theme if today is the wedding day and a day-of theme is set
-      const today = new Date();
-      const weddingDate = new Date(wedding.wedding_date);
-      const isWeddingDay =
-        today.getFullYear() === weddingDate.getFullYear() &&
-        today.getMonth() === weddingDate.getMonth() &&
-        today.getDate() === weddingDate.getDate();
-      const activeTheme = isWeddingDay && wedding.wedding_day_theme
+      const activeTheme = isWeddingDay(wedding.wedding_date) && wedding.wedding_day_theme
         ? wedding.wedding_day_theme
         : wedding.theme;
 

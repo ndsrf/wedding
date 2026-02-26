@@ -18,8 +18,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
-import { generateWeddingReply } from '@/lib/ai/wedding-assistant';
+import { generateWeddingReply, type InvitationTemplateContext } from '@/lib/ai/wedding-assistant';
 import { getShortUrlPath } from '@/lib/short-url';
+import { isWeddingDay } from '@/lib/date-formatter';
+import type { TemplateDesign } from '@/types/invitation-template';
 import { uploadFile, deleteFile, generateUniqueFilename } from '@/lib/storage';
 import { uploadToWeddingGooglePhotos } from '@/lib/google-photos/upload-helper';
 
@@ -350,6 +352,29 @@ export async function POST(request: NextRequest) {
       console.warn('[TWILIO_INBOUND] Failed to generate short URL, will use long URL:', err);
     }
 
+    // --- Fetch the active invitation template ----------------------------
+    // Use the wedding-day template override on the day of the wedding,
+    // otherwise use the standard invitation template.
+    let invitationTemplate: InvitationTemplateContext | null = null;
+    const activeTemplateId =
+      isWeddingDay(family.wedding.wedding_date) && family.wedding.wedding_day_invitation_template_id
+        ? family.wedding.wedding_day_invitation_template_id
+        : family.wedding.invitation_template_id;
+
+    if (activeTemplateId) {
+      try {
+        const template = await prisma.invitationTemplate.findUnique({
+          where: { id: activeTemplateId },
+          select: { design: true },
+        });
+        if (template) {
+          invitationTemplate = { design: template.design as unknown as TemplateDesign };
+        }
+      } catch (err) {
+        console.warn('[TWILIO_INBOUND] Failed to fetch invitation template, proceeding without it:', err);
+      }
+    }
+
     const aiReply = await generateWeddingReply(
       body,
       family.wedding,
@@ -360,7 +385,8 @@ export async function POST(request: NextRequest) {
         members: family.members,
       },
       language,
-      shortRsvpUrl
+      shortRsvpUrl,
+      invitationTemplate
     );
 
     if (!aiReply) {

@@ -43,3 +43,19 @@ export function formatDateByLanguage(
 
   return date.toLocaleDateString(locale, options || defaultOptions);
 }
+
+/**
+ * Returns true when today's calendar date matches the wedding date.
+ * Used to activate day-of overrides (theme, invitation template, etc.).
+ *
+ * @param weddingDate - The wedding date (Date or ISO string)
+ */
+export function isWeddingDay(weddingDate: Date | string): boolean {
+  const today = new Date();
+  const d = new Date(weddingDate);
+  return (
+    today.getFullYear() === d.getFullYear() &&
+    today.getMonth() === d.getMonth() &&
+    today.getDate() === d.getDate()
+  );
+}
