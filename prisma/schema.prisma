@@ -115,8 +115,12 @@ model Wedding {
   wizard_current_step             Int?
   wizard_completed_at             DateTime?
   wizard_skipped                  Boolean            @default(false)
-  // Google Photos integration (admin pastes album share link manually)
-  google_photos_share_url         String?            // Album share link pasted by admin
+  // Google Photos integration
+  google_photos_share_url         String?            // Album share link pasted by admin (for guests to add photos directly)
+  google_photos_album_id          String?            // Album ID for OAuth-based programmatic upload
+  google_photos_access_token      String?            // Current short-lived access token
+  google_photos_refresh_token     String?            // Long-lived refresh token
+  google_photos_token_expiry      DateTime?          // When the access token expires
   checklist_sections              ChecklistSection[]
   checklist_tasks                 ChecklistTask[]
   families                        Family[]
@@ -601,8 +605,10 @@ model WeddingPhoto {
   source        PhotoSource @default(UPLOAD)
   sender_name   String?     // Display name (guest name from WhatsApp, uploader name, etc.)
   caption       String?
-  approved      Boolean     @default(true)  // Admin can hide individual photos
-  created_at    DateTime    @default(now())
+  approved                Boolean     @default(true)  // Admin can hide individual photos
+  google_photos_media_id  String?                     // Google Photos media item ID (for URL refresh)
+  url_expires_at          DateTime?                   // When url expires (Google Photos baseUrls last ~60 min)
+  created_at              DateTime    @default(now())
   wedding       Wedding     @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
 
   @@index([wedding_id])

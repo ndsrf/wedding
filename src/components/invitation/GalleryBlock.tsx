@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
@@ -28,12 +28,14 @@ interface GalleryBlockProps {
   };
 }
 
+const PAGE_SIZE = 20;
+const PREFETCH_THRESHOLD = 5; // load next page when this many photos remain
+
 /**
  * GalleryBlock – Photo carousel for invitation pages.
  *
- * Fetches approved photos from the public gallery API and displays them in a
- * touch-friendly carousel. Optionally shows an "Add your photo" button that
- * opens an upload modal so guests can contribute directly from the invitation.
+ * Loads photos in pages of 20 via cursor pagination. Automatically prefetches
+ * the next page when the user navigates close to the end of loaded photos.
  */
 export function GalleryBlock({
   weddingId,
@@ -47,6 +49,9 @@ export function GalleryBlock({
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const nextCursorRef = useRef<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadSenderName, setUploadSenderName] = useState('');
@@ -55,19 +60,41 @@ export function GalleryBlock({
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  // ── Fetch photos ──────────────────────────────────────────────────────────
+  // ── Fetch first page ───────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!weddingId) return;
     setLoading(true);
-    fetch(`/api/public/gallery/${weddingId}`)
+    fetch(`/api/public/gallery/${weddingId}?limit=${PAGE_SIZE}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.success) setPhotos(data.data ?? []);
+        if (data.success) {
+          setPhotos(data.data ?? []);
+          setHasMore(data.meta?.hasMore ?? false);
+          nextCursorRef.current = data.meta?.nextCursor ?? null;
+        }
       })
       .catch(() => {/* silently fail */})
       .finally(() => setLoading(false));
   }, [weddingId]);
+
+  // ── Load next page ─────────────────────────────────────────────────────────
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || !nextCursorRef.current) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/public/gallery/${weddingId}?limit=${PAGE_SIZE}&cursor=${nextCursorRef.current}`);
+      const data = await res.json();
+      if (data.success) {
+        setPhotos((prev) => [...prev, ...(data.data ?? [])]);
+        setHasMore(data.meta?.hasMore ?? false);
+        nextCursorRef.current = data.meta?.nextCursor ?? null;
+      }
+    } catch {/* silently fail */} finally {
+      setLoadingMore(false);
+    }
+  }, [weddingId, loadingMore, hasMore]);
 
   // ── Carousel navigation ───────────────────────────────────────────────────
 
@@ -79,17 +106,26 @@ export function GalleryBlock({
   }, []);
 
   const next = useCallback(() => {
-    setCurrentIndex((i) => Math.min(maxIndex, i + 1));
-  }, [maxIndex]);
+    setCurrentIndex((i) => {
+      const next = Math.min(maxIndex, i + 1);
+      // Prefetch when approaching the end of loaded photos
+      if (total - next <= PREFETCH_THRESHOLD) loadMore();
+      return next;
+    });
+  }, [maxIndex, total, loadMore]);
 
   // Auto-play
   useEffect(() => {
     if (!autoPlayMs || total <= columns) return;
     const interval = setInterval(() => {
-      setCurrentIndex((i) => (i >= maxIndex ? 0 : i + 1));
+      setCurrentIndex((i) => {
+        const next = i >= maxIndex ? 0 : i + 1;
+        if (total - next <= PREFETCH_THRESHOLD) loadMore();
+        return next;
+      });
     }, autoPlayMs);
     return () => clearInterval(interval);
-  }, [autoPlayMs, total, columns, maxIndex]);
+  }, [autoPlayMs, total, columns, maxIndex, loadMore]);
 
   // Touch swipe support
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -267,19 +303,16 @@ export function GalleryBlock({
         )}
       </div>
 
-      {/* Dot indicators */}
+      {/* Counter + loading indicator */}
       {total > 1 && (
-        <div className="flex justify-center gap-1 mt-3">
-          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              aria-label={t('goToPhoto', { n: i + 1 })}
-              className={`w-2 h-2 rounded-full transition ${
-                i === currentIndex ? 'bg-current opacity-100' : 'bg-current opacity-30'
-              }`}
-            />
-          ))}
+        <div className="flex justify-center items-center gap-2 mt-3 text-xs opacity-60">
+          <span>{currentIndex + 1} / {total}{hasMore ? '+' : ''}</span>
+          {loadingMore && (
+            <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          )}
         </div>
       )}
 

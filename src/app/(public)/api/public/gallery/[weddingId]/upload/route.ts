@@ -145,6 +145,10 @@ export async function POST(
         sender_name: senderName,
         caption,
         approved: true,
+        ...(gPhotos ? {
+          google_photos_media_id: gPhotos.mediaId,
+          url_expires_at: new Date(gPhotos.expiresAt),
+        } : {}),
       },
     });
 

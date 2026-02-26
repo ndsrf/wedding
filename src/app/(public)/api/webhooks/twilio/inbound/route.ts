@@ -248,6 +248,10 @@ export async function POST(request: NextRequest) {
                 source: 'WHATSAPP',
                 sender_name: mediaFamily.name,
                 approved: true,
+                ...(gPhotos ? {
+                  google_photos_media_id: gPhotos.mediaId,
+                  url_expires_at: new Date(gPhotos.expiresAt),
+                } : {}),
               },
             });
 
