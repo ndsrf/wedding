@@ -20,6 +20,7 @@ import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply, type InvitationTemplateContext } from '@/lib/ai/wedding-assistant';
 import { getShortUrlPath } from '@/lib/short-url';
+import { isWeddingDay } from '@/lib/date-formatter';
 import type { TemplateDesign } from '@/types/invitation-template';
 import { uploadFile, deleteFile, generateUniqueFilename } from '@/lib/storage';
 import { uploadToWeddingGooglePhotos } from '@/lib/google-photos/upload-helper';
@@ -355,14 +356,8 @@ export async function POST(request: NextRequest) {
     // Use the wedding-day template override on the day of the wedding,
     // otherwise use the standard invitation template.
     let invitationTemplate: InvitationTemplateContext | null = null;
-    const today = new Date();
-    const weddingDate = new Date(family.wedding.wedding_date);
-    const isWeddingDay =
-      today.getFullYear() === weddingDate.getFullYear() &&
-      today.getMonth() === weddingDate.getMonth() &&
-      today.getDate() === weddingDate.getDate();
     const activeTemplateId =
-      isWeddingDay && family.wedding.wedding_day_invitation_template_id
+      isWeddingDay(family.wedding.wedding_date) && family.wedding.wedding_day_invitation_template_id
         ? family.wedding.wedding_day_invitation_template_id
         : family.wedding.invitation_template_id;
 
