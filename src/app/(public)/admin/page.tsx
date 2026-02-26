@@ -13,6 +13,7 @@ import { formatDateByLanguage } from '@/lib/date-formatter';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
 import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
 import { WizardButton } from '@/components/admin/WizardButton';
+import PrivateHeader from '@/components/PrivateHeader';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface ItinerarySummaryItem {
@@ -172,9 +173,30 @@ export default async function AdminDashboardPage() {
 
   const language = await getLanguageFromRequest();
 
+  // Show seating & gift tracking only within 2 months of the wedding
+  const showLateStageActions = stats.days_until_wedding > 0 && stats.days_until_wedding <= 60;
+
+  const notificationBell = (
+    <Link
+      href="/admin/notifications"
+      className="relative p-2 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+      aria-label={t('admin.dashboard.activity')}
+    >
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg>
+    </Link>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
+    <div className="min-h-screen">
+      {/* Top Header: Logo, Language, Sign-out, Notifications */}
+      <PrivateHeader
+        hideBackButton
+        additionalContent={notificationBell}
+      />
+
+      {/* Wedding Hero */}
       <div className="bg-white shadow-sm border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -310,27 +332,95 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Actions */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.dashboard.manageWedding')}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            <WizardButton />
 
+          {/* Primary Actions: Guest Management + Configure Wedding */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            {/* Guest Management - most important, featured */}
             <Link
               href="/admin/guests"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-purple-200 hover:bg-purple-50/30 transition-all"
+              className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-purple-100 shadow-sm p-6 hover:shadow-md hover:border-purple-300 hover:bg-purple-50/30 transition-all"
             >
-              <div className="flex-shrink-0 w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-                <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-md shadow-purple-200 group-hover:shadow-purple-300 transition-shadow">
+                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.guestList')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.guestListSubtitle')}</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-gray-900">{t('admin.dashboard.guestList')}</h3>
+                  <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
+                    {stats.guest_count}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.guestListSubtitle')}</p>
               </div>
+              <svg className="h-5 w-5 text-gray-300 group-hover:text-purple-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
 
+            {/* Configure Wedding - prominent */}
+            <Link
+              href="/admin/configure"
+              className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-indigo-100 shadow-sm p-6 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-indigo-200 group-hover:shadow-indigo-300 transition-shadow">
+                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-gray-900">{t('admin.dashboard.configure')}</h3>
+                <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.configureSubtitle')}</p>
+              </div>
+              <svg className="h-5 w-5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          {/* Secondary Actions */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Setup Wizard */}
+            <WizardButton />
+
+            {/* Invitations & Templates — grouped */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
+                  <svg className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.invitationsAndTemplates')}</h3>
+              </div>
+              <div className="flex flex-col gap-1.5 pl-1">
+                <Link
+                  href="/admin/invitation-builder"
+                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  {t('admin.dashboard.invitationBuilder')}
+                </Link>
+                <Link
+                  href="/admin/templates"
+                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {t('admin.dashboard.templates')}
+                </Link>
+              </div>
+            </div>
+
+            {/* Checklist */}
             <Link
               href="/admin/checklist"
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-teal-200 hover:bg-teal-50/30 transition-all"
@@ -346,127 +436,7 @@ export default async function AdminDashboardPage() {
               </div>
             </Link>
 
-            <Link
-              href="/admin/notifications"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-blue-200 hover:bg-blue-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.activity')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.activitySubtitle')}</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/payments"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-green-200 hover:bg-green-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.payments')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.paymentsSubtitle')}</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/guests?action=import"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-orange-200 hover:bg-orange-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
-                <svg className="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.importGuests')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.importGuestsSubtitle')}</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/configure"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.configure')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.configureSubtitle')}</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/templates"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-pink-200 hover:bg-pink-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center group-hover:bg-pink-100 transition-colors">
-                <svg className="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.templates')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.templatesSubtitle')}</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/invitation-builder"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.invitationBuilder')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.invitationBuilderSubtitle')}</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/seating"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-cyan-200 hover:bg-cyan-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
-                <svg className="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.seatingPlan')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.seatingPlanSubtitle')}</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/providers"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-rose-200 hover:bg-rose-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center group-hover:bg-rose-100 transition-colors">
-                <svg className="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.providers')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.providersSubtitle')}</p>
-              </div>
-            </Link>
-
+            {/* Reports */}
             <Link
               href="/admin/reports"
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-emerald-200 hover:bg-emerald-50/30 transition-all"
@@ -481,6 +451,42 @@ export default async function AdminDashboardPage() {
                 <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.reportsSubtitle')}</p>
               </div>
             </Link>
+
+            {/* Seating Plan — conditional: within 2 months */}
+            {showLateStageActions && (
+              <Link
+                href="/admin/seating"
+                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-cyan-200 hover:bg-cyan-50/30 transition-all"
+              >
+                <div className="flex-shrink-0 w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
+                  <svg className="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.seatingPlan')}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.seatingPlanSubtitle')}</p>
+                </div>
+              </Link>
+            )}
+
+            {/* Gift Tracking — conditional: within 2 months */}
+            {showLateStageActions && (
+              <Link
+                href="/admin/payments"
+                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/30 transition-all"
+              >
+                <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                  <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.payments')}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.paymentsSubtitle')}</p>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
 

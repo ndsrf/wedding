@@ -13,6 +13,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { X, Calendar } from 'lucide-react';
 import { AdminInviteForm } from '@/components/planner/AdminInviteForm';
 import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
+import PrivateHeader from '@/components/PrivateHeader';
 import type { WeddingWithStats, ItineraryItem, Location } from '@/types/models';
 import type { WeddingAdmin } from '@prisma/client';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
@@ -183,21 +184,24 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
   };
   const statusColor = statusColors[wedding.status] ?? 'bg-gray-100 text-gray-600';
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
-            <Link href="/planner" className="hover:text-gray-600 transition-colors">{t('common.navigation.dashboard')}</Link>
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            <Link href="/planner/weddings" className="hover:text-gray-600 transition-colors">{t('planner.dashboard.myWeddings')}</Link>
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            <span className="text-gray-600 font-medium truncate">{wedding.couple_names}</span>
-          </div>
+  // Show seating & gift tracking only within 2 months of the wedding
+  const today = new Date();
+  const daysUntilWedding = Math.ceil((weddingDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const showLateStageActions = daysUntilWedding > 0 && daysUntilWedding <= 60;
 
-          {/* Title + Edit */}
+  return (
+    <div className="min-h-screen">
+      {/* Top Header: Logo, Language, Sign-out */}
+      <PrivateHeader
+        backUrl="/planner/weddings"
+        title={wedding.couple_names}
+        subtitle={`${formattedDate}${wedding.location ? ` · ${wedding.location}` : ''}`}
+      />
+
+      {/* Wedding Summary */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          {/* Title row */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 flex-wrap">
@@ -206,7 +210,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                   {t(`planner.weddings.statusLabels.${wedding.status}`)}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500">
                 {formattedDate}{wedding.wedding_time && ` ${t('planner.weddings.at')} ${wedding.wedding_time}`}{wedding.location && ` \u00b7 ${wedding.location}`}
               </p>
             </div>
@@ -222,7 +226,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
           </div>
 
           {/* Stats Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-gray-100">
             <div>
               <p className="text-2xl font-bold text-gray-900">{wedding.guest_count}</p>
               <p className="text-sm text-gray-500 mt-0.5">{t('planner.weddings.totalGuests')}</p>
@@ -277,25 +281,36 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
         {/* Quick Actions */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('planner.weddings.quickActions')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+          {/* Primary: Guest Management */}
+          <div className="mb-4">
             <Link
               href={`/planner/weddings/${weddingId}/guests`}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-indigo-200 hover:bg-indigo-50/20 transition-all"
+              className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-indigo-100 shadow-sm p-6 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
             >
-              <div className="flex-shrink-0 w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-md shadow-indigo-200 group-hover:shadow-indigo-300 transition-shadow">
+                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.guestList')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.guestListSubtitle')}</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-gray-900">{t('admin.dashboard.guestList')}</h3>
+                  <span className="text-xs font-semibold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
+                    {wedding.guest_count}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.guestListSubtitle')}</p>
               </div>
-              <svg className="h-4 w-4 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-5 w-5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
+          </div>
 
+          {/* Secondary Actions */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {/* Checklist */}
             <Link
               href={`/planner/weddings/${weddingId}/checklist`}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-teal-200 hover:bg-teal-50/20 transition-all"
@@ -306,86 +321,47 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('planner.checklist.title') || 'Wedding Checklist'}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('planner.checklist.description') || 'Manage tasks and track progress'}</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('planner.checklist.title') || 'Checklist'}</h3>
+                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('planner.checklist.description') || 'Tasks & progress'}</p>
               </div>
               <svg className="h-4 w-4 text-gray-300 group-hover:text-teal-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
 
-            <Link
-              href={`/planner/weddings/${weddingId}/notifications`}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-blue-200 hover:bg-blue-50/20 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
+            {/* Invitations & Templates — grouped */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
+                  <svg className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.invitationsAndTemplates')}</h3>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.activity')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.activitySubtitle')}</p>
+              <div className="flex flex-col gap-1.5 pl-1">
+                <Link
+                  href={`/planner/weddings/${weddingId}/invitation-builder`}
+                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  {t('admin.dashboard.invitationBuilder')}
+                </Link>
+                <Link
+                  href={`/planner/weddings/${weddingId}/templates`}
+                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {t('admin.templates.title')}
+                </Link>
               </div>
-              <svg className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            </div>
 
-            <Link
-              href={`/planner/weddings/${weddingId}/seating`}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-cyan-200 hover:bg-cyan-50/20 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
-                <svg className="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.seatingPlan')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.seatingPlanSubtitle')}</p>
-              </div>
-              <svg className="h-4 w-4 text-gray-300 group-hover:text-cyan-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-
-            <Link
-              href={`/planner/weddings/${weddingId}/invitation-builder`}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/20 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.invitationBuilder')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.invitationBuilderSubtitle')}</p>
-              </div>
-              <svg className="h-4 w-4 text-gray-300 group-hover:text-amber-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-
-            <Link
-              href={`/planner/weddings/${weddingId}/providers`}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-green-200 hover:bg-green-50/20 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('planner.providers.title') || 'Providers'}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('planner.providers.description') || 'Manage providers and payments'}</p>
-              </div>
-              <svg className="h-4 w-4 text-gray-300 group-hover:text-green-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-
+            {/* Reports */}
             <Link
               href={`/planner/weddings/${weddingId}/reports`}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-purple-200 hover:bg-purple-50/20 transition-all"
@@ -404,23 +380,47 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
               </svg>
             </Link>
 
-            <Link
-              href={`/planner/weddings/${weddingId}/templates`}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-pink-200 hover:bg-pink-50/20 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center group-hover:bg-pink-100 transition-colors">
-                <svg className="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            {/* Seating Plan — conditional: within 2 months */}
+            {showLateStageActions && (
+              <Link
+                href={`/planner/weddings/${weddingId}/seating`}
+                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-cyan-200 hover:bg-cyan-50/20 transition-all"
+              >
+                <div className="flex-shrink-0 w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
+                  <svg className="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.seatingPlan')}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.seatingPlanSubtitle')}</p>
+                </div>
+                <svg className="h-4 w-4 text-gray-300 group-hover:text-cyan-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.templates.title')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.templates.description')}</p>
-              </div>
-              <svg className="h-4 w-4 text-gray-300 group-hover:text-pink-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+              </Link>
+            )}
+
+            {/* Gift/Payment Tracking — conditional: within 2 months */}
+            {showLateStageActions && (
+              <Link
+                href={`/planner/weddings/${weddingId}/providers`}
+                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/20 transition-all"
+              >
+                <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                  <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.payments')}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.paymentsSubtitle')}</p>
+                </div>
+                <svg className="h-4 w-4 text-gray-300 group-hover:text-amber-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            )}
           </div>
         </div>
 

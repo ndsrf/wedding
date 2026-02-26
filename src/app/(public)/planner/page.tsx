@@ -11,6 +11,7 @@ import { getTranslations } from '@/lib/i18n/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { UpcomingTasksWidget } from '@/components/planner/UpcomingTasksWidget';
+import PrivateHeader from '@/components/PrivateHeader';
 import type { PlannerStats } from '@/types/api';
 import type { AuthenticatedUser } from '@/types/api';
 
@@ -102,26 +103,31 @@ export default async function PlannerDashboardPage() {
   // Fetch stats data directly from database
   const stats = await getStats(user);
 
+  const createWeddingButton = (
+    <Link
+      href="/planner/weddings?action=create"
+      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-md hover:shadow-lg"
+    >
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+      </svg>
+      {t('planner.dashboard.createWedding')}
+    </Link>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Professional Header */}
+    <div className="min-h-screen">
+      {/* Top Header: Logo, Language, Sign-out */}
+      <PrivateHeader
+        hideBackButton
+        additionalContent={createWeddingButton}
+      />
+
+      {/* Dashboard Title */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{t('planner.dashboard.title')}</h1>
-              <p className="mt-0.5 text-sm text-gray-500">{t('planner.dashboard.subtitle')}</p>
-            </div>
-            <Link
-              href="/planner/weddings?action=create"
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-md hover:shadow-lg"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              {t('planner.dashboard.createWedding')}
-            </Link>
-          </div>
+          <h1 className="text-2xl font-bold text-gray-900">{t('planner.dashboard.title')}</h1>
+          <p className="mt-0.5 text-sm text-gray-500">{t('planner.dashboard.subtitle')}</p>
         </div>
       </div>
 
