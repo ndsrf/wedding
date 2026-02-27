@@ -10,7 +10,12 @@ import { prisma } from '@/lib/db/prisma';
 import { requireAnyRole } from '@/lib/auth/middleware';
 import { generateUniqueFilename } from '@/lib/storage';
 import { saveWeddingPhoto } from '@/lib/photos/save-wedding-photo';
+import { batchGetMediaItems } from '@/lib/google-photos/client';
+import { getWeddingAccessToken } from '@/lib/google-photos/upload-helper';
 import type { APIResponse } from '@/types/api';
+
+const REFRESH_BUFFER_MS = 5 * 60 * 1000; // refresh URLs 5 min before expiry
+const URL_TTL_MS = 55 * 60 * 1000;       // 55 min safe TTL for stored baseUrls
 
 export const runtime = 'nodejs';
 
@@ -48,6 +53,44 @@ export async function GET(request: NextRequest) {
       }),
       prisma.weddingPhoto.count({ where }),
     ]);
+
+    // Lazily refresh expired Google Photos baseUrls (same logic as public gallery)
+    const now = Date.now();
+    const expiredPhotos = photos.filter(
+      (p) => p.google_photos_media_id &&
+             (!p.url_expires_at || p.url_expires_at.getTime() - now < REFRESH_BUFFER_MS)
+    );
+
+    if (expiredPhotos.length > 0) {
+      try {
+        const accessToken = await getWeddingAccessToken(user.wedding_id);
+        if (accessToken) {
+          const mediaIds = expiredPhotos.map((p) => p.google_photos_media_id!).slice(0, 50);
+          const refreshed = await batchGetMediaItems(accessToken, mediaIds);
+          const newExpiry = new Date(now + URL_TTL_MS);
+          const byId = new Map(refreshed.map((item) => [item.id, item]));
+
+          await Promise.all(
+            expiredPhotos.map(async (photo) => {
+              const item = byId.get(photo.google_photos_media_id!);
+              if (!item) return;
+              const newUrl = item.baseUrl;
+              const newThumb = `${item.baseUrl}=w400-h400-c`;
+              photo.url = newUrl;
+              photo.thumbnail_url = newThumb;
+              photo.url_expires_at = newExpiry;
+              await prisma.weddingPhoto.update({
+                where: { id: photo.id },
+                data: { url: newUrl, thumbnail_url: newThumb, url_expires_at: newExpiry },
+              });
+            })
+          );
+        }
+      } catch (refreshErr) {
+        // Non-fatal: serve potentially stale URLs
+        console.warn('[ADMIN_GALLERY_GET] URL refresh failed:', refreshErr);
+      }
+    }
 
     return NextResponse.json<APIResponse>({
       success: true,
