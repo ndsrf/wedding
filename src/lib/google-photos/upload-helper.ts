@@ -9,7 +9,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { refreshGoogleAccessToken, uploadPhotoToAlbum } from './client';
+import { refreshGoogleAccessToken, uploadPhotoToAlbum, batchGetMediaItems } from './client';
 import type { GooglePhotosMediaItem } from './client';
 
 export interface GooglePhotosUploadResult {
@@ -77,13 +77,27 @@ export async function uploadToWeddingGooglePhotos(
     description
   );
 
+  // Immediately confirm the URL via batchGet.
+  // The baseUrl in the batchCreate response may not be immediately serveable
+  // (Google processes uploads asynchronously). A batchGet call returns a
+  // fresh, confirmed CDN URL that is guaranteed to be displayable.
+  let confirmedBaseUrl = mediaItem.baseUrl;
+  try {
+    const confirmed = await batchGetMediaItems(accessToken, [mediaItem.id]);
+    if (confirmed.length > 0 && confirmed[0].baseUrl) {
+      confirmedBaseUrl = confirmed[0].baseUrl;
+    }
+  } catch {
+    // Non-fatal: fall back to the batchCreate URL
+  }
+
   // baseUrls expire in ~60 minutes
   const expiresAt = Date.now() + 55 * 60 * 1000; // 55 min to be safe
 
   return {
     mediaItem,
     mediaId: mediaItem.id,
-    baseUrl: mediaItem.baseUrl,
+    baseUrl: confirmedBaseUrl,
     expiresAt,
   };
 }
