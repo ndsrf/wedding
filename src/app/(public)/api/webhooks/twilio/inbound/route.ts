@@ -22,8 +22,8 @@ import { generateWeddingReply, type InvitationTemplateContext } from '@/lib/ai/w
 import { getShortUrlPath } from '@/lib/short-url';
 import { isWeddingDay } from '@/lib/date-formatter';
 import type { TemplateDesign } from '@/types/invitation-template';
-import { uploadFile, deleteFile, generateUniqueFilename } from '@/lib/storage';
-import { uploadToWeddingGooglePhotos } from '@/lib/google-photos/upload-helper';
+import { generateUniqueFilename } from '@/lib/storage';
+import { saveWeddingPhoto } from '@/lib/photos/save-wedding-photo';
 import { t as translate } from '@/lib/i18n/server';
 import type { Language } from '@/lib/i18n/config';
 
@@ -202,73 +202,21 @@ export async function POST(request: NextRequest) {
             const buffer = Buffer.from(await fetchRes.arrayBuffer());
             const ext = mediaContentType.split('/')[1]?.split(';')[0] ?? 'jpg';
             const filename = generateUniqueFilename(`whatsapp-photo.${ext}`);
-            const storagePath = `gallery/${mediaFamily.wedding_id}/${filename}`;
 
-            // Upload to blob storage as temporary holding area
-            const { url: blobUrl } = await uploadFile(storagePath, buffer, {
+            await saveWeddingPhoto({
+              weddingId: mediaFamily.wedding_id,
+              buffer,
+              filename,
               contentType: mediaContentType,
+              source: 'WHATSAPP',
+              senderName: mediaFamily.name,
+              approved: true,
+              logPrefix: '[TWILIO_INBOUND]',
             });
-
-            // Attempt to forward the photo to the wedding's Google Photos album
-            let photoUrl = blobUrl;
-            let thumbnailUrl: string | null = null;
-            let deleteBlobUrl: string | null = blobUrl;
-            let gPhotos: Awaited<ReturnType<typeof uploadToWeddingGooglePhotos>> = null;
-
-            try {
-              gPhotos = await uploadToWeddingGooglePhotos(
-                mediaFamily.wedding_id,
-                buffer,
-                filename,
-                mediaContentType,
-                mediaFamily.name ?? undefined
-              );
-
-              if (gPhotos) {
-                // Use Google Photos CDN URL for display; thumbnail is a cropped variant
-                photoUrl = gPhotos.baseUrl;
-                thumbnailUrl = `${gPhotos.baseUrl}=w400-h400-c`;
-                console.log('[TWILIO_INBOUND] Uploaded WhatsApp photo to Google Photos', {
-                  wedding_id: mediaFamily.wedding_id,
-                  family: mediaFamily.name,
-                });
-              } else {
-                // Google Photos not configured – keep blob URL, do not delete
-                deleteBlobUrl = null;
-              }
-            } catch (gErr) {
-              console.error('[TWILIO_INBOUND] Google Photos upload failed, keeping blob URL:', gErr);
-              deleteBlobUrl = null;
-            }
-
-            await prisma.weddingPhoto.create({
-              data: {
-                wedding_id: mediaFamily.wedding_id,
-                url: photoUrl,
-                thumbnail_url: thumbnailUrl,
-                source: 'WHATSAPP',
-                sender_name: mediaFamily.name,
-                approved: true,
-                ...(gPhotos ? {
-                  google_photos_media_id: gPhotos.mediaId,
-                  url_expires_at: new Date(gPhotos.expiresAt),
-                } : {}),
-              },
-            });
-
-            // Clean up blob now that the photo is safely in Google Photos
-            if (deleteBlobUrl) {
-              try {
-                await deleteFile(deleteBlobUrl);
-              } catch (delErr) {
-                console.warn('[TWILIO_INBOUND] Failed to delete temp blob after Google Photos upload:', delErr);
-              }
-            }
 
             console.log('[TWILIO_INBOUND] Saved WhatsApp photo to gallery', {
               wedding_id: mediaFamily.wedding_id,
               family: mediaFamily.name,
-              storage: deleteBlobUrl ? 'google-photos' : 'blob',
             });
           } catch (err) {
             console.error('[TWILIO_INBOUND] Error saving WhatsApp photo:', err);

@@ -8,7 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAnyRole } from '@/lib/auth/middleware';
-import { uploadFile, generateUniqueFilename } from '@/lib/storage';
+import { generateUniqueFilename } from '@/lib/storage';
+import { saveWeddingPhoto } from '@/lib/photos/save-wedding-photo';
 import type { APIResponse } from '@/types/api';
 
 export const runtime = 'nodejs';
@@ -109,19 +110,17 @@ export async function POST(request: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const filename = generateUniqueFilename(file.name);
-    const storagePath = `gallery/${user.wedding_id}/${filename}`;
 
-    const { url } = await uploadFile(storagePath, buffer, { contentType: file.type });
-
-    const photo = await prisma.weddingPhoto.create({
-      data: {
-        wedding_id: user.wedding_id,
-        url,
-        source: 'UPLOAD',
-        sender_name: user.name,
-        caption: caption ?? null,
-        approved: true,
-      },
+    const photo = await saveWeddingPhoto({
+      weddingId: user.wedding_id,
+      buffer,
+      filename,
+      contentType: file.type,
+      source: 'UPLOAD',
+      senderName: user.name,
+      caption: caption ?? null,
+      approved: true,
+      logPrefix: '[ADMIN_GALLERY_UPLOAD]',
     });
 
     return NextResponse.json<APIResponse>({ success: true, data: photo }, { status: 201 });
