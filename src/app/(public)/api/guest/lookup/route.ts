@@ -5,8 +5,11 @@
  * Looks up a guest family by their phone number or email address
  * within a specific wedding (identified by short_url_initials).
  *
- * Used by the public /w/[code] landing page to let guests find
- * their personalised invitation without needing the direct link.
+ * Phone numbers are normalised and country-prefixed using the same
+ * processPhoneNumber() helper used throughout the rest of the platform,
+ * so a bare local number (e.g. "612345678") is automatically expanded
+ * to the full international form (e.g. "+34612345678") using the
+ * wedding's configured country.
  *
  * Returns the family's short_url_code so the client can redirect
  * to /inv/[initials]/[shortCode].
@@ -14,7 +17,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { normalizePhoneNumber, processPhoneNumber } from '@/lib/phone-utils';
+import { processPhoneNumber } from '@/lib/phone-utils';
 
 export async function POST(request: NextRequest) {
   let body: { initials?: string; contact?: string };
@@ -35,7 +38,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Contact is required' }, { status: 400 });
   }
 
-  // Find wedding by initials (case-insensitive via toUpperCase normalisation)
+  // Find wedding by initials (normalised to upper-case)
   const wedding = await prisma.wedding.findFirst({
     where: {
       short_url_initials: initials.toUpperCase(),
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
   let family: { short_url_code: string | null } | null = null;
 
   if (isEmail) {
-    // ── Email lookup ──────────────────────────────────────────────────────
+    // ── Email lookup (case-insensitive) ───────────────────────────────────
     family = await prisma.family.findFirst({
       where: {
         wedding_id: wedding.id,
@@ -66,34 +69,25 @@ export async function POST(request: NextRequest) {
     });
   } else {
     // ── Phone lookup ──────────────────────────────────────────────────────
-    // Build a set of normalised variants to maximise match chances:
-    //   • raw normalised input  (e.g. "612345678")
-    //   • with wedding-country prefix (e.g. "+34612345678")
-    const normalized = normalizePhoneNumber(trimmedContact);
-    const withPrefix = processPhoneNumber(trimmedContact, wedding.wedding_country);
+    // processPhoneNumber mirrors the logic used when saving guest records:
+    //   1. normalise (strip spaces/dashes, keep leading +)
+    //   2. add wedding-country prefix when no international prefix present
+    //      e.g. "612345678" + "ES" → "+34612345678"
+    const processedPhone = processPhoneNumber(trimmedContact, wedding.wedding_country);
 
-    const variants = [...new Set([normalized, withPrefix].filter(Boolean))] as string[];
-
-    if (variants.length === 0) {
+    if (!processedPhone) {
       return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
 
-    // Try phone field
+    // Search phone field first, then whatsapp_number as fallback
     family = await prisma.family.findFirst({
-      where: {
-        wedding_id: wedding.id,
-        OR: variants.map((phone) => ({ phone })),
-      },
+      where: { wedding_id: wedding.id, phone: processedPhone },
       select: { short_url_code: true },
     });
 
-    // Fallback: try whatsapp_number field
     if (!family) {
       family = await prisma.family.findFirst({
-        where: {
-          wedding_id: wedding.id,
-          OR: variants.map((p) => ({ whatsapp_number: p })),
-        },
+        where: { wedding_id: wedding.id, whatsapp_number: processedPhone },
         select: { short_url_code: true },
       });
     }
