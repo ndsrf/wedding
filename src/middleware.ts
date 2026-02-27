@@ -125,8 +125,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Guest routes - CRITICAL PATH
-  // Return early for guest RSVP routes to ensure maximum performance
-  if (pathname.startsWith('/rsvp') || pathname.startsWith('/api/guest')) {
+  // Return early for guest RSVP routes and the public wedding landing page
+  // to ensure maximum performance.
+  if (
+    pathname.startsWith('/rsvp') ||
+    pathname.startsWith('/api/guest') ||
+    pathname.startsWith('/w/') ||
+    pathname === '/w'
+  ) {
     const response = NextResponse.next();
     response.headers.set('x-priority', 'high');
     response.headers.set('x-route-type', 'rsvp');
