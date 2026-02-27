@@ -68,6 +68,7 @@ export default async function WeddingLandingPage({ params }: Props) {
       dress_code: true,
       additional_info: true,
       default_language: true,
+      wedding_country: true,
     },
   });
 
@@ -90,6 +91,7 @@ export default async function WeddingLandingPage({ params }: Props) {
         dressCode: wedding.dress_code ?? undefined,
         additionalInfo: wedding.additional_info ?? undefined,
         defaultLanguage: wedding.default_language.toLowerCase() as Language,
+        weddingCountry: wedding.wedding_country,
       }}
     />
   );
