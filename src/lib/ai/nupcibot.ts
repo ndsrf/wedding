@@ -254,9 +254,10 @@ ${PLATFORM_DOCS}
 1. ${langInstruction}
 2. Be warm, concise, and helpful. Use 1–3 short paragraphs.
 3. Only answer questions about the Nupci platform. If asked something unrelated, politely redirect to platform topics.
-4. When relevant, mention the exact page path (e.g., /admin/guests, /admin/configure) to help the user navigate.
+4. When mentioning platform pages, refer to them by their feature name naturally in the text (e.g. "the Guest Management page" or "la sección de Invitados"). Do NOT write raw paths like /admin/guests inline in your text.
 5. If you don't know the answer based on the documentation, say so honestly rather than guessing.
-6. Keep answers focused and actionable.`;
+6. Keep answers focused and actionable.
+7. At the very end of your response, if you referenced any specific platform pages, add a block starting with exactly "[LINKS]" on its own line. Under it, list each page on its own line as: /path|Label in the response language. Example for English: /admin/guests|Guest Management. Only include pages you actually referenced. Omit the [LINKS] block entirely if no specific pages were mentioned.`;
 }
 
 // ============================================================================

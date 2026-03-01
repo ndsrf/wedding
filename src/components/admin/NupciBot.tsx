@@ -8,35 +8,65 @@ import Link from 'next/link';
 import type { ChatMessage } from '@/lib/ai/nupcibot';
 
 // ── Message renderer ────────────────────────────────────────────────────────
-// Parses assistant replies and turns /admin/... paths into clickable links.
-function renderMessageContent(text: string): React.ReactNode[] {
-  const PATH_RE = /(\/admin\/[a-zA-Z0-9\-_/]*)/g;
-  const parts: React.ReactNode[] = [];
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
+// Parses assistant replies that may include a trailing [LINKS] block.
+// Format: text...\n[LINKS]\n/path|Label\n/path|Label
+interface ParsedMessage {
+  text: string;
+  links: Array<{ path: string; label: string }>;
+}
 
-  while ((match = PATH_RE.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
-    }
-    const path = match[1];
-    parts.push(
-      <Link
-        key={match.index}
-        href={path}
-        className="underline decoration-rose-400 text-rose-600 hover:text-rose-700 font-medium break-all"
-      >
-        {path}
-      </Link>
-    );
-    lastIndex = match.index + match[0].length;
-  }
+function parseMessageContent(raw: string): ParsedMessage {
+  const marker = '[LINKS]';
+  const markerIndex = raw.indexOf(marker);
+  if (markerIndex === -1) return { text: raw.trim(), links: [] };
 
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
+  const text = raw.slice(0, markerIndex).trim();
+  const linksSection = raw.slice(markerIndex + marker.length).trim();
+  const links = linksSection
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const pipeIndex = line.indexOf('|');
+      if (pipeIndex === -1) return { path: line, label: line };
+      return { path: line.slice(0, pipeIndex).trim(), label: line.slice(pipeIndex + 1).trim() };
+    })
+    .filter(({ path }) => path.startsWith('/'));
 
-  return parts;
+  return { text, links };
+}
+
+function LinkIcon({ className }: { className: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+    </svg>
+  );
+}
+
+function AssistantMessage({ content }: { content: string }) {
+  const { text, links } = parseMessageContent(content);
+  return (
+    <div className="flex flex-col gap-1.5 max-w-[85%]">
+      <div className="bg-gray-50 text-gray-700 rounded-xl rounded-bl-none px-3 py-2 text-sm leading-relaxed">
+        {text}
+      </div>
+      {links.length > 0 && (
+        <div className="flex flex-col gap-1">
+          {links.map(({ path, label }) => (
+            <Link
+              key={path}
+              href={path}
+              className="flex items-center gap-2 px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-xs font-medium text-rose-700 transition-colors group"
+            >
+              <LinkIcon className="h-3 w-3 flex-shrink-0 text-rose-400 group-hover:text-rose-600 transition-colors" />
+              <span>{label}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 type Screen = 'menu' | 'message-planner' | 'chat';
@@ -434,17 +464,13 @@ export function NupciBot() {
                   <BotIcon className="h-3 w-3 text-rose-600" />
                 </div>
               )}
-              <div
-                className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-rose-500 text-white rounded-br-none'
-                    : 'bg-gray-50 text-gray-700 rounded-bl-none'
-                }`}
-              >
-                {msg.role === 'assistant'
-                  ? renderMessageContent(msg.content)
-                  : msg.content}
-              </div>
+              {msg.role === 'assistant' ? (
+                <AssistantMessage content={msg.content} />
+              ) : (
+                <div className="max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed bg-rose-500 text-white rounded-br-none">
+                  {msg.content}
+                </div>
+              )}
             </div>
           ))}
           {isChatLoading && (
