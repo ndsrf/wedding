@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
       where: whereClause,
       skip,
       take: limit,
-      orderBy: { created_at: 'desc' },
+      orderBy: { name: 'asc' },
       include: {
         members: true,
         gifts: {

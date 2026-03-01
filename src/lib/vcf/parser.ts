@@ -109,10 +109,10 @@ function parseVCard(vCardText: string): VCFContact | null {
         if (!name) {
           // N format: Family;Given;Middle;Prefix;Suffix
           // Decode first so that encoded semicolons are not mistaken for
-          // field separators.
+          // field separators, then reorder to western "Given Family" order.
           const decodedN = decode(value);
-          const nameParts = decodedN.split(';').filter((p) => p.trim());
-          name = nameParts.join(' ').trim();
+          const [family, given, middle, prefix, suffix] = decodedN.split(';').map((p) => p.trim());
+          name = [prefix, given, middle, family, suffix].filter(Boolean).join(' ');
         }
         break;
 
