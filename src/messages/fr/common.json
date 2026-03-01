@@ -1606,7 +1606,7 @@
       "close": "Fermer",
       "greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider aujourd'hui ?",
       "helpConfigure": "Aidez-moi à configurer mon mariage",
-      "viewReports": "Voir et exporter les rapports",
+      "viewReports": "Voir et imprimer les listes",
       "messagePlanner": {
         "button": "Écrire à mon wedding planner",
         "title": "Écrire au planner",
@@ -1624,10 +1624,10 @@
         "errorGeneric": "Impossible d'envoyer le message. Veuillez réessayer."
       },
       "chat": {
-        "button": "Chatter avec NupciBot",
         "title": "Chat NupciBot",
         "subtitle": "Posez-moi n'importe quelle question",
         "greeting": "Bonjour ! Posez-moi toutes vos questions sur la plateforme — fonctionnalités, utilisation, navigation. Je suis là pour aider !",
+        "menuPlaceholder": "Demandez-moi ce que vous voulez...",
         "placeholder": "Posez une question...",
         "errorReply": "Désolé, je n'ai pas pu générer de réponse pour l'instant. Veuillez réessayer.",
         "limitReached": "Vous avez atteint la limite de 5 questions par session. Veuillez fermer le chat et le rouvrir pour démarrer une nouvelle conversation."
