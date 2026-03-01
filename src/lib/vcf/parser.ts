@@ -85,39 +85,48 @@ function parseVCard(vCardText: string): VCFContact | null {
     // Extract property name (before semicolon or colon)
     const propertyName = propertyPart.split(';')[0].toUpperCase();
 
+    // Detect QUOTED-PRINTABLE encoding (vCard 2.1 style)
+    const upperPropertyPart = propertyPart.toUpperCase();
+    const isQuotedPrintable = upperPropertyPart.includes('QUOTED-PRINTABLE');
+
+    // Choose the right decoder for this property's value
+    const decode = (v: string) =>
+      isQuotedPrintable ? decodeQuotedPrintable(v) : decodeValue(v);
+
     switch (propertyName) {
       case 'FN': // Formatted Name
         if (!name) {
-          name = decodeValue(value);
+          name = decode(value);
         }
         break;
 
       case 'N': // Structured Name (fallback if FN not present)
         if (!name) {
           // N format: Family;Given;Middle;Prefix;Suffix
-          const nameParts = value.split(';').filter((p) => p.trim());
+          // Decode first so that encoded semicolons are handled correctly
+          const decodedN = decode(value);
+          const nameParts = decodedN.split(';').filter((p) => p.trim());
           name = nameParts.join(' ').trim();
-          name = decodeValue(name);
         }
         break;
 
       case 'EMAIL':
         if (!email) {
-          email = decodeValue(value);
+          email = decode(value);
         }
         break;
 
       case 'TEL': // Phone number
         // Prefer mobile/cell numbers, but take any if none found yet
-        const isMobile = propertyPart.toUpperCase().includes('CELL') || propertyPart.toUpperCase().includes('MOBILE');
+        const isMobile = upperPropertyPart.includes('CELL') || upperPropertyPart.includes('MOBILE');
         if (!phone || isMobile) {
-          phone = cleanPhoneNumber(decodeValue(value));
+          phone = cleanPhoneNumber(decode(value));
         }
         break;
 
       case 'ORG': // Organization
         if (!organization) {
-          organization = decodeValue(value);
+          organization = decode(value);
         }
         break;
     }
@@ -138,7 +147,10 @@ function parseVCard(vCardText: string): VCFContact | null {
 
 /**
  * Unfold lines (vCard format allows line folding with spaces/tabs)
- * Lines that continue are prefixed with a space or tab
+ * Lines that continue are prefixed with a space or tab.
+ * Also handles QUOTED-PRINTABLE soft line breaks: a line ending with `=`
+ * means the QP value continues on the next line without a leading space
+ * (vCard 2.1 spec, section 2.1.3).
  */
 function unfoldLines(text: string): string[] {
   const lines = text.split(/\r?\n/);
@@ -147,8 +159,12 @@ function unfoldLines(text: string): string[] {
   let currentLine = '';
   for (const line of lines) {
     if (line.startsWith(' ') || line.startsWith('\t')) {
-      // Continuation of previous line
+      // vCard line folding: continuation of previous line
       currentLine += line.substring(1);
+    } else if (currentLine.endsWith('=')) {
+      // QUOTED-PRINTABLE soft line break: strip the trailing `=` and append
+      // the next line directly (no leading space in vCard 2.1 QP continuations)
+      currentLine = currentLine.slice(0, -1) + line;
     } else {
       if (currentLine) {
         unfolded.push(currentLine);
@@ -184,6 +200,26 @@ function decodeValue(value: string): string {
   }
 
   return decoded;
+}
+
+/**
+ * Decode QUOTED-PRINTABLE encoded vCard values (common in vCard 2.1).
+ * Groups consecutive =XX sequences and decodes them as UTF-8 bytes so that
+ * multi-byte characters (e.g. accented letters, emoji) are reconstructed
+ * correctly.
+ */
+function decodeQuotedPrintable(value: string): string {
+  // Collect runs of consecutive =XX tokens and decode them as UTF-8 together
+  // so that multi-byte sequences like =C3=AD (í in UTF-8) are handled correctly.
+  return value.replace(/((?:=[0-9A-Fa-f]{2})+)/g, (match) => {
+    const bytes = match.match(/=[0-9A-Fa-f]{2}/g)!.map((m) => parseInt(m.slice(1), 16));
+    try {
+      return Buffer.from(bytes).toString('utf-8');
+    } catch {
+      // Fallback: return raw characters if UTF-8 decode fails
+      return bytes.map((b) => String.fromCharCode(b)).join('');
+    }
+  });
 }
 
 /**
