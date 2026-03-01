@@ -982,6 +982,24 @@
         "guestCount": "Número de Invitados",
         "minAge": "Edad Mínima",
         "maxAge": "Edad Máxima"
+      },
+      "nlQuery": {
+        "title": "Consulta tus Datos de Boda",
+        "subtitle": "Escribe una pregunta en español para consultar los datos de tu boda",
+        "placeholder": "Ej. ¿Cuántos invitados confirmaron asistencia?",
+        "ask": "Consultar",
+        "loading": "Generando...",
+        "error": "Error al ejecutar la consulta. Por favor, inténtalo de nuevo.",
+        "noData": "No se encontraron resultados para tu pregunta.",
+        "resultsTitle": "Resultados de la Consulta",
+        "rows": "filas",
+        "examples": "Ejemplos de preguntas",
+        "example1": "¿Cuántos invitados confirmaron asistencia?",
+        "example2": "Mostrar invitados con restricciones dietéticas",
+        "example3": "Listar invitados sin asignación de mesa",
+        "example4": "¿Cuál es el total de regalos recibidos?",
+        "generatedSql": "SQL generado (solo lectura)",
+        "securityNote": "Solo se permiten consultas de solo lectura. Los resultados están restringidos automáticamente a los datos de tu boda."
       }
     },
     "providers": {

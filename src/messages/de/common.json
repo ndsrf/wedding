@@ -694,6 +694,24 @@
         "guestCount": "Anzahl der Gäste",
         "minAge": "Min. Alter",
         "maxAge": "Max. Alter"
+      },
+      "nlQuery": {
+        "title": "Ihre Hochzeitsdaten abfragen",
+        "subtitle": "Stellen Sie eine Frage auf Deutsch, um Ihre Hochzeitsdaten abzufragen",
+        "placeholder": "Z.B. Wie viele Gäste haben zugesagt?",
+        "ask": "Abfragen",
+        "loading": "Wird generiert...",
+        "error": "Abfrage fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "noData": "Keine Ergebnisse für Ihre Frage gefunden.",
+        "resultsTitle": "Abfrageergebnisse",
+        "rows": "Zeilen",
+        "examples": "Beispielfragen",
+        "example1": "Wie viele Gäste haben zugesagt?",
+        "example2": "Gäste mit Ernährungseinschränkungen anzeigen",
+        "example3": "Gäste ohne Tischzuweisung auflisten",
+        "example4": "Was ist der Gesamtbetrag der erhaltenen Geschenke?",
+        "generatedSql": "Generiertes SQL (nur Lesezugriff)",
+        "securityNote": "Nur Nur-Lese-Abfragen sind erlaubt. Ergebnisse sind automatisch auf Ihre Hochzeitsdaten beschränkt."
       }
     },
     "providers": {

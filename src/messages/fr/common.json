@@ -694,6 +694,24 @@
         "guestCount": "Nombre d'Invités",
         "minAge": "Âge Min",
         "maxAge": "Âge Max"
+      },
+      "nlQuery": {
+        "title": "Interrogez vos Données de Mariage",
+        "subtitle": "Posez une question en français pour consulter vos données de mariage",
+        "placeholder": "Ex. Combien d'invités ont confirmé leur présence ?",
+        "ask": "Demander",
+        "loading": "Génération...",
+        "error": "Échec de la requête. Veuillez réessayer.",
+        "noData": "Aucun résultat trouvé pour votre question.",
+        "resultsTitle": "Résultats de la Requête",
+        "rows": "lignes",
+        "examples": "Exemples de questions",
+        "example1": "Combien d'invités ont confirmé leur présence ?",
+        "example2": "Afficher les invités avec des restrictions alimentaires",
+        "example3": "Lister les invités sans attribution de table",
+        "example4": "Quel est le montant total des cadeaux reçus ?",
+        "generatedSql": "SQL généré (lecture seule)",
+        "securityNote": "Seules les requêtes en lecture seule sont autorisées. Les résultats sont automatiquement limités aux données de votre mariage."
       }
     },
     "providers": {

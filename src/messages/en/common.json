@@ -986,6 +986,24 @@
         "guestCount": "Guest Count",
         "minAge": "Min Age",
         "maxAge": "Max Age"
+      },
+      "nlQuery": {
+        "title": "Ask About Your Wedding Data",
+        "subtitle": "Type a question in plain English to query your wedding data",
+        "placeholder": "e.g. How many guests confirmed attendance?",
+        "ask": "Ask",
+        "loading": "Generating...",
+        "error": "Failed to run query. Please try again.",
+        "noData": "No results found for your question.",
+        "resultsTitle": "Query Results",
+        "rows": "rows",
+        "examples": "Example questions",
+        "example1": "How many guests confirmed attendance?",
+        "example2": "Show guests with dietary restrictions",
+        "example3": "List guests without a table assignment",
+        "example4": "What is the total gift amount received?",
+        "generatedSql": "Generated SQL (read-only)",
+        "securityNote": "Only read-only queries are allowed. Results are automatically restricted to your wedding data."
       }
     },
     "providers": {
