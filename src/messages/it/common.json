@@ -934,7 +934,9 @@
         "eventType": "Tipo Evento",
         "family": "Famiglia",
         "channel": "Canale",
+        "readStatus": "Stato",
         "unread": "Non Letto",
+        "all": "Tutti",
         "read": "Letto"
       },
       "markAsRead": "Segna come Letto",

@@ -1228,7 +1228,9 @@
         "eventType": "Event Type",
         "family": "Family",
         "channel": "Channel",
+        "readStatus": "Status",
         "unread": "Unread",
+        "all": "All",
         "read": "Read"
       },
       "markAsRead": "Mark as Read",

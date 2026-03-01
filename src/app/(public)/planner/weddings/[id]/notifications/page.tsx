@@ -44,6 +44,7 @@ interface Filters {
   channel?: Channel;
   date_from?: string;
   date_to?: string;
+  read?: string; // 'false' = unread only (default), '' = all
 }
 
 export default function NotificationsPage() {
@@ -53,7 +54,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [reminderFamilies, setReminderFamilies] = useState<ReminderFamily[]>([]);
-  const [filters, setFilters] = useState<Filters>({});
+  const [filters, setFilters] = useState<Filters>({ read: 'false' });
   const [loading, setLoading] = useState(true);
   const [reminderLoading, setReminderLoading] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
@@ -70,6 +71,7 @@ export default function NotificationsPage() {
       if (filters.channel) qParams.set('channel', filters.channel);
       if (filters.date_from) qParams.set('date_from', filters.date_from);
       if (filters.date_to) qParams.set('date_to', filters.date_to);
+      if (filters.read !== undefined && filters.read !== '') qParams.set('read', filters.read);
 
       const response = await fetch(`/api/planner/weddings/${weddingId}/notifications?${qParams.toString()}`);
       const data = await response.json();
@@ -239,7 +241,23 @@ export default function NotificationsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {/* Read Status */}
+            <div>
+              <label htmlFor="read_status" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('admin.notifications.filters.readStatus')}
+              </label>
+              <select
+                id="read_status"
+                value={filters.read ?? 'false'}
+                onChange={(e) => setFilters({ ...filters, read: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900"
+              >
+                <option value="false">{t('admin.notifications.filters.unread')}</option>
+                <option value="">{t('admin.notifications.filters.all')}</option>
+              </select>
+            </div>
+
             {/* Event Type */}
             <div>
               <label htmlFor="event_type" className="block text-sm font-medium text-gray-700 mb-1">
@@ -333,10 +351,10 @@ export default function NotificationsPage() {
           </div>
 
           {/* Clear Filters */}
-          {(filters.event_type || filters.channel || filters.date_from || filters.date_to) && (
+          {(filters.event_type || filters.channel || filters.date_from || filters.date_to || filters.read === '') && (
             <div className="mt-4 flex justify-end">
               <button
-                onClick={() => setFilters({})}
+                onClick={() => setFilters({ read: 'false' })}
                 className="text-sm text-purple-600 hover:text-purple-800"
               >
                 {t('common.buttons.clearFilters')}
