@@ -694,6 +694,25 @@
         "guestCount": "Numero Ospiti",
         "minAge": "Età Min",
         "maxAge": "Età Max"
+      },
+      "nlQuery": {
+        "title": "Interroga i Tuoi Dati di Matrimonio",
+        "subtitle": "Scrivi una domanda in italiano per consultare i tuoi dati",
+        "placeholder": "Es. Quanti ospiti hanno confermato la presenza?",
+        "ask": "Chiedi",
+        "loading": "Generazione...",
+        "error": "Errore nell'esecuzione della query. Riprova.",
+        "noData": "Nessun risultato trovato per la tua domanda.",
+        "resultsTitle": "Risultati della Query",
+        "rows": "righe",
+        "examples": "Esempi di domande",
+        "example1": "Quanti ospiti hanno confermato la presenza?",
+        "example2": "Mostra ospiti con restrizioni alimentari",
+        "example3": "Elenca ospiti senza assegnazione tavolo",
+        "example4": "Qual è il totale dei regali ricevuti?",
+        "generatedSql": "SQL generato (sola lettura)",
+        "securityNote": "Sono consentite solo query in sola lettura. I risultati sono automaticamente limitati ai dati del tuo matrimonio.",
+        "example5": "Quanti ospiti vengono dal mio lato?"
       }
     },
     "providers": {
