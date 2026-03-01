@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
+import { parseInitials } from '@/lib/short-url';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -178,6 +179,7 @@ export async function GET(request: NextRequest) {
           created_by: wedding.created_by,
           updated_at: wedding.updated_at,
           updated_by: wedding.updated_by,
+          short_url_initials: wedding.short_url_initials,
           // RSVP Configuration fields
           transportation_question_enabled: wedding.transportation_question_enabled,
           transportation_question_text: wedding.transportation_question_text,
@@ -357,6 +359,7 @@ export async function POST(request: NextRequest) {
         payment_tracking_mode: validatedData.payment_tracking_mode,
         allow_guest_additions: validatedData.allow_guest_additions,
         default_language: validatedData.default_language,
+        short_url_initials: parseInitials(validatedData.couple_names),
         save_the_date_enabled: true,
         status: 'ACTIVE',
         created_by: user.id,

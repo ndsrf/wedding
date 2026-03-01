@@ -232,6 +232,7 @@ async function seedExistingWedding(planner: any) {
       transportation_question_text: 'Do you need transportation?',
       dietary_restrictions_enabled: true,
       save_the_date_enabled: true,
+      short_url_initials: 'SM',
       extra_question_1_enabled: true,
       extra_question_1_text: 'How many children will attend?',
     },

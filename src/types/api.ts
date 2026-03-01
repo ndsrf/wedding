@@ -142,6 +142,7 @@ export interface MasterWeddingOverview {
   default_language: Language;
   wedding_country: string;
   status: string;
+  short_url_initials: string | null;
   created_at: Date;
   created_by: string;
   updated_at: Date;

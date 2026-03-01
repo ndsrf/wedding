@@ -1434,7 +1434,10 @@
         "cancel": "Cancel",
         "save": "Save Configuration",
         "saving": "Saving...",
-        "submitError": "Failed to save configuration. Please try again."
+        "submitError": "Failed to save configuration. Please try again.",
+        "invitationUrl": "General Invitation URL",
+        "copyUrl": "Copy to Clipboard",
+        "copySuccess": "URL copied!"
       },
       "dangerZone": {
         "title": "Danger Zone",
@@ -1626,9 +1629,34 @@
     "nupcibot": {
       "subtitle": "Your wedding assistant",
       "close": "Close",
-      "greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you?",
+      "greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you today?",
       "helpConfigure": "Help me configure my wedding",
-      "viewReports": "View and export reports"
+      "viewReports": "View and export reports",
+      "messagePlanner": {
+        "button": "Message my wedding planner",
+        "title": "Message Planner",
+        "subtitle": "Send a message to your planner",
+        "description": "Send an email directly to your wedding planner. They'll receive it and reply through their usual channel.",
+        "topicLabel": "Topic / Subject",
+        "topicPlaceholder": "e.g. Question about the venue",
+        "messageLabel": "Your message",
+        "messagePlaceholder": "Write your message here...",
+        "send": "Send Message",
+        "sending": "Sending...",
+        "back": "Back to menu",
+        "successTitle": "Message sent!",
+        "successDesc": "Your planner will receive your message by email shortly.",
+        "errorGeneric": "Failed to send message. Please try again."
+      },
+      "chat": {
+        "button": "Chat with NupciBot",
+        "title": "NupciBot Chat",
+        "subtitle": "Ask me anything",
+        "greeting": "Hi! Ask me anything about the platform — features, how-tos, navigation. I'm here to help!",
+        "placeholder": "Type a question...",
+        "errorReply": "Sorry, I couldn't generate a reply right now. Please try again.",
+        "limitReached": "You've reached the limit of 5 questions per session. Please close the chat and open it again to start a new conversation."
+      }
     }
   },
   "guest": {
@@ -1892,6 +1920,68 @@
       "title": "Getting Started",
       "content": "Ready to streamline your wedding planning business? Start with our free 14-day trial to explore all features with your first wedding. No credit card required.",
       "button": "Request a Demo"
+    },
+    "features": {
+      "title": "Platform Features",
+      "guests": {
+        "title": "Guest Management",
+        "path": "/admin/guests",
+        "content": "Organize guests into family units. Add or edit families with contact info (email, phone, WhatsApp), language preference, and communication channel. Import and export guest lists from Excel. Use bulk actions to edit properties or send messages to multiple guests at once. Filter by RSVP status, channel, language, or assigned admin."
+      },
+      "configure": {
+        "title": "Configure Your Wedding",
+        "path": "/admin/configure",
+        "content": "Customize every aspect of your RSVP experience: dress code, additional guest info, allow guest additions, gift IBAN with automated reference codes, Save the Date messages, and up to 3 custom RSVP questions plus 3 mandatory text fields."
+      },
+      "templates": {
+        "title": "Message Templates",
+        "path": "/admin/templates",
+        "content": "Create and manage Invitation, Reminder, Confirmation, and Save-the-Date templates for WhatsApp, Email, and SMS in all 5 languages (EN, ES, FR, IT, DE). Use placeholders like {familyName} and {magicLink} to personalize each message."
+      },
+      "invitationBuilder": {
+        "title": "Invitation Builder",
+        "path": "/admin/invitation-builder",
+        "content": "Design a beautiful, branded invitation page that guests see when they open their magic link. Add text, images, location maps, countdown timers, and add-to-calendar buttons. Supports multilingual content and custom backgrounds."
+      },
+      "notifications": {
+        "title": "Notifications & Activity",
+        "path": "/admin/notifications",
+        "content": "A real-time activity feed shows every guest interaction: link opened, RSVP started, submitted, or edited, invitation sent, payment received, and AI replies. Filter by date, event type, or guest. A notification bell in the header shows unread count."
+      },
+      "reports": {
+        "title": "Reports",
+        "path": "/admin/reports",
+        "content": "Generate and export four report types: Attendee List (full guest details), Guests Per Administrator (attribution summary), Seating Plan Report (table assignments with dietary info), and Guest Age Average (statistics by admin or table). Export as Excel or CSV."
+      },
+      "seating": {
+        "title": "Seating Plan",
+        "path": "/admin/seating",
+        "content": "Configure tables with custom names and capacities. Assign confirmed guests via drag-and-drop, randomly auto-assign, or split family members across different tables. View assigned/unassigned totals at a glance."
+      },
+      "checklist": {
+        "title": "Wedding Checklist",
+        "path": "/admin/checklist",
+        "content": "Track every wedding task pre-populated from your planner's template. Each task has a title, description, due date, status (Pending/In Progress/Completed), and assignment (Planner/Couple). Import and export to Excel."
+      },
+      "providers": {
+        "title": "Providers",
+        "path": "/admin/providers",
+        "content": "Manage your wedding service providers (venue, catering, photography, etc.). Assign providers from the planner's library, track contract status, and record payments with amount, method, and date."
+      },
+      "payments": {
+        "title": "Gifts & Payments",
+        "path": "/admin/payments",
+        "content": "Track wedding gifts in automated mode (unique reference codes per family for bank transfers) or manual mode. Mark gifts as received or confirmed and filter by attending status."
+      },
+      "gallery": {
+        "title": "Photo Gallery",
+        "path": "/admin/gallery",
+        "content": "Connect Google Photos for automatic album sync, or upload photos manually. Control which photos are visible. Guests can contribute photos directly to the shared album."
+      },
+      "nupcibot": {
+        "title": "NupciBot AI Assistant",
+        "content": "The floating NupciBot button (bottom-right of the dashboard) gives you four quick actions: reconfigure your wedding via the setup wizard, view reports, send a message to your wedding planner by email, or open an AI chat to ask questions about the platform."
+      }
     }
   },
   "news": {

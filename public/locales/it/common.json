@@ -619,7 +619,42 @@
       "noWeddingAssigned": "Nessun matrimonio assegnato."
     },
     "checklist": {
-      "loadError": "Impossibile caricare la lista di controllo"
+      "title": "Lista di Controllo Matrimonio",
+      "subtitle": "Gestisci le attività e monitora i progressi del tuo matrimonio",
+      "loading": "Caricamento lista...",
+      "saving": "Salvataggio...",
+      "error": "Errore nel caricamento della lista",
+      "retry": "Riprova",
+      "emptyTitle": "Nessuna attività ancora",
+      "emptyDesc": "Importa una lista o attendi che il tuo organizzatore aggiunga le attività.",
+      "import": "Importa da Excel",
+      "importing": "Importazione...",
+      "export": "Esporta in Excel",
+      "exporting": "Esportazione...",
+      "delete": "Elimina",
+      "deleteConfirm": "Sei sicuro di voler eliminare questa attività?",
+      "markComplete": "Segna come completata",
+      "markIncomplete": "Segna come incompleta",
+      "descriptionPlaceholder": "Aggiungi descrizione...",
+      "columns": {
+        "done": "Fatto",
+        "title": "Titolo",
+        "description": "Descrizione",
+        "assignedTo": "Assegnato a",
+        "dueDate": "Data di scadenza",
+        "status": "Stato",
+        "actions": "Azioni"
+      },
+      "assignedTo": {
+        "planner": "Organizzatore Matrimonio",
+        "couple": "Coppia",
+        "other": "Altro"
+      },
+      "status": {
+        "PENDING": "In attesa",
+        "IN_PROGRESS": "In corso",
+        "COMPLETED": "Completato"
+      }
     },
     "tasks": {
       "title": "Attività in Arrivo",
@@ -1037,44 +1072,6 @@
       "deleteConfirm": "Sei sicuro di voler eliminare questa foto?",
       "manualUpload": "Caricamento manuale"
     },
-    "checklist": {
-      "title": "Lista di Controllo Matrimonio",
-      "subtitle": "Gestisci le attività e monitora i progressi del tuo matrimonio",
-      "loading": "Caricamento lista...",
-      "saving": "Salvataggio...",
-      "error": "Errore nel caricamento della lista",
-      "retry": "Riprova",
-      "emptyTitle": "Nessuna attività ancora",
-      "emptyDesc": "Importa una lista o attendi che il tuo organizzatore aggiunga le attività.",
-      "import": "Importa da Excel",
-      "importing": "Importazione...",
-      "export": "Esporta in Excel",
-      "exporting": "Esportazione...",
-      "delete": "Elimina",
-      "deleteConfirm": "Sei sicuro di voler eliminare questa attività?",
-      "markComplete": "Segna come completata",
-      "markIncomplete": "Segna come incompleta",
-      "descriptionPlaceholder": "Aggiungi descrizione...",
-      "columns": {
-        "done": "Fatto",
-        "title": "Titolo",
-        "description": "Descrizione",
-        "assignedTo": "Assegnato a",
-        "dueDate": "Data di scadenza",
-        "status": "Stato",
-        "actions": "Azioni"
-      },
-      "assignedTo": {
-        "planner": "Organizzatore Matrimonio",
-        "couple": "Coppia",
-        "other": "Altro"
-      },
-      "status": {
-        "PENDING": "In attesa",
-        "IN_PROGRESS": "In corso",
-        "COMPLETED": "Completato"
-      }
-    },
     "templates": {
       "title": "Modelli di Messaggi",
       "description": "Gestisci i modelli di invito e promemoria per il tuo matrimonio in tutte le lingue supportate.",
@@ -1182,6 +1179,38 @@
       "mapStyle": "Stile Mappa",
       "colorMap": "Colore",
       "grayscaleMap": "Scala di Grigi"
+    },
+    "nupcibot": {
+      "subtitle": "Il tuo assistente matrimoniale",
+      "close": "Chiudi",
+      "greeting": "Ciao! Sono NupciBot, il tuo assistente matrimoniale. Come posso aiutarti oggi?",
+      "helpConfigure": "Aiutami a configurare il mio matrimonio",
+      "viewReports": "Visualizza ed esporta report",
+      "messagePlanner": {
+        "button": "Scrivi al mio wedding planner",
+        "title": "Scrivi al planner",
+        "subtitle": "Invia un messaggio al tuo planner",
+        "description": "Invia una email direttamente al tuo wedding planner. La riceverà e ti risponderà tramite il suo canale abituale.",
+        "topicLabel": "Argomento / Oggetto",
+        "topicPlaceholder": "es. Domanda sulla location",
+        "messageLabel": "Il tuo messaggio",
+        "messagePlaceholder": "Scrivi il tuo messaggio qui...",
+        "send": "Invia messaggio",
+        "sending": "Invio in corso...",
+        "back": "Torna al menu",
+        "successTitle": "Messaggio inviato!",
+        "successDesc": "Il tuo planner riceverà il tuo messaggio via email a breve.",
+        "errorGeneric": "Impossibile inviare il messaggio. Riprova."
+      },
+      "chat": {
+        "button": "Chatta con NupciBot",
+        "title": "Chat NupciBot",
+        "subtitle": "Chiedimi qualsiasi cosa",
+        "greeting": "Ciao! Chiedimi qualsiasi cosa sulla piattaforma — funzionalità, come usarla, navigazione. Sono qui per aiutarti!",
+        "placeholder": "Fai una domanda...",
+        "errorReply": "Mi dispiace, non ho potuto generare una risposta in questo momento. Riprova.",
+        "limitReached": "Hai raggiunto il limite di 5 domande per sessione. Per favore, chiudi la chat e riaprila per iniziare una nuova conversazione."
+      }
     }
   },
   "guest": {
@@ -1412,6 +1441,68 @@
         "Monitoraggio delle conferme di presenza in tempo reale con notifiche di attività",
         "Monitoraggio dei regali con conferma di pagamento automatica o manuale"
       ]
+    },
+    "features": {
+      "title": "Funzionalità della Piattaforma",
+      "guests": {
+        "title": "Gestione degli Invitati",
+        "path": "/admin/guests",
+        "content": "Organizza gli invitati in unità familiari. Aggiungi o modifica famiglie con informazioni di contatto (email, telefono, WhatsApp), preferenza di lingua e canale di comunicazione. Importa ed esporta liste di invitati da Excel. Usa azioni di massa per modificare proprietà o inviare messaggi a più invitati."
+      },
+      "configure": {
+        "title": "Configura il tuo Matrimonio",
+        "path": "/admin/configure",
+        "content": "Personalizza ogni aspetto dell'esperienza RSVP: dress code, informazioni aggiuntive, consentire aggiunte di ospiti, IBAN per i regali con codici di riferimento automatici, messaggi Save the Date e fino a 3 domande RSVP personalizzate più 3 campi di testo obbligatori."
+      },
+      "templates": {
+        "title": "Modelli di Messaggi",
+        "path": "/admin/templates",
+        "content": "Crea e gestisci modelli di Invito, Promemoria, Conferma e Save-the-Date per WhatsApp, Email e SMS nelle 5 lingue. Usa segnaposto come familyName e magicLink per personalizzare ogni messaggio."
+      },
+      "invitationBuilder": {
+        "title": "Costruttore di Inviti",
+        "path": "/admin/invitation-builder",
+        "content": "Progetta una bella pagina di invito che gli ospiti vedono aprendo il loro link magico. Aggiungi testo, immagini, mappe di localizzazione, conto alla rovescia e pulsanti per aggiungere al calendario."
+      },
+      "notifications": {
+        "title": "Notifiche e Attività",
+        "path": "/admin/notifications",
+        "content": "Un feed di attività in tempo reale mostra ogni interazione degli ospiti: link aperto, RSVP avviato, inviato o modificato, invito inviato, pagamento ricevuto e risposte AI. Filtra per data, tipo di evento o ospite."
+      },
+      "reports": {
+        "title": "Report",
+        "path": "/admin/reports",
+        "content": "Genera ed esporta quattro tipi di report: Lista Partecipanti, Ospiti per Amministratore, Report Piano di Tavoli e Media Età degli Ospiti. Esporta come Excel o CSV."
+      },
+      "seating": {
+        "title": "Piano dei Tavoli",
+        "path": "/admin/seating",
+        "content": "Configura tavoli con nomi e capacità personalizzati. Assegna gli ospiti confermati tramite trascinamento, assegnazione casuale automatica o dividi le famiglie tra tavoli diversi."
+      },
+      "checklist": {
+        "title": "Lista di Controllo Matrimonio",
+        "path": "/admin/checklist",
+        "content": "Tieni traccia di ogni attività del matrimonio pre-compilata dal modello del tuo planner. Ogni attività ha titolo, descrizione, data di scadenza, stato e assegnazione. Importa ed esporta in Excel."
+      },
+      "providers": {
+        "title": "Fornitori",
+        "path": "/admin/providers",
+        "content": "Gestisci i fornitori di servizi del tuo matrimonio. Assegna fornitori, tieni traccia dello stato del contratto e registra i pagamenti con importo, metodo e data."
+      },
+      "payments": {
+        "title": "Regali e Pagamenti",
+        "path": "/admin/payments",
+        "content": "Tieni traccia dei regali in modalità automatica (codici di riferimento unici per famiglia) o manuale. Segna i regali come ricevuti o confermati e filtra per stato di presenza."
+      },
+      "gallery": {
+        "title": "Galleria Foto",
+        "path": "/admin/gallery",
+        "content": "Connetti Google Photos per la sincronizzazione automatica degli album, o carica foto manualmente. Controlla quali foto sono visibili. Gli ospiti possono contribuire foto all'album condiviso."
+      },
+      "nupcibot": {
+        "title": "Assistente AI NupciBot",
+        "content": "Il pulsante flottante di NupciBot ti offre quattro azioni rapide: riconfigurare il matrimonio, vedere i report, inviare un messaggio al tuo wedding planner via email, o aprire una chat AI per fare domande sulla piattaforma."
+      }
     },
     "gettingStarted": {
       "title": "Inizia",

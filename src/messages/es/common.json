@@ -1419,7 +1419,10 @@
         "cancel": "Cancelar",
         "save": "Guardar Configuración",
         "saving": "Guardando...",
-        "submitError": "Error al guardar la configuración. Por favor inténtalo de nuevo."
+        "submitError": "Error al guardar la configuración. Por favor inténtalo de nuevo.",
+        "invitationUrl": "URL General de Invitación",
+        "copyUrl": "Copiar al Portapapeles",
+        "copySuccess": "¡URL copiada!"
       },
       "dangerZone": {
         "title": "Zona de Peligro",
@@ -1609,11 +1612,36 @@
       "manualUpload": "Subida manual"
     },
     "nupcibot": {
-      "subtitle": "Tu asistente de bodas",
+      "subtitle": "Tu asistente de boda",
       "close": "Cerrar",
-      "greeting": "¡Hola! Soy NupciBot, tu asistente de bodas. ¿En qué te puedo ayudar?",
+      "greeting": "¡Hola! Soy NupciBot, tu asistente de boda. ¿En qué puedo ayudarte hoy?",
       "helpConfigure": "Ayúdame a configurar mi boda",
-      "viewReports": "Ver y exportar informes"
+      "viewReports": "Ver y exportar informes",
+      "messagePlanner": {
+        "button": "Escribir a mi wedding planner",
+        "title": "Escribir al planner",
+        "subtitle": "Envía un mensaje a tu planner",
+        "description": "Envía un email directamente a tu wedding planner. Lo recibirá y te responderá por su canal habitual.",
+        "topicLabel": "Tema / Asunto",
+        "topicPlaceholder": "ej. Pregunta sobre el lugar",
+        "messageLabel": "Tu mensaje",
+        "messagePlaceholder": "Escribe tu mensaje aquí...",
+        "send": "Enviar mensaje",
+        "sending": "Enviando...",
+        "back": "Volver al menú",
+        "successTitle": "¡Mensaje enviado!",
+        "successDesc": "Tu planner recibirá tu mensaje por email en breve.",
+        "errorGeneric": "No se pudo enviar el mensaje. Inténtalo de nuevo."
+      },
+      "chat": {
+        "button": "Chatear con NupciBot",
+        "title": "Chat con NupciBot",
+        "subtitle": "Pregúntame lo que quieras",
+        "greeting": "¡Hola! Pregúntame lo que quieras sobre la plataforma: funciones, cómo usarla, navegación. ¡Estoy aquí para ayudar!",
+        "placeholder": "Escribe una pregunta...",
+        "errorReply": "Lo siento, no pude generar una respuesta ahora mismo. Inténtalo de nuevo.",
+        "limitReached": "Has alcanzado el límite de 5 preguntas por sesión. Por favor, cierra el chat y ábrelo de nuevo para iniciar una nueva conversación."
+      }
     }
   },
   "guest": {
@@ -1868,6 +1896,68 @@
       "title": "Comenzar",
       "content": "¿Listo para optimizar tu negocio de planificación de bodas? Comienza con nuestra prueba gratuita de 14 días para explorar todas las funciones con tu primera boda. No se requiere tarjeta de crédito.",
       "button": "Solicita una Demo"
+    },
+    "features": {
+      "title": "Funcionalidades de la Plataforma",
+      "guests": {
+        "title": "Gestión de Invitados",
+        "path": "/admin/guests",
+        "content": "Organiza a los invitados en unidades familiares. Añade o edita familias con información de contacto (email, teléfono, WhatsApp), preferencia de idioma y canal de comunicación. Importa y exporta listas de invitados desde Excel. Usa acciones masivas para editar propiedades o enviar mensajes a varios invitados. Filtra por estado de RSVP, canal, idioma o administrador asignado."
+      },
+      "configure": {
+        "title": "Configurar tu Boda",
+        "path": "/admin/configure",
+        "content": "Personaliza cada aspecto de la experiencia RSVP: código de vestimenta, información adicional, permitir adiciones de invitados, IBAN para regalos con códigos de referencia automáticos, mensajes Save the Date y hasta 3 preguntas RSVP personalizadas más 3 campos de texto obligatorios."
+      },
+      "templates": {
+        "title": "Plantillas de Mensajes",
+        "path": "/admin/templates",
+        "content": "Crea y gestiona plantillas de Invitación, Recordatorio, Confirmación y Save-the-Date para WhatsApp, Email y SMS en los 5 idiomas. Usa marcadores como familyName y magicLink para personalizar cada mensaje."
+      },
+      "invitationBuilder": {
+        "title": "Constructor de Invitaciones",
+        "path": "/admin/invitation-builder",
+        "content": "Diseña una página de invitación hermosa que los invitados ven al abrir su enlace mágico. Añade texto, imágenes, mapas de ubicación, cronómetros de cuenta regresiva y botones para agregar al calendario."
+      },
+      "notifications": {
+        "title": "Notificaciones y Actividad",
+        "path": "/admin/notifications",
+        "content": "Un feed de actividad en tiempo real muestra cada interacción de los invitados: enlace abierto, RSVP iniciado, enviado o editado, invitación enviada, pago recibido y respuestas de IA. Filtra por fecha, tipo de evento o invitado."
+      },
+      "reports": {
+        "title": "Informes",
+        "path": "/admin/reports",
+        "content": "Genera y exporta cuatro tipos de informes: Lista de Asistentes, Invitados por Administrador, Informe de Plan de Asientos y Promedio de Edad de Invitados. Exporta como Excel o CSV."
+      },
+      "seating": {
+        "title": "Plan de Asientos",
+        "path": "/admin/seating",
+        "content": "Configura mesas con nombres y capacidades personalizadas. Asigna invitados confirmados mediante arrastrar y soltar, asignación automática aleatoria o divide familias entre diferentes mesas."
+      },
+      "checklist": {
+        "title": "Lista de Verificación de Bodas",
+        "path": "/admin/checklist",
+        "content": "Rastrea cada tarea de la boda prepoblada desde la plantilla de tu planner. Cada tarea tiene título, descripción, fecha de vencimiento, estado y asignación. Importa y exporta a Excel."
+      },
+      "providers": {
+        "title": "Proveedores",
+        "path": "/admin/providers",
+        "content": "Gestiona los proveedores de servicios de tu boda. Asigna proveedores, rastrea el estado del contrato y registra pagos con importe, método y fecha."
+      },
+      "payments": {
+        "title": "Regalos y Pagos",
+        "path": "/admin/payments",
+        "content": "Rastrea regalos de boda en modo automático (códigos de referencia únicos por familia) o modo manual. Marca regalos como recibidos o confirmados y filtra por estado de asistencia."
+      },
+      "gallery": {
+        "title": "Galería de Fotos",
+        "path": "/admin/gallery",
+        "content": "Conecta Google Photos para sincronización automática de álbumes, o sube fotos manualmente. Controla qué fotos son visibles. Los invitados pueden contribuir fotos al álbum compartido."
+      },
+      "nupcibot": {
+        "title": "Asistente IA NupciBot",
+        "content": "El botón flotante de NupciBot te da cuatro acciones rápidas: reconfigurar tu boda, ver informes, enviar un mensaje a tu wedding planner por email, o abrir un chat de IA para hacer preguntas sobre la plataforma."
+      }
     }
   },
   "news": {

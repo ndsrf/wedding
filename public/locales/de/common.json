@@ -619,7 +619,42 @@
       "noWeddingAssigned": "Keine Hochzeit zugewiesen."
     },
     "checklist": {
-      "loadError": "Checkliste konnte nicht geladen werden"
+      "title": "Hochzeits-Checkliste",
+      "subtitle": "Aufgaben verwalten und Fortschritt Ihrer Hochzeit verfolgen",
+      "loading": "Checkliste wird geladen...",
+      "saving": "Speichern...",
+      "error": "Fehler beim Laden der Checkliste",
+      "retry": "Erneut versuchen",
+      "emptyTitle": "Noch keine Aufgaben",
+      "emptyDesc": "Importieren Sie eine Checkliste oder warten Sie, bis Ihr Planer Aufgaben hinzufügt.",
+      "import": "Aus Excel importieren",
+      "importing": "Importiere...",
+      "export": "Nach Excel exportieren",
+      "exporting": "Exportiere...",
+      "delete": "Löschen",
+      "deleteConfirm": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?",
+      "markComplete": "Als erledigt markieren",
+      "markIncomplete": "Als nicht erledigt markieren",
+      "descriptionPlaceholder": "Beschreibung hinzufügen...",
+      "columns": {
+        "done": "Erledigt",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "assignedTo": "Zugewiesen an",
+        "dueDate": "Fälligkeitsdatum",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "assignedTo": {
+        "planner": "Hochzeitsplaner",
+        "couple": "Paar",
+        "other": "Andere"
+      },
+      "status": {
+        "PENDING": "Ausstehend",
+        "IN_PROGRESS": "In Bearbeitung",
+        "COMPLETED": "Abgeschlossen"
+      }
     },
     "tasks": {
       "title": "Bevorstehende Aufgaben",
@@ -718,7 +753,7 @@
         "viewTimeline": "Aktivitätsverlauf anzeigen",
         "noEvents": "Für diesen Gast wurde noch keine Aktivität aufgezeichnet.",
         "loading": "Lade Zeitverlauf...",
-        "guestCreated": "Gast zum System hinzugef\u00fcgt"
+        "guestCreated": "Gast zum System hinzugefügt"
       },
       "import": "Aus Excel importieren",
       "export": "Nach Excel exportieren",
@@ -766,8 +801,8 @@
         "saveChanges": "Änderungen speichern",
         "rsvpAnswers": "RSVP-Antworten",
         "privateNotes": "Private Notizen",
-        "privateNotesPlaceholder": "Interne Notizen zu diesem Gast hinzuf\u00fcgen (Ern\u00e4hrungsvorlieben, Sitzplatzpr\u00e4ferenzen, besondere W\u00fcnsche usw.)",
-        "privateNotesHelp": "Diese Notizen sind nur f\u00fcr Hochzeitsadministratoren sichtbar und werden nicht mit den G\u00e4sten geteilt."
+        "privateNotesPlaceholder": "Interne Notizen zu diesem Gast hinzufügen (Ernährungsvorlieben, Sitzplatzpräferenzen, besondere Wünsche usw.)",
+        "privateNotesHelp": "Diese Notizen sind nur für Hochzeitsadministratoren sichtbar und werden nicht mit den Gästen geteilt."
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
@@ -1037,44 +1072,6 @@
       "deleteConfirm": "Möchten Sie dieses Foto wirklich löschen?",
       "manualUpload": "Manueller Upload"
     },
-    "checklist": {
-      "title": "Hochzeits-Checkliste",
-      "subtitle": "Aufgaben verwalten und Fortschritt Ihrer Hochzeit verfolgen",
-      "loading": "Checkliste wird geladen...",
-      "saving": "Speichern...",
-      "error": "Fehler beim Laden der Checkliste",
-      "retry": "Erneut versuchen",
-      "emptyTitle": "Noch keine Aufgaben",
-      "emptyDesc": "Importieren Sie eine Checkliste oder warten Sie, bis Ihr Planer Aufgaben hinzufügt.",
-      "import": "Aus Excel importieren",
-      "importing": "Importiere...",
-      "export": "Nach Excel exportieren",
-      "exporting": "Exportiere...",
-      "delete": "Löschen",
-      "deleteConfirm": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?",
-      "markComplete": "Als erledigt markieren",
-      "markIncomplete": "Als nicht erledigt markieren",
-      "descriptionPlaceholder": "Beschreibung hinzufügen...",
-      "columns": {
-        "done": "Erledigt",
-        "title": "Titel",
-        "description": "Beschreibung",
-        "assignedTo": "Zugewiesen an",
-        "dueDate": "Fälligkeitsdatum",
-        "status": "Status",
-        "actions": "Aktionen"
-      },
-      "assignedTo": {
-        "planner": "Hochzeitsplaner",
-        "couple": "Paar",
-        "other": "Andere"
-      },
-      "status": {
-        "PENDING": "Ausstehend",
-        "IN_PROGRESS": "In Bearbeitung",
-        "COMPLETED": "Abgeschlossen"
-      }
-    },
     "templates": {
       "title": "Nachrichtenvorlagen",
       "description": "Verwalten Sie Einladungs- und Erinnerungsvorlagen für Ihre Hochzeit in allen unterstützten Sprachen.",
@@ -1182,6 +1179,38 @@
       "mapStyle": "Kartenstil",
       "colorMap": "Farbe",
       "grayscaleMap": "Graustufen"
+    },
+    "nupcibot": {
+      "subtitle": "Ihr Hochzeitsassistent",
+      "close": "Schließen",
+      "greeting": "Hallo! Ich bin NupciBot, Ihr Hochzeitsassistent. Wie kann ich Ihnen heute helfen?",
+      "helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren",
+      "viewReports": "Berichte anzeigen und exportieren",
+      "messagePlanner": {
+        "button": "Nachricht an meinen Wedding Planner",
+        "title": "Planner schreiben",
+        "subtitle": "Senden Sie eine Nachricht an Ihren Planner",
+        "description": "Senden Sie eine E-Mail direkt an Ihren Wedding Planner. Er wird sie erhalten und über seinen üblichen Kanal antworten.",
+        "topicLabel": "Betreff",
+        "topicPlaceholder": "z.B. Frage zur Location",
+        "messageLabel": "Ihre Nachricht",
+        "messagePlaceholder": "Schreiben Sie hier Ihre Nachricht...",
+        "send": "Nachricht senden",
+        "sending": "Wird gesendet...",
+        "back": "Zurück zum Menü",
+        "successTitle": "Nachricht gesendet!",
+        "successDesc": "Ihr Planner wird Ihre Nachricht in Kürze per E-Mail erhalten.",
+        "errorGeneric": "Nachricht konnte nicht gesendet werden. Bitte erneut versuchen."
+      },
+      "chat": {
+        "button": "Mit NupciBot chatten",
+        "title": "NupciBot Chat",
+        "subtitle": "Stellen Sie mir beliebige Fragen",
+        "greeting": "Hallo! Stellen Sie mir beliebige Fragen zur Plattform — Funktionen, Bedienung, Navigation. Ich bin hier, um zu helfen!",
+        "placeholder": "Frage eingeben...",
+        "errorReply": "Entschuldigung, ich konnte gerade keine Antwort generieren. Bitte erneut versuchen.",
+        "limitReached": "Sie haben das Limit von 5 Fragen pro Sitzung erreicht. Bitte schließen Sie den Chat und öffnen Sie ihn erneut, um eine neue Unterhaltung zu beginnen."
+      }
     }
   },
   "guest": {
@@ -1412,6 +1441,68 @@
         "Echtzeit-Zusagenverfolgung mit Aktivitätsbenachrichtigungen",
         "Geschenkverfolgung mit automatischer oder manueller Zahlungsbestätigung"
       ]
+    },
+    "features": {
+      "title": "Plattformfunktionen",
+      "guests": {
+        "title": "Gästeverwaltung",
+        "path": "/admin/guests",
+        "content": "Organisieren Sie Gäste in Familieneinheiten. Fügen Sie Familien mit Kontaktdaten (E-Mail, Telefon, WhatsApp), Sprachpräferenz und Kommunikationskanal hinzu oder bearbeiten Sie sie. Importieren und exportieren Sie Gästelisten aus Excel. Verwenden Sie Massenaktionen, um Eigenschaften zu bearbeiten oder Nachrichten an mehrere Gäste zu senden."
+      },
+      "configure": {
+        "title": "Hochzeit Konfigurieren",
+        "path": "/admin/configure",
+        "content": "Passen Sie jeden Aspekt der RSVP-Erfahrung an: Dresscode, zusätzliche Informationen, Gästezusätze erlauben, IBAN für Geschenke mit automatischen Referenzcodes, Save-the-Date-Nachrichten und bis zu 3 benutzerdefinierte RSVP-Fragen plus 3 Pflichtfelder."
+      },
+      "templates": {
+        "title": "Nachrichtenvorlagen",
+        "path": "/admin/templates",
+        "content": "Erstellen und verwalten Sie Einladungs-, Erinnerungs-, Bestätigungs- und Save-the-Date-Vorlagen für WhatsApp, E-Mail und SMS in allen 5 Sprachen. Verwenden Sie Platzhalter wie familyName und magicLink, um jede Nachricht zu personalisieren."
+      },
+      "invitationBuilder": {
+        "title": "Einladungsersteller",
+        "path": "/admin/invitation-builder",
+        "content": "Gestalten Sie eine schöne Einladungsseite, die Gäste beim Öffnen ihres magischen Links sehen. Fügen Sie Text, Bilder, Ortskarten, Countdowns und Schaltflächen zum Kalender hinzufügen ein."
+      },
+      "notifications": {
+        "title": "Benachrichtigungen und Aktivität",
+        "path": "/admin/notifications",
+        "content": "Ein Echtzeit-Aktivitätsfeed zeigt jede Gastinteraktion: Link geöffnet, RSVP gestartet, eingereicht oder bearbeitet, Einladung gesendet, Zahlung erhalten und KI-Antworten. Filtern nach Datum, Ereignistyp oder Gast."
+      },
+      "reports": {
+        "title": "Berichte",
+        "path": "/admin/reports",
+        "content": "Erstellen und exportieren Sie vier Berichtstypen: Teilnehmerliste, Gäste pro Administrator, Sitzplanbericht und Durchschnittsalter der Gäste. Export als Excel oder CSV."
+      },
+      "seating": {
+        "title": "Sitzplan",
+        "path": "/admin/seating",
+        "content": "Konfigurieren Sie Tische mit benutzerdefinierten Namen und Kapazitäten. Weisen Sie bestätigte Gäste per Drag-and-Drop zu, automatisch zufällig oder teilen Sie Familien auf verschiedene Tische auf."
+      },
+      "checklist": {
+        "title": "Hochzeits-Checkliste",
+        "path": "/admin/checklist",
+        "content": "Verfolgen Sie jede Hochzeitsaufgabe, die aus der Vorlage Ihres Planers vorausgefüllt wurde. Jede Aufgabe hat Titel, Beschreibung, Fälligkeitsdatum, Status und Zuweisung. Import und Export nach Excel."
+      },
+      "providers": {
+        "title": "Dienstleister",
+        "path": "/admin/providers",
+        "content": "Verwalten Sie die Hochzeitsdienstleister. Weisen Sie Dienstleister zu, verfolgen Sie den Vertragsstatus und erfassen Sie Zahlungen mit Betrag, Methode und Datum."
+      },
+      "payments": {
+        "title": "Geschenke und Zahlungen",
+        "path": "/admin/payments",
+        "content": "Verfolgen Sie Hochzeitsgeschenke im automatischen Modus (eindeutige Referenzcodes pro Familie) oder manuellen Modus. Markieren Sie Geschenke als erhalten oder bestätigt und filtern Sie nach Anwesenheitsstatus."
+      },
+      "gallery": {
+        "title": "Fotogalerie",
+        "path": "/admin/gallery",
+        "content": "Verbinden Sie Google Photos für automatische Album-Synchronisierung oder laden Sie Fotos manuell hoch. Steuern Sie, welche Fotos sichtbar sind. Gäste können Fotos zum gemeinsamen Album beitragen."
+      },
+      "nupcibot": {
+        "title": "NupciBot KI-Assistent",
+        "content": "Die schwebende NupciBot-Schaltfläche bietet vier Schnellaktionen: Hochzeit neu konfigurieren, Berichte anzeigen, eine E-Mail-Nachricht an Ihren Wedding Planner senden oder einen KI-Chat für Plattformfragen öffnen."
+      }
     },
     "gettingStarted": {
       "title": "Erste Schritte",

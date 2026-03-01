@@ -162,6 +162,9 @@ export interface Wedding {
   // Messaging Configuration - WhatsApp mode
   whatsapp_mode: WhatsAppMode;
 
+  // Wedding Code for Short URLs
+  short_url_initials: string | null;
+
   // RSVP Configuration - Extra Yes/No questions (up to 3)
   extra_question_1_enabled: boolean;
   extra_question_1_text: string | null;

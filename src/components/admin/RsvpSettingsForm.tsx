@@ -70,6 +70,21 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const invitationUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/w/${wedding.short_url_initials}`
+    : '';
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(invitationUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy URL:', err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,6 +152,43 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
           {error}
+        </div>
+      )}
+
+      {/* Invitation URL Section */}
+      {wedding.short_url_initials && (
+        <div className="bg-purple-50 border border-purple-100 rounded-lg p-6">
+          <h3 className="text-lg font-medium text-purple-900 mb-2">{t('invitationUrl')}</h3>
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 bg-white border border-purple-200 rounded-md px-4 py-2 text-purple-900 font-mono text-sm overflow-hidden text-ellipsis whitespace-nowrap">
+              {invitationUrl}
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyUrl}
+              className={`flex-shrink-0 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                copied
+                  ? 'bg-green-600 text-white'
+                  : 'bg-purple-600 text-white hover:bg-purple-700'
+              }`}
+            >
+              {copied ? (
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {t('copySuccess')}
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
+                  {t('copyUrl')}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       )}
 

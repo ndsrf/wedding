@@ -97,6 +97,7 @@ export async function GET(request: NextRequest) {
       default_language: wedding.default_language,
       wedding_country: wedding.wedding_country,
       status: wedding.status,
+      short_url_initials: wedding.short_url_initials,
       created_at: wedding.created_at,
       created_by: wedding.created_by,
       updated_at: wedding.updated_at,

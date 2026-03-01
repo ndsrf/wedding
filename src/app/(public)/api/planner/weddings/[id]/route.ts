@@ -166,6 +166,7 @@ export async function GET(
       created_by: wedding.created_by,
       updated_at: wedding.updated_at,
       updated_by: wedding.updated_by,
+      short_url_initials: wedding.short_url_initials,
       // RSVP Configuration fields
       transportation_question_enabled: wedding.transportation_question_enabled,
       transportation_question_text: wedding.transportation_question_text,

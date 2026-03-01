@@ -1602,9 +1602,34 @@
     "nupcibot": {
       "subtitle": "Votre assistant mariage",
       "close": "Fermer",
-      "greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider ?",
+      "greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider aujourd'hui ?",
       "helpConfigure": "Aidez-moi à configurer mon mariage",
-      "viewReports": "Voir et exporter les rapports"
+      "viewReports": "Voir et exporter les rapports",
+      "messagePlanner": {
+        "button": "Écrire à mon wedding planner",
+        "title": "Écrire au planner",
+        "subtitle": "Envoyez un message à votre planner",
+        "description": "Envoyez un email directement à votre wedding planner. Il le recevra et vous répondra par son canal habituel.",
+        "topicLabel": "Sujet",
+        "topicPlaceholder": "ex. Question sur le lieu",
+        "messageLabel": "Votre message",
+        "messagePlaceholder": "Écrivez votre message ici...",
+        "send": "Envoyer le message",
+        "sending": "Envoi en cours...",
+        "back": "Retour au menu",
+        "successTitle": "Message envoyé !",
+        "successDesc": "Votre planner recevra votre message par email sous peu.",
+        "errorGeneric": "Impossible d'envoyer le message. Veuillez réessayer."
+      },
+      "chat": {
+        "button": "Chatter avec NupciBot",
+        "title": "Chat NupciBot",
+        "subtitle": "Posez-moi n'importe quelle question",
+        "greeting": "Bonjour ! Posez-moi toutes vos questions sur la plateforme — fonctionnalités, utilisation, navigation. Je suis là pour aider !",
+        "placeholder": "Posez une question...",
+        "errorReply": "Désolé, je n'ai pas pu générer de réponse pour l'instant. Veuillez réessayer.",
+        "limitReached": "Vous avez atteint la limite de 5 questions par session. Veuillez fermer le chat et le rouvrir pour démarrer une nouvelle conversation."
+      }
     }
   },
   "guest": {
@@ -1859,6 +1884,68 @@
       "title": "Commencer",
       "content": "Prêt à rationaliser votre activité d'organisation de mariages ? Commencez avec notre essai gratuit de 14 jours pour explorer toutes les fonctionnalités avec votre premier mariage. Aucune carte de crédit requise.",
       "button": "Demander une Démo"
+    },
+    "features": {
+      "title": "Fonctionnalités de la Plateforme",
+      "guests": {
+        "title": "Gestion des Invités",
+        "path": "/admin/guests",
+        "content": "Organisez les invités en unités familiales. Ajoutez ou modifiez des familles avec les coordonnées (email, téléphone, WhatsApp), la préférence de langue et le canal de communication. Importez et exportez des listes d'invités depuis Excel. Utilisez des actions en masse pour modifier des propriétés ou envoyer des messages à plusieurs invités."
+      },
+      "configure": {
+        "title": "Configurer Votre Mariage",
+        "path": "/admin/configure",
+        "content": "Personnalisez chaque aspect de l'expérience RSVP : code vestimentaire, informations supplémentaires, permettre les ajouts d'invités, IBAN pour les cadeaux avec codes de référence automatiques, messages Save the Date et jusqu'à 3 questions RSVP personnalisées plus 3 champs de texte obligatoires."
+      },
+      "templates": {
+        "title": "Modèles de Messages",
+        "path": "/admin/templates",
+        "content": "Créez et gérez des modèles d'Invitation, Rappel, Confirmation et Save-the-Date pour WhatsApp, Email et SMS dans les 5 langues. Utilisez des variables comme familyName et magicLink pour personnaliser chaque message."
+      },
+      "invitationBuilder": {
+        "title": "Constructeur d'Invitations",
+        "path": "/admin/invitation-builder",
+        "content": "Concevez une belle page d'invitation que les invités voient en ouvrant leur lien magique. Ajoutez du texte, des images, des cartes de localisation, des comptes à rebours et des boutons pour ajouter au calendrier."
+      },
+      "notifications": {
+        "title": "Notifications et Activité",
+        "path": "/admin/notifications",
+        "content": "Un flux d'activité en temps réel affiche chaque interaction des invités : lien ouvert, RSVP démarré, soumis ou modifié, invitation envoyée, paiement reçu et réponses IA. Filtrez par date, type d'événement ou invité."
+      },
+      "reports": {
+        "title": "Rapports",
+        "path": "/admin/reports",
+        "content": "Générez et exportez quatre types de rapports : Liste des Participants, Invités par Administrateur, Rapport de Plan de Table et Moyenne d'Âge des Invités. Exportez en Excel ou CSV."
+      },
+      "seating": {
+        "title": "Plan de Table",
+        "path": "/admin/seating",
+        "content": "Configurez des tables avec des noms et capacités personnalisés. Assignez les invités confirmés par glisser-déposer, assignation aléatoire automatique ou divisez les familles entre différentes tables."
+      },
+      "checklist": {
+        "title": "Liste de Contrôle Mariage",
+        "path": "/admin/checklist",
+        "content": "Suivez chaque tâche du mariage pré-remplie depuis le modèle de votre planner. Chaque tâche a un titre, une description, une date d'échéance, un statut et une assignation. Importez et exportez en Excel."
+      },
+      "providers": {
+        "title": "Prestataires",
+        "path": "/admin/providers",
+        "content": "Gérez les prestataires de votre mariage. Assignez des prestataires, suivez le statut du contrat et enregistrez les paiements avec montant, méthode et date."
+      },
+      "payments": {
+        "title": "Cadeaux et Paiements",
+        "path": "/admin/payments",
+        "content": "Suivez les cadeaux en mode automatique (codes de référence uniques par famille) ou mode manuel. Marquez les cadeaux comme reçus ou confirmés et filtrez par statut de présence."
+      },
+      "gallery": {
+        "title": "Galerie Photos",
+        "path": "/admin/gallery",
+        "content": "Connectez Google Photos pour la synchronisation automatique d'albums, ou téléchargez des photos manuellement. Contrôlez quelles photos sont visibles. Les invités peuvent contribuer des photos à l'album partagé."
+      },
+      "nupcibot": {
+        "title": "Assistant IA NupciBot",
+        "content": "Le bouton flottant NupciBot vous offre quatre actions rapides : reconfigurer votre mariage, voir les rapports, envoyer un message à votre wedding planner par email, ou ouvrir un chat IA pour poser des questions sur la plateforme."
+      }
     }
   },
   "news": {
