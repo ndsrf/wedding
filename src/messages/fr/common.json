@@ -72,6 +72,10 @@
       "page": "Page",
       "of": "sur"
     },
+    "selection": {
+      "selectAll": "Tout sélectionner",
+      "selectedCount": "{count, plural, one {# sélectionné} other {# sélectionnés}}"
+    },
     "optional": "Optionnel",
     "languages": {
       "ES": "Espagnol",

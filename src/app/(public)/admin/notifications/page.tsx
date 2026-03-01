@@ -48,6 +48,7 @@ interface Filters {
 export default function NotificationsPage() {
   const t = useTranslations();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [reminderFamilies, setReminderFamilies] = useState<ReminderFamily[]>([]);
   const [filters, setFilters] = useState<Filters>({});
   const [loading, setLoading] = useState(true);
@@ -74,6 +75,8 @@ export default function NotificationsPage() {
         setNotifications(data.data.items);
         setTotalPages(data.data.pagination.totalPages);
         setUnreadCount(data.data.unread_count);
+        // Reset selection when data changes
+        setSelectedIds([]);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -137,6 +140,24 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleBulkMarkRead = async () => {
+    if (selectedIds.length === 0) return;
+    
+    try {
+      setLoading(true);
+      await fetch('/api/admin/notifications/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error marking notifications read:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleExport = async () => {
     try {
       const response = await fetch('/api/admin/notifications/export', {
@@ -181,6 +202,14 @@ export default function NotificationsPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
+              {selectedIds.length > 0 && (
+                <button
+                  onClick={handleBulkMarkRead}
+                  className="px-4 py-3 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
+                >
+                  {t('admin.notifications.markAsRead')}
+                </button>
+              )}
               <button
                 onClick={handleExport}
                 className="px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
@@ -197,6 +226,7 @@ export default function NotificationsPage() {
           </div>
         </div>
       </header>
+
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -219,12 +249,20 @@ export default function NotificationsPage() {
                 <option value="">{t('admin.guests.filters.all')}</option>
                 <option value="LINK_OPENED">{t('admin.notifications.events.linkOpened')}</option>
                 <option value="INVITATION_SENT">{t('admin.notifications.events.invitationSent')}</option>
+                <option value="SAVE_THE_DATE_SENT">{t('admin.notifications.events.saveTheDateSent')}</option>
                 <option value="RSVP_STARTED">{t('admin.notifications.events.rsvpStarted')}</option>
                 <option value="RSVP_SUBMITTED">{t('admin.notifications.events.rsvpSubmitted')}</option>
                 <option value="RSVP_UPDATED">{t('admin.notifications.events.rsvpEdited')}</option>
                 <option value="GUEST_ADDED">{t('admin.notifications.events.guestAdded')}</option>
                 <option value="PAYMENT_RECEIVED">{t('admin.notifications.events.paymentReceived')}</option>
                 <option value="REMINDER_SENT">{t('admin.notifications.events.reminderSent')}</option>
+                <option value="TASK_ASSIGNED">{t('admin.notifications.events.taskAssigned')}</option>
+                <option value="TASK_COMPLETED">{t('admin.notifications.events.taskCompleted')}</option>
+                <option value="MESSAGE_DELIVERED">{t('admin.notifications.events.messageDelivered')}</option>
+                <option value="MESSAGE_READ">{t('admin.notifications.events.messageRead')}</option>
+                <option value="MESSAGE_FAILED">{t('admin.notifications.events.messageFailed')}</option>
+                <option value="MESSAGE_RECEIVED">{t('admin.notifications.events.messageReceived')}</option>
+                <option value="AI_REPLY_SENT">{t('admin.notifications.events.aiReplySent')}</option>
               </select>
             </div>
 
@@ -303,6 +341,8 @@ export default function NotificationsPage() {
         {/* Notification List */}
         <NotificationList
           notifications={notifications}
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
           onMarkRead={handleMarkRead}
           loading={loading}
         />

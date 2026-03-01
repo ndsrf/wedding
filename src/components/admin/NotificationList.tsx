@@ -34,6 +34,8 @@ interface NotificationItem {
 
 interface NotificationListProps {
   notifications: NotificationItem[];
+  selectedIds: string[];
+  onSelectionChange: (ids: string[]) => void;
   onMarkRead?: (notificationId: string) => void;
   loading?: boolean;
 }
@@ -140,7 +142,13 @@ const getEventTypeColor = (type: EventType): string => {
   }
 };
 
-export function NotificationList({ notifications, onMarkRead, loading }: NotificationListProps) {
+export function NotificationList({ 
+  notifications, 
+  selectedIds, 
+  onSelectionChange, 
+  onMarkRead, 
+  loading 
+}: NotificationListProps) {
   const t = useTranslations();
   const format = useFormatter();
   const router = useRouter();
@@ -149,6 +157,25 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
     // Navigate to guests page with search filter for this family
     router.push(`/admin/guests?search=${encodeURIComponent(familyName)}`);
   };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      onSelectionChange(notifications.map(n => n.id));
+    } else {
+      onSelectionChange([]);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    if (selectedIds.includes(id)) {
+      onSelectionChange(selectedIds.filter(selectedId => selectedId !== id));
+    } else {
+      onSelectionChange([...selectedIds, id]);
+    }
+  };
+
+  const allSelected = notifications.length > 0 && selectedIds.length === notifications.length;
+  const isIndeterminate = selectedIds.length > 0 && selectedIds.length < notifications.length;
 
   const getEventTypeLabel = (type: EventType): string => {
     const keyMap: Record<EventType, string> = {
@@ -170,9 +197,7 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
       AI_REPLY_SENT: 'aiReplySent',
     };
 
-    // For RSVP_STARTED, which isn't in our map explicitly, we could add it or fallback
-    // Since it wasn't in the original map either (it was RSVP_UPDATED essentially), we'll map it
-    const key = keyMap[type] || 'linkOpened'; // Default fallback
+    const key = keyMap[type] || 'linkOpened';
     return t(`admin.notifications.events.${key}`);
   };
 
@@ -211,59 +236,91 @@ export function NotificationList({ notifications, onMarkRead, loading }: Notific
 
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
+      {/* Selection Header */}
+      <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center">
+        <div className="flex items-center h-5">
+          <input
+            id="select-all"
+            type="checkbox"
+            checked={allSelected}
+            ref={el => {
+              if (el) el.indeterminate = isIndeterminate;
+            }}
+            onChange={handleSelectAll}
+            className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+          />
+        </div>
+        <label htmlFor="select-all" className="ml-3 text-sm font-medium text-gray-700">
+          {selectedIds.length > 0 
+            ? t('common.selection.selectedCount', { count: selectedIds.length })
+            : t('common.selection.selectAll')
+          }
+        </label>
+      </div>
+
       <ul className="divide-y divide-gray-200">
         {notifications.map((notification) => (
           <li
             key={notification.id}
-            className={`p-4 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-purple-50' : ''}`}
-            onClick={() => {
-              if (notification.family) {
-                handleNotificationClick(notification.family.name);
-              }
-            }}
+            className={`p-4 hover:bg-gray-50 flex items-start space-x-4 ${!notification.read ? 'bg-purple-50/50' : ''}`}
           >
-            <div className="flex items-start space-x-4">
-              <div className={`p-2 rounded-full ${getEventTypeColor(notification.event_type)}`}>
-                {getEventTypeIcon(notification.event_type)}
+            <div className="flex items-center h-5 pt-1">
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(notification.id)}
+                onChange={() => handleSelectOne(notification.id)}
+                className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
+            </div>
+            
+            <div className={`p-2 rounded-full ${getEventTypeColor(notification.event_type)} flex-shrink-0`}>
+              {getEventTypeIcon(notification.event_type)}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-900">
+                  {getEventTypeLabel(notification.event_type)}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {format.relativeTime(new Date(notification.created_at), new Date())}
+                </p>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-900">
-                    {getEventTypeLabel(notification.event_type)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {format.relativeTime(new Date(notification.created_at), new Date())}
-                  </p>
-                </div>
-                {notification.family && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    {notification.family.name}
-                    {notification.channel && (
-                      <span className="text-gray-400 ml-2">via {notification.channel}</span>
-                    )}
-                  </p>
-                )}
-                {notification.event_type === 'MESSAGE_RECEIVED' && notification.details?.body ? (
-                  <WhatsAppMessageBubble
-                    message={String(notification.details.body)}
-                    aiReply={notification.details.ai_reply ? String(notification.details.ai_reply) : null}
-                  />
-                ) : null}
-                {notification.event_type === 'AI_REPLY_SENT' && notification.details?.reply_preview ? (
-                  <WhatsAppMessageBubble
-                    message={String(notification.details.reply_preview)}
-                    messageLabel="AI Reply"
-                  />
-                ) : null}
-                {!notification.read && onMarkRead && (
-                  <button
-                    onClick={() => onMarkRead(notification.id)}
-                    className="mt-2 text-xs text-purple-600 hover:text-purple-800"
+              
+              {notification.family && (
+                <p className="text-sm text-gray-600 mt-1">
+                  <span 
+                    onClick={() => handleNotificationClick(notification.family!.name)}
+                    className="font-semibold text-purple-600 hover:text-purple-800 hover:underline cursor-pointer"
                   >
-                    {t('admin.notifications.markAsRead')}
-                  </button>
-                )}
-              </div>
+                    {notification.family.name}
+                  </span>
+                  {notification.channel && (
+                    <span className="text-gray-400 ml-2">via {notification.channel}</span>
+                  )}
+                </p>
+              )}
+              
+              {notification.event_type === 'MESSAGE_RECEIVED' && notification.details?.body ? (
+                <WhatsAppMessageBubble
+                  message={String(notification.details.body)}
+                  aiReply={notification.details.ai_reply ? String(notification.details.ai_reply) : null}
+                />
+              ) : null}
+              {notification.event_type === 'AI_REPLY_SENT' && notification.details?.reply_preview ? (
+                <WhatsAppMessageBubble
+                  message={String(notification.details.reply_preview)}
+                  messageLabel="AI Reply"
+                />
+              ) : null}
+              {!notification.read && onMarkRead && (
+                <button
+                  onClick={() => onMarkRead(notification.id)}
+                  className="mt-2 text-xs text-purple-600 hover:text-purple-800 font-medium"
+                >
+                  {t('admin.notifications.markAsRead')}
+                </button>
+              )}
             </div>
           </li>
         ))}
