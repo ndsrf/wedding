@@ -847,6 +847,7 @@
       "add": "Aggiungi Ospite",
       "import": "Importa da Excel",
       "importVcf": "Importa famiglie VCF (Google, Apple)",
+      "importingVcf": "Importazione...",
       "selected": "selezionati",
       "copyInvLink": "Copia link di invito",
       "table": {

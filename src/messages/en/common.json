@@ -1141,6 +1141,7 @@
       "add": "Add Guest",
       "import": "Import from Excel",
       "importVcf": "Import VCF (Google, Apple) families",
+      "importingVcf": "Importing...",
       "selected": "selected",
       "copyInvLink": "Copy invitation link",
       "table": {

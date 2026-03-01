@@ -847,6 +847,7 @@
       "add": "Gast hinzufügen",
       "import": "Aus Excel importieren",
       "importVcf": "VCF-Familien importieren (Google, Apple)",
+      "importingVcf": "Importieren...",
       "selected": "ausgewählt",
       "copyInvLink": "Einladungslink kopieren",
       "table": {

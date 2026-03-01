@@ -103,6 +103,7 @@ export default function GuestsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [guestToDelete, setGuestToDelete] = useState<GuestWithStatus | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [importingVcf, setImportingVcf] = useState(false);
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -668,18 +669,41 @@ export default function GuestsPage() {
               </label>
               )}
               {!isReadOnly && (
-                <label className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer text-center">
-                  {t('admin.guests.importVcf')}
+                <label
+                  className={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md text-center inline-flex items-center gap-2 ${
+                    importingVcf
+                      ? 'opacity-60 cursor-not-allowed pointer-events-none'
+                      : 'hover:bg-gray-50 cursor-pointer'
+                  }`}
+                >
+                  {importingVcf ? (
+                    <>
+                      <svg
+                        className="animate-spin h-4 w-4 text-gray-500 shrink-0"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      {t('admin.guests.importingVcf')}
+                    </>
+                  ) : (
+                    t('admin.guests.importVcf')
+                  )}
                   <input
                     type="file"
                     accept=".vcf"
                     className="hidden"
+                    disabled={importingVcf}
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
 
                       const formData = new FormData();
                       formData.append('file', file);
+                      setImportingVcf(true);
 
                       try {
                         const response = await fetch('/api/admin/guests/import-vcf', {
@@ -699,8 +723,10 @@ export default function GuestsPage() {
                       } catch (error) {
                         console.error('VCF import error:', error);
                         showNotification('error', 'VCF import failed');
+                      } finally {
+                        setImportingVcf(false);
+                        e.target.value = '';
                       }
-                      e.target.value = '';
                     }}
                   />
                 </label>
