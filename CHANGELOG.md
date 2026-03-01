@@ -1,3 +1,77 @@
+# [1.2.0](https://github.com/ndsrf/wedding/compare/v1.0.0...v1.2.0) (2026-03-01)
+
+
+### Bug Fixes
+
+* add missing id field to WeddingData type and setWeddingData call ([57e30e9](https://github.com/ndsrf/wedding/commit/57e30e987b1114b6caca8374969231b86cbef1b6))
+* add missing main_event_location_id field to test fixture ([53b94eb](https://github.com/ndsrf/wedding/commit/53b94ebc37f7d2be8ecdd359aeca2ceea1d21847))
+* add missing planner reminders and save-the-date API routes ([44f4846](https://github.com/ndsrf/wedding/commit/44f484607305eec721a1d3d695f8a41c989ca088))
+* add prisma migrate deploy to build script for Vercel ([4abd1d1](https://github.com/ndsrf/wedding/commit/4abd1d1bf30e5f7ba93ff6fda7d9f3826eba92d4))
+* **api:** add missing wedding_day_invitation_template_id to planner wedding response objects ([8b8b86f](https://github.com/ndsrf/wedding/commit/8b8b86f1aa3f1f9b45a35c30a1ffbd1b941b5105))
+* cast Buffer to BodyInit for fetch body in google-photos client ([86b8a9d](https://github.com/ndsrf/wedding/commit/86b8a9d4e66e02644a71e87168ea4bdd9343b958))
+* create new migration to apply locations and itinerary schema ([262a816](https://github.com/ndsrf/wedding/commit/262a816b78fc4977354c8604fb9a3153b531dd99))
+* datetime-local format for itinerary on mobile ([1ddbddd](https://github.com/ndsrf/wedding/commit/1ddbddd579079069de4905afc14e3244a384fbd5))
+* **deps:** replace es-shims polyfill packages with local stubs via npm workspaces ([52ad5ea](https://github.com/ndsrf/wedding/commit/52ad5ea857b3a01985564a88b3b016081252c959))
+* **deps:** upgrade jest to v30 and add test-exclude override to eliminate blocked packages ([ee54920](https://github.com/ndsrf/wedding/commit/ee54920b1b4fad949648b3e1cdf77069a2aaba23))
+* **e2e:** update create-wedding test for new location select field ([0ddbc90](https://github.com/ndsrf/wedding/commit/0ddbc908601c41d19354c684151e665c40d11540))
+* **gallery:** confirm Google Photos URLs on upload; refresh in admin gallery ([0bf43f2](https://github.com/ndsrf/wedding/commit/0bf43f2b0c7d093af5c58fd24d204db6adebba31))
+* **google-photos:** make album creation non-fatal in OAuth callback ([02555f9](https://github.com/ndsrf/wedding/commit/02555f978ee2d764996c9118fb75f7448336c2f1))
+* hoist gPhotos declaration to fix 'Cannot find name' compile error ([fecb0d6](https://github.com/ndsrf/wedding/commit/fecb0d61edb49d0b96eafef4821fafe5d2a90ef5))
+* more fixes to track AI replies in the notifications screen ([6588a93](https://github.com/ndsrf/wedding/commit/6588a93547060d783d3eea969e01df6d1dac0b45))
+* move event type from Location to ItineraryItem; fix location dropdown ([1540e67](https://github.com/ndsrf/wedding/commit/1540e6782fd7908eed366689ca373f65b6da90fd))
+* remove unused remaining var in migrate route; update Google Photos README ([90cf139](https://github.com/ndsrf/wedding/commit/90cf13918f3cf57f2d4afa0a5cd8499fd29f7370))
+* rename unused request param in gallery DELETE handler ([7b4ef1c](https://github.com/ndsrf/wedding/commit/7b4ef1c4eb3c495fae769f68f9117ea64dbe5765))
+* render gallery blocks on invitation page and fix hardcoded Spanish tab ([5b8a10e](https://github.com/ndsrf/wedding/commit/5b8a10e69185b31f1e29037df19e9b01577dd251))
+* resolve all build errors for Next.js 15 compilation ([b46e155](https://github.com/ndsrf/wedding/commit/b46e15591ec7bc0135d78dc8cd07cb2afa84d9ee))
+* resolve ESLint compilation errors in gallery components ([551f5f2](https://github.com/ndsrf/wedding/commit/551f5f2a2bc72fd3cb0871142f50618ae9d6742e))
+* rewrite migration as idempotent SQL; revert Dockerfile ([ba4e3ee](https://github.com/ndsrf/wedding/commit/ba4e3ee16553c3c11ce7311bcbd4d698224805fd))
+* run prisma migrate deploy on container startup ([8a1fcde](https://github.com/ndsrf/wedding/commit/8a1fcde77ee7a979eea1164ec9e82be079a91e6d))
+* **security:** override https-proxy-agent to v7 to eliminate agent-base@6.0.2 ([ff46d04](https://github.com/ndsrf/wedding/commit/ff46d04d102c88dbaad8b71251b10609ebdd9249))
+* **security:** resolve Hono vulnerability GHSA-gq3j-xvxp-8hrf ([8d8c622](https://github.com/ndsrf/wedding/commit/8d8c6223b8a0eab32f7fd0dee4d84af076abc1b6))
+* **security:** update hono to 4.12.2 to patch GHSA-xh87-mx6m-69f3 ([e3c57d7](https://github.com/ndsrf/wedding/commit/e3c57d750e64652ddbe5e9adb034de29972ac73f))
+* show error to user when Google Photos connection fails ([e846c78](https://github.com/ndsrf/wedding/commit/e846c7810dcb32eb0c8646dca23c26e49b09b255))
+* strip trailing slash from APP_URL to prevent redirect_uri_mismatch ([fdc5b9e](https://github.com/ndsrf/wedding/commit/fdc5b9ee39528359665be41b60b5e05d25876152))
+* **tests:** add google_photos fields to baseWedding fixture ([b32f62e](https://github.com/ndsrf/wedding/commit/b32f62e6f5b0591979198df920f7fba43d7b0215))
+* **tests:** add missing wedding_day_invitation_template_id to test fixture and Wedding interface ([1153567](https://github.com/ndsrf/wedding/commit/1153567fd39737265ad3a91e7e26d443b0587ace))
+* **test:** update jest --testPathPattern to --testPathPatterns for jest v30 ([87ed501](https://github.com/ndsrf/wedding/commit/87ed50155ed9402e523faad24d4492f67d7ddd35))
+* Timeline for AI messages ([c6e2e45](https://github.com/ndsrf/wedding/commit/c6e2e455f9779e4c1ddddcd6eb2c1380efc05474))
+* **ui:** restore PrivateHeader and reprioritise dashboard actions ([b1c06d0](https://github.com/ndsrf/wedding/commit/b1c06d03ecea5439cd7917c887d3148be92dc415))
+* Update wedding assistant prompt for RSVP handling to include magic link ([d41b1a1](https://github.com/ndsrf/wedding/commit/d41b1a1621f80b8af7e1cb371933916a45d947bb))
+* **webhooks:** resolve AI reply tracking failures due to database timeouts ([ad89705](https://github.com/ndsrf/wedding/commit/ad897051234ba3a34958f6da503b995826cedf0e))
+* wedding edit form and admin itinerary display ([48b7a45](https://github.com/ndsrf/wedding/commit/48b7a457d370be2b3175ebc3f50a1e05617fac6d))
+
+
+### Features
+
+* Add AI auto-reply functionality for WhatsApp messages ([1b94bfa](https://github.com/ndsrf/wedding/commit/1b94bfa0f8b71830494b9774045a3fc0914eb82a))
+* add i18n translations for itinerary feature ([1a1dbf7](https://github.com/ndsrf/wedding/commit/1a1dbf70124bc773c5c0cfe5d76af4d256544f32))
+* add itinerary display to wedding detail page ([c17adcf](https://github.com/ndsrf/wedding/commit/c17adcf962de1966b62a8fe118ad9fb54a8fd2c8))
+* add ItineraryTimeline component with horizontal step layout ([96de5a4](https://github.com/ndsrf/wedding/commit/96de5a474bbe81619e4b488dcb65d33a17b05816))
+* add location management, itinerary, and Google Maps support ([3cbed25](https://github.com/ndsrf/wedding/commit/3cbed257d573af128aee80bf3140dfe9cc38bfc1))
+* add public /w/[code] wedding landing page with guest lookup ([3d5732e](https://github.com/ndsrf/wedding/commit/3d5732eff5b050faf0b8c5c629375e892475a6a0))
+* add wedding photo gallery with Google Photos integration ([9fb0b97](https://github.com/ndsrf/wedding/commit/9fb0b97656f062c5897ee9c17ea1ce7eae60483d))
+* **ai:** use short URLs in AI replies and prevent WhatsApp prefetch tracking ([3cd49ed](https://github.com/ndsrf/wedding/commit/3cd49ed72f9b30b867bb848ded0483a99bbcdb62))
+* complete i18n for itinerary and main event location ([0dabf59](https://github.com/ndsrf/wedding/commit/0dabf598790d941c777a581d617ea6dbf5ea28e4))
+* Enhance /admin homepage, and add NupciBot ([302c2cd](https://github.com/ndsrf/wedding/commit/302c2cdee17cd1e57c4d1381a40380f0759c6b66))
+* **google-photos:** remove OAuth backend, add paste-link API + migration ([e93d330](https://github.com/ndsrf/wedding/commit/e93d330227522cb610d90cce5ac9bdfd6d36ec1f))
+* **google-photos:** replace OAuth flow with manual album link paste ([5c11312](https://github.com/ndsrf/wedding/commit/5c113121b3baf63887548b697a4b9c0e86e3eb6d))
+* **google-photos:** restore OAuth upload with appendonly scope + migration + pagination ([68dc073](https://github.com/ndsrf/wedding/commit/68dc073289838a156a775dc48b60d2009f8c8897))
+* include active invitation template text blocks in AI system prompt ([13a785f](https://github.com/ndsrf/wedding/commit/13a785f4a42dd4521704055ae5144f350196123a))
+* Notification bell ([e9bb84e](https://github.com/ndsrf/wedding/commit/e9bb84e57225c85885155b1fbabd63e587925ea5))
+* NupciBot with doc context and link to wedding in RSVP ([447449f](https://github.com/ndsrf/wedding/commit/447449f2b0d45ee0f932be5564a2aa5b9eb3aa47))
+* redesign Google Photos connected state UI ([af03d05](https://github.com/ndsrf/wedding/commit/af03d05f4bec6ec5c472b374d8a07ff3f63366f0))
+* sort itinerary items by date and time ([ae17d4c](https://github.com/ndsrf/wedding/commit/ae17d4cb5c0a7959e456f890667e61436b77ec15))
+* upload WhatsApp and web photos to Google Photos via temp blob storage ([e1b9a5f](https://github.com/ndsrf/wedding/commit/e1b9a5fcaf33366055a498b0173a39269d6db42f))
+* **w-page:** add header, language bar, footer; refactor phone prefix logic ([b650f22](https://github.com/ndsrf/wedding/commit/b650f22d35cf632197c2aa13f0fb0b98f65110f5))
+* **w-page:** split phone/email into separate fields with prefix dropdown ([390d3ad](https://github.com/ndsrf/wedding/commit/390d3ad9f420479e03f096b72e9c6dcbc0c9f307))
+
+
+### Reverts
+
+* remove prisma migrate deploy from build script ([0460e4b](https://github.com/ndsrf/wedding/commit/0460e4b4814832ce8c4ce12807e42f9d41ce339e))
+
+
+
 # [1.1.0](https://github.com/ndsrf/wedding/compare/v1.0.0...v1.1.0) (2026-03-01)
 
 
