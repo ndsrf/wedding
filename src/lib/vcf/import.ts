@@ -176,6 +176,27 @@ async function importContact(
     ? processPhoneNumber(contact.phone, countryCode)
     : null;
 
+  // When a contact has no email, phone is the only deduplication key.
+  // This prevents re-importing the same VCF file from creating duplicates
+  // for contacts that lack an email address.
+  if (!contact.email && processedPhone) {
+    const existingFamilyByPhone = await prisma.family.findFirst({
+      where: {
+        wedding_id: options.weddingId,
+        phone: processedPhone,
+      },
+    });
+
+    if (existingFamilyByPhone) {
+      errors.push({
+        contact: contact.name,
+        field: 'phone',
+        message: `Phone ${processedPhone} already exists - skipped`,
+      });
+      throw new Error('Duplicate phone');
+    }
+  }
+
   // Use phone for WhatsApp by default if phone exists
   const whatsappNumber = processedPhone;
 

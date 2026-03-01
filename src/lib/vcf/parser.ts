@@ -82,42 +82,57 @@ function parseVCard(vCardText: string): VCFContact | null {
 
     if (!value) continue;
 
-    // Extract property name (before semicolon or colon)
-    const propertyName = propertyPart.split(';')[0].toUpperCase();
+    // Extract property name (before semicolon), then strip the optional iOS
+    // group prefix so that "item1.EMAIL" is recognised as "EMAIL".
+    const rawPropertyName = propertyPart.split(';')[0];
+    const dotIndex = rawPropertyName.lastIndexOf('.');
+    const propertyName = (dotIndex !== -1 ? rawPropertyName.substring(dotIndex + 1) : rawPropertyName).toUpperCase();
+
+    // Detect QUOTED-PRINTABLE encoding (vCard 2.1 style) and charset
+    const upperPropertyPart = propertyPart.toUpperCase();
+    const isQuotedPrintable = upperPropertyPart.includes('QUOTED-PRINTABLE');
+    const charsetMatch = propertyPart.match(/CHARSET=([^;:\s]+)/i);
+    const charset = charsetMatch ? charsetMatch[1] : 'utf-8';
+
+    // Choose the right decoder for this property's value
+    const decode = (v: string) =>
+      isQuotedPrintable ? decodeQuotedPrintable(v, charset) : decodeValue(v);
 
     switch (propertyName) {
       case 'FN': // Formatted Name
         if (!name) {
-          name = decodeValue(value);
+          name = decode(value);
         }
         break;
 
       case 'N': // Structured Name (fallback if FN not present)
         if (!name) {
           // N format: Family;Given;Middle;Prefix;Suffix
-          const nameParts = value.split(';').filter((p) => p.trim());
-          name = nameParts.join(' ').trim();
-          name = decodeValue(name);
+          // Decode first so that encoded semicolons are not mistaken for
+          // field separators, then reorder to western "Given Family" order.
+          const decodedN = decode(value);
+          const [family, given, middle, prefix, suffix] = decodedN.split(';').map((p) => p.trim());
+          name = [prefix, given, middle, family, suffix].filter(Boolean).join(' ');
         }
         break;
 
       case 'EMAIL':
         if (!email) {
-          email = decodeValue(value);
+          email = decode(value);
         }
         break;
 
       case 'TEL': // Phone number
         // Prefer mobile/cell numbers, but take any if none found yet
-        const isMobile = propertyPart.toUpperCase().includes('CELL') || propertyPart.toUpperCase().includes('MOBILE');
+        const isMobile = upperPropertyPart.includes('CELL') || upperPropertyPart.includes('MOBILE');
         if (!phone || isMobile) {
-          phone = cleanPhoneNumber(decodeValue(value));
+          phone = cleanPhoneNumber(decode(value));
         }
         break;
 
       case 'ORG': // Organization
         if (!organization) {
-          organization = decodeValue(value);
+          organization = decode(value);
         }
         break;
     }
@@ -137,23 +152,43 @@ function parseVCard(vCardText: string): VCFContact | null {
 }
 
 /**
- * Unfold lines (vCard format allows line folding with spaces/tabs)
- * Lines that continue are prefixed with a space or tab
+ * Unfold lines (vCard format allows line folding with spaces/tabs).
+ * Lines that continue are prefixed with a space or tab.
+ *
+ * Also handles QUOTED-PRINTABLE soft line breaks: in vCard 2.1 a QP-encoded
+ * value that is too long is split by appending `=` at the end of the line,
+ * with the continuation on the next line WITHOUT a leading space (vCard 2.1
+ * spec §2.1.3).  We only apply this rule when the current property is
+ * explicitly declared as QUOTED-PRINTABLE, so that base64 padding `=` / `==`
+ * at the end of PHOTO or other binary fields is not mistaken for a QP soft
+ * line break.
  */
 function unfoldLines(text: string): string[] {
   const lines = text.split(/\r?\n/);
   const unfolded: string[] = [];
 
   let currentLine = '';
+  let currentLineIsQP = false;
+
   for (const line of lines) {
     if (line.startsWith(' ') || line.startsWith('\t')) {
-      // Continuation of previous line
+      // Standard vCard line folding: continuation of previous line
       currentLine += line.substring(1);
+    } else if (currentLineIsQP && currentLine.endsWith('=')) {
+      // QUOTED-PRINTABLE soft line break: strip the trailing `=` and append
+      // the next line directly (no leading space in vCard 2.1 QP continuations)
+      currentLine = currentLine.slice(0, -1) + line;
     } else {
       if (currentLine) {
         unfolded.push(currentLine);
       }
       currentLine = line;
+      // Detect if this new property line uses QP encoding so we can correctly
+      // distinguish QP soft line breaks from innocent trailing `=` characters
+      // (e.g. base64 padding in PHOTO fields).
+      const colonIdx = line.indexOf(':');
+      currentLineIsQP =
+        colonIdx !== -1 && line.substring(0, colonIdx).toUpperCase().includes('QUOTED-PRINTABLE');
     }
   }
 
@@ -165,8 +200,8 @@ function unfoldLines(text: string): string[] {
 }
 
 /**
- * Decode vCard encoded values
- * Handles quoted-printable encoding and escaping
+ * Decode vCard escaped values (vCard 3.0 / 4.0 style)
+ * Handles \n, \,, \;, \\ escape sequences.
  */
 function decodeValue(value: string): string {
   let decoded = value;
@@ -184,6 +219,40 @@ function decodeValue(value: string): string {
   }
 
   return decoded;
+}
+
+/**
+ * Decode QUOTED-PRINTABLE encoded vCard values (common in vCard 2.1).
+ * Groups consecutive =XX sequences and decodes them as a single byte buffer
+ * so that multi-byte characters (e.g. accented letters encoded in UTF-8 or
+ * Latin-1) are reconstructed correctly.
+ *
+ * @param value   - The raw QP-encoded string (soft line breaks already removed
+ *                  by unfoldLines before this is called).
+ * @param charset - The declared charset (default 'utf-8'). Pass 'iso-8859-1'
+ *                  or 'windows-1252' for Android vCard 2.1 files that declare
+ *                  CHARSET=ISO-8859-1.
+ */
+function decodeQuotedPrintable(value: string, charset: string = 'utf-8'): string {
+  // Normalise charset name to one of the Buffer encoding strings we support
+  const normalized = charset.toLowerCase().replace(/[-_]/g, '');
+  const bufEncoding: BufferEncoding =
+    normalized === 'iso88591' || normalized === 'latin1' || normalized === 'windows1252'
+      ? 'latin1'
+      : 'utf8';
+
+  // Collect runs of consecutive =XX tokens and decode them together as a
+  // byte buffer so that multi-byte UTF-8 sequences like =C3=AD (í) are
+  // handled correctly.
+  return value.replace(/((?:=[0-9A-Fa-f]{2})+)/g, (match) => {
+    const bytes = match.match(/=[0-9A-Fa-f]{2}/g)!.map((m) => parseInt(m.slice(1), 16));
+    try {
+      return Buffer.from(bytes).toString(bufEncoding);
+    } catch {
+      // Fallback: return raw characters if decode fails
+      return bytes.map((b) => String.fromCharCode(b)).join('');
+    }
+  });
 }
 
 /**
@@ -211,12 +280,13 @@ export function validateVCF(vcfContent: string): string | null {
     return 'VCF file is empty';
   }
 
-  // Check for basic vCard structure
-  if (!vcfContent.includes('BEGIN:VCARD') && !vcfContent.includes('BEGIN:vCard')) {
+  // Use case-insensitive checks – the main parser already uses /BEGIN:VCARD/i
+  // and we should be consistent so files with lowercase tags are not rejected.
+  if (!/BEGIN:VCARD/i.test(vcfContent)) {
     return 'Invalid VCF file format: missing BEGIN:VCARD';
   }
 
-  if (!vcfContent.includes('END:VCARD') && !vcfContent.includes('END:vCard')) {
+  if (!/END:VCARD/i.test(vcfContent)) {
     return 'Invalid VCF file format: missing END:VCARD';
   }
 

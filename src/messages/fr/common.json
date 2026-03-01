@@ -847,6 +847,7 @@
       "add": "Ajouter Invité",
       "import": "Importer depuis Excel",
       "importVcf": "Importer familles VCF (Google, Apple)",
+      "importingVcf": "Importation...",
       "selected": "sélectionnés",
       "copyInvLink": "Copier le lien d'invitation",
       "table": {
