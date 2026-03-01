@@ -1,3 +1,12 @@
+## [1.2.1](https://github.com/ndsrf/wedding/compare/v1.2.0...v1.2.1) (2026-03-01)
+
+
+### Features
+
+* Links from nupcibot are shown at the end the message so it is clear ([0214d0f](https://github.com/ndsrf/wedding/commit/0214d0f8ccf1dbee83ec54f9cadf84d73d2ffc94))
+
+
+
 # [1.2.0](https://github.com/ndsrf/wedding/compare/v1.0.0...v1.2.0) (2026-03-01)
 
 
