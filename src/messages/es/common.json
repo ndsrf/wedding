@@ -653,7 +653,14 @@
       "reports": "Informes",
       "reportsSubtitle": "Generar y exportar informes",
       "weddingNotFound": "Boda no encontrada",
-      "contactPlanner": "Por favor contacta a tu wedding planner."
+      "contactPlanner": "Por favor contacta a tu wedding planner.",
+      "tasksAndVendors": "Tareas y Proveedores",
+      "tasksAndVendorsSubtitle": "Gestionar tareas y proveedores",
+      "vendors": "Proveedores",
+      "tablesAndGifts": "Mesas y Regalos",
+      "tablesAndGiftsSubtitle": "Plan de asientos y seguimiento de regalos",
+      "nupcibot_greeting": "¡Hola! Soy NupciBot, tu asistente de bodas. ¿En qué te puedo ayudar?",
+      "nupcibot_helpConfigure": "Ayúdame a configurar mi boda"
     },
     "wizard": {
       "title": "Asistente de Configuración de Boda",
@@ -1596,6 +1603,13 @@
       "delete": "Eliminar",
       "deleteConfirm": "¿Eliminar esta foto de la galería?",
       "manualUpload": "Subida manual"
+    },
+    "nupcibot": {
+      "subtitle": "Tu asistente de bodas",
+      "close": "Cerrar",
+      "greeting": "¡Hola! Soy NupciBot, tu asistente de bodas. ¿En qué te puedo ayudar?",
+      "helpConfigure": "Ayúdame a configurar mi boda",
+      "viewReports": "Ver y exportar informes"
     }
   },
   "guest": {

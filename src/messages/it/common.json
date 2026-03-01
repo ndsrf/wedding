@@ -649,7 +649,14 @@
       "weddingNotFound": "Matrimonio non trovato",
       "contactPlanner": "Contatta il tuo organizzatore di matrimoni.",
       "setupWizard": "Procedura Guidata di Configurazione",
-      "setupWizardSubtitle": "Configura il tuo matrimonio passo dopo passo"
+      "setupWizardSubtitle": "Configura il tuo matrimonio passo dopo passo",
+      "tasksAndVendors": "Attività e Fornitori",
+      "tasksAndVendorsSubtitle": "Gestisci attività e fornitori",
+      "vendors": "Fornitori",
+      "tablesAndGifts": "Tavoli e Regali",
+      "tablesAndGiftsSubtitle": "Piano dei posti e tracciamento regali",
+      "nupcibot_greeting": "Ciao! Sono NupciBot, il tuo assistente matrimoniale. Come posso aiutarti?",
+      "nupcibot_helpConfigure": "Aiutami a configurare il mio matrimonio"
     },
     "reports": {
       "title": "Report",
@@ -1587,6 +1594,13 @@
       "delete": "Elimina",
       "deleteConfirm": "Eliminare questa foto dalla galleria?",
       "manualUpload": "Caricamento manuale"
+    },
+    "nupcibot": {
+      "subtitle": "Il tuo assistente matrimoniale",
+      "close": "Chiudi",
+      "greeting": "Ciao! Sono NupciBot, il tuo assistente matrimoniale. Come posso aiutarti?",
+      "helpConfigure": "Aiutami a configurare il mio matrimonio",
+      "viewReports": "Visualizza ed esporta i report"
     }
   },
   "guest": {

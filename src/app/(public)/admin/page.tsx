@@ -12,7 +12,7 @@ import { prisma } from '@/lib/db/prisma';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
 import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
-import { WizardButton } from '@/components/admin/WizardButton';
+import { NupciBot } from '@/components/admin/NupciBot';
 import PrivateHeader from '@/components/PrivateHeader';
 import type { AuthenticatedUser } from '@/types/api';
 
@@ -173,9 +173,6 @@ export default async function AdminDashboardPage() {
 
   const language = await getLanguageFromRequest();
 
-  // Show seating & gift tracking only within 2 months of the wedding
-  const showLateStageActions = stats.days_until_wedding > 0 && stats.days_until_wedding <= 60;
-
   const notificationBell = (
     <Link
       href="/admin/notifications"
@@ -199,20 +196,20 @@ export default async function AdminDashboardPage() {
       {/* Wedding Hero */}
       <div className="bg-white shadow-sm border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="min-w-0">
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+          <div className="flex flex-row items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 leading-tight">
                 {stats.couple_names}
               </h1>
-              <p className="mt-2 text-gray-500 text-sm">
+              <p className="mt-1 sm:mt-2 text-gray-500 text-xs sm:text-sm">
                 {formatDateByLanguage(stats.wedding_date, language)}
                 {stats.location && <>{' \u00b7 '}{stats.location}</>}
               </p>
             </div>
             {stats.days_until_wedding > 0 && (
-              <div className="flex-shrink-0 text-center bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-2xl px-8 py-5 shadow-lg shadow-rose-200">
-                <p className="text-5xl font-bold leading-none">{stats.days_until_wedding}</p>
-                <p className="text-rose-100 text-sm mt-1.5 font-medium">{t('admin.dashboard.daysUntilWedding')}</p>
+              <div className="flex-shrink-0 text-center bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-xl sm:rounded-2xl px-4 py-3 sm:px-8 sm:py-5 shadow-lg shadow-rose-200">
+                <p className="text-3xl sm:text-5xl font-bold leading-none">{stats.days_until_wedding}</p>
+                <p className="text-rose-100 text-xs sm:text-sm mt-1 sm:mt-1.5 font-medium">{t('admin.dashboard.daysUntilWedding')}</p>
               </div>
             )}
           </div>
@@ -332,6 +329,11 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Upcoming Tasks Widget — shown above main actions */}
+        {user.wedding_id && (
+          <UpcomingTasksWidget />
+        )}
+
         {/* Actions */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.dashboard.manageWedding')}</h2>
@@ -384,9 +386,38 @@ export default async function AdminDashboardPage() {
           </div>
 
           {/* Secondary Actions */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {/* Setup Wizard */}
-            <WizardButton />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Tareas y Proveedores — grouped */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center">
+                  <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.tasksAndVendors')}</h3>
+              </div>
+              <div className="flex flex-col gap-1.5 pl-1">
+                <Link
+                  href="/admin/checklist"
+                  className="text-xs text-gray-600 hover:text-teal-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                  {t('admin.dashboard.checklist')}
+                </Link>
+                <Link
+                  href="/admin/providers"
+                  className="text-xs text-gray-600 hover:text-teal-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  {t('admin.dashboard.vendors')}
+                </Link>
+              </div>
+            </div>
 
             {/* Invitations & Templates — grouped */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
@@ -420,81 +451,43 @@ export default async function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Checklist */}
-            <Link
-              href="/admin/checklist"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-teal-200 hover:bg-teal-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center group-hover:bg-teal-100 transition-colors">
-                <svg className="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.checklist')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.checklistSubtitle')}</p>
-              </div>
-            </Link>
-
-            {/* Reports */}
-            <Link
-              href="/admin/reports"
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-emerald-200 hover:bg-emerald-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.reports')}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.reportsSubtitle')}</p>
-              </div>
-            </Link>
-
-            {/* Seating Plan — conditional: within 2 months */}
-            {showLateStageActions && (
-              <Link
-                href="/admin/seating"
-                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-cyan-200 hover:bg-cyan-50/30 transition-all"
-              >
-                <div className="flex-shrink-0 w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
-                  <svg className="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            {/* Mesas y Regalos — grouped, always visible */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                  <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
                   </svg>
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.seatingPlan')}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.seatingPlanSubtitle')}</p>
-                </div>
-              </Link>
-            )}
-
-            {/* Gift Tracking — conditional: within 2 months */}
-            {showLateStageActions && (
-              <Link
-                href="/admin/payments"
-                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/30 transition-all"
-              >
-                <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                  <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.tablesAndGifts')}</h3>
+              </div>
+              <div className="flex flex-col gap-1.5 pl-1">
+                <Link
+                  href="/admin/payments"
+                  className="text-xs text-gray-600 hover:text-amber-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.payments')}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.paymentsSubtitle')}</p>
-                </div>
-              </Link>
-            )}
+                  {t('admin.dashboard.payments')}
+                </Link>
+                <Link
+                  href="/admin/seating"
+                  className="text-xs text-gray-600 hover:text-amber-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
+                  </svg>
+                  {t('admin.dashboard.seatingPlan')}
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Upcoming Tasks Widget */}
-        {user.wedding_id && (
-          <UpcomingTasksWidget />
-        )}
       </main>
+
+      {/* NupciBot floating assistant */}
+      <NupciBot />
     </div>
   );
 }

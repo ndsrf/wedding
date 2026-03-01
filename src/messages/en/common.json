@@ -657,7 +657,14 @@
       "reports": "Reports",
       "reportsSubtitle": "Generate and export reports",
       "weddingNotFound": "Wedding not found",
-      "contactPlanner": "Please contact your wedding planner."
+      "contactPlanner": "Please contact your wedding planner.",
+      "tasksAndVendors": "Tasks & Vendors",
+      "tasksAndVendorsSubtitle": "Manage tasks and vendors",
+      "vendors": "Vendors",
+      "tablesAndGifts": "Tables & Gifts",
+      "tablesAndGiftsSubtitle": "Seating plan and gift tracking",
+      "nupcibot_greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you?",
+      "nupcibot_helpConfigure": "Help me configure my wedding"
     },
     "wizard": {
       "title": "Wedding Setup Wizard",
@@ -1611,6 +1618,13 @@
       "delete": "Delete",
       "deleteConfirm": "Delete this photo from the gallery?",
       "manualUpload": "Manual upload"
+    },
+    "nupcibot": {
+      "subtitle": "Your wedding assistant",
+      "close": "Close",
+      "greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you?",
+      "helpConfigure": "Help me configure my wedding",
+      "viewReports": "View and export reports"
     }
   },
   "guest": {

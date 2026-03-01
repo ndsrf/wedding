@@ -649,7 +649,14 @@
       "weddingNotFound": "Hochzeit nicht gefunden",
       "contactPlanner": "Bitte kontaktieren Sie Ihren Hochzeitsplaner.",
       "setupWizard": "Einrichtungs-Assistent",
-      "setupWizardSubtitle": "Konfigurieren Sie Ihre Hochzeit Schritt für Schritt"
+      "setupWizardSubtitle": "Konfigurieren Sie Ihre Hochzeit Schritt für Schritt",
+      "tasksAndVendors": "Aufgaben & Dienstleister",
+      "tasksAndVendorsSubtitle": "Aufgaben und Dienstleister verwalten",
+      "vendors": "Dienstleister",
+      "tablesAndGifts": "Tische & Geschenke",
+      "tablesAndGiftsSubtitle": "Sitzplan und Geschenkverfolgung",
+      "nupcibot_greeting": "Hallo! Ich bin NupciBot, Ihr Hochzeitsassistent. Wie kann ich Ihnen helfen?",
+      "nupcibot_helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren"
     },
     "reports": {
       "title": "Berichte",
@@ -1587,6 +1594,13 @@
       "delete": "Löschen",
       "deleteConfirm": "Dieses Foto aus der Galerie löschen?",
       "manualUpload": "Manuelles Hochladen"
+    },
+    "nupcibot": {
+      "subtitle": "Ihr Hochzeitsassistent",
+      "close": "Schließen",
+      "greeting": "Hallo! Ich bin NupciBot, Ihr Hochzeitsassistent. Wie kann ich Ihnen helfen?",
+      "helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren",
+      "viewReports": "Berichte anzeigen und exportieren"
     }
   },
   "guest": {
