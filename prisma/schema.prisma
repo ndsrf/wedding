@@ -360,6 +360,7 @@ model TrackingEvent {
 
   @@index([family_id])
   @@index([wedding_id])
+  @@index([wedding_id, timestamp])
   @@index([event_type])
   @@index([timestamp])
   @@map("tracking_events")
@@ -386,6 +387,7 @@ model Notification {
   @@index([read])
   @@index([created_at])
   @@index([tracking_event_id])
+  @@index([tracking_event_id, read])
   @@map("notifications")
 }
 

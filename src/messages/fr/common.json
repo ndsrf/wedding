@@ -934,7 +934,9 @@
         "eventType": "Type d'Événement",
         "family": "Famille",
         "channel": "Canal",
+        "readStatus": "Statut",
         "unread": "Non Lu",
+        "all": "Tous",
         "read": "Lu"
       },
       "markAsRead": "Marquer comme Lu",
