@@ -178,6 +178,7 @@ export function NupciBot() {
   // Chat state
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
+  const [menuChatInput, setMenuChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -255,14 +256,14 @@ export function NupciBot() {
   const limitReached = chatHistory.filter((m) => m.role === 'user').length >= 5;
 
   // ── Chat submit ──
-  async function handleChatSubmit() {
-    const trimmed = chatInput.trim();
+  async function handleChatSubmit(inputOverride?: string) {
+    const trimmed = (inputOverride !== undefined ? inputOverride : chatInput).trim();
     if (!trimmed || isChatLoading || limitReached) return;
 
     const newHistory: ChatMessage[] = [...chatHistory, { role: 'user', content: trimmed }];
     const userMsgCount = newHistory.filter((m) => m.role === 'user').length;
     setChatHistory(newHistory);
-    setChatInput('');
+    if (inputOverride === undefined) setChatInput('');
     setIsChatLoading(true);
 
     try {
@@ -294,6 +295,21 @@ export function NupciBot() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleChatSubmit();
+    }
+  }
+
+  async function handleMenuChatSubmit() {
+    const trimmed = menuChatInput.trim();
+    if (!trimmed) return;
+    setMenuChatInput('');
+    setScreen('chat');
+    await handleChatSubmit(trimmed);
+  }
+
+  function handleMenuChatKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleMenuChatSubmit();
     }
   }
 
@@ -357,19 +373,25 @@ export function NupciBot() {
           <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
         </button>
 
-        {/* Option: chat */}
-        <button
-          onClick={() => setScreen('chat')}
-          className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-purple-100 hover:border-purple-300 hover:bg-purple-50 transition-all group"
-        >
-          <div className="flex-shrink-0 w-8 h-8 bg-purple-50 group-hover:bg-purple-100 rounded-lg flex items-center justify-center transition-colors">
-            <svg className="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <span className="text-sm font-medium text-gray-800 flex-1">{t('chat.button')}</span>
-          <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-purple-400 transition-colors flex-shrink-0" />
-        </button>
+        {/* Chat input */}
+        <div className="flex gap-2 mt-1">
+          <input
+            type="text"
+            value={menuChatInput}
+            onChange={(e) => setMenuChatInput(e.target.value)}
+            onKeyDown={handleMenuChatKeyDown}
+            placeholder={t('chat.menuPlaceholder')}
+            className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+          />
+          <button
+            onClick={handleMenuChatSubmit}
+            disabled={!menuChatInput.trim()}
+            className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-xl flex items-center justify-center hover:from-rose-600 hover:to-pink-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Send"
+          >
+            <SendIcon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     );
   }
