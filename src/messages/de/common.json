@@ -711,7 +711,8 @@
         "example3": "Gäste ohne Tischzuweisung auflisten",
         "example4": "Was ist der Gesamtbetrag der erhaltenen Geschenke?",
         "generatedSql": "Generiertes SQL (nur Lesezugriff)",
-        "securityNote": "Nur Nur-Lese-Abfragen sind erlaubt. Ergebnisse sind automatisch auf Ihre Hochzeitsdaten beschränkt."
+        "securityNote": "Nur Nur-Lese-Abfragen sind erlaubt. Ergebnisse sind automatisch auf Ihre Hochzeitsdaten beschränkt.",
+        "example5": "Wie viele Gäste kommen von meiner Seite?"
       }
     },
     "providers": {

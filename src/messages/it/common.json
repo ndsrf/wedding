@@ -711,7 +711,8 @@
         "example3": "Elenca ospiti senza assegnazione tavolo",
         "example4": "Qual è il totale dei regali ricevuti?",
         "generatedSql": "SQL generato (sola lettura)",
-        "securityNote": "Sono consentite solo query in sola lettura. I risultati sono automaticamente limitati ai dati del tuo matrimonio."
+        "securityNote": "Sono consentite solo query in sola lettura. I risultati sono automaticamente limitati ai dati del tuo matrimonio.",
+        "example5": "Quanti ospiti vengono dal mio lato?"
       }
     },
     "providers": {

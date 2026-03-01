@@ -43,10 +43,14 @@ const DANGEROUS_KEYWORDS =
 const SCHEMA_DESCRIPTION = `You are a PostgreSQL SQL query generator for a wedding management system.
 Your ONLY job is to produce safe SELECT queries based on the user's natural-language question.
 
+## Parameters (always provided — never hardcode these values)
+- $1 = wedding_id  — scope EVERY query to this wedding
+- $2 = current admin's ID — use when the user says "my guests", "my side", "I invited", "my families", etc.
+
 ## Available Tables
 
 ### families
-id TEXT PK, wedding_id TEXT (**ALWAYS filter this**), name TEXT, email TEXT, phone TEXT,
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, email TEXT, phone TEXT,
 whatsapp_number TEXT, preferred_language TEXT (ES/EN/FR/IT/DE),
 channel_preference TEXT (WHATSAPP/EMAIL/SMS), invited_by_admin_id TEXT FK→wedding_admins,
 created_at TIMESTAMP
@@ -59,27 +63,28 @@ table_id TEXT FK→tables, added_by_guest BOOLEAN, created_at TIMESTAMP
 **NOTE: No direct wedding_id — MUST JOIN with families to scope by wedding.**
 
 ### tables
-id TEXT PK, wedding_id TEXT (**ALWAYS filter this**), name TEXT, number INTEGER,
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, number INTEGER,
 capacity INTEGER, created_at TIMESTAMP
 
 ### wedding_admins
-id TEXT PK, wedding_id TEXT (**ALWAYS filter this**), name TEXT, email TEXT,
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, email TEXT,
 preferred_language TEXT, invited_at TIMESTAMP, last_login_at TIMESTAMP
 
 ### gifts
-id TEXT PK, family_id TEXT FK→families, wedding_id TEXT (**ALWAYS filter this**),
+id TEXT PK, family_id TEXT FK→families, wedding_id TEXT (**ALWAYS filter this with $1**),
 amount DECIMAL, status TEXT (PENDING/RECEIVED/CONFIRMED),
 transaction_date TIMESTAMP, created_at TIMESTAMP
 
 ## Strict Rules
 1. ONLY write SELECT statements. NEVER write INSERT, UPDATE, DELETE, DROP, CREATE, ALTER or any other statement.
-2. ALWAYS filter by wedding_id using the parameter $1 (e.g. WHERE f.wedding_id = $1 or WHERE wedding_id = $1).
+2. ALWAYS filter by wedding_id using $1 (e.g. WHERE f.wedding_id = $1 or WHERE wedding_id = $1).
 3. For family_members, ALWAYS JOIN with families: FROM family_members fm JOIN families f ON fm.family_id = f.id WHERE f.wedding_id = $1.
-4. $1 is the ONLY parameter placeholder you may use (it holds the wedding_id).
-5. Add LIMIT ${MAX_ROWS} at the end of every query.
-6. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
-7. Use clear English column aliases (e.g. family_name, guest_name, attending_status).
-8. Only reference tables listed above.`;
+4. You may use $1 (wedding_id) and $2 (current admin ID). No other parameters.
+5. When the user says "my guests", "my side", "I invited", "from my side", etc. add AND f.invited_by_admin_id = $2.
+6. Add LIMIT ${MAX_ROWS} at the end of every query.
+7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
+8. Use clear English column aliases (e.g. family_name, guest_name, attending_status).
+9. Only reference tables listed above.`;
 
 // ============================================================================
 // SQL GENERATION (LLM)
@@ -99,7 +104,7 @@ async function generateSQLWithOpenAI(question: string): Promise<string | null> {
       { role: 'user', content: question },
     ],
     max_tokens: 600,
-    temperature: 0.1, // low temperature → deterministic, predictable SQL
+    temperature: 0.1,
   });
 
   return response.choices[0]?.message?.content?.trim() ?? null;
@@ -130,6 +135,23 @@ async function generateSQL(question: string): Promise<string | null> {
     return generateSQLWithGemini(question);
   }
   return generateSQLWithOpenAI(question);
+}
+
+// ============================================================================
+// SERIALIZATION
+// ============================================================================
+
+/**
+ * PostgreSQL aggregate functions (COUNT, SUM, etc.) return BigInt values via
+ * the pg driver. Convert them to regular numbers so they can be JSON-serialized
+ * and placed into Excel cells.
+ */
+function serializeRow(row: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(row)) {
+    out[key] = typeof val === 'bigint' ? Number(val) : val;
+  }
+  return out;
 }
 
 // ============================================================================
@@ -231,10 +253,15 @@ export interface NLQueryResult {
 /**
  * Convert a natural-language question into SQL via the LLM, validate it,
  * then execute it against the database scoped to `wedding_id`.
+ *
+ * @param question  Natural-language question from the user
+ * @param wedding_id  Bound to $1 — scopes every query to this wedding
+ * @param admin_id   Bound to $2 — used when the user refers to "my guests / my side"
  */
 export async function executeNaturalLanguageQuery(
   question: string,
-  wedding_id: string
+  wedding_id: string,
+  admin_id: string
 ): Promise<NLQueryResult> {
   const rawSql = await generateSQL(question);
   if (!rawSql) {
@@ -249,14 +276,16 @@ export async function executeNaturalLanguageQuery(
   const sql = validation.cleanedSql;
   console.log('[NL-QUERY] Executing validated query:', sql);
 
-  // $1 is replaced by the parameterized wedding_id value — safe against SQL injection
-  const results = (await prisma.$queryRawUnsafe(sql, wedding_id)) as Record<
+  // $1 = wedding_id, $2 = admin_id — both parameterized, safe against SQL injection.
+  // Passing $2 even when the query only uses $1 is harmless in PostgreSQL.
+  const raw = (await prisma.$queryRawUnsafe(sql, wedding_id, admin_id)) as Record<
     string,
     unknown
   >[];
-  const columns = results.length > 0 ? Object.keys(results[0]) : [];
+  const data = raw.map(serializeRow);
+  const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
-  return { data: results, sql, columns };
+  return { data, sql, columns };
 }
 
 /**
@@ -265,7 +294,8 @@ export async function executeNaturalLanguageQuery(
  */
 export async function executeValidatedSQL(
   sql: string,
-  wedding_id: string
+  wedding_id: string,
+  admin_id: string
 ): Promise<NLQueryResult> {
   const validation = validateSQL(sql);
   if (!validation.valid || !validation.cleanedSql) {
@@ -273,11 +303,12 @@ export async function executeValidatedSQL(
   }
 
   const cleanedSql = validation.cleanedSql;
-  const results = (await prisma.$queryRawUnsafe(cleanedSql, wedding_id)) as Record<
+  const raw = (await prisma.$queryRawUnsafe(cleanedSql, wedding_id, admin_id)) as Record<
     string,
     unknown
   >[];
-  const columns = results.length > 0 ? Object.keys(results[0]) : [];
+  const data = raw.map(serializeRow);
+  const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
-  return { data: results, sql: cleanedSql, columns };
+  return { data, sql: cleanedSql, columns };
 }

@@ -1003,7 +1003,8 @@
         "example3": "List guests without a table assignment",
         "example4": "What is the total gift amount received?",
         "generatedSql": "Generated SQL (read-only)",
-        "securityNote": "Only read-only queries are allowed. Results are automatically restricted to your wedding data."
+        "securityNote": "Only read-only queries are allowed. Results are automatically restricted to your wedding data.",
+        "example5": "How many guests are coming from my side?"
       }
     },
     "providers": {

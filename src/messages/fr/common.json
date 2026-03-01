@@ -711,7 +711,8 @@
         "example3": "Lister les invités sans attribution de table",
         "example4": "Quel est le montant total des cadeaux reçus ?",
         "generatedSql": "SQL généré (lecture seule)",
-        "securityNote": "Seules les requêtes en lecture seule sont autorisées. Les résultats sont automatiquement limités aux données de votre mariage."
+        "securityNote": "Seules les requêtes en lecture seule sont autorisées. Les résultats sont automatiquement limités aux données de votre mariage.",
+        "example5": "Combien d'invités viennent de mon côté ?"
       }
     },
     "providers": {

@@ -999,7 +999,8 @@
         "example3": "Listar invitados sin asignación de mesa",
         "example4": "¿Cuál es el total de regalos recibidos?",
         "generatedSql": "SQL generado (solo lectura)",
-        "securityNote": "Solo se permiten consultas de solo lectura. Los resultados están restringidos automáticamente a los datos de tu boda."
+        "securityNote": "Solo se permiten consultas de solo lectura. Los resultados están restringidos automáticamente a los datos de tu boda.",
+        "example5": "¿Cuántos invitados vienen de mi parte?"
       }
     },
     "providers": {

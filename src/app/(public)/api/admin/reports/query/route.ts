@@ -48,10 +48,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // user.id is the WeddingAdmin.id — used as $2 (admin context) in queries
+    const admin_id = user.id;
+
     // Execute the query (LLM path or re-execute path for exports)
     const result = providedSql
-      ? await executeValidatedSQL(providedSql, user.wedding_id)
-      : await executeNaturalLanguageQuery(question!, user.wedding_id);
+      ? await executeValidatedSQL(providedSql, user.wedding_id, admin_id)
+      : await executeNaturalLanguageQuery(question!, user.wedding_id, admin_id);
 
     // ── JSON response ────────────────────────────────────────────────────────
     if (format === 'json') {
@@ -69,6 +72,7 @@ export async function POST(req: NextRequest) {
         result.columns.map((col) => {
           const val = row[col];
           if (val === null || val === undefined) return '';
+          if (typeof val === 'bigint') return Number(val);
           if (typeof val === 'object') return JSON.stringify(val);
           return val as string | number | boolean;
         })

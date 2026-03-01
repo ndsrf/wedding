@@ -573,6 +573,7 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
 
   // ── View: report list + NL query chat box ────────────────────────────────
   const examples = [
+    t('admin.reports.nlQuery.example5'), // "my side" — first to highlight the admin-scoped capability
     t('admin.reports.nlQuery.example1'),
     t('admin.reports.nlQuery.example2'),
     t('admin.reports.nlQuery.example3'),
@@ -581,64 +582,7 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
 
   return (
     <div className="space-y-8">
-      {/* Standard report cards */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {reports.map((report) => {
-          const colors = getColorClasses(report.colorClass);
-
-          return (
-            <div
-              key={report.id}
-              className={`bg-white border-2 ${colors.border} rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow`}
-            >
-              <div className="p-6">
-                <div
-                  className={`inline-flex items-center justify-center w-12 h-12 ${colors.bg} ${colors.text} rounded-lg mb-4`}
-                >
-                  {report.icon}
-                </div>
-
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{report.title}</h3>
-
-                <p className="text-sm text-gray-600 mb-6">{report.description}</p>
-
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handleView(report)}
-                    disabled={loadingData}
-                    className={`w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 ${colors.ring} disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    {t('admin.reports.viewReport')}
-                  </button>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => handleDownload(report, 'xlsx')}
-                      disabled={downloading === `${report.id}-xlsx`}
-                      className={`flex items-center justify-center px-3 py-2 border ${colors.border} rounded-md text-sm font-medium ${colors.text} ${colors.bg} ${colors.hover} focus:outline-none focus:ring-2 focus:ring-offset-2 ${colors.ring} disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      {downloading === `${report.id}-xlsx` ? '...' : 'Excel'}
-                    </button>
-
-                    <button
-                      onClick={() => handleDownload(report, 'csv')}
-                      disabled={downloading === `${report.id}-csv`}
-                      className={`flex items-center justify-center px-3 py-2 border ${colors.border} rounded-md text-sm font-medium ${colors.text} ${colors.bg} ${colors.hover} focus:outline-none focus:ring-2 focus:ring-offset-2 ${colors.ring} disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      {downloading === `${report.id}-csv` ? '...' : 'CSV'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Natural Language Query Chat Box */}
+      {/* Natural Language Query Chat Box — top of page */}
       <div className="bg-white border-2 border-rose-200 rounded-lg shadow-sm overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 bg-gradient-to-r from-rose-50 to-pink-50 border-b border-rose-200">
@@ -714,6 +658,63 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
             <span>{t('admin.reports.nlQuery.securityNote')}</span>
           </div>
         </div>
+      </div>
+
+      {/* Standard report cards */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        {reports.map((report) => {
+          const colors = getColorClasses(report.colorClass);
+
+          return (
+            <div
+              key={report.id}
+              className={`bg-white border-2 ${colors.border} rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow`}
+            >
+              <div className="p-6">
+                <div
+                  className={`inline-flex items-center justify-center w-12 h-12 ${colors.bg} ${colors.text} rounded-lg mb-4`}
+                >
+                  {report.icon}
+                </div>
+
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{report.title}</h3>
+
+                <p className="text-sm text-gray-600 mb-6">{report.description}</p>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handleView(report)}
+                    disabled={loadingData}
+                    className={`w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 ${colors.ring} disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {t('admin.reports.viewReport')}
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleDownload(report, 'xlsx')}
+                      disabled={downloading === `${report.id}-xlsx`}
+                      className={`flex items-center justify-center px-3 py-2 border ${colors.border} rounded-md text-sm font-medium ${colors.text} ${colors.bg} ${colors.hover} focus:outline-none focus:ring-2 focus:ring-offset-2 ${colors.ring} disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      {downloading === `${report.id}-xlsx` ? '...' : 'Excel'}
+                    </button>
+
+                    <button
+                      onClick={() => handleDownload(report, 'csv')}
+                      disabled={downloading === `${report.id}-csv`}
+                      className={`flex items-center justify-center px-3 py-2 border ${colors.border} rounded-md text-sm font-medium ${colors.text} ${colors.bg} ${colors.hover} focus:outline-none focus:ring-2 focus:ring-offset-2 ${colors.ring} disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      {downloading === `${report.id}-csv` ? '...' : 'CSV'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Info Box */}
