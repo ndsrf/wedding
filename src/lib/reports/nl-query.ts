@@ -241,6 +241,28 @@ export function validateSQL(rawSql: string): ValidationResult {
 }
 
 // ============================================================================
+// PARAMETER BINDING
+// ============================================================================
+
+/**
+ * PostgreSQL requires the number of bound parameters to match exactly the
+ * number of $N placeholders in the query. Build the parameter array by
+ * inspecting which placeholders are actually present in the SQL.
+ *
+ * $1 = wedding_id (always required)
+ * $2 = admin_id   (only when the query references it)
+ */
+function buildParams(sql: string, wedding_id: string, admin_id: string): unknown[] {
+  const maxParam = [...sql.matchAll(/\$(\d+)/g)].reduce(
+    (max, m) => Math.max(max, parseInt(m[1], 10)),
+    0
+  );
+  const params: unknown[] = [wedding_id];
+  if (maxParam >= 2) params.push(admin_id);
+  return params;
+}
+
+// ============================================================================
 // PUBLIC API
 // ============================================================================
 
@@ -276,9 +298,8 @@ export async function executeNaturalLanguageQuery(
   const sql = validation.cleanedSql;
   console.log('[NL-QUERY] Executing validated query:', sql);
 
-  // $1 = wedding_id, $2 = admin_id — both parameterized, safe against SQL injection.
-  // Passing $2 even when the query only uses $1 is harmless in PostgreSQL.
-  const raw = (await prisma.$queryRawUnsafe(sql, wedding_id, admin_id)) as Record<
+  // Pass only the parameters the SQL actually references ($1 always, $2 only if used).
+  const raw = (await prisma.$queryRawUnsafe(sql, ...buildParams(sql, wedding_id, admin_id))) as Record<
     string,
     unknown
   >[];
@@ -303,7 +324,7 @@ export async function executeValidatedSQL(
   }
 
   const cleanedSql = validation.cleanedSql;
-  const raw = (await prisma.$queryRawUnsafe(cleanedSql, wedding_id, admin_id)) as Record<
+  const raw = (await prisma.$queryRawUnsafe(cleanedSql, ...buildParams(cleanedSql, wedding_id, admin_id))) as Record<
     string,
     unknown
   >[];
