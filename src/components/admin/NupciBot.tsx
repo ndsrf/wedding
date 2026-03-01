@@ -524,7 +524,7 @@ export function NupciBot() {
             className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
           />
           <button
-            onClick={handleChatSubmit}
+            onClick={() => handleChatSubmit()}
             disabled={isChatLoading || !chatInput.trim() || limitReached}
             className="flex-shrink-0 w-9 h-9 bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-xl flex items-center justify-center hover:from-rose-600 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Send"
