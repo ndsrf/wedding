@@ -280,10 +280,7 @@ export async function GET(
       },
     };
 
-    return NextResponse.json(response, {
-      status: 200,
-      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
-    });
+    return NextResponse.json(response, { status: 200 });
   } catch (error: unknown) {
     // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';
