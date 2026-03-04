@@ -68,7 +68,7 @@ function makeFormDataRequest(file: Blob, filename: string): NextRequest {
 }
 
 /** Creates a minimal valid .nupcinv buffer */
-function makeMinimalNupcinv(name = 'Test Template', blocks: any[] = []): Buffer {
+function makeMinimalNupcinv(name = 'Test Template', blocks: any[] = []): Uint8Array {
   const manifest = {
     format_version: '1.0',
     exported_at: new Date().toISOString(),
@@ -82,7 +82,7 @@ function makeMinimalNupcinv(name = 'Test Template', blocks: any[] = []): Buffer 
   return createZip([
     { name: 'manifest.json', data: Buffer.from(JSON.stringify(manifest)) },
     { name: 'design.json', data: Buffer.from(JSON.stringify(design)) },
-  ]);
+  ]) as unknown as Uint8Array;
 }
 
 // ============================================================================
@@ -307,7 +307,7 @@ describe('Integration Tests - Invitation Export/Import API', () => {
     });
 
     it('returns 422 for a file that is not a valid ZIP', async () => {
-      const blob = new Blob([Buffer.from('not a zip file')], { type: 'application/octet-stream' });
+      const blob = new Blob([Buffer.from('not a zip file') as unknown as Uint8Array], { type: 'application/octet-stream' });
       const req = makeFormDataRequest(blob, 'bad.nupcinv');
       const res = await importRoute(req);
       expect(res.status).toBe(422);
@@ -317,7 +317,7 @@ describe('Integration Tests - Invitation Export/Import API', () => {
       const zip = createZip([
         { name: 'design.json', data: Buffer.from('{}') },
       ]);
-      const blob = new Blob([zip], { type: 'application/octet-stream' });
+      const blob = new Blob([zip as unknown as Uint8Array], { type: 'application/octet-stream' });
       const req = makeFormDataRequest(blob, 'no-manifest.nupcinv');
       const res = await importRoute(req);
       expect(res.status).toBe(422);
@@ -328,7 +328,7 @@ describe('Integration Tests - Invitation Export/Import API', () => {
       const zip = createZip([
         { name: 'manifest.json', data: Buffer.from(JSON.stringify(manifest)) },
       ]);
-      const blob = new Blob([zip], { type: 'application/octet-stream' });
+      const blob = new Blob([zip as unknown as Uint8Array], { type: 'application/octet-stream' });
       const req = makeFormDataRequest(blob, 'no-design.nupcinv');
       const res = await importRoute(req);
       expect(res.status).toBe(422);
@@ -360,7 +360,7 @@ describe('Integration Tests - Invitation Export/Import API', () => {
       const archiveBuffer = Buffer.from(await exportRes.arrayBuffer());
 
       // 2. Import
-      const blob = new Blob([archiveBuffer], { type: 'application/octet-stream' });
+      const blob = new Blob([archiveBuffer as unknown as Uint8Array], { type: 'application/octet-stream' });
       const importReq = makeFormDataRequest(blob, 'exported.nupcinv');
       const importRes = await importRoute(importReq);
 
@@ -380,7 +380,7 @@ describe('Integration Tests - Invitation Export/Import API', () => {
       const archiveBuffer = Buffer.from(await exportRes.arrayBuffer());
 
       // Import
-      const blob = new Blob([archiveBuffer], { type: 'application/octet-stream' });
+      const blob = new Blob([archiveBuffer as unknown as Uint8Array], { type: 'application/octet-stream' });
       const importRes = await importRoute(makeFormDataRequest(blob, 'round-trip.nupcinv'));
       const { template } = await importRes.json();
 
