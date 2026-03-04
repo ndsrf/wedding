@@ -68,7 +68,7 @@ export async function GET(
     const safeName = template.name.replace(/[^a-z0-9_\-\s]/gi, '_').trim() || 'invitation';
     const filename = `${safeName}.nupcinv`;
 
-    return new NextResponse(archive, {
+    return new NextResponse(archive.buffer as ArrayBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/octet-stream',
