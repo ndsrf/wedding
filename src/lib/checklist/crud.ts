@@ -499,12 +499,12 @@ export async function getUpcomingTasksForPlanner(
   planner_id: string,
   limit_per_wedding: number = 3
 ): Promise<UpcomingTask[]> {
-  // Get all active, non-deleted weddings for this planner
+  // 1. Get all active, non-deleted weddings for this planner (1 query)
   const weddings = await prisma.wedding.findMany({
     where: {
       planner_id,
-      status: 'ACTIVE', // Only active weddings
-      deleted_at: null, // Exclude deleted weddings
+      status: 'ACTIVE',
+      deleted_at: null,
     },
     select: {
       id: true,
@@ -512,23 +512,60 @@ export async function getUpcomingTasksForPlanner(
     },
   });
 
-  // Fetch upcoming tasks for each wedding
+  if (weddings.length === 0) return [];
+
+  const weddingMap = new Map(weddings.map((w) => [w.id, w.couple_names]));
+
+  // 2. Fetch all WEDDING_PLANNER tasks across all weddings in a single query
+  const rawTasks = await prisma.checklistTask.findMany({
+    where: {
+      wedding_id: { in: weddings.map((w) => w.id) },
+      template_id: null,
+      completed: false,
+      due_date: { not: null },
+      assigned_to: 'WEDDING_PLANNER',
+    },
+    include: {
+      section: { select: { name: true } },
+    },
+    orderBy: [{ due_date: 'asc' }, { order: 'asc' }],
+  });
+
+  // 3. Group by wedding_id and take top `limit_per_wedding` per wedding
+  const countByWedding = new Map<string, number>();
+  const now = new Date();
   const allTasks: UpcomingTask[] = [];
 
-  for (const wedding of weddings) {
-    // Filter by WEDDING_PLANNER assignment for planner dashboard
-    const tasks = await getUpcomingTasks(wedding.id, 'WEDDING_PLANNER', limit_per_wedding);
+  for (const task of rawTasks) {
+    const weddingId = task.wedding_id!;
+    const count = countByWedding.get(weddingId) ?? 0;
+    if (count >= limit_per_wedding) continue;
+    countByWedding.set(weddingId, count + 1);
 
-    // Add wedding name to each task
-    const tasksWithWeddingName = tasks.map((task) => ({
+    let days_until_due: number | null = null;
+    let urgency_color: 'red' | 'orange' | 'green' = 'green';
+
+    if (task.due_date) {
+      const diffTime = new Date(task.due_date).getTime() - now.getTime();
+      days_until_due = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (days_until_due < 0) {
+        urgency_color = 'red';
+      } else if (days_until_due < 30) {
+        urgency_color = 'orange';
+      }
+    }
+
+    allTasks.push({
       ...task,
-      wedding_couple_names: wedding.couple_names,
-    }));
-
-    allTasks.push(...tasksWithWeddingName);
+      section_name: task.section?.name || null,
+      wedding_id: weddingId,
+      days_until_due,
+      urgency_color,
+      wedding_couple_names: weddingMap.get(weddingId),
+    });
   }
 
-  // Sort all tasks by due date across all weddings
+  // 4. Sort globally by due date across all weddings
   allTasks.sort((a, b) => {
     if (!a.due_date) return 1;
     if (!b.due_date) return -1;

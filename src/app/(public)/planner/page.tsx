@@ -29,35 +29,21 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
       where: { planner_id: user.planner_id },
     });
 
-    // Get all weddings for the planner
-    const weddings = await prisma.wedding.findMany({
-      where: { planner_id: user.planner_id },
-      include: {
-        families: {
-          include: {
-            members: true,
-          },
+    // Calculate stats using aggregate queries (avoids loading all families + members into memory)
+    const [total_guests, totalFamilies, familiesWithRSVP] = await Promise.all([
+      prisma.familyMember.count({
+        where: { family: { wedding: { planner_id: user.planner_id } } },
+      }),
+      prisma.family.count({
+        where: { wedding: { planner_id: user.planner_id } },
+      }),
+      prisma.family.count({
+        where: {
+          wedding: { planner_id: user.planner_id },
+          members: { some: { attending: { not: null } } },
         },
-      },
-    });
-
-    // Calculate total guests across all weddings
-    const total_guests = weddings.reduce(
-      (sum, wedding) =>
-        sum + wedding.families.reduce((familySum, family) => familySum + family.members.length, 0),
-      0
-    );
-
-    // Calculate RSVP completion percentage
-    let totalFamilies = 0;
-    let familiesWithRSVP = 0;
-
-    weddings.forEach((wedding) => {
-      totalFamilies += wedding.families.length;
-      familiesWithRSVP += wedding.families.filter((family) =>
-        family.members.some((member) => member.attending !== null)
-      ).length;
-    });
+      }),
+    ]);
 
     const rsvp_completion_percentage =
       totalFamilies > 0 ? Math.round((familiesWithRSVP / totalFamilies) * 100) : 0;

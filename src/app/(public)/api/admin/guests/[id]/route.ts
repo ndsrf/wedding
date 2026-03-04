@@ -13,6 +13,7 @@ import type { APIResponse, UpdateGuestResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import { getFamilyWithMembers, updateFamily, deleteFamily } from '@/lib/guests/crud';
 import { updateFamilySchema } from '@/lib/guests/validation';
+import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -127,6 +128,9 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
     // Update family using service
     const family = await updateFamily(familyId, user.wedding_id, validatedData, user.id);
 
+    // Invalidate wedding stats cache (RSVP/attending counts may have changed)
+    await invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id));
+
     const response: UpdateGuestResponse = {
       success: true,
       data: family,
@@ -220,6 +224,9 @@ export async function DELETE(_request: NextRequest, context: RouteParams) {
 
     // Delete family using service
     const result = await deleteFamily(familyId, user.wedding_id, user.id);
+
+    // Invalidate wedding stats cache (guest count changed)
+    await invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id));
 
     const response: APIResponse = {
       success: true,

@@ -338,6 +338,7 @@ model FamilyMember {
   @@index([family_id])
   @@index([table_id])
   @@index([added_by_guest])
+  @@index([family_id, attending])
   @@map("family_members")
 }
 
@@ -407,6 +408,7 @@ model Gift {
   @@index([wedding_id])
   @@index([status])
   @@index([reference_code_used])
+  @@index([wedding_id, status])
   @@map("gifts")
 }
 
@@ -507,6 +509,7 @@ model ChecklistTask {
   @@index([status])
   @@index([completed])
   @@index([order])
+  @@index([wedding_id, completed, assigned_to, due_date])
   @@map("checklist_tasks")
 }
 

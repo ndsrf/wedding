@@ -99,7 +99,10 @@ export async function GET() {
       data: template,
     };
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=600, stale-while-revalidate=300' },
+    });
   } catch (error: unknown) {
     // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';

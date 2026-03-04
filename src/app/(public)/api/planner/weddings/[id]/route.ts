@@ -12,6 +12,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import type {
   APIResponse,
   GetWeddingResponse,
@@ -73,6 +74,17 @@ export async function GET(
 
     const { id: weddingId } = await params;
 
+    // Check Redis cache first
+    const cacheKey = CACHE_KEYS.plannerWeddingDetail(weddingId);
+    const cached = await getCached<object>(cacheKey);
+    if (cached) {
+      const response: GetWeddingResponse = { success: true, data: cached as GetWeddingResponse['data'] };
+      return NextResponse.json(response, {
+        status: 200,
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+      });
+    }
+
     // Fetch wedding with relations
     const wedding = await prisma.wedding.findUnique({
       where: { id: weddingId },
@@ -116,28 +128,30 @@ export async function GET(
       return NextResponse.json(response, { status: 403 });
     }
 
-    // Calculate stats
-    const families = await prisma.family.findMany({
-      where: { wedding_id: wedding.id },
-      include: {
-        members: true,
-        gifts: true,
-      },
-    });
+    // Calculate stats using aggregate queries (avoids loading all families into memory)
+    const [guest_count, totalFamilies, rsvp_count, attending_count, payment_received_count] =
+      await Promise.all([
+        prisma.familyMember.count({ where: { family: { wedding_id: wedding.id } } }),
+        prisma.family.count({ where: { wedding_id: wedding.id } }),
+        prisma.family.count({
+          where: {
+            wedding_id: wedding.id,
+            members: { some: { attending: { not: null } } },
+          },
+        }),
+        prisma.familyMember.count({
+          where: { family: { wedding_id: wedding.id }, attending: true },
+        }),
+        prisma.family.count({
+          where: {
+            wedding_id: wedding.id,
+            gifts: { some: { status: { in: ['RECEIVED', 'CONFIRMED'] } } },
+          },
+        }),
+      ]);
 
-    const guest_count = families.reduce((sum, family) => sum + family.members.length, 0);
-    const rsvp_count = families.filter((family) =>
-      family.members.some((member) => member.attending !== null)
-    ).length;
     const rsvp_completion_percentage =
-      families.length > 0 ? Math.round((rsvp_count / families.length) * 100) : 0;
-    const attending_count = families.reduce(
-      (sum, family) => sum + family.members.filter((member) => member.attending === true).length,
-      0
-    );
-    const payment_received_count = families.filter((family) =>
-      family.gifts.some((gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED')
-    ).length;
+      totalFamilies > 0 ? Math.round((rsvp_count / totalFamilies) * 100) : 0;
 
     const weddingWithStats = {
       id: wedding.id,
@@ -197,12 +211,18 @@ export async function GET(
       main_event_location: wedding.main_event_location,
     };
 
+    // Store in Redis for subsequent requests
+    await setCached(cacheKey, weddingWithStats, CACHE_TTL.WEDDING_STATS);
+
     const response: GetWeddingResponse = {
       success: true,
       data: weddingWithStats,
     };
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response, {
+      status: 200,
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+    });
   } catch (error: unknown) {
     // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';
@@ -410,6 +430,9 @@ export async function PATCH(
       invalidateWeddingPageCache(weddingId);
       void revalidateWeddingRSVPPages(weddingId);
     }
+
+    // Invalidate the planner wedding detail cache
+    await invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId));
 
     const response: UpdateWeddingResponse = {
       success: true,

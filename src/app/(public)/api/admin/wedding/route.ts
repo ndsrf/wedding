@@ -13,6 +13,7 @@ import { getAllSystemThemes } from '@/lib/theme/presets';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import type { ThemeConfig } from '@/types/theme';
 import type { Theme } from '@/types/models';
 import type {
@@ -95,24 +96,45 @@ export async function GET() {
       return NextResponse.json(response, { status: 403 });
     }
 
-    // Fetch wedding with related data
-    const wedding = await prisma.wedding.findUnique({
-      where: { id: user.wedding_id },
-      include: {
-        planner: {
-          select: {
-            name: true,
-          },
-        },
-        wedding_admins: true,
-        families: {
+    // Check Redis cache first
+    const cacheKey = CACHE_KEYS.adminWedding(user.wedding_id);
+    const cached = await getCached<object>(cacheKey);
+    if (cached) {
+      const response: GetWeddingDetailsResponse = { success: true, data: cached as GetWeddingDetailsResponse['data'] };
+      return NextResponse.json(response, {
+        status: 200,
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+      });
+    }
+
+    // Fetch wedding core data and stats in parallel (avoids loading all families into memory)
+    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedCount] =
+      await Promise.all([
+        prisma.wedding.findUnique({
+          where: { id: user.wedding_id },
           include: {
-            members: true,
-            gifts: true,
+            planner: { select: { name: true } },
+            wedding_admins: true,
           },
-        },
-      },
-    });
+        }),
+        prisma.familyMember.count({ where: { family: { wedding_id: user.wedding_id } } }),
+        prisma.family.count({ where: { wedding_id: user.wedding_id } }),
+        prisma.family.count({
+          where: {
+            wedding_id: user.wedding_id,
+            members: { some: { attending: { not: null } } },
+          },
+        }),
+        prisma.familyMember.count({
+          where: { family: { wedding_id: user.wedding_id }, attending: true },
+        }),
+        prisma.family.count({
+          where: {
+            wedding_id: user.wedding_id,
+            gifts: { some: { status: { in: ['RECEIVED', 'CONFIRMED'] } } },
+          },
+        }),
+      ]);
 
     if (!wedding) {
       const response: APIResponse = {
@@ -137,33 +159,8 @@ export async function GET() {
       return NextResponse.json(response, { status: 404 });
     }
 
-    // Calculate stats
-    const totalGuests = wedding.families.reduce(
-      (sum, family) => sum + family.members.length,
-      0
-    );
-
-    const rsvpSubmittedFamilies = wedding.families.filter((family) =>
-      family.members.some((member) => member.attending !== null)
-    );
-
-    const rsvpCount = rsvpSubmittedFamilies.length;
     const rsvpCompletionPercentage =
-      wedding.families.length > 0
-        ? Math.round((rsvpCount / wedding.families.length) * 100)
-        : 0;
-
-    const attendingCount = wedding.families.reduce(
-      (sum, family) =>
-        sum + family.members.filter((m) => m.attending === true).length,
-      0
-    );
-
-    const paymentReceivedCount = wedding.families.filter((family) =>
-      family.gifts.some(
-        (gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED'
-      )
-    ).length;
+      totalFamilies > 0 ? Math.round((rsvpCount / totalFamilies) * 100) : 0;
 
     // Fetch available themes
     const systemThemes = getAllSystemThemes();
@@ -284,12 +281,18 @@ export async function GET() {
       available_themes: availableThemes,
     };
 
+    // Store in Redis for subsequent requests
+    await setCached(cacheKey, weddingDetails, CACHE_TTL.WEDDING_DETAILS);
+
     const response: GetWeddingDetailsResponse = {
       success: true,
       data: weddingDetails,
     };
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response, {
+      status: 200,
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+    });
   } catch (error: unknown) {
     // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';
@@ -498,6 +501,9 @@ export async function PATCH(request: NextRequest) {
     } else {
       invalidateWeddingPageCache(user.wedding_id);
     }
+
+    // Invalidate the admin wedding cache so the next GET fetches fresh data
+    await invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id));
 
     const response: UpdateWeddingConfigResponse = {
       success: true,
