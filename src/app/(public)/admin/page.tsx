@@ -47,53 +47,43 @@ async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | 
       return null;
     }
 
-    const wedding = await prisma.wedding.findUnique({
-      where: { id: user.wedding_id },
-      include: {
-        families: {
+    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedCount] =
+      await Promise.all([
+        prisma.wedding.findUnique({
+          where: { id: user.wedding_id },
           include: {
-            members: true,
-            gifts: true,
+            main_event_location: true,
+            itinerary_items: {
+              include: { location: true },
+              orderBy: { date_time: 'asc' },
+            },
           },
-        },
-        main_event_location: true,
-        itinerary_items: {
-          include: { location: true },
-          orderBy: { date_time: 'asc' },
-        },
-      },
-    });
+        }),
+        prisma.familyMember.count({ where: { family: { wedding_id: user.wedding_id } } }),
+        prisma.family.count({ where: { wedding_id: user.wedding_id } }),
+        prisma.family.count({
+          where: {
+            wedding_id: user.wedding_id,
+            members: { some: { attending: { not: null } } },
+          },
+        }),
+        prisma.familyMember.count({
+          where: { family: { wedding_id: user.wedding_id }, attending: true },
+        }),
+        prisma.family.count({
+          where: {
+            wedding_id: user.wedding_id,
+            gifts: { some: { status: { in: ['RECEIVED', 'CONFIRMED'] } } },
+          },
+        }),
+      ]);
 
     if (!wedding) {
       return null;
     }
 
-    const totalGuests = wedding.families.reduce(
-      (sum, family) => sum + family.members.length,
-      0
-    );
-
-    const rsvpSubmittedFamilies = wedding.families.filter((family) =>
-      family.members.some((member) => member.attending !== null)
-    );
-
-    const rsvpCount = rsvpSubmittedFamilies.length;
     const rsvpCompletionPercentage =
-      wedding.families.length > 0
-        ? Math.round((rsvpCount / wedding.families.length) * 100)
-        : 0;
-
-    const attendingCount = wedding.families.reduce(
-      (sum, family) =>
-        sum + family.members.filter((m) => m.attending === true).length,
-      0
-    );
-
-    const paymentReceivedCount = wedding.families.filter((family) =>
-      family.gifts.some(
-        (gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED'
-      )
-    ).length;
+      totalFamilies > 0 ? Math.round((rsvpCount / totalFamilies) * 100) : 0;
 
     const today = new Date();
     const weddingDate = new Date(wedding.wedding_date);

@@ -14,6 +14,7 @@ import { API_ERROR_CODES } from '@/types/api';
 import type { Prisma } from '@prisma/client';
 import { createFamily } from '@/lib/guests/crud';
 import { createFamilySchema } from '@/lib/guests/validation';
+import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 
 // Validation schema for query parameters
 const listGuestsQuerySchema = z.object({
@@ -242,7 +243,10 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
+    });
   } catch (error: unknown) {
     // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';
@@ -328,6 +332,9 @@ export async function POST(request: NextRequest) {
 
     // Create family using service
     const family = await createFamily(validatedInput, user.id);
+
+    // Invalidate wedding stats cache (guest count changed)
+    await invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id));
 
     const response: APIResponse = {
       success: true,

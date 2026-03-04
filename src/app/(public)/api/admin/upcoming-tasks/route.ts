@@ -18,6 +18,7 @@ import type { APIResponse } from '@/types/api';
 import type { UpcomingTask } from '@/types/checklist';
 import { API_ERROR_CODES } from '@/types/api';
 import { DEFAULT_UPCOMING_TASKS_LIMIT } from '@/types/checklist';
+import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 
 /**
  * GET /api/admin/upcoming-tasks
@@ -39,24 +40,32 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json(response, { status: 403 });
     }
 
-    // Fetch upcoming tasks for the wedding, filtered by "COUPLE" assignment
-    // Returns tasks sorted by due date with urgency color coding
-    const upcomingTasks = await getUpcomingTasks(
-      user.wedding_id,
-      'COUPLE', // Only tasks assigned to the couple
-      DEFAULT_UPCOMING_TASKS_LIMIT.ADMIN // 5 tasks
-    );
+    const weddingId = user.wedding_id;
+
+    // Check Redis cache first
+    const cacheKey = CACHE_KEYS.adminUpcomingTasks(weddingId);
+    const cached = await getCached<UpcomingTask[]>(cacheKey);
+
+    const upcomingTasks = cached ?? await (async () => {
+      const tasks = await getUpcomingTasks(
+        weddingId,
+        'COUPLE',
+        DEFAULT_UPCOMING_TASKS_LIMIT.ADMIN // 5 tasks
+      );
+      await setCached(cacheKey, tasks, CACHE_TTL.UPCOMING_TASKS);
+      return tasks;
+    })();
 
     const response: APIResponse<UpcomingTask[]> = {
       success: true,
       data: upcomingTasks,
     };
 
-    // Add cache headers for performance (cache for 1 minute)
     return NextResponse.json(response, {
       status: 200,
       headers: {
-        'Cache-Control': 'private, max-age=60',
+        'X-Cache': cached ? 'HIT' : 'MISS',
+        'Cache-Control': 'private, max-age=120, stale-while-revalidate=60',
       },
     });
   } catch (error: unknown) {

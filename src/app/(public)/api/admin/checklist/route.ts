@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { requireAnyRole } from '@/lib/auth/middleware';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
+import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 import {
   getChecklist,
   createTask,
@@ -312,6 +313,12 @@ export async function POST(request: NextRequest) {
       section_name: section?.name,
     });
 
+    // Invalidate upcoming tasks caches (new task may appear in widgets)
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminUpcomingTasks(weddingId)),
+      user.planner_id ? invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)) : Promise.resolve(),
+    ]);
+
     const response: APIResponse = {
       success: true,
       data: task,
@@ -508,6 +515,12 @@ export async function PATCH(request: NextRequest) {
       });
     }
 
+    // Invalidate upcoming tasks caches (task may have been completed/updated)
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminUpcomingTasks(weddingId)),
+      user.planner_id ? invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)) : Promise.resolve(),
+    ]);
+
     const response: APIResponse = {
       success: true,
       data: task,
@@ -609,6 +622,12 @@ export async function DELETE(request: NextRequest) {
 
     // Delete task
     await deleteTask(validatedData.task_id, weddingId);
+
+    // Invalidate upcoming tasks caches (deleted task should disappear from widgets)
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminUpcomingTasks(weddingId)),
+      user.planner_id ? invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)) : Promise.resolve(),
+    ]);
 
     const response: APIResponse = {
       success: true,
