@@ -95,7 +95,8 @@ export interface ExportedDesign {
 export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
   const type = raw.type as TemplateBlock['type'];
   // Strip the internal version field before returning
-  const { _version: _v, ...block } = raw as { _version?: number } & Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { _version, ...block } = raw as { _version?: number } & Record<string, unknown>;
 
   switch (type) {
     case 'text': {
