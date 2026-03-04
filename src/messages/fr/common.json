@@ -1291,7 +1291,14 @@
       "galleryLarge": "Grand",
       "galleryCircular": "Circulaire",
       "galleryHint": "Les photos sont automatiquement chargées depuis la galerie du mariage. Vous pouvez les gérer dans",
-      "galleryHintPath": "Paramètres → Galerie de photos"
+      "galleryHintPath": "Paramètres → Galerie de photos",
+      "exportTemplate": "Exporter",
+      "importTemplate": "Importer",
+      "importingTemplate": "Importation...",
+      "importSuccess": "Modèle importé avec succès",
+      "importError": "Échec de l'importation du modèle",
+      "exportError": "Échec de l'exportation du modèle",
+      "importInstructions": "Sélectionnez un fichier .nupcinv à importer"
     },
     "wizard": {
       "title": "Assistant de Configuration du Mariage",

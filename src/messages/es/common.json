@@ -1587,7 +1587,14 @@
       "galleryLarge": "Grande",
       "galleryCircular": "Circular",
       "galleryHint": "Las fotos se cargan automáticamente desde la galería de la boda. Puedes gestionar las fotos en",
-      "galleryHintPath": "Configuración → Galería de fotos"
+      "galleryHintPath": "Configuración → Galería de fotos",
+      "exportTemplate": "Exportar",
+      "importTemplate": "Importar",
+      "importingTemplate": "Importando...",
+      "importSuccess": "Plantilla importada correctamente",
+      "importError": "Error al importar la plantilla",
+      "exportError": "Error al exportar la plantilla",
+      "importInstructions": "Selecciona un archivo .nupcinv para importar"
     },
     "gallery": {
       "googlePhotosTitle": "Google Photos",
