@@ -30,6 +30,10 @@ const ACCEPTED_GHSAS = [
   // undici - MODERATE severity
   'GHSA-g9mf-h72j-4rw9', // Unbounded decompression chain
 
+  // @hono/node-server - HIGH severity (transitive dep via @prisma/dev only, not used directly)
+  // Fix requires prisma downgrade to 6.19.2 (breaking change). Risk accepted: not in app runtime path.
+  'GHSA-wc8c-qw6v-h7f6', // Authorization bypass via encoded slashes in Serve Static Middleware
+
   // minimatch - HIGH severity (dev dependencies only)
   'GHSA-3ppc-4f35-3m26', // ReDoS via repeated wildcards
   // ajv - MODERATE severity
