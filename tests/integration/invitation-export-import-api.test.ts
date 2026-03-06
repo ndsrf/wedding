@@ -68,8 +68,10 @@ function makeFormDataRequest(file: Blob, filename: string): NextRequest {
 }
 
 /** Converts a Buffer (Node.js) to a plain Uint8Array<ArrayBuffer> accepted by Blob. */
-function toUint8Array(buf: Buffer): Uint8Array {
-  return new Uint8Array(buf.buffer as ArrayBuffer, buf.byteOffset, buf.byteLength);
+function toUint8Array(buf: Buffer): Uint8Array<ArrayBuffer> {
+  const arr = new Uint8Array(buf.length);
+  arr.set(buf);
+  return arr;
 }
 
 /** Creates a minimal valid .nupcinv buffer */
