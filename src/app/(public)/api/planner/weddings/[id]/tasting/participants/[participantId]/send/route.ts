@@ -54,7 +54,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   if (!custom_message) {
     try {
-      const lang = (wedding.default_language ?? 'ES') as Parameters<typeof getTemplateForSending>[1];
+      const lang = (wedding.default_language ?? 'ES') as Parameters<typeof getTemplateForSending>[2];
       const tpl = await getTemplateForSending(
         weddingId,
         'TASTING_MENU',
