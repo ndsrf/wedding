@@ -1291,7 +1291,14 @@
       "galleryLarge": "Grande",
       "galleryCircular": "Circolare",
       "galleryHint": "Le foto vengono caricate automaticamente dalla galleria del matrimonio. Puoi gestirle in",
-      "galleryHintPath": "Impostazioni → Galleria fotografica"
+      "galleryHintPath": "Impostazioni → Galleria fotografica",
+      "exportTemplate": "Esporta",
+      "importTemplate": "Importa",
+      "importingTemplate": "Importazione in corso...",
+      "importSuccess": "Modello importato con successo",
+      "importError": "Impossibile importare il modello",
+      "exportError": "Impossibile esportare il modello",
+      "importInstructions": "Seleziona un file .nupcinv da importare"
     },
     "wizard": {
       "title": "Procedura Guidata per la Configurazione del Matrimonio",

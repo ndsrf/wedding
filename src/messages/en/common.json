@@ -1602,7 +1602,14 @@
       "galleryLarge": "Large",
       "galleryCircular": "Circular",
       "galleryHint": "Photos are automatically loaded from the wedding gallery. You can manage them in",
-      "galleryHintPath": "Settings → Photo Gallery"
+      "galleryHintPath": "Settings → Photo Gallery",
+      "exportTemplate": "Export",
+      "importTemplate": "Import",
+      "importingTemplate": "Importing...",
+      "importSuccess": "Template imported successfully",
+      "importError": "Failed to import template",
+      "exportError": "Failed to export template",
+      "importInstructions": "Select a .nupcinv file to import"
     },
     "gallery": {
       "googlePhotosTitle": "Google Photos",

@@ -1291,7 +1291,14 @@
       "galleryLarge": "Groß",
       "galleryCircular": "Kreisförmig",
       "galleryHint": "Fotos werden automatisch aus der Hochzeitsgalerie geladen. Sie können sie verwalten unter",
-      "galleryHintPath": "Einstellungen → Fotogalerie"
+      "galleryHintPath": "Einstellungen → Fotogalerie",
+      "exportTemplate": "Exportieren",
+      "importTemplate": "Importieren",
+      "importingTemplate": "Importiere...",
+      "importSuccess": "Vorlage erfolgreich importiert",
+      "importError": "Fehler beim Importieren der Vorlage",
+      "exportError": "Fehler beim Exportieren der Vorlage",
+      "importInstructions": "Wählen Sie eine .nupcinv-Datei zum Importieren aus"
     },
     "wizard": {
       "title": "Hochzeit-Einrichtungsassistent",

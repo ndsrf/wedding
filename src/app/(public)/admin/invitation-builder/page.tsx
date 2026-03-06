@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { InvitationTemplateEditor } from '@/components/admin/InvitationTemplateEditor';
@@ -61,6 +61,10 @@ export default function InvitationBuilderPage() {
   // Rename state
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+
+  // Import state
+  const [isImporting, setIsImporting] = useState(false);
+  const importFileRef = useRef<HTMLInputElement>(null);
 
   // Load initial data
   useEffect(() => {
@@ -258,6 +262,49 @@ export default function InvitationBuilderPage() {
     }
   };
 
+  const handleExportTemplate = async (template: UserTemplate) => {
+    try {
+      const res = await fetch(`/api/admin/invitation-template/${template.id}/export`);
+      if (!res.ok) throw new Error('Failed to export template');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${template.name.replace(/[^a-z0-9_\-\s]/gi, '_').trim() || 'invitation'}.nupcinv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('exportError'));
+    }
+  };
+
+  const handleImportFile = async (file: File) => {
+    setIsImporting(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/admin/invitation-template/import', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || t('importError'));
+      }
+      const body = await res.json();
+      const imported = body.template as UserTemplate;
+      setUserTemplates((prev) => [imported, ...prev]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('importError'));
+    } finally {
+      setIsImporting(false);
+      if (importFileRef.current) importFileRef.current.value = '';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -293,12 +340,32 @@ export default function InvitationBuilderPage() {
                   <p className="mt-1 text-sm text-gray-600">{t('description')}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setView('picker')}
-                className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-md hover:bg-amber-700"
-              >
-                {t('createNew')}
-              </button>
+              <div className="flex gap-2">
+                {/* Hidden file input for import */}
+                <input
+                  ref={importFileRef}
+                  type="file"
+                  accept=".nupcinv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImportFile(file);
+                  }}
+                />
+                <button
+                  onClick={() => importFileRef.current?.click()}
+                  disabled={isImporting}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {isImporting ? t('importingTemplate') : t('importTemplate')}
+                </button>
+                <button
+                  onClick={() => setView('picker')}
+                  className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-md hover:bg-amber-700"
+                >
+                  {t('createNew')}
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -410,6 +477,13 @@ export default function InvitationBuilderPage() {
                         title={t('duplicateTemplate')}
                       >
                         {t('duplicateTemplate')}
+                      </button>
+                      <button
+                        onClick={() => handleExportTemplate(template)}
+                        className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition text-sm font-medium"
+                        title={t('exportTemplate')}
+                      >
+                        {t('exportTemplate')}
                       </button>
                       <button
                         onClick={() => handleDeleteTemplate(template.id)}
