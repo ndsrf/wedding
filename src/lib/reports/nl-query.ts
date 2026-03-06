@@ -13,7 +13,7 @@
  */
 
 import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { Parser } from 'node-sql-parser';
 import { prisma } from '@/lib/db/prisma';
 
@@ -114,15 +114,15 @@ async function generateSQLWithGemini(question: string): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-  const model = genAI.getGenerativeModel({
-    model: modelName,
-    systemInstruction: SCHEMA_DESCRIPTION,
-  });
+  const ai = new GoogleGenAI({ apiKey });
+  const modelName = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 
-  const result = await model.generateContent(question);
-  return result.response.text()?.trim() || null;
+  const result = await ai.models.generateContent({
+    model: modelName,
+    contents: question,
+    config: { systemInstruction: SCHEMA_DESCRIPTION },
+  });
+  return result.text?.trim() || null;
 }
 
 async function generateSQL(question: string): Promise<string | null> {

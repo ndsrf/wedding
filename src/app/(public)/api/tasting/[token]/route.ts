@@ -77,8 +77,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
         sections: sectionsWithAverages,
         participants: menu.participants,
       },
-      my_scores: participant.scores.reduce<Record<string, { score: number; notes: string | null }>>((acc, s) => {
-        acc[s.dish_id] = { score: s.score, notes: s.notes };
+      my_scores: participant.scores.reduce<Record<string, { score: number; notes: string | null; image_url: string | null }>>((acc, s) => {
+        acc[s.dish_id] = { score: s.score, notes: s.notes, image_url: s.image_url };
         return acc;
       }, {}),
     },

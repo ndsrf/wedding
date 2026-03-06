@@ -1697,7 +1697,11 @@
         "deleteConfirm": "Supprimer ce plat?",
         "save": "Enregistrer",
         "cancel": "Annuler",
-        "edit": "Modifier"
+        "edit": "Modifier",
+        "uploadPhoto": "Ajouter une photo",
+        "changePhoto": "Changer la photo",
+        "removePhoto": "Supprimer la photo",
+        "uploading": "Envoi en cours..."
       },
       "participants": {
         "title": "Participants",
@@ -1891,7 +1895,11 @@
         "saved": "Enregistré!",
         "error": "Erreur lors de l'enregistrement",
         "stars": "{score} sur 5",
-        "notRated": "Pas encore noté"
+        "notRated": "Pas encore noté",
+        "addPhoto": "Ajouter une photo",
+        "changePhoto": "Changer la photo",
+        "removePhoto": "Supprimer",
+        "uploadingPhoto": "Envoi..."
       },
       "allScores": {
         "empty": "Pas encore de notes.",

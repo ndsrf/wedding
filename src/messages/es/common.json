@@ -1709,7 +1709,11 @@
         "deleteConfirm": "¿Seguro que quieres eliminar este plato?",
         "save": "Guardar",
         "cancel": "Cancelar",
-        "edit": "Editar"
+        "edit": "Editar",
+        "uploadPhoto": "Subir foto",
+        "changePhoto": "Cambiar foto",
+        "removePhoto": "Quitar foto",
+        "uploading": "Subiendo..."
       },
       "participants": {
         "title": "Participantes",
@@ -1903,7 +1907,11 @@
         "saved": "¡Guardado!",
         "error": "Error al guardar la valoración",
         "stars": "{score} de 5",
-        "notRated": "Sin valorar aún"
+        "notRated": "Sin valorar aún",
+        "addPhoto": "Añadir foto",
+        "changePhoto": "Cambiar foto",
+        "removePhoto": "Quitar",
+        "uploadingPhoto": "Subiendo..."
       },
       "allScores": {
         "empty": "Sin valoraciones aún.",

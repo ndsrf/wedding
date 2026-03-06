@@ -1697,7 +1697,11 @@
         "deleteConfirm": "Eliminare questo piatto?",
         "save": "Salva",
         "cancel": "Annulla",
-        "edit": "Modifica"
+        "edit": "Modifica",
+        "uploadPhoto": "Carica foto",
+        "changePhoto": "Cambia foto",
+        "removePhoto": "Rimuovi foto",
+        "uploading": "Caricamento..."
       },
       "participants": {
         "title": "Partecipanti",
@@ -1891,7 +1895,11 @@
         "saved": "Salvato!",
         "error": "Errore nel salvataggio",
         "stars": "{score} su 5",
-        "notRated": "Non ancora valutato"
+        "notRated": "Non ancora valutato",
+        "addPhoto": "Aggiungi foto",
+        "changePhoto": "Cambia foto",
+        "removePhoto": "Rimuovi",
+        "uploadingPhoto": "Caricamento..."
       },
       "allScores": {
         "empty": "Nessun voto ancora.",

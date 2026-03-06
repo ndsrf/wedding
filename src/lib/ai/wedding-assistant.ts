@@ -13,7 +13,7 @@
  */
 
 import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import type { Wedding, Family, FamilyMember } from '@prisma/client';
 import type { TemplateDesign, SupportedLanguage } from '@/types/invitation-template';
 
@@ -223,16 +223,15 @@ async function generateWithGemini(systemPrompt: string, userMessage: string): Pr
     return null;
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
+  const ai = new GoogleGenAI({ apiKey });
+  const modelName = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-  const model = genAI.getGenerativeModel({
+  const result = await ai.models.generateContent({
     model: modelName,
-    systemInstruction: systemPrompt,
+    contents: userMessage,
+    config: { systemInstruction: systemPrompt },
   });
-
-  const result = await model.generateContent(userMessage);
-  return result.response.text()?.trim() || null;
+  return result.text?.trim() || null;
 }
 
 // ============================================================================

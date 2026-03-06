@@ -1724,7 +1724,11 @@
         "deleteConfirm": "Are you sure you want to delete this dish?",
         "save": "Save",
         "cancel": "Cancel",
-        "edit": "Edit"
+        "edit": "Edit",
+        "uploadPhoto": "Upload Photo",
+        "changePhoto": "Change Photo",
+        "removePhoto": "Remove Photo",
+        "uploading": "Uploading..."
       },
       "participants": {
         "title": "Participants",
@@ -1919,7 +1923,11 @@
         "saved": "Saved!",
         "error": "Failed to save rating",
         "stars": "{score} out of 5",
-        "notRated": "Not rated yet"
+        "notRated": "Not rated yet",
+        "addPhoto": "Add Photo",
+        "changePhoto": "Change Photo",
+        "removePhoto": "Remove",
+        "uploadingPhoto": "Uploading..."
       },
       "allScores": {
         "empty": "No ratings yet.",

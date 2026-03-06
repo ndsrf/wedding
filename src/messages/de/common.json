@@ -1697,7 +1697,11 @@
         "deleteConfirm": "Dieses Gericht löschen?",
         "save": "Speichern",
         "cancel": "Abbrechen",
-        "edit": "Bearbeiten"
+        "edit": "Bearbeiten",
+        "uploadPhoto": "Foto hochladen",
+        "changePhoto": "Foto ändern",
+        "removePhoto": "Foto entfernen",
+        "uploading": "Wird hochgeladen..."
       },
       "participants": {
         "title": "Teilnehmer",
@@ -1891,7 +1895,11 @@
         "saved": "Gespeichert!",
         "error": "Fehler beim Speichern",
         "stars": "{score} von 5",
-        "notRated": "Noch nicht bewertet"
+        "notRated": "Noch nicht bewertet",
+        "addPhoto": "Foto hinzufügen",
+        "changePhoto": "Foto ändern",
+        "removePhoto": "Entfernen",
+        "uploadingPhoto": "Wird hochgeladen..."
       },
       "allScores": {
         "empty": "Noch keine Bewertungen.",

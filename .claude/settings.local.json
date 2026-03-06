@@ -93,7 +93,9 @@
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx tsx:*)",
       "Bash(npm ls:*)",
       "Bash(DATABASE_URL=postgresql://wedding:wedding@postgresql.lan:5432/wed1 npx prisma db push:*)",
-      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate resolve --rolled-back 20260307000001_add_tasting_menu_master_templates)"
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate resolve --rolled-back 20260307000001_add_tasting_menu_master_templates)",
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate resolve --rolled-back 20260307000002_add_tasting_dish_image_url 2>&1)"
     ]
   }
 }

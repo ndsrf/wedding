@@ -2,18 +2,18 @@
  * Menu Parser AI
  *
  * Parses a tasting menu from a PDF or image file using AI vision.
- * Supports OpenAI (images only) and Gemini (images + PDFs).
+ * Supports OpenAI (images + PDFs) and Gemini (images + PDFs).
  *
  * Configuration (env vars):
  *   AI_PROVIDER    - "openai" (default) or "gemini"
  *   OPENAI_API_KEY - Required when AI_PROVIDER=openai
  *   OPENAI_VISION_MODEL - Optional, defaults to "gpt-4o"
  *   GEMINI_API_KEY - Required when AI_PROVIDER=gemini
- *   GEMINI_MODEL   - Optional, defaults to "gemini-2.0-flash"
+ *   GEMINI_MODEL   - Optional, defaults to "gemini-3-flash-preview"
  */
 
 import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -61,11 +61,6 @@ Rules:
 // ─── OpenAI ───────────────────────────────────────────────────────────────────
 
 async function parseWithOpenAI(fileBuffer: Buffer, mimeType: string): Promise<ParsedMenu | null> {
-  if (mimeType === 'application/pdf') {
-    console.error('[MENU_PARSER] OpenAI does not support PDF files. Use Gemini or upload an image.');
-    return null;
-  }
-
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.error('[MENU_PARSER] OPENAI_API_KEY is not configured');
@@ -76,18 +71,17 @@ async function parseWithOpenAI(fileBuffer: Buffer, mimeType: string): Promise<Pa
   const model = process.env.OPENAI_VISION_MODEL || 'gpt-4o';
   const base64 = fileBuffer.toString('base64');
 
+  const filePart: OpenAI.ChatCompletionContentPart =
+    mimeType === 'application/pdf'
+      ? { type: 'file', file: { filename: 'menu.pdf', file_data: `data:application/pdf;base64,${base64}` } }
+      : { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } };
+
   const response = await openai.chat.completions.create({
     model,
     messages: [
       {
         role: 'user',
-        content: [
-          { type: 'text', text: SYSTEM_PROMPT },
-          {
-            type: 'image_url',
-            image_url: { url: `data:${mimeType};base64,${base64}` },
-          },
-        ],
+        content: [{ type: 'text', text: SYSTEM_PROMPT }, filePart],
       },
     ],
     max_tokens: 4096,
@@ -107,18 +101,25 @@ async function parseWithGemini(fileBuffer: Buffer, mimeType: string): Promise<Pa
     return null;
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-  const model = genAI.getGenerativeModel({ model: modelName });
+  const ai = new GoogleGenAI({ apiKey });
+  const modelName = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 
   const base64 = fileBuffer.toString('base64');
 
-  const result = await model.generateContent([
-    SYSTEM_PROMPT,
-    { inlineData: { data: base64, mimeType } },
-  ]);
+  const result = await ai.models.generateContent({
+    model: modelName,
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          { text: SYSTEM_PROMPT },
+          { inlineData: { data: base64, mimeType } },
+        ],
+      },
+    ],
+  });
 
-  const text = result.response.text()?.trim() ?? '';
+  const text = result.text?.trim() ?? '';
   return extractJson(text);
 }
 
@@ -165,11 +166,6 @@ export async function parseMenuFromFile(fileBuffer: Buffer, mimeType: string): P
 
   try {
     if (provider === 'gemini') {
-      return await parseWithGemini(fileBuffer, mimeType);
-    }
-    // OpenAI is the default — but for PDFs fall back to Gemini if key is available
-    if (mimeType === 'application/pdf' && process.env.GEMINI_API_KEY) {
-      console.log('[MENU_PARSER] PDF detected, falling back to Gemini');
       return await parseWithGemini(fileBuffer, mimeType);
     }
     return await parseWithOpenAI(fileBuffer, mimeType);

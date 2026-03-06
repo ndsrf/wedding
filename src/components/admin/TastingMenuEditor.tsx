@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
@@ -16,6 +16,7 @@ export interface TastingDish {
   section_id: string;
   name: string;
   description: string | null;
+  image_url: string | null;
   order: number;
 }
 
@@ -46,6 +47,10 @@ interface ParsedSection {
 
 interface ParsedMenu {
   sections: ParsedSection[];
+}
+
+interface ImportSelections {
+  sections: { checked: boolean; dishes: boolean[] }[];
 }
 
 interface Props {
@@ -83,11 +88,38 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
   const [editingDish, setEditingDish] = useState<Record<string, { name: string; description: string }>>({});
   const [dishEditSaving, setDishEditSaving] = useState<Record<string, boolean>>({});
 
+  // Image upload: keyed by dish id
+  const [imageUploading, setImageUploading] = useState<Record<string, boolean>>({});
+  const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
   // Import state
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importPreview, setImportPreview] = useState<ParsedMenu | null>(null);
+  const [importSelections, setImportSelections] = useState<ImportSelections | null>(null);
   const [applyingImport, setApplyingImport] = useState(false);
+
+  const toggleImportSection = (si: number, checked: boolean) => {
+    setImportSelections(prev => {
+      if (!prev) return prev;
+      return {
+        sections: prev.sections.map((s, i) =>
+          i === si ? { checked, dishes: s.dishes.map(() => checked) } : s
+        ),
+      };
+    });
+  };
+
+  const toggleImportDish = (si: number, di: number, checked: boolean) => {
+    setImportSelections(prev => {
+      if (!prev) return prev;
+      return {
+        sections: prev.sections.map((s, i) =>
+          i !== si ? s : { ...s, dishes: s.dishes.map((d, j) => (j === di ? checked : d)) }
+        ),
+      };
+    });
+  };
 
   const handleSaveMenu = async () => {
     setMenuSaving(true);
@@ -224,6 +256,50 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     }
   };
 
+  // ─── Image handlers ─────────────────────────────────────────────────────────
+
+  const handleImageUpload = useCallback(async (sectionId: string, dishId: string, file: File) => {
+    if (!menu) return;
+    setImageUploading(prev => ({ ...prev, [dishId]: true }));
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${apiBase}/dishes/${dishId}/image`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message);
+      onMenuChange({
+        ...menu,
+        sections: menu.sections.map(s =>
+          s.id === sectionId
+            ? { ...s, dishes: s.dishes.map(d => d.id === dishId ? { ...d, image_url: data.data.image_url } : d) }
+            : s
+        ),
+      });
+    } finally {
+      setImageUploading(prev => ({ ...prev, [dishId]: false }));
+    }
+  }, [menu, apiBase, onMenuChange]);
+
+  const handleImageRemove = useCallback(async (sectionId: string, dishId: string) => {
+    if (!menu) return;
+    setImageUploading(prev => ({ ...prev, [dishId]: true }));
+    try {
+      const res = await fetch(`${apiBase}/dishes/${dishId}/image`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message);
+      onMenuChange({
+        ...menu,
+        sections: menu.sections.map(s =>
+          s.id === sectionId
+            ? { ...s, dishes: s.dishes.map(d => d.id === dishId ? { ...d, image_url: null } : d) }
+            : s
+        ),
+      });
+    } finally {
+      setImageUploading(prev => ({ ...prev, [dishId]: false }));
+    }
+  }, [menu, apiBase, onMenuChange]);
+
   // ─── Import handlers ────────────────────────────────────────────────────────
 
   const handleImportClick = () => {
@@ -252,7 +328,11 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         throw new Error(data.error?.message ?? t('import.error'));
       }
 
-      setImportPreview(data.data as ParsedMenu);
+      const parsed = data.data as ParsedMenu;
+      setImportPreview(parsed);
+      setImportSelections({
+        sections: parsed.sections.map(s => ({ checked: true, dishes: s.dishes.map(() => true) })),
+      });
     } catch (err) {
       setImportError(err instanceof Error ? err.message : t('import.error'));
     } finally {
@@ -261,15 +341,20 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
   };
 
   const handleApplyImport = async () => {
-    if (!importPreview || !menu) return;
+    if (!importPreview) return;
 
     if (!confirm(t('import.confirmReplace'))) return;
 
     setApplyingImport(true);
     try {
-      let currentMenu = menu;
+      let currentMenu: TastingMenu | null = menu;
 
-      for (const parsedSection of importPreview.sections) {
+      for (let si = 0; si < importPreview.sections.length; si++) {
+        const sectionSel = importSelections?.sections[si];
+        if (!sectionSel?.checked) continue;
+
+        const parsedSection = importPreview.sections[si];
+
         // Create section
         const sectionRes = await fetch(`${apiBase}/sections`, {
           method: 'POST',
@@ -280,10 +365,16 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         if (!sectionData.success) continue;
 
         const newSection: TastingSection = { ...sectionData.data, dishes: [] };
+        if (!currentMenu) {
+          currentMenu = { id: sectionData.data.menu_id, title: menuTitle, description: menuDescription || null, sections: [] };
+        }
         currentMenu = { ...currentMenu, sections: [...currentMenu.sections, newSection] };
 
         // Create dishes
-        for (const parsedDish of parsedSection.dishes) {
+        for (let di = 0; di < parsedSection.dishes.length; di++) {
+          if (!sectionSel.dishes[di]) continue;
+
+          const parsedDish = parsedSection.dishes[di];
           const dishRes = await fetch(`${apiBase}/dishes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -305,8 +396,9 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         }
       }
 
-      onMenuChange(currentMenu);
+      if (currentMenu) onMenuChange(currentMenu);
       setImportPreview(null);
+      setImportSelections(null);
     } finally {
       setApplyingImport(false);
     }
@@ -406,7 +498,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
             <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-base font-semibold text-gray-900">{t('import.preview')}</h2>
               <button
-                onClick={() => setImportPreview(null)}
+                onClick={() => { setImportPreview(null); setImportSelections(null); }}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -419,31 +511,57 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
               {importPreview.sections.length === 0 && (
                 <p className="text-sm text-gray-500 italic">{t('sections.empty')}</p>
               )}
-              {importPreview.sections.map((section, si) => (
-                <div key={si} className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
-                    <h4 className="text-sm font-semibold text-gray-800">{section.name}</h4>
+              {importPreview.sections.map((section, si) => {
+                const sectionSel = importSelections?.sections[si];
+                const sectionChecked = sectionSel?.checked ?? true;
+                return (
+                  <div key={si} className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-3 py-2 border-b border-gray-200 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={sectionChecked}
+                        onChange={e => toggleImportSection(si, e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      <h4 className={`text-sm font-semibold ${sectionChecked ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
+                        {section.name}
+                      </h4>
+                    </div>
+                    <ul className="divide-y divide-gray-100">
+                      {section.dishes.length === 0 && (
+                        <li className="px-3 py-2 text-xs text-gray-400 italic">{t('dishes.empty')}</li>
+                      )}
+                      {section.dishes.map((dish, di) => {
+                        const dishChecked = sectionSel?.dishes[di] ?? true;
+                        return (
+                          <li key={di} className="px-3 py-2 flex items-start gap-2">
+                            <input
+                              type="checkbox"
+                              checked={dishChecked}
+                              disabled={!sectionChecked}
+                              onChange={e => toggleImportDish(si, di, e.target.checked)}
+                              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                            />
+                            <div>
+                              <p className={`text-sm font-medium ${dishChecked && sectionChecked ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
+                                {dish.name}
+                              </p>
+                              {dish.description && (
+                                <p className="text-xs text-gray-500 mt-0.5">{dish.description}</p>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
-                  <ul className="divide-y divide-gray-100">
-                    {section.dishes.length === 0 && (
-                      <li className="px-3 py-2 text-xs text-gray-400 italic">{t('dishes.empty')}</li>
-                    )}
-                    {section.dishes.map((dish, di) => (
-                      <li key={di} className="px-3 py-2">
-                        <p className="text-sm font-medium text-gray-800">{dish.name}</p>
-                        {dish.description && (
-                          <p className="text-xs text-gray-500 mt-0.5">{dish.description}</p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="px-5 py-4 border-t border-gray-200 flex gap-3 justify-end">
               <button
-                onClick={() => setImportPreview(null)}
+                onClick={() => { setImportPreview(null); setImportSelections(null); }}
                 className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50"
               >
                 {t('import.cancel')}
@@ -526,6 +644,42 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
                         placeholder={t('dishes.description')}
                         className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-rose-500 focus:border-rose-500"
                       />
+                      {/* Image controls in edit mode */}
+                      <div className="flex items-center gap-2">
+                        {dish.image_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={dish.image_url} alt={dish.name} className="h-12 w-12 rounded object-cover border border-gray-200 shrink-0" />
+                        )}
+                        <input
+                          ref={el => { imageInputRefs.current[dish.id] = el; }}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          className="hidden"
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(section.id, dish.id, file);
+                            e.target.value = '';
+                          }}
+                        />
+                        <button
+                          type="button"
+                          disabled={imageUploading[dish.id]}
+                          onClick={() => imageInputRefs.current[dish.id]?.click()}
+                          className="text-xs px-2 py-1 border border-gray-300 rounded text-gray-600 hover:bg-gray-50 disabled:opacity-50 flex items-center gap-1"
+                        >
+                          {imageUploading[dish.id] ? <WeddingSpinner size="sm" /> : null}
+                          {imageUploading[dish.id] ? t('dishes.uploading') : dish.image_url ? t('dishes.changePhoto') : t('dishes.uploadPhoto')}
+                        </button>
+                        {dish.image_url && !imageUploading[dish.id] && (
+                          <button
+                            type="button"
+                            onClick={() => handleImageRemove(section.id, dish.id)}
+                            className="text-xs px-2 py-1 border border-gray-300 rounded text-red-500 hover:bg-red-50"
+                          >
+                            {t('dishes.removePhoto')}
+                          </button>
+                        )}
+                      </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleSaveDish(section.id, dish.id)}
@@ -545,13 +699,19 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
                     </div>
                   ) : (
                     /* Read view for dish */
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">{dish.name}</p>
-                        {dish.description && <p className="text-xs text-gray-500 mt-0.5">{dish.description}</p>}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        {dish.image_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={dish.image_url} alt={dish.name} className="h-12 w-12 rounded object-cover border border-gray-200 shrink-0" />
+                        )}
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">{dish.name}</p>
+                          {dish.description && <p className="text-xs text-gray-500 mt-0.5">{dish.description}</p>}
+                        </div>
                       </div>
                       {!readOnly && (
-                        <div className="flex items-center gap-2 ml-4 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             onClick={() => handleStartEditDish(dish)}
                             className="text-xs text-gray-500 hover:text-gray-700"
