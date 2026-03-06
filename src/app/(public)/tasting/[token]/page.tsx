@@ -2,16 +2,19 @@
  * Public Tasting Menu Page
  * /tasting/[token]
  *
- * Participant page for rating dishes and viewing collective scores.
+ * Auto-saves scores and notes as the user enters them.
+ * On reload, the server returns the latest saved scores so the user
+ * can continue exactly where they left off.
+ *
  * Three tabs:
- *   1. My Ratings  – rate each dish 1-5 + add notes
+ *   1. My Ratings  – star rating (1-5) + notes, auto-saved
  *   2. Everyone's Ratings – all participants' scores
  *   3. Average Scores – computed averages, sortable
  */
 
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback, useRef, use } from 'react';
 import { useTranslations } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
@@ -58,6 +61,7 @@ interface TastingData {
 
 type Tab = 'my' | 'all' | 'avg';
 type SortKey = 'score' | 'name';
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface PageProps {
   params: Promise<{ token: string }>;
@@ -78,13 +82,26 @@ function Stars({ value, onChange, readonly = false }: { value: number; onChange?
           onMouseEnter={() => !readonly && setHover(i)}
           onMouseLeave={() => !readonly && setHover(0)}
           onClick={() => onChange?.(i)}
-          className={`text-2xl transition-colors ${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'} ${i <= display ? 'text-yellow-400' : 'text-gray-300'}`}
+          className={`text-2xl transition-transform ${readonly ? 'cursor-default' : 'cursor-pointer active:scale-125'} ${i <= display ? 'text-yellow-400' : 'text-gray-300'}`}
         >
           ★
         </button>
       ))}
     </div>
   );
+}
+
+// ─── Save-status badge ────────────────────────────────────────────────────────
+
+function SaveBadge({ status }: { status: SaveStatus }) {
+  if (status === 'idle') return null;
+  const map: Record<Exclude<SaveStatus, 'idle'>, { text: string; className: string }> = {
+    saving: { text: '…', className: 'text-gray-400' },
+    saved:  { text: '✓ Saved', className: 'text-green-500' },
+    error:  { text: '⚠ Retry', className: 'text-red-400' },
+  };
+  const { text, className } = map[status as Exclude<SaveStatus, 'idle'>];
+  return <span className={`text-xs transition-opacity ${className}`}>{text}</span>;
 }
 
 // ─── My Scores Tab ───────────────────────────────────────────────────────────
@@ -95,37 +112,64 @@ function MyScoresTab({ data, token, onScoreUpdate }: {
   onScoreUpdate: (dishId: string, score: number, notes: string | null) => void;
 }) {
   const t = useTranslations('guest.tasting');
-  const [saving, setSaving] = useState<Record<string, boolean>>({});
-  const [saved, setSaved] = useState<Record<string, boolean>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Per-dish local state
   const [localScores, setLocalScores] = useState<Record<string, { score: number; notes: string }>>(
-    Object.fromEntries(
+    () => Object.fromEntries(
       Object.entries(data.my_scores).map(([dishId, s]) => [dishId, { score: s.score, notes: s.notes ?? '' }])
     )
   );
+  const [status, setStatus] = useState<Record<string, SaveStatus>>({});
 
-  const handleSave = async (dishId: string) => {
-    const local = localScores[dishId];
-    if (!local?.score) return;
-    setSaving(prev => ({ ...prev, [dishId]: true }));
-    setErrors(prev => ({ ...prev, [dishId]: '' }));
+  // Debounce timers per dish
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const save = useCallback(async (dishId: string, score: number, notes: string) => {
+    if (!score) return; // don't save until a star is selected
+    setStatus(prev => ({ ...prev, [dishId]: 'saving' }));
     try {
       const res = await fetch(`/api/tasting/${token}/score`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dish_id: dishId, score: local.score, notes: local.notes || null }),
+        body: JSON.stringify({ dish_id: dishId, score, notes: notes || null }),
       });
       const d = await res.json();
-      if (!d.success) throw new Error(d.error?.message ?? t('score.error'));
-      onScoreUpdate(dishId, local.score, local.notes || null);
-      setSaved(prev => ({ ...prev, [dishId]: true }));
-      setTimeout(() => setSaved(prev => ({ ...prev, [dishId]: false })), 2000);
-    } catch (err) {
-      setErrors(prev => ({ ...prev, [dishId]: err instanceof Error ? err.message : t('score.error') }));
-    } finally {
-      setSaving(prev => ({ ...prev, [dishId]: false }));
+      if (!d.success) throw new Error(d.error?.message);
+      onScoreUpdate(dishId, score, notes || null);
+      setStatus(prev => ({ ...prev, [dishId]: 'saved' }));
+      // Reset to idle after 2 s
+      setTimeout(() => setStatus(prev => ({ ...prev, [dishId]: 'idle' })), 2000);
+    } catch {
+      setStatus(prev => ({ ...prev, [dishId]: 'error' }));
     }
-  };
+  }, [token, onScoreUpdate]);
+
+  // Auto-save with debounce when notes change
+  const scheduleNoteSave = useCallback((dishId: string, score: number, notes: string) => {
+    clearTimeout(timers.current[dishId]);
+    setStatus(prev => ({ ...prev, [dishId]: 'idle' })); // clear badge while typing
+    timers.current[dishId] = setTimeout(() => {
+      save(dishId, score, notes);
+    }, 1200);
+  }, [save]);
+
+  // Star click saves immediately
+  const handleStarChange = useCallback((dishId: string, currentNotes: string, newScore: number) => {
+    clearTimeout(timers.current[dishId]);
+    setLocalScores(prev => ({ ...prev, [dishId]: { score: newScore, notes: currentNotes } }));
+    save(dishId, newScore, currentNotes);
+  }, [save]);
+
+  const handleNotesChange = useCallback((dishId: string, currentScore: number, notes: string) => {
+    setLocalScores(prev => ({ ...prev, [dishId]: { score: currentScore, notes } }));
+    scheduleNoteSave(dishId, currentScore, notes);
+  }, [scheduleNoteSave]);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    const t = timers.current;
+    return () => { Object.values(t).forEach(clearTimeout); };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -135,37 +179,44 @@ function MyScoresTab({ data, token, onScoreUpdate }: {
           <div className="space-y-4">
             {section.dishes.map(dish => {
               const local = localScores[dish.id] ?? { score: 0, notes: '' };
+              const dishStatus = status[dish.id] ?? 'idle';
               return (
                 <div key={dish.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                  <h3 className="font-medium text-gray-900">{dish.name}</h3>
-                  {dish.description && <p className="text-sm text-gray-500 mt-0.5">{dish.description}</p>}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900">{dish.name}</h3>
+                      {dish.description && <p className="text-sm text-gray-500 mt-0.5">{dish.description}</p>}
+                    </div>
+                    <SaveBadge status={dishStatus} />
+                  </div>
+
                   <div className="mt-3">
-                    <p className="text-xs text-gray-600 mb-1">{t('score.rate')}</p>
+                    <p className="text-xs text-gray-500 mb-1.5">{t('score.rate')}</p>
                     <Stars
                       value={local.score}
-                      onChange={v => setLocalScores(prev => ({ ...prev, [dish.id]: { ...prev[dish.id] ?? { notes: '' }, score: v } }))}
+                      onChange={v => handleStarChange(dish.id, local.notes, v)}
                     />
                   </div>
+
                   <div className="mt-3">
                     <textarea
                       value={local.notes}
-                      onChange={e => setLocalScores(prev => ({ ...prev, [dish.id]: { ...prev[dish.id] ?? { score: 0 }, notes: e.target.value } }))}
+                      onChange={e => handleNotesChange(dish.id, local.score, e.target.value)}
                       placeholder={t('score.notesPlaceholder')}
                       rows={2}
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-rose-500 focus:border-rose-500 resize-none"
                     />
                   </div>
-                  <div className="mt-2 flex items-center gap-3">
+
+                  {/* Tap-to-retry on error */}
+                  {dishStatus === 'error' && (
                     <button
-                      onClick={() => handleSave(dish.id)}
-                      disabled={!local.score || saving[dish.id]}
-                      className="px-4 py-1.5 bg-rose-600 text-white text-sm rounded-lg hover:bg-rose-700 disabled:opacity-40"
+                      onClick={() => save(dish.id, local.score, local.notes)}
+                      className="mt-1 text-xs text-red-500 underline"
                     >
-                      {saving[dish.id] ? t('score.saving') : t('score.save')}
+                      {t('score.error')} — tap to retry
                     </button>
-                    {saved[dish.id] && <span className="text-sm text-green-600">✓ {t('score.saved')}</span>}
-                    {errors[dish.id] && <span className="text-sm text-red-600">{errors[dish.id]}</span>}
-                  </div>
+                  )}
                 </div>
               );
             })}
@@ -228,7 +279,6 @@ function AverageScoresTab({ data }: { data: TastingData }) {
 
   return (
     <div className="space-y-6">
-      {/* Sort controls */}
       <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 px-4 py-3">
         <span className="text-sm text-gray-600">{t('averages.sortBy')}:</span>
         <button
@@ -246,15 +296,11 @@ function AverageScoresTab({ data }: { data: TastingData }) {
       </div>
 
       {data.menu.sections.map(section => {
-        const sortedDishes = [...section.dishes].sort((a, b) => {
-          if (sortBy === 'score') {
-            const aScore = a.average_score ?? -1;
-            const bScore = b.average_score ?? -1;
-            return bScore - aScore; // descending
-          }
-          return a.name.localeCompare(b.name);
-        });
-
+        const sortedDishes = [...section.dishes].sort((a, b) =>
+          sortBy === 'score'
+            ? (b.average_score ?? -1) - (a.average_score ?? -1)
+            : a.name.localeCompare(b.name)
+        );
         return (
           <div key={section.id}>
             <h2 className="text-lg font-semibold text-gray-800 mb-3 pb-1 border-b border-gray-200">{section.name}</h2>
@@ -314,6 +360,15 @@ export default function TastingPage({ params }: PageProps) {
   }, [token, t]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Re-fetch when the page becomes visible again (phone wake-up / tab switch)
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') fetchData();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [fetchData]);
 
   const handleScoreUpdate = useCallback((dishId: string, score: number, notes: string | null) => {
     setData(prev => {
