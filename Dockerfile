@@ -37,6 +37,8 @@ COPY . .
 # Set build-time environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+# Enable standalone output (required for Docker; must NOT be set on Vercel)
+ENV DEPLOYMENT_TARGET=docker
 
 # Set DATABASE_URL for Next.js build (required for API route analysis)
 # This is only used during build, not for actual DB connection

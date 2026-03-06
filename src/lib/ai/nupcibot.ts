@@ -10,11 +10,11 @@
  *   OPENAI_API_KEY - Required when AI_PROVIDER=openai
  *   OPENAI_MODEL   - Optional, defaults to "gpt-4o-mini"
  *   GEMINI_API_KEY - Required when AI_PROVIDER=gemini
- *   GEMINI_MODEL   - Optional, defaults to "gemini-2.0-flash"
+ *   GEMINI_MODEL   - Optional, defaults to "gemini-3-flash-preview"
  */
 
 import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
 // ============================================================================
 // TYPES
@@ -309,12 +309,8 @@ async function generateWithGemini(
     return null;
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-  const model = genAI.getGenerativeModel({
-    model: modelName,
-    systemInstruction: systemPrompt,
-  });
+  const ai = new GoogleGenAI({ apiKey });
+  const modelName = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 
   // Build Gemini chat history (all turns except the last user message)
   const geminiHistory = history.map((m) => ({
@@ -322,9 +318,13 @@ async function generateWithGemini(
     parts: [{ text: m.content }],
   }));
 
-  const chat = model.startChat({ history: geminiHistory });
-  const result = await chat.sendMessage(userMessage);
-  return result.response.text()?.trim() || null;
+  const chat = ai.chats.create({
+    model: modelName,
+    config: { systemInstruction: systemPrompt },
+    history: geminiHistory,
+  });
+  const result = await chat.sendMessage({ message: userMessage });
+  return result.text?.trim() || null;
 }
 
 // ============================================================================

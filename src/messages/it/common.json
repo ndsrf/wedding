@@ -1696,7 +1696,12 @@
         "delete": "Elimina",
         "deleteConfirm": "Eliminare questo piatto?",
         "save": "Salva",
-        "cancel": "Annulla"
+        "cancel": "Annulla",
+        "edit": "Modifica",
+        "uploadPhoto": "Carica foto",
+        "changePhoto": "Cambia foto",
+        "removePhoto": "Rimuovi foto",
+        "uploading": "Caricamento..."
       },
       "participants": {
         "title": "Partecipanti",
@@ -1738,7 +1743,19 @@
       },
       "loading": "Caricamento...",
       "error": "Errore di caricamento",
-      "noMenu": "Nessun menu configurato."
+      "noMenu": "Nessun menu configurato.",
+      "import": {
+        "title": "Importa da PDF o immagine",
+        "description": "Carica una foto o un PDF di un menu e l'IA estrarrà automaticamente le sezioni e i piatti.",
+        "button": "Carica menu",
+        "processing": "Elaborazione...",
+        "error": "Impossibile estrarre il menu da questo file. Prova con un'altra immagine o PDF.",
+        "preview": "Anteprima menu",
+        "confirmReplace": "Le sezioni e i piatti importati verranno aggiunti al menu attuale. Continuare?",
+        "apply": "Aggiungi al menu",
+        "applying": "Importazione...",
+        "cancel": "Annulla"
+      }
     }
   },
   "guest": {
@@ -1878,7 +1895,11 @@
         "saved": "Salvato!",
         "error": "Errore nel salvataggio",
         "stars": "{score} su 5",
-        "notRated": "Non ancora valutato"
+        "notRated": "Non ancora valutato",
+        "addPhoto": "Aggiungi foto",
+        "changePhoto": "Cambia foto",
+        "removePhoto": "Rimuovi",
+        "uploadingPhoto": "Caricamento..."
       },
       "allScores": {
         "empty": "Nessun voto ancora.",

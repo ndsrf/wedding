@@ -5,8 +5,9 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Enable standalone output for Docker deployment
-  output: 'standalone',
+  // Enable standalone output for Docker/self-hosted deployment only.
+  // Vercel handles its own bundling; setting this on Vercel breaks routing.
+  ...(process.env.DEPLOYMENT_TARGET === 'docker' ? { output: 'standalone' } : {}),
   // Security and performance
   poweredByHeader: false,
   // Disable compression if behind Cloudflare (let Cloudflare handle it)

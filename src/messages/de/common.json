@@ -1696,7 +1696,12 @@
         "delete": "Löschen",
         "deleteConfirm": "Dieses Gericht löschen?",
         "save": "Speichern",
-        "cancel": "Abbrechen"
+        "cancel": "Abbrechen",
+        "edit": "Bearbeiten",
+        "uploadPhoto": "Foto hochladen",
+        "changePhoto": "Foto ändern",
+        "removePhoto": "Foto entfernen",
+        "uploading": "Wird hochgeladen..."
       },
       "participants": {
         "title": "Teilnehmer",
@@ -1738,7 +1743,19 @@
       },
       "loading": "Laden...",
       "error": "Ladefehler",
-      "noMenu": "Noch kein Menü konfiguriert."
+      "noMenu": "Noch kein Menü konfiguriert.",
+      "import": {
+        "title": "Aus PDF oder Bild importieren",
+        "description": "Laden Sie ein Foto oder PDF einer Speisekarte hoch und die KI extrahiert automatisch die Abschnitte und Gerichte.",
+        "button": "Menü hochladen",
+        "processing": "Verarbeitung...",
+        "error": "Das Menü konnte nicht aus dieser Datei extrahiert werden. Bitte versuchen Sie ein anderes Bild oder PDF.",
+        "preview": "Menü-Vorschau",
+        "confirmReplace": "Die importierten Abschnitte und Gerichte werden zum aktuellen Menü hinzugefügt. Fortfahren?",
+        "apply": "Zum Menü hinzufügen",
+        "applying": "Importieren...",
+        "cancel": "Abbrechen"
+      }
     }
   },
   "guest": {
@@ -1878,7 +1895,11 @@
         "saved": "Gespeichert!",
         "error": "Fehler beim Speichern",
         "stars": "{score} von 5",
-        "notRated": "Noch nicht bewertet"
+        "notRated": "Noch nicht bewertet",
+        "addPhoto": "Foto hinzufügen",
+        "changePhoto": "Foto ändern",
+        "removePhoto": "Entfernen",
+        "uploadingPhoto": "Wird hochgeladen..."
       },
       "allScores": {
         "empty": "Noch keine Bewertungen.",

@@ -789,6 +789,7 @@ model TastingDish {
   section_id  String
   name        String
   description String?        @db.Text
+  image_url   String?
   order       Int
   created_at  DateTime       @default(now())
   updated_at  DateTime       @updatedAt
@@ -826,6 +827,7 @@ model TastingScore {
   dish_id        String
   score          Int                // 1-5
   notes          String?            @db.Text
+  image_url      String?
   created_at     DateTime           @default(now())
   updated_at     DateTime           @updatedAt
   participant    TastingParticipant @relation(fields: [participant_id], references: [id], onDelete: Cascade)

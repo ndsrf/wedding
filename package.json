@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^1.44.0",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@react-email/components": "^0.0.29",
