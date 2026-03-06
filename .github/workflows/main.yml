@@ -146,6 +146,7 @@ jobs:
           NEXT_PUBLIC_IS_E2E: 'true'
           NEXTAUTH_SECRET: dummy-secret-for-build
           NEXTAUTH_URL: http://localhost:3000
+          DEPLOYMENT_TARGET: docker
 
       - name: Package build artifacts
         run: |
