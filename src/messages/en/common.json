@@ -668,7 +668,8 @@
       "tablesAndGifts": "Tables & Gifts",
       "tablesAndGiftsSubtitle": "Seating plan and gift tracking",
       "nupcibot_greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you?",
-      "nupcibot_helpConfigure": "Help me configure my wedding"
+      "nupcibot_helpConfigure": "Help me configure my wedding",
+      "tastingMenu": "Tasting Menu"
     },
     "wizard": {
       "title": "Wedding Setup Wizard",
@@ -1482,7 +1483,8 @@
         "invitation": "📩 Invitations",
         "reminder": "🔔 Reminders",
         "confirmation": "✅ Confirmations",
-        "saveTheDate": "📅 Save the Date"
+        "saveTheDate": "📅 Save the Date",
+        "tastingMenu": "🍽️ Tasting Menu"
       },
       "language": {
         "title": "Language"
@@ -1679,6 +1681,84 @@
         "errorReply": "Sorry, I couldn't generate a reply right now. Please try again.",
         "limitReached": "You've reached the limit of 5 questions per session. Please close the chat and open it again to start a new conversation."
       }
+    },
+    "tastingMenu": {
+      "title": "Tasting Menu",
+      "description": "Manage the food tasting experience for your wedding. Add sections, dishes, and participants.",
+      "nav": "Tasting Menu",
+      "menu": {
+        "title": "Menu Setup",
+        "menuTitle": "Menu Title",
+        "menuDescription": "Description (optional)",
+        "save": "Save Menu",
+        "saving": "Saving...",
+        "saved": "Menu saved!",
+        "error": "Failed to save menu"
+      },
+      "sections": {
+        "title": "Sections",
+        "add": "Add Section",
+        "name": "Section Name",
+        "namePlaceholder": "e.g. Starters, Main, Desserts...",
+        "empty": "No sections yet. Add the first section.",
+        "delete": "Delete Section",
+        "deleteConfirm": "Are you sure you want to delete this section and all its dishes?",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "dishes": {
+        "title": "Dishes",
+        "add": "Add Dish",
+        "name": "Dish Name",
+        "namePlaceholder": "e.g. Tomato gazpacho, Beef tenderloin...",
+        "description": "Description (optional)",
+        "empty": "No dishes yet. Add the first dish.",
+        "delete": "Delete Dish",
+        "deleteConfirm": "Are you sure you want to delete this dish?",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "participants": {
+        "title": "Participants",
+        "add": "Add Participant",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "whatsapp": "WhatsApp Number",
+        "channel": "Preferred Channel",
+        "empty": "No participants yet.",
+        "delete": "Remove",
+        "deleteConfirm": "Are you sure you want to remove this participant?",
+        "send": "Send Link",
+        "sendAll": "Send All",
+        "sending": "Sending...",
+        "sent": "Link sent!",
+        "sentAt": "Sent {date}",
+        "notSent": "Not sent yet",
+        "copyLink": "Copy Link",
+        "copied": "Copied!",
+        "linkLabel": "Tasting Link",
+        "save": "Add",
+        "cancel": "Cancel",
+        "inviteModal": {
+          "title": "Send Tasting Link",
+          "message": "Message",
+          "send": "Send via {channel}",
+          "whatsappButton": "Open in WhatsApp"
+        }
+      },
+      "templates": {
+        "tab": "Message Template",
+        "tastingMenu": "🍽️ Tasting Menu"
+      },
+      "tabs": {
+        "menu": "Menu & Dishes",
+        "participants": "Participants",
+        "template": "Message Template"
+      },
+      "loading": "Loading tasting menu...",
+      "error": "Failed to load tasting menu",
+      "noMenu": "No tasting menu configured yet."
     }
   },
   "guest": {
@@ -1800,6 +1880,43 @@
       "description": "Description (optional)",
       "uploading": "Uploading...",
       "sendPhoto": "Send photo"
+    },
+    "tasting": {
+      "title": "Tasting Menu",
+      "welcome": "Welcome, {name}!",
+      "subtitle": "Please rate each dish and share your thoughts.",
+      "tabs": {
+        "myScores": "My Ratings",
+        "allScores": "Everyone's Ratings",
+        "averages": "Average Scores"
+      },
+      "score": {
+        "rate": "Your Rating",
+        "notes": "Notes (optional)",
+        "notesPlaceholder": "Share your thoughts about this dish...",
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "Saved!",
+        "error": "Failed to save rating",
+        "stars": "{score} out of 5",
+        "notRated": "Not rated yet"
+      },
+      "allScores": {
+        "empty": "No ratings yet.",
+        "by": "by {name}",
+        "noNotes": "No notes"
+      },
+      "averages": {
+        "sortBy": "Sort by",
+        "sortByScore": "Score",
+        "sortByName": "Name",
+        "avg": "Avg: {score}",
+        "ratings": "{count} rating(s)",
+        "noRatings": "No ratings yet"
+      },
+      "loading": "Loading...",
+      "error": "Failed to load tasting menu",
+      "notFound": "Tasting link not found or expired."
     }
   },
   "auth": {

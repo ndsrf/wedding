@@ -660,7 +660,8 @@
       "tablesAndGifts": "Tavoli e Regali",
       "tablesAndGiftsSubtitle": "Piano dei posti e tracciamento regali",
       "nupcibot_greeting": "Ciao! Sono NupciBot, il tuo assistente matrimoniale. Come posso aiutarti?",
-      "nupcibot_helpConfigure": "Aiutami a configurare il mio matrimonio"
+      "nupcibot_helpConfigure": "Aiutami a configurare il mio matrimonio",
+      "tastingMenu": "Menu di Degustazione"
     },
     "reports": {
       "title": "Report",
@@ -1171,7 +1172,8 @@
         "title": "Tipo di Modello",
         "invitation": "📩 Inviti",
         "reminder": "🔔 Promemoria",
-        "confirmation": "✅ Conferme"
+        "confirmation": "✅ Conferme",
+        "tastingMenu": "🍽️ Menu di Degustazione"
       },
       "language": {
         "title": "Lingua"
@@ -1652,6 +1654,84 @@
         "errorReply": "Mi dispiace, non ho potuto generare una risposta in questo momento. Riprova.",
         "limitReached": "Hai raggiunto il limite di 5 domande per sessione. Per favore, chiudi la chat e riaprila per iniziare una nuova conversazione."
       }
+    },
+    "tastingMenu": {
+      "title": "Menu di Degustazione",
+      "description": "Gestisci l'esperienza di degustazione culinaria per il tuo matrimonio.",
+      "nav": "Menu di Degustazione",
+      "menu": {
+        "title": "Configurazione Menu",
+        "menuTitle": "Titolo Menu",
+        "menuDescription": "Descrizione (opzionale)",
+        "save": "Salva",
+        "saving": "Salvataggio...",
+        "saved": "Menu salvato!",
+        "error": "Errore nel salvataggio"
+      },
+      "sections": {
+        "title": "Sezioni",
+        "add": "Aggiungi Sezione",
+        "name": "Nome Sezione",
+        "namePlaceholder": "es. Antipasti, Primo, Dolci...",
+        "empty": "Nessuna sezione. Aggiungi la prima.",
+        "delete": "Elimina",
+        "deleteConfirm": "Eliminare questa sezione e i suoi piatti?",
+        "save": "Salva",
+        "cancel": "Annulla"
+      },
+      "dishes": {
+        "title": "Piatti",
+        "add": "Aggiungi Piatto",
+        "name": "Nome Piatto",
+        "namePlaceholder": "es. Bruschetta, Risotto ai funghi...",
+        "description": "Descrizione (opzionale)",
+        "empty": "Nessun piatto. Aggiungi il primo.",
+        "delete": "Elimina",
+        "deleteConfirm": "Eliminare questo piatto?",
+        "save": "Salva",
+        "cancel": "Annulla"
+      },
+      "participants": {
+        "title": "Partecipanti",
+        "add": "Aggiungi",
+        "name": "Nome",
+        "email": "Email",
+        "phone": "Telefono",
+        "whatsapp": "WhatsApp",
+        "channel": "Canale Preferito",
+        "empty": "Nessun partecipante.",
+        "delete": "Rimuovi",
+        "deleteConfirm": "Rimuovere questo partecipante?",
+        "send": "Invia Link",
+        "sendAll": "Invia a Tutti",
+        "sending": "Invio...",
+        "sent": "Link inviato!",
+        "sentAt": "Inviato il {date}",
+        "notSent": "Non ancora inviato",
+        "copyLink": "Copia Link",
+        "copied": "Copiato!",
+        "linkLabel": "Link Degustazione",
+        "save": "Aggiungi",
+        "cancel": "Annulla",
+        "inviteModal": {
+          "title": "Invia Link",
+          "message": "Messaggio",
+          "send": "Invia via {channel}",
+          "whatsappButton": "Apri in WhatsApp"
+        }
+      },
+      "templates": {
+        "tab": "Modello Messaggio",
+        "tastingMenu": "🍽️ Menu di Degustazione"
+      },
+      "tabs": {
+        "menu": "Menu e Piatti",
+        "participants": "Partecipanti",
+        "template": "Modello Messaggio"
+      },
+      "loading": "Caricamento...",
+      "error": "Errore di caricamento",
+      "noMenu": "Nessun menu configurato."
     }
   },
   "guest": {
@@ -1772,6 +1852,43 @@
       "description": "Descrizione (opzionale)",
       "uploading": "Caricamento...",
       "sendPhoto": "Invia foto"
+    },
+    "tasting": {
+      "title": "Menu di Degustazione",
+      "welcome": "Benvenuto/a, {name}!",
+      "subtitle": "Valuta ogni piatto e condividi la tua opinione.",
+      "tabs": {
+        "myScores": "I Miei Voti",
+        "allScores": "Voti di Tutti",
+        "averages": "Medie"
+      },
+      "score": {
+        "rate": "Il Tuo Voto",
+        "notes": "Note (opzionale)",
+        "notesPlaceholder": "Condividi la tua opinione...",
+        "save": "Salva",
+        "saving": "Salvataggio...",
+        "saved": "Salvato!",
+        "error": "Errore nel salvataggio",
+        "stars": "{score} su 5",
+        "notRated": "Non ancora valutato"
+      },
+      "allScores": {
+        "empty": "Nessun voto ancora.",
+        "by": "da {name}",
+        "noNotes": "Nessuna nota"
+      },
+      "averages": {
+        "sortBy": "Ordina per",
+        "sortByScore": "Punteggio",
+        "sortByName": "Nome",
+        "avg": "Media: {score}",
+        "ratings": "{count} voto/i",
+        "noRatings": "Nessun voto ancora"
+      },
+      "loading": "Caricamento...",
+      "error": "Errore di caricamento",
+      "notFound": "Link non trovato o scaduto."
     }
   },
   "auth": {

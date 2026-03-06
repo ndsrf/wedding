@@ -12,6 +12,9 @@ export interface TemplateVariables {
   magicLink?: string;
   rsvpCutoffDate?: string;
   referenceCode?: string;
+  // Tasting menu placeholders
+  participantName?: string;
+  tastingLink?: string;
   [key: string]: string | undefined;
 }
 
@@ -126,6 +129,18 @@ export function getAvailablePlaceholders(): Array<{
       label: "Reference Code",
       description: "Payment reference code (if applicable)",
       example: "REF-12345-67890",
+    },
+    {
+      key: "participantName",
+      label: "Participant Name",
+      description: "The name of the tasting menu participant",
+      example: "John Smith",
+    },
+    {
+      key: "tastingLink",
+      label: "Tasting Link",
+      description: "The unique link for the tasting menu participant",
+      example: "https://wedding.com/tasting/abc123",
     },
   ];
 }

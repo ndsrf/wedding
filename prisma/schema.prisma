@@ -133,6 +133,7 @@ model Wedding {
   providers                       WeddingProvider[]
   itinerary_items                 ItineraryItem[]
   photos                          WeddingPhoto[]
+  tasting_menu                    TastingMenu?
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   theme                           Theme?             @relation("WeddingTheme", fields: [theme_id], references: [id])
   wedding_day_theme               Theme?             @relation("WeddingDayTheme", fields: [wedding_day_theme_id], references: [id])
@@ -683,6 +684,7 @@ enum TemplateType {
   INVITATION
   REMINDER
   CONFIRMATION
+  TASTING_MENU
 }
 
 enum Channel {
@@ -746,4 +748,90 @@ enum PhotoSource {
   WHATSAPP
   UPLOAD
   GOOGLE_PHOTOS
+}
+
+// -----------------------------------------------------------------------------
+// TASTING MENU — per-wedding food tasting experience
+// -----------------------------------------------------------------------------
+
+model TastingMenu {
+  id           String             @id @default(uuid())
+  wedding_id   String             @unique
+  title        String             @default("Tasting Menu")
+  description  String?            @db.Text
+  created_at   DateTime           @default(now())
+  updated_at   DateTime           @updatedAt
+  wedding      Wedding            @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  sections     TastingSection[]
+  participants TastingParticipant[]
+
+  @@index([wedding_id])
+  @@map("tasting_menus")
+}
+
+model TastingSection {
+  id         String         @id @default(uuid())
+  menu_id    String
+  name       String
+  order      Int
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  menu       TastingMenu    @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+  dishes     TastingDish[]
+
+  @@index([menu_id])
+  @@index([menu_id, order])
+  @@map("tasting_sections")
+}
+
+model TastingDish {
+  id          String         @id @default(uuid())
+  section_id  String
+  name        String
+  description String?        @db.Text
+  order       Int
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  section     TastingSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  scores      TastingScore[]
+
+  @@index([section_id])
+  @@index([section_id, order])
+  @@map("tasting_dishes")
+}
+
+model TastingParticipant {
+  id               String         @id @default(uuid())
+  menu_id          String
+  name             String
+  email            String?
+  phone            String?
+  whatsapp_number  String?
+  channel_preference Channel?
+  magic_token      String         @unique @default(uuid())
+  invite_sent_at   DateTime?
+  created_at       DateTime       @default(now())
+  menu             TastingMenu    @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+  scores           TastingScore[]
+
+  @@index([menu_id])
+  @@index([magic_token])
+  @@map("tasting_participants")
+}
+
+model TastingScore {
+  id             String             @id @default(uuid())
+  participant_id String
+  dish_id        String
+  score          Int                // 1-5
+  notes          String?            @db.Text
+  created_at     DateTime           @default(now())
+  updated_at     DateTime           @updatedAt
+  participant    TastingParticipant @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  dish           TastingDish        @relation(fields: [dish_id], references: [id], onDelete: Cascade)
+
+  @@unique([participant_id, dish_id])
+  @@index([dish_id])
+  @@index([participant_id])
+  @@map("tasting_scores")
 }
