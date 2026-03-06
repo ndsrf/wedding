@@ -660,7 +660,8 @@
       "tablesAndGifts": "Tische & Geschenke",
       "tablesAndGiftsSubtitle": "Sitzplan und Geschenkverfolgung",
       "nupcibot_greeting": "Hallo! Ich bin NupciBot, Ihr Hochzeitsassistent. Wie kann ich Ihnen helfen?",
-      "nupcibot_helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren"
+      "nupcibot_helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren",
+      "tastingMenu": "Verkostungsmenü"
     },
     "reports": {
       "title": "Berichte",
@@ -1171,7 +1172,8 @@
         "title": "Vorlagentyp",
         "invitation": "📩 Einladungen",
         "reminder": "🔔 Erinnerungen",
-        "confirmation": "✅ Bestätigungen"
+        "confirmation": "✅ Bestätigungen",
+        "tastingMenu": "🍽️ Verkostungsmenü"
       },
       "language": {
         "title": "Sprache"
@@ -1659,6 +1661,84 @@
         "errorReply": "Entschuldigung, ich konnte gerade keine Antwort generieren. Bitte erneut versuchen.",
         "limitReached": "Sie haben das Limit von 5 Fragen pro Sitzung erreicht. Bitte schließen Sie den Chat und öffnen Sie ihn erneut, um eine neue Unterhaltung zu beginnen."
       }
+    },
+    "tastingMenu": {
+      "title": "Verkostungsmenü",
+      "description": "Verwalten Sie das kulinarische Verkostungserlebnis für Ihre Hochzeit.",
+      "nav": "Verkostungsmenü",
+      "menu": {
+        "title": "Menü-Einrichtung",
+        "menuTitle": "Menütitel",
+        "menuDescription": "Beschreibung (optional)",
+        "save": "Speichern",
+        "saving": "Speichern...",
+        "saved": "Menü gespeichert!",
+        "error": "Fehler beim Speichern"
+      },
+      "sections": {
+        "title": "Abschnitte",
+        "add": "Abschnitt hinzufügen",
+        "name": "Abschnittsname",
+        "namePlaceholder": "z.B. Vorspeisen, Hauptgang, Desserts...",
+        "empty": "Noch keine Abschnitte.",
+        "delete": "Löschen",
+        "deleteConfirm": "Diesen Abschnitt und alle Gerichte löschen?",
+        "save": "Speichern",
+        "cancel": "Abbrechen"
+      },
+      "dishes": {
+        "title": "Gerichte",
+        "add": "Gericht hinzufügen",
+        "name": "Gerichtname",
+        "namePlaceholder": "z.B. Tomatensuppe, Rinderfilet...",
+        "description": "Beschreibung (optional)",
+        "empty": "Noch keine Gerichte.",
+        "delete": "Löschen",
+        "deleteConfirm": "Dieses Gericht löschen?",
+        "save": "Speichern",
+        "cancel": "Abbrechen"
+      },
+      "participants": {
+        "title": "Teilnehmer",
+        "add": "Hinzufügen",
+        "name": "Name",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "whatsapp": "WhatsApp",
+        "channel": "Bevorzugter Kanal",
+        "empty": "Noch keine Teilnehmer.",
+        "delete": "Entfernen",
+        "deleteConfirm": "Diesen Teilnehmer entfernen?",
+        "send": "Link senden",
+        "sendAll": "Alle senden",
+        "sending": "Senden...",
+        "sent": "Link gesendet!",
+        "sentAt": "Gesendet am {date}",
+        "notSent": "Noch nicht gesendet",
+        "copyLink": "Link kopieren",
+        "copied": "Kopiert!",
+        "linkLabel": "Verkostungslink",
+        "save": "Hinzufügen",
+        "cancel": "Abbrechen",
+        "inviteModal": {
+          "title": "Link senden",
+          "message": "Nachricht",
+          "send": "Senden via {channel}",
+          "whatsappButton": "In WhatsApp öffnen"
+        }
+      },
+      "templates": {
+        "tab": "Nachrichtenvorlage",
+        "tastingMenu": "🍽️ Verkostungsmenü"
+      },
+      "tabs": {
+        "menu": "Menü und Gerichte",
+        "participants": "Teilnehmer",
+        "template": "Nachrichtenvorlage"
+      },
+      "loading": "Laden...",
+      "error": "Ladefehler",
+      "noMenu": "Noch kein Menü konfiguriert."
     }
   },
   "guest": {
@@ -1779,6 +1859,43 @@
       "description": "Beschreibung (optional)",
       "uploading": "Wird hochgeladen...",
       "sendPhoto": "Foto senden"
+    },
+    "tasting": {
+      "title": "Verkostungsmenü",
+      "welcome": "Willkommen, {name}!",
+      "subtitle": "Bitte bewerten Sie jedes Gericht und teilen Sie Ihre Meinung.",
+      "tabs": {
+        "myScores": "Meine Bewertungen",
+        "allScores": "Alle Bewertungen",
+        "averages": "Durchschnitte"
+      },
+      "score": {
+        "rate": "Ihre Bewertung",
+        "notes": "Notizen (optional)",
+        "notesPlaceholder": "Teilen Sie Ihre Meinung...",
+        "save": "Speichern",
+        "saving": "Speichern...",
+        "saved": "Gespeichert!",
+        "error": "Fehler beim Speichern",
+        "stars": "{score} von 5",
+        "notRated": "Noch nicht bewertet"
+      },
+      "allScores": {
+        "empty": "Noch keine Bewertungen.",
+        "by": "von {name}",
+        "noNotes": "Keine Notizen"
+      },
+      "averages": {
+        "sortBy": "Sortieren nach",
+        "sortByScore": "Bewertung",
+        "sortByName": "Name",
+        "avg": "Ø: {score}",
+        "ratings": "{count} Bewertung(en)",
+        "noRatings": "Noch keine Bewertungen"
+      },
+      "loading": "Laden...",
+      "error": "Ladefehler",
+      "notFound": "Link nicht gefunden oder abgelaufen."
     }
   },
   "auth": {

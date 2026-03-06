@@ -164,6 +164,31 @@ Con cariño,
         body: `¡Gracias {{familyName}}! Tu asistencia ha sido confirmada para el {{weddingDate}}. ¡Nos vemos allí!`,
       },
     },
+    TASTING_MENU: {
+      EMAIL: {
+        subject: "Invitación a la Degustación del Menú - {{coupleNames}}",
+        body: `Estimado/a {{participantName}},
+
+¡Te invitamos a participar en la degustación del menú para la boda de {{coupleNames}}!
+
+Por favor, visita el siguiente enlace para valorar cada plato y compartir tu opinión:
+
+{{tastingLink}}
+
+¡Esperamos tu feedback!
+
+Con cariño,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Invitación a la Degustación",
+        body: `¡Hola {{participantName}}! 🍽️ Te invitamos a la degustación del menú para la boda de {{coupleNames}}. Valora cada plato aquí: {{tastingLink}}`,
+      },
+      SMS: {
+        subject: "Degustación",
+        body: `¡Hola {{participantName}}! Tu enlace para la degustación del menú de {{coupleNames}}: {{tastingLink}}`,
+      },
+    },
   },
   EN: {
     SAVE_THE_DATE: {
@@ -308,6 +333,31 @@ With love,
       SMS: {
         subject: "Confirmed",
         body: `Thank you {{familyName}}! Your attendance is confirmed for {{weddingDate}}. See you there!`,
+      },
+    },
+    TASTING_MENU: {
+      EMAIL: {
+        subject: "Invitation to Menu Tasting - {{coupleNames}}",
+        body: `Dear {{participantName}},
+
+You are invited to participate in the menu tasting for {{coupleNames}}'s wedding!
+
+Please visit the following link to rate each dish and share your thoughts:
+
+{{tastingLink}}
+
+We look forward to your feedback!
+
+With love,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Menu Tasting Invitation",
+        body: `Hi {{participantName}}! 🍽️ You're invited to the menu tasting for {{coupleNames}}'s wedding. Rate each dish here: {{tastingLink}}`,
+      },
+      SMS: {
+        subject: "Menu Tasting",
+        body: `Hi {{participantName}}! Your tasting menu link for {{coupleNames}}'s wedding: {{tastingLink}}`,
       },
     },
   },
@@ -456,6 +506,31 @@ Avec amour,
         body: `Merci {{familyName}}! Votre présence est confirmée pour le {{weddingDate}}. À bientôt!`,
       },
     },
+    TASTING_MENU: {
+      EMAIL: {
+        subject: "Invitation à la dégustation du menu - {{coupleNames}}",
+        body: `Cher/Chère {{participantName}},
+
+Vous êtes invité(e) à participer à la dégustation du menu pour le mariage de {{coupleNames}}!
+
+Veuillez visiter le lien suivant pour noter chaque plat et partager votre avis:
+
+{{tastingLink}}
+
+Nous attendons vos retours avec impatience!
+
+Avec amour,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Dégustation du menu",
+        body: `Bonjour {{participantName}}! 🍽️ Vous êtes invité(e) à la dégustation du menu pour le mariage de {{coupleNames}}. Notez chaque plat ici: {{tastingLink}}`,
+      },
+      SMS: {
+        subject: "Dégustation",
+        body: `Bonjour {{participantName}}! Votre lien de dégustation pour {{coupleNames}}: {{tastingLink}}`,
+      },
+    },
   },
   IT: {
     SAVE_THE_DATE: {
@@ -600,6 +675,31 @@ Con amore,
       SMS: {
         subject: "Confermato",
         body: `Grazie {{familyName}}! La vostra partecipazione è confermata per il {{weddingDate}}. A presto!`,
+      },
+    },
+    TASTING_MENU: {
+      EMAIL: {
+        subject: "Invito alla degustazione del menu - {{coupleNames}}",
+        body: `Caro/a {{participantName}},
+
+Sei invitato/a a partecipare alla degustazione del menu per il matrimonio di {{coupleNames}}!
+
+Visita il seguente link per valutare ogni piatto e condividere la tua opinione:
+
+{{tastingLink}}
+
+Non vediamo l'ora di ricevere il tuo feedback!
+
+Con amore,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Degustazione menu",
+        body: `Ciao {{participantName}}! 🍽️ Sei invitato/a alla degustazione del menu per il matrimonio di {{coupleNames}}. Valuta ogni piatto qui: {{tastingLink}}`,
+      },
+      SMS: {
+        subject: "Degustazione",
+        body: `Ciao {{participantName}}! Il tuo link per la degustazione di {{coupleNames}}: {{tastingLink}}`,
       },
     },
   },
@@ -748,6 +848,31 @@ Mit Liebe,
         body: `Danke {{familyName}}! Eure Teilnahme ist für den {{weddingDate}} bestätigt. Bis bald!`,
       },
     },
+    TASTING_MENU: {
+      EMAIL: {
+        subject: "Einladung zur Menüverkostung - {{coupleNames}}",
+        body: `Liebe/r {{participantName}},
+
+Wir laden Sie herzlich zu unserer Menüverkostung für die Hochzeit von {{coupleNames}} ein!
+
+Bitte besuchen Sie den folgenden Link, um jeden Gang zu bewerten und Ihre Meinung zu teilen:
+
+{{tastingLink}}
+
+Wir freuen uns auf Ihr Feedback!
+
+Mit Liebe,
+{{coupleNames}}`,
+      },
+      WHATSAPP: {
+        subject: "Einladung zur Menüverkostung",
+        body: `Hallo {{participantName}}! 🍽️ Wir laden dich zur Menüverkostung für die Hochzeit von {{coupleNames}} ein. Bewerte jeden Gang hier: {{tastingLink}}`,
+      },
+      SMS: {
+        subject: "Menüverkostung",
+        body: `Hallo {{participantName}}! Dein Link zur Menüverkostung für {{coupleNames}}: {{tastingLink}}`,
+      },
+    },
   },
 };
 
@@ -773,7 +898,7 @@ export function getAllDefaultTemplates(): Array<{
   body: string;
 }> {
   const languages: Language[] = ["ES", "EN", "FR", "IT", "DE"];
-  const types: TemplateType[] = ["SAVE_THE_DATE", "INVITATION", "REMINDER", "CONFIRMATION"];
+  const types: TemplateType[] = ["SAVE_THE_DATE", "INVITATION", "REMINDER", "CONFIRMATION", "TASTING_MENU"];
   const channels: Channel[] = ["EMAIL", "WHATSAPP", "SMS"];
 
   return languages.flatMap((language) =>

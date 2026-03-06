@@ -660,7 +660,8 @@
       "tablesAndGifts": "Tables et Cadeaux",
       "tablesAndGiftsSubtitle": "Plan de table et suivi des cadeaux",
       "nupcibot_greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider ?",
-      "nupcibot_helpConfigure": "Aidez-moi à configurer mon mariage"
+      "nupcibot_helpConfigure": "Aidez-moi à configurer mon mariage",
+      "tastingMenu": "Menu de Dégustation"
     },
     "reports": {
       "title": "Rapports",
@@ -1171,7 +1172,8 @@
         "title": "Type de Modèle",
         "invitation": "📩 Invitations",
         "reminder": "🔔 Rappels",
-        "confirmation": "✅ Confirmations"
+        "confirmation": "✅ Confirmations",
+        "tastingMenu": "🍽️ Menu de Dégustation"
       },
       "language": {
         "title": "Langue"
@@ -1659,6 +1661,84 @@
         "errorReply": "Désolé, je n'ai pas pu générer de réponse pour l'instant. Veuillez réessayer.",
         "limitReached": "Vous avez atteint la limite de 5 questions par session. Veuillez fermer le chat et le rouvrir pour démarrer une nouvelle conversation."
       }
+    },
+    "tastingMenu": {
+      "title": "Menu de Dégustation",
+      "description": "Gérez l'expérience de dégustation culinaire pour votre mariage.",
+      "nav": "Menu de Dégustation",
+      "menu": {
+        "title": "Configuration du Menu",
+        "menuTitle": "Titre du Menu",
+        "menuDescription": "Description (optionnel)",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "saved": "Menu enregistré!",
+        "error": "Erreur lors de l'enregistrement"
+      },
+      "sections": {
+        "title": "Sections",
+        "add": "Ajouter une Section",
+        "name": "Nom de la Section",
+        "namePlaceholder": "ex. Entrées, Plat, Desserts...",
+        "empty": "Pas de sections. Ajoutez la première.",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer cette section et ses plats?",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      },
+      "dishes": {
+        "title": "Plats",
+        "add": "Ajouter un Plat",
+        "name": "Nom du Plat",
+        "namePlaceholder": "ex. Soupe à l'oignon, Magret de canard...",
+        "description": "Description (optionnel)",
+        "empty": "Pas de plats. Ajoutez le premier.",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer ce plat?",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      },
+      "participants": {
+        "title": "Participants",
+        "add": "Ajouter",
+        "name": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "whatsapp": "WhatsApp",
+        "channel": "Canal Préféré",
+        "empty": "Pas de participants.",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer ce participant?",
+        "send": "Envoyer le Lien",
+        "sendAll": "Envoyer à Tous",
+        "sending": "Envoi...",
+        "sent": "Lien envoyé!",
+        "sentAt": "Envoyé le {date}",
+        "notSent": "Pas encore envoyé",
+        "copyLink": "Copier le Lien",
+        "copied": "Copié!",
+        "linkLabel": "Lien de Dégustation",
+        "save": "Ajouter",
+        "cancel": "Annuler",
+        "inviteModal": {
+          "title": "Envoyer le Lien",
+          "message": "Message",
+          "send": "Envoyer via {channel}",
+          "whatsappButton": "Ouvrir dans WhatsApp"
+        }
+      },
+      "templates": {
+        "tab": "Modèle de Message",
+        "tastingMenu": "🍽️ Menu de Dégustation"
+      },
+      "tabs": {
+        "menu": "Menu et Plats",
+        "participants": "Participants",
+        "template": "Modèle de Message"
+      },
+      "loading": "Chargement...",
+      "error": "Erreur de chargement",
+      "noMenu": "Aucun menu configuré."
     }
   },
   "guest": {
@@ -1779,6 +1859,43 @@
       "description": "Description (optionnel)",
       "uploading": "Envoi en cours...",
       "sendPhoto": "Envoyer la photo"
+    },
+    "tasting": {
+      "title": "Menu de Dégustation",
+      "welcome": "Bienvenue, {name}!",
+      "subtitle": "Veuillez évaluer chaque plat et partager vos impressions.",
+      "tabs": {
+        "myScores": "Mes Notes",
+        "allScores": "Toutes les Notes",
+        "averages": "Moyennes"
+      },
+      "score": {
+        "rate": "Votre Note",
+        "notes": "Notes (optionnel)",
+        "notesPlaceholder": "Partagez votre avis...",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "saved": "Enregistré!",
+        "error": "Erreur lors de l'enregistrement",
+        "stars": "{score} sur 5",
+        "notRated": "Pas encore noté"
+      },
+      "allScores": {
+        "empty": "Pas encore de notes.",
+        "by": "par {name}",
+        "noNotes": "Pas de notes"
+      },
+      "averages": {
+        "sortBy": "Trier par",
+        "sortByScore": "Note",
+        "sortByName": "Nom",
+        "avg": "Moy: {score}",
+        "ratings": "{count} note(s)",
+        "noRatings": "Pas encore de notes"
+      },
+      "loading": "Chargement...",
+      "error": "Erreur de chargement",
+      "notFound": "Lien non trouvé ou expiré."
     }
   },
   "auth": {

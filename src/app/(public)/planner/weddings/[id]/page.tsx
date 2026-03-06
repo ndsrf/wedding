@@ -358,6 +358,13 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                   </svg>
                   {t('admin.templates.title')}
                 </Link>
+                <Link
+                  href={`/planner/weddings/${weddingId}/tasting`}
+                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <span className="text-xs">🍽️</span>
+                  {t('admin.tastingMenu.nav')}
+                </Link>
               </div>
             </div>
 

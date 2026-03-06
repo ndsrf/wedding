@@ -664,7 +664,8 @@
       "tablesAndGifts": "Mesas y Regalos",
       "tablesAndGiftsSubtitle": "Plan de asientos y seguimiento de regalos",
       "nupcibot_greeting": "¡Hola! Soy NupciBot, tu asistente de bodas. ¿En qué te puedo ayudar?",
-      "nupcibot_helpConfigure": "Ayúdame a configurar mi boda"
+      "nupcibot_helpConfigure": "Ayúdame a configurar mi boda",
+      "tastingMenu": "Menú de Degustación"
     },
     "wizard": {
       "title": "Asistente de Configuración de Boda",
@@ -1467,7 +1468,8 @@
         "invitation": "📩 Invitaciones",
         "reminder": "🔔 Recordatorios",
         "confirmation": "✅ Confirmaciones",
-        "saveTheDate": "📅 Reserva la Fecha"
+        "saveTheDate": "📅 Reserva la Fecha",
+        "tastingMenu": "🍽️ Menú de Degustación"
       },
       "language": {
         "title": "Idioma"
@@ -1671,6 +1673,84 @@
         "errorReply": "Lo siento, no pude generar una respuesta ahora mismo. Inténtalo de nuevo.",
         "limitReached": "Has alcanzado el límite de 5 preguntas por sesión. Por favor, cierra el chat y ábrelo de nuevo para iniciar una nueva conversación."
       }
+    },
+    "tastingMenu": {
+      "title": "Menú de Degustación",
+      "description": "Gestiona la experiencia de degustación gastronómica para tu boda. Añade secciones, platos y participantes.",
+      "nav": "Menú de Degustación",
+      "menu": {
+        "title": "Configuración del Menú",
+        "menuTitle": "Título del Menú",
+        "menuDescription": "Descripción (opcional)",
+        "save": "Guardar Menú",
+        "saving": "Guardando...",
+        "saved": "¡Menú guardado!",
+        "error": "Error al guardar el menú"
+      },
+      "sections": {
+        "title": "Secciones",
+        "add": "Añadir Sección",
+        "name": "Nombre de la Sección",
+        "namePlaceholder": "p.ej. Entrantes, Principal, Postres...",
+        "empty": "Sin secciones aún. Añade la primera sección.",
+        "delete": "Eliminar Sección",
+        "deleteConfirm": "¿Seguro que quieres eliminar esta sección y todos sus platos?",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
+      "dishes": {
+        "title": "Platos",
+        "add": "Añadir Plato",
+        "name": "Nombre del Plato",
+        "namePlaceholder": "p.ej. Gazpacho de tomate, Solomillo de ternera...",
+        "description": "Descripción (opcional)",
+        "empty": "Sin platos aún. Añade el primer plato.",
+        "delete": "Eliminar Plato",
+        "deleteConfirm": "¿Seguro que quieres eliminar este plato?",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
+      "participants": {
+        "title": "Participantes",
+        "add": "Añadir Participante",
+        "name": "Nombre",
+        "email": "Email",
+        "phone": "Teléfono",
+        "whatsapp": "Número de WhatsApp",
+        "channel": "Canal Preferido",
+        "empty": "Sin participantes aún.",
+        "delete": "Eliminar",
+        "deleteConfirm": "¿Seguro que quieres eliminar este participante?",
+        "send": "Enviar Enlace",
+        "sendAll": "Enviar a Todos",
+        "sending": "Enviando...",
+        "sent": "¡Enlace enviado!",
+        "sentAt": "Enviado el {date}",
+        "notSent": "No enviado aún",
+        "copyLink": "Copiar Enlace",
+        "copied": "¡Copiado!",
+        "linkLabel": "Enlace de Degustación",
+        "save": "Añadir",
+        "cancel": "Cancelar",
+        "inviteModal": {
+          "title": "Enviar Enlace de Degustación",
+          "message": "Mensaje",
+          "send": "Enviar por {channel}",
+          "whatsappButton": "Abrir en WhatsApp"
+        }
+      },
+      "templates": {
+        "tab": "Plantilla de Mensaje",
+        "tastingMenu": "🍽️ Menú de Degustación"
+      },
+      "tabs": {
+        "menu": "Menú y Platos",
+        "participants": "Participantes",
+        "template": "Plantilla de Mensaje"
+      },
+      "loading": "Cargando menú de degustación...",
+      "error": "Error al cargar el menú de degustación",
+      "noMenu": "No hay menú de degustación configurado aún."
     }
   },
   "guest": {
@@ -1791,6 +1871,43 @@
       "description": "Descripción (opcional)",
       "uploading": "Subiendo...",
       "sendPhoto": "Enviar foto"
+    },
+    "tasting": {
+      "title": "Menú de Degustación",
+      "welcome": "¡Bienvenido/a, {name}!",
+      "subtitle": "Por favor, valora cada plato y comparte tu opinión.",
+      "tabs": {
+        "myScores": "Mis Valoraciones",
+        "allScores": "Valoraciones de Todos",
+        "averages": "Puntuaciones Medias"
+      },
+      "score": {
+        "rate": "Tu Valoración",
+        "notes": "Notas (opcional)",
+        "notesPlaceholder": "Comparte tu opinión sobre este plato...",
+        "save": "Guardar",
+        "saving": "Guardando...",
+        "saved": "¡Guardado!",
+        "error": "Error al guardar la valoración",
+        "stars": "{score} de 5",
+        "notRated": "Sin valorar aún"
+      },
+      "allScores": {
+        "empty": "Sin valoraciones aún.",
+        "by": "por {name}",
+        "noNotes": "Sin notas"
+      },
+      "averages": {
+        "sortBy": "Ordenar por",
+        "sortByScore": "Puntuación",
+        "sortByName": "Nombre",
+        "avg": "Media: {score}",
+        "ratings": "{count} valoración(es)",
+        "noRatings": "Sin valoraciones aún"
+      },
+      "loading": "Cargando...",
+      "error": "Error al cargar el menú de degustación",
+      "notFound": "Enlace de degustación no encontrado o expirado."
     }
   },
   "auth": {

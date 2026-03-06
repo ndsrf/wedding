@@ -20,8 +20,8 @@ export async function createTemplate(request: CreateTemplateRequest) {
       type: request.type,
       language: request.language,
       channel: request.channel,
-      subject: request.subject,
-      body: request.body,
+      subject: request.subject ?? '',
+      body: request.body ?? '',
     },
   });
 }

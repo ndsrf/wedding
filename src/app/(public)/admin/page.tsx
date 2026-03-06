@@ -430,6 +430,27 @@ export default async function AdminDashboardPage() {
               </div>
             </div>
 
+            {/* Tasting Menu */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
+                  <span className="text-xl">🍽️</span>
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900">{t('admin.tastingMenu.nav')}</h3>
+              </div>
+              <div className="flex flex-col gap-1.5 pl-1">
+                <Link
+                  href="/admin/tasting"
+                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  {t('admin.tastingMenu.title')}
+                </Link>
+              </div>
+            </div>
+
             {/* Mesas y Regalos — grouped, always visible */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
               <div className="flex items-center gap-3">
