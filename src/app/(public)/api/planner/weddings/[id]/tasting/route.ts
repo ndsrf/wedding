@@ -28,13 +28,37 @@ export async function GET(_request: NextRequest, { params }: Params) {
   const wedding = await verifyPlannerOwnership(weddingId, user.planner_id);
   if (!wedding) return NextResponse.json({ success: false, error: { code: 'NOT_FOUND', message: 'Wedding not found' } }, { status: 404 });
 
-  const menu = await prisma.tastingMenu.findUnique({
+  const menuData = await prisma.tastingMenu.findUnique({
     where: { wedding_id: weddingId },
     include: {
-      sections: { orderBy: { order: 'asc' }, include: { dishes: { orderBy: { order: 'asc' } } } },
+      sections: {
+        orderBy: { order: 'asc' },
+        include: {
+          dishes: {
+            orderBy: { order: 'asc' },
+            include: { scores: { select: { score: true } } },
+          },
+        },
+      },
       participants: { orderBy: { created_at: 'asc' } },
     },
   });
+
+  let menu = menuData as unknown;
+
+  if (menuData) {
+    const sections = menuData.sections.map((section) => ({
+      ...section,
+      dishes: section.dishes.map((dish) => {
+        const scores = dish.scores || [];
+        const avg = scores.length > 0
+          ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / scores.length) * 10) / 10
+          : null;
+        return { ...dish, average_score: avg, score_count: scores.length };
+      }),
+    }));
+    menu = { ...menuData, sections };
+  }
 
   return NextResponse.json({ success: true, data: menu, wedding_language: wedding.default_language ?? 'ES' });
 }

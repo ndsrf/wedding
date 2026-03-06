@@ -30,7 +30,9 @@
     "status": {
       "pending": "Pendiente",
       "inProgress": "En Progreso",
-      "completed": "Completado"
+      "completed": "Completado",
+      "saving": "Guardando...",
+      "saved": "Guardado"
     },
     "navigation": {
       "home": "Inicio",
@@ -665,7 +667,7 @@
       "tablesAndGiftsSubtitle": "Plan de asientos y seguimiento de regalos",
       "nupcibot_greeting": "¡Hola! Soy NupciBot, tu asistente de bodas. ¿En qué te puedo ayudar?",
       "nupcibot_helpConfigure": "Ayúdame a configurar mi boda",
-      "tastingMenu": "Menú de Degustación"
+      "foodAndDrinks": "Comida y Bebida"
     },
     "wizard": {
       "title": "Asistente de Configuración de Boda",
@@ -1677,7 +1679,9 @@
     "tastingMenu": {
       "title": "Menú de Degustación",
       "description": "Gestiona la experiencia de degustación gastronómica para tu boda. Añade secciones, platos y participantes.",
-      "nav": "Menú de Degustación",
+      "nav": "Comida y Bebida",
+      "tasting": "Menú de Degustación",
+      "weddingMenu": "Menú de Boda",
       "menu": {
         "title": "Configuración del Menú",
         "menuTitle": "Título del Menú",
@@ -1768,6 +1772,20 @@
         "applying": "Importando...",
         "cancel": "Cancelar"
       }
+    },
+    "menu": {
+      "title": "Menú de la Boda",
+      "description": "Selecciona los platos de tu menú de degustación que se servirán en la boda.",
+      "available": "Disponibles",
+      "selected": "Seleccionados",
+      "generatePrintable": "Generar Menú Imprimible",
+      "selectSection": "Seleccionar Sección",
+      "unselectSection": "Deseleccionar Sección",
+      "moveToSelected": "Mover a Seleccionados",
+      "moveToAvailable": "Mover a Disponibles",
+      "noDishes": "No se encontraron platos. Configura primero tu Menú de Degustación.",
+      "saveSuccess": "Selección de menú de boda guardada correctamente",
+      "saveError": "Error al guardar la selección de menú de boda"
     }
   },
   "guest": {

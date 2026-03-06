@@ -429,6 +429,43 @@ export async function exportAgeAverage(
   return generateExcelFile(rows, 'Age Average', 'age-average', format);
 }
 
+/**
+ * Export wedding menu (selected dishes)
+ */
+export async function exportWeddingMenu(
+  wedding_id: string,
+  format: ExportFormat = 'xlsx'
+): Promise<ExportResult> {
+  const tastingMenu = await prisma.tastingMenu.findFirst({
+    where: { wedding_id },
+    include: {
+      sections: {
+        include: {
+          dishes: {
+            where: { is_selected: true },
+            orderBy: { order: 'asc' },
+          },
+        },
+        orderBy: { order: 'asc' },
+      },
+    },
+  });
+
+  const rows: (string | number)[][] = [['Section', 'Dish Name']];
+
+  if (tastingMenu) {
+    tastingMenu.sections.forEach(section => {
+      if (section.dishes.length > 0) {
+        section.dishes.forEach(dish => {
+          rows.push([section.name, dish.name]);
+        });
+      }
+    });
+  }
+
+  return generateExcelFile(rows, 'Wedding Menu', 'wedding-menu', format);
+}
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================

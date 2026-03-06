@@ -790,6 +790,7 @@ model TastingDish {
   name        String
   description String?        @db.Text
   image_url   String?
+  is_selected Boolean        @default(false)
   order       Int
   created_at  DateTime       @default(now())
   updated_at  DateTime       @updatedAt

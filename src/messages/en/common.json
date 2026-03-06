@@ -30,7 +30,9 @@
     "status": {
       "pending": "Pending",
       "inProgress": "In Progress",
-      "completed": "Completed"
+      "completed": "Completed",
+      "saving": "Saving...",
+      "saved": "Saved"
     },
     "navigation": {
       "home": "Home",
@@ -669,7 +671,7 @@
       "tablesAndGiftsSubtitle": "Seating plan and gift tracking",
       "nupcibot_greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you?",
       "nupcibot_helpConfigure": "Help me configure my wedding",
-      "tastingMenu": "Tasting Menu"
+      "foodAndDrinks": "Food & Drinks"
     },
     "wizard": {
       "title": "Wedding Setup Wizard",
@@ -1692,7 +1694,8 @@
     "tastingMenu": {
       "title": "Tasting Menu",
       "description": "Manage the food tasting experience for your wedding. Add sections, dishes, and participants.",
-      "nav": "Tasting Menu",
+      "nav": "Food & Drinks",
+      "weddingMenu": "Wedding Menu",
       "menu": {
         "title": "Menu Setup",
         "menuTitle": "Menu Title",
@@ -1783,6 +1786,20 @@
         "applying": "Importing...",
         "cancel": "Cancel"
       }
+    },
+    "menu": {
+      "title": "Wedding Menu",
+      "description": "Select the dishes from your tasting menu that will be served at the wedding.",
+      "available": "Available",
+      "selected": "Selected",
+      "generatePrintable": "Generate Printable Menu",
+      "selectSection": "Select Section",
+      "unselectSection": "Unselect Section",
+      "moveToSelected": "Move to Selected",
+      "moveToAvailable": "Move to Available",
+      "noDishes": "No dishes found. Configure your Tasting Menu first.",
+      "saveSuccess": "Wedding menu selection saved successfully",
+      "saveError": "Failed to save wedding menu selection"
     }
   },
   "guest": {

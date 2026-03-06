@@ -20,13 +20,18 @@ export async function GET() {
     return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'No wedding' } }, { status: 403 });
   }
 
-  const [menu, wedding] = await Promise.all([
+  const [menuData, wedding] = await Promise.all([
     prisma.tastingMenu.findUnique({
       where: { wedding_id: user.wedding_id },
       include: {
         sections: {
           orderBy: { order: 'asc' },
-          include: { dishes: { orderBy: { order: 'asc' } } },
+          include: {
+            dishes: {
+              orderBy: { order: 'asc' },
+              include: { scores: { select: { score: true } } },
+            },
+          },
         },
         participants: { orderBy: { created_at: 'asc' } },
       },
@@ -36,6 +41,22 @@ export async function GET() {
       select: { default_language: true },
     }),
   ]);
+
+  let menu = menuData as unknown;
+
+  if (menuData) {
+    const sections = menuData.sections.map((section) => ({
+      ...section,
+      dishes: section.dishes.map((dish) => {
+        const scores = dish.scores || [];
+        const avg = scores.length > 0
+          ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / scores.length) * 10) / 10
+          : null;
+        return { ...dish, average_score: avg, score_count: scores.length };
+      }),
+    }));
+    menu = { ...menuData, sections };
+  }
 
   return NextResponse.json({ success: true, data: menu, wedding_language: wedding?.default_language ?? 'ES' });
 }

@@ -17,6 +17,9 @@ export interface TastingDish {
   name: string;
   description: string | null;
   image_url: string | null;
+  is_selected?: boolean;
+  average_score?: number | null;
+  score_count?: number;
   order: number;
 }
 
@@ -61,6 +64,26 @@ interface Props {
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
+
+/**
+ * Helper to handle fetch responses and parse JSON safely
+ */
+async function fetchJson(url: string, options?: RequestInit) {
+  const res = await fetch(url, options);
+  let data;
+  try {
+    const text = await res.text();
+    data = text ? JSON.parse(text) : {};
+  } catch (err) {
+    console.error('Failed to parse JSON response:', err);
+    data = { success: false, error: { message: 'Invalid server response' } };
+  }
+
+  if (!res.ok && data.success !== false) {
+    return { success: false, error: { message: data.error?.message ?? `Server error (${res.status})` }, status: res.status };
+  }
+  return { ...data, status: res.status };
+}
 
 export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = false }: Props) {
   const t = useTranslations('admin.tastingMenu');
@@ -125,12 +148,11 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     setMenuSaving(true);
     setMenuError(null);
     try {
-      const res = await fetch(apiBase, {
+      const data = await fetchJson(apiBase, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: menuTitle, description: menuDescription || undefined }),
       });
-      const data = await res.json();
       if (!data.success) throw new Error(data.error?.message ?? t('menu.error'));
       onMenuChange({ ...(menu ?? { id: data.data.id, sections: [] }), title: menuTitle, description: menuDescription || null });
       setEditingMenu(false);
@@ -145,16 +167,18 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     if (!addingSectionName.trim()) return;
     setAddingSection(true);
     try {
-      const res = await fetch(`${apiBase}/sections`, {
+      const data = await fetchJson(`${apiBase}/sections`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: addingSectionName.trim() }),
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error?.message);
+      if (!data.success) throw new Error(data.error?.message ?? 'Failed to add section');
       const current = menu ?? { id: data.data.menu_id, title: menuTitle, description: menuDescription || null, sections: [] };
       onMenuChange({ ...current, sections: [...current.sections, { ...data.data, dishes: [] }] });
       setAddingSectionName('');
+    } catch (err) {
+      console.error('Error adding section:', err);
+      alert(err instanceof Error ? err.message : 'Error adding section');
     } finally {
       setAddingSection(false);
     }
@@ -162,23 +186,27 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
 
   const handleDeleteSection = async (sectionId: string) => {
     if (!confirm(t('sections.deleteConfirm'))) return;
-    const res = await fetch(`${apiBase}/sections/${sectionId}`, { method: 'DELETE' });
-    if (res.ok && menu) {
+    const data = await fetchJson(`${apiBase}/sections/${sectionId}`, { method: 'DELETE' });
+    if (data.success && menu) {
       onMenuChange({ ...menu, sections: menu.sections.filter(s => s.id !== sectionId) });
+    } else if (data.error) {
+      alert(data.error.message);
     }
   };
 
   const handleRenameSection = async (sectionId: string) => {
     const name = editingSection[sectionId]?.trim();
     if (!name || !menu) return;
-    const res = await fetch(`${apiBase}/sections/${sectionId}`, {
+    const data = await fetchJson(`${apiBase}/sections/${sectionId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
     });
-    if (res.ok) {
+    if (data.success) {
       onMenuChange({ ...menu, sections: menu.sections.map(s => s.id === sectionId ? { ...s, name } : s) });
       setEditingSection(prev => { const n = { ...prev }; delete n[sectionId]; return n; });
+    } else if (data.error) {
+      alert(data.error.message);
     }
   };
 
@@ -187,13 +215,12 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     if (!form?.name?.trim() || !menu) return;
     setDishSaving(prev => ({ ...prev, [sectionId]: true }));
     try {
-      const res = await fetch(`${apiBase}/dishes`, {
+      const data = await fetchJson(`${apiBase}/dishes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ section_id: sectionId, name: form.name.trim(), description: form.description || undefined }),
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error?.message);
+      if (!data.success) throw new Error(data.error?.message ?? 'Failed to add dish');
       onMenuChange({
         ...menu,
         sections: menu.sections.map(s =>
@@ -201,6 +228,9 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         ),
       });
       setAddingDish(prev => ({ ...prev, [sectionId]: { name: '', description: '' } }));
+    } catch (err) {
+      console.error('Error adding dish:', err);
+      alert(err instanceof Error ? err.message : 'Error adding dish');
     } finally {
       setDishSaving(prev => ({ ...prev, [sectionId]: false }));
     }
@@ -208,14 +238,16 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
 
   const handleDeleteDish = async (sectionId: string, dishId: string) => {
     if (!confirm(t('dishes.deleteConfirm')) || !menu) return;
-    const res = await fetch(`${apiBase}/dishes/${dishId}`, { method: 'DELETE' });
-    if (res.ok) {
+    const data = await fetchJson(`${apiBase}/dishes/${dishId}`, { method: 'DELETE' });
+    if (data.success) {
       onMenuChange({
         ...menu,
         sections: menu.sections.map(s =>
           s.id === sectionId ? { ...s, dishes: s.dishes.filter(d => d.id !== dishId) } : s
         ),
       });
+    } else if (data.error) {
+      alert(data.error.message);
     }
   };
 
@@ -235,13 +267,12 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     if (!form?.name?.trim() || !menu) return;
     setDishEditSaving(prev => ({ ...prev, [dishId]: true }));
     try {
-      const res = await fetch(`${apiBase}/dishes/${dishId}`, {
+      const data = await fetchJson(`${apiBase}/dishes/${dishId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name.trim(), description: form.description || null }),
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error?.message);
+      if (!data.success) throw new Error(data.error?.message ?? 'Failed to save dish');
       onMenuChange({
         ...menu,
         sections: menu.sections.map(s =>
@@ -251,6 +282,9 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         ),
       });
       handleCancelEditDish(dishId);
+    } catch (err) {
+      console.error('Error saving dish:', err);
+      alert(err instanceof Error ? err.message : 'Error saving dish');
     } finally {
       setDishEditSaving(prev => ({ ...prev, [dishId]: false }));
     }
@@ -264,9 +298,8 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await fetch(`${apiBase}/dishes/${dishId}/image`, { method: 'POST', body: formData });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error?.message);
+      const data = await fetchJson(`${apiBase}/dishes/${dishId}/image`, { method: 'POST', body: formData });
+      if (!data.success) throw new Error(data.error?.message ?? 'Failed to upload image');
       onMenuChange({
         ...menu,
         sections: menu.sections.map(s =>
@@ -275,6 +308,9 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
             : s
         ),
       });
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      alert(err instanceof Error ? err.message : 'Error uploading image');
     } finally {
       setImageUploading(prev => ({ ...prev, [dishId]: false }));
     }
@@ -284,9 +320,8 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     if (!menu) return;
     setImageUploading(prev => ({ ...prev, [dishId]: true }));
     try {
-      const res = await fetch(`${apiBase}/dishes/${dishId}/image`, { method: 'DELETE' });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error?.message);
+      const data = await fetchJson(`${apiBase}/dishes/${dishId}/image`, { method: 'DELETE' });
+      if (!data.success) throw new Error(data.error?.message ?? 'Failed to remove image');
       onMenuChange({
         ...menu,
         sections: menu.sections.map(s =>
@@ -295,6 +330,9 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
             : s
         ),
       });
+    } catch (err) {
+      console.error('Error removing image:', err);
+      alert(err instanceof Error ? err.message : 'Error removing image');
     } finally {
       setImageUploading(prev => ({ ...prev, [dishId]: false }));
     }
@@ -321,8 +359,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch(`${apiBase}/import`, { method: 'POST', body: formData });
-      const data = await res.json();
+      const data = await fetchJson(`${apiBase}/import`, { method: 'POST', body: formData });
 
       if (!data.success) {
         throw new Error(data.error?.message ?? t('import.error'));
@@ -356,12 +393,11 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         const parsedSection = importPreview.sections[si];
 
         // Create section
-        const sectionRes = await fetch(`${apiBase}/sections`, {
+        const sectionData = await fetchJson(`${apiBase}/sections`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: parsedSection.name }),
         });
-        const sectionData = await sectionRes.json();
         if (!sectionData.success) continue;
 
         const newSection: TastingSection = { ...sectionData.data, dishes: [] };
@@ -375,7 +411,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
           if (!sectionSel.dishes[di]) continue;
 
           const parsedDish = parsedSection.dishes[di];
-          const dishRes = await fetch(`${apiBase}/dishes`, {
+          const dishData = await fetchJson(`${apiBase}/dishes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -384,7 +420,6 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
               description: parsedDish.description || undefined,
             }),
           });
-          const dishData = await dishRes.json();
           if (!dishData.success) continue;
 
           currentMenu = {
@@ -399,6 +434,9 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
       if (currentMenu) onMenuChange(currentMenu);
       setImportPreview(null);
       setImportSelections(null);
+    } catch (err) {
+      console.error('Error applying import:', err);
+      alert('Error applying import');
     } finally {
       setApplyingImport(false);
     }
