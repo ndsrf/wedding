@@ -38,7 +38,6 @@ export default function AdminTastingPage() {
 
   const [menu, setMenu] = useState<TastingMenu | null>(null);
   const [participants, setParticipants] = useState<TastingParticipant[]>([]);
-  const [whatsappMode, setWhatsappMode] = useState<'BUSINESS' | 'LINKS'>('BUSINESS');
 
   // Template state
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
@@ -55,9 +54,8 @@ export default function AdminTastingPage() {
       setLoading(true);
       setError(null);
 
-      const [menuRes, weddingRes, templatesRes] = await Promise.all([
+      const [menuRes, templatesRes] = await Promise.all([
         fetch('/api/admin/tasting'),
-        fetch('/api/admin/wedding'),
         fetch('/api/admin/templates?type=TASTING_MENU&limit=50'),
       ]);
 
@@ -67,13 +65,6 @@ export default function AdminTastingPage() {
           const { sections, participants: p, ...rest } = menuData.data;
           setMenu({ ...rest, sections: sections ?? [] });
           setParticipants(p ?? []);
-        }
-      }
-
-      if (weddingRes.ok) {
-        const weddingData = await weddingRes.json();
-        if (weddingData.success) {
-          setWhatsappMode(weddingData.data?.whatsapp_mode ?? 'BUSINESS');
         }
       }
 
@@ -160,7 +151,6 @@ export default function AdminTastingPage() {
               <TastingParticipantManager
                 participants={participants}
                 apiBase="/api/admin/tasting"
-                whatsappMode={whatsappMode}
                 onParticipantsChange={setParticipants}
                 readOnly={isReadOnly}
               />

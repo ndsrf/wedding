@@ -41,7 +41,6 @@ export default function PlannerTastingPage({ params }: PageProps) {
 
   const [menu, setMenu] = useState<TastingMenu | null>(null);
   const [participants, setParticipants] = useState<TastingParticipant[]>([]);
-  const [whatsappMode, setWhatsappMode] = useState<'BUSINESS' | 'LINKS'>('BUSINESS');
 
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('ES');
@@ -79,7 +78,6 @@ export default function PlannerTastingPage({ params }: PageProps) {
         const weddingData = await weddingRes.json();
         if (weddingData.success) {
           setWeddingName(weddingData.data?.couple_names ?? '');
-          setWhatsappMode(weddingData.data?.whatsapp_mode ?? 'BUSINESS');
         }
       }
 

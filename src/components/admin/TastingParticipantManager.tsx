@@ -22,7 +22,6 @@ export interface TastingParticipant {
 interface Props {
   participants: TastingParticipant[];
   apiBase: string;
-  whatsappMode?: 'BUSINESS' | 'LINKS';
   onParticipantsChange: (participants: TastingParticipant[]) => void;
   readOnly?: boolean;
 }
@@ -44,7 +43,7 @@ function getTastingUrl(token: string): string {
   return `/tasting/${token}`;
 }
 
-export function TastingParticipantManager({ participants, apiBase, whatsappMode = 'BUSINESS', onParticipantsChange, readOnly = false }: Props) {
+export function TastingParticipantManager({ participants, apiBase, onParticipantsChange, readOnly = false }: Props) {
   const t = useTranslations('admin.tastingMenu');
 
   const [form, setForm] = useState<AddForm>(EMPTY_FORM);
