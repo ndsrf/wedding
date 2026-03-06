@@ -21,7 +21,7 @@ BEGIN
             VALUES (
                 gen_random_uuid(),
                 planner_record.id,
-                master_template.type,
+                master_template.type::"TemplateType",
                 master_template.language,
                 master_template.channel,
                 master_template.subject,
@@ -56,7 +56,7 @@ BEGIN
             VALUES (
                 gen_random_uuid(),
                 wedding_record.id,
-                planner_template.type,
+                planner_template.type::"TemplateType",
                 planner_template.language,
                 planner_template.channel,
                 planner_template.subject,
