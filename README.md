@@ -423,6 +423,12 @@ Internet → Next.js app (port 80) → PostgreSQL (port 5432)
 - Docker and Docker Compose installed on server
 - Access to pull from `ghcr.io/ndsrf/wedding`
 
+### Required Environment Variable
+
+Set `DEPLOYMENT_TARGET=docker` in your `.env` file (or Docker environment). This enables Next.js [standalone output](https://nextjs.org/docs/app/api-reference/next-config-js/output#automatically-copying-needed-files) which is required for Docker deployments. Without it the app will still run, but will not be optimally packaged.
+
+> **Important:** Do **not** set `DEPLOYMENT_TARGET=docker` when deploying to Vercel. Vercel handles its own bundling and enabling standalone output there breaks routing for all pages.
+
 ### Quick Start
 
 1. **Copy deployment files to your server:**
@@ -434,6 +440,9 @@ Internet → Next.js app (port 80) → PostgreSQL (port 5432)
 
 2. **Configure environment variables in `.env`:**
    ```bash
+   # Deployment target — enables standalone output for Docker
+   DEPLOYMENT_TARGET=docker
+
    # Database credentials
    POSTGRES_USER=wedding
    POSTGRES_PASSWORD=<strong-random-password>
@@ -518,6 +527,7 @@ When deploying to Vercel, the runtime environment is read-only, which prevents a
 1. **Set Environment Variables**: In your Vercel project settings, add:
    - `DATABASE_URL`: Your production database connection string.
    - `AUTO_MIGRATE`: `false` (optional, the app now auto-detects Vercel).
+   - **Do not set `DEPLOYMENT_TARGET`** — leaving it unset (or any value other than `docker`) tells the app it is running on Vercel and disables the Docker-only standalone output mode, which would otherwise break Vercel's routing.
 
 2. **Update Build Command**: Change the default build command in Vercel settings to:
    ```bash
