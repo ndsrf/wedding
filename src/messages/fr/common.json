@@ -1894,12 +1894,14 @@
         "saving": "Enregistrement...",
         "saved": "Enregistré!",
         "error": "Erreur lors de l'enregistrement",
-        "stars": "{score} sur 5",
+        "stars": "{score} sur 10",
         "notRated": "Pas encore noté",
         "addPhoto": "Ajouter une photo",
         "changePhoto": "Changer la photo",
         "removePhoto": "Supprimer",
-        "uploadingPhoto": "Envoi..."
+        "uploadingPhoto": "Envoi...",
+        "takePhoto": "Caméra",
+        "chooseGallery": "Galerie"
       },
       "allScores": {
         "empty": "Pas encore de notes.",

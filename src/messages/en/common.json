@@ -1922,12 +1922,14 @@
         "saving": "Saving...",
         "saved": "Saved!",
         "error": "Failed to save rating",
-        "stars": "{score} out of 5",
+        "stars": "{score} out of 10",
         "notRated": "Not rated yet",
         "addPhoto": "Add Photo",
         "changePhoto": "Change Photo",
         "removePhoto": "Remove",
-        "uploadingPhoto": "Uploading..."
+        "uploadingPhoto": "Uploading...",
+        "takePhoto": "Camera",
+        "chooseGallery": "Gallery"
       },
       "allScores": {
         "empty": "No ratings yet.",

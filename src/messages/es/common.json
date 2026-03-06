@@ -1906,12 +1906,14 @@
         "saving": "Guardando...",
         "saved": "¡Guardado!",
         "error": "Error al guardar la valoración",
-        "stars": "{score} de 5",
+        "stars": "{score} de 10",
         "notRated": "Sin valorar aún",
         "addPhoto": "Añadir foto",
         "changePhoto": "Cambiar foto",
         "removePhoto": "Quitar",
-        "uploadingPhoto": "Subiendo..."
+        "uploadingPhoto": "Subiendo...",
+        "takePhoto": "Cámara",
+        "chooseGallery": "Galería"
       },
       "allScores": {
         "empty": "Sin valoraciones aún.",

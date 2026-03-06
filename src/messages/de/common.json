@@ -1894,12 +1894,14 @@
         "saving": "Speichern...",
         "saved": "Gespeichert!",
         "error": "Fehler beim Speichern",
-        "stars": "{score} von 5",
+        "stars": "{score} von 10",
         "notRated": "Noch nicht bewertet",
         "addPhoto": "Foto hinzufügen",
         "changePhoto": "Foto ändern",
         "removePhoto": "Entfernen",
-        "uploadingPhoto": "Wird hochgeladen..."
+        "uploadingPhoto": "Wird hochgeladen...",
+        "takePhoto": "Kamera",
+        "chooseGallery": "Galerie"
       },
       "allScores": {
         "empty": "Noch keine Bewertungen.",

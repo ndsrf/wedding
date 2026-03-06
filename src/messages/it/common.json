@@ -1894,12 +1894,14 @@
         "saving": "Salvataggio...",
         "saved": "Salvato!",
         "error": "Errore nel salvataggio",
-        "stars": "{score} su 5",
+        "stars": "{score} su 10",
         "notRated": "Non ancora valutato",
         "addPhoto": "Aggiungi foto",
         "changePhoto": "Cambia foto",
         "removePhoto": "Rimuovi",
-        "uploadingPhoto": "Caricamento..."
+        "uploadingPhoto": "Caricamento...",
+        "takePhoto": "Fotocamera",
+        "chooseGallery": "Galleria"
       },
       "allScores": {
         "empty": "Nessun voto ancora.",

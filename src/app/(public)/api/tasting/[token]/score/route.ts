@@ -1,6 +1,7 @@
 /**
  * Public Tasting Score API
- * POST /api/tasting/[token]/score  - Save or update a dish score
+ * POST   /api/tasting/[token]/score  - Save or update a dish score
+ * DELETE /api/tasting/[token]/score  - Remove a dish score
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,7 +12,7 @@ type Params = { params: Promise<{ token: string }> };
 
 const scoreSchema = z.object({
   dish_id: z.string().uuid(),
-  score: z.number().int().min(1).max(5),
+  score: z.number().int().min(1).max(10),
   notes: z.string().max(2000).optional().nullable(),
 });
 
@@ -55,4 +56,28 @@ export async function POST(request: NextRequest, { params }: Params) {
   });
 
   return NextResponse.json({ success: true, data: score });
+}
+
+export async function DELETE(request: NextRequest, { params }: Params) {
+  const { token } = await params;
+
+  const participant = await prisma.tastingParticipant.findUnique({
+    where: { magic_token: token },
+  });
+
+  if (!participant) {
+    return NextResponse.json({ success: false, error: { code: 'NOT_FOUND', message: 'Invalid tasting link' } }, { status: 404 });
+  }
+
+  const body = await request.json();
+  const parsed = z.object({ dish_id: z.string().uuid() }).safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message } }, { status: 400 });
+  }
+
+  await prisma.tastingScore.deleteMany({
+    where: { participant_id: participant.id, dish_id: parsed.data.dish_id },
+  });
+
+  return NextResponse.json({ success: true });
 }
