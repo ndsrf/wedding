@@ -163,7 +163,6 @@ export default function PlannerTastingPage({ params }: PageProps) {
               <TastingParticipantManager
                 participants={participants}
                 apiBase={apiBase}
-                whatsappMode={whatsappMode}
                 onParticipantsChange={setParticipants}
               />
             )}
