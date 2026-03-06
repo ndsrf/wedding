@@ -1708,7 +1708,8 @@
         "delete": "Eliminar Plato",
         "deleteConfirm": "¿Seguro que quieres eliminar este plato?",
         "save": "Guardar",
-        "cancel": "Cancelar"
+        "cancel": "Cancelar",
+        "edit": "Editar"
       },
       "participants": {
         "title": "Participantes",
@@ -1750,7 +1751,19 @@
       },
       "loading": "Cargando menú de degustación...",
       "error": "Error al cargar el menú de degustación",
-      "noMenu": "No hay menú de degustación configurado aún."
+      "noMenu": "No hay menú de degustación configurado aún.",
+      "import": {
+        "title": "Importar desde PDF o imagen",
+        "description": "Sube una foto o PDF de un menú y la IA extraerá las secciones y platos automáticamente.",
+        "button": "Subir menú",
+        "processing": "Procesando...",
+        "error": "No se pudo extraer el menú de este archivo. Por favor, prueba con otra imagen o PDF.",
+        "preview": "Vista previa del menú",
+        "confirmReplace": "¿Deseas añadir las secciones y platos importados a tu menú actual?",
+        "apply": "Añadir al menú",
+        "applying": "Importando...",
+        "cancel": "Cancelar"
+      }
     }
   },
   "guest": {

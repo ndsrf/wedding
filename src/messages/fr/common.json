@@ -1696,7 +1696,8 @@
         "delete": "Supprimer",
         "deleteConfirm": "Supprimer ce plat?",
         "save": "Enregistrer",
-        "cancel": "Annuler"
+        "cancel": "Annuler",
+        "edit": "Modifier"
       },
       "participants": {
         "title": "Participants",
@@ -1738,7 +1739,19 @@
       },
       "loading": "Chargement...",
       "error": "Erreur de chargement",
-      "noMenu": "Aucun menu configuré."
+      "noMenu": "Aucun menu configuré.",
+      "import": {
+        "title": "Importer depuis un PDF ou une image",
+        "description": "Téléchargez une photo ou un PDF d'un menu et l'IA extraira automatiquement les sections et les plats.",
+        "button": "Télécharger le menu",
+        "processing": "Traitement...",
+        "error": "Impossible d'extraire le menu de ce fichier. Veuillez essayer une autre image ou un autre PDF.",
+        "preview": "Aperçu du menu",
+        "confirmReplace": "Cela ajoutera les sections et plats importés à votre menu actuel. Continuer ?",
+        "apply": "Ajouter au menu",
+        "applying": "Importation...",
+        "cancel": "Annuler"
+      }
     }
   },
   "guest": {
