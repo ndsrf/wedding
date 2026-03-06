@@ -118,6 +118,29 @@ function getRedirectForRole(role: string): string {
 }
 
 // ============================================================================
+// HELPER: Locale negotiation for root path
+// ============================================================================
+
+/**
+ * Pick the best supported locale from an Accept-Language header string.
+ * Returns the defaultLocale if no match is found.
+ */
+function negotiateLocale(acceptLanguage: string, locales: string[], defaultLocale: string): string {
+  if (!acceptLanguage) return defaultLocale;
+  const candidates = acceptLanguage
+    .split(',')
+    .map(part => {
+      const [lang, q] = part.trim().split(';q=');
+      return { lang: lang.trim().split('-')[0].toLowerCase(), q: q ? parseFloat(q) : 1 };
+    })
+    .sort((a, b) => b.q - a.q);
+  for (const { lang } of candidates) {
+    if (locales.includes(lang)) return lang;
+  }
+  return defaultLocale;
+}
+
+// ============================================================================
 // MIDDLEWARE
 // ============================================================================
 
@@ -152,14 +175,31 @@ export async function middleware(request: NextRequest) {
 
     if (token?.user?.role) {
       const role = (token.user as AuthenticatedUser).role;
-      // Extract locale if present, otherwise use default
       const redirectPath = getRedirectForRole(role);
-      
-      // We don't want to prefix dashboard routes with locale if they are not in [locale]
       return NextResponse.redirect(new URL(redirectPath, request.url));
     }
-    
-    // Fall through to intlMiddleware for non-authenticated users
+
+    // For unauthenticated users at the bare root path, explicitly route to
+    // [locale]/page.tsx. We do this instead of delegating to intlMiddleware
+    // because intlMiddleware may return NextResponse.next() for the default
+    // locale, which leaves Next.js with no matching page at "/" and causes 404.
+    if (pathname === '/') {
+      const acceptLanguage = request.headers.get('accept-language') ?? '';
+      const locale = negotiateLocale(
+        acceptLanguage,
+        routing.locales as string[],
+        routing.defaultLocale,
+      );
+      if (locale !== routing.defaultLocale) {
+        // Non-default locale: visible redirect (e.g. / → /es)
+        return NextResponse.redirect(new URL(`/${locale}`, request.url));
+      }
+      // Default locale: internal rewrite so [locale]/page.tsx can handle it
+      // without changing the URL shown to the user.
+      return NextResponse.rewrite(new URL(`/${routing.defaultLocale}`, request.url));
+    }
+
+    // For locale-prefixed roots (/en, /es, …) fall through to intlMiddleware below
   }
 
   // 3. Internationalization
