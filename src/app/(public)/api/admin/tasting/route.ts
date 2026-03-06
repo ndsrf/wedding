@@ -20,22 +20,24 @@ export async function GET() {
     return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'No wedding' } }, { status: 403 });
   }
 
-  const menu = await prisma.tastingMenu.findUnique({
-    where: { wedding_id: user.wedding_id },
-    include: {
-      sections: {
-        orderBy: { order: 'asc' },
-        include: {
-          dishes: { orderBy: { order: 'asc' } },
+  const [menu, wedding] = await Promise.all([
+    prisma.tastingMenu.findUnique({
+      where: { wedding_id: user.wedding_id },
+      include: {
+        sections: {
+          orderBy: { order: 'asc' },
+          include: { dishes: { orderBy: { order: 'asc' } } },
         },
+        participants: { orderBy: { created_at: 'asc' } },
       },
-      participants: {
-        orderBy: { created_at: 'asc' },
-      },
-    },
-  });
+    }),
+    prisma.wedding.findUnique({
+      where: { id: user.wedding_id },
+      select: { default_language: true },
+    }),
+  ]);
 
-  return NextResponse.json({ success: true, data: menu });
+  return NextResponse.json({ success: true, data: menu, wedding_language: wedding?.default_language ?? 'ES' });
 }
 
 export async function POST(request: NextRequest) {

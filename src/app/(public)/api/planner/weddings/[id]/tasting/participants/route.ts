@@ -16,6 +16,7 @@ const createParticipantSchema = z.object({
   phone: z.string().max(50).optional().or(z.literal('')),
   whatsapp_number: z.string().max(50).optional().or(z.literal('')),
   channel_preference: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
+  language: z.enum(['ES', 'EN', 'FR', 'IT', 'DE']).optional(),
 });
 
 export async function POST(request: NextRequest, { params }: Params) {
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       phone: parsed.data.phone || null,
       whatsapp_number: parsed.data.whatsapp_number || null,
       channel_preference: parsed.data.channel_preference ?? null,
+      language: parsed.data.language ?? 'ES',
     },
   });
 

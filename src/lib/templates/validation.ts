@@ -6,7 +6,7 @@ import { z } from "zod";
 
 // Common validations
 const languageEnum = z.enum(["ES", "EN", "FR", "IT", "DE"]);
-const templateTypeEnum = z.enum(["INVITATION", "REMINDER"]);
+const templateTypeEnum = z.enum(["SAVE_THE_DATE", "INVITATION", "REMINDER", "CONFIRMATION", "TASTING_MENU"]);
 const channelEnum = z.enum(["EMAIL", "WHATSAPP", "SMS"]);
 
 /**
@@ -17,14 +17,8 @@ export const createTemplateSchema = z.object({
   type: templateTypeEnum,
   language: languageEnum,
   channel: channelEnum,
-  subject: z
-    .string()
-    .min(1, "Subject is required")
-    .max(200, "Subject must be 200 characters or less"),
-  body: z
-    .string()
-    .min(10, "Body must be at least 10 characters")
-    .max(5000, "Body must be 5000 characters or less"),
+  subject: z.string().min(1).max(200).optional(),
+  body: z.string().min(1).max(5000).optional(),
 });
 
 export type CreateTemplateRequest = z.infer<typeof createTemplateSchema>;

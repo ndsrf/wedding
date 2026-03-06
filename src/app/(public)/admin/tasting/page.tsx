@@ -38,6 +38,7 @@ export default function AdminTastingPage() {
 
   const [menu, setMenu] = useState<TastingMenu | null>(null);
   const [participants, setParticipants] = useState<TastingParticipant[]>([]);
+  const [weddingLanguage, setWeddingLanguage] = useState<Language>('ES');
 
   // Template state
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
@@ -66,6 +67,7 @@ export default function AdminTastingPage() {
           setMenu({ ...rest, sections: sections ?? [] });
           setParticipants(p ?? []);
         }
+        if (menuData.wedding_language) setWeddingLanguage(menuData.wedding_language as Language);
       }
 
       if (templatesRes.ok) {
@@ -153,6 +155,7 @@ export default function AdminTastingPage() {
                 apiBase="/api/admin/tasting"
                 onParticipantsChange={setParticipants}
                 readOnly={isReadOnly}
+                weddingLanguage={weddingLanguage}
               />
             )}
 

@@ -11,6 +11,8 @@ import {
   validateCreateTemplate,
 } from "@/lib/templates";
 import { listTemplates, createTemplate } from "@/lib/templates/crud";
+import { DEFAULT_TEMPLATES } from "@/lib/templates/defaults";
+import type { Language, TemplateType, Channel } from "@prisma/client";
 
 /**
  * GET /api/admin/templates
@@ -92,23 +94,21 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
+    const { type, language, channel } = body;
 
-    // Ensure wedding_id matches the user's wedding
-    if (body.wedding_id !== user.wedding_id) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Cannot create templates for other weddings",
-          },
-        },
-        { status: 403 }
-      );
-    }
+    // Fill in defaults for subject/body if not provided
+    const defaults = DEFAULT_TEMPLATES[language as Language]?.[type as TemplateType]?.[channel as Channel];
+    const enrichedBody = {
+      wedding_id: user.wedding_id,
+      type,
+      language,
+      channel,
+      subject: body.subject ?? defaults?.subject ?? `${type} Template`,
+      body: body.body ?? defaults?.body ?? '',
+    };
 
     // Validate request
-    const validation = validateCreateTemplate(body);
+    const validation = validateCreateTemplate(enrichedBody);
     if (validation.error) {
       return NextResponse.json(
         {

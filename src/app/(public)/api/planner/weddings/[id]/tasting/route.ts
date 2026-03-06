@@ -36,7 +36,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     },
   });
 
-  return NextResponse.json({ success: true, data: menu });
+  return NextResponse.json({ success: true, data: menu, wedding_language: wedding.default_language ?? 'ES' });
 }
 
 export async function POST(request: NextRequest, { params }: Params) {

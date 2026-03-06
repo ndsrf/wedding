@@ -15,8 +15,41 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, use } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+
+const LANGUAGES = [
+  { code: 'es', label: 'ES' },
+  { code: 'en', label: 'EN' },
+  { code: 'fr', label: 'FR' },
+  { code: 'it', label: 'IT' },
+  { code: 'de', label: 'DE' },
+];
+
+function LanguageSelector() {
+  const locale = useLocale();
+  const switchLocale = (code: string) => {
+    document.cookie = `NEXT_LOCALE=${code}; path=/; max-age=31536000; SameSite=Lax`;
+    window.location.reload();
+  };
+  return (
+    <div className="flex gap-1">
+      {LANGUAGES.map(({ code, label }) => (
+        <button
+          key={code}
+          onClick={() => switchLocale(code)}
+          className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+            locale === code
+              ? 'bg-rose-600 text-white border-rose-600'
+              : 'border-gray-300 text-gray-500 hover:bg-gray-100'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -425,9 +458,16 @@ export default function TastingPage({ params }: PageProps) {
       {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4">
-          <p className="text-xs text-gray-500 mb-0.5">{data.menu.wedding.couple_names}</p>
-          <h1 className="text-xl font-bold text-gray-900">🍽️ {data.menu.title}</h1>
-          <p className="text-sm text-gray-600 mt-0.5">{t('welcome', { name: data.participant.name })}</p>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-gray-500 mb-0.5">{data.menu.wedding.couple_names}</p>
+              <h1 className="text-xl font-bold text-gray-900">🍽️ {data.menu.title}</h1>
+              <p className="text-sm text-gray-600 mt-0.5">{t('welcome', { name: data.participant.name })}</p>
+            </div>
+            <div className="shrink-0 mt-1">
+              <LanguageSelector />
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}

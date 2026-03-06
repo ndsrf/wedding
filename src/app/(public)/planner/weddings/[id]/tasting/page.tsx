@@ -41,6 +41,7 @@ export default function PlannerTastingPage({ params }: PageProps) {
 
   const [menu, setMenu] = useState<TastingMenu | null>(null);
   const [participants, setParticipants] = useState<TastingParticipant[]>([]);
+  const [weddingLanguage, setWeddingLanguage] = useState<Language>('ES');
 
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('ES');
@@ -72,6 +73,7 @@ export default function PlannerTastingPage({ params }: PageProps) {
           setMenu({ ...rest, sections: sections ?? [] });
           setParticipants(p ?? []);
         }
+        if (menuData.wedding_language) setWeddingLanguage(menuData.wedding_language as Language);
       }
 
       if (weddingRes.ok) {
@@ -164,6 +166,7 @@ export default function PlannerTastingPage({ params }: PageProps) {
                 participants={participants}
                 apiBase={apiBase}
                 onParticipantsChange={setParticipants}
+                weddingLanguage={weddingLanguage}
               />
             )}
 

@@ -801,18 +801,19 @@ model TastingDish {
 }
 
 model TastingParticipant {
-  id               String         @id @default(uuid())
-  menu_id          String
-  name             String
-  email            String?
-  phone            String?
-  whatsapp_number  String?
+  id                 String         @id @default(uuid())
+  menu_id            String
+  name               String
+  email              String?
+  phone              String?
+  whatsapp_number    String?
   channel_preference Channel?
-  magic_token      String         @unique @default(uuid())
-  invite_sent_at   DateTime?
-  created_at       DateTime       @default(now())
-  menu             TastingMenu    @relation(fields: [menu_id], references: [id], onDelete: Cascade)
-  scores           TastingScore[]
+  language           Language       @default(ES)
+  magic_token        String         @unique @default(uuid())
+  invite_sent_at     DateTime?
+  created_at         DateTime       @default(now())
+  menu               TastingMenu    @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+  scores             TastingScore[]
 
   @@index([menu_id])
   @@index([magic_token])
