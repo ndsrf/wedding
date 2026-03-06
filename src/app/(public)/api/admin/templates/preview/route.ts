@@ -147,6 +147,8 @@ export async function POST(request: NextRequest) {
       magicLink: sampleData?.magicLink || "https://wedding.com/rsvp/example",
       rsvpCutoffDate: cutoffDate,
       referenceCode: sampleData?.referenceCode || "REF-12345-67890",
+      tastingParticipantName: sampleData?.tastingParticipantName || "Juan",
+      tastingLink: sampleData?.tastingLink || "https://wedding.com/tasting/xyz",
     };
 
     // Render template

@@ -85,6 +85,8 @@ export const previewTemplateSchema = z.object({
         .default("https://wedding.com/rsvp/example"),
       rsvpCutoffDate: z.string().default("Friday, May 31, 2024"),
       referenceCode: z.string().default("REF-12345-67890"),
+      tastingParticipantName: z.string().default("Juan"),
+      tastingLink: z.string().default("https://wedding.com/tasting/xyz"),
     })
     .optional(),
 });

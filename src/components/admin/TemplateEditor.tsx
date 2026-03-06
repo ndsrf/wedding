@@ -333,6 +333,16 @@ export function TemplateEditor({
               <div className="text-xs text-purple-800 font-mono">{'{{9}}'}</div>
               <div className="text-xs text-purple-700">Wedding location</div>
             </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">tastingParticipantName</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{10}}'}</div>
+              <div className="text-xs text-purple-700">Tasting participant name</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs text-purple-800 font-mono">tastingLink</div>
+              <div className="text-xs text-purple-800 font-mono">{'{{11}}'}</div>
+              <div className="text-xs text-purple-700">Tasting menu link</div>
+            </div>
           </div>
           <p className="text-xs text-purple-700 mt-3 italic">
             Note: The body field above is for reference only. When using a Content Template ID, the actual message content comes from Meta&apos;s approved template.
