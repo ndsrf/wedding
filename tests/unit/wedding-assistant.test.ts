@@ -20,13 +20,11 @@ jest.mock('openai', () => {
   return { default: MockOpenAI, __esModule: true };
 });
 
-jest.mock('@google/generative-ai', () => {
-  const MockGoogleGenerativeAI = jest.fn().mockImplementation(() => ({
-    getGenerativeModel: jest.fn().mockReturnValue({
-      generateContent: mockGeminiGenerateContent,
-    }),
+jest.mock('@google/genai', () => {
+  const MockGoogleGenAI = jest.fn().mockImplementation(() => ({
+    models: { generateContent: mockGeminiGenerateContent },
   }));
-  return { GoogleGenerativeAI: MockGoogleGenerativeAI };
+  return { GoogleGenAI: MockGoogleGenAI };
 });
 
 // ─── Imports (after mocks) ───────────────────────────────────────────────────
@@ -164,7 +162,7 @@ describe('generateWeddingReply', () => {
     it('uses Gemini when AI_PROVIDER=gemini and GEMINI_API_KEY is set', async () => {
       setEnv({ GEMINI_API_KEY: 'gemini-key', AI_PROVIDER: 'gemini' });
       mockGeminiGenerateContent.mockResolvedValue({
-        response: { text: () => 'Gemini reply' },
+        text: 'Gemini reply',
       });
 
       const result = await generateWeddingReply('Hello?', baseWedding, baseFamily, 'EN');
@@ -188,7 +186,7 @@ describe('generateWeddingReply', () => {
     it('falls back to Gemini when OPENAI_API_KEY is absent but GEMINI_API_KEY is set', async () => {
       setEnv({ GEMINI_API_KEY: 'gemini-key' });
       mockGeminiGenerateContent.mockResolvedValue({
-        response: { text: () => 'Gemini fallback' },
+        text: 'Gemini fallback',
       });
 
       const result = await generateWeddingReply('Hello?', baseWedding, baseFamily, 'EN');
@@ -343,7 +341,7 @@ describe('generateWeddingReply', () => {
     it('returns null when Gemini returns empty text', async () => {
       setEnv({ GEMINI_API_KEY: 'gemini-key', AI_PROVIDER: 'gemini' });
       mockGeminiGenerateContent.mockResolvedValue({
-        response: { text: () => '' },
+        text: '',
       });
 
       const result = await generateWeddingReply('Hello?', baseWedding, baseFamily, 'EN');
