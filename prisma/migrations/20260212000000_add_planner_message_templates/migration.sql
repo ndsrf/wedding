@@ -612,9 +612,9 @@ BEGIN
                 ) VALUES (
                     uuid_generate_v4(),
                     planner_record.id,
-                    master_template.type,
-                    master_template.language,
-                    master_template.channel,
+                    master_template.type::"TemplateType",
+                    master_template.language::"Language",
+                    master_template.channel::"Channel",
                     master_template.subject,
                     master_template.body,
                     NOW(),
