@@ -84,6 +84,7 @@ export default function PlannerTemplatesPage() {
     'INVITATION',
     'REMINDER',
     'CONFIRMATION',
+    'TASTING_MENU',
   ];
 
   const getTabLabel = (type: TemplateTypeTab) => {
@@ -96,6 +97,8 @@ export default function PlannerTemplatesPage() {
         return t('type.confirmation');
       case 'SAVE_THE_DATE':
         return t('type.saveTheDate');
+      case 'TASTING_MENU':
+        return t('type.tastingMenu');
       default:
         return type;
     }

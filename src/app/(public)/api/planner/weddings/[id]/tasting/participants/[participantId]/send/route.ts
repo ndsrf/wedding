@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   const tastingLink = toAbsoluteUrl(`/tasting/${participant.magic_token}`) ?? '';
 
   const variables = {
-    participantName: participant.name,
+    tastingParticipantName: participant.name,
     coupleNames: wedding.couple_names,
     tastingLink,
     weddingDate: wedding.wedding_date.toLocaleDateString('en-US'),

@@ -13,7 +13,7 @@ export interface TemplateVariables {
   rsvpCutoffDate?: string;
   referenceCode?: string;
   // Tasting menu placeholders
-  participantName?: string;
+  tastingParticipantName?: string;
   tastingLink?: string;
   [key: string]: string | undefined;
 }
@@ -131,8 +131,8 @@ export function getAvailablePlaceholders(): Array<{
       example: "REF-12345-67890",
     },
     {
-      key: "participantName",
-      label: "Participant Name",
+      key: "tastingParticipantName",
+      label: "Tasting Participant Name",
       description: "The name of the tasting menu participant",
       example: "John Smith",
     },

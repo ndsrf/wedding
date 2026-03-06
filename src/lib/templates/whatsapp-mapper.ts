@@ -19,6 +19,8 @@ export const WHATSAPP_VARIABLE_MAPPING = {
   rsvpCutoffDate: { position: 7, description: "RSVP cutoff date" },
   referenceCode: { position: 8, description: "Family reference code" },
   location: { position: 9, description: "Wedding location" },
+  tastingParticipantName: { position: 10, description: "Tasting participant name" },
+  tastingLink: { position: 11, description: "Tasting menu link" },
 } as const;
 
 /**
@@ -66,6 +68,8 @@ export function mapToWhatsAppVariables(
   result["7"] = variables.rsvpCutoffDate || "";
   result["8"] = variables.referenceCode || "";
   result["9"] = variables.location || "";
+  result["10"] = variables.tastingParticipantName || "";
+  result["11"] = variables.tastingLink || "";
 
   return result;
 }
@@ -128,6 +132,18 @@ export function getWhatsAppVariableMappingDisplay() {
       appVariable: "location",
       placeholder: "{{9}}",
       description: "Wedding location",
+    },
+    {
+      position: 10,
+      appVariable: "tastingParticipantName",
+      placeholder: "{{10}}",
+      description: "Tasting participant name",
+    },
+    {
+      position: 11,
+      appVariable: "tastingLink",
+      placeholder: "{{11}}",
+      description: "Tasting menu link",
     },
   ];
 }

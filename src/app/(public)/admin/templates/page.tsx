@@ -19,7 +19,7 @@ import { TemplatePreview } from '@/components/admin/TemplatePreview';
 import { getAvailablePlaceholders } from '@/lib/templates';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
-type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE';
+type TemplateTypeTab = 'INVITATION' | 'REMINDER' | 'CONFIRMATION' | 'SAVE_THE_DATE' | 'TASTING_MENU';
 type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
 
 export default function TemplatesPage() {
@@ -104,8 +104,8 @@ export default function TemplatesPage() {
   const currentTemplate = filteredTemplates[0];
 
   const availableTabs: TemplateTypeTab[] = saveTheDateEnabled
-    ? ['SAVE_THE_DATE', 'INVITATION', 'REMINDER', 'CONFIRMATION']
-    : ['INVITATION', 'REMINDER', 'CONFIRMATION'];
+    ? ['SAVE_THE_DATE', 'INVITATION', 'REMINDER', 'CONFIRMATION', 'TASTING_MENU']
+    : ['INVITATION', 'REMINDER', 'CONFIRMATION', 'TASTING_MENU'];
 
   const getTabLabel = (type: TemplateTypeTab) => {
     switch (type) {
@@ -117,6 +117,8 @@ export default function TemplatesPage() {
         return t('type.confirmation');
       case 'SAVE_THE_DATE':
         return t('type.saveTheDate');
+      case 'TASTING_MENU':
+        return t('type.tastingMenu');
       default:
         return type;
     }

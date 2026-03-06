@@ -1082,7 +1082,8 @@
         "title": "Type de Modèle",
         "invitation": "📩 Invitations",
         "reminder": "🔔 Rappels",
-        "confirmation": "✅ Confirmations"
+        "confirmation": "✅ Confirmations",
+        "tastingMenu": "🍽️ Dégustation"
       },
       "language": {
         "title": "Langue"

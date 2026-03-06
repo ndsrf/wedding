@@ -1082,7 +1082,8 @@
         "title": "Vorlagentyp",
         "invitation": "📩 Einladungen",
         "reminder": "🔔 Erinnerungen",
-        "confirmation": "✅ Bestätigungen"
+        "confirmation": "✅ Bestätigungen",
+        "tastingMenu": "🍽️ Menüverkostung"
       },
       "language": {
         "title": "Sprache"

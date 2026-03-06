@@ -12,16 +12,13 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import type { MessageTemplate, Language } from '@prisma/client';
+import type { Language } from '@prisma/client';
 import PrivateHeader from '@/components/PrivateHeader';
 import { TastingMenuEditor, type TastingMenu } from '@/components/admin/TastingMenuEditor';
 import { TastingParticipantManager, type TastingParticipant } from '@/components/admin/TastingParticipantManager';
-import { TemplateEditor } from '@/components/admin/TemplateEditor';
-import { TemplatePreview } from '@/components/admin/TemplatePreview';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
-type Tab = 'menu' | 'participants' | 'template';
-type TemplateChannel = 'EMAIL' | 'WHATSAPP' | 'SMS';
+type Tab = 'menu' | 'participants';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -30,7 +27,6 @@ interface PageProps {
 export default function PlannerTastingPage({ params }: PageProps) {
   const { id: weddingId } = use(params);
   const t = useTranslations('admin.tastingMenu');
-  const templateT = useTranslations('admin.templates');
   const { status } = useSession();
   const router = useRouter();
 
@@ -43,13 +39,7 @@ export default function PlannerTastingPage({ params }: PageProps) {
   const [participants, setParticipants] = useState<TastingParticipant[]>([]);
   const [weddingLanguage, setWeddingLanguage] = useState<Language>('ES');
 
-  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('ES');
-  const [selectedChannel, setSelectedChannel] = useState<TemplateChannel>('WHATSAPP');
-  const [previewOpen, setPreviewOpen] = useState(false);
-
   const apiBase = `/api/planner/weddings/${weddingId}/tasting`;
-  const templateApiBase = `/api/planner/weddings/${weddingId}`;
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/signin');
@@ -60,10 +50,9 @@ export default function PlannerTastingPage({ params }: PageProps) {
       setLoading(true);
       setError(null);
 
-      const [menuRes, weddingRes, templatesRes] = await Promise.all([
+      const [menuRes, weddingRes] = await Promise.all([
         fetch(apiBase),
         fetch(`/api/planner/weddings/${weddingId}`),
-        fetch(`${templateApiBase}/templates?type=TASTING_MENU&limit=50`),
       ]);
 
       if (menuRes.ok) {
@@ -82,30 +71,20 @@ export default function PlannerTastingPage({ params }: PageProps) {
           setWeddingName(weddingData.data?.couple_names ?? '');
         }
       }
-
-      if (templatesRes.ok) {
-        const templatesData = await templatesRes.json();
-        if (templatesData.success) setTemplates(templatesData.data?.items ?? []);
-      }
     } catch {
       setError(t('error'));
     } finally {
       setLoading(false);
     }
-  }, [apiBase, templateApiBase, weddingId, t]);
+  }, [apiBase, weddingId, t]);
 
   useEffect(() => {
     if (status === 'authenticated') fetchData();
   }, [status, fetchData]);
 
-  const currentTemplate = templates.find(
-    tp => tp.type === 'TASTING_MENU' && tp.language === selectedLanguage && tp.channel === selectedChannel
-  );
-
   const tabs: { id: Tab; label: string }[] = [
     { id: 'menu', label: t('tabs.menu') },
     { id: 'participants', label: `${t('tabs.participants')} (${participants.length})` },
-    { id: 'template', label: t('tabs.template') },
   ];
 
   return (
@@ -168,85 +147,6 @@ export default function PlannerTastingPage({ params }: PageProps) {
                 onParticipantsChange={setParticipants}
                 weddingLanguage={weddingLanguage}
               />
-            )}
-
-            {activeTab === 'template' && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-wrap gap-6">
-                  <div>
-                    <p className="text-xs font-medium text-gray-700 mb-2">{templateT('language.title')}</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {(['ES', 'EN', 'FR', 'IT', 'DE'] as Language[]).map(lang => (
-                        <button key={lang} onClick={() => setSelectedLanguage(lang)}
-                          className={`px-3 py-1 text-xs rounded-full border transition-colors ${selectedLanguage === lang ? 'bg-rose-600 text-white border-rose-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
-                          {lang}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-700 mb-2">{templateT('channel.title')}</p>
-                    <div className="flex gap-2">
-                      {(['WHATSAPP', 'EMAIL', 'SMS'] as TemplateChannel[]).map(ch => (
-                        <button key={ch} onClick={() => setSelectedChannel(ch)}
-                          className={`px-3 py-1 text-xs rounded-full border transition-colors ${selectedChannel === ch ? 'bg-rose-600 text-white border-rose-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
-                          {ch === 'WHATSAPP' ? '💬 WhatsApp' : ch === 'EMAIL' ? '✉️ Email' : '📱 SMS'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {currentTemplate ? (
-                  <TemplateEditor
-                    key={currentTemplate.id}
-                    template={currentTemplate}
-                    channel={selectedChannel}
-                    onSave={async (subject, body, contentTemplateId) => {
-                      const res = await fetch(`${templateApiBase}/templates/${currentTemplate.id}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ subject, body, content_template_id: contentTemplateId }),
-                      });
-                      if (!res.ok) throw new Error(templateT('editor.error'));
-                      setTemplates(prev => prev.map(tp =>
-                        tp.id === currentTemplate.id ? { ...tp, subject, body } : tp
-                      ));
-                    }}
-                    onPreview={() => setPreviewOpen(true)}
-                    onImageUpdate={fetchData}
-                    apiBaseUrl={templateApiBase}
-                  />
-                ) : (
-                  <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-                    <p className="text-gray-500 text-sm mb-4">
-                      {templateT('editor.notFound', { type: 'Tasting Menu', language: selectedLanguage, channel: selectedChannel })}
-                    </p>
-                    <button
-                      onClick={async () => {
-                        const res = await fetch(`${templateApiBase}/templates`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ type: 'TASTING_MENU', language: selectedLanguage, channel: selectedChannel }),
-                        });
-                        if (res.ok) fetchData();
-                      }}
-                      className="px-4 py-2 bg-rose-600 text-white text-sm rounded-md hover:bg-rose-700"
-                    >
-                      Create Template
-                    </button>
-                  </div>
-                )}
-
-                {previewOpen && currentTemplate && (
-                  <TemplatePreview
-                    templateId={currentTemplate.id}
-                    language={selectedLanguage}
-                    onClose={() => setPreviewOpen(false)}
-                    apiBaseUrl={templateApiBase}
-                  />
-                )}
-              </div>
             )}
           </>
         )}

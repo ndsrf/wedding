@@ -5,7 +5,7 @@
 INSERT INTO master_message_templates (id, type, language, channel, subject, body, created_at, updated_at) VALUES
 (gen_random_uuid(), 'TASTING_MENU', 'ES', 'EMAIL',
   'Tu enlace para la degustación de {{coupleNames}}',
-  'Hola {{participantName}},
+  'Hola {{tastingParticipantName}},
 
 Te invitamos a calificar los platos del menú de degustación para la boda de {{coupleNames}}.
 
@@ -20,7 +20,7 @@ Con cariño,
 
 (gen_random_uuid(), 'TASTING_MENU', 'ES', 'WHATSAPP',
   'Degustación',
-  '¡Hola {{participantName}}! 🍽️
+  '¡Hola {{tastingParticipantName}}! 🍽️
 
 Te invitamos a valorar el menú de degustación para la boda de {{coupleNames}}.
 
@@ -31,12 +31,12 @@ Accede a tu enlace personal para calificar cada plato:
 
 (gen_random_uuid(), 'TASTING_MENU', 'ES', 'SMS',
   'Degustación',
-  'Hola {{participantName}}! Valora el menú de degustación de {{coupleNames}}: {{tastingLink}}', NOW(), NOW()),
+  'Hola {{tastingParticipantName}}! Valora el menú de degustación de {{coupleNames}}: {{tastingLink}}', NOW(), NOW()),
 
 -- ENGLISH (EN)
 (gen_random_uuid(), 'TASTING_MENU', 'EN', 'EMAIL',
   'Your tasting menu link for {{coupleNames}}''s wedding',
-  'Hi {{participantName}},
+  'Hi {{tastingParticipantName}},
 
 You are invited to rate the dishes at the tasting menu for {{coupleNames}}''s wedding.
 
@@ -51,7 +51,7 @@ With love,
 
 (gen_random_uuid(), 'TASTING_MENU', 'EN', 'WHATSAPP',
   'Tasting Menu',
-  'Hi {{participantName}}! 🍽️
+  'Hi {{tastingParticipantName}}! 🍽️
 
 You''re invited to rate the tasting menu for {{coupleNames}}''s wedding.
 
@@ -62,12 +62,12 @@ Thank you for your feedback!', NOW(), NOW()),
 
 (gen_random_uuid(), 'TASTING_MENU', 'EN', 'SMS',
   'Tasting Menu',
-  'Hi {{participantName}}! Rate the tasting menu for {{coupleNames}}: {{tastingLink}}', NOW(), NOW()),
+  'Hi {{tastingParticipantName}}! Rate the tasting menu for {{coupleNames}}: {{tastingLink}}', NOW(), NOW()),
 
 -- FRENCH (FR)
 (gen_random_uuid(), 'TASTING_MENU', 'FR', 'EMAIL',
   'Votre lien pour la dégustation de {{coupleNames}}',
-  'Bonjour {{participantName}},
+  'Bonjour {{tastingParticipantName}},
 
 Vous êtes invité(e) à noter les plats du menu de dégustation pour le mariage de {{coupleNames}}.
 
@@ -82,7 +82,7 @@ Avec affection,
 
 (gen_random_uuid(), 'TASTING_MENU', 'FR', 'WHATSAPP',
   'Dégustation',
-  'Bonjour {{participantName}} ! 🍽️
+  'Bonjour {{tastingParticipantName}} ! 🍽️
 
 Vous êtes invité(e) à noter le menu de dégustation pour le mariage de {{coupleNames}}.
 
@@ -93,12 +93,12 @@ Merci pour vos retours !', NOW(), NOW()),
 
 (gen_random_uuid(), 'TASTING_MENU', 'FR', 'SMS',
   'Dégustation',
-  'Bonjour {{participantName}} ! Notez le menu de dégustation de {{coupleNames}} : {{tastingLink}}', NOW(), NOW()),
+  'Bonjour {{tastingParticipantName}} ! Notez le menu de dégustation de {{coupleNames}} : {{tastingLink}}', NOW(), NOW()),
 
 -- ITALIAN (IT)
 (gen_random_uuid(), 'TASTING_MENU', 'IT', 'EMAIL',
   'Il tuo link per la degustazione di {{coupleNames}}',
-  'Ciao {{participantName}},
+  'Ciao {{tastingParticipantName}},
 
 Sei invitato/a a valutare i piatti del menu di degustazione per il matrimonio di {{coupleNames}}.
 
@@ -113,7 +113,7 @@ Con affetto,
 
 (gen_random_uuid(), 'TASTING_MENU', 'IT', 'WHATSAPP',
   'Degustazione',
-  'Ciao {{participantName}}! 🍽️
+  'Ciao {{tastingParticipantName}}! 🍽️
 
 Sei invitato/a a valutare il menu di degustazione per il matrimonio di {{coupleNames}}.
 
@@ -124,12 +124,12 @@ Grazie per il tuo feedback!', NOW(), NOW()),
 
 (gen_random_uuid(), 'TASTING_MENU', 'IT', 'SMS',
   'Degustazione',
-  'Ciao {{participantName}}! Valuta il menu di degustazione di {{coupleNames}}: {{tastingLink}}', NOW(), NOW()),
+  'Ciao {{tastingParticipantName}}! Valuta il menu di degustazione di {{coupleNames}}: {{tastingLink}}', NOW(), NOW()),
 
 -- GERMAN (DE)
 (gen_random_uuid(), 'TASTING_MENU', 'DE', 'EMAIL',
   'Dein Link für das Tasting-Menü von {{coupleNames}}',
-  'Hallo {{participantName}},
+  'Hallo {{tastingParticipantName}},
 
 Du bist eingeladen, die Gerichte des Tasting-Menüs für die Hochzeit von {{coupleNames}} zu bewerten.
 
@@ -144,7 +144,7 @@ Mit Liebe,
 
 (gen_random_uuid(), 'TASTING_MENU', 'DE', 'WHATSAPP',
   'Tasting-Menü',
-  'Hallo {{participantName}}! 🍽️
+  'Hallo {{tastingParticipantName}}! 🍽️
 
 Du bist eingeladen, das Tasting-Menü für die Hochzeit von {{coupleNames}} zu bewerten.
 
@@ -155,6 +155,6 @@ Vielen Dank für dein Feedback!', NOW(), NOW()),
 
 (gen_random_uuid(), 'TASTING_MENU', 'DE', 'SMS',
   'Tasting-Menü',
-  'Hallo {{participantName}}! Bewerte das Tasting-Menü von {{coupleNames}}: {{tastingLink}}', NOW(), NOW())
+  'Hallo {{tastingParticipantName}}! Bewerte das Tasting-Menü von {{coupleNames}}: {{tastingLink}}', NOW(), NOW())
 
 ON CONFLICT (type, language, channel) DO NOTHING;

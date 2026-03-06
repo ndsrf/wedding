@@ -1143,7 +1143,8 @@
         "invitation": "📩 Invitations",
         "reminder": "🔔 Reminders",
         "confirmation": "✅ Confirmations",
-        "saveTheDate": "📅 Save the Date"
+        "saveTheDate": "📅 Save the Date",
+        "tastingMenu": "🍽️ Tasting Menu"
       },
       "language": {
         "title": "Language"
