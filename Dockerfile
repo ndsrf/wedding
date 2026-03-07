@@ -21,7 +21,7 @@ ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm install -g npm@11 && npm ci
 
 # ============================================
 # Stage 2: Builder
