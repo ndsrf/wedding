@@ -17,6 +17,7 @@ import PrivateHeader from '@/components/PrivateHeader';
 import type { WeddingWithStats, ItineraryItem, Location } from '@/types/models';
 import type { WeddingAdmin } from '@prisma/client';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import { NavGroup } from '@/components/shared/NavGroup';
 
 interface WeddingDetailPageProps {
   params: Promise<{ id: string }>;
@@ -330,66 +331,73 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
             </Link>
 
             {/* Invitations & Templates — grouped */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
-                  <svg className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.invitationsAndTemplates')}</h3>
-              </div>
-              <div className="flex flex-col gap-1.5 pl-1">
-                <Link
-                  href={`/planner/weddings/${weddingId}/invitation-builder`}
-                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  {t('admin.dashboard.invitationBuilder')}
-                </Link>
-                <Link
-                  href={`/planner/weddings/${weddingId}/templates`}
-                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  {t('admin.templates.title')}
-                </Link>
-              </div>
-            </div>
+            <NavGroup
+              title={t('admin.dashboard.invitationsAndTemplates')}
+              headerBgClass="bg-pink-50"
+              hoverTextClass="hover:text-pink-600"
+              headerIcon={
+                <svg className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              }
+              items={[
+                {
+                  href: `/planner/weddings/${weddingId}/invitation-builder`,
+                  label: t('admin.dashboard.invitationBuilder'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: `/planner/weddings/${weddingId}/templates`,
+                  label: t('admin.templates.title'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
 
-            {/* Food & Drinks */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
-                  <span className="text-xl">🍽️</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.tastingMenu.nav')}</h3>
-              </div>
-              <div className="flex flex-col gap-1.5 pl-1">
-                <Link
-                  href={`/planner/weddings/${weddingId}/tasting`}
-                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  {t('admin.tastingMenu.tasting')}
-                </Link>
-                <Link
-                  href={`/planner/weddings/${weddingId}/menu`}
-                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  {t('admin.tastingMenu.weddingMenu')}
-                </Link>
-              </div>
-            </div>
+            {/* Food & Drinks — grouped, includes seating plan */}
+            <NavGroup
+              title={t('admin.tastingMenu.nav')}
+              headerBgClass="bg-rose-50"
+              hoverTextClass="hover:text-rose-600"
+              headerIcon={<span className="text-xl">🍽️</span>}
+              items={[
+                {
+                  href: `/planner/weddings/${weddingId}/tasting`,
+                  label: t('admin.tastingMenu.tasting'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: `/planner/weddings/${weddingId}/menu`,
+                  label: t('admin.tastingMenu.weddingMenu'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: `/planner/weddings/${weddingId}/seating`,
+                  label: t('admin.dashboard.seatingPlan'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
 
             {/* Reports */}
             <Link
@@ -409,27 +417,6 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-
-            {/* Seating Plan — conditional: within 2 months */}
-            {showLateStageActions && (
-              <Link
-                href={`/planner/weddings/${weddingId}/seating`}
-                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-cyan-200 hover:bg-cyan-50/20 transition-all"
-              >
-                <div className="flex-shrink-0 w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
-                  <svg className="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.seatingPlan')}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.seatingPlanSubtitle')}</p>
-                </div>
-                <svg className="h-4 w-4 text-gray-300 group-hover:text-cyan-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            )}
 
             {/* Gift/Payment Tracking — conditional: within 2 months */}
             {showLateStageActions && (

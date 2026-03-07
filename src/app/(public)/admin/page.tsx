@@ -15,6 +15,7 @@ import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
 import { NupciBot } from '@/components/admin/NupciBot';
 import NotificationBell from '@/components/admin/NotificationBell';
 import PrivateHeader from '@/components/PrivateHeader';
+import { NavGroup } from '@/components/shared/NavGroup';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface ItinerarySummaryItem {
@@ -367,116 +368,114 @@ export default async function AdminDashboardPage() {
           {/* Secondary Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Tareas y Finanzas — grouped */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center">
-                  <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.tasksAndFinances')}</h3>
-              </div>
-              <div className="flex flex-col gap-1.5 pl-1">
-                <Link
-                  href="/admin/checklist"
-                  className="text-xs text-gray-600 hover:text-teal-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
-                  {t('admin.dashboard.checklist')}
-                </Link>
-                <Link
-                  href="/admin/providers"
-                  className="text-xs text-gray-600 hover:text-teal-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  {t('admin.dashboard.expenses')}
-                </Link>
-                <Link
-                  href="/admin/payments"
-                  className="text-xs text-gray-600 hover:text-teal-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {t('admin.dashboard.payments')}
-                </Link>
-              </div>
-            </div>
+            <NavGroup
+              title={t('admin.dashboard.tasksAndFinances')}
+              headerBgClass="bg-teal-50"
+              hoverTextClass="hover:text-teal-600"
+              headerIcon={
+                <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              }
+              items={[
+                {
+                  href: '/admin/checklist',
+                  label: t('admin.dashboard.checklist'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: '/admin/providers',
+                  label: t('admin.dashboard.expenses'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: '/admin/payments',
+                  label: t('admin.dashboard.payments'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
 
             {/* Invitations & Templates — grouped */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
-                  <svg className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.invitationsAndTemplates')}</h3>
-              </div>
-              <div className="flex flex-col gap-1.5 pl-1">
-                <Link
-                  href="/admin/invitation-builder"
-                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  {t('admin.dashboard.invitationBuilder')}
-                </Link>
-                <Link
-                  href="/admin/templates"
-                  className="text-xs text-gray-600 hover:text-pink-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  {t('admin.dashboard.templates')}
-                </Link>
-              </div>
-            </div>
+            <NavGroup
+              title={t('admin.dashboard.invitationsAndTemplates')}
+              headerBgClass="bg-pink-50"
+              hoverTextClass="hover:text-pink-600"
+              headerIcon={
+                <svg className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              }
+              items={[
+                {
+                  href: '/admin/invitation-builder',
+                  label: t('admin.dashboard.invitationBuilder'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: '/admin/templates',
+                  label: t('admin.dashboard.templates'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
 
-            {/* Food & Drinks */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
-                  <span className="text-xl">🍽️</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.tastingMenu.nav')}</h3>
-              </div>
-              <div className="flex flex-col gap-1.5 pl-1">
-                <Link
-                  href="/admin/tasting"
-                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  {t('admin.tastingMenu.tasting')}
-                </Link>
-                <Link
-                  href="/admin/menu"
-                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  {t('admin.tastingMenu.weddingMenu')}
-                </Link>
-                <Link
-                  href="/admin/seating"
-                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
-                  </svg>
-                  {t('admin.dashboard.seatingPlan')}
-                </Link>
-              </div>
-            </div>
+            {/* Food & Drinks — grouped */}
+            <NavGroup
+              title={t('admin.tastingMenu.nav')}
+              headerBgClass="bg-rose-50"
+              hoverTextClass="hover:text-rose-600"
+              headerIcon={<span className="text-xl">🍽️</span>}
+              items={[
+                {
+                  href: '/admin/tasting',
+                  label: t('admin.tastingMenu.tasting'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: '/admin/menu',
+                  label: t('admin.tastingMenu.weddingMenu'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: '/admin/seating',
+                  label: t('admin.dashboard.seatingPlan'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
           </div>
         </div>
       </main>
