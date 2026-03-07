@@ -1,3 +1,13 @@
+# [1.4.0](https://github.com/ndsrf/wedding/compare/v1.3.0...v1.4.0) (2026-03-07)
+
+
+### Features
+
+* **seating:** Enhance seating configuration and layout features. Add support for table types, colors, dimensions, and layout elements. Update UI to include new options for table configuration and layout management. Implement API changes to handle new seating attributes and layout saving functionality. ([b04e101](https://github.com/ndsrf/wedding/commit/b04e1016827f0e9bb548d8ea0c96def7a21769b2))
+* **tasting:** Implement search functionality for dishes in tasting menu, including filtering sections based on user input. Update UI to display search results and no-results message. Add translations for search-related text in multiple languages. ([ed3efb9](https://github.com/ndsrf/wedding/commit/ed3efb9d0a7d8d59e2aac383a94debd26d3e014c))
+
+
+
 # [1.3.0](https://github.com/ndsrf/wedding/compare/v1.2.1...v1.3.0) (2026-03-07)
 
 
