@@ -52,6 +52,8 @@ export async function POST(request: NextRequest, { params }: Params) {
   let messageBody = custom_message ?? '';
   let messageSubject = `Tasting Menu - ${wedding.couple_names}`;
 
+  let contentTemplateId: string | undefined;
+
   if (!custom_message) {
     try {
       const lang = (wedding.default_language ?? 'ES') as Parameters<typeof getTemplateForSending>[2];
@@ -64,6 +66,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       if (tpl) {
         messageBody = renderTemplate(tpl.body, variables);
         messageSubject = renderTemplate(tpl.subject, variables);
+        contentTemplateId = (tpl as unknown as { content_template_id?: string }).content_template_id;
       }
     } catch { /* use fallback */ }
   }
@@ -86,7 +89,11 @@ export async function POST(request: NextRequest, { params }: Params) {
   } else if (channel === 'WHATSAPP') {
     const phone = participant.whatsapp_number || participant.phone;
     if (!phone) return NextResponse.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'No phone' } }, { status: 400 });
-    const result = await sendDynamicMessage(phone, messageBody, MessageType.WHATSAPP);
+    if (!contentTemplateId) return NextResponse.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'No WhatsApp Content Template ID configured for this template' } }, { status: 400 });
+    const { mapToWhatsAppVariables } = await import('@/lib/templates/whatsapp-mapper');
+    const { sendWhatsAppWithContentTemplate } = await import('@/lib/sms/twilio');
+    const whatsappVars = mapToWhatsAppVariables(variables);
+    const result = await sendWhatsAppWithContentTemplate(phone, contentTemplateId, whatsappVars);
     if (!result.success) return NextResponse.json({ success: false, error: { code: 'SEND_FAILED', message: result.error ?? 'Failed' } }, { status: 500 });
   } else {
     const phone = participant.phone || participant.whatsapp_number;
