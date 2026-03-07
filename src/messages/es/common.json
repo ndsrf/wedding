@@ -1099,10 +1099,35 @@
         "addTable": "Añadir Mesa",
         "tableName": "Nombre de la Mesa",
         "tableNumber": "Nº",
+        "type": "Tipo",
+        "types": {
+          "circle": "Circular",
+          "square": "Cuadrada",
+          "rectangle": "Rectangular"
+        },
         "capacity": "Capacidad",
         "actions": "Acciones",
         "save": "Guardar Mesas",
         "saving": "Guardando..."
+      },
+      "layout": {
+        "title": "Distribución",
+        "unplacedTables": "Mesas sin colocar",
+        "canvasActions": {
+          "title": "Herramientas",
+          "drawLine": "Dibujar Línea",
+          "addText": "Añadir Texto",
+          "clear": "Limpiar Todo",
+          "delete": "Eliminar Seleccionado",
+          "save": "Guardar Diseño",
+          "export": "Exportar a Excel",
+          "rotate": "Rotar 90°"
+        },
+        "showNames": "Mostrar nombres de invitados",
+        "textPlaceholder": "Doble clic para editar texto",
+        "familySeating": "Asientos por Familia",
+        "familyTogether": "Mantener familias juntas",
+        "manualSeating": "Orden de asientos manual"
       },
       "assignment": {
         "title": "Asignación de Invitados",

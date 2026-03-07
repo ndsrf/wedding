@@ -724,6 +724,10 @@ export type PreviewTemplateResponse = APIResponse<PreviewTemplateResult>;
 
 export interface TableWithGuests extends Table {
   assigned_guests: Array<FamilyMember & { family_name: string }>;
+  type: string;
+  x: number | null;
+  y: number | null;
+  rotation: number | null;
 }
 
 export interface SeatingPlanData {
@@ -735,6 +739,8 @@ export interface SeatingPlanData {
     total_seats: number;
     assigned_seats: number;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  layout_elements?: any;
 }
 
 export type GetSeatingPlanResponse = APIResponse<SeatingPlanData>;
@@ -745,6 +751,13 @@ export interface UpsertTablesRequest {
     number: number;
     name?: string | null;
     capacity: number;
+    type?: string;
+    color?: string | null;
+    width?: number | null;
+    height?: number | null;
+    x?: number | null;
+    y?: number | null;
+    rotation?: number | null;
   }>;
   delete_ids?: string[];
 }
@@ -755,10 +768,27 @@ export interface AssignGuestsRequest {
   assignments: Array<{
     guest_id: string;
     table_id: string | null;
+    seat_index?: number | null;
   }>;
 }
 
 export type AssignGuestsResponse = APIResponse<{ success: boolean }>;
+
+export interface SaveLayoutRequest {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  layout_elements: any;
+  tables?: Array<{
+    id: string;
+    x: number | null;
+    y: number | null;
+    rotation: number | null;
+    color?: string | null;
+    width?: number | null;
+    height?: number | null;
+  }>;
+}
+
+export type SaveLayoutResponse = APIResponse<{ success: boolean }>;
 
 export interface SplitFamilyRequest {
   family_id: string;

@@ -9,8 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import type { GetSeatingPlanResponse } from '@/types/api';
+import type { GetSeatingPlanResponse, TableWithGuests } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
+import type { FamilyMember, LayoutElement } from '@/types/models';
 
 /**
  * GET /api/admin/seating
@@ -33,10 +34,10 @@ export async function GET() {
       );
     }
 
-    // Fetch wedding details for couple names
+    // Fetch wedding details for couple names and layout
     const wedding = await prisma.wedding.findUnique({
       where: { id: user.wedding_id },
-      select: { couple_names: true, couple_table_id: true },
+      select: { couple_names: true, couple_table_id: true, layout_elements: true },
     });
 
     if (!wedding) {
@@ -63,6 +64,7 @@ export async function GET() {
         type: 'ADULT',
         attending: true,
         table_id: wedding.couple_table_id,
+        seat_index: 0,
       },
       {
         id: 'couple-member-2',
@@ -72,6 +74,7 @@ export async function GET() {
         type: 'ADULT',
         attending: true,
         table_id: wedding.couple_table_id,
+        seat_index: 1,
       },
     ];
 
@@ -81,6 +84,7 @@ export async function GET() {
       orderBy: { number: 'asc' },
       include: {
         assigned_guests: {
+          orderBy: { seat_index: 'asc' },
           include: {
             family: {
               select: { name: true },
@@ -114,6 +118,8 @@ export async function GET() {
       // Add couple if assigned to this table
       if (wedding.couple_table_id === table.id) {
         assignedGuests.push(...coupleMembers as GuestWithFamilyName[]);
+        // Sort again after adding couple
+        assignedGuests.sort((a, b) => (a.seat_index || 0) - (b.seat_index || 0));
       }
 
       return {
@@ -146,14 +152,15 @@ export async function GET() {
     const response: GetSeatingPlanResponse = {
       success: true,
       data: {
-        tables: formattedTables,
-        unassigned_guests: unassignedGuests,
+        tables: formattedTables as unknown as TableWithGuests[],
+        unassigned_guests: unassignedGuests as unknown as Array<FamilyMember & { family_name: string }>,
         stats: {
           total_guests: totalGuestsCount + 2, // +2 for the couple
           confirmed_guests: confirmedGuestsCount,
           total_seats: totalSeats,
           assigned_seats: assignedSeats,
         },
+        layout_elements: wedding.layout_elements as unknown as LayoutElement[],
       },
     };
 
@@ -178,6 +185,7 @@ const assignSchema = z.object({
     z.object({
       guest_id: z.string(),
       table_id: z.string().uuid().nullable(),
+      seat_index: z.number().int().min(0).nullable().optional(),
     })
   ),
 });
@@ -220,20 +228,46 @@ export async function POST(request: NextRequest) {
 
     // Update each guest assignment
     if (guestAssignments.length > 0) {
-      // Using a transaction for atomicity
-      await prisma.$transaction(
-        guestAssignments.map((assignment) =>
-          prisma.familyMember.update({
-            where: {
-              id: assignment.guest_id,
-              family: { wedding_id: user.wedding_id as string }, // Security check
-            },
-            data: {
-              table_id: assignment.table_id,
-            },
-          })
-        )
-      );
+      // Group assignments by table to handle seat_index correctly
+      const byTable: Record<string, string[]> = {};
+      guestAssignments.forEach(a => {
+        if (a.table_id) {
+          if (!byTable[a.table_id]) byTable[a.table_id] = [];
+          byTable[a.table_id].push(a.guest_id);
+        }
+      });
+
+      await prisma.$transaction(async (tx) => {
+        // Handle unassignments (table_id is null)
+        const unassignments = guestAssignments.filter(a => !a.table_id);
+        for (const a of unassignments) {
+          await tx.familyMember.update({
+            where: { id: a.guest_id, family: { wedding_id: user.wedding_id as string } },
+            data: { table_id: null, seat_index: null }
+          });
+        }
+
+        // Handle assignments to tables
+        for (const [tableId, guestIds] of Object.entries(byTable)) {
+          // Get current max seat_index for this table
+          const maxSeat = await tx.familyMember.aggregate({
+            where: { table_id: tableId },
+            _max: { seat_index: true }
+          });
+          let nextIndex = (maxSeat._max.seat_index ?? -1) + 1;
+
+          for (const guestId of guestIds) {
+            const assignment = guestAssignments.find(a => a.guest_id === guestId);
+            await tx.familyMember.update({
+              where: { id: guestId, family: { wedding_id: user.wedding_id as string } },
+              data: { 
+                table_id: tableId, 
+                seat_index: assignment?.seat_index !== undefined ? assignment.seat_index : nextIndex++ 
+              }
+            });
+          }
+        }
+      });
     }
 
     return NextResponse.json({ success: true }, { status: 200 });

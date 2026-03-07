@@ -1103,10 +1103,35 @@
         "addTable": "Add Table",
         "tableName": "Table Name",
         "tableNumber": "No.",
+        "type": "Type",
+        "types": {
+          "circle": "Circle",
+          "square": "Square",
+          "rectangle": "Rectangle"
+        },
         "capacity": "Capacity",
         "actions": "Actions",
         "save": "Save Tables",
         "saving": "Saving..."
+      },
+      "layout": {
+        "title": "Layout",
+        "unplacedTables": "Unplaced Tables",
+        "canvasActions": {
+          "title": "Tools",
+          "drawLine": "Draw Line",
+          "addText": "Add Text",
+          "clear": "Clear All",
+          "delete": "Delete Selected",
+          "save": "Save Layout",
+          "export": "Export to Excel",
+          "rotate": "Rotate 90°"
+        },
+        "showNames": "Show Guest Names",
+        "textPlaceholder": "Double click to edit text",
+        "familySeating": "Family Seating",
+        "familyTogether": "Keep families together",
+        "manualSeating": "Manual seating order"
       },
       "assignment": {
         "title": "Guest Assignment",

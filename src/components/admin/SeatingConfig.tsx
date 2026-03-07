@@ -13,14 +13,14 @@ interface SeatingConfigProps {
 export function SeatingConfig({ tables, onUpdate, apiBase = '/api/admin/seating' }: SeatingConfigProps) {
   const t = useTranslations();
   const [localTables, setLocalTables] = useState<Partial<Table>[]>(
-    tables.length > 0 ? tables : [{ number: 1, capacity: 10 }]
+    tables.length > 0 ? tables : [{ number: 1, capacity: 10, type: 'circle', color: '#ffffff', width: 80, height: 80 }]
   );
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   const addTable = () => {
     const nextNumber = Math.max(0, ...localTables.map((t) => t.number || 0)) + 1;
-    setLocalTables([...localTables, { number: nextNumber, capacity: 10 }]);
+    setLocalTables([...localTables, { number: nextNumber, capacity: 10, type: 'circle', color: '#ffffff', width: 80, height: 80 }]);
   };
 
   const removeTable = (index: number) => {
@@ -85,6 +85,12 @@ export function SeatingConfig({ tables, onUpdate, apiBase = '/api/admin/seating'
                 {t('admin.seating.config.tableName')}
               </th>
               <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {t('admin.seating.config.type')}
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Color
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.seating.config.capacity')}
               </th>
               <th className="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -110,6 +116,25 @@ export function SeatingConfig({ tables, onUpdate, apiBase = '/api/admin/seating'
                     onChange={(e) => updateTable(index, 'name', e.target.value)}
                     placeholder={`Table ${table.number}`}
                     className="w-full px-2 py-1 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <select
+                    value={table.type || 'circle'}
+                    onChange={(e) => updateTable(index, 'type' as keyof Table, e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="circle">{t('admin.seating.config.types.circle')}</option>
+                    <option value="square">{t('admin.seating.config.types.square')}</option>
+                    <option value="rectangle">{t('admin.seating.config.types.rectangle')}</option>
+                  </select>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="color"
+                    value={table.color || '#ffffff'}
+                    onChange={(e) => updateTable(index, 'color' as keyof Table, e.target.value)}
+                    className="w-12 h-8 p-0 border-none bg-transparent cursor-pointer"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

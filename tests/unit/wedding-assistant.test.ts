@@ -74,6 +74,7 @@ const baseWedding = {
   extra_info_2_label: null,
   extra_info_3_enabled: false,
   extra_info_3_label: null,
+  layout_elements: null,
   deleted_at: null,
   deleted_by: null,
   disabled_at: null,

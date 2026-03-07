@@ -6,14 +6,16 @@ import Link from 'next/link';
 import { StatsCard } from '@/components/planner/StatsCard';
 import { SeatingConfig } from '@/components/admin/SeatingConfig';
 import { SeatingAssignment } from '@/components/admin/SeatingAssignment';
+import { SeatingLayout } from '@/components/admin/SeatingLayout';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { SeatingPlanData } from '@/types/api';
+import PrivateHeader from '@/components/PrivateHeader';
 
 export default function SeatingPlanPage() {
   const t = useTranslations();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<SeatingPlanData | null>(null);
-  const [activeTab, setActiveTab] = useState<'assignment' | 'config'>('assignment');
+  const [activeTab, setActiveTab] = useState<'assignment' | 'config' | 'layout'>('config');
 
   const fetchData = async () => {
     setLoading(true);
@@ -58,39 +60,21 @@ export default function SeatingPlanPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/admin"
-                className="p-2 text-gray-600 hover:text-gray-600 transition-colors"
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{t('admin.seating.title')}</h1>
-                <p className="text-sm text-gray-600">{t('admin.seating.subtitle')}</p>
-              </div>
-            </div>
+      <PrivateHeader />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center mb-6">
+          <Link href="/admin" className="text-gray-500 hover:text-gray-700 mr-3">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">🪑 {t('admin.seating.title')}</h1>
+            <p className="mt-1 text-sm text-gray-500">{t('admin.seating.subtitle')}</p>
           </div>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatsCard
@@ -121,6 +105,16 @@ export default function SeatingPlanPage() {
           <div className="border-b border-gray-200">
             <nav className="flex -mb-px">
               <button
+                onClick={() => setActiveTab('config')}
+                className={`flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'config'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {t('admin.seating.config.title')}
+              </button>
+              <button
                 onClick={() => setActiveTab('assignment')}
                 className={`flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'assignment'
@@ -131,27 +125,34 @@ export default function SeatingPlanPage() {
                 {t('admin.seating.assignment.title')}
               </button>
               <button
-                onClick={() => setActiveTab('config')}
+                onClick={() => setActiveTab('layout')}
                 className={`flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'config'
+                  activeTab === 'layout'
                     ? 'border-purple-500 text-purple-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                {t('admin.seating.config.title')}
+                {t('admin.seating.layout.title')}
               </button>
             </nav>
           </div>
 
           <div className="p-6">
-            {activeTab === 'assignment' ? (
+            {activeTab === 'config' && (
+              <SeatingConfig
+                tables={data.tables}
+                onUpdate={fetchData}
+              />
+            )}
+            {activeTab === 'assignment' && (
               <SeatingAssignment
                 data={data}
                 onUpdate={fetchData}
               />
-            ) : (
-              <SeatingConfig
-                tables={data.tables}
+            )}
+            {activeTab === 'layout' && (
+              <SeatingLayout
+                data={data}
                 onUpdate={fetchData}
               />
             )}

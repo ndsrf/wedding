@@ -115,6 +115,7 @@ model Wedding {
   wizard_current_step             Int?
   wizard_completed_at             DateTime?
   wizard_skipped                  Boolean            @default(false)
+  layout_elements                 Json?              // Store canvas lines, text, etc.
   // Google Photos integration
   google_photos_share_url         String?            // Album share link pasted by admin (for guests to add photos directly)
   google_photos_album_id          String?            // Album ID for OAuth-based programmatic upload
@@ -331,6 +332,7 @@ model FamilyMember {
   accessibility_needs  String?
   added_by_guest       Boolean    @default(false)
   table_id             String?
+  seat_index           Int?       // Position within the table
   seating_group        String?
   created_at           DateTime   @default(now())
   family               Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)
@@ -437,6 +439,13 @@ model Table {
   name            String?
   number          Int
   capacity        Int
+  type            String         @default("circle") // square, rectangle, circle
+  color           String?        @default("#ffffff")
+  width           Float?         @default(80)
+  height          Float?         @default(80)
+  x               Float?         // Canvas X position
+  y               Float?         // Canvas Y position
+  rotation        Float?         @default(0)
   created_at      DateTime       @default(now())
   updated_at      DateTime       @updatedAt
   assigned_guests FamilyMember[]

@@ -8,6 +8,21 @@
 
 import type { ThemeConfig } from './theme';
 
+export interface LayoutElement {
+  id: string;
+  type: 'line' | 'text';
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+  text?: string;
+  x?: number;
+  y?: number;
+  fontSize?: number;
+  size?: number;
+  color?: string;
+}
+
 // ============================================================================
 // ENUMS - Import and re-export from Prisma for convenience
 // ============================================================================
@@ -180,6 +195,8 @@ export interface Wedding {
   extra_info_2_label: string | null;
   extra_info_3_enabled: boolean;
   extra_info_3_label: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  layout_elements?: any | null; // JSON value for canvas elements
 }
 
 export interface WeddingAdmin {
@@ -239,6 +256,7 @@ export interface FamilyMember {
   accessibility_needs: string | null;
   added_by_guest: boolean;
   table_id: string | null;
+  seat_index?: number | null;
   seating_group: string | null;
   created_at: Date;
 }
@@ -249,6 +267,13 @@ export interface Table {
   name: string | null;
   number: number;
   capacity: number;
+  type: string;
+  color: string | null;
+  width: number | null;
+  height: number | null;
+  x: number | null;
+  y: number | null;
+  rotation: number | null;
   created_at: Date;
   updated_at: Date;
 }

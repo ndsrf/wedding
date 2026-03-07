@@ -18,6 +18,13 @@ const upsertTablesSchema = z.object({
       number: z.number().int().positive(),
       name: z.string().nullable().optional(),
       capacity: z.number().int().positive(),
+      type: z.string().optional().default('circle'),
+      color: z.string().nullable().optional(),
+      width: z.number().nullable().optional(),
+      height: z.number().nullable().optional(),
+      x: z.number().nullable().optional(),
+      y: z.number().nullable().optional(),
+      rotation: z.number().nullable().optional(),
     })
   ),
   delete_ids: z.array(z.string().uuid()).optional().default([]),
@@ -81,6 +88,13 @@ export async function POST(request: NextRequest) {
               number: table.number,
               name: table.name || null,
               capacity: table.capacity,
+              type: table.type,
+              color: table.color || '#ffffff',
+              width: table.width ?? 80,
+              height: table.height ?? 80,
+              x: table.x ?? null,
+              y: table.y ?? null,
+              rotation: table.rotation ?? 0,
             },
           });
           upsertedTables.push(updated);
@@ -92,6 +106,13 @@ export async function POST(request: NextRequest) {
               number: table.number,
               name: table.name || null,
               capacity: table.capacity,
+              type: table.type,
+              color: table.color || '#ffffff',
+              width: table.width ?? 80,
+              height: table.height ?? 80,
+              x: table.x ?? null,
+              y: table.y ?? null,
+              rotation: table.rotation ?? 0,
             },
           });
           upsertedTables.push(created);
