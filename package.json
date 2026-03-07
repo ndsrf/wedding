@@ -49,7 +49,7 @@
     "html2canvas": "^1.4.1",
     "ioredis": "^5.10.0",
     "isomorphic-dompurify": "^2.35.0",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.577.0",
     "mime": "^4.1.0",
     "next": "^15.1.6",
     "next-auth": "^5.0.0-beta.30",
