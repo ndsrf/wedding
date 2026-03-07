@@ -1,3 +1,46 @@
+# [1.3.0](https://github.com/ndsrf/wedding/compare/v1.2.1...v1.3.0) (2026-03-07)
+
+
+### Bug Fixes
+
+* Add new variables for tasting menu in the template preview and whatsapp variables ([c25d993](https://github.com/ndsrf/wedding/commit/c25d9938926a5b18636c6308903f237f76f962db))
+* BigInt serialization, admin context ($2), chat box at top ([f16aa89](https://github.com/ndsrf/wedding/commit/f16aa8984602f6e5ab68b1c73316c51a2f39c2e5))
+* **config:** make output:standalone conditional on DEPLOYMENT_TARGET=docker ([5e414bc](https://github.com/ndsrf/wedding/commit/5e414bc198959d5622239150b74df317251d7846))
+* **docker:** set DEPLOYMENT_TARGET=docker in Dockerfile and CI build ([0e51ee1](https://github.com/ndsrf/wedding/commit/0e51ee1d28c15b515422d776cae62f69a10b1262))
+* Fix tasting menu template migration screen issues ([c8098e0](https://github.com/ndsrf/wedding/commit/c8098e0fa6e467c7743f60b3707b4620056e0154))
+* Fix tasting menu template migration screen issues ([6bd6bdc](https://github.com/ndsrf/wedding/commit/6bd6bdcbaedffda97613bb99f4b5a1f537754ebc))
+* **middleware:** explicitly handle root path routing to avoid 404 ([88791b4](https://github.com/ndsrf/wedding/commit/88791b41b609d4d43b6197c381acd331824fc793))
+* **migration:** Cast language and channel fields to "Language" and "Channel" in tasting menu migration SQL ([c6cd904](https://github.com/ndsrf/wedding/commit/c6cd9040bc18d39607f176786c52fe404c6cdfcf))
+* **migration:** Cast template type to "TemplateType" in tasting menu migration SQL ([c5e1435](https://github.com/ndsrf/wedding/commit/c5e14358f844276d7242e7cef18c5e190832fe73))
+* **migration:** Cast template type, language, and channel fields to their respective types in planner message templates migration SQL ([4b45ea1](https://github.com/ndsrf/wedding/commit/4b45ea16276d1030d8c4e890080b7d5010934aed))
+* pass exact number of SQL parameters to avoid PostgreSQL bind error ([14a832b](https://github.com/ndsrf/wedding/commit/14a832be30d119c075dd23575a2ac4cb90edcd2d))
+* remove Cache-Control from guest list endpoints to prevent stale data after add/delete ([5ccb72b](https://github.com/ndsrf/wedding/commit/5ccb72be03fcc7f5e04151c9343619cc5a5a8fb0))
+* **tasting:** correct Parameters index for Language type in send routes ([f0f303b](https://github.com/ndsrf/wedding/commit/f0f303b17608220f77aff65f53b975e6cd0c4707))
+* **tasting:** remove lingering whatsappMode prop from planner tasting page ([dd2a860](https://github.com/ndsrf/wedding/commit/dd2a86052c1663ef5ad201c23e862c70427d997d))
+* **tasting:** remove unused whatsappMode prop to resolve ESLint error ([86d2cbc](https://github.com/ndsrf/wedding/commit/86d2cbc050d5aedccb521b39a5c8e63250744511))
+* **tests:** update Gemini mock to @google/genai SDK ([9f38cce](https://github.com/ndsrf/wedding/commit/9f38ccec0b644388412b810039ee80a3ee3c6d5c))
+* **vcf:** correct N-field name order; sort guest list alphabetically ([94b3012](https://github.com/ndsrf/wedding/commit/94b3012fd93f0c72b46b7ffbee8f5111c0d4438c))
+* **vcf:** decode QUOTED-PRINTABLE encoded names in vCard 2.1 files ([37e6981](https://github.com/ndsrf/wedding/commit/37e69815ad28f06ec9b15fcba6479a5d21f01736))
+* **vcf:** handle base64 photo padding, iOS groups, charset, and case validation ([40783cb](https://github.com/ndsrf/wedding/commit/40783cb9499a6a89765314101a8f7d0466975931))
+
+
+### Features
+
+* add invitation template export/import (.nupcinv format) ([7f37799](https://github.com/ndsrf/wedding/commit/7f37799cf9ea9581cb44f824ea8e8953ce19dcc4))
+* Add Menu page to select the final menu from the tasting menu options ([49a2ad9](https://github.com/ndsrf/wedding/commit/49a2ad98b8798456aeb19c63c6c88aad565b1bf6))
+* add natural-language query chat box to /admin/reports ([8eb5265](https://github.com/ndsrf/wedding/commit/8eb52650bf10ab5102e0a2cc76bd9013252cac74))
+* add Redis caching, fix N+1 queries, and add DB indexes for /admin and /planner performance ([f8796ce](https://github.com/ndsrf/wedding/commit/f8796ce2910db15603cef5b5278c5f9f340602ea))
+* add tasting menu experience for admin and planner ([7b03c84](https://github.com/ndsrf/wedding/commit/7b03c84e03eec1dbf9aac51df4ed18d6e6c68f00))
+* default notifications to unread, add read/all filter, add DB indexes ([5c64b8d](https://github.com/ndsrf/wedding/commit/5c64b8dcfbd616c37e1f44b713e16eb631327d77))
+* Moved tasting menu messaging templates to the standard templates page ([59055cd](https://github.com/ndsrf/wedding/commit/59055cdb97478b2831b8ced33a8f3cb27a4ef086))
+* **tasting:** add dish inline editing and AI menu import from PDF/image ([d01c347](https://github.com/ndsrf/wedding/commit/d01c34727fe649d0a410aba85d7f08e5ee432347))
+* **tasting:** auto-save scores and resume on page reload ([dff3ba8](https://github.com/ndsrf/wedding/commit/dff3ba84a285059b75bd9d781ee93680711c25aa))
+* **tasting:** edit participants, language per participant, template fix, public page language selector ([da56e99](https://github.com/ndsrf/wedding/commit/da56e99243e37667cffbf534f44f9f4234dfde86))
+* **tasting:** Enhance tasting scoring system: update score range from 1-5 to 1-10, adjust UI components accordingly, and implement collapsible sections for better user experience. Update translations for score display and photo upload options in multiple languages. ([bc9055b](https://github.com/ndsrf/wedding/commit/bc9055b78524fbf35f3dc5d59cd4416ca4f36030))
+* **vcf:** import spinner + duplicate phone dedup ([52c5cdb](https://github.com/ndsrf/wedding/commit/52c5cdbd6d1c3bcc1c9b3b42f4f33aeb0e3c063e))
+
+
+
 ## [1.2.1](https://github.com/ndsrf/wedding/compare/v1.2.0...v1.2.1) (2026-03-01)
 
 
