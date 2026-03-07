@@ -17,6 +17,7 @@
 import { useState, useEffect, useCallback, useRef, use } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import Footer from '@/components/Footer';
 
 const LANGUAGES = [
   { code: 'es', label: 'ES' },
@@ -139,13 +140,27 @@ function SaveBadge({ status }: { status: SaveStatus }) {
   return <span className={`text-xs transition-opacity ${className}`}>{text}</span>;
 }
 
+// ─── Filter helper ───────────────────────────────────────────────────────────
+
+function filterSections(sections: Section[], query: string): Section[] {
+  if (!query.trim()) return sections;
+  const q = query.toLowerCase();
+  return sections
+    .map(section => ({
+      ...section,
+      dishes: section.dishes.filter(d => d.name.toLowerCase().includes(q)),
+    }))
+    .filter(section => section.dishes.length > 0);
+}
+
 // ─── My Scores Tab ───────────────────────────────────────────────────────────
 
-function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate }: {
+function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate, searchQuery }: {
   data: TastingData;
   token: string;
   onScoreUpdate: (dishId: string, score: number, notes: string | null) => void;
   onImageUpdate: (dishId: string, imageUrl: string | null) => void;
+  searchQuery: string;
 }) {
   const t = useTranslations('guest.tasting');
 
@@ -285,6 +300,8 @@ function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate }: {
     return () => { Object.values(t).forEach(clearTimeout); };
   }, []);
 
+  const visibleSections = filterSections(data.menu.sections, searchQuery);
+
   return (
     <>
       {lightboxUrl && (
@@ -302,8 +319,12 @@ function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate }: {
         </div>
       )}
 
+      {visibleSections.length === 0 && searchQuery.trim() && (
+        <p className="text-sm text-gray-500 italic text-center py-8">{t('search.noResults')}</p>
+      )}
+
       <div className="space-y-4">
-        {data.menu.sections.map(section => {
+        {visibleSections.map(section => {
           const collapsed = collapsedSections.has(section.id);
           return (
             <div key={section.id}>
@@ -431,7 +452,7 @@ function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate }: {
 
 // ─── All Scores Tab ──────────────────────────────────────────────────────────
 
-function AllScoresTab({ data }: { data: TastingData }) {
+function AllScoresTab({ data, searchQuery }: { data: TastingData; searchQuery: string }) {
   const t = useTranslations('guest.tasting');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
@@ -444,6 +465,8 @@ function AllScoresTab({ data }: { data: TastingData }) {
       return next;
     });
   };
+
+  const visibleSections = filterSections(data.menu.sections, searchQuery);
 
   return (
     <>
@@ -470,8 +493,12 @@ function AllScoresTab({ data }: { data: TastingData }) {
         </div>
       )}
 
+      {visibleSections.length === 0 && searchQuery.trim() && (
+        <p className="text-sm text-gray-500 italic text-center py-8">{t('search.noResults')}</p>
+      )}
+
       <div className="space-y-4">
-        {data.menu.sections.map(section => {
+        {visibleSections.map(section => {
           const collapsed = collapsedSections.has(section.id);
           return (
             <div key={section.id}>
@@ -553,7 +580,7 @@ function AllScoresTab({ data }: { data: TastingData }) {
 
 // ─── Average Scores Tab ──────────────────────────────────────────────────────
 
-function AverageScoresTab({ data }: { data: TastingData }) {
+function AverageScoresTab({ data, searchQuery }: { data: TastingData; searchQuery: string }) {
   const t = useTranslations('guest.tasting');
   const [sortBy, setSortBy] = useState<SortKey>('score');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
@@ -567,6 +594,8 @@ function AverageScoresTab({ data }: { data: TastingData }) {
       return next;
     });
   };
+
+  const visibleSections = filterSections(data.menu.sections, searchQuery);
 
   return (
     <>
@@ -610,7 +639,11 @@ function AverageScoresTab({ data }: { data: TastingData }) {
           </button>
         </div>
 
-        {data.menu.sections.map(section => {
+        {visibleSections.length === 0 && searchQuery.trim() && (
+          <p className="text-sm text-gray-500 italic text-center py-8">{t('search.noResults')}</p>
+        )}
+
+        {visibleSections.map(section => {
           const collapsed = collapsedSections.has(section.id);
           const sortedDishes = [...section.dishes].sort((a, b) =>
             sortBy === 'score'
@@ -772,6 +805,8 @@ export default function TastingPage({ params }: PageProps) {
     });
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const tabs: { id: Tab; label: string }[] = [
     { id: 'my', label: t('tabs.myScores') },
     { id: 'all', label: t('tabs.allScores') },
@@ -814,6 +849,22 @@ export default function TastingPage({ params }: PageProps) {
           </div>
         </div>
 
+        {/* Search */}
+        <div className="max-w-2xl mx-auto px-4 pb-3">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder={t('search.placeholder')}
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-rose-500 focus:border-rose-500 bg-gray-50"
+            />
+          </div>
+        </div>
+
         {/* Tabs */}
         <div className="border-t border-gray-100">
           <div className="max-w-2xl mx-auto px-4">
@@ -845,11 +896,13 @@ export default function TastingPage({ params }: PageProps) {
         )}
 
         {activeTab === 'my' && (
-          <MyScoresTab data={data} token={token} onScoreUpdate={handleScoreUpdate} onImageUpdate={handleImageUpdate} />
+          <MyScoresTab data={data} token={token} onScoreUpdate={handleScoreUpdate} onImageUpdate={handleImageUpdate} searchQuery={searchQuery} />
         )}
-        {activeTab === 'all' && <AllScoresTab data={data} />}
-        {activeTab === 'avg' && <AverageScoresTab data={data} />}
+        {activeTab === 'all' && <AllScoresTab data={data} searchQuery={searchQuery} />}
+        {activeTab === 'avg' && <AverageScoresTab data={data} searchQuery={searchQuery} />}
       </div>
+
+      <Footer />
     </div>
   );
 }

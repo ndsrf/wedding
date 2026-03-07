@@ -1918,7 +1918,11 @@
       },
       "loading": "Laden...",
       "error": "Ladefehler",
-      "notFound": "Link nicht gefunden oder abgelaufen."
+      "notFound": "Link nicht gefunden oder abgelaufen.",
+      "search": {
+        "placeholder": "Gerichte suchen...",
+        "noResults": "Keine Gerichte entsprechen Ihrer Suche."
+      }
     }
   },
   "auth": {

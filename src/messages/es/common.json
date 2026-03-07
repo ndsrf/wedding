@@ -1948,7 +1948,11 @@
       },
       "loading": "Cargando...",
       "error": "Error al cargar el menú de degustación",
-      "notFound": "Enlace de degustación no encontrado o expirado."
+      "notFound": "Enlace de degustación no encontrado o expirado.",
+      "search": {
+        "placeholder": "Buscar platos...",
+        "noResults": "Ningún plato coincide con tu búsqueda."
+      }
     }
   },
   "auth": {

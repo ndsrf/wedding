@@ -1918,7 +1918,11 @@
       },
       "loading": "Chargement...",
       "error": "Erreur de chargement",
-      "notFound": "Lien non trouvé ou expiré."
+      "notFound": "Lien non trouvé ou expiré.",
+      "search": {
+        "placeholder": "Rechercher des plats...",
+        "noResults": "Aucun plat ne correspond à votre recherche."
+      }
     }
   },
   "auth": {

@@ -1918,7 +1918,11 @@
       },
       "loading": "Caricamento...",
       "error": "Errore di caricamento",
-      "notFound": "Link non trovato o scaduto."
+      "notFound": "Link non trovato o scaduto.",
+      "search": {
+        "placeholder": "Cerca piatti...",
+        "noResults": "Nessun piatto corrisponde alla ricerca."
+      }
     }
   },
   "auth": {

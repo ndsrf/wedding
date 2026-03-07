@@ -1963,7 +1963,11 @@
       },
       "loading": "Loading...",
       "error": "Failed to load tasting menu",
-      "notFound": "Tasting link not found or expired."
+      "notFound": "Tasting link not found or expired.",
+      "search": {
+        "placeholder": "Search dishes...",
+        "noResults": "No dishes match your search."
+      }
     }
   },
   "auth": {
