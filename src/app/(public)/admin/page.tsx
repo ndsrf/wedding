@@ -366,7 +366,7 @@ export default async function AdminDashboardPage() {
 
           {/* Secondary Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Tareas y Proveedores — grouped */}
+            {/* Tareas y Finanzas — grouped */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center">
@@ -374,7 +374,7 @@ export default async function AdminDashboardPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.tasksAndVendors')}</h3>
+                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.tasksAndFinances')}</h3>
               </div>
               <div className="flex flex-col gap-1.5 pl-1">
                 <Link
@@ -393,7 +393,16 @@ export default async function AdminDashboardPage() {
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  {t('admin.dashboard.vendors')}
+                  {t('admin.dashboard.expenses')}
+                </Link>
+                <Link
+                  href="/admin/payments"
+                  className="text-xs text-gray-600 hover:text-teal-600 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {t('admin.dashboard.payments')}
                 </Link>
               </div>
             </div>
@@ -457,32 +466,9 @@ export default async function AdminDashboardPage() {
                   </svg>
                   {t('admin.tastingMenu.weddingMenu')}
                 </Link>
-              </div>
-            </div>
-
-            {/* Mesas y Regalos — grouped, always visible */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                  <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.tablesAndGifts')}</h3>
-              </div>
-              <div className="flex flex-col gap-1.5 pl-1">
-                <Link
-                  href="/admin/payments"
-                  className="text-xs text-gray-600 hover:text-amber-600 hover:underline flex items-center gap-1 transition-colors"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {t('admin.dashboard.payments')}
-                </Link>
                 <Link
                   href="/admin/seating"
-                  className="text-xs text-gray-600 hover:text-amber-600 hover:underline flex items-center gap-1 transition-colors"
+                  className="text-xs text-gray-600 hover:text-rose-600 hover:underline flex items-center gap-1 transition-colors"
                 >
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
