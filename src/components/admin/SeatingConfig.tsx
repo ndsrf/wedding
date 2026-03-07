@@ -10,7 +10,7 @@ interface SeatingConfigProps {
   apiBase?: string;
 }
 
-export function SeatingConfig({ tables, onUpdate, apiBase = '/api/admin' }: SeatingConfigProps) {
+export function SeatingConfig({ tables, onUpdate, apiBase = '/api/admin/seating' }: SeatingConfigProps) {
   const t = useTranslations();
   const [localTables, setLocalTables] = useState<Partial<Table>[]>(
     tables.length > 0 ? tables : [{ number: 1, capacity: 10 }]
@@ -40,7 +40,7 @@ export function SeatingConfig({ tables, onUpdate, apiBase = '/api/admin' }: Seat
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${apiBase}/seating/tables`, {
+      const response = await fetch(`${apiBase}/tables`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

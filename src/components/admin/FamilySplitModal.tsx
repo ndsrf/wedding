@@ -19,7 +19,7 @@ export function FamilySplitModal({
   members,
   onClose,
   onUpdate,
-  apiBase = '/api/admin',
+  apiBase = '/api/admin/seating',
 }: FamilySplitModalProps) {
   const t = useTranslations();
   const [saving, setSaving] = useState(false);

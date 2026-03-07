@@ -11,7 +11,7 @@ interface SeatingAssignmentProps {
   apiBase?: string;
 }
 
-export function SeatingAssignment({ data, onUpdate, apiBase = '/api/admin' }: SeatingAssignmentProps) {
+export function SeatingAssignment({ data, onUpdate, apiBase = '/api/admin/seating' }: SeatingAssignmentProps) {
   const t = useTranslations();
   const [search, setSearch] = useState('');
   const [assigning, setAssigning] = useState(false);

@@ -173,6 +173,49 @@ When "Allow Guest Additions" is enabled in configuration, guests can add family 
 
 ---
 
+### Tasting Menu (/admin/tasting)
+Manage the wedding tasting experience — rate dishes with guests and collaborators before choosing the final menu.
+
+**Menu tab:**
+- Create a tasting menu with a title and description.
+- Add **sections** (e.g. Appetizers, Main Course, Dessert) and **dishes** within each section.
+- Each dish can have a name, description, and a photo.
+- **AI Import**: Upload a PDF or image of a catering menu and the platform parses it automatically into sections and dishes. A preview lets you select which items to import.
+- **Average scores** (1–10) per dish are shown once participants submit their ratings.
+
+**Participants tab:**
+- Add participants (name, email, phone/WhatsApp, preferred channel, language).
+- Send each participant a unique tasting link via WhatsApp, Email, or SMS using the TASTING_MENU message template.
+- Copy the link directly if needed.
+- WhatsApp LINKS mode: the admin opens a pre-filled wa.me URL manually.
+
+**Sending tasting links:**
+- The link goes to a personalised page at /tasting/[token] (no login required).
+- The message uses the TASTING_MENU template with variables: {{tastingParticipantName}}, {{coupleNames}}, {{tastingLink}}, {{weddingDate}}.
+- Configure templates at the Message Templates page.
+
+---
+
+### Menu Selection (/planner/weddings/[id]/menu — Planner only)
+After the tasting, the planner uses this page to select the final wedding menu from the tasted dishes:
+- Two-column interface: **Available Dishes** (left) and **Selected Dishes** (right).
+- Move dishes between columns individually or section by section.
+- Each dish shows its average tasting score (stars).
+- Saving marks the chosen dishes with an is_selected flag.
+
+---
+
+### Guest Tasting Experience (/tasting/[token])
+Participants receive a magic link and access their personalised tasting page with three tabs:
+
+1. **My Ratings** – Rate each dish 1–10 stars, add text notes, and upload a photo. All changes auto-save.
+2. **Everyone's Ratings** – See the scores, notes, and photos submitted by all other participants.
+3. **Average Scores** – View the computed average score per dish (1 decimal), sortable by score or name, with the number of ratings and all uploaded photos.
+
+Dishes are grouped by section (collapsible). The page is available in all 5 languages; participants can switch language from a top-right selector.
+
+---
+
 ### Gallery (/admin/gallery)
 Manage wedding photos:
 - Connect Google Photos account for automatic sync.
@@ -257,7 +300,7 @@ ${PLATFORM_DOCS}
 4. When mentioning platform pages, refer to them by their feature name naturally in the text (e.g. "the Guest Management page" or "la sección de Invitados"). Do NOT write raw paths like /admin/guests inline in your text.
 5. If you don't know the answer based on the documentation, say so honestly rather than guessing.
 6. Keep answers focused and actionable.
-7. At the very end of your response, if you referenced any specific platform pages, add a block starting with exactly "[LINKS]" on its own line. Under it, list each page on its own line as: /path|Label in the response language. Example for English: /admin/guests|Guest Management. Only include pages you actually referenced. Omit the [LINKS] block entirely if no specific pages were mentioned.`;
+7. At the very end of your response, if you referenced any specific platform pages, add a block starting with exactly "[LINKS]" on its own line. Under it, list each page on its own line as: /path|Label in the response language. Example for English: /admin/guests|Guest Management. Pages you may reference include: /admin/tasting|Tasting Menu, /admin/templates|Message Templates. Only include pages you actually referenced. Omit the [LINKS] block entirely if no specific pages were mentioned.`;
 }
 
 // ============================================================================

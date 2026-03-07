@@ -30,6 +30,19 @@ const ALLOWED_TABLES = new Set([
   'tables',
   'wedding_admins',
   'gifts',
+  // checklist
+  'checklist_sections',
+  'checklist_tasks',
+  // providers & payments
+  'wedding_providers',
+  'provider_categories',
+  'payments',
+  // tasting menu
+  'tasting_menus',
+  'tasting_sections',
+  'tasting_dishes',
+  'tasting_participants',
+  'tasting_scores',
 ]);
 
 /** Keywords that must never appear in any generated query */
@@ -72,8 +85,57 @@ preferred_language TEXT, invited_at TIMESTAMP, last_login_at TIMESTAMP
 
 ### gifts
 id TEXT PK, family_id TEXT FK→families, wedding_id TEXT (**ALWAYS filter this with $1**),
-amount DECIMAL, status TEXT (PENDING/RECEIVED/CONFIRMED),
-transaction_date TIMESTAMP, created_at TIMESTAMP
+amount DECIMAL, reference_code_used TEXT, auto_matched BOOLEAN,
+status TEXT (PENDING/RECEIVED/CONFIRMED), transaction_date TIMESTAMP, created_at TIMESTAMP
+**NOTE: JOIN with families to get family name.**
+
+### checklist_sections
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, order INTEGER, created_at TIMESTAMP
+
+### checklist_tasks
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), section_id TEXT FK→checklist_sections,
+title TEXT, description TEXT, assigned_to TEXT (WEDDING_PLANNER/COUPLE/OTHER),
+due_date TIMESTAMP, status TEXT (PENDING/IN_PROGRESS/COMPLETED),
+completed BOOLEAN, completed_at TIMESTAMP, completed_by TEXT, order INTEGER, created_at TIMESTAMP
+**NOTE: Has direct wedding_id — no join needed to scope by wedding. JOIN checklist_sections for section name.**
+
+### wedding_providers
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), category_id TEXT FK→provider_categories,
+provider_id TEXT, name TEXT, contact_name TEXT, email TEXT, phone TEXT,
+total_price DECIMAL, notes TEXT, created_at TIMESTAMP
+**NOTE: name is the provider name as assigned to this wedding. JOIN provider_categories for category name.**
+
+### provider_categories
+id TEXT PK, planner_id TEXT, name TEXT, created_at TIMESTAMP
+**NOTE: no wedding_id — join via wedding_providers. Only use for the category name column.**
+
+### payments
+id TEXT PK, wedding_provider_id TEXT FK→wedding_providers, amount DECIMAL,
+date TIMESTAMP, method TEXT (CASH/BANK_TRANSFER/PAYPAL/BIZUM/REVOLUT/OTHER), notes TEXT, created_at TIMESTAMP
+**NOTE: No direct wedding_id — MUST JOIN via wedding_providers: FROM payments p JOIN wedding_providers wp ON p.wedding_provider_id = wp.id WHERE wp.wedding_id = $1.**
+
+### tasting_menus
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), title TEXT, description TEXT, created_at TIMESTAMP
+
+### tasting_sections
+id TEXT PK, menu_id TEXT FK→tasting_menus, name TEXT, order INTEGER, created_at TIMESTAMP
+**NOTE: No direct wedding_id — MUST JOIN tasting_menus: FROM tasting_sections ts JOIN tasting_menus tm ON ts.menu_id = tm.id WHERE tm.wedding_id = $1.**
+
+### tasting_dishes
+id TEXT PK, section_id TEXT FK→tasting_sections, name TEXT, description TEXT,
+is_selected BOOLEAN (true = chosen for final menu), order INTEGER, created_at TIMESTAMP
+**NOTE: No direct wedding_id — MUST JOIN: FROM tasting_dishes td JOIN tasting_sections ts ON td.section_id = ts.id JOIN tasting_menus tm ON ts.menu_id = tm.id WHERE tm.wedding_id = $1.**
+
+### tasting_participants
+id TEXT PK, menu_id TEXT FK→tasting_menus, name TEXT, email TEXT, phone TEXT,
+whatsapp_number TEXT, channel_preference TEXT (WHATSAPP/EMAIL/SMS), language TEXT,
+invite_sent_at TIMESTAMP, created_at TIMESTAMP
+**NOTE: No direct wedding_id — MUST JOIN tasting_menus: FROM tasting_participants tp JOIN tasting_menus tm ON tp.menu_id = tm.id WHERE tm.wedding_id = $1.**
+
+### tasting_scores
+id TEXT PK, participant_id TEXT FK→tasting_participants, dish_id TEXT FK→tasting_dishes,
+score INTEGER (1–10), notes TEXT, created_at TIMESTAMP
+**NOTE: No direct wedding_id — MUST JOIN through dishes or participants to scope by wedding. Shortest path: FROM tasting_scores sc JOIN tasting_dishes td ON sc.dish_id = td.id JOIN tasting_sections ts ON td.section_id = ts.id JOIN tasting_menus tm ON ts.menu_id = tm.id WHERE tm.wedding_id = $1. To get averages use AVG(score).**
 
 ## Strict Rules
 1. ONLY write SELECT statements. NEVER write INSERT, UPDATE, DELETE, DROP, CREATE, ALTER or any other statement.
