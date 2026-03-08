@@ -86,7 +86,6 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.2",
-    "autoprefixer": "^10.4.20",
     "conventional-changelog-cli": "^5.0.0",
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.6",
