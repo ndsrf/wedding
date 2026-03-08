@@ -81,7 +81,7 @@
     "@types/html2canvas": "^1.0.0",
     "@types/jest": "^30.0.0",
     "@types/mime": "^4.0.0",
-    "@types/node": "^22.10.5",
+    "@types/node": "^24.0.0",
     "@types/pg": "^8.16.0",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.2",
