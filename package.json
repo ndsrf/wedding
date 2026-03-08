@@ -9,7 +9,7 @@
     "dev": "NODE_OPTIONS='--dns-result-order=ipv4first' next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:unit": "jest --testPathPatterns=tests/unit --coverage --coverageThreshold='{}'",
@@ -73,6 +73,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.0.0",
     "@commitlint/config-conventional": "^20.0.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.49.1",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.6.3",

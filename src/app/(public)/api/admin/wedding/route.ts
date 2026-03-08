@@ -219,7 +219,7 @@ export async function GET() {
 
     const availableThemes = [...systemThemeObjects, ...customThemeObjects, ...invitationTemplateObjects];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const weddingDetails = {
       id: wedding.id,
       planner_id: wedding.planner_id,

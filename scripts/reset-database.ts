@@ -77,7 +77,7 @@ async function resetDatabase() {
     try {
       await prisma.$executeRawUnsafe('SET session_replication_role = replica;');
       console.log('  ℹ️ Disabled foreign key checks');
-    } catch (error) {
+    } catch (_error) {
       console.log('  ⚠️  Cannot disable foreign key checks (requires superuser, skipping)');
       // Continue anyway - truncate with cascade will handle constraints
     }
@@ -97,7 +97,7 @@ async function resetDatabase() {
     try {
       await prisma.$executeRawUnsafe('SET session_replication_role = DEFAULT;');
       console.log('  ℹ️ Re-enabled foreign key checks');
-    } catch (error) {
+    } catch (_error) {
       console.log('  ⚠️  Could not re-enable foreign key checks (already at default)');
     }
 

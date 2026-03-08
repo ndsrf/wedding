@@ -93,7 +93,7 @@ export async function ensureWeddingInitials(weddingId: string): Promise<string> 
   let candidate = base;
   let suffix    = 0;
 
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const taken = await prisma.wedding.findFirst({
       where: { short_url_initials: candidate },

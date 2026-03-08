@@ -163,7 +163,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
             value={formData.invitation_template_id || formData.theme_id}
             onChange={(e) => {
               const theme = themes.find(t => t.id === e.target.value);
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               
               if ((theme as unknown as Record<string, unknown>)?._type === 'invitation_template') {
                 handleChange('invitation_template_id', e.target.value);
                 handleChange('theme_id', '');
