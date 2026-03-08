@@ -95,7 +95,18 @@
       "Bash(DATABASE_URL=postgresql://wedding:wedding@postgresql.lan:5432/wed1 npx prisma db push:*)",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate resolve --rolled-back 20260307000001_add_tasting_menu_master_templates)",
       "WebFetch(domain:ai.google.dev)",
-      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate resolve --rolled-back 20260307000002_add_tasting_dish_image_url 2>&1)"
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate resolve --rolled-back 20260307000002_add_tasting_dish_image_url 2>&1)",
+      "mcp__linear-server__get_project",
+      "mcp__linear-server__list_issues",
+      "mcp__linear-server__list_projects",
+      "mcp__linear-server__get_issue",
+      "mcp__linear-server__save_issue",
+      "Bash(DATABASE_URL=\"postgresql://x:x@localhost/x\" VECTOR_DATABASE_URL=\"postgresql://x:x@localhost/x\" npx prisma validate --schema=prisma/vector/schema.prisma 2>&1)",
+      "Bash(DATABASE_URL=\"postgresql://x:x@localhost/x\" npx prisma validate --schema=prisma/vector/schema.prisma 2>&1)",
+      "mcp__linear-server__save_comment",
+      "mcp__linear-server__list_issue_statuses",
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate status 2>&1 | tail -30)",
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate status 2>&1)"
     ]
   }
 }

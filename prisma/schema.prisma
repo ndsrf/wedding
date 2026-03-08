@@ -760,6 +760,22 @@ enum PhotoSource {
 }
 
 // -----------------------------------------------------------------------------
+// RAG INGESTION — tracks document ingestion job progress
+// -----------------------------------------------------------------------------
+
+model RagIngestionJob {
+  id           String    @id @default(uuid())
+  triggeredAt  DateTime  @default(now())
+  totalFiles   Int       @default(0)
+  processed    Int       @default(0)
+  failed       Int       @default(0)
+  completedAt  DateTime?
+
+  @@index([triggeredAt])
+  @@map("rag_ingestion_jobs")
+}
+
+// -----------------------------------------------------------------------------
 // TASTING MENU — per-wedding food tasting experience
 // -----------------------------------------------------------------------------
 

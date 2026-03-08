@@ -224,11 +224,12 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, providerId: string) => {
     if (!e.target.files?.[0]) return;
     setUploading(true);
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
+    formData.append('weddingProviderId', providerId);
 
     try {
       const res = await fetch('/api/upload', {
@@ -247,11 +248,12 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     }
   };
 
-  const handlePaymentDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePaymentDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>, providerId: string) => {
     if (!e.target.files?.[0]) return;
     setUploadingPaymentDoc(true);
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
+    formData.append('weddingProviderId', providerId);
 
     try {
       const res = await fetch('/api/upload', {
@@ -521,7 +523,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                     {isEditing ? (
                       <div className="flex flex-col gap-1">
-                        <Input type="file" accept=".pdf" onChange={handleFileUpload} disabled={uploading} className="w-36 text-xs" />
+                        <Input type="file" accept=".pdf" onChange={(e) => handleFileUpload(e, wp.id)} disabled={uploading} className="w-36 text-xs" />
                         {uploading && <span className="text-xs text-blue-500">Uploading...</span>}
                         {editForm.contract_url && <span className="text-xs text-green-500">File attached</span>}
                       </div>
@@ -611,7 +613,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                     <div className="flex gap-2 items-center">
                         <Input
                             type="file"
-                            onChange={handlePaymentDocumentUpload}
+                            onChange={(e) => handlePaymentDocumentUpload(e, showPaymentForm)}
                             disabled={uploadingPaymentDoc}
                             className="text-sm"
                         />

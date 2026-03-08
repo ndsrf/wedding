@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { getTranslations } from '@/lib/i18n/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { AnalyticsCard } from '@/components/master/AnalyticsCard';
+import { RagReindexPanel } from '@/components/master/RagReindexPanel';
 import { prisma } from '@/lib/db/prisma';
 import type { MasterAnalytics } from '@/types/api';
 
@@ -111,6 +112,9 @@ export default async function MasterDashboardPage() {
             />
           </div>
         )}
+
+        {/* Documents & AI (vector search) */}
+        {process.env.NEXT_PUBLIC_VECTOR_ENABLED === 'true' && <RagReindexPanel />}
 
         {/* Quick Links */}
         <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-8 border border-pink-100">

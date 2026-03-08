@@ -134,6 +134,11 @@ export async function detectUserRole(email: string, authProvider: AuthProvider) 
   // Check wedding admin (may have access to multiple weddings, but we'll get the first one)
   const weddingAdmin = await prisma.weddingAdmin.findFirst({
     where: { email },
+    include: {
+      wedding: {
+        select: { planner_id: true }
+      }
+    },
     orderBy: { created_at: 'desc' }, // Get most recent wedding assignment
   });
 
@@ -154,7 +159,7 @@ export async function detectUserRole(email: string, authProvider: AuthProvider) 
       name: weddingAdmin.name,
       preferred_language: weddingAdmin.preferred_language,
       wedding_id: weddingAdmin.wedding_id,
-      planner_id: undefined,
+      planner_id: weddingAdmin.wedding.planner_id,
     };
   }
 

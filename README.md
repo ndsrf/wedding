@@ -1114,6 +1114,68 @@ The AI responds **in the guest's preferred language** (ES, EN, FR, IT, DE) and a
 - [WhatsApp Message Templates](https://www.twilio.com/docs/whatsapp/tutorial/send-whatsapp-notification-messages-templates)
 - [Meta WhatsApp Business Policy](https://www.whatsapp.com/legal/business-policy/)
 
+### Vector Database — AI Document Search (RAG)
+
+The app supports semantic search over uploaded wedding documents (contracts, ways-of-working guides, system manuals) using [pgvector](https://github.com/pgvector/pgvector) on [Neon](https://neon.tech). This powers the Nupcibot AI assistant with context-aware answers grounded in real documents.
+
+This feature is **fully optional**. When `VECTOR_DATABASE_URL` is not set, `isVectorEnabled()` returns `false` everywhere and all vector code paths are silently skipped.
+
+#### Environment Variables
+
+```bash
+# Neon PostgreSQL with pgvector — required to enable AI document search
+# Leave unset (or commented out) to disable the feature entirely
+VECTOR_DATABASE_URL=postgresql://user:password@ep-xxx.neon.tech/neondb?sslmode=require
+
+# Show the RAG re-index UI in the Master Admin dashboard.
+# Set to "true" whenever VECTOR_DATABASE_URL is configured.
+NEXT_PUBLIC_VECTOR_ENABLED=true
+```
+
+#### Setup
+
+1. **Create a Neon project** at [neon.tech](https://neon.tech) (free tier is sufficient).
+2. **Enable the pgvector extension** in your Neon database:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS vector;
+   ```
+3. **Set `VECTOR_DATABASE_URL`** in your `.env` to the Neon connection string.
+4. **Generate the Prisma client** for the vector schema:
+   ```bash
+   VECTOR_DATABASE_URL=<url> npx prisma generate --schema=prisma/vector/schema.prisma
+   ```
+5. **Start the app** — on first startup the schema is pushed automatically via `prisma db push --schema=prisma/vector/schema.prisma`.
+
+On **Vercel**, add the schema push to your build command:
+```bash
+npx prisma migrate deploy && npx prisma db push --schema=prisma/vector/schema.prisma --skip-generate --accept-data-loss
+```
+
+#### How It Works
+
+- Uploaded documents (PDFs, DOCX, plain text) are chunked into ~1000-character segments and embedded using the configured AI provider (`text-embedding-3-small` for OpenAI, `text-embedding-004` for Gemini).
+- Embeddings are stored in the `document_chunks` table on Neon using `vector(1536)` columns.
+- When a wedding admin or planner asks Nupcibot a question, the top-K most similar chunks are retrieved via cosine similarity (`<=>`) and injected into the prompt as context.
+- Each chunk is scoped to its tenant (`weddingId` / `plannerId` / `docType`) so users only ever see their own documents.
+
+#### Schema
+
+The vector schema is defined in `prisma/vector/schema.prisma` (separate from the main `prisma/schema.prisma`) and generates a dedicated Prisma client at `@prisma/vector-client`.
+
+| Model | Table | Description |
+|---|---|---|
+| `DocumentChunk` | `document_chunks` | Stores text chunks with their `vector(1536)` embeddings |
+
+| Enum | Values | Description |
+|---|---|---|
+| `DocType` | `WEDDING_DOCUMENT`, `WAYS_OF_WORKING`, `SYSTEM_MANUAL` | Scopes access by role |
+
+#### Implementation Files
+
+- `prisma/vector/schema.prisma` — Prisma schema for the vector database
+- `src/lib/db/vector-prisma.ts` — Singleton client; exports `isVectorEnabled()` and `vectorPrisma`
+- `src/lib/db/migrationManager.ts` — Calls `prisma db push --schema=prisma/vector/schema.prisma` on startup when enabled
+
 ### Google Photos Integration
 
 Each wedding can optionally be linked to a Google Photos album. The app uploads photos directly to the album whenever guests share images (via the invitation gallery upload or WhatsApp). Blob storage is used only as a temporary staging area — once a photo is safely in Google Photos the blob copy is deleted.

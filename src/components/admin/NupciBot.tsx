@@ -44,13 +44,60 @@ function LinkIcon({ className }: { className: string }) {
   );
 }
 
-function AssistantMessage({ content }: { content: string }) {
+// Parse "References\n- file1.pdf|url1\n- file2.docx" section from assistant replies
+function parseReferences(raw: string): { body: string; references: Array<{ label: string; url?: string }> } {
+  const refPattern = /\n\n(?:\*\*)?References(?:\*\*)?\n([\s\S]*)$/i;
+  const match = raw.match(refPattern);
+  if (!match) return { body: raw.trim(), references: [] };
+
+  const body = raw.slice(0, raw.length - match[0].length).trim();
+  const references = match[1]
+    .split('\n')
+    .map((l) => l.replace(/^[-*]\s*/, '').trim())
+    .filter(Boolean)
+    .map((line) => {
+      const parts = line.split('|');
+      return {
+        label: parts[0].trim(),
+        url: parts[1]?.trim(),
+      };
+    });
+
+  return { body, references };
+}
+
+function AssistantMessage({ content, t }: { content: string; t: (key: string) => string }) {
   const { text, links } = parseMessageContent(content);
+  const { body, references } = parseReferences(text);
+
   return (
     <div className="flex flex-col gap-1.5 max-w-[85%]">
-      <div className="bg-gray-50 text-gray-700 rounded-xl rounded-bl-none px-3 py-2 text-sm leading-relaxed">
-        {text}
+      <div className="bg-gray-50 text-gray-700 rounded-xl rounded-bl-none px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap">
+        {body}
       </div>
+      {references.length > 0 && (
+        <div className="bg-gray-50 rounded-xl rounded-tl-none px-3 py-2 border-t border-gray-200">
+          <p className="text-xs font-semibold text-gray-500 mb-1">{t('referencesTitle')}</p>
+          <ul className="text-xs text-gray-400 space-y-0.5">
+            {references.map((ref, idx) => (
+              <li key={idx} className="truncate">
+                • {ref.url ? (
+                  <a 
+                    href={ref.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-rose-500 underline decoration-rose-200 underline-offset-2 transition-colors"
+                  >
+                    {ref.label}
+                  </a>
+                ) : (
+                  ref.label
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {links.length > 0 && (
         <div className="flex flex-col gap-1">
           {links.map(({ path, label }) => (
@@ -277,13 +324,88 @@ export function NupciBot() {
           userName,
         }),
       });
-      const data = await res.json();
-      const replyContent = data.success && data.data?.reply ? data.data.reply : t('chat.errorReply');
-      const updatedHistory: ChatMessage[] = [...newHistory, { role: 'assistant', content: replyContent }];
-      if (userMsgCount >= 5) {
-        updatedHistory.push({ role: 'assistant', content: t('chat.limitReached') });
+
+      const contentType = res.headers.get('content-type') ?? '';
+
+      if (contentType.includes('text/event-stream') || contentType.includes('text/plain')) {
+        // Streaming response — consume the Vercel AI SDK data stream
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        let accumulated = '';
+
+        if (reader) {
+          // Add a placeholder assistant message for progressive rendering
+          const streamingHistory: ChatMessage[] = [...newHistory, { role: 'assistant', content: '' }];
+          setChatHistory(streamingHistory);
+
+          let leftover = '';
+          let isDataStream = false;
+          let firstChunk = true;
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            
+            if (firstChunk) {
+              // Vercel AI SDK Data Stream protocol uses prefixes like 0:, 1:, etc.
+              isDataStream = chunk.startsWith('0:') || chunk.includes('\n0:');
+              firstChunk = false;
+            }
+
+            if (isDataStream) {
+              const combined = leftover + chunk;
+              const lines = combined.split('\n');
+              leftover = lines.pop() || '';
+
+              for (const line of lines) {
+                if (line.startsWith('0:')) {
+                  try {
+                    const token = JSON.parse(line.slice(2));
+                    accumulated += token;
+                    setChatHistory([
+                      ...newHistory,
+                      { role: 'assistant', content: accumulated },
+                    ]);
+                  } catch { /* ignore parse errors */ }
+                }
+              }
+            } else {
+              // Raw text stream fallback
+              accumulated += chunk;
+              setChatHistory([
+                ...newHistory,
+                { role: 'assistant', content: accumulated },
+              ]);
+            }
+          }
+          
+          // Process final leftover if any (only for data stream)
+          if (isDataStream && leftover.startsWith('0:')) {
+            try {
+              const token = JSON.parse(leftover.slice(2));
+              accumulated += token;
+            } catch { /* ignore */ }
+          }
+        }
+
+        const replyContent = accumulated || t('chat.errorReply');
+        const updatedHistory: ChatMessage[] = [...newHistory, { role: 'assistant', content: replyContent }];
+        if (userMsgCount >= 5) {
+          updatedHistory.push({ role: 'assistant', content: t('chat.limitReached') });
+        }
+        setChatHistory(updatedHistory);
+      } else {
+        // JSON fallback response
+        const data = await res.json();
+        const replyContent = data.success && data.data?.reply ? data.data.reply : t('chat.errorReply');
+        const updatedHistory: ChatMessage[] = [...newHistory, { role: 'assistant', content: replyContent }];
+        if (userMsgCount >= 5) {
+          updatedHistory.push({ role: 'assistant', content: t('chat.limitReached') });
+        }
+        setChatHistory(updatedHistory);
       }
-      setChatHistory(updatedHistory);
     } catch {
       setChatHistory([...newHistory, { role: 'assistant', content: t('chat.errorReply') }]);
     } finally {
@@ -487,7 +609,7 @@ export function NupciBot() {
                 </div>
               )}
               {msg.role === 'assistant' ? (
-                <AssistantMessage content={msg.content} />
+                <AssistantMessage content={msg.content} t={t} />
               ) : (
                 <div className="max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed bg-rose-500 text-white rounded-br-none">
                   {msg.content}

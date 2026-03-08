@@ -1689,6 +1689,7 @@
     "nupcibot": {
       "subtitle": "Your wedding assistant",
       "close": "Close",
+      "referencesTitle": "References",
       "greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you today?",
       "helpConfigure": "Help me configure my wedding",
       "viewReports": "View and print lists",

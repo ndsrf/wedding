@@ -19,6 +19,7 @@ const nextConfig = {
     } : false,
   },
   experimental: {
+    after: true,
     serverActions: {
       bodySizeLimit: '5mb',
     },
@@ -26,7 +27,7 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', 'xlsx', 'zod'],
   },
   // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
-  serverExternalPackages: ['@exodus/bytes'],
+  serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas'],
   env: {
     // Automatically enable Facebook login if credentials are provided
     // Can be manually overridden by setting NEXT_PUBLIC_FACEBOOK_ENABLED in .env

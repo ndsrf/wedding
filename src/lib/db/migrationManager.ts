@@ -1,6 +1,8 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import { Client } from 'pg';
+import { isVectorEnabled } from './vector-prisma';
 
 const execAsync = promisify(exec);
 
@@ -263,7 +265,7 @@ export class MigrationManager {
       console.warn('[Migration] ⚠️  You should commit migration files to git!');
 
       try {
-        const { stderr } = await execAsync('npx prisma db push --skip-generate', {
+        const { stderr } = await execAsync('npx prisma db push', {
           cwd: path.resolve(process.cwd()),
           env: { ...process.env },
         });
@@ -290,6 +292,97 @@ export class MigrationManager {
   reset(): void {
     this.hasRunMigrations = false;
     this.migrationInProgress = false;
+  }
+}
+
+/**
+ * Push the vector Prisma schema to the Neon vector database on startup.
+ * Skipped when VECTOR_DATABASE_URL is absent or on Vercel (handled at build time).
+ * Non-fatal — the app continues even if the vector DB is unavailable.
+ */
+async function runVectorDbInit(): Promise<void> {
+  if (!isVectorEnabled()) {
+    console.log('[VectorDB] VECTOR_DATABASE_URL not set, skipping vector DB initialization');
+    return;
+  }
+
+  const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1';
+  if (isVercel) {
+    console.log('[VectorDB] Skipping vector schema push on Vercel (run at build time)');
+    return;
+  }
+
+  try {
+    const vectorDbUrl = process.env.VECTOR_DATABASE_URL;
+    const mainDbUrl = process.env.DATABASE_URL;
+
+    // If they are the same, don't use db push with --accept-data-loss as it will drop all main tables
+    // because they are not present in prisma/vector/schema.prisma
+    if (vectorDbUrl === mainDbUrl) {
+      console.warn('[VectorDB] ⚠️ VECTOR_DATABASE_URL is the same as DATABASE_URL');
+      console.warn('[VectorDB] Skipping destructive schema push to protect your main database tables');
+      console.warn('[VectorDB] To use vector features on the same database, merge prisma/vector/schema.prisma into schema.prisma');
+      return;
+    }
+
+    console.log('[VectorDB] Applying vector migrations to Neon...');
+
+    // Ensure the pgvector extension exists before migrations
+    const pgClient = new Client({ connectionString: vectorDbUrl });
+    await pgClient.connect();
+    await pgClient.query('CREATE EXTENSION IF NOT EXISTS vector;');
+    await pgClient.end();
+
+    // Isolation hack: Prisma doesn't support --migration-dir properly with multiple schemas
+    // in all versions, so we temporarily swap prisma/migrations with our vector migrations
+    const mainMigrationsPath = path.resolve(process.cwd(), 'prisma/migrations');
+    const tempMainPath = path.resolve(process.cwd(), 'prisma/main_migrations_tmp');
+    const vectorMigrationsPath = path.resolve(process.cwd(), 'prisma/vector/migrations');
+    
+    let migrationsSwapped = false;
+    try {
+      // 1. Move main migrations out of the way
+      await execAsync(`mv "${mainMigrationsPath}" "${tempMainPath}"`);
+      // 2. Link or copy vector migrations to prisma/migrations
+      await execAsync(`mkdir -p "${mainMigrationsPath}" && cp -r "${vectorMigrationsPath}/"* "${mainMigrationsPath}/"`);
+      migrationsSwapped = true;
+
+      // 3. Run deploy
+      const { stdout, stderr } = await execAsync(
+        'npx prisma migrate deploy --schema=prisma/vector/schema.prisma',
+        {
+          cwd: path.resolve(process.cwd()),
+          env: { ...process.env, DATABASE_URL: vectorDbUrl },
+        }
+      );
+
+      if (stdout) console.log('[VectorDB]', stdout.trim());
+      if (stderr && !stderr.includes('warn')) console.warn('[VectorDB]', stderr.trim());
+    } catch (migrateError) {
+      console.warn('[VectorDB] Migration deploy failed, falling back to db push:', migrateError instanceof Error ? migrateError.message : String(migrateError));
+      
+      // Fallback to db push if deploy fails (e.g. baseline issues)
+      const { stdout, stderr } = await execAsync(
+        'npx prisma db push --schema=prisma/vector/schema.prisma --accept-data-loss',
+        {
+          cwd: path.resolve(process.cwd()),
+          env: { ...process.env, DATABASE_URL: vectorDbUrl },
+        }
+      );
+      if (stdout) console.log('[VectorDB] Fallback:', stdout.trim());
+      if (stderr && !stderr.includes('warn')) console.warn('[VectorDB] Fallback:', stderr.trim());
+    } finally {
+      // 4. Restore original migrations
+      if (migrationsSwapped) {
+        await execAsync(`rm -rf "${mainMigrationsPath}" && mv "${tempMainPath}" "${mainMigrationsPath}"`);
+      }
+    }
+
+    console.log('[VectorDB] ✓ Vector DB schema is up to date');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[VectorDB] ✗ Vector DB initialization failed:', errorMessage);
+    // Non-fatal: app can run without the vector DB (isVectorEnabled() guards call sites)
   }
 }
 
@@ -334,4 +427,7 @@ export async function runStartupMigrations(): Promise<void> {
       process.exit(1);
     }
   }
+
+  // Initialize the vector database schema (Neon / pgvector)
+  await runVectorDbInit();
 }

@@ -1635,6 +1635,7 @@
     "nupcibot": {
       "subtitle": "Votre assistant mariage",
       "close": "Fermer",
+      "referencesTitle": "Références",
       "greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider aujourd'hui ?",
       "helpConfigure": "Aidez-moi à configurer mon mariage",
       "viewReports": "Voir et imprimer les listes",
