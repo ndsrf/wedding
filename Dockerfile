@@ -4,7 +4,7 @@
 # Stage 1: Dependencies
 # Install all dependencies including devDependencies
 # ============================================
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 
 WORKDIR /app
 
@@ -72,7 +72,7 @@ RUN npm prune --omit=dev
 # Stage 4: Production Runner
 # Minimal production image with only runtime deps
 # ============================================
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 
 # Install required runtime dependencies
 RUN apk add --no-cache libc6-compat openssl dumb-init
