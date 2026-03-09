@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply, type InvitationTemplateContext } from '@/lib/ai/wedding-assistant';
+import { generateNupciBotReply } from '@/lib/ai/nupcibot';
 import { getShortUrlPath } from '@/lib/short-url';
 import { isWeddingDay } from '@/lib/date-formatter';
 import type { TemplateDesign } from '@/types/invitation-template';
@@ -119,6 +120,58 @@ async function retryDbOperation<T>(
 }
 
 // ============================================================================
+// NUPCIBOT LINK FORMATTING FOR WHATSAPP
+// ============================================================================
+
+/**
+ * Convert Nupcibot's [LINKS] block into WhatsApp-friendly text.
+ *
+ * Input format:
+ *   Some answer text...
+ *
+ *   [LINKS]
+ *   /admin/guests|Guest Management
+ *   /admin/templates|Message Templates
+ *
+ * Output: strips the [LINKS] block and appends full URLs as plain text lines.
+ */
+function formatNupcibotReplyForWhatsApp(reply: string): string {
+  const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const linksMarker = '[LINKS]';
+  const linksIndex = reply.indexOf(linksMarker);
+
+  if (linksIndex === -1) {
+    return reply.trim();
+  }
+
+  const textPart = reply.slice(0, linksIndex).trim();
+  const linksPart = reply.slice(linksIndex + linksMarker.length).trim();
+
+  if (!linksPart) {
+    return textPart;
+  }
+
+  const linkLines = linksPart
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const sepIdx = line.indexOf('|');
+      if (sepIdx === -1) return null;
+      const path = line.slice(0, sepIdx).trim();
+      const label = line.slice(sepIdx + 1).trim();
+      return `${label}: ${appUrl}${path}`;
+    })
+    .filter((l): l is string => l !== null);
+
+  if (linkLines.length === 0) {
+    return textPart;
+  }
+
+  return `${textPart}\n\n${linkLines.join('\n')}`;
+}
+
+// ============================================================================
 // WEBHOOK HANDLER
 // ============================================================================
 
@@ -167,6 +220,39 @@ export async function POST(request: NextRequest) {
 
     if (!fromPhone) {
       return emptyTwiML();
+    }
+
+    // --- Check if sender is a wedding admin --------------------------------
+    // Admin messages are routed through NupciBot instead of the guest AI.
+    if (body) {
+      const matchingAdmin = await prisma.weddingAdmin.findFirst({
+        where: { phone: fromPhone },
+        include: { wedding: true },
+      });
+
+      if (matchingAdmin) {
+        console.log('[TWILIO_INBOUND] Sender is wedding admin, routing to NupciBot', {
+          adminId: matchingAdmin.id,
+          weddingId: matchingAdmin.wedding_id,
+        });
+
+        const language = String(matchingAdmin.wedding?.default_language ?? 'EN');
+        const nupcibotReply = await generateNupciBotReply(
+          body,
+          [],
+          language,
+          matchingAdmin.name,
+          matchingAdmin.wedding_id,
+        );
+
+        if (!nupcibotReply) {
+          console.warn('[TWILIO_INBOUND] NupciBot returned no reply for admin', matchingAdmin.id);
+          return emptyTwiML();
+        }
+
+        const whatsappReply = formatNupcibotReplyForWhatsApp(nupcibotReply);
+        return messageTwiML(whatsappReply);
+      }
     }
 
     // --- Handle media attachments (photos sent via WhatsApp) --------------

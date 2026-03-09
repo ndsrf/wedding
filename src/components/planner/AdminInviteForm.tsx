@@ -2,36 +2,45 @@
  * Admin Invite Form Component
  *
  * Form for inviting wedding admins to manage a wedding
- * Validates email and name inputs
+ * Validates email, name, and optional phone inputs
  */
 
 'use client';
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { COUNTRIES, COUNTRY_PHONE_PREFIXES } from '@/lib/phone-utils';
 
 interface AdminInviteFormData {
   name: string;
   email: string;
+  phone: string;
 }
 
 interface AdminInviteFormProps {
   onSubmit: (data: AdminInviteFormData) => Promise<void>;
   onCancel: () => void;
+  weddingCountry?: string;
 }
 
-export function AdminInviteForm({ onSubmit, onCancel }: AdminInviteFormProps) {
+export function AdminInviteForm({ onSubmit, onCancel, weddingCountry = 'ES' }: AdminInviteFormProps) {
   const t = useTranslations();
+
+  // Default the prefix to the wedding country's prefix
+  const defaultPrefix = COUNTRY_PHONE_PREFIXES[weddingCountry] ?? '+34';
+
   const [formData, setFormData] = useState<AdminInviteFormData>({
     name: '',
     email: '',
+    phone: '',
   });
+  const [phonePrefix, setPhonePrefix] = useState<string>(defaultPrefix);
 
-  const [errors, setErrors] = useState<Partial<AdminInviteFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof AdminInviteFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<AdminInviteFormData> = {};
+    const newErrors: Partial<Record<keyof AdminInviteFormData, string>> = {};
 
     if (!formData.name.trim()) {
       newErrors.name = t('planner.admins.validation.nameRequired');
@@ -58,11 +67,17 @@ export function AdminInviteForm({ onSubmit, onCancel }: AdminInviteFormProps) {
 
     console.log('[FORM DEBUG] Validation passed, calling onSubmit');
     setIsSubmitting(true);
+
+    // Build full phone: combine prefix + digits, or empty if no digits entered
+    const phoneDigits = formData.phone.trim();
+    const fullPhone = phoneDigits ? `${phonePrefix}${phoneDigits}` : '';
+
     try {
-      await onSubmit(formData);
+      await onSubmit({ ...formData, phone: fullPhone });
       console.log('[FORM DEBUG] onSubmit completed successfully');
       // Reset form on success
-      setFormData({ name: '', email: '' });
+      setFormData({ name: '', email: '', phone: '' });
+      setPhonePrefix(defaultPrefix);
       setErrors({});
     } catch (error) {
       console.error('[FORM DEBUG] Form submission error:', error);
@@ -115,6 +130,35 @@ export function AdminInviteForm({ onSubmit, onCancel }: AdminInviteFormProps) {
           placeholder={t('planner.admins.emailPlaceholder')}
         />
         {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+      </div>
+
+      {/* Phone Field */}
+      <div>
+        <label htmlFor="admin_phone" className="block text-sm font-medium text-gray-700 mb-1">
+          {t('planner.admins.phone')}
+        </label>
+        <div className="flex gap-2">
+          <select
+            value={phonePrefix}
+            onChange={(e) => setPhonePrefix(e.target.value)}
+            className="w-28 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+          >
+            {COUNTRIES.map((c) => (
+              <option key={c.code} value={c.prefix}>
+                {c.prefix} ({c.code})
+              </option>
+            ))}
+          </select>
+          <input
+            id="admin_phone"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => handleChange('phone', e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={t('planner.admins.phonePlaceholder')}
+          />
+        </div>
+        <p className="mt-1 text-xs text-gray-500">{t('planner.admins.phoneHint')}</p>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-4">

@@ -531,7 +531,10 @@
         "nameRequired": "Il nome è obbligatorio",
         "emailRequired": "L'email è obbligatoria",
         "invalidEmail": "Indirizzo email non valido"
-      }
+      },
+      "phone": "Numero di Telefono (WhatsApp)",
+      "phonePlaceholder": "612 345 678",
+      "phoneHint": "Opzionale. Usato per identificarti quando invii messaggi tramite WhatsApp."
     },
     "themes": {
       "title": "Gestione Temi",

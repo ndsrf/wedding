@@ -539,7 +539,10 @@
         "nameRequired": "Name is required",
         "emailRequired": "Email is required",
         "invalidEmail": "Invalid email address"
-      }
+      },
+      "phone": "Phone Number (WhatsApp)",
+      "phonePlaceholder": "612 345 678",
+      "phoneHint": "Optional. Used to identify you when messaging via WhatsApp."
     },
     "themes": {
       "title": "Theme Management",

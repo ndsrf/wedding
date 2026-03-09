@@ -531,7 +531,10 @@
         "nameRequired": "Le nom est obligatoire",
         "emailRequired": "L'email est obligatoire",
         "invalidEmail": "Adresse email invalide"
-      }
+      },
+      "phone": "Numéro de Téléphone (WhatsApp)",
+      "phonePlaceholder": "06 12 34 56 78",
+      "phoneHint": "Optionnel. Utilisé pour vous identifier lors de l'envoi de messages via WhatsApp."
     },
     "themes": {
       "title": "Gestion des Thèmes",
