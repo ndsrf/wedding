@@ -77,8 +77,63 @@ export function parseInitials(coupleNames: string): string {
 }
 
 /**
+ * Build the ordered list of initials candidates to try for a given couple name.
+ *
+ * Strategy (in order):
+ *   1. 2-letter base:            "LJ"
+ *   2. 3-letter (add 2nd char of first name): "LAJ"
+ *   3. 4-letter (add 3rd char of first name): "LAUJ"
+ *   4. Numeric suffixes on base: "LJ1", "LJ2", …
+ *
+ * Using additional letters from the couple's real names keeps the initials
+ * human-readable and meaningful while avoiding numeric-looking codes.
+ */
+function buildInitialsCandidates(coupleNames: string): Generator<string> {
+  function* gen() {
+    const trimmed = coupleNames.trim();
+    let firstName = '';
+    let secondName = '';
+
+    for (const sep of NAME_SEPARATORS) {
+      const idx = trimmed.toLowerCase().indexOf(sep.toLowerCase());
+      if (idx !== -1) {
+        const first  = trimmed.slice(0, idx).trim();
+        const second = trimmed.slice(idx + sep.length).trim();
+        if (first.length > 0 && second.length > 0) {
+          firstName  = first;
+          secondName = second;
+          break;
+        }
+      }
+    }
+
+    const base = parseInitials(coupleNames);
+    yield base; // e.g. "LJ"
+
+    // Try adding extra letters from the first name (3rd then 4th initials)
+    for (let extra = 1; extra <= 2; extra++) {
+      if (firstName.length > extra) {
+        // Insert the extra character before the second initial
+        yield (firstName.slice(0, extra + 1) + (secondName[0] ?? '')).toUpperCase();
+      } else if (trimmed.length > extra + 1) {
+        // Fallback: extend from the raw string
+        yield trimmed.slice(0, extra + 2).toUpperCase();
+      }
+    }
+
+    // Final fallback: numeric suffixes on the 2-letter base
+    let suffix = 1;
+    while (true) {
+      yield `${base}${suffix}`;
+      suffix += 1;
+    }
+  }
+  return gen();
+}
+
+/**
  * Return (and persist if needed) the short-URL initials for a wedding.
- * Handles collisions: LJ → LJ1 → LJ2 …
+ * Handles collisions: LJ → LAJ → LAUJ → LJ1 → LJ2 …
  */
 export async function ensureWeddingInitials(weddingId: string): Promise<string> {
   const wedding = await prisma.wedding.findUnique({
@@ -89,12 +144,11 @@ export async function ensureWeddingInitials(weddingId: string): Promise<string> 
   if (!wedding) throw new Error('Wedding not found');
   if (wedding.short_url_initials) return wedding.short_url_initials;
 
-  const base = parseInitials(wedding.couple_names);
-  let candidate = base;
-  let suffix    = 0;
+  const candidates = buildInitialsCandidates(wedding.couple_names);
 
-   
   while (true) {
+    const { value: candidate } = candidates.next();
+
     const taken = await prisma.wedding.findFirst({
       where: { short_url_initials: candidate },
     });
@@ -106,9 +160,6 @@ export async function ensureWeddingInitials(weddingId: string): Promise<string> 
       });
       return candidate;
     }
-
-    suffix   += 1;
-    candidate = `${base}${suffix}`;
   }
 }
 
