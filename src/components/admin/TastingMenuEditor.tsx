@@ -35,6 +35,9 @@ export interface TastingMenu {
   id: string;
   title: string;
   description: string | null;
+  tasting_date: string | null;
+  status: 'OPEN' | 'CLOSED';
+  effective_status?: 'OPEN' | 'CLOSED';
   sections: TastingSection[];
 }
 
@@ -89,10 +92,14 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
   const t = useTranslations('admin.tastingMenu');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Menu title/description form
+  // Menu title/description/date/status form
   const [editingMenu, setEditingMenu] = useState(false);
   const [menuTitle, setMenuTitle] = useState(menu?.title ?? 'Tasting Menu');
   const [menuDescription, setMenuDescription] = useState(menu?.description ?? '');
+  const [menuTastingDate, setMenuTastingDate] = useState(
+    menu?.tasting_date ? menu.tasting_date.split('T')[0] : ''
+  );
+  const [menuStatus, setMenuStatus] = useState<'OPEN' | 'CLOSED'>(menu?.status ?? 'CLOSED');
   const [menuSaving, setMenuSaving] = useState(false);
   const [menuError, setMenuError] = useState<string | null>(null);
 
@@ -148,13 +155,28 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     setMenuSaving(true);
     setMenuError(null);
     try {
+      const payload: Record<string, unknown> = {
+        title: menuTitle,
+        description: menuDescription || undefined,
+        status: menuStatus,
+        tasting_date: menuTastingDate
+          ? new Date(menuTastingDate).toISOString()
+          : null,
+      };
       const data = await fetchJson(apiBase, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: menuTitle, description: menuDescription || undefined }),
+        body: JSON.stringify(payload),
       });
       if (!data.success) throw new Error(data.error?.message ?? t('menu.error'));
-      onMenuChange({ ...(menu ?? { id: data.data.id, sections: [] }), title: menuTitle, description: menuDescription || null });
+      onMenuChange({
+        ...(menu ?? { id: data.data.id, sections: [] }),
+        title: menuTitle,
+        description: menuDescription || null,
+        tasting_date: menuTastingDate || null,
+        status: menuStatus,
+        effective_status: data.data.effective_status,
+      });
       setEditingMenu(false);
     } catch (err) {
       setMenuError(err instanceof Error ? err.message : t('menu.error'));
@@ -173,7 +195,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         body: JSON.stringify({ name: addingSectionName.trim() }),
       });
       if (!data.success) throw new Error(data.error?.message ?? 'Failed to add section');
-      const current = menu ?? { id: data.data.menu_id, title: menuTitle, description: menuDescription || null, sections: [] };
+      const current = menu ?? { id: data.data.menu_id, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
       onMenuChange({ ...current, sections: [...current.sections, { ...data.data, dishes: [] }] });
       setAddingSectionName('');
     } catch (err) {
@@ -402,7 +424,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
 
         const newSection: TastingSection = { ...sectionData.data, dishes: [] };
         if (!currentMenu) {
-          currentMenu = { id: sectionData.data.menu_id, title: menuTitle, description: menuDescription || null, sections: [] };
+          currentMenu = { id: sectionData.data.menu_id, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
         }
         currentMenu = { ...currentMenu, sections: [...currentMenu.sections, newSection] };
 
@@ -449,7 +471,13 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-900">{t('menu.title')}</h3>
           {!readOnly && !editingMenu && (
-            <button onClick={() => { setEditingMenu(true); setMenuTitle(menu?.title ?? 'Tasting Menu'); setMenuDescription(menu?.description ?? ''); }}
+            <button onClick={() => {
+              setEditingMenu(true);
+              setMenuTitle(menu?.title ?? 'Tasting Menu');
+              setMenuDescription(menu?.description ?? '');
+              setMenuTastingDate(menu?.tasting_date ? menu.tasting_date.split('T')[0] : '');
+              setMenuStatus(menu?.status ?? 'CLOSED');
+            }}
               className="text-sm text-rose-600 hover:text-rose-700">Edit</button>
           )}
         </div>
@@ -469,6 +497,33 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
               rows={2}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-rose-500 focus:border-rose-500"
             />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Tasting Date</label>
+                <input
+                  type="date"
+                  value={menuTastingDate}
+                  onChange={e => setMenuTastingDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={menuStatus}
+                  onChange={e => setMenuStatus(e.target.value as 'OPEN' | 'CLOSED')}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-rose-500 focus:border-rose-500 bg-white"
+                >
+                  <option value="CLOSED">Closed</option>
+                  <option value="OPEN">Open</option>
+                </select>
+                <p className="text-xs text-gray-400 mt-1">
+                  {menuStatus === 'CLOSED'
+                    ? 'Auto-opens on the tasting date'
+                    : 'Always open — no auto behaviour'}
+                </p>
+              </div>
+            </div>
             {menuError && <p className="text-xs text-red-600">{menuError}</p>}
             <div className="flex gap-2">
               <button onClick={handleSaveMenu} disabled={menuSaving}
@@ -485,6 +540,24 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
           <div>
             <p className="text-base font-medium text-gray-800">{menu?.title ?? 'Tasting Menu'}</p>
             {menu?.description && <p className="text-sm text-gray-500 mt-1">{menu.description}</p>}
+            <div className="flex items-center gap-4 mt-2">
+              {menu?.tasting_date && (
+                <p className="text-xs text-gray-500">
+                  📅 {new Date(menu.tasting_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              )}
+              <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${
+                (menu?.effective_status ?? menu?.status) === 'OPEN'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-600'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${(menu?.effective_status ?? menu?.status) === 'OPEN' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                {(menu?.effective_status ?? menu?.status) === 'OPEN' ? 'Open' : 'Closed'}
+                {menu?.status === 'CLOSED' && (menu?.effective_status === 'OPEN') && (
+                  <span className="text-gray-400 font-normal"> (auto)</span>
+                )}
+              </span>
+            </div>
           </div>
         )}
       </div>
