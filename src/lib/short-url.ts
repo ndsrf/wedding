@@ -154,13 +154,36 @@ export async function ensureWeddingInitials(weddingId: string): Promise<string> 
 // Short code – generation & persistence
 // ---------------------------------------------------------------------------
 
-/** Generate a random base-62 string of the given length. */
+/**
+ * Generate a cryptographically secure random base-62 string of the given length.
+ *
+ * Uses crypto.getRandomValues() (Web Crypto API, available in Node.js ≥18 and
+ * all edge runtimes) instead of Math.random(), which is not cryptographically
+ * secure and whose output can be predicted from a small number of observations.
+ *
+ * Rejection sampling is used to eliminate modulo bias: raw bytes in [0, 248)
+ * are accepted (248 = ⌊256/62⌋ × 62), bytes in [248, 256) are discarded.
+ * The rejection rate is ~3.1 %, so the expected number of drawn bytes is
+ * length / 0.969 ≈ length × 1.032 — negligible overhead.
+ */
 function randomCode(length: number): string {
-  let code = '';
-  for (let i = 0; i < length; i++) {
-    code += BASE62[Math.floor(Math.random() * BASE62.length)];
+  const chars: string[] = [];
+  // Over-provision slightly; rejection sampling may discard a few bytes.
+  const buf = new Uint8Array(Math.ceil(length * 1.1) + 4);
+
+  while (chars.length < length) {
+    crypto.getRandomValues(buf);
+    for (const byte of buf) {
+      // Accept only values in [0, 248) to avoid modulo bias.
+      // 248 = 4 × 62; distributes evenly across all 62 BASE62 characters.
+      if (byte < 248) {
+        chars.push(BASE62[byte % 62]);
+        if (chars.length === length) break;
+      }
+    }
   }
-  return code;
+
+  return chars.join('');
 }
 
 /**
