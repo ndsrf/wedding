@@ -136,7 +136,7 @@ async function retryDbOperation<T>(
  * Output: strips the [LINKS] block and appends full URLs as plain text lines.
  */
 function formatNupcibotReplyForWhatsApp(reply: string): string {
-  const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const appUrl = (process.env.APP_URL ?? '').replace(/\/$/, '');
   const linksMarker = '[LINKS]';
   const linksIndex = reply.indexOf(linksMarker);
 
