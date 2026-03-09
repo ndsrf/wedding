@@ -82,7 +82,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
     }
   }, [weddingId, fetchWeddingDetails]);
 
-  const handleInviteAdmin = async (formData: { name: string; email: string }) => {
+  const handleInviteAdmin = async (formData: { name: string; email: string; phone: string }) => {
     console.log('[INVITE DEBUG] handleInviteAdmin called with:', formData);
     console.log('[INVITE DEBUG] weddingId:', weddingId);
 
@@ -535,6 +535,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
             <AdminInviteForm
               onSubmit={handleInviteAdmin}
               onCancel={() => setShowInviteForm(false)}
+              weddingCountry={wedding.wedding_country}
             />
           </div>
         </div>

@@ -235,6 +235,7 @@ export type ListDeletedWeddingsResponse = APIResponse<PaginatedResponse<WeddingW
 export interface InviteWeddingAdminRequest {
   email: string;
   name: string;
+  phone?: string;
 }
 
 export type InviteWeddingAdminResponse = APIResponse<WeddingAdmin>;

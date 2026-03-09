@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { sendAdminInvitation } from '@/lib/email/resend';
+import { processPhoneNumber } from '@/lib/phone-utils';
 import type { Language } from '@/lib/i18n/config';
 import type {
   APIResponse,
@@ -23,6 +24,7 @@ import { API_ERROR_CODES } from '@/types/api';
 const inviteAdminSchema = z.object({
   email: z.string().email('Invalid email address'),
   name: z.string().min(1, 'Name is required'),
+  phone: z.string().optional(),
 });
 
 /**
@@ -102,11 +104,62 @@ export async function POST(
       return NextResponse.json(response, { status: 409 });
     }
 
+    // Process phone number with wedding country prefix if provided
+    const processedPhone = validatedData.phone
+      ? processPhoneNumber(validatedData.phone, wedding.wedding_country)
+      : null;
+
+    // Ensure email and phone are unique across all active weddings.
+    // This prevents cross-tenant ambiguity in WhatsApp routing and avoids
+    // one person being simultaneously admin of multiple active weddings.
+    const [emailConflict, phoneConflict] = await Promise.all([
+      prisma.weddingAdmin.findFirst({
+        where: {
+          email: validatedData.email,
+          wedding_id: { not: weddingId },
+          wedding: { status: 'ACTIVE' },
+        },
+        select: { id: true },
+      }),
+      processedPhone
+        ? prisma.weddingAdmin.findFirst({
+            where: {
+              phone: processedPhone,
+              wedding: { status: 'ACTIVE' },
+            },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+    ]);
+
+    if (emailConflict) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.ALREADY_EXISTS,
+          message: 'This email is already registered as an admin for another active wedding',
+        },
+      };
+      return NextResponse.json(response, { status: 409 });
+    }
+
+    if (phoneConflict) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.ALREADY_EXISTS,
+          message: 'This phone number is already registered as an admin for another active wedding',
+        },
+      };
+      return NextResponse.json(response, { status: 409 });
+    }
+
     // Create wedding admin invitation
     const weddingAdmin = await prisma.weddingAdmin.create({
       data: {
         email: validatedData.email,
         name: validatedData.name,
+        phone: processedPhone,
         wedding_id: weddingId,
         invited_by: user.id,
         auth_provider: 'GOOGLE', // Default, will be updated on first login

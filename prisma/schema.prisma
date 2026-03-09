@@ -157,6 +157,7 @@ model WeddingAdmin {
   id                  String        @id @default(uuid())
   email               String
   name                String
+  phone               String?
   google_id           String?
   auth_provider       AuthProvider
   last_login_provider AuthProvider?

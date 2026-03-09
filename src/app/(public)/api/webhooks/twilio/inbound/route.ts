@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply, type InvitationTemplateContext } from '@/lib/ai/wedding-assistant';
+import { generateNupciBotReply } from '@/lib/ai/nupcibot';
 import { getShortUrlPath } from '@/lib/short-url';
 import { isWeddingDay } from '@/lib/date-formatter';
 import type { TemplateDesign } from '@/types/invitation-template';
@@ -119,6 +120,45 @@ async function retryDbOperation<T>(
 }
 
 // ============================================================================
+// NUPCIBOT LINK FORMATTING FOR WHATSAPP
+// ============================================================================
+
+/**
+ * Convert Nupcibot's [LINKS] block into WhatsApp-friendly text.
+ *
+ * Input format:
+ *   Some answer text...
+ *
+ *   [LINKS]
+ *   /admin/guests|Guest Management
+ *   /admin/templates|Message Templates
+ *
+ * Output: strips the [LINKS] block and appends full URLs as plain text lines.
+ */
+function formatNupcibotReplyForWhatsApp(reply: string): string {
+  const appUrl = (process.env.APP_URL ?? '').replace(/\/$/, '');
+
+  // Match everything before [LINKS] as text, then capture each /path|Label line.
+  // The 's' flag makes '.' match newlines so the links section is consumed in one pass.
+  return reply
+    .replace(
+      /\[LINKS\]\s*((?:\/\S+\|[^\n]+\n?)*)/g,
+      (_match, linksBlock: string) => {
+        const lines = linksBlock
+          .split('\n')
+          .map((line) => {
+            const [path, ...labelParts] = line.trim().split('|');
+            const label = labelParts.join('|').trim();
+            return path && label ? `${label}: ${appUrl}${path.trim()}` : '';
+          })
+          .filter(Boolean);
+        return lines.length ? `\n\n${lines.join('\n')}` : '';
+      },
+    )
+    .trim();
+}
+
+// ============================================================================
 // WEBHOOK HANDLER
 // ============================================================================
 
@@ -169,11 +209,53 @@ export async function POST(request: NextRequest) {
       return emptyTwiML();
     }
 
+    // --- Check if sender is a wedding admin --------------------------------
+    // Admin messages are routed through NupciBot instead of the guest AI.
+    // Scope to ACTIVE weddings only to prevent cross-tenant information leakage
+    // in a multi-tenant system where phone numbers are not globally unique.
+    if (body) {
+      const matchingAdmin = await prisma.weddingAdmin.findFirst({
+        where: {
+          phone: fromPhone,
+          wedding: { status: 'ACTIVE' },
+        },
+        include: { wedding: true },
+      });
+
+      if (matchingAdmin) {
+        console.log('[TWILIO_INBOUND] Sender is wedding admin, routing to NupciBot', {
+          adminId: matchingAdmin.id,
+          weddingId: matchingAdmin.wedding_id,
+        });
+
+        const language = String(matchingAdmin.wedding?.default_language ?? 'EN');
+        const nupcibotReply = await generateNupciBotReply(
+          body,
+          [],
+          language,
+          matchingAdmin.name,
+          matchingAdmin.wedding_id,
+        );
+
+        if (!nupcibotReply) {
+          console.warn('[TWILIO_INBOUND] NupciBot returned no reply for admin', matchingAdmin.id);
+          return emptyTwiML();
+        }
+
+        const whatsappReply = formatNupcibotReplyForWhatsApp(nupcibotReply);
+        return messageTwiML(whatsappReply);
+      }
+    }
+
     // --- Handle media attachments (photos sent via WhatsApp) --------------
     if (numMedia > 0) {
-      // Find the family first so we know the wedding_id
+      // Find the family first so we know the wedding_id.
+      // Scope to ACTIVE weddings to prevent cross-tenant leakage.
       const mediaFamily = await prisma.family.findFirst({
-        where: { OR: [{ whatsapp_number: fromPhone }, { phone: fromPhone }] },
+        where: {
+          OR: [{ whatsapp_number: fromPhone }, { phone: fromPhone }],
+          wedding: { status: 'ACTIVE' },
+        },
         select: { id: true, wedding_id: true, name: true, preferred_language: true },
       });
 
@@ -238,14 +320,15 @@ export async function POST(request: NextRequest) {
 
     // --- Look up family by phone number -----------------------------------
     // We search both whatsapp_number and phone fields.
-    // Families are uniquely tied to a wedding, so a phone number should
-    // return at most one family in practice.
+    // Scoped to ACTIVE weddings to prevent cross-tenant leakage in multi-tenant
+    // deployments where the same phone number may appear across weddings.
     const family = await prisma.family.findFirst({
       where: {
         OR: [
           { whatsapp_number: fromPhone },
           { phone: fromPhone },
         ],
+        wedding: { status: 'ACTIVE' },
       },
       include: {
         wedding: true,
