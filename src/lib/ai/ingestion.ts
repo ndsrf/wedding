@@ -14,6 +14,7 @@ import { generateEmbeddings } from './embeddings';
 import { prisma } from '@/lib/db/prisma';
 import { getProvider } from '@/lib/storage';
 import { VercelBlobStorageProvider } from '@/lib/storage/providers/vercel-blob';
+import { after } from 'next/server';
 
 export type DocType = 'WEDDING_DOCUMENT' | 'WAYS_OF_WORKING' | 'SYSTEM_MANUAL' | 'REFERENCES';
 
@@ -84,8 +85,17 @@ export async function ingestDocument(params: IngestionParams): Promise<void> {
     jobId,
   } = params;
 
+  console.log(`[INGESTION] Starting ingestion for ${sourceName} (URL: ${blobUrl})`);
+
   // Fetch file content
-  const response = await fetch(blobUrl);
+  let response;
+  try {
+    response = await fetch(blobUrl);
+  } catch (fetchErr: unknown) {
+    console.error(`[INGESTION] Fetch failed for ${blobUrl}:`, fetchErr);
+    throw fetchErr;
+  }
+
   if (!response.ok) {
     throw new Error(`[INGESTION] Failed to fetch ${blobUrl}: ${response.status} ${response.statusText}`);
   }
@@ -149,15 +159,22 @@ export async function ingestDocument(params: IngestionParams): Promise<void> {
 
 /**
  * Schedule a document for ingestion in the background.
- * Wraps ingestDocument for use with waitUntil or fire-and-forget patterns.
+ * Wraps ingestDocument for use with Next.js 15 'after' or fire-and-forget patterns.
  * No-op when vector DB is disabled.
  */
 export function scheduleIngestion(params: IngestionParams): void {
   if (!isVectorEnabled()) return;
 
-  ingestDocument(params).catch((err) => {
+  const promise = ingestDocument(params).catch((err) => {
     console.error(`[INGESTION] Background ingestion failed for ${params.sourceName}:`, err);
   });
+
+  try {
+    // Next.js 15+ after() ensures the task completes even after response is sent
+    after(() => promise);
+  } catch (_e) {
+    // Fallback if called outside of request context
+  }
 }
 
 // ── Fan-out Re-index ─────────────────────────────────────────────────────────
@@ -234,6 +251,13 @@ export async function fanOutReindex(): Promise<{ total: number, done: Promise<vo
     
     console.log(`[INGESTION] Fan-out reindex job ${job.id} completed.`);
   })();
+
+  try {
+    // Next.js 15+ after() ensures the task completes even after response is sent
+    after(() => done);
+  } catch (_e) {
+    // Fallback if called outside of request context
+  }
 
   return { total, done };
 }
