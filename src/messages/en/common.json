@@ -1734,7 +1734,14 @@
         "save": "Save Menu",
         "saving": "Saving...",
         "saved": "Menu saved!",
-        "error": "Failed to save menu"
+        "error": "Failed to save menu",
+        "tastingDate": "Tasting Date",
+        "status": "Status",
+        "statusOpen": "Open",
+        "statusClosed": "Closed",
+        "statusClosedHint": "Auto-opens on the tasting date",
+        "statusOpenHint": "Always open — no auto behaviour",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Sections",

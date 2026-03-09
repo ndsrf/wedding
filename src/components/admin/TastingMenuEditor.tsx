@@ -499,7 +499,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Tasting Date</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t('menu.tastingDate')}</label>
                 <input
                   type="date"
                   value={menuTastingDate}
@@ -508,19 +508,19 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t('menu.status')}</label>
                 <select
                   value={menuStatus}
                   onChange={e => setMenuStatus(e.target.value as 'OPEN' | 'CLOSED')}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-rose-500 focus:border-rose-500 bg-white"
                 >
-                  <option value="CLOSED">Closed</option>
-                  <option value="OPEN">Open</option>
+                  <option value="CLOSED">{t('menu.statusClosed')}</option>
+                  <option value="OPEN">{t('menu.statusOpen')}</option>
                 </select>
                 <p className="text-xs text-gray-400 mt-1">
                   {menuStatus === 'CLOSED'
-                    ? 'Auto-opens on the tasting date'
-                    : 'Always open — no auto behaviour'}
+                    ? t('menu.statusClosedHint')
+                    : t('menu.statusOpenHint')}
                 </p>
               </div>
             </div>
@@ -552,9 +552,9 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
                   : 'bg-gray-100 text-gray-600'
               }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${(menu?.effective_status ?? menu?.status) === 'OPEN' ? 'bg-green-500' : 'bg-gray-400'}`} />
-                {(menu?.effective_status ?? menu?.status) === 'OPEN' ? 'Open' : 'Closed'}
+                {(menu?.effective_status ?? menu?.status) === 'OPEN' ? t('menu.statusOpen') : t('menu.statusClosed')}
                 {menu?.status === 'CLOSED' && (menu?.effective_status === 'OPEN') && (
-                  <span className="text-gray-400 font-normal"> (auto)</span>
+                  <span className="text-gray-400 font-normal"> {t('menu.statusAuto')}</span>
                 )}
               </span>
             </div>

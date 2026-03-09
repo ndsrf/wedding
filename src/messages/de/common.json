@@ -1679,7 +1679,14 @@
         "save": "Speichern",
         "saving": "Speichern...",
         "saved": "Menü gespeichert!",
-        "error": "Fehler beim Speichern"
+        "error": "Fehler beim Speichern",
+        "tastingDate": "Verkostungsdatum",
+        "status": "Status",
+        "statusOpen": "Geöffnet",
+        "statusClosed": "Geschlossen",
+        "statusClosedHint": "Öffnet automatisch am Tag der Verkostung",
+        "statusOpenHint": "Immer geöffnet — kein automatisches Verhalten",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Abschnitte",

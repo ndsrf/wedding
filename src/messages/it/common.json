@@ -1679,7 +1679,14 @@
         "save": "Salva",
         "saving": "Salvataggio...",
         "saved": "Menu salvato!",
-        "error": "Errore nel salvataggio"
+        "error": "Errore nel salvataggio",
+        "tastingDate": "Data di Degustazione",
+        "status": "Stato",
+        "statusOpen": "Aperto",
+        "statusClosed": "Chiuso",
+        "statusClosedHint": "Si apre automaticamente il giorno della degustazione",
+        "statusOpenHint": "Sempre aperto — nessun comportamento automatico",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Sezioni",

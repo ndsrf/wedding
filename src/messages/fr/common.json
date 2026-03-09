@@ -1679,7 +1679,14 @@
         "save": "Enregistrer",
         "saving": "Enregistrement...",
         "saved": "Menu enregistré!",
-        "error": "Erreur lors de l'enregistrement"
+        "error": "Erreur lors de l'enregistrement",
+        "tastingDate": "Date de Dégustation",
+        "status": "Statut",
+        "statusOpen": "Ouvert",
+        "statusClosed": "Fermé",
+        "statusClosedHint": "S'ouvre automatiquement le jour de la dégustation",
+        "statusOpenHint": "Toujours ouvert — aucun comportement automatique",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Sections",
