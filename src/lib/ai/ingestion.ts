@@ -61,73 +61,48 @@ async function extractText(buffer: Buffer, sourceName: string): Promise<string> 
   return buffer.toString('utf-8');
 }
 
-// ── Core Ingest ───────────────────────────────────────────────────────────────
+// ── Shared upsert helper ──────────────────────────────────────────────────────
+
+interface UpsertParams {
+  text: string;
+  sourceName: string;
+  docType: DocType;
+  fullUrl?: string;
+  metadata?: Record<string, unknown>;
+  weddingId?: string;
+  plannerId?: string;
+  weddingProviderId?: string;
+  paymentId?: string;
+  locationId?: string;
+}
 
 /**
- * Ingest a single document: fetch → extract text → chunk → embed → upsert.
- * Deletes existing chunks for the same sourceName before inserting new ones.
- * No-op when vector DB is disabled.
+ * Chunk → embed → delete-old → insert-new for a pre-extracted text string.
+ * Caller must ensure isVectorEnabled() and vectorPrisma are truthy.
+ * Returns the number of chunks inserted.
  */
-export async function ingestDocument(params: IngestionParams): Promise<void> {
-  if (!isVectorEnabled() || !vectorPrisma) return;
-
+async function _chunkEmbedUpsert(params: UpsertParams): Promise<number> {
   const {
-    blobUrl,
-    sourceName,
-    docType,
-    fullUrl,
-    metadata,
-    weddingId,
-    plannerId,
-    weddingProviderId,
-    paymentId,
-    locationId,
-    jobId,
+    text, sourceName, docType, fullUrl, metadata,
+    weddingId, plannerId, weddingProviderId, paymentId, locationId,
   } = params;
 
-  console.log(`[INGESTION] Starting ingestion for ${sourceName} (URL: ${blobUrl})`);
-
-  // Fetch file content
-  let response;
-  try {
-    response = await fetch(blobUrl);
-  } catch (fetchErr: unknown) {
-    console.error(`[INGESTION] Fetch failed for ${blobUrl}:`, fetchErr);
-    throw fetchErr;
-  }
-
-  if (!response.ok) {
-    throw new Error(`[INGESTION] Failed to fetch ${blobUrl}: ${response.status} ${response.statusText}`);
-  }
-  const buffer = Buffer.from(await response.arrayBuffer());
-
-  // Extract text
-  const text = await extractText(buffer, sourceName);
-  if (!text.trim()) {
-    console.warn(`[INGESTION] No text extracted from ${sourceName}`);
-    return;
-  }
-
-  // Chunk
   const chunks = chunkText(text);
-  if (chunks.length === 0) return;
+  if (chunks.length === 0) return 0;
 
-  // Generate embeddings
   const embeddings = await generateEmbeddings(chunks);
 
-  // Delete existing chunks for this source (upsert by sourceName)
-  await vectorPrisma.documentChunk.deleteMany({ where: { sourceName } });
+  await vectorPrisma!.documentChunk.deleteMany({ where: { sourceName } });
 
-  // Insert new chunks via raw SQL (pgvector requires ::vector cast)
   for (let i = 0; i < chunks.length; i++) {
     const vectorStr = `[${embeddings[i].join(',')}]`;
-    await vectorPrisma.$executeRawUnsafe(
+    await vectorPrisma!.$executeRawUnsafe(
       `INSERT INTO document_chunks (
-        id, content, embedding, "sourceName", "fullUrl", "metadata", "docType", 
+        id, content, embedding, "sourceName", "fullUrl", "metadata", "docType",
         "weddingId", "plannerId", "weddingProviderId", "paymentId", "locationId", "createdAt"
       )
        VALUES (
-        gen_random_uuid(), $1, $2::vector, $3, $4, $5::jsonb, $6::"DocType", 
+        gen_random_uuid(), $1, $2::vector, $3, $4, $5::jsonb, $6::"DocType",
         $7, $8, $9, $10, $11, now()
       )`,
       chunks[i],
@@ -144,9 +119,50 @@ export async function ingestDocument(params: IngestionParams): Promise<void> {
     );
   }
 
-  console.log(`[INGESTION] Ingested ${chunks.length} chunks for ${sourceName}`);
+  return chunks.length;
+}
 
-  // Update job counters if provided
+// ── Core Ingest ───────────────────────────────────────────────────────────────
+
+/**
+ * Ingest a single document: fetch → extract text → chunk → embed → upsert.
+ * Deletes existing chunks for the same sourceName before inserting new ones.
+ * No-op when vector DB is disabled.
+ */
+export async function ingestDocument(params: IngestionParams): Promise<void> {
+  if (!isVectorEnabled() || !vectorPrisma) return;
+
+  const { blobUrl, sourceName, docType, fullUrl, metadata,
+          weddingId, plannerId, weddingProviderId, paymentId, locationId, jobId } = params;
+
+  console.log(`[INGESTION] Starting ingestion for ${sourceName} (URL: ${blobUrl})`);
+
+  let response;
+  try {
+    response = await fetch(blobUrl);
+  } catch (fetchErr: unknown) {
+    console.error(`[INGESTION] Fetch failed for ${blobUrl}:`, fetchErr);
+    throw fetchErr;
+  }
+
+  if (!response.ok) {
+    throw new Error(`[INGESTION] Failed to fetch ${blobUrl}: ${response.status} ${response.statusText}`);
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+
+  const text = await extractText(buffer, sourceName);
+  if (!text.trim()) {
+    console.warn(`[INGESTION] No text extracted from ${sourceName}`);
+    return;
+  }
+
+  const count = await _chunkEmbedUpsert({
+    text, sourceName, docType, fullUrl, metadata,
+    weddingId, plannerId, weddingProviderId, paymentId, locationId,
+  });
+
+  console.log(`[INGESTION] Ingested ${count} chunks for ${sourceName}`);
+
   if (jobId) {
     await prisma.ragIngestionJob.update({
       where: { id: jobId },
@@ -171,48 +187,15 @@ export async function ingestTextContent(params: {
 }): Promise<void> {
   if (!isVectorEnabled() || !vectorPrisma) return;
 
-  const { text, sourceName, docType, fullUrl, metadata } = params;
+  const { text, sourceName } = params;
 
   if (!text.trim()) {
     console.warn(`[INGESTION] No text provided for ${sourceName}`);
     return;
   }
 
-  const chunks = chunkText(text);
-  if (chunks.length === 0) return;
-
-  const embeddings = await generateEmbeddings(chunks);
-
-  // Delete existing chunks for this source (upsert by sourceName)
-  await vectorPrisma.documentChunk.deleteMany({ where: { sourceName } });
-
-  // Insert new chunks via raw SQL (pgvector requires ::vector cast)
-  for (let i = 0; i < chunks.length; i++) {
-    const vectorStr = `[${embeddings[i].join(',')}]`;
-    await vectorPrisma.$executeRawUnsafe(
-      `INSERT INTO document_chunks (
-        id, content, embedding, "sourceName", "fullUrl", "metadata", "docType",
-        "weddingId", "plannerId", "weddingProviderId", "paymentId", "locationId", "createdAt"
-      )
-       VALUES (
-        gen_random_uuid(), $1, $2::vector, $3, $4, $5::jsonb, $6::"DocType",
-        $7, $8, $9, $10, $11, now()
-      )`,
-      chunks[i],
-      vectorStr,
-      sourceName,
-      fullUrl ?? null,
-      metadata ? JSON.stringify(metadata) : null,
-      docType,
-      null,
-      null,
-      null,
-      null,
-      null,
-    );
-  }
-
-  console.log(`[INGESTION] Ingested ${chunks.length} chunks for ${sourceName}`);
+  const count = await _chunkEmbedUpsert(params);
+  console.log(`[INGESTION] Ingested ${count} chunks for ${sourceName}`);
 }
 
 // ── Schedule (fire-and-forget wrapper) ───────────────────────────────────────
