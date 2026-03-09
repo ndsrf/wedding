@@ -11,7 +11,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
-import { parseInitials } from '@/lib/short-url';
+import { ensureWeddingInitials } from '@/lib/short-url';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -359,12 +359,14 @@ export async function POST(request: NextRequest) {
         payment_tracking_mode: validatedData.payment_tracking_mode,
         allow_guest_additions: validatedData.allow_guest_additions,
         default_language: validatedData.default_language,
-        short_url_initials: parseInitials(validatedData.couple_names),
         save_the_date_enabled: true,
         status: 'ACTIVE',
         created_by: user.id,
       },
     });
+
+    // Assign unique short-URL initials (collision-safe: appends 2 random chars)
+    await ensureWeddingInitials(wedding.id);
 
     // Create itinerary items if provided
     if (validatedData.itinerary && validatedData.itinerary.length > 0) {
