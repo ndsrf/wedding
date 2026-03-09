@@ -365,7 +365,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Assign unique short-URL initials (collision-safe: tries 3rd/4th letter before numbers)
+    // Assign unique short-URL initials (collision-safe: appends 2 random chars)
     await ensureWeddingInitials(wedding.id);
 
     // Create itinerary items if provided
