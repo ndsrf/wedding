@@ -155,6 +155,66 @@ export async function ingestDocument(params: IngestionParams): Promise<void> {
   }
 }
 
+// ── Ingest from in-memory text ─────────────────────────────────────────────
+
+/**
+ * Ingest a document from a plain text string (no blob fetch needed).
+ * Deletes existing chunks for the same sourceName before inserting new ones.
+ * No-op when vector DB is disabled.
+ */
+export async function ingestTextContent(params: {
+  text: string;
+  sourceName: string;
+  docType: DocType;
+  fullUrl?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<void> {
+  if (!isVectorEnabled() || !vectorPrisma) return;
+
+  const { text, sourceName, docType, fullUrl, metadata } = params;
+
+  if (!text.trim()) {
+    console.warn(`[INGESTION] No text provided for ${sourceName}`);
+    return;
+  }
+
+  const chunks = chunkText(text);
+  if (chunks.length === 0) return;
+
+  const embeddings = await generateEmbeddings(chunks);
+
+  // Delete existing chunks for this source (upsert by sourceName)
+  await vectorPrisma.documentChunk.deleteMany({ where: { sourceName } });
+
+  // Insert new chunks via raw SQL (pgvector requires ::vector cast)
+  for (let i = 0; i < chunks.length; i++) {
+    const vectorStr = `[${embeddings[i].join(',')}]`;
+    await vectorPrisma.$executeRawUnsafe(
+      `INSERT INTO document_chunks (
+        id, content, embedding, "sourceName", "fullUrl", "metadata", "docType",
+        "weddingId", "plannerId", "weddingProviderId", "paymentId", "locationId", "createdAt"
+      )
+       VALUES (
+        gen_random_uuid(), $1, $2::vector, $3, $4, $5::jsonb, $6::"DocType",
+        $7, $8, $9, $10, $11, now()
+      )`,
+      chunks[i],
+      vectorStr,
+      sourceName,
+      fullUrl ?? null,
+      metadata ? JSON.stringify(metadata) : null,
+      docType,
+      null,
+      null,
+      null,
+      null,
+      null,
+    );
+  }
+
+  console.log(`[INGESTION] Ingested ${chunks.length} chunks for ${sourceName}`);
+}
+
 // ── Schedule (fire-and-forget wrapper) ───────────────────────────────────────
 
 /**
