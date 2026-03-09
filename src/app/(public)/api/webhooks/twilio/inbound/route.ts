@@ -20,6 +20,8 @@ import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply, type InvitationTemplateContext } from '@/lib/ai/wedding-assistant';
 import { generateNupciBotReply } from '@/lib/ai/nupcibot';
+import { generateRagReply } from '@/lib/ai/rag-chat';
+import { isVectorEnabled } from '@/lib/db/vector-prisma';
 import { getShortUrlPath } from '@/lib/short-url';
 import { isWeddingDay } from '@/lib/date-formatter';
 import type { TemplateDesign } from '@/types/invitation-template';
@@ -229,13 +231,26 @@ export async function POST(request: NextRequest) {
         });
 
         const language = String(matchingAdmin.wedding?.default_language ?? 'EN');
-        const nupcibotReply = await generateNupciBotReply(
-          body,
-          [],
-          language,
-          matchingAdmin.name,
-          matchingAdmin.wedding_id,
-        );
+        let nupcibotReply: string | null;
+
+        if (isVectorEnabled()) {
+          nupcibotReply = await generateRagReply({
+            userMessage: body,
+            history: [],
+            language,
+            userName: matchingAdmin.name,
+            weddingId: matchingAdmin.wedding_id,
+            role: 'wedding_admin',
+          });
+        } else {
+          nupcibotReply = await generateNupciBotReply(
+            body,
+            [],
+            language,
+            matchingAdmin.name,
+            matchingAdmin.wedding_id,
+          );
+        }
 
         if (!nupcibotReply) {
           console.warn('[TWILIO_INBOUND] NupciBot returned no reply for admin', matchingAdmin.id);
