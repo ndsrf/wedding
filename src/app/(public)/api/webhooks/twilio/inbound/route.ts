@@ -142,7 +142,7 @@ function formatNupcibotReplyForWhatsApp(reply: string): string {
   // The 's' flag makes '.' match newlines so the links section is consumed in one pass.
   return reply
     .replace(
-      /\[LINKS\]\s*((?:\/\S+\|[^\n]+\n?)*)/gs,
+      /\[LINKS\]\s*((?:\/\S+\|[^\n]+\n?)*)/g,
       (_match, linksBlock: string) => {
         const lines = linksBlock
           .split('\n')
