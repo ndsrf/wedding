@@ -164,3 +164,50 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
 
   return result.toTextStreamResponse();
 }
+
+/**
+ * Non-streaming RAG chat reply.
+ * Uses the same agentic pipeline as streamRagChat but awaits the full text,
+ * suitable for contexts that need a plain string (e.g. WhatsApp TwiML replies).
+ */
+export async function generateRagReply(params: RagChatParams): Promise<string | null> {
+  const { userMessage, history, language, userName, weddingId, plannerId, role } = params;
+
+  let weddingDate: string | undefined;
+  let coupleNames: string | undefined;
+
+  if (weddingId) {
+    try {
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        select: { wedding_date: true, couple_names: true },
+      });
+      if (wedding) {
+        weddingDate = wedding.wedding_date.toISOString().split('T')[0];
+        coupleNames = wedding.couple_names;
+      }
+    } catch (err) {
+      console.warn('[RAG-CHAT] Failed to fetch wedding info:', err);
+    }
+  }
+
+  const sanitizedMessage = sanitizeMessage(userMessage);
+  const system = buildSystemPrompt(language, userName, weddingDate, coupleNames);
+  const cappedHistory = history.slice(-20);
+
+  const messages = [
+    ...cappedHistory.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+    { role: 'user' as const, content: sanitizedMessage },
+  ];
+
+  const result = streamText({
+    model: getChatModel(),
+    system,
+    messages,
+    tools: buildTools({ weddingId, plannerId, role }),
+    stopWhen: stepCountIs(5),
+  });
+
+  const text = await result.text;
+  return text || null;
+}
