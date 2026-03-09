@@ -48,7 +48,9 @@ export function buildTools(ctx: ToolContext): ToolSet {
           return chunks.map((c) => ({
             content: c.content,
             sourceName: c.sourceName,
-            fullUrl: c.fullUrl,
+            // SYSTEM_MANUAL docs (e.g. platform docs) should not surface a
+            // clickable URL in the References section of the chat reply.
+            fullUrl: c.docType === 'SYSTEM_MANUAL' ? undefined : c.fullUrl,
             weddingProviderId: c.weddingProviderId,
             paymentId: c.paymentId,
             locationId: c.locationId,

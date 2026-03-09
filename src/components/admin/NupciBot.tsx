@@ -241,13 +241,15 @@ export function NupciBot() {
 
   function handleClose() {
     setIsOpen(false);
-    // Reset screens when closing
+    // Reset all state when closing so the next open starts fresh
     setTimeout(() => {
       setScreen('menu');
       setMessageSent(false);
       setSendError('');
       setTopic('');
       setPlannerMessage('');
+      setChatHistory([]);
+      setChatInput('');
     }, 300);
   }
 
