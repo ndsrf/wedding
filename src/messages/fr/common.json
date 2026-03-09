@@ -1935,6 +1935,10 @@
       "search": {
         "placeholder": "Rechercher des plats...",
         "noResults": "Aucun plat ne correspond à votre recherche."
+      },
+      "closed": {
+        "title": "Le menu de dégustation est en lecture seule",
+        "description": "Ce menu de dégustation est actuellement fermé. Contactez les mariés pour plus d'informations."
       }
     }
   },

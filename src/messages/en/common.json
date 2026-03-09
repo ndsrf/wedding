@@ -2005,6 +2005,10 @@
       "search": {
         "placeholder": "Search dishes...",
         "noResults": "No dishes match your search."
+      },
+      "closed": {
+        "title": "Tasting menu is read-only",
+        "description": "This tasting menu is currently closed. Contact the couple for more information."
       }
     }
   },

@@ -1935,6 +1935,10 @@
       "search": {
         "placeholder": "Gerichte suchen...",
         "noResults": "Keine Gerichte entsprechen Ihrer Suche."
+      },
+      "closed": {
+        "title": "Das Verkostungsmenü ist schreibgeschützt",
+        "description": "Dieses Verkostungsmenü ist derzeit geschlossen. Wende dich für weitere Informationen an das Paar."
       }
     }
   },

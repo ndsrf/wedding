@@ -912,10 +912,8 @@ export default function TastingPage({ params }: PageProps) {
           <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
             <span className="text-amber-500 text-lg shrink-0">🔒</span>
             <div>
-              <p className="text-sm font-medium text-amber-800">Tasting menu is read-only</p>
-              <p className="text-xs text-amber-700 mt-0.5">
-                This tasting menu is currently closed. Contact the couple for more information.
-              </p>
+              <p className="text-sm font-medium text-amber-800">{t('closed.title')}</p>
+              <p className="text-xs text-amber-700 mt-0.5">{t('closed.description')}</p>
             </div>
           </div>
         )}

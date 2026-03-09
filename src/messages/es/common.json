@@ -1990,6 +1990,10 @@
       "search": {
         "placeholder": "Buscar platos...",
         "noResults": "Ningún plato coincide con tu búsqueda."
+      },
+      "closed": {
+        "title": "El menú de degustación es de solo lectura",
+        "description": "Este menú de degustación está cerrado actualmente. Contacta con la pareja para más información."
       }
     }
   },

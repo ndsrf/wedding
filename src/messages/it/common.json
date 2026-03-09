@@ -1935,6 +1935,10 @@
       "search": {
         "placeholder": "Cerca piatti...",
         "noResults": "Nessun piatto corrisponde alla ricerca."
+      },
+      "closed": {
+        "title": "Il menu di degustazione è in sola lettura",
+        "description": "Questo menu di degustazione è attualmente chiuso. Contatta la coppia per ulteriori informazioni."
       }
     }
   },
