@@ -30,7 +30,7 @@ export interface ChatMessage {
 // PLATFORM KNOWLEDGE BASE
 // ============================================================================
 
-const PLATFORM_DOCS = `
+export const PLATFORM_DOCS = `
 # Nupci – Wedding Management Platform
 
 Nupci is a comprehensive, multi-tenant wedding management platform designed for professional wedding planners. It allows planners to manage multiple weddings simultaneously and gives each couple secure access to their own wedding data.

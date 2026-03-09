@@ -126,38 +126,59 @@ async function retryDbOperation<T>(
 // ============================================================================
 
 /**
- * Convert Nupcibot's [LINKS] block into WhatsApp-friendly text.
+ * Convert Nupcibot's [LINKS] and References blocks into WhatsApp-friendly text.
  *
- * Input format:
- *   Some answer text...
- *
+ * [LINKS] input:
  *   [LINKS]
  *   /admin/guests|Guest Management
- *   /admin/templates|Message Templates
  *
- * Output: strips the [LINKS] block and appends full URLs as plain text lines.
+ * References input (from RAG):
+ *   References
+ *   - checklist.pdf|https://blob.example.com/checklist.pdf
+ *   - platform-docs          ← no URL → plain label only
+ *
+ * Both are converted to "Label: url" plain-text lines that WhatsApp auto-hyperlinks.
  */
 function formatNupcibotReplyForWhatsApp(reply: string): string {
   const appUrl = (process.env.APP_URL ?? '').replace(/\/$/, '');
 
-  // Match everything before [LINKS] as text, then capture each /path|Label line.
-  // The 's' flag makes '.' match newlines so the links section is consumed in one pass.
-  return reply
-    .replace(
-      /\[LINKS\]\s*((?:\/\S+\|[^\n]+\n?)*)/g,
-      (_match, linksBlock: string) => {
-        const lines = linksBlock
-          .split('\n')
-          .map((line) => {
-            const [path, ...labelParts] = line.trim().split('|');
-            const label = labelParts.join('|').trim();
-            return path && label ? `${label}: ${appUrl}${path.trim()}` : '';
-          })
-          .filter(Boolean);
-        return lines.length ? `\n\n${lines.join('\n')}` : '';
-      },
-    )
-    .trim();
+  // Convert [LINKS] block (/path|Label) → "Label: APP_URL/path"
+  let formatted = reply.replace(
+    /\[LINKS\]\s*((?:\/\S+\|[^\n]+\n?)*)/g,
+    (_match, linksBlock: string) => {
+      const lines = linksBlock
+        .split('\n')
+        .map((line) => {
+          const [path, ...labelParts] = line.trim().split('|');
+          const label = labelParts.join('|').trim();
+          return path && label ? `${label}: ${appUrl}${path.trim()}` : '';
+        })
+        .filter(Boolean);
+      return lines.length ? `\n\n${lines.join('\n')}` : '';
+    },
+  );
+
+  // Convert References block (filename|url or plain filename) → "filename: url" or "filename"
+  formatted = formatted.replace(
+    /\n\n(?:\*\*)?References(?:\*\*)?\n([\s\S]*)$/i,
+    (_match, refsBlock: string) => {
+      const lines = refsBlock
+        .split('\n')
+        .map((line) => {
+          const cleaned = line.replace(/^[-*]\s*/, '').trim();
+          if (!cleaned) return '';
+          const pipeIdx = cleaned.indexOf('|');
+          if (pipeIdx === -1) return cleaned;
+          const label = cleaned.slice(0, pipeIdx).trim();
+          const url = cleaned.slice(pipeIdx + 1).trim();
+          return url ? `${label}: ${url}` : label;
+        })
+        .filter(Boolean);
+      return lines.length ? `\n\n${lines.join('\n')}` : '';
+    },
+  );
+
+  return formatted.trim();
 }
 
 // ============================================================================
