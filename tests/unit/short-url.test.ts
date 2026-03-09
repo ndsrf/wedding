@@ -81,7 +81,7 @@ describe('Short URL Service', () => {
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
       // Should have format /inv/{initials}/{code}
-      expect(result).toMatch(/^\/inv\/LJ\/[a-zA-Z0-9]{3,4}$/);
+      expect(result).toMatch(/^\/inv\/LJ\/[a-zA-Z0-9]{5,6}$/);
       expect(prisma.family.update).toHaveBeenCalled();
     });
 
@@ -172,7 +172,7 @@ describe('Short URL Service', () => {
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      expect(result).toMatch(/^\/inv\/[A-Z]{2,4}\/[a-zA-Z0-9]{3,4}$/);
+      expect(result).toMatch(/^\/inv\/[A-Z]{2,4}[a-zA-Z0-9]{0,2}\/[a-zA-Z0-9]{3,6}$/);
     });
   });
 

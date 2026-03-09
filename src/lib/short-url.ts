@@ -4,11 +4,15 @@
  * Produces short magic links in the format /inv/{INITIALS}/{CODE} that HTTP-redirect
  * to the full /rsvp/{magic_token} page.
  *
- * INITIALS – derived from the couple's names (e.g. "Laura y Javier" → "LJ").
- *            Collisions across weddings are resolved by appending a number: LJ, LJ1, LJ2 …
- * CODE     – a 3-character base-62 string (a-zA-Z0-9).  62³ = 238,328 combinations,
- *            more than enough for any single wedding.  Falls back to 4 characters
- *            if the unlikely case of exhaustion arises.
+ * INITIALS – derived from the couple's names (e.g. "Laura y Javier" → "LJ"),
+ *            sanitized to alphanumeric-only, then suffixed with 2 random base-62
+ *            characters (e.g. "LJaB").  The random suffix prevents enumeration
+ *            of other weddings' URLs even when attacker knows the couple names.
+ *            62² = 3,844 combinations per name-derived prefix.
+ *            Collisions are resolved by regenerating the random suffix.
+ * CODE     – a 5-character base-62 string (a-zA-Z0-9).  62⁵ = 916,132,832
+ *            combinations, making per-wedding family enumeration infeasible.
+ *            Falls back to 6 characters if the unlikely case of exhaustion arises.
  */
 
 import { prisma } from '@/lib/db/prisma';
@@ -77,55 +81,36 @@ export function parseInitials(coupleNames: string): string {
 }
 
 /**
- * Build the ordered list of initials candidates to try for a given couple name.
+ * Strip any character that is not alphanumeric so the result is safe to
+ * embed verbatim in a URL path segment.  Accented letters, spaces, ampersands
+ * and other separators are removed.
+ */
+function sanitizeForUrl(str: string): string {
+  return str.replace(/[^a-zA-Z0-9]/g, '');
+}
+
+/**
+ * Build an infinite sequence of initials candidates for a given couple name.
  *
- * Strategy (in order):
- *   1. 2-letter base:            "LJ"
- *   2. 3-letter (add 2nd char of first name): "LAJ"
- *   3. 4-letter (add 3rd char of first name): "LAUJ"
- *   4. Numeric suffixes on base: "LJ1", "LJ2", …
+ * Each candidate is:
+ *   sanitize(nameInitials).toUpperCase() + 2 random base-62 chars
  *
- * Using additional letters from the couple's real names keeps the initials
- * human-readable and meaningful while avoiding numeric-looking codes.
+ * e.g. "Laura y Javier" → "LJaB", "LJqT", "LJ3z", …
+ *
+ * The 2 random characters (62² = 3,844 combinations) make each candidate
+ * unpredictable even when an attacker knows the couple names, preventing
+ * enumeration of other weddings' URLs.  Collisions are resolved by simply
+ * drawing a new random suffix — with 3,844 slots the first attempt succeeds
+ * with >99.97 % probability.
+ *
+ * All yielded strings are guaranteed to contain only [a-zA-Z0-9].
  */
 function buildInitialsCandidates(coupleNames: string): Generator<string> {
   function* gen() {
-    const trimmed = coupleNames.trim();
-    let firstName = '';
-    let secondName = '';
-
-    for (const sep of NAME_SEPARATORS) {
-      const idx = trimmed.toLowerCase().indexOf(sep.toLowerCase());
-      if (idx !== -1) {
-        const first  = trimmed.slice(0, idx).trim();
-        const second = trimmed.slice(idx + sep.length).trim();
-        if (first.length > 0 && second.length > 0) {
-          firstName  = first;
-          secondName = second;
-          break;
-        }
-      }
-    }
-
-    const base = parseInitials(coupleNames);
-    yield base; // e.g. "LJ"
-
-    // Try adding extra letters from the first name (3rd then 4th initials)
-    for (let extra = 1; extra <= 2; extra++) {
-      if (firstName.length > extra) {
-        // Insert the extra character before the second initial
-        yield (firstName.slice(0, extra + 1) + (secondName[0] ?? '')).toUpperCase();
-      } else if (trimmed.length > extra + 1) {
-        // Fallback: extend from the raw string
-        yield trimmed.slice(0, extra + 2).toUpperCase();
-      }
-    }
-
-    // Final fallback: numeric suffixes on the 2-letter base
-    let suffix = 1;
+    const base = sanitizeForUrl(parseInitials(coupleNames)).toUpperCase();
+    // Infinite sequence: base + 2 fresh random BASE62 chars each iteration
     while (true) {
-      yield `${base}${suffix}`;
-      suffix += 1;
+      yield base + randomCode(2);
     }
   }
   return gen();
@@ -133,7 +118,9 @@ function buildInitialsCandidates(coupleNames: string): Generator<string> {
 
 /**
  * Return (and persist if needed) the short-URL initials for a wedding.
- * Handles collisions: LJ → LAJ → LAUJ → LJ1 → LJ2 …
+ * Each candidate is sanitized to alphanumeric-only and suffixed with 2 random
+ * base-62 characters (e.g. "LJaB").  Collisions are resolved by redrawing the
+ * random suffix; the probability of even a single collision is ~0.03 %.
  */
 export async function ensureWeddingInitials(weddingId: string): Promise<string> {
   const wedding = await prisma.wedding.findUnique({
@@ -178,10 +165,11 @@ function randomCode(length: number): string {
 
 /**
  * Generate a short code that is unique within the given wedding.
- * Tries 3-char codes first (238 328 slots); falls back to 4-char (14 776 336 slots).
+ * Tries 5-char codes first (916,132,832 slots); falls back to 6-char
+ * (56,800,235,584 slots) to make per-wedding family enumeration infeasible.
  */
 async function generateShortCode(weddingId: string): Promise<string> {
-  for (let len = 3; len <= 4; len++) {
+  for (let len = 5; len <= 6; len++) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const code = randomCode(len);
       const taken = await prisma.family.findFirst({
@@ -291,9 +279,9 @@ export async function assignShortCode(
   familyId: string,
   weddingId: string,
 ): Promise<void> {
-  // Generate a unique code within this transaction
-  // Using 3 characters for better security (62^3 = 238,328 combinations)
-  for (let len = 3; len <= 4; len++) {
+  // Generate a unique code within this transaction.
+  // 5 characters = 62^5 = 916,132,832 combinations, making enumeration infeasible.
+  for (let len = 5; len <= 6; len++) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const code = randomCode(len);
       const taken = await tx.family.findFirst({
