@@ -17,6 +17,8 @@ import { z } from 'zod';
 import type { ToolSet } from 'ai';
 import { retrieveChunks } from './retrieval';
 import { prisma } from '@/lib/db/prisma';
+import { convertRelativeDateToAbsolute } from '@/lib/checklist/date-converter';
+import type { RelativeDateFormat } from '@/lib/checklist/date-converter';
 
 export interface ToolContext {
   weddingId?: string;
@@ -180,6 +182,122 @@ export function buildTools(ctx: ToolContext): ToolSet {
         } catch (err) {
           console.error('[TOOLS] update_family_rsvp error:', err);
           return { error: 'Failed to update RSVP status' };
+        }
+      },
+    }),
+
+    // ── Add Reminder to Checklist ──────────────────────────────────────────
+    add_reminder: tool({
+      description:
+        'Add a reminder or task to the wedding checklist under the "Reminders" section. Use this for actions like "Remind me to do X tomorrow" or "Remind me to do X 2 months before the wedding".',
+      inputSchema: zodSchema(
+        z.object({
+          title: z.string().describe('The title of the reminder or task'),
+          description: z.string().optional().describe('Additional details about the reminder'),
+          dueDate: z.string().optional().describe('The absolute due date in YYYY-MM-DD format (if known)'),
+          dueDateRelative: z
+            .string()
+            .optional()
+            .describe(
+              'The relative due date in WEDDING_DATE[+-]days format (e.g. "WEDDING_DATE-60" for 2 months before)',
+            ),
+        }),
+      ),
+      execute: async ({ title, description, dueDate, dueDateRelative }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+
+        try {
+          // 1. Fetch wedding info (date and language)
+          const wedding = await prisma.wedding.findUnique({
+            where: { id: ctx.weddingId },
+            select: { wedding_date: true, default_language: true },
+          });
+
+          if (!wedding) return { error: 'Wedding not found' };
+
+          // 2. Localize section name
+          const sectionNames: Record<string, string> = {
+            EN: 'Reminders',
+            ES: 'Recordatorios',
+            DE: 'Erinnerungen',
+            FR: 'Rappels',
+            IT: 'Promemoria',
+          };
+          const localizedSectionName = sectionNames[wedding.default_language] || 'Reminders';
+
+          // 3. Find or create the section
+          let section = await prisma.checklistSection.findFirst({
+            where: {
+              wedding_id: ctx.weddingId,
+              name: localizedSectionName,
+              template_id: null,
+            },
+          });
+
+          if (!section) {
+            const lastSection = await prisma.checklistSection.findFirst({
+              where: { wedding_id: ctx.weddingId, template_id: null },
+              orderBy: { order: 'desc' },
+            });
+            const nextOrder = (lastSection?.order ?? 0) + 1;
+
+            section = await prisma.checklistSection.create({
+              data: {
+                wedding_id: ctx.weddingId,
+                name: localizedSectionName,
+                order: nextOrder,
+              },
+            });
+          }
+
+          // 4. Resolve absolute due date
+          let absoluteDate: Date | null = null;
+          if (dueDate) {
+            absoluteDate = new Date(dueDate);
+          } else if (dueDateRelative && wedding.wedding_date) {
+            try {
+              absoluteDate = convertRelativeDateToAbsolute(
+                dueDateRelative as RelativeDateFormat,
+                wedding.wedding_date,
+              );
+            } catch (err) {
+              console.warn('[TOOLS] add_reminder date conversion error:', err);
+            }
+          }
+
+          // 5. Create the task
+          const lastTask = await prisma.checklistTask.findFirst({
+            where: { wedding_id: ctx.weddingId, section_id: section.id },
+            orderBy: { order: 'desc' },
+          });
+          const taskOrder = (lastTask?.order ?? 0) + 1;
+
+          const task = await prisma.checklistTask.create({
+            data: {
+              wedding_id: ctx.weddingId,
+              section_id: section.id,
+              title,
+              description,
+              due_date: absoluteDate,
+              due_date_relative: dueDateRelative,
+              order: taskOrder,
+              assigned_to: 'COUPLE',
+            },
+          });
+
+          return {
+            status: 'success',
+            message: `Reminder "${title}" added to the "${localizedSectionName}" section.`,
+            task: {
+              id: task.id,
+              title: task.title,
+              dueDate: task.due_date?.toISOString(),
+              dueDateRelative: task.due_date_relative,
+            },
+          };
+        } catch (err) {
+          console.error('[TOOLS] add_reminder error:', err);
+          return { error: 'Failed to add reminder' };
         }
       },
     }),

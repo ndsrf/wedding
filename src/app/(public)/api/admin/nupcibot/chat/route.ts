@@ -53,7 +53,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Fallback: non-streaming JSON response
-    const reply = await generateNupciBotReply(message.trim(), cappedHistory, language, userName);
+    const reply = await generateNupciBotReply(
+      message.trim(),
+      cappedHistory,
+      language,
+      userName,
+      user.wedding_id,
+    );
 
     if (!reply) {
       const response: APIResponse = {

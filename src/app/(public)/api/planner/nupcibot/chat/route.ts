@@ -21,11 +21,12 @@ export async function POST(request: NextRequest) {
     const user = await requireRole('planner');
 
     const body = await request.json();
-    const { message, history = [], language = 'EN', userName } = body as {
+    const { message, history = [], language = 'EN', userName, weddingId } = body as {
       message: string;
       history: ChatMessage[];
       language?: string;
       userName?: string;
+      weddingId?: string;
     };
 
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
@@ -46,12 +47,19 @@ export async function POST(request: NextRequest) {
         language,
         userName,
         plannerId: user.planner_id,
+        weddingId,
         role: 'planner',
       });
     }
 
     // Fallback: non-streaming JSON response
-    const reply = await generateNupciBotReply(message.trim(), cappedHistory, language, userName);
+    const reply = await generateNupciBotReply(
+      message.trim(),
+      cappedHistory,
+      language,
+      userName,
+      weddingId,
+    );
 
     if (!reply) {
       const response: APIResponse = {
