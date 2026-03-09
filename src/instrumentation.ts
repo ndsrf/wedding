@@ -31,12 +31,12 @@ export async function register() {
 
         const contentHash = createHash('md5').update(PLATFORM_DOCS).digest('hex');
 
-        const existing = await vectorPrisma.documentChunk.findFirst({
-          where: { sourceName: 'system-platform-docs' },
-          select: { metadata: true },
-        });
+        const rows = await vectorPrisma.$queryRawUnsafe<{ metadata: Record<string, unknown> | null }>(
+          `SELECT metadata FROM document_chunks WHERE "sourceName" = $1 LIMIT 1`,
+          'system-platform-docs',
+        );
 
-        const storedHash = (existing?.metadata as Record<string, unknown> | null)?.contentHash;
+        const storedHash = rows[0]?.metadata?.contentHash;
 
         if (storedHash === contentHash) {
           console.log('[VectorDB] Platform docs already up to date, skipping seed');
