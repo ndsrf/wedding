@@ -387,36 +387,6 @@ async function runVectorDbInit(): Promise<void> {
 }
 
 /**
- * Seed the vector DB with the platform documentation (PLATFORM_DOCS).
- * Replaces any existing system document and adds a fresh one linked to APP_URL/docs.
- * Non-fatal — the app continues even if this fails.
- */
-async function seedPlatformDocs(): Promise<void> {
-  if (!isVectorEnabled()) return;
-
-  try {
-    const { PLATFORM_DOCS } = await import('@/lib/ai/nupcibot');
-    const { ingestTextContent } = await import('@/lib/ai/ingestion');
-
-    const appUrl = process.env.APP_URL ?? '';
-    const sourceName = 'system-platform-docs';
-    const fullUrl = `${appUrl}/docs`;
-
-    console.log('[VectorDB] Seeding platform docs...');
-    await ingestTextContent({
-      text: PLATFORM_DOCS,
-      sourceName,
-      docType: 'SYSTEM_MANUAL',
-      fullUrl,
-    });
-    console.log('[VectorDB] ✓ Platform docs seeded');
-  } catch (error) {
-    console.error('[VectorDB] Failed to seed platform docs:', error);
-    // Non-fatal: app can run without the platform docs in vector DB
-  }
-}
-
-/**
  * Run migrations on application startup
  * This should be called before any database operations
  */
@@ -460,7 +430,4 @@ export async function runStartupMigrations(): Promise<void> {
 
   // Initialize the vector database schema (Neon / pgvector)
   await runVectorDbInit();
-
-  // Seed the vector DB with the platform documentation
-  await seedPlatformDocs();
 }
