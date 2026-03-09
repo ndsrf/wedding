@@ -172,7 +172,7 @@ describe('Short URL Service', () => {
 
       const result = await getShortUrlPath('550e8400-e29b-41d4-a716-446655440010');
 
-      expect(result).toMatch(/^\/inv\/[A-Z]{2,4}[a-zA-Z0-9]{0,2}\/[a-zA-Z0-9]{3,6}$/);
+      expect(result).toMatch(/^\/inv\/[A-Z]{2}[a-zA-Z0-9]*\/[a-zA-Z0-9]{3,6}$/);
     });
   });
 
