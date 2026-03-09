@@ -186,6 +186,68 @@ export async function PATCH(
           return NextResponse.json(response, { status: 400 });
         }
 
+        // Before reactivating, ensure none of this wedding's admins have an
+        // email or phone that conflicts with admins already in active weddings.
+        // This preserves cross-tenant uniqueness used for WhatsApp routing.
+        {
+          const adminsToRestore = await prisma.weddingAdmin.findMany({
+            where: { wedding_id: weddingId },
+            select: { id: true, email: true, phone: true, name: true },
+          });
+
+          const emails = adminsToRestore.map((a) => a.email);
+          const phones = adminsToRestore
+            .map((a) => a.phone)
+            .filter((p): p is string => p !== null);
+
+          const [emailConflicts, phoneConflicts] = await Promise.all([
+            emails.length > 0
+              ? prisma.weddingAdmin.findMany({
+                  where: {
+                    email: { in: emails },
+                    wedding_id: { not: weddingId },
+                    wedding: { status: WeddingStatus.ACTIVE },
+                  },
+                  select: { email: true },
+                })
+              : Promise.resolve([]),
+            phones.length > 0
+              ? prisma.weddingAdmin.findMany({
+                  where: {
+                    phone: { in: phones },
+                    wedding_id: { not: weddingId },
+                    wedding: { status: WeddingStatus.ACTIVE },
+                  },
+                  select: { phone: true },
+                })
+              : Promise.resolve([]),
+          ]);
+
+          if (emailConflicts.length > 0) {
+            const conflictingEmails = emailConflicts.map((a) => a.email).join(', ');
+            const response: APIResponse = {
+              success: false,
+              error: {
+                code: API_ERROR_CODES.CONFLICT,
+                message: `Cannot reactivate: the following admin email(s) are already registered in another active wedding: ${conflictingEmails}`,
+              },
+            };
+            return NextResponse.json(response, { status: 409 });
+          }
+
+          if (phoneConflicts.length > 0) {
+            const conflictingPhones = phoneConflicts.map((a) => a.phone).join(', ');
+            const response: APIResponse = {
+              success: false,
+              error: {
+                code: API_ERROR_CODES.CONFLICT,
+                message: `Cannot reactivate: the following admin phone number(s) are already registered in another active wedding: ${conflictingPhones}`,
+              },
+            };
+            return NextResponse.json(response, { status: 409 });
+          }
+        }
+
         updatedWedding = await prisma.wedding.update({
           where: { id: weddingId },
           data: {

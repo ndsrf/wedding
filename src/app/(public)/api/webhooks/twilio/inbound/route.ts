@@ -137,38 +137,25 @@ async function retryDbOperation<T>(
  */
 function formatNupcibotReplyForWhatsApp(reply: string): string {
   const appUrl = (process.env.APP_URL ?? '').replace(/\/$/, '');
-  const linksMarker = '[LINKS]';
-  const linksIndex = reply.indexOf(linksMarker);
 
-  if (linksIndex === -1) {
-    return reply.trim();
-  }
-
-  const textPart = reply.slice(0, linksIndex).trim();
-  const linksPart = reply.slice(linksIndex + linksMarker.length).trim();
-
-  if (!linksPart) {
-    return textPart;
-  }
-
-  const linkLines = linksPart
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const sepIdx = line.indexOf('|');
-      if (sepIdx === -1) return null;
-      const path = line.slice(0, sepIdx).trim();
-      const label = line.slice(sepIdx + 1).trim();
-      return `${label}: ${appUrl}${path}`;
-    })
-    .filter((l): l is string => l !== null);
-
-  if (linkLines.length === 0) {
-    return textPart;
-  }
-
-  return `${textPart}\n\n${linkLines.join('\n')}`;
+  // Match everything before [LINKS] as text, then capture each /path|Label line.
+  // The 's' flag makes '.' match newlines so the links section is consumed in one pass.
+  return reply
+    .replace(
+      /\[LINKS\]\s*((?:\/\S+\|[^\n]+\n?)*)/gs,
+      (_match, linksBlock: string) => {
+        const lines = linksBlock
+          .split('\n')
+          .map((line) => {
+            const [path, ...labelParts] = line.trim().split('|');
+            const label = labelParts.join('|').trim();
+            return path && label ? `${label}: ${appUrl}${path.trim()}` : '';
+          })
+          .filter(Boolean);
+        return lines.length ? `\n\n${lines.join('\n')}` : '';
+      },
+    )
+    .trim();
 }
 
 // ============================================================================
@@ -224,9 +211,14 @@ export async function POST(request: NextRequest) {
 
     // --- Check if sender is a wedding admin --------------------------------
     // Admin messages are routed through NupciBot instead of the guest AI.
+    // Scope to ACTIVE weddings only to prevent cross-tenant information leakage
+    // in a multi-tenant system where phone numbers are not globally unique.
     if (body) {
       const matchingAdmin = await prisma.weddingAdmin.findFirst({
-        where: { phone: fromPhone },
+        where: {
+          phone: fromPhone,
+          wedding: { status: 'ACTIVE' },
+        },
         include: { wedding: true },
       });
 
@@ -257,9 +249,13 @@ export async function POST(request: NextRequest) {
 
     // --- Handle media attachments (photos sent via WhatsApp) --------------
     if (numMedia > 0) {
-      // Find the family first so we know the wedding_id
+      // Find the family first so we know the wedding_id.
+      // Scope to ACTIVE weddings to prevent cross-tenant leakage.
       const mediaFamily = await prisma.family.findFirst({
-        where: { OR: [{ whatsapp_number: fromPhone }, { phone: fromPhone }] },
+        where: {
+          OR: [{ whatsapp_number: fromPhone }, { phone: fromPhone }],
+          wedding: { status: 'ACTIVE' },
+        },
         select: { id: true, wedding_id: true, name: true, preferred_language: true },
       });
 
@@ -324,14 +320,15 @@ export async function POST(request: NextRequest) {
 
     // --- Look up family by phone number -----------------------------------
     // We search both whatsapp_number and phone fields.
-    // Families are uniquely tied to a wedding, so a phone number should
-    // return at most one family in practice.
+    // Scoped to ACTIVE weddings to prevent cross-tenant leakage in multi-tenant
+    // deployments where the same phone number may appear across weddings.
     const family = await prisma.family.findFirst({
       where: {
         OR: [
           { whatsapp_number: fromPhone },
           { phone: fromPhone },
         ],
+        wedding: { status: 'ACTIVE' },
       },
       include: {
         wedding: true,
