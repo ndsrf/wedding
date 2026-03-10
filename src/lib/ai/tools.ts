@@ -127,7 +127,11 @@ export function buildTools(ctx: ToolContext): ToolSet {
     // ── Update Family RSVP ────────────────────────────────────────────────
     update_family_rsvp: tool({
       description:
-        'Update the RSVP status for a family or specific individual members within a family. Use this when an admin wants to manually set attendance — either for the whole family or for named individuals (e.g. "Mark Smith is coming but Jane Smith is not").',
+        'Update the RSVP attendance for a family or specific individual members within a family. ' +
+        'IMPORTANT — choose the right parameters: ' +
+        '(1) If specific member names are mentioned (e.g. "John is coming but Elena is not"), you MUST use memberUpdates — never set the top-level attending flag for individual-level requests. ' +
+        '(2) Only set the top-level attending flag when the whole family is referred to without naming individuals (e.g. "the Smith family is coming"). ' +
+        '(3) You may combine both: memberUpdates for named members + attending as a default for the rest.',
       inputSchema: zodSchema(
         z.object({
           familyName: z.string().describe('The name of the family to update (e.g., "Smith")'),
@@ -135,7 +139,8 @@ export function buildTools(ctx: ToolContext): ToolSet {
             .boolean()
             .optional()
             .describe(
-              'Whether ALL members of the family are attending. Omit when using memberUpdates for per-member control.',
+              'Whole-family default: set ONLY when no specific member names are mentioned. ' +
+              'When combined with memberUpdates this becomes the fallback for members not listed in memberUpdates.',
             ),
           memberUpdates: z
             .array(
@@ -146,7 +151,8 @@ export function buildTools(ctx: ToolContext): ToolSet {
             )
             .optional()
             .describe(
-              'Per-member attendance overrides. Use this instead of (or alongside) the top-level attending flag when different members have different statuses.',
+              'REQUIRED whenever specific member names are mentioned. ' +
+              'List every named member with their individual attending status.',
             ),
         }),
       ),
