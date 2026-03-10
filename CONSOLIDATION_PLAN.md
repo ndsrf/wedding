@@ -133,7 +133,8 @@ For **UI pages**, no middleware changes are needed — each role continues to ac
 3. **Create `src/components/shared/<FeatureName>PageContent.tsx`** using the admin version as base, replacing hardcoded API strings with `apiPaths.*`.
 4. **Replace the admin `page.tsx`** with a thin wrapper (≤30 lines).
 5. **Replace the planner `page.tsx`** with a thin wrapper (≤30 lines).
-6. *(Optional later)* **Extract API handlers** to `src/lib/<feature>/api-handlers.ts`.
+6. **Extract API handler business logic** to `src/lib/<feature>/api-handlers.ts`, following the pattern in `src/lib/guests/api-handlers.ts`. Each handler accepts `weddingId: string` and returns a `NextResponse`. Route files become auth-only wrappers (~30 lines each).
+7. **Centralise planner access validation** in `src/lib/<feature>/planner-access.ts` (see `src/lib/guests/planner-access.ts`) to avoid copy-pasting the ownership check across every planner route.
 
 ---
 
@@ -158,6 +159,8 @@ For **UI pages**, no middleware changes are needed — each role continues to ac
 
 ## Completed: Guests Page
 
+### UI Consolidation
+
 **Shared component:** `src/components/shared/GuestsPageContent.tsx`
 
 **Differences resolved:**
@@ -170,3 +173,16 @@ For **UI pages**, no middleware changes are needed — each role continues to ac
 | `GuestTimelineModal apiBase` | Uses `apiPaths.apiBase` |
 | `ReminderModal apiBase` | Uses `apiPaths.apiBase` |
 | Guest additions 404 guard | `guestAdditionsOptional` prop (planner passes `true`) |
+
+### API Consolidation
+
+**Shared handlers:** `src/lib/guests/api-handlers.ts`
+
+All business logic for 14 operations extracted into shared functions:
+`listGuestsHandler`, `createGuestHandler`, `getGuestHandler`, `updateGuestHandler`, `deleteGuestHandler`, `bulkDeleteGuestsHandler`, `bulkUpdateGuestsHandler`, `exportGuestsHandler`, `importGuestsHandler`, `importVcfGuestsHandler`, `getGuestTemplateHandler`, `getGuestTimelineHandler`, `getGuestInvLinkHandler`, `handleGuestApiError`.
+
+**Shared access guard:** `src/lib/guests/planner-access.ts`
+
+`validatePlannerAccess(plannerId, weddingId)` returns `null` (access granted) or a ready-to-return `NextResponse` (403/404). Removed 10 copy-pasted copies from individual planner route files.
+
+**All 20 API route files** (10 admin + 10 planner) reduced to ~30-line auth-and-dispatch wrappers. The planner routes now also correctly call `invalidateCache` (previously missing).
