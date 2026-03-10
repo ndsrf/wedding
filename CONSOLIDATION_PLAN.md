@@ -135,6 +135,37 @@ For **UI pages**, no middleware changes are needed — each role continues to ac
 5. **Replace the planner `page.tsx`** with a thin wrapper (≤30 lines).
 6. **Extract API handler business logic** to `src/lib/<feature>/api-handlers.ts`, following the pattern in `src/lib/guests/api-handlers.ts`. Each handler accepts `weddingId: string` and returns a `NextResponse`. Route files become auth-only wrappers (~30 lines each).
 7. **Centralise planner access validation** in `src/lib/<feature>/planner-access.ts` (see `src/lib/guests/planner-access.ts`) to avoid copy-pasting the ownership check across every planner route.
+8. **Run the API parity safety check** (see below) before marking the screen as done.
+
+---
+
+## API Parity Safety Check
+
+After consolidating each screen, verify that every API endpoint the shared component calls exists and is fully implemented on **both** sides. This check caught a missing `GET /admins` on the planner side (causing the "invited by" field to be invisible) during the Guests consolidation.
+
+### Checklist
+
+For each `apiPaths.*` entry passed to the shared component:
+
+| Check | How to verify |
+|-------|--------------|
+| Route file exists on the planner side | `ls src/app/(public)/api/planner/weddings/[id]/<feature>/` |
+| All HTTP methods used by the component are implemented | Search the shared component for `fetch(apiPaths.X` and cross-check against `export async function GET/POST/PUT/PATCH/DELETE` in the planner route file |
+| Sub-routes called via `${apiPaths.x}/suffix` also exist | List sub-directories: `ls src/app/(public)/api/planner/weddings/[id]/<feature>/` |
+| `apiBase`-relative calls (`${apiPaths.apiBase}/something`) resolve to existing planner routes | Grep the shared component and any child components for `apiBase` usage, then verify each path |
+
+### Common failure patterns
+
+- **Missing HTTP verb**: Route file exists but only has `POST`/`DELETE` — no `GET`. The shared component silently gets an empty or error response, hiding UI that depends on the data.
+- **Missing sub-route**: The admin side has e.g. `guests/[id]/timeline` but the planner side does not.
+- **Child component with a hardcoded default**: A modal or sub-component accepts `apiBase` as an optional prop with a hardcoded `/api/admin` default. Works on admin, silently misfires on planner if the prop is not wired through.
+
+### Quick audit command
+
+```bash
+# List all fetch() targets in the shared component, then manually diff against planner routes
+grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageContent.tsx | sort -u
+```
 
 ---
 
