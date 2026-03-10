@@ -139,7 +139,7 @@ async function retryDbOperation<T>(
  *
  * Both are converted to "Label: url" plain-text lines that WhatsApp auto-hyperlinks.
  */
-function formatNupcibotReplyForWhatsApp(reply: string): string {
+async function formatNupcibotReplyForWhatsApp(reply: string, language: string): Promise<string> {
   const appUrl = (process.env.APP_URL ?? '').replace(/\/$/, '');
 
   // Convert [LINKS] block (/path|Label) → "Label: APP_URL/path"
@@ -158,9 +158,10 @@ function formatNupcibotReplyForWhatsApp(reply: string): string {
     },
   );
 
-  // Convert References block (filename|url or plain filename) → "filename: url" or "filename"
+  // Convert References block (filename|url or plain filename) → translated bold heading + "filename: url" lines
+  const referencesHeading = await translate('admin.nupcibot.referencesTitle', language as Parameters<typeof translate>[1]);
   formatted = formatted.replace(
-    /\n\n(?:\*\*)?References(?:\*\*)?\n([\s\S]*)$/i,
+    /\n+(?:\*\*)?References(?:\*\*)?:?\n([\s\S]*)$/i,
     (_match, refsBlock: string) => {
       const lines = refsBlock
         .split('\n')
@@ -174,7 +175,7 @@ function formatNupcibotReplyForWhatsApp(reply: string): string {
           return url ? `${label}: ${url}` : label;
         })
         .filter(Boolean);
-      return lines.length ? `\n\n${lines.join('\n')}` : '';
+      return lines.length ? `\n\n*${referencesHeading}*\n${lines.join('\n')}` : '';
     },
   );
 
@@ -278,7 +279,7 @@ export async function POST(request: NextRequest) {
           return emptyTwiML();
         }
 
-        const whatsappReply = formatNupcibotReplyForWhatsApp(nupcibotReply);
+        const whatsappReply = await formatNupcibotReplyForWhatsApp(nupcibotReply, language);
         return messageTwiML(whatsappReply);
       }
     }
