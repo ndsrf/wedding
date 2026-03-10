@@ -404,6 +404,7 @@ export async function bulkDeleteGuestsHandler(
       return (await tx.family.deleteMany({ where: { id: { in: family_ids } } })).count;
     });
 
+    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
     const response: APIResponse = { success: true, data: { deleted_count: count } };
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
@@ -481,6 +482,7 @@ export async function bulkUpdateGuestsHandler(
       return { updatedFamilies, updatedMembers };
     });
 
+    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
     const response: APIResponse = {
       success: true,
       data: { updated_families: result.updatedFamilies, updated_members: result.updatedMembers },
@@ -608,6 +610,7 @@ export async function importGuestsHandler(
       return NextResponse.json(body, { status: 400 });
     }
 
+    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
     const response: APIResponse = {
       success: true,
       data: {
@@ -708,6 +711,7 @@ export async function importVcfGuestsHandler(
       return NextResponse.json(body, { status: 400 });
     }
 
+    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
     const response: APIResponse = {
       success: true,
       data: {

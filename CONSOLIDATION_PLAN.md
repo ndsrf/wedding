@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
 // Planner route
 export async function GET(request: NextRequest, { params }) {
   const user = await requireRole('planner');
-  const { id: weddingId } = await params;
+  const { id: weddingId } = params;
   await assertPlannerOwns(user.planner_id!, weddingId);
   return listGuestsHandler(weddingId, request.nextUrl.searchParams);
 }
