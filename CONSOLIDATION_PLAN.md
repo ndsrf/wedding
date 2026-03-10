@@ -175,7 +175,7 @@ grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageConte
 |--------|-----------|--------------|--------|
 | Guests | `/admin/guests` | `/planner/weddings/[id]/guests` | ✅ Done |
 | Notifications | `/admin/notifications` | `/planner/weddings/[id]/notifications` | ⬜ Pending |
-| Menu | `/admin/menu` | `/planner/weddings/[id]/menu` | ⬜ Pending |
+| Menu | `/admin/menu` | `/planner/weddings/[id]/menu` | ✅ Done |
 | Tasting | `/admin/tasting` | `/planner/weddings/[id]/tasting` | ⬜ Pending |
 | Seating | `/admin/seating` | `/planner/weddings/[id]/seating` | ⬜ Pending |
 | Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ⬜ Pending |
@@ -217,3 +217,32 @@ All business logic for 14 operations extracted into shared functions:
 `validatePlannerAccess(plannerId, weddingId)` returns `null` (access granted) or a ready-to-return `NextResponse` (403/404). Removed 10 copy-pasted copies from individual planner route files.
 
 **All 20 API route files** (10 admin + 10 planner) reduced to ~30-line auth-and-dispatch wrappers. The planner routes now also correctly call `invalidateCache` (previously missing).
+
+---
+
+## Completed: Menu Page
+
+### UI Consolidation
+
+**Shared component:** `src/components/shared/MenuPageContent.tsx`
+
+**Differences resolved:**
+| Difference | Resolution |
+|-----------|-----------|
+| API base paths | `apiPaths.apiBase` passed as prop (e.g. `/api/admin/tasting` vs `/api/planner/weddings/:id/tasting`) |
+| Header/nav | `header` React slot prop |
+| Wedding name subtitle | Planner thin page fetches couple names and passes them in its `header` slot |
+| `WeddingMenuSelector apiBase` | Uses `apiPaths.apiBase` (component already accepted this prop) |
+
+### API Consolidation
+
+**Shared handlers:** `src/lib/menu/api-handlers.ts`
+
+Business logic for 2 operations extracted into shared functions:
+`updateMenuSelectionHandler`, `exportMenuHandler`.
+
+**Shared access guard:** reuses `src/lib/guests/planner-access.ts`
+
+`validatePlannerAccess` is generic and shared directly — no separate menu copy needed.
+
+**All 4 API route files** (2 admin + 2 planner) reduced to ~25-line auth-and-dispatch wrappers. The planner routes now correctly call `validatePlannerAccess` (previously missing — any planner could modify any wedding's menu).
