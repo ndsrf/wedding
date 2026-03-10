@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
 import { uploadFile, deleteFile } from '@/lib/storage';
+import { computeEffectiveStatus } from '@/lib/tasting/status';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 type Params = { params: Promise<{ token: string }> };
@@ -17,10 +18,15 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   const participant = await prisma.tastingParticipant.findUnique({
     where: { magic_token: token },
-    include: { menu: { select: { wedding_id: true } } },
+    include: { menu: { select: { wedding_id: true, status: true, tasting_date: true } } },
   });
   if (!participant) {
     return NextResponse.json({ success: false, error: { code: 'NOT_FOUND', message: 'Invalid tasting link' } }, { status: 404 });
+  }
+
+  const effective_status = computeEffectiveStatus(participant.menu.status, participant.menu.tasting_date);
+  if (effective_status === 'CLOSED') {
+    return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'Tasting menu is currently closed' } }, { status: 403 });
   }
 
   const formData = await request.formData();
@@ -73,9 +79,15 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
   const participant = await prisma.tastingParticipant.findUnique({
     where: { magic_token: token },
+    include: { menu: { select: { status: true, tasting_date: true } } },
   });
   if (!participant) {
     return NextResponse.json({ success: false, error: { code: 'NOT_FOUND' } }, { status: 404 });
+  }
+
+  const effective_status = computeEffectiveStatus(participant.menu.status, participant.menu.tasting_date);
+  if (effective_status === 'CLOSED') {
+    return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'Tasting menu is currently closed' } }, { status: 403 });
   }
 
   const { dish_id: dishId } = await request.json();

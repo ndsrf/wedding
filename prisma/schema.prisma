@@ -780,11 +780,18 @@ model RagIngestionJob {
 // TASTING MENU — per-wedding food tasting experience
 // -----------------------------------------------------------------------------
 
+enum TastingMenuStatus {
+  OPEN
+  CLOSED
+}
+
 model TastingMenu {
   id           String             @id @default(uuid())
   wedding_id   String             @unique
   title        String             @default("Tasting Menu")
   description  String?            @db.Text
+  tasting_date DateTime?
+  status       TastingMenuStatus  @default(CLOSED)
   created_at   DateTime           @default(now())
   updated_at   DateTime           @updatedAt
   wedding      Wedding            @relation(fields: [wedding_id], references: [id], onDelete: Cascade)

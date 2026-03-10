@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
+import { computeEffectiveStatus } from '@/lib/tasting/status';
 
 type Params = { params: Promise<{ token: string }> };
 
@@ -16,15 +17,25 @@ const scoreSchema = z.object({
   notes: z.string().max(2000).optional().nullable(),
 });
 
+async function getParticipantWithMenu(token: string) {
+  return prisma.tastingParticipant.findUnique({
+    where: { magic_token: token },
+    include: { menu: { select: { status: true, tasting_date: true } } },
+  });
+}
+
 export async function POST(request: NextRequest, { params }: Params) {
   const { token } = await params;
 
-  const participant = await prisma.tastingParticipant.findUnique({
-    where: { magic_token: token },
-  });
+  const participant = await getParticipantWithMenu(token);
 
   if (!participant) {
     return NextResponse.json({ success: false, error: { code: 'NOT_FOUND', message: 'Invalid tasting link' } }, { status: 404 });
+  }
+
+  const effective_status = computeEffectiveStatus(participant.menu.status, participant.menu.tasting_date);
+  if (effective_status === 'CLOSED') {
+    return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'Tasting menu is currently closed' } }, { status: 403 });
   }
 
   const body = await request.json();
@@ -61,12 +72,15 @@ export async function POST(request: NextRequest, { params }: Params) {
 export async function DELETE(request: NextRequest, { params }: Params) {
   const { token } = await params;
 
-  const participant = await prisma.tastingParticipant.findUnique({
-    where: { magic_token: token },
-  });
+  const participant = await getParticipantWithMenu(token);
 
   if (!participant) {
     return NextResponse.json({ success: false, error: { code: 'NOT_FOUND', message: 'Invalid tasting link' } }, { status: 404 });
+  }
+
+  const effective_status = computeEffectiveStatus(participant.menu.status, participant.menu.tasting_date);
+  if (effective_status === 'CLOSED') {
+    return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'Tasting menu is currently closed' } }, { status: 403 });
   }
 
   const body = await request.json();

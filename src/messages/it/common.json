@@ -1679,7 +1679,14 @@
         "save": "Salva",
         "saving": "Salvataggio...",
         "saved": "Menu salvato!",
-        "error": "Errore nel salvataggio"
+        "error": "Errore nel salvataggio",
+        "tastingDate": "Data di Degustazione",
+        "status": "Stato",
+        "statusOpen": "Aperto",
+        "statusClosed": "Chiuso",
+        "statusClosedHint": "Si apre automaticamente il giorno della degustazione",
+        "statusOpenHint": "Sempre aperto — nessun comportamento automatico",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Sezioni",
@@ -1928,6 +1935,10 @@
       "search": {
         "placeholder": "Cerca piatti...",
         "noResults": "Nessun piatto corrisponde alla ricerca."
+      },
+      "closed": {
+        "title": "Il menu di degustazione è in sola lettura",
+        "description": "Questo menu di degustazione è attualmente chiuso. Contatta la coppia per ulteriori informazioni."
       }
     }
   },

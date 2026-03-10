@@ -88,6 +88,9 @@ interface TastingData {
     id: string;
     title: string;
     description: string | null;
+    tasting_date: string | null;
+    status: 'OPEN' | 'CLOSED';
+    effective_status: 'OPEN' | 'CLOSED';
     wedding: { couple_names: string };
     sections: Section[];
     participants: { id: string; name: string }[];
@@ -155,12 +158,13 @@ function filterSections(sections: Section[], query: string): Section[] {
 
 // ─── My Scores Tab ───────────────────────────────────────────────────────────
 
-function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate, searchQuery }: {
+function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate, searchQuery, readOnly = false }: {
   data: TastingData;
   token: string;
   onScoreUpdate: (dishId: string, score: number, notes: string | null) => void;
   onImageUpdate: (dishId: string, imageUrl: string | null) => void;
   searchQuery: string;
+  readOnly?: boolean;
 }) {
   const t = useTranslations('guest.tasting');
 
@@ -355,84 +359,90 @@ function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate, searchQuery }:
                             <h3 className="font-medium text-gray-900">{dish.name}</h3>
                             {dish.description && <p className="text-sm text-gray-500 mt-0.5">{dish.description}</p>}
                           </div>
-                          <SaveBadge status={dishStatus} />
+                          {!readOnly && <SaveBadge status={dishStatus} />}
                         </div>
 
                         <div className="mt-3">
                           <p className="text-xs text-gray-500 mb-1.5">{t('score.rate')}</p>
-                          <Stars value={local.score} onChange={v => handleStarChange(dish.id, local.notes, v)} />
+                          <Stars value={local.score} onChange={readOnly ? undefined : v => handleStarChange(dish.id, local.notes, v)} readonly={readOnly} />
                         </div>
 
                         <div className="mt-3">
                           <textarea
                             value={local.notes}
-                            onChange={e => handleNotesChange(dish.id, local.score, e.target.value)}
+                            onChange={e => !readOnly && handleNotesChange(dish.id, local.score, e.target.value)}
                             placeholder={t('score.notesPlaceholder')}
                             rows={2}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-rose-500 focus:border-rose-500 resize-none"
+                            readOnly={readOnly}
+                            className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none ${readOnly ? 'bg-gray-50 text-gray-500 cursor-default' : 'focus:ring-rose-500 focus:border-rose-500'}`}
                           />
                         </div>
 
-                        {/* Photo upload */}
-                        <div className="mt-3 flex items-center gap-2 flex-wrap">
-                          {imageUrl && (
+                        {/* Photo — show existing in read-only, show upload controls otherwise */}
+                        {imageUrl && (
+                          <div className="mt-3">
                             <button type="button" onClick={() => setLightboxUrl(imageUrl)} className="shrink-0 focus:outline-none">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={imageUrl} alt={dish.name} className="h-14 w-14 rounded-lg object-cover border border-gray-200 hover:opacity-90 transition-opacity" />
                             </button>
-                          )}
-                          <input
-                            ref={el => { fileInputRefs.current[dish.id] = el; }}
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            className="hidden"
-                            onChange={e => {
-                              const file = e.target.files?.[0];
-                              if (file) handleImageUpload(dish.id, file);
-                              e.target.value = '';
-                            }}
-                          />
-                          {uploading ? (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400">
-                              <WeddingSpinner size="sm" />{t('score.uploadingPhoto')}
-                            </span>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => triggerFileInput(dish.id, true)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                              >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                {t('score.takePhoto')}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => triggerFileInput(dish.id, false)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                              >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                {t('score.chooseGallery')}
-                              </button>
-                              {imageUrl && (
+                          </div>
+                        )}
+                        {!readOnly && (
+                          <div className="mt-3 flex items-center gap-2 flex-wrap">
+                            {!imageUrl && null}
+                            <input
+                              ref={el => { fileInputRefs.current[dish.id] = el; }}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/gif"
+                              className="hidden"
+                              onChange={e => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(dish.id, file);
+                                e.target.value = '';
+                              }}
+                            />
+                            {uploading ? (
+                              <span className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400">
+                                <WeddingSpinner size="sm" />{t('score.uploadingPhoto')}
+                              </span>
+                            ) : (
+                              <>
                                 <button
                                   type="button"
-                                  onClick={() => handleImageRemove(dish.id)}
-                                  className="text-sm text-red-400 hover:text-red-600 transition-colors"
+                                  onClick={() => triggerFileInput(dish.id, true)}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                                 >
-                                  {t('score.removePhoto')}
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                  {t('score.takePhoto')}
                                 </button>
-                              )}
-                            </>
-                          )}
-                        </div>
+                                <button
+                                  type="button"
+                                  onClick={() => triggerFileInput(dish.id, false)}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  {t('score.chooseGallery')}
+                                </button>
+                                {imageUrl && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleImageRemove(dish.id)}
+                                    className="text-sm text-red-400 hover:text-red-600 transition-colors"
+                                  >
+                                    {t('score.removePhoto')}
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )}
 
-                        {dishStatus === 'error' && (
+                        {!readOnly && dishStatus === 'error' && (
                           <button onClick={() => save(dish.id, local.score, local.notes)} className="mt-1 text-xs text-red-500 underline">
                             {t('score.error')} — tap to retry
                           </button>
@@ -832,6 +842,8 @@ export default function TastingPage({ params }: PageProps) {
     );
   }
 
+  const isClosed = data.menu.effective_status === 'CLOSED';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50">
       {/* Header */}
@@ -839,7 +851,14 @@ export default function TastingPage({ params }: PageProps) {
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs text-gray-500 mb-0.5">{data.menu.wedding.couple_names}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-xs text-gray-500 mb-0.5">{data.menu.wedding.couple_names}</p>
+                {data.menu.tasting_date && (
+                  <p className="text-xs text-gray-400 mb-0.5">
+                    · {new Date(data.menu.tasting_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </p>
+                )}
+              </div>
               <h1 className="text-xl font-bold text-gray-900">🍽️ {data.menu.title}</h1>
               <p className="text-sm text-gray-600 mt-0.5">{t('welcome', { name: data.participant.name })}</p>
             </div>
@@ -889,6 +908,16 @@ export default function TastingPage({ params }: PageProps) {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6">
+        {isClosed && (
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+            <span className="text-amber-500 text-lg shrink-0">🔒</span>
+            <div>
+              <p className="text-sm font-medium text-amber-800">{t('closed.title')}</p>
+              <p className="text-xs text-amber-700 mt-0.5">{t('closed.description')}</p>
+            </div>
+          </div>
+        )}
+
         {data.menu.description && activeTab === 'my' && (
           <p className="text-sm text-gray-600 mb-6 bg-white rounded-xl border border-gray-200 px-4 py-3 shadow-sm">
             {data.menu.description}
@@ -896,7 +925,7 @@ export default function TastingPage({ params }: PageProps) {
         )}
 
         {activeTab === 'my' && (
-          <MyScoresTab data={data} token={token} onScoreUpdate={handleScoreUpdate} onImageUpdate={handleImageUpdate} searchQuery={searchQuery} />
+          <MyScoresTab data={data} token={token} onScoreUpdate={handleScoreUpdate} onImageUpdate={handleImageUpdate} searchQuery={searchQuery} readOnly={isClosed} />
         )}
         {activeTab === 'all' && <AllScoresTab data={data} searchQuery={searchQuery} />}
         {activeTab === 'avg' && <AverageScoresTab data={data} searchQuery={searchQuery} />}

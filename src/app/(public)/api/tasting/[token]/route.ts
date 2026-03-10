@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { computeEffectiveStatus } from '@/lib/tasting/status';
 
 type Params = { params: Promise<{ token: string }> };
 
@@ -62,6 +63,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
     }),
   }));
 
+  const effective_status = computeEffectiveStatus(menu.status, menu.tasting_date);
+
   return NextResponse.json({
     success: true,
     data: {
@@ -73,6 +76,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
         id: menu.id,
         title: menu.title,
         description: menu.description,
+        tasting_date: menu.tasting_date,
+        status: menu.status,
+        effective_status,
         wedding: menu.wedding,
         sections: sectionsWithAverages,
         participants: menu.participants,
