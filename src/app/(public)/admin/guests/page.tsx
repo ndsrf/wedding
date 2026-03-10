@@ -94,6 +94,8 @@ export default function GuestsPage() {
   const [activeTab, setActiveTab] = useState<'guests' | 'additions'>('guests');
   const [weddingConfig, setWeddingConfig] = useState<WeddingQuestionConfig | null>(null);
   const [weddingGiftIban, setWeddingGiftIban] = useState<string | null>(null);
+  const [weddingShortCode, setWeddingShortCode] = useState<string | null>(null);
+  const [copiedGeneralLink, setCopiedGeneralLink] = useState(false);
   const [admins, setAdmins] = useState<Array<{ id: string; name: string; email: string }>>([]);
 
   // Modal states
@@ -190,6 +192,7 @@ export default function GuestsPage() {
           extra_info_3_label: data.data.extra_info_3_label,
         });
         setWeddingGiftIban(data.data.gift_iban || null);
+        setWeddingShortCode(data.data.short_url_initials || null);
       }
     } catch (error) {
       console.error('Error fetching wedding config:', error);
@@ -316,6 +319,15 @@ export default function GuestsPage() {
       console.error('Error loading guest:', error);
       showNotification('error', t('common.errors.generic'));
     }
+  };
+
+  // Handle copy general invitation link
+  const handleCopyGeneralInvLink = async () => {
+    if (!weddingShortCode) return;
+    const url = `${window.location.origin}/w/${weddingShortCode}`;
+    await navigator.clipboard.writeText(url);
+    setCopiedGeneralLink(true);
+    setTimeout(() => setCopiedGeneralLink(false), 2000);
   };
 
   // Handle copy invitation link
@@ -793,6 +805,14 @@ export default function GuestsPage() {
                     )}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
+                    {weddingShortCode && (
+                      <button
+                        onClick={handleCopyGeneralInvLink}
+                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
+                      >
+                        {copiedGeneralLink ? '✓' : t('admin.guests.copyGeneralInvitationLink')}
+                      </button>
+                    )}
                     <button
                       onClick={() => setIsBulkDeleteDialogOpen(true)}
                       disabled={selectedGuestIds.length === 0}

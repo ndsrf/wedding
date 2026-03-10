@@ -930,6 +930,7 @@
       "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file.",
       "bulkActions": "Azioni di massa",
+      "copyGeneralInvitationLink": "Copia link invito generale",
       "deleteSelected": "Elimina selezionati",
       "selectGuestsHint": "Seleziona gli ospiti dall'elenco per eseguire azioni di massa",
       "bulkDeleteTitle": "Elimina ospiti selezionati",
