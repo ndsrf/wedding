@@ -1,6 +1,7 @@
 /**
  * Wedding Planner - Wedding Admins API Routes
  *
+ * GET /api/planner/weddings/:id/admins - List wedding admins
  * POST /api/planner/weddings/:id/admins - Invite wedding admin
  * DELETE /api/planner/weddings/:id/admins/:admin_id - Remove wedding admin (via query param)
  */
@@ -19,6 +20,84 @@ import type {
   InviteWeddingAdminRequest,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
+
+/**
+ * GET /api/planner/weddings/:id/admins
+ * Returns list of WeddingAdmin { id, name, email } for the given wedding
+ */
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await requireRole('planner');
+
+    if (!user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: 'Planner ID not found in session',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    const { id: weddingId } = await params;
+
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: weddingId },
+      select: { planner_id: true },
+    });
+
+    if (!wedding) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Wedding not found' },
+      };
+      return NextResponse.json(response, { status: 404 });
+    }
+
+    if (wedding.planner_id !== user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.FORBIDDEN, message: 'You do not have access to this wedding' },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    const admins = await prisma.weddingAdmin.findMany({
+      where: { wedding_id: weddingId },
+      select: { id: true, name: true, email: true },
+      orderBy: { created_at: 'asc' },
+    });
+
+    const response: APIResponse = { success: true, data: admins };
+    return NextResponse.json(response, { status: 200 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage.includes('UNAUTHORIZED')) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.UNAUTHORIZED, message: 'Authentication required' },
+      };
+      return NextResponse.json(response, { status: 401 });
+    }
+    if (errorMessage.includes('FORBIDDEN')) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.FORBIDDEN, message: 'Planner role required' },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+    console.error('Error fetching admins:', error);
+    const response: APIResponse = {
+      success: false,
+      error: { code: API_ERROR_CODES.INTERNAL_ERROR, message: 'Failed to fetch admins' },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}
 
 // Validation schema for inviting wedding admin
 const inviteAdminSchema = z.object({
