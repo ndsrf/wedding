@@ -46,7 +46,7 @@ function LinkIcon({ className }: { className: string }) {
 
 // Parse "References\n- file1.pdf|url1\n- file2.docx" section from assistant replies
 function parseReferences(raw: string): { body: string; references: Array<{ label: string; url?: string }> } {
-  const refPattern = /\n\n(?:\*\*)?References(?:\*\*)?\n([\s\S]*)$/i;
+  const refPattern = /\n+(?:\*\*)?References(?:\*\*)?:?\n([\s\S]*)$/i;
   const match = raw.match(refPattern);
   if (!match) return { body: raw.trim(), references: [] };
 
