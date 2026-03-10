@@ -336,7 +336,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
     // ── Suggest Tables for a Family ────────────────────────────────────────
     suggest_tables_for_family: tool({
       description:
-        'Find the best table(s) for a family to sit at. Ranks tables by: (1) has enough free seats for all attending members, (2) most other guests at that table share the same invited_by_admin_id as this family.',
+        'Find the best table(s) for a family to sit at. Ranks tables by: (1) has enough free seats for all attending members, (2) most other guests at that table share the same invited_by_admin_id as this family, (3) closest average age to the family\'s attending members (when age data is available).',
       inputSchema: zodSchema(
         z.object({
           familyName: z.string().describe('The name of the family to find a table for'),
@@ -360,7 +360,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
             include: {
               members: {
                 where: { attending: true },
-                select: { id: true, name: true },
+                select: { id: true, name: true, age: true },
               },
             },
           });
@@ -388,12 +388,17 @@ export function buildTools(ctx: ToolContext): ToolSet {
           });
           const invitedByAdminId = familyRecord?.invited_by_admin_id ?? null;
 
-          // Fetch all tables with their current guests (and their family's invited_by_admin_id)
+          // Compute average age of the family's attending members (null if no ages entered)
+          const familyAges = family.members.map((m) => m.age).filter((a): a is number => a !== null && a !== undefined);
+          const familyAvgAge = familyAges.length > 0 ? familyAges.reduce((s, a) => s + a, 0) / familyAges.length : null;
+
+          // Fetch all tables with their current guests (family admin id + age for similarity)
           const tables = await prisma.table.findMany({
             where: { wedding_id: ctx.weddingId },
             include: {
               assigned_guests: {
                 select: {
+                  age: true,
                   family: {
                     select: { invited_by_admin_id: true },
                   },
@@ -409,6 +414,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
             currentOccupancy: number;
             availableSeats: number;
             sharedAdminCount: number;
+            ageDiff: number | null; // absolute difference between family avg age and table avg age
           };
 
           const suggestions: TableSuggestion[] = [];
@@ -426,12 +432,25 @@ export function buildTools(ctx: ToolContext): ToolSet {
                 ).length
               : 0;
 
+            // Compute age similarity: average age of guests already at the table
+            let ageDiff: number | null = null;
+            if (familyAvgAge !== null) {
+              const tableAges = t.assigned_guests
+                .map((g) => g.age)
+                .filter((a): a is number => a !== null && a !== undefined);
+              if (tableAges.length > 0) {
+                const tableAvgAge = tableAges.reduce((s, a) => s + a, 0) / tableAges.length;
+                ageDiff = Math.abs(familyAvgAge - tableAvgAge);
+              }
+            }
+
             suggestions.push({
               tableNumber: t.number,
               capacity: t.capacity,
               currentOccupancy,
               availableSeats,
               sharedAdminCount,
+              ageDiff,
             });
           }
 
@@ -443,9 +462,12 @@ export function buildTools(ctx: ToolContext): ToolSet {
             };
           }
 
-          // Sort: most shared-admin guests first, then most available seats
+          // Sort: (1) most shared-admin guests, (2) closest average age (nulls last), (3) most available seats
           suggestions.sort((a, b) => {
             if (b.sharedAdminCount !== a.sharedAdminCount) return b.sharedAdminCount - a.sharedAdminCount;
+            if (a.ageDiff !== null && b.ageDiff !== null) return a.ageDiff - b.ageDiff;
+            if (a.ageDiff !== null) return -1; // a has age data, prefer it
+            if (b.ageDiff !== null) return 1;
             return b.availableSeats - a.availableSeats;
           });
 
@@ -455,6 +477,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
             status: 'success',
             family: family.name,
             attendingCount,
+            familyAvgAge,
             invitedByAdminId,
             suggestions: top.map((s) => ({
               tableNumber: s.tableNumber,
@@ -462,6 +485,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
               currentOccupancy: s.currentOccupancy,
               availableSeats: s.availableSeats,
               sharedAdminGuestsAtTable: s.sharedAdminCount,
+              avgAgeDifference: s.ageDiff !== null ? Math.round(s.ageDiff * 10) / 10 : null,
             })),
           };
         } catch (err) {
