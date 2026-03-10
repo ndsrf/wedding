@@ -1247,6 +1247,7 @@
         "privateNotesHelp": "Estas notas solo son visibles para los administradores de la boda y no se compartirán con los invitados."
       },
       "bulkActions": "Acciones en lote",
+      "copyGeneralInvitationLink": "Copiar enlace de invitación general",
       "deleteSelected": "Eliminar seleccionados",
       "selectGuestsHint": "Selecciona invitados de la lista para realizar acciones en lote",
       "bulkDeleteTitle": "Eliminar invitados seleccionados",
