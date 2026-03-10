@@ -48,9 +48,9 @@ export function buildTools(ctx: ToolContext): ToolSet {
           return chunks.map((c) => ({
             content: c.content,
             sourceName: c.sourceName,
-            // SYSTEM_MANUAL docs (e.g. platform docs) should not surface a
+            // SYSTEM_MANUAL docs (e.g. platform docs) should surface a
             // clickable URL in the References section of the chat reply.
-            fullUrl: c.docType === 'SYSTEM_MANUAL' ? undefined : c.fullUrl,
+            fullUrl: c.fullUrl,
             weddingProviderId: c.weddingProviderId,
             paymentId: c.paymentId,
             locationId: c.locationId,
@@ -127,14 +127,30 @@ export function buildTools(ctx: ToolContext): ToolSet {
     // ── Update Family RSVP ────────────────────────────────────────────────
     update_family_rsvp: tool({
       description:
-        'Update the RSVP status for all members of a family by family name. Use this when an admin wants to manually set the attendance for an entire family unit.',
+        'Update the RSVP status for a family or specific individual members within a family. Use this when an admin wants to manually set attendance — either for the whole family or for named individuals (e.g. "Mark Smith is coming but Jane Smith is not").',
       inputSchema: zodSchema(
         z.object({
           familyName: z.string().describe('The name of the family to update (e.g., "Smith")'),
-          attending: z.boolean().describe('Whether the family is attending (true) or not (false)'),
+          attending: z
+            .boolean()
+            .optional()
+            .describe(
+              'Whether ALL members of the family are attending. Omit when using memberUpdates for per-member control.',
+            ),
+          memberUpdates: z
+            .array(
+              z.object({
+                memberName: z.string().describe('The name of the individual family member'),
+                attending: z.boolean().describe('Whether this specific member is attending'),
+              }),
+            )
+            .optional()
+            .describe(
+              'Per-member attendance overrides. Use this instead of (or alongside) the top-level attending flag when different members have different statuses.',
+            ),
         }),
       ),
-      execute: async ({ familyName, attending }) => {
+      execute: async ({ familyName, attending, memberUpdates }) => {
         if (!ctx.weddingId) return { error: 'No wedding context available' };
         try {
           // Search for families matching the name (case-insensitive)
@@ -144,7 +160,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
               name: { contains: familyName, mode: 'insensitive' },
             },
             include: {
-              members: { select: { id: true, name: true } },
+              members: { select: { id: true, name: true, attending: true } },
             },
           });
 
@@ -166,24 +182,291 @@ export function buildTools(ctx: ToolContext): ToolSet {
           }
 
           const family = families[0];
+          const results: Array<{ member: string; attending: boolean }> = [];
+          const notFound: string[] = [];
 
-          // Update all members of the family
-          await prisma.familyMember.updateMany({
-            where: { family_id: family.id },
-            data: { attending },
-          });
+          if (memberUpdates && memberUpdates.length > 0) {
+            // Per-member updates — find each member by name (case-insensitive)
+            for (const update of memberUpdates) {
+              const member = family.members.find(
+                (m) => m.name.toLowerCase() === update.memberName.toLowerCase(),
+              );
+              if (!member) {
+                notFound.push(update.memberName);
+                continue;
+              }
+              await prisma.familyMember.update({
+                where: { id: member.id },
+                data: { attending: update.attending },
+              });
+              results.push({ member: member.name, attending: update.attending });
+            }
+
+            // Also apply the family-wide flag to remaining members if provided
+            if (attending !== undefined) {
+              const updatedIds = results.map((r) =>
+                family.members.find((m) => m.name === r.member)!.id,
+              );
+              await prisma.familyMember.updateMany({
+                where: { family_id: family.id, id: { notIn: updatedIds } },
+                data: { attending },
+              });
+              const remaining = family.members.filter((m) => !updatedIds.includes(m.id));
+              for (const m of remaining) {
+                results.push({ member: m.name, attending });
+              }
+            }
+          } else if (attending !== undefined) {
+            // Whole-family update
+            await prisma.familyMember.updateMany({
+              where: { family_id: family.id },
+              data: { attending },
+            });
+            for (const m of family.members) {
+              results.push({ member: m.name, attending });
+            }
+          } else {
+            return { error: 'Provide either attending or memberUpdates (or both).' };
+          }
 
           return {
-            status: 'success',
-            message: `RSVP status for family "${family.name}" updated to ${
-              attending ? 'attending' : 'not attending'
-            } for all ${family.members.length} members.`,
+            status: notFound.length > 0 ? 'partial' : 'success',
             family: family.name,
-            memberCount: family.members.length,
+            updated: results,
+            notFound: notFound.length > 0 ? notFound : undefined,
+            message:
+              notFound.length > 0
+                ? `Updated ${results.length} member(s) for "${family.name}". Could not find: ${notFound.join(', ')}.`
+                : `Updated ${results.length} member(s) for family "${family.name}".`,
           };
         } catch (err) {
           console.error('[TOOLS] update_family_rsvp error:', err);
           return { error: 'Failed to update RSVP status' };
+        }
+      },
+    }),
+
+    // ── Assign Family to Table ─────────────────────────────────────────────
+    assign_family_to_table: tool({
+      description:
+        'Assign the attending members of a family to a specific table. Optionally limit which members are assigned. Clears any previous table assignment for the affected members first.',
+      inputSchema: zodSchema(
+        z.object({
+          familyName: z.string().describe('The name of the family to seat'),
+          tableNumber: z.number().int().describe('The table number to assign the family to'),
+          memberNames: z
+            .array(z.string())
+            .optional()
+            .describe(
+              'Specific member names to assign. If omitted, all attending members of the family are assigned.',
+            ),
+        }),
+      ),
+      execute: async ({ familyName, tableNumber, memberNames }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          // Resolve family
+          const families = await prisma.family.findMany({
+            where: {
+              wedding_id: ctx.weddingId,
+              name: { contains: familyName, mode: 'insensitive' },
+            },
+            include: {
+              members: { select: { id: true, name: true, attending: true } },
+            },
+          });
+
+          if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+          if (families.length > 1) {
+            return {
+              status: 'ambiguous',
+              message: `Multiple families found matching "${familyName}". Please clarify.`,
+              families: families.map((f) => ({ id: f.id, name: f.name })),
+            };
+          }
+
+          const family = families[0];
+
+          // Resolve table
+          const table = await prisma.table.findUnique({
+            where: { wedding_id_number: { wedding_id: ctx.weddingId, number: tableNumber } },
+            include: { assigned_guests: { select: { id: true } } },
+          });
+
+          if (!table) return { error: `Table ${tableNumber} not found` };
+
+          // Determine which members to assign
+          let targets = family.members.filter((m) => m.attending === true);
+          if (memberNames && memberNames.length > 0) {
+            const lowerNames = memberNames.map((n) => n.toLowerCase());
+            targets = targets.filter((m) => lowerNames.includes(m.name.toLowerCase()));
+          }
+
+          if (targets.length === 0) {
+            return { error: 'No attending members found to assign (check RSVP status).' };
+          }
+
+          const currentOccupancy = table.assigned_guests.length;
+          if (currentOccupancy + targets.length > table.capacity) {
+            return {
+              error: `Table ${tableNumber} does not have enough space. Capacity: ${table.capacity}, current occupancy: ${currentOccupancy}, trying to add: ${targets.length}.`,
+            };
+          }
+
+          // Assign members
+          await prisma.familyMember.updateMany({
+            where: { id: { in: targets.map((m) => m.id) } },
+            data: { table_id: table.id },
+          });
+
+          return {
+            status: 'success',
+            message: `Assigned ${targets.length} member(s) of "${family.name}" to table ${tableNumber}.`,
+            family: family.name,
+            table: tableNumber,
+            assignedMembers: targets.map((m) => m.name),
+          };
+        } catch (err) {
+          console.error('[TOOLS] assign_family_to_table error:', err);
+          return { error: 'Failed to assign family to table' };
+        }
+      },
+    }),
+
+    // ── Suggest Tables for a Family ────────────────────────────────────────
+    suggest_tables_for_family: tool({
+      description:
+        'Find the best table(s) for a family to sit at. Ranks tables by: (1) has enough free seats for all attending members, (2) most other guests at that table share the same invited_by_admin_id as this family.',
+      inputSchema: zodSchema(
+        z.object({
+          familyName: z.string().describe('The name of the family to find a table for'),
+          topN: z
+            .number()
+            .int()
+            .optional()
+            .default(3)
+            .describe('How many table suggestions to return (default 3)'),
+        }),
+      ),
+      execute: async ({ familyName, topN }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          // Resolve family
+          const families = await prisma.family.findMany({
+            where: {
+              wedding_id: ctx.weddingId,
+              name: { contains: familyName, mode: 'insensitive' },
+            },
+            include: {
+              members: {
+                where: { attending: true },
+                select: { id: true, name: true },
+              },
+            },
+          });
+
+          if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+          if (families.length > 1) {
+            return {
+              status: 'ambiguous',
+              message: `Multiple families found matching "${familyName}". Please clarify.`,
+              families: families.map((f) => ({ id: f.id, name: f.name })),
+            };
+          }
+
+          const family = families[0];
+          const attendingCount = family.members.length;
+
+          if (attendingCount === 0) {
+            return { error: `No attending members in family "${family.name}" to seat.` };
+          }
+
+          // Get the invited_by_admin_id for this family (may be null)
+          const familyRecord = await prisma.family.findUnique({
+            where: { id: family.id },
+            select: { invited_by_admin_id: true },
+          });
+          const invitedByAdminId = familyRecord?.invited_by_admin_id ?? null;
+
+          // Fetch all tables with their current guests (and their family's invited_by_admin_id)
+          const tables = await prisma.table.findMany({
+            where: { wedding_id: ctx.weddingId },
+            include: {
+              assigned_guests: {
+                select: {
+                  family: {
+                    select: { invited_by_admin_id: true },
+                  },
+                },
+              },
+            },
+            orderBy: { number: 'asc' },
+          });
+
+          type TableSuggestion = {
+            tableNumber: number;
+            capacity: number;
+            currentOccupancy: number;
+            availableSeats: number;
+            sharedAdminCount: number;
+          };
+
+          const suggestions: TableSuggestion[] = [];
+
+          for (const t of tables) {
+            const currentOccupancy = t.assigned_guests.length;
+            const availableSeats = t.capacity - currentOccupancy;
+
+            if (availableSeats < attendingCount) continue; // not enough room
+
+            // Count guests at this table sharing the same invited_by_admin_id
+            const sharedAdminCount = invitedByAdminId
+              ? t.assigned_guests.filter(
+                  (g) => g.family?.invited_by_admin_id === invitedByAdminId,
+                ).length
+              : 0;
+
+            suggestions.push({
+              tableNumber: t.number,
+              capacity: t.capacity,
+              currentOccupancy,
+              availableSeats,
+              sharedAdminCount,
+            });
+          }
+
+          if (suggestions.length === 0) {
+            return {
+              status: 'no_space',
+              message: `No table has enough space for ${attendingCount} attending member(s) from "${family.name}".`,
+              attendingCount,
+            };
+          }
+
+          // Sort: most shared-admin guests first, then most available seats
+          suggestions.sort((a, b) => {
+            if (b.sharedAdminCount !== a.sharedAdminCount) return b.sharedAdminCount - a.sharedAdminCount;
+            return b.availableSeats - a.availableSeats;
+          });
+
+          const top = suggestions.slice(0, topN ?? 3);
+
+          return {
+            status: 'success',
+            family: family.name,
+            attendingCount,
+            invitedByAdminId,
+            suggestions: top.map((s) => ({
+              tableNumber: s.tableNumber,
+              capacity: s.capacity,
+              currentOccupancy: s.currentOccupancy,
+              availableSeats: s.availableSeats,
+              sharedAdminGuestsAtTable: s.sharedAdminCount,
+            })),
+          };
+        } catch (err) {
+          console.error('[TOOLS] suggest_tables_for_family error:', err);
+          return { error: 'Failed to suggest tables' };
         }
       },
     }),
