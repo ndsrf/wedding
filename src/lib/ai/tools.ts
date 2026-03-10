@@ -186,11 +186,12 @@ export function buildTools(ctx: ToolContext): ToolSet {
           const notFound: string[] = [];
 
           if (memberUpdates && memberUpdates.length > 0) {
+            const memberMap = new Map(family.members.map((m) => [m.name.toLowerCase(), m]));
+            const updatedIds: string[] = [];
+
             // Per-member updates — find each member by name (case-insensitive)
             for (const update of memberUpdates) {
-              const member = family.members.find(
-                (m) => m.name.toLowerCase() === update.memberName.toLowerCase(),
-              );
+              const member = memberMap.get(update.memberName.toLowerCase());
               if (!member) {
                 notFound.push(update.memberName);
                 continue;
@@ -200,13 +201,11 @@ export function buildTools(ctx: ToolContext): ToolSet {
                 data: { attending: update.attending },
               });
               results.push({ member: member.name, attending: update.attending });
+              updatedIds.push(member.id);
             }
 
             // Also apply the family-wide flag to remaining members if provided
             if (attending !== undefined) {
-              const updatedIds = results.map((r) =>
-                family.members.find((m) => m.name === r.member)!.id,
-              );
               await prisma.familyMember.updateMany({
                 where: { family_id: family.id, id: { notIn: updatedIds } },
                 data: { attending },
@@ -381,12 +380,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
             return { error: `No attending members in family "${family.name}" to seat.` };
           }
 
-          // Get the invited_by_admin_id for this family (may be null)
-          const familyRecord = await prisma.family.findUnique({
-            where: { id: family.id },
-            select: { invited_by_admin_id: true },
-          });
-          const invitedByAdminId = familyRecord?.invited_by_admin_id ?? null;
+          const invitedByAdminId = family.invited_by_admin_id ?? null;
 
           // Compute average age of the family's attending members (null if no ages entered)
           const familyAges = family.members.map((m) => m.age).filter((a): a is number => a !== null && a !== undefined);
