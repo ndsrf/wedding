@@ -44,7 +44,7 @@
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@react-email/components": "^1.0.0",
-    "@vercel/analytics": "^1.6.1",
+    "@vercel/analytics": "^2.0.0",
     "@vercel/blob": "^2.0.0",
     "@vercel/speed-insights": "^2.0.0",
     "ai": "^6.0.116",
