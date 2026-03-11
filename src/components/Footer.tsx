@@ -67,9 +67,19 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">{t('landing.footer.support')}</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link href="/help-center" className="hover:text-white transition-colors">
                   {t('landing.footer.help')}
                 </Link>
+              </li>
+              <li>
+                <a 
+                  href="https://status.nupci.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-white transition-colors"
+                >
+                  {t('landing.footer.status')}
+                </a>
               </li>
               <li>
                 <Link href="/docs" className="hover:text-white transition-colors">

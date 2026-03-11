@@ -103,6 +103,17 @@
     "yes": "Sì",
     "no": "No"
   },
+  "helpCenter": {
+    "title": "Centro Assistenza",
+    "subtitle": "Siamo qui per supportarti",
+    "description": "I nostri clienti sono incredibilmente importanti per noi. Ci impegniamo a garantirti la migliore esperienza possibile e a rendere il processo di pianificazione del tuo matrimonio il più fluido possibile.",
+    "statusTitle": "Stato del Sistema",
+    "statusDescription": "Controlla lo stato operativo attuale dei nostri servizi.",
+    "statusLink": "Vai allo Stato del Sistema",
+    "contactTitle": "Contattaci",
+    "contactDescription": "Se hai domande specifiche o devi segnalare un problema, contatta il nostro team di supporto.",
+    "contactLink": "Vai al Modulo di Contatto"
+  },
   "landing": {
     "nav": {
       "features": "Caratteristiche",
@@ -224,6 +235,7 @@
       "privacy": "Privacy Policy",
       "help": "Centro Assistenza",
       "docs": "Documentazione",
+      "status": "Stato del Sistema",
       "rights": "Tutti i diritti riservati."
     },
     "title": "{commercialName} - Gestione Matrimoni"

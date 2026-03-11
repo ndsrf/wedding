@@ -28,6 +28,8 @@ const PUBLIC_ROUTES = [
   '/api/auth',
   '/contact',
   '/api/contact',
+  '/help-center',
+  '/api/help-center',
   '/api/health',
 ];
 
@@ -211,6 +213,7 @@ export async function middleware(request: NextRequest) {
     pathname === '/privacy' ||
     pathname === '/contact' ||
     pathname === '/news' ||
+    pathname === '/help-center' ||
     pathname.startsWith('/news/') ||
     pathname.endsWith('/amp') ||
     routing.locales.some(locale => {
@@ -221,6 +224,7 @@ export async function middleware(request: NextRequest) {
              pathname === `${localePath}/privacy` ||
              pathname === `${localePath}/contact` ||
              pathname === `${localePath}/news` ||
+             pathname === `${localePath}/help-center` ||
              pathname.startsWith(`${localePath}/news/`) ||
              pathname.endsWith('/amp');
     });

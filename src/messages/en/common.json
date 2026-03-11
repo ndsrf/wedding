@@ -108,6 +108,17 @@
     "no": "No",
     "error": "Error"
   },
+  "helpCenter": {
+    "title": "Help Center",
+    "subtitle": "We're here to support you",
+    "description": "Our customers are incredibly important to us. We're dedicated to ensuring you have the best possible experience and that your wedding planning process is as smooth as possible.",
+    "statusTitle": "System Status",
+    "statusDescription": "Check the current operational status of our services.",
+    "statusLink": "Go to System Status",
+    "contactTitle": "Contact Us",
+    "contactDescription": "If you have specific questions or need to report an issue, please reach out to our support team.",
+    "contactLink": "Go to Contact Form"
+  },
   "landing": {
     "nav": {
       "features": "Features",
@@ -229,6 +240,7 @@
       "privacy": "Privacy Policy",
       "help": "Help Center",
       "docs": "Documentation",
+      "status": "System Status",
       "rights": "All rights reserved."
     },
     "title": "{commercialName} - Wedding Management"

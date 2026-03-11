@@ -103,6 +103,17 @@
     "yes": "Oui",
     "no": "Non"
   },
+  "helpCenter": {
+    "title": "Centre d'Aide",
+    "subtitle": "Nous sommes là pour vous aider",
+    "description": "Nos clients sont extrêmement importants pour nous. Nous nous engageons à vous offrir la meilleure expérience possible et à faire en sorte que votre processus de planification de mariage soit aussi fluide que possible.",
+    "statusTitle": "État du Système",
+    "statusDescription": "Consultez l'état opérationnel actuel de nos services.",
+    "statusLink": "Aller à l'État du Système",
+    "contactTitle": "Contactez-nous",
+    "contactDescription": "Si vous avez des questions spécifiques ou si vous devez signaler un problème, veuillez contacter notre équipe d'assistance.",
+    "contactLink": "Aller au Formulaire de Contact"
+  },
   "landing": {
     "nav": {
       "features": "Fonctionnalités",
@@ -224,6 +235,7 @@
       "privacy": "Politique de Confidentialité",
       "help": "Centre d'Aide",
       "docs": "Documentation",
+      "status": "État du Système",
       "rights": "Tous droits réservés."
     },
     "title": "{commercialName} - Gestion de Mariages"
