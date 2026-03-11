@@ -1,241 +1,83 @@
 /**
- * Invitation Template Detail API
+ * Admin Invitation Template Detail API — Get, Update & Delete
  *
- * GET: Get single template
- * PUT: Update template
- * DELETE: Delete template
+ * GET    /api/admin/invitation-template/[id]
+ * PUT    /api/admin/invitation-template/[id]
+ * DELETE /api/admin/invitation-template/[id]
+ *
+ * Auth-and-dispatch thin wrapper; business logic lives in
+ * src/lib/invitation-template/api-handlers.ts.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
-import { prisma } from '@/lib/db/prisma';
-import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
-import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
-import { Prisma } from '@prisma/client';
+import {
+  getInvitationTemplateHandler,
+  updateInvitationTemplateHandler,
+  deleteInvitationTemplateHandler,
+  handleInvitationTemplateApiError,
+} from '@/lib/invitation-template/api-handlers';
 
-// ============================================================================
-// GET - Get single template
-// ============================================================================
-
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-    const { id } = await params;
+    const { id: templateId } = await params;
     const user = await requireRole('wedding_admin');
 
     if (!user.wedding_id) {
       return NextResponse.json(
         { error: 'Wedding ID not found in user context' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const template = await prisma.invitationTemplate.findUnique({
-      where: { id },
-    });
-
-    if (!template) {
-      return NextResponse.json(
-        { error: 'Template not found' },
-        { status: 404 }
-      );
-    }
-
-    // Verify ownership
-    if (template.wedding_id !== user.wedding_id) {
-      return NextResponse.json(
-        { error: 'Forbidden: No access to this template' },
-        { status: 403 }
-      );
-    }
-
-    return NextResponse.json(template);
+    return getInvitationTemplateHandler(user.wedding_id, templateId);
   } catch (error) {
-    console.error('Error fetching invitation template:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-
-    if (message.includes('UNAUTHORIZED') || message.includes('FORBIDDEN')) {
-      return NextResponse.json({ error: message }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to fetch invitation template' },
-      { status: 500 }
-    );
+    return handleInvitationTemplateApiError(error);
   }
 }
 
-// ============================================================================
-// PUT - Update template
-// ============================================================================
-
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-    const { id } = await params;
+    const { id: templateId } = await params;
     const user = await requireRole('wedding_admin');
 
     if (!user.wedding_id) {
       return NextResponse.json(
         { error: 'Wedding ID not found in user context' },
-        { status: 400 }
-      );
-    }
-
-    const template = await prisma.invitationTemplate.findUnique({
-      where: { id },
-    });
-
-    if (!template) {
-      return NextResponse.json(
-        { error: 'Template not found' },
-        { status: 404 }
-      );
-    }
-
-    // Verify ownership
-    if (template.wedding_id !== user.wedding_id) {
-      return NextResponse.json(
-        { error: 'Forbidden: No access to this template' },
-        { status: 403 }
+        { status: 400 },
       );
     }
 
     const body = await req.json();
-    const { name, design } = body;
-
-    // Build update object
-    const updateData: Prisma.InvitationTemplateUpdateInput = {};
-
-    if (name !== undefined) {
-      if (typeof name !== 'string' || name.trim().length === 0) {
-        return NextResponse.json(
-          { error: 'Template name must be a non-empty string' },
-          { status: 400 }
-        );
-      }
-      updateData.name = name.trim();
-    }
-
-    if (design !== undefined) {
-      if (typeof design !== 'object' || !design.globalStyle || !Array.isArray(design.blocks)) {
-        return NextResponse.json(
-          { error: 'Design must have globalStyle and blocks array' },
-          { status: 400 }
-        );
-      }
-      updateData.design = design as unknown as Prisma.InputJsonValue;
-
-      // Pre-render HTML for all languages
-      try {
-        const wedding = await prisma.wedding.findUnique({
-          where: { id: user.wedding_id },
-          select: {
-            couple_names: true,
-            wedding_date: true,
-            wedding_time: true,
-            location: true,
-          },
-        });
-
-        if (wedding) {
-          const { preRenderTemplate } = await import('@/lib/invitation-template/pre-renderer');
-          updateData.pre_rendered_html = preRenderTemplate(design) as unknown as Prisma.InputJsonValue;
-        }
-      } catch (err) {
-        console.error('Failed to pre-render template during update:', err);
-      }
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: 'No fields to update' },
-        { status: 400 }
-      );
-    }
-
-    const updated = await prisma.invitationTemplate.update({
-      where: { id },
-      data: updateData,
-    });
-
-    // Invalidate in-memory cache
-    invalidateWeddingPageCache(template.wedding_id);
-
-    // Revalidate ISR cached pages (fire-and-forget for performance)
-    void revalidateWeddingRSVPPages(template.wedding_id);
-
-    return NextResponse.json(updated);
+    return updateInvitationTemplateHandler(user.wedding_id, templateId, body);
   } catch (error) {
-    console.error('Error updating invitation template:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-
-    if (message.includes('UNAUTHORIZED') || message.includes('FORBIDDEN')) {
-      return NextResponse.json({ error: message }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to update invitation template' },
-      { status: 500 }
-    );
+    return handleInvitationTemplateApiError(error);
   }
 }
 
-// ============================================================================
-// DELETE - Delete template
-// ============================================================================
-
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-    const { id } = await params;
+    const { id: templateId } = await params;
     const user = await requireRole('wedding_admin');
 
     if (!user.wedding_id) {
       return NextResponse.json(
         { error: 'Wedding ID not found in user context' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const template = await prisma.invitationTemplate.findUnique({
-      where: { id },
-    });
-
-    if (!template) {
-      return NextResponse.json(
-        { error: 'Template not found' },
-        { status: 404 }
-      );
-    }
-
-    // Verify ownership
-    if (template.wedding_id !== user.wedding_id) {
-      return NextResponse.json(
-        { error: 'Forbidden: No access to this template' },
-        { status: 403 }
-      );
-    }
-
-    await prisma.invitationTemplate.delete({
-      where: { id },
-    });
-
-    // Invalidate in-memory cache
-    invalidateWeddingPageCache(template.wedding_id);
-
-    // Revalidate ISR cached pages (fire-and-forget for performance)
-    void revalidateWeddingRSVPPages(template.wedding_id);
-
-    return NextResponse.json({ success: true }, { status: 200 });
+    return deleteInvitationTemplateHandler(user.wedding_id, templateId);
   } catch (error) {
-    console.error('Error deleting invitation template:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-
-    if (message.includes('UNAUTHORIZED') || message.includes('FORBIDDEN')) {
-      return NextResponse.json({ error: message }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to delete invitation template' },
-      { status: 500 }
-    );
+    return handleInvitationTemplateApiError(error);
   }
 }
