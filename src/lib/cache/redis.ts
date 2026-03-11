@@ -55,8 +55,13 @@ export function getClient(): Redis | null {
   if (_connectAttempted) return _client;
   _connectAttempted = true;
 
-  const url = process.env.WEDDING_REDIS_REDIS_URL;
-  if (!url) return null;
+  const url = process.env.WEDDING_REDIS_REDIS_URL || process.env.REDIS_URL;
+  if (!url) {
+    console.debug('[Redis] No Redis URL found in WEDDING_REDIS_REDIS_URL or REDIS_URL');
+    return null;
+  }
+
+  console.debug(`[Redis] Initialising client with URL: ${url.replace(/:[^:@]+@/, ':****@')}`);
 
   try {
     // Dynamic require so Next.js does not bundle ioredis for the browser

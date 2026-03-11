@@ -34,6 +34,8 @@ function getCacheSize(): number {
 export const NOTIFICATION_CACHE_KEYS = {
   /** Unread count for a wedding */
   unreadCount: (weddingId: string) => `notifications:unread_count:${weddingId}`,
+  /** Total count of all notifications for a wedding */
+  totalCount: (weddingId: string) => `notifications:total_count:${weddingId}`,
   /** Last N notifications for a wedding (JSON list) */
   lastNotifications: (weddingId: string) => `notifications:last_list:${weddingId}`,
 } as const;
@@ -42,43 +44,73 @@ export const NOTIFICATION_CACHE_KEYS = {
 const NOTIFICATION_CACHE_TTL = 3600;
 
 // ============================================================================
-// UNREAD COUNT
+// COUNTS
 // ============================================================================
+
+/**
+ * Get a cached count by key.
+ */
+async function getCachedCount(key: string): Promise<number | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const count = await client.get(key);
+    return count !== null ? parseInt(count, 10) : null;
+  } catch (error) {
+    console.warn(`[NotificationCache] Error getting count for ${key}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Set a cached count by key.
+ */
+async function setCachedCount(key: string, count: number): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  try {
+    await client.set(key, count.toString(), 'EX', NOTIFICATION_CACHE_TTL);
+  } catch (error) {
+    console.warn(`[NotificationCache] Error setting count for ${key}:`, error);
+  }
+}
 
 /**
  * Get the cached unread count for a wedding.
  * Returns null if not cached or Redis is unavailable.
  */
 export async function getCachedUnreadCount(weddingId: string): Promise<number | null> {
-  const client = getClient();
-  if (!client) return null;
-
-  try {
-    const count = await client.get(NOTIFICATION_CACHE_KEYS.unreadCount(weddingId));
-    return count !== null ? parseInt(count, 10) : null;
-  } catch (error) {
-    console.warn('[NotificationCache] Error getting unread count:', error);
-    return null;
+  const count = await getCachedCount(NOTIFICATION_CACHE_KEYS.unreadCount(weddingId));
+  if (count !== null) {
+    console.debug(`[NotificationCache] HIT unread count for ${weddingId}: ${count}`);
+  } else {
+    console.debug(`[NotificationCache] MISS unread count for ${weddingId}`);
   }
+  return count;
 }
 
 /**
  * Set the cached unread count for a wedding.
  */
 export async function setCachedUnreadCount(weddingId: string, count: number): Promise<void> {
-  const client = getClient();
-  if (!client) return;
+  console.debug(`[NotificationCache] SET unread count for ${weddingId}: ${count}`);
+  await setCachedCount(NOTIFICATION_CACHE_KEYS.unreadCount(weddingId), count);
+}
 
-  try {
-    await client.set(
-      NOTIFICATION_CACHE_KEYS.unreadCount(weddingId),
-      count.toString(),
-      'EX',
-      NOTIFICATION_CACHE_TTL
-    );
-  } catch (error) {
-    console.warn('[NotificationCache] Error setting unread count:', error);
-  }
+/**
+ * Get the cached total notification count for a wedding.
+ */
+export async function getCachedTotalCount(weddingId: string): Promise<number | null> {
+  return getCachedCount(NOTIFICATION_CACHE_KEYS.totalCount(weddingId));
+}
+
+/**
+ * Set the cached total notification count for a wedding.
+ */
+export async function setCachedTotalCount(weddingId: string, count: number): Promise<void> {
+  await setCachedCount(NOTIFICATION_CACHE_KEYS.totalCount(weddingId), count);
 }
 
 /**
@@ -174,11 +206,44 @@ export async function invalidateNotificationList(weddingId: string): Promise<voi
 }
 
 /**
+ * Increment the cached total count for a wedding.
+ */
+export async function incrementTotalCount(weddingId: string): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  try {
+    const key = NOTIFICATION_CACHE_KEYS.totalCount(weddingId);
+    const exists = await client.exists(key);
+    if (exists) {
+      await client.incr(key);
+    }
+  } catch (error) {
+    console.warn('[NotificationCache] Error incrementing total count:', error);
+  }
+}
+
+/**
+ * Invalidate the total count cache for a wedding.
+ */
+export async function invalidateTotalCount(weddingId: string): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  try {
+    await client.del(NOTIFICATION_CACHE_KEYS.totalCount(weddingId));
+  } catch (error) {
+    console.warn('[NotificationCache] Error invalidating total count:', error);
+  }
+}
+
+/**
  * Invalidate all notification caches for a wedding.
  */
 export async function invalidateAllNotificationCache(weddingId: string): Promise<void> {
   await Promise.all([
     invalidateUnreadCount(weddingId),
+    invalidateTotalCount(weddingId),
     invalidateNotificationList(weddingId),
   ]);
 }

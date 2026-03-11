@@ -7,6 +7,10 @@ import {
   setCachedUnreadCount, 
   incrementUnreadCount, 
   invalidateUnreadCount,
+  getCachedTotalCount,
+  setCachedTotalCount,
+  incrementTotalCount,
+  invalidateTotalCount,
   getCachedNotifications,
   setCachedNotifications,
   invalidateNotificationList
@@ -26,6 +30,7 @@ jest.mock('@/lib/cache/redis', () => ({
   getClient: jest.fn(),
   NOTIFICATION_CACHE_KEYS: {
     unreadCount: (weddingId: string) => `notifications:unread_count:${weddingId}`,
+    totalCount: (weddingId: string) => `notifications:total_count:${weddingId}`,
     lastNotifications: (weddingId: string) => `notifications:last_list:${weddingId}`,
   }
 }));
@@ -77,6 +82,35 @@ describe('Notification Cache Service', () => {
     it('should invalidate unread count', async () => {
       await invalidateUnreadCount(weddingId);
       expect(mockRedis.del).toHaveBeenCalledWith(expect.stringContaining(weddingId));
+    });
+  });
+
+  describe('Total Count', () => {
+    it('should get cached total count', async () => {
+      mockRedis.get.mockResolvedValue('100');
+      const result = await getCachedTotalCount(weddingId);
+      expect(result).toBe(100);
+    });
+
+    it('should set cached total count', async () => {
+      await setCachedTotalCount(weddingId, 150);
+      expect(mockRedis.set).toHaveBeenCalledWith(
+        expect.stringContaining('total_count'),
+        '150',
+        'EX',
+        expect.any(Number)
+      );
+    });
+
+    it('should increment total count only if it exists', async () => {
+      mockRedis.exists.mockResolvedValue(1);
+      await incrementTotalCount(weddingId);
+      expect(mockRedis.incr).toHaveBeenCalledWith(expect.stringContaining('total_count'));
+    });
+
+    it('should invalidate total count', async () => {
+      await invalidateTotalCount(weddingId);
+      expect(mockRedis.del).toHaveBeenCalledWith(expect.stringContaining('total_count'));
     });
   });
 

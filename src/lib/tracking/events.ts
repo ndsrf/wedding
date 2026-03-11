@@ -7,7 +7,11 @@
 
 import { prisma } from '@/lib/db/prisma';
 import type { EventType, Channel, Prisma } from '@prisma/client';
-import { incrementUnreadCount, invalidateNotificationList } from '@/lib/notifications/cache';
+import { 
+  incrementUnreadCount, 
+  incrementTotalCount,
+  invalidateNotificationList 
+} from '@/lib/notifications/cache';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -59,6 +63,7 @@ export async function trackEvent(options: TrackEventOptions) {
     if (!admin_triggered) {
       incrementUnreadCount(wedding_id).catch(() => {});
     }
+    incrementTotalCount(wedding_id).catch(() => {});
     invalidateNotificationList(wedding_id).catch(() => {});
 
     return event;

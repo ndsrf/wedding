@@ -16,9 +16,11 @@ import { getCachedUnreadCount, setCachedUnreadCount } from '@/lib/notifications/
  * Get accurate unread count using relational query (with Redis caching)
  */
 export async function GET(_request: NextRequest) {
+  const start = performance.now();
   try {
     // Check authentication and require wedding_admin role
     const user = await requireRole('wedding_admin');
+    const authEnd = performance.now();
 
     if (!user.wedding_id) {
       const response: APIResponse = {
@@ -32,8 +34,13 @@ export async function GET(_request: NextRequest) {
     }
 
     // 1. Try to get from Redis cache
+    const cacheStart = performance.now();
     const cachedCount = await getCachedUnreadCount(user.wedding_id);
+    const cacheEnd = performance.now();
+    
     if (cachedCount !== null) {
+      const totalEnd = performance.now();
+      console.debug(`[UnreadCount] CACHE HIT for ${user.wedding_id} in ${(totalEnd - start).toFixed(2)}ms (auth: ${(authEnd - start).toFixed(2)}ms, redis: ${(cacheEnd - cacheStart).toFixed(2)}ms)`);
       return NextResponse.json({
         success: true,
         data: {
@@ -43,7 +50,7 @@ export async function GET(_request: NextRequest) {
     }
 
     // 2. Cache miss - Calculate accurate unread count using a single count query
-    // TrackingEvents that have NO Notification records with read=true
+    const dbStart = performance.now();
     const unreadCount = await prisma.trackingEvent.count({
       where: {
         wedding_id: user.wedding_id,
@@ -54,9 +61,13 @@ export async function GET(_request: NextRequest) {
         },
       },
     });
+    const dbEnd = performance.now();
 
     // 3. Update Redis cache
     await setCachedUnreadCount(user.wedding_id, unreadCount);
+    const totalEnd = performance.now();
+    
+    console.debug(`[UnreadCount] CACHE MISS for ${user.wedding_id} in ${(totalEnd - start).toFixed(2)}ms (auth: ${(authEnd - start).toFixed(2)}ms, db: ${(dbEnd - dbStart).toFixed(2)}ms)`);
 
     return NextResponse.json({
       success: true,
