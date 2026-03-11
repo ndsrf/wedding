@@ -176,7 +176,7 @@ grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageConte
 | Guests | `/admin/guests` | `/planner/weddings/[id]/guests` | ✅ Done |
 | Notifications | `/admin/notifications` | `/planner/weddings/[id]/notifications` | ⬜ Pending |
 | Menu | `/admin/menu` | `/planner/weddings/[id]/menu` | ✅ Done |
-| Tasting | `/admin/tasting` | `/planner/weddings/[id]/tasting` | ⬜ Pending |
+| Tasting | `/admin/tasting` | `/planner/weddings/[id]/tasting` | ✅ Done |
 | Seating | `/admin/seating` | `/planner/weddings/[id]/seating` | ⬜ Pending |
 | Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ⬜ Pending |
 | Reports | `/admin/reports` | `/planner/weddings/[id]/reports` | ⬜ Pending |
@@ -246,3 +246,33 @@ Business logic for 2 operations extracted into shared functions:
 `validatePlannerAccess` is generic and shared directly — no separate menu copy needed.
 
 **All 4 API route files** (2 admin + 2 planner) reduced to ~25-line auth-and-dispatch wrappers. The planner routes now correctly call `validatePlannerAccess` (previously missing — any planner could modify any wedding's menu).
+
+---
+
+## Completed: Tasting Page
+
+### UI Consolidation
+
+**Shared component:** `src/components/shared/TastingPageContent.tsx`
+
+**Differences resolved:**
+| Difference | Resolution |
+|-----------|-----------|
+| API base paths | `apiBase` prop (`/api/admin/tasting` vs `/api/planner/weddings/:id/tasting`) |
+| Back link href | `backHref` prop (`/admin` vs `/planner/weddings/:id`) |
+| Subtitle text | `subtitle` prop (admin: `t('description')`, planner: fetched couple names) |
+| `isReadOnly` source | `isReadOnly` prop (admin reads from `useWeddingAccess`, planner defaults to `false`) |
+| Planner wedding name fetch | Planner page fetches couple names separately and passes as `subtitle` |
+
+### API Consolidation
+
+**Shared handlers:** `src/lib/tasting/api-handlers.ts`
+
+Business logic for 16 operations extracted into shared functions:
+`getTastingMenuHandler`, `upsertTastingMenuHandler`, `createSectionHandler`, `updateSectionHandler`, `deleteSectionHandler`, `createDishHandler`, `updateDishHandler`, `deleteDishHandler`, `uploadDishImageHandler`, `deleteDishImageHandler`, `getParticipantsHandler`, `createParticipantHandler`, `updateParticipantHandler`, `deleteParticipantHandler`, `sendParticipantLinkHandler`, `importTastingMenuHandler`.
+
+**Shared access guard:** reuses `src/lib/guests/planner-access.ts`
+
+Previously the planner routes embedded `{ wedding: { planner_id: user.planner_id } }` deep into every Prisma WHERE clause. Now all 10 planner routes call `validatePlannerAccess` upfront and then delegate to the shared handler using just `weddingId`.
+
+**All 20 API route files** (10 admin + 10 planner) reduced to ~20-line auth-and-dispatch wrappers. Security fix: planner import route previously accepted any `weddingId` without verifying planner ownership — now guarded.
