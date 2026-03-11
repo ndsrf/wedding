@@ -1685,8 +1685,10 @@
     },
     "tastingMenu": {
       "title": "Menu de Dégustation",
-      "description": "Gérez l'expérience de dégustation culinaire pour votre mariage.",
-      "nav": "Menu de Dégustation",
+      "description": "Gérez l'expérience de dégustation culinaire pour votre mariage. Ajoutez des sections, des plats et des participants.",
+      "nav": "Nourriture & Boissons",
+      "tasting": "Menu de Dégustation",
+      "weddingMenu": "Menu de Mariage",
       "menu": {
         "title": "Configuration du Menu",
         "menuTitle": "Titre du Menu",

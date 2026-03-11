@@ -1742,6 +1742,7 @@
       "description": "Manage the food tasting experience for your wedding. Add sections, dishes, and participants.",
       "nav": "Food & Drinks",
       "weddingMenu": "Wedding Menu",
+      "tasting": "Tasting Menu",
       "menu": {
         "title": "Menu Setup",
         "menuTitle": "Menu Title",

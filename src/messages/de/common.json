@@ -1685,8 +1685,10 @@
     },
     "tastingMenu": {
       "title": "Verkostungsmenü",
-      "description": "Verwalten Sie das kulinarische Verkostungserlebnis für Ihre Hochzeit.",
-      "nav": "Verkostungsmenü",
+      "description": "Verwalten Sie das kulinarische Verkostungserlebnis für Ihre Hochzeit. Fügen Sie Abschnitte, Gerichte und Teilnehmer hinzu.",
+      "nav": "Essen & Trinken",
+      "tasting": "Verkostungsmenü",
+      "weddingMenu": "Hochzeitsmenü",
       "menu": {
         "title": "Menü-Einrichtung",
         "menuTitle": "Menütitel",
