@@ -181,7 +181,7 @@ grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageConte
 | Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ⬜ Pending |
 | Reports | `/admin/reports` | `/planner/weddings/[id]/reports` | ⬜ Pending |
 | Providers | `/admin/providers` | `/planner/weddings/[id]/providers` | ⬜ Pending |
-| Invitation Builder | `/admin/invitation-builder` | `/planner/weddings/[id]/invitation-builder` | ⬜ Pending |
+| Invitation Builder | `/admin/invitation-builder` | `/planner/weddings/[id]/invitation-builder` | ✅ Done |
 | Templates | `/admin/templates` | `/planner/weddings/[id]/templates` | ⬜ Pending |
 
 > Not all screens need consolidation. Evaluate if the planner version has meaningful differences before merging.
@@ -276,3 +276,37 @@ Business logic for 16 operations extracted into shared functions:
 Previously the planner routes embedded `{ wedding: { planner_id: user.planner_id } }` deep into every Prisma WHERE clause. Now all 10 planner routes call `validatePlannerAccess` upfront and then delegate to the shared handler using just `weddingId`.
 
 **All 20 API route files** (10 admin + 10 planner) reduced to ~20-line auth-and-dispatch wrappers. Security fix: planner import route previously accepted any `weddingId` without verifying planner ownership — now guarded.
+
+---
+
+## Completed: Invitation Builder Page
+
+### UI Consolidation
+
+**Shared component:** `src/components/shared/InvitationBuilderPageContent.tsx`
+
+**Shared preview component:** `src/components/shared/InvitationBuilderPreviewContent.tsx`
+
+**Differences resolved:**
+| Difference | Resolution |
+|-----------|-----------|
+| API base paths | `apiPaths.apiBase` prop (`/api/admin` vs `/api/planner/weddings/:id`) |
+| Wedding data fetch URL | `apiPaths.weddingApi` prop (`/api/admin/wedding` vs `/api/planner/weddings/:id`) |
+| Back link href | `backHref` prop (`/admin` vs `/planner/weddings/:id`) |
+| Preview window URL | `previewUrl` prop passed through to `InvitationTemplateEditor` |
+| Rename/duplicate/preview buttons | Planner was missing these features; now included via shared component |
+| Template list not updated on create | Bug in planner page fixed; shared component always updates list |
+| Preview page language selector | Planner preview lacked language selector; now uses shared `InvitationBuilderPreviewContent` with selector |
+
+### API Consolidation
+
+**Shared handlers:** `src/lib/invitation-template/api-handlers.ts`
+
+Business logic for 10 operations extracted into shared functions:
+`listInvitationTemplatesHandler`, `createInvitationTemplateHandler`, `getInvitationTemplateHandler`, `updateInvitationTemplateHandler`, `deleteInvitationTemplateHandler`, `duplicateInvitationTemplateHandler`, `exportInvitationTemplateHandler`, `importInvitationTemplateHandler`, `listInvitationImagesHandler`, `uploadInvitationImageHandler`.
+
+**Shared access guard:** reuses `src/lib/guests/planner-access.ts`
+
+**New planner route:** `src/app/(public)/api/planner/weddings/[id]/invitation-template/[templateId]/duplicate/route.ts` — this endpoint was previously missing, so planners could not duplicate templates.
+
+**All 12 API route files** (6 admin + 6 planner) reduced to ~25-line auth-and-dispatch wrappers. The planner routes now use `validatePlannerAccess` consistently instead of inline ownership checks.
