@@ -6,6 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
+Last updated: 2026-03-11
 Last updated: 2026-02-19
 Last updated: 2026-02-18
 
@@ -120,6 +121,11 @@ This document tracks known security vulnerabilities that have been assessed and 
 - **Future Plan**: Upgrade to @vercel/blob@2.x when stable and breaking changes are assessed
 
 ### Recently Fixed
+
+#### 2026-03-11
+- **@babel/runtime < 7.26.10** (MODERATE): Inefficient RegExp complexity
+  - Fixed by adding override to package.json: `"@babel/runtime": ">=7.26.10"`
+  - [GHSA-968p-4wvh-cqc8](https://github.com/advisories/GHSA-968p-4wvh-cqc8)
 
 #### 2026-02-06
 - **next.js 10.0.0 - 15.5.9** (HIGH): DoS vulnerabilities
