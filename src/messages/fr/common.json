@@ -103,6 +103,17 @@
     "yes": "Oui",
     "no": "Non"
   },
+  "helpCenter": {
+    "title": "Centre d'Aide",
+    "subtitle": "Nous sommes là pour vous aider",
+    "description": "Nos clients sont extrêmement importants pour nous. Nous nous engageons à vous offrir la meilleure expérience possible et à faire en sorte que votre processus de planification de mariage soit aussi fluide que possible.",
+    "statusTitle": "État du Système",
+    "statusDescription": "Consultez l'état opérationnel actuel de nos services.",
+    "statusLink": "Aller à l'État du Système",
+    "contactTitle": "Contactez-nous",
+    "contactDescription": "Si vous avez des questions spécifiques ou si vous devez signaler un problème, veuillez contacter notre équipe d'assistance.",
+    "contactLink": "Aller au Formulaire de Contact"
+  },
   "landing": {
     "nav": {
       "features": "Fonctionnalités",
@@ -224,6 +235,7 @@
       "privacy": "Politique de Confidentialité",
       "help": "Centre d'Aide",
       "docs": "Documentation",
+      "status": "État du Système",
       "rights": "Tous droits réservés."
     },
     "title": "{commercialName} - Gestion de Mariages"
@@ -531,7 +543,10 @@
         "nameRequired": "Le nom est obligatoire",
         "emailRequired": "L'email est obligatoire",
         "invalidEmail": "Adresse email invalide"
-      }
+      },
+      "phone": "Numéro de Téléphone (WhatsApp)",
+      "phonePlaceholder": "06 12 34 56 78",
+      "phoneHint": "Optionnel. Utilisé pour vous identifier lors de l'envoi de messages via WhatsApp."
     },
     "themes": {
       "title": "Gestion des Thèmes",
@@ -927,6 +942,7 @@
       "importSuccess": "Liste d'invités importée avec succès",
       "importError": "Erreur d'importation. Veuillez vérifier le fichier.",
       "bulkActions": "Actions groupées",
+      "copyGeneralInvitationLink": "Copier le lien d'invitation général",
       "deleteSelected": "Supprimer la sélection",
       "selectGuestsHint": "Sélectionnez les invités dans la liste pour effectuer des actions groupées",
       "bulkDeleteTitle": "Supprimer les invités sélectionnés",
@@ -1635,6 +1651,7 @@
     "nupcibot": {
       "subtitle": "Votre assistant mariage",
       "close": "Fermer",
+      "referencesTitle": "Références",
       "greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider aujourd'hui ?",
       "helpConfigure": "Aidez-moi à configurer mon mariage",
       "viewReports": "Voir et imprimer les listes",
@@ -1675,7 +1692,14 @@
         "save": "Enregistrer",
         "saving": "Enregistrement...",
         "saved": "Menu enregistré!",
-        "error": "Erreur lors de l'enregistrement"
+        "error": "Erreur lors de l'enregistrement",
+        "tastingDate": "Date de Dégustation",
+        "status": "Statut",
+        "statusOpen": "Ouvert",
+        "statusClosed": "Fermé",
+        "statusClosedHint": "S'ouvre automatiquement le jour de la dégustation",
+        "statusOpenHint": "Toujours ouvert — aucun comportement automatique",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Sections",
@@ -1924,6 +1948,10 @@
       "search": {
         "placeholder": "Rechercher des plats...",
         "noResults": "Aucun plat ne correspond à votre recherche."
+      },
+      "closed": {
+        "title": "Le menu de dégustation est en lecture seule",
+        "description": "Ce menu de dégustation est actuellement fermé. Contactez les mariés pour plus d'informations."
       }
     }
   },

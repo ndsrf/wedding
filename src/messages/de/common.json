@@ -103,6 +103,17 @@
     "yes": "Ja",
     "no": "Nein"
   },
+  "helpCenter": {
+    "title": "Hilfecenter",
+    "subtitle": "Wir sind hier, um Sie zu unterstützen",
+    "description": "Unsere Kunden sind uns unglaublich wichtig. Wir setzen alles daran, dass Sie die bestmögliche Erfahrung machen und Ihr Hochzeitsplanungsprozess so reibungslos wie möglich verläuft.",
+    "statusTitle": "Systemstatus",
+    "statusDescription": "Überprüfen Sie den aktuellen Betriebsstatus unserer Dienste.",
+    "statusLink": "Zum Systemstatus",
+    "contactTitle": "Kontaktieren Sie uns",
+    "contactDescription": "Wenn Sie spezifische Fragen haben oder ein Problem melden müssen, wenden Sie sich bitte an unser Support-Team.",
+    "contactLink": "Zum Kontaktformular"
+  },
   "landing": {
     "nav": {
       "features": "Funktionen",
@@ -224,6 +235,7 @@
       "privacy": "Datenschutzrichtlinie",
       "help": "Hilfecenter",
       "docs": "Dokumentation",
+      "status": "Systemstatus",
       "rights": "Alle Rechte vorbehalten."
     },
     "title": "{commercialName} - Hochzeitsverwaltung"
@@ -531,7 +543,10 @@
         "nameRequired": "Name ist erforderlich",
         "emailRequired": "E-Mail ist erforderlich",
         "invalidEmail": "Ungültige E-Mail-Adresse"
-      }
+      },
+      "phone": "Telefonnummer (WhatsApp)",
+      "phonePlaceholder": "612 345 678",
+      "phoneHint": "Optional. Wird verwendet, um Sie bei WhatsApp-Nachrichten zu identifizieren."
     },
     "themes": {
       "title": "Themenverwaltung",
@@ -927,6 +942,7 @@
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
       "bulkActions": "Massenaktionen",
+      "copyGeneralInvitationLink": "Allgemeinen Einladungslink kopieren",
       "deleteSelected": "Ausgewählte löschen",
       "selectGuestsHint": "Wählen Sie Gäste aus der Liste aus, um Massenaktionen durchzuführen",
       "bulkDeleteTitle": "Ausgewählte Gäste löschen",
@@ -1635,6 +1651,7 @@
     "nupcibot": {
       "subtitle": "Ihr Hochzeitsassistent",
       "close": "Schließen",
+      "referencesTitle": "Referenzen",
       "greeting": "Hallo! Ich bin NupciBot, Ihr Hochzeitsassistent. Wie kann ich Ihnen heute helfen?",
       "helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren",
       "viewReports": "Listen anzeigen und drucken",
@@ -1675,7 +1692,14 @@
         "save": "Speichern",
         "saving": "Speichern...",
         "saved": "Menü gespeichert!",
-        "error": "Fehler beim Speichern"
+        "error": "Fehler beim Speichern",
+        "tastingDate": "Verkostungsdatum",
+        "status": "Status",
+        "statusOpen": "Geöffnet",
+        "statusClosed": "Geschlossen",
+        "statusClosedHint": "Öffnet automatisch am Tag der Verkostung",
+        "statusOpenHint": "Immer geöffnet — kein automatisches Verhalten",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Abschnitte",
@@ -1924,6 +1948,10 @@
       "search": {
         "placeholder": "Gerichte suchen...",
         "noResults": "Keine Gerichte entsprechen Ihrer Suche."
+      },
+      "closed": {
+        "title": "Das Verkostungsmenü ist schreibgeschützt",
+        "description": "Dieses Verkostungsmenü ist derzeit geschlossen. Wende dich für weitere Informationen an das Paar."
       }
     }
   },

@@ -28,6 +28,8 @@ const PUBLIC_ROUTES = [
   '/api/auth',
   '/contact',
   '/api/contact',
+  '/help-center',
+  '/api/help-center',
   '/api/health',
 ];
 
@@ -167,10 +169,11 @@ export async function middleware(request: NextRequest) {
   // Check if user is logged in when accessing root to redirect to dashboard
   const isRootPath = pathname === '/' || routing.locales.some(locale => pathname === `/${locale}`);
   if (isRootPath) {
+    const isProduction = process.env.NEXTAUTH_URL?.startsWith('https://');
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
-      secureCookie: request.url.startsWith('https://'),
+      secureCookie: isProduction || request.url.startsWith('https://'),
     });
 
     if (token?.user?.role) {
@@ -211,6 +214,7 @@ export async function middleware(request: NextRequest) {
     pathname === '/privacy' ||
     pathname === '/contact' ||
     pathname === '/news' ||
+    pathname === '/help-center' ||
     pathname.startsWith('/news/') ||
     pathname.endsWith('/amp') ||
     routing.locales.some(locale => {
@@ -221,6 +225,7 @@ export async function middleware(request: NextRequest) {
              pathname === `${localePath}/privacy` ||
              pathname === `${localePath}/contact` ||
              pathname === `${localePath}/news` ||
+             pathname === `${localePath}/help-center` ||
              pathname.startsWith(`${localePath}/news/`) ||
              pathname.endsWith('/amp');
     });
@@ -236,10 +241,11 @@ export async function middleware(request: NextRequest) {
 
   // 5. Authenticated routes
   // Get user session token
+  const isProduction = process.env.NEXTAUTH_URL?.startsWith('https://');
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
-    secureCookie: request.url.startsWith('https://'),
+    secureCookie: isProduction || request.url.startsWith('https://'),
   });
 
   const user = token?.user as AuthenticatedUser | undefined;
@@ -252,6 +258,12 @@ export async function middleware(request: NextRequest) {
   if (isShared) {
     // Shared route - requires authentication
     if (!user) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Authentication required' } },
+          { status: 401 }
+        );
+      }
       const signInUrl = new URL('/auth/signin', request.url);
       signInUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(signInUrl);
@@ -261,7 +273,13 @@ export async function middleware(request: NextRequest) {
     if (hasSharedRouteAccess(pathname, user.role)) {
       return NextResponse.next();
     } else {
-      // User doesn't have access - redirect to their dashboard
+      // User doesn't have access - return error for API or redirect for pages
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Forbidden' } },
+          { status: 403 }
+        );
+      }
       const redirectUrl = new URL(getRedirectForRole(user.role), request.url);
       return NextResponse.redirect(redirectUrl);
     }
@@ -273,6 +291,13 @@ export async function middleware(request: NextRequest) {
   if (requiredRole) {
     // Route requires authentication
     if (!user) {
+      // Not authenticated
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Authentication required' } },
+          { status: 401 }
+        );
+      }
       // Not authenticated - redirect to sign in
       const signInUrl = new URL('/auth/signin', request.url);
       signInUrl.searchParams.set('callbackUrl', pathname);
@@ -281,6 +306,13 @@ export async function middleware(request: NextRequest) {
 
     // Check if user has required role
     if (user.role !== requiredRole) {
+      // Wrong role
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Forbidden' } },
+          { status: 403 }
+        );
+      }
       // Wrong role - redirect to appropriate dashboard
       const redirectUrl = new URL(getRedirectForRole(user.role), request.url);
       return NextResponse.redirect(redirectUrl);

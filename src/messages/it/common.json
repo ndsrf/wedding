@@ -103,6 +103,17 @@
     "yes": "Sì",
     "no": "No"
   },
+  "helpCenter": {
+    "title": "Centro Assistenza",
+    "subtitle": "Siamo qui per supportarti",
+    "description": "I nostri clienti sono incredibilmente importanti per noi. Ci impegniamo a garantirti la migliore esperienza possibile e a rendere il processo di pianificazione del tuo matrimonio il più fluido possibile.",
+    "statusTitle": "Stato del Sistema",
+    "statusDescription": "Controlla lo stato operativo attuale dei nostri servizi.",
+    "statusLink": "Vai allo Stato del Sistema",
+    "contactTitle": "Contattaci",
+    "contactDescription": "Se hai domande specifiche o devi segnalare un problema, contatta il nostro team di supporto.",
+    "contactLink": "Vai al Modulo di Contatto"
+  },
   "landing": {
     "nav": {
       "features": "Caratteristiche",
@@ -224,6 +235,7 @@
       "privacy": "Privacy Policy",
       "help": "Centro Assistenza",
       "docs": "Documentazione",
+      "status": "Stato del Sistema",
       "rights": "Tutti i diritti riservati."
     },
     "title": "{commercialName} - Gestione Matrimoni"
@@ -531,7 +543,10 @@
         "nameRequired": "Il nome è obbligatorio",
         "emailRequired": "L'email è obbligatoria",
         "invalidEmail": "Indirizzo email non valido"
-      }
+      },
+      "phone": "Numero di Telefono (WhatsApp)",
+      "phonePlaceholder": "612 345 678",
+      "phoneHint": "Opzionale. Usato per identificarti quando invii messaggi tramite WhatsApp."
     },
     "themes": {
       "title": "Gestione Temi",
@@ -927,6 +942,7 @@
       "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file.",
       "bulkActions": "Azioni di massa",
+      "copyGeneralInvitationLink": "Copia link invito generale",
       "deleteSelected": "Elimina selezionati",
       "selectGuestsHint": "Seleziona gli ospiti dall'elenco per eseguire azioni di massa",
       "bulkDeleteTitle": "Elimina ospiti selezionati",
@@ -1635,6 +1651,7 @@
     "nupcibot": {
       "subtitle": "Il tuo assistente matrimoniale",
       "close": "Chiudi",
+      "referencesTitle": "Riferimenti",
       "greeting": "Ciao! Sono NupciBot, il tuo assistente matrimoniale. Come posso aiutarti oggi?",
       "helpConfigure": "Aiutami a configurare il mio matrimonio",
       "viewReports": "Visualizza e stampa le liste",
@@ -1675,7 +1692,14 @@
         "save": "Salva",
         "saving": "Salvataggio...",
         "saved": "Menu salvato!",
-        "error": "Errore nel salvataggio"
+        "error": "Errore nel salvataggio",
+        "tastingDate": "Data di Degustazione",
+        "status": "Stato",
+        "statusOpen": "Aperto",
+        "statusClosed": "Chiuso",
+        "statusClosedHint": "Si apre automaticamente il giorno della degustazione",
+        "statusOpenHint": "Sempre aperto — nessun comportamento automatico",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Sezioni",
@@ -1924,6 +1948,10 @@
       "search": {
         "placeholder": "Cerca piatti...",
         "noResults": "Nessun piatto corrisponde alla ricerca."
+      },
+      "closed": {
+        "title": "Il menu di degustazione è in sola lettura",
+        "description": "Questo menu di degustazione è attualmente chiuso. Contatta la coppia per ulteriori informazioni."
       }
     }
   },

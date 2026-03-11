@@ -38,6 +38,7 @@ export default function NotificationBell() {
   return (
     <Link
       href="/admin/notifications"
+      prefetch={false}
       className="relative p-2 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
       aria-label={t('admin.dashboard.activity')}
     >

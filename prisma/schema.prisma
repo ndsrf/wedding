@@ -157,6 +157,7 @@ model WeddingAdmin {
   id                  String        @id @default(uuid())
   email               String
   name                String
+  phone               String?
   google_id           String?
   auth_provider       AuthProvider
   last_login_provider AuthProvider?
@@ -760,14 +761,37 @@ enum PhotoSource {
 }
 
 // -----------------------------------------------------------------------------
+// RAG INGESTION — tracks document ingestion job progress
+// -----------------------------------------------------------------------------
+
+model RagIngestionJob {
+  id           String    @id @default(uuid())
+  triggeredAt  DateTime  @default(now())
+  totalFiles   Int       @default(0)
+  processed    Int       @default(0)
+  failed       Int       @default(0)
+  completedAt  DateTime?
+
+  @@index([triggeredAt])
+  @@map("rag_ingestion_jobs")
+}
+
+// -----------------------------------------------------------------------------
 // TASTING MENU — per-wedding food tasting experience
 // -----------------------------------------------------------------------------
+
+enum TastingMenuStatus {
+  OPEN
+  CLOSED
+}
 
 model TastingMenu {
   id           String             @id @default(uuid())
   wedding_id   String             @unique
   title        String             @default("Tasting Menu")
   description  String?            @db.Text
+  tasting_date DateTime?
+  status       TastingMenuStatus  @default(CLOSED)
   created_at   DateTime           @default(now())
   updated_at   DateTime           @updatedAt
   wedding      Wedding            @relation(fields: [wedding_id], references: [id], onDelete: Cascade)

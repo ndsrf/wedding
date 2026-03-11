@@ -107,6 +107,17 @@
     "yes": "Sí",
     "no": "No"
   },
+  "helpCenter": {
+    "title": "Centro de Ayuda",
+    "subtitle": "Estamos aquí para apoyarte",
+    "description": "Nuestros clientes son increíblemente importantes para nosotros. Estamos dedicados a asegurar que tengas la mejor experiencia posible y que tu proceso de organización de bodas sea lo más fluido posible.",
+    "statusTitle": "Estado del Sistema",
+    "statusDescription": "Consulta el estado operativo actual de nuestros servicios.",
+    "statusLink": "Ir al Estado del Sistema",
+    "contactTitle": "Contáctanos",
+    "contactDescription": "Si tienes preguntas específicas o necesitas informar de un problema, por favor contacta con nuestro equipo de soporte.",
+    "contactLink": "Ir al Formulario de Contacto"
+  },
   "landing": {
     "nav": {
       "features": "Características",
@@ -228,6 +239,7 @@
       "privacy": "Política de Privacidad",
       "help": "Centro de Ayuda",
       "docs": "Documentación",
+      "status": "Estado del Sistema",
       "rights": "Todos los derechos reservados."
     },
     "title": "{commercialName} - Gestión de Bodas"
@@ -535,7 +547,10 @@
         "nameRequired": "El nombre es obligatorio",
         "emailRequired": "El correo es obligatorio",
         "invalidEmail": "Correo electrónico inválido"
-      }
+      },
+      "phone": "Número de Teléfono (WhatsApp)",
+      "phonePlaceholder": "612 345 678",
+      "phoneHint": "Opcional. Se usa para identificarte cuando envíes mensajes por WhatsApp."
     },
     "themes": {
       "title": "Gestión de Temas",
@@ -1244,6 +1259,7 @@
         "privateNotesHelp": "Estas notas solo son visibles para los administradores de la boda y no se compartirán con los invitados."
       },
       "bulkActions": "Acciones en lote",
+      "copyGeneralInvitationLink": "Copiar enlace de invitación general",
       "deleteSelected": "Eliminar seleccionados",
       "selectGuestsHint": "Selecciona invitados de la lista para realizar acciones en lote",
       "bulkDeleteTitle": "Eliminar invitados seleccionados",
@@ -1674,6 +1690,7 @@
     "nupcibot": {
       "subtitle": "Tu asistente de boda",
       "close": "Cerrar",
+      "referencesTitle": "Referencias",
       "greeting": "¡Hola! Soy NupciBot, tu asistente de boda. ¿En qué puedo ayudarte hoy?",
       "helpConfigure": "Ayúdame a configurar mi boda",
       "viewReports": "Ver e imprimir listados",
@@ -1716,7 +1733,14 @@
         "save": "Guardar Menú",
         "saving": "Guardando...",
         "saved": "¡Menú guardado!",
-        "error": "Error al guardar el menú"
+        "error": "Error al guardar el menú",
+        "tastingDate": "Fecha de Degustación",
+        "status": "Estado",
+        "statusOpen": "Abierto",
+        "statusClosed": "Cerrado",
+        "statusClosedHint": "Se abre automáticamente el día de la degustación",
+        "statusOpenHint": "Siempre abierto — sin comportamiento automático",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Secciones",
@@ -1979,6 +2003,10 @@
       "search": {
         "placeholder": "Buscar platos...",
         "noResults": "Ningún plato coincide con tu búsqueda."
+      },
+      "closed": {
+        "title": "El menú de degustación es de solo lectura",
+        "description": "Este menú de degustación está cerrado actualmente. Contacta con la pareja para más información."
       }
     }
   },

@@ -1,0 +1,103 @@
+/**
+ * NupciBot Chat API Route (Planner)
+ *
+ * POST /api/planner/nupcibot/chat
+ * Body: { message: string, history: ChatMessage[], language?: string, userName?: string }
+ *
+ * When VECTOR_DATABASE_URL is set: returns a Vercel AI SDK data stream (text/event-stream).
+ * Fallback: returns { success: true, data: { reply: string } } JSON.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { requireRole } from '@/lib/auth/middleware';
+import { generateNupciBotReply, type ChatMessage } from '@/lib/ai/nupcibot';
+import { streamRagChat } from '@/lib/ai/rag-chat';
+import { isVectorEnabled } from '@/lib/db/vector-prisma';
+import type { APIResponse } from '@/types/api';
+import { API_ERROR_CODES } from '@/types/api';
+
+export async function POST(request: NextRequest) {
+  try {
+    const user = await requireRole('planner');
+
+    const body = await request.json();
+    const { message, history = [], language = 'EN', userName, weddingId } = body as {
+      message: string;
+      history: ChatMessage[];
+      language?: string;
+      userName?: string;
+      weddingId?: string;
+    };
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Message is required' },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // Cap history at last 20 messages
+    const cappedHistory = history.slice(-20);
+
+    if (isVectorEnabled()) {
+      return streamRagChat({
+        userMessage: message.trim(),
+        history: cappedHistory,
+        language,
+        userName,
+        plannerId: user.planner_id,
+        weddingId,
+        role: 'planner',
+      });
+    }
+
+    // Fallback: non-streaming JSON response
+    const reply = await generateNupciBotReply(
+      message.trim(),
+      cappedHistory,
+      language,
+      userName,
+      weddingId,
+    );
+
+    if (!reply) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.INTERNAL_ERROR, message: 'AI service unavailable' },
+      };
+      return NextResponse.json(response, { status: 503 });
+    }
+
+    const response: APIResponse<{ reply: string }> = {
+      success: true,
+      data: { reply },
+    };
+    return NextResponse.json(response, { status: 200 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : '';
+
+    if (errorMessage.includes('UNAUTHORIZED')) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.UNAUTHORIZED, message: 'Authentication required' },
+      };
+      return NextResponse.json(response, { status: 401 });
+    }
+
+    if (errorMessage.includes('FORBIDDEN')) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.FORBIDDEN, message: 'Planner role required' },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    console.error('[NUPCIBOT] Planner chat error:', error);
+    const response: APIResponse = {
+      success: false,
+      error: { code: API_ERROR_CODES.INTERNAL_ERROR, message: 'Failed to generate reply' },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}

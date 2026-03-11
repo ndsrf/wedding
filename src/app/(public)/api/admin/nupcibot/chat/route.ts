@@ -1,20 +1,24 @@
 /**
- * NupciBot Chat API Route
+ * NupciBot Chat API Route (Admin)
  *
  * POST /api/admin/nupcibot/chat
- * Body: { message: string, history: { role: 'user'|'assistant', content: string }[], language?: string }
- * Returns: { reply: string }
+ * Body: { message: string, history: ChatMessage[], language?: string, userName?: string }
+ *
+ * When VECTOR_DATABASE_URL is set: returns a Vercel AI SDK data stream (text/event-stream).
+ * Fallback: returns { success: true, data: { reply: string } } JSON.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
-import { generateNupciBotReply, ChatMessage } from '@/lib/ai/nupcibot';
+import { generateNupciBotReply, type ChatMessage } from '@/lib/ai/nupcibot';
+import { streamRagChat } from '@/lib/ai/rag-chat';
+import { isVectorEnabled } from '@/lib/db/vector-prisma';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 
 export async function POST(request: NextRequest) {
   try {
-    await requireRole('wedding_admin');
+    const user = await requireRole('wedding_admin');
 
     const body = await request.json();
     const { message, history = [], language = 'EN', userName } = body as {
@@ -32,7 +36,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 });
     }
 
-    const reply = await generateNupciBotReply(message.trim(), history, language, userName);
+    // Cap history at last 20 messages
+    const cappedHistory = history.slice(-20);
+
+    if (isVectorEnabled()) {
+      console.log(`[NUPCIBOT] Starting RAG chat stream for ${user.email} (wedding: ${user.wedding_id})`);
+      return streamRagChat({
+        userMessage: message.trim(),
+        history: cappedHistory,
+        language,
+        userName,
+        weddingId: user.wedding_id,
+        plannerId: user.planner_id,
+        role: 'wedding_admin',
+      });
+    }
+
+    // Fallback: non-streaming JSON response
+    const reply = await generateNupciBotReply(
+      message.trim(),
+      cappedHistory,
+      language,
+      userName,
+      user.wedding_id,
+    );
 
     if (!reply) {
       const response: APIResponse = {

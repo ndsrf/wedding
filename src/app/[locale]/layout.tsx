@@ -7,6 +7,7 @@ import { isValidLanguage } from '@/lib/i18n/config'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 import CookieConsent from '@/components/CookieConsent'
+import HyperDXProvider from '@/components/observability/HyperDXProvider'
 import '../globals.css'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -67,19 +68,13 @@ export default async function RootLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        <link
-          rel="preload"
-          href="/fonts/playfair/playfair-display-400.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
         {/* Resource hints for external resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
       </head>
       <body>
+        <HyperDXProvider />
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           <CookieConsent />

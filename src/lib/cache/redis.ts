@@ -51,7 +51,7 @@ export const CACHE_TTL = {
 let _client: Redis | null = null;
 let _connectAttempted = false;
 
-function getClient(): Redis | null {
+export function getClient(): Redis | null {
   if (_connectAttempted) return _client;
   _connectAttempted = true;
 
@@ -60,7 +60,7 @@ function getClient(): Redis | null {
 
   try {
     // Dynamic require so Next.js does not bundle ioredis for the browser
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const IORedis = require('ioredis') as typeof import('ioredis').default;
     const client = new IORedis(url, {
       lazyConnect: true,

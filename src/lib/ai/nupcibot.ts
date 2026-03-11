@@ -15,6 +15,7 @@
 
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
+import { prisma } from '@/lib/db/prisma';
 
 // ============================================================================
 // TYPES
@@ -29,7 +30,7 @@ export interface ChatMessage {
 // PLATFORM KNOWLEDGE BASE
 // ============================================================================
 
-const PLATFORM_DOCS = `
+export const PLATFORM_DOCS = `
 # Nupci – Wedding Management Platform
 
 Nupci is a comprehensive, multi-tenant wedding management platform designed for professional wedding planners. It allows planners to manage multiple weddings simultaneously and gives each couple secure access to their own wedding data.
@@ -272,22 +273,34 @@ The platform supports English (EN), Spanish (ES), French (FR), Italian (IT), and
 // PROMPT BUILDER
 // ============================================================================
 
-function buildSystemPrompt(language: string, userName?: string): string {
+function buildSystemPrompt(
+  language: string,
+  userName?: string,
+  weddingDate?: string,
+  coupleNames?: string,
+): string {
   const languageInstructions: Record<string, string> = {
     EN: 'Respond in English.',
     ES: 'Responde siempre en español.',
-    FR: 'Réponds toujours en français.',
-    IT: 'Rispondi sempre in italiano.',
+    FR: 'Réponds siempre en français.',
+    IT: 'Rispondi siempre in italiano.',
     DE: 'Antworte immer auf Deutsch.',
   };
 
   const langInstruction = languageInstructions[language] ?? languageInstructions['EN'];
-
   const userLine = userName ? `You are talking to ${userName}. Address them by name when appropriate.\n` : '';
+  const today = new Date().toISOString().split('T')[0];
+
+  const weddingLine =
+    weddingDate && coupleNames
+      ? `The wedding for ${coupleNames} is on ${weddingDate}. `
+      : '';
 
   return `You are NupciBot, a friendly and helpful AI assistant for the Nupci wedding management platform. You help wedding admins (couples) understand how to use the platform, navigate its features, and get the most out of it.
+Today's date is ${today}. ${weddingLine}
 ${userLine}
 ${langInstruction}
+
 
 Your knowledge about the platform is based on the following documentation:
 
@@ -386,9 +399,29 @@ export async function generateNupciBotReply(
   userMessage: string,
   history: ChatMessage[] = [],
   language = 'EN',
-  userName?: string
+  userName?: string,
+  weddingId?: string,
 ): Promise<string | null> {
-  const systemPrompt = buildSystemPrompt(language, userName);
+  // Fetch wedding info if available
+  let weddingDate: string | undefined;
+  let coupleNames: string | undefined;
+
+  if (weddingId) {
+    try {
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        select: { wedding_date: true, couple_names: true },
+      });
+      if (wedding) {
+        weddingDate = wedding.wedding_date.toISOString().split('T')[0];
+        coupleNames = wedding.couple_names;
+      }
+    } catch (err) {
+      console.warn('[NUPCIBOT] Failed to fetch wedding info:', err);
+    }
+  }
+
+  const systemPrompt = buildSystemPrompt(language, userName, weddingDate, coupleNames);
 
   const provider =
     process.env.AI_PROVIDER ||

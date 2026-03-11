@@ -1,0 +1,22 @@
+{
+  "filePath": ".spec-workflow/specs/ai-search-agentic-nupcibot/tasks.md",
+  "currentVersion": 2,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-03-08T19:27:35.890Z",
+      "trigger": "initial",
+      "approvalId": "approval_1772998055876_c6bw4wdzr",
+      "approvalTitle": "Tasks: AI Search & Agentic Nupcibot"
+    },
+    {
+      "version": 2,
+      "filename": "snapshot-002.json",
+      "timestamp": "2026-03-08T19:29:14.754Z",
+      "trigger": "approved",
+      "approvalId": "approval_1772998055876_c6bw4wdzr",
+      "approvalTitle": "Tasks: AI Search & Agentic Nupcibot"
+    }
+  ]
+}

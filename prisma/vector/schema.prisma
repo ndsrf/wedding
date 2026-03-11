@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/@prisma/vector-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DocType {
+  WEDDING_DOCUMENT
+  WAYS_OF_WORKING
+  SYSTEM_MANUAL
+  REFERENCES
+}
+
+model DocumentChunk {
+  id                String                     @id @default(uuid())
+  content           String
+  embedding         Unsupported("vector(1536)")
+  sourceName        String
+  fullUrl           String?
+  metadata          Json?
+  docType           DocType
+  weddingId         String?
+  plannerId         String?
+  weddingProviderId String?
+  paymentId         String?
+  locationId        String?
+  createdAt         DateTime                   @default(now())
+
+  @@map("document_chunks")
+}

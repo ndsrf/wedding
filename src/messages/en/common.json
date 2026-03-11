@@ -108,6 +108,17 @@
     "no": "No",
     "error": "Error"
   },
+  "helpCenter": {
+    "title": "Help Center",
+    "subtitle": "We're here to support you",
+    "description": "Our customers are incredibly important to us. We're dedicated to ensuring you have the best possible experience and that your wedding planning process is as smooth as possible.",
+    "statusTitle": "System Status",
+    "statusDescription": "Check the current operational status of our services.",
+    "statusLink": "Go to System Status",
+    "contactTitle": "Contact Us",
+    "contactDescription": "If you have specific questions or need to report an issue, please reach out to our support team.",
+    "contactLink": "Go to Contact Form"
+  },
   "landing": {
     "nav": {
       "features": "Features",
@@ -229,6 +240,7 @@
       "privacy": "Privacy Policy",
       "help": "Help Center",
       "docs": "Documentation",
+      "status": "System Status",
       "rights": "All rights reserved."
     },
     "title": "{commercialName} - Wedding Management"
@@ -539,7 +551,10 @@
         "nameRequired": "Name is required",
         "emailRequired": "Email is required",
         "invalidEmail": "Invalid email address"
-      }
+      },
+      "phone": "Phone Number (WhatsApp)",
+      "phonePlaceholder": "612 345 678",
+      "phoneHint": "Optional. Used to identify you when messaging via WhatsApp."
     },
     "themes": {
       "title": "Theme Management",
@@ -1248,6 +1263,7 @@
       "importSuccess": "Guest list imported successfully",
       "importError": "Import error. Please check the file.",
       "bulkActions": "Bulk Actions",
+      "copyGeneralInvitationLink": "Copy general invitation link",
       "deleteSelected": "Delete Selected",
       "selectGuestsHint": "Select guests from the list to perform bulk actions",
       "bulkDeleteTitle": "Delete Selected Guests",
@@ -1689,6 +1705,7 @@
     "nupcibot": {
       "subtitle": "Your wedding assistant",
       "close": "Close",
+      "referencesTitle": "References",
       "greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you today?",
       "helpConfigure": "Help me configure my wedding",
       "viewReports": "View and print lists",
@@ -1730,7 +1747,14 @@
         "save": "Save Menu",
         "saving": "Saving...",
         "saved": "Menu saved!",
-        "error": "Failed to save menu"
+        "error": "Failed to save menu",
+        "tastingDate": "Tasting Date",
+        "status": "Status",
+        "statusOpen": "Open",
+        "statusClosed": "Closed",
+        "statusClosedHint": "Auto-opens on the tasting date",
+        "statusOpenHint": "Always open — no auto behaviour",
+        "statusAuto": "(auto)"
       },
       "sections": {
         "title": "Sections",
@@ -1994,6 +2018,10 @@
       "search": {
         "placeholder": "Search dishes...",
         "noResults": "No dishes match your search."
+      },
+      "closed": {
+        "title": "Tasting menu is read-only",
+        "description": "This tasting menu is currently closed. Contact the couple for more information."
       }
     }
   },

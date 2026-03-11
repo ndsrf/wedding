@@ -2,12 +2,14 @@
 // In production Docker containers, environment variables are passed directly
 import { defineConfig, env } from 'prisma/config';
 
+const isVector = process.env.SCHEMA === 'vector';
+
 export default defineConfig({
-  schema: 'prisma/schema.prisma',
+  schema: isVector ? 'prisma/vector/schema.prisma' : 'prisma/schema.prisma',
   migrations: {
-    path: 'prisma/migrations',
+    path: isVector ? 'prisma/vector/migrations' : 'prisma/migrations',
   },
   datasource: {
-    url: env('DATABASE_URL'),
+    url: isVector ? env('VECTOR_DATABASE_URL') : env('DATABASE_URL'),
   },
 });
