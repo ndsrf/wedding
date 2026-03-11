@@ -521,7 +521,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       </div>
 
       {/* Form Actions */}
-      <div className="flex justify-end space-x-3 pt-4 border-t">
+      <div className="flex justify-end space-x-3 pt-4 pb-4 border-t">
         <button
           type="button"
           onClick={onCancel}

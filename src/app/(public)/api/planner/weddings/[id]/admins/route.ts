@@ -215,7 +215,7 @@ export async function POST(
       const response: APIResponse = {
         success: false,
         error: {
-          code: API_ERROR_CODES.ALREADY_EXISTS,
+          code: API_ERROR_CODES.ADMIN_EMAIL_ALREADY_EXISTS,
           message: 'This email is already registered as an admin for another active wedding',
         },
       };
@@ -226,7 +226,7 @@ export async function POST(
       const response: APIResponse = {
         success: false,
         error: {
-          code: API_ERROR_CODES.ALREADY_EXISTS,
+          code: API_ERROR_CODES.ADMIN_PHONE_ALREADY_EXISTS,
           message: 'This phone number is already registered as an admin for another active wedding',
         },
       };

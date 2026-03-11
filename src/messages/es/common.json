@@ -538,6 +538,8 @@
       "emailPlaceholder": "admin@ejemplo.com",
       "inviteSent": "Invitación enviada exitosamente",
       "inviteError": "Error al invitar al administrador",
+      "emailAlreadyRegistered": "Este correo electrónico ya está registrado como administrador para otra boda activa",
+      "phoneAlreadyRegistered": "Este número de teléfono ya está registrado como administrador para otra boda activa",
       "remove": "Eliminar Administrador",
       "confirmRemove": "¿Estás seguro de que quieres eliminar a este administrador?",
       "invitationNote": "El administrador recibirá un correo de invitación con instrucciones para iniciar sesión y acceder a esta boda.",
