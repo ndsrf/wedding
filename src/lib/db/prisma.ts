@@ -45,7 +45,7 @@ const poolConfig: PoolConfig = {
 }
 
 const pool = new Pool(poolConfig)
-const adapter = new PrismaPg(pool)
+const adapter = new PrismaPg(pool as any)
 
 // Prisma Client configuration
 const prismaClientOptions: Prisma.PrismaClientOptions = {
