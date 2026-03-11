@@ -105,6 +105,7 @@
     "typescript": "^5.7.3"
   },
   "overrides": {
+    "@babel/runtime": ">=7.26.10",
     "hono": "^4.12.7",
     "https-proxy-agent": "^7.0.0",
     "test-exclude": "^8.0.0"

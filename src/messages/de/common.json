@@ -534,6 +534,8 @@
       "emailPlaceholder": "admin@beispiel.de",
       "inviteSent": "Einladung erfolgreich gesendet",
       "inviteError": "Fehler beim Einladen des Administrators",
+      "emailAlreadyRegistered": "Diese E-Mail ist bereits als Administrator für eine andere aktive Hochzeit registriert",
+      "phoneAlreadyRegistered": "Diese Telefonnummer ist bereits als Administrator für eine andere aktive Hochzeit registriert",
       "remove": "Administrator entfernen",
       "confirmRemove": "Sind Sie sicher, dass Sie diesen Administrator entfernen möchten?",
       "invitationNote": "Der Administrator erhält eine Einladungs-E-Mail mit Anweisungen zur Anmeldung und zum Zugriff auf diese Hochzeit.",
@@ -1683,8 +1685,10 @@
     },
     "tastingMenu": {
       "title": "Verkostungsmenü",
-      "description": "Verwalten Sie das kulinarische Verkostungserlebnis für Ihre Hochzeit.",
-      "nav": "Verkostungsmenü",
+      "description": "Verwalten Sie das kulinarische Verkostungserlebnis für Ihre Hochzeit. Fügen Sie Abschnitte, Gerichte und Teilnehmer hinzu.",
+      "nav": "Essen & Trinken",
+      "tasting": "Verkostungsmenü",
+      "weddingMenu": "Hochzeitsmenü",
       "menu": {
         "title": "Menü-Einrichtung",
         "menuTitle": "Menütitel",
