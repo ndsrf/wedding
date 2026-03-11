@@ -58,7 +58,7 @@ function createVectorClient(): VectorPrismaClient | null {
     connectionTimeoutMillis: 5000,
   })
 
-  const adapter = new PrismaPg(pool as any)
+  const adapter = new PrismaPg(pool as unknown as ConstructorParameters<typeof PrismaPg>[0])
 
   return new PrismaClient({
     adapter,

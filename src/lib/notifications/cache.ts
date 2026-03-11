@@ -43,20 +43,46 @@ export const NOTIFICATION_CACHE_KEYS = {
 /** TTL for notification cache (1 hour) */
 const NOTIFICATION_CACHE_TTL = 3600;
 
+/** Soft TTL for notification cache (1 minute) - after this, we still serve stale but revalidate in background */
+const NOTIFICATION_SOFT_TTL = 60;
+
 // ============================================================================
 // COUNTS
 // ============================================================================
 
+interface CachedValue<T> {
+  value: T;
+  expiry: number;
+}
+
 /**
- * Get a cached count by key.
+ * Get a cached count by key with soft TTL support.
  */
 async function getCachedCount(key: string): Promise<number | null> {
   const client = getClient();
   if (!client) return null;
 
   try {
-    const count = await client.get(key);
-    return count !== null ? parseInt(count, 10) : null;
+    const data = await client.get(key);
+    if (data === null) return null;
+
+    try {
+      const parsed = JSON.parse(data);
+      if (typeof parsed === 'object' && parsed !== null && 'value' in parsed) {
+        return (parsed as CachedValue<number>).value;
+      }
+      // If it's a number/string that JSON.parse handled (like "7" -> 7)
+      if (typeof parsed === 'number') return parsed;
+      if (typeof parsed === 'string') {
+        const value = parseInt(parsed, 10);
+        return isNaN(value) ? null : value;
+      }
+      return null;
+    } catch {
+      // Fallback for non-JSON strings
+      const value = parseInt(data, 10);
+      return isNaN(value) ? null : value;
+    }
   } catch (error) {
     console.warn(`[NotificationCache] Error getting count for ${key}:`, error);
     return null;
@@ -64,17 +90,78 @@ async function getCachedCount(key: string): Promise<number | null> {
 }
 
 /**
- * Set a cached count by key.
+ * Set a cached count by key with soft TTL.
  */
 async function setCachedCount(key: string, count: number): Promise<void> {
   const client = getClient();
   if (!client) return;
 
   try {
-    await client.set(key, count.toString(), 'EX', NOTIFICATION_CACHE_TTL);
+    const data: CachedValue<number> = {
+      value: count,
+      expiry: Date.now() + (NOTIFICATION_SOFT_TTL * 1000)
+    };
+    await client.set(key, JSON.stringify(data), 'EX', NOTIFICATION_CACHE_TTL);
   } catch (error) {
     console.warn(`[NotificationCache] Error setting count for ${key}:`, error);
   }
+}
+
+/**
+ * Get or set cached count with a producer function.
+ * Implements a simple stale-while-revalidate pattern to avoid stampedes.
+ */
+export async function getOrSetCachedCount(
+  key: string,
+  producer: () => Promise<number>
+): Promise<number> {
+  const client = getClient();
+  if (!client) return producer();
+
+  try {
+    const data = await client.get(key);
+    if (data !== null) {
+      try {
+        const parsed = JSON.parse(data) as CachedValue<number>;
+        const now = Date.now();
+        
+        // If still within soft TTL, return immediately
+        if (now < parsed.expiry) {
+          return parsed.value;
+        }
+
+        // Soft TTL expired - try to acquire a lock to revalidate in background
+        const lockKey = `${key}:revalidate_lock`;
+        const acquiredLock = await client.set(lockKey, '1', 'EX', 30, 'NX');
+        
+        if (acquiredLock) {
+          // Fire and forget revalidation
+          producer().then(async (newValue) => {
+            await setCachedCount(key, newValue);
+            await client.del(lockKey);
+          }).catch((err) => {
+            console.error(`[NotificationCache] Background revalidation failed for ${key}:`, err);
+            client.del(lockKey);
+          });
+        }
+
+        // Return stale value while revalidating
+        return parsed.value;
+      } catch {
+        // Fallback for old format - just use it and overwrite with new format
+        const value = parseInt(data, 10);
+        setCachedCount(key, value).catch(() => {});
+        return value;
+      }
+    }
+  } catch (error) {
+    console.warn(`[NotificationCache] Error in getOrSetCachedCount for ${key}:`, error);
+  }
+
+  // Hard miss or error
+  const newValue = await producer();
+  await setCachedCount(key, newValue);
+  return newValue;
 }
 
 /**

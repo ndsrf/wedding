@@ -22,9 +22,9 @@ import {
   setCachedNotifications, 
   invalidateAllNotificationCache,
   getCachedUnreadCount,
-  setCachedUnreadCount,
   getCachedTotalCount,
-  setCachedTotalCount
+  getOrSetCachedCount,
+  NOTIFICATION_CACHE_KEYS
 } from './cache';
 
 // ============================================================================
@@ -170,9 +170,11 @@ export async function listNotificationsHandler(
 
   if (!hasFilters && isFirstPage && limit <= cacheSize) {
     const start = performance.now();
-    const cachedItems = await getCachedNotifications(weddingId);
-    const cachedUnread = await getCachedUnreadCount(weddingId);
-    const cachedTotal = await getCachedTotalCount(weddingId);
+    const [cachedItems, cachedUnread, cachedTotal] = await Promise.all([
+      getCachedNotifications(weddingId),
+      getCachedUnreadCount(weddingId),
+      getCachedTotalCount(weddingId),
+    ]);
 
     if (cachedItems !== null && cachedUnread !== null && cachedTotal !== null) {
       const end = performance.now();
@@ -211,29 +213,77 @@ export async function listNotificationsHandler(
       : { none: { read: true } };
   }
 
-  const [total, events, unreadCount] = await Promise.all([
-    prisma.trackingEvent.count({ where: whereClause }),
-    prisma.trackingEvent.findMany({
-      where: whereClause,
-      skip,
-      take: Math.max(limit, hasFilters ? limit : cacheSize), // Fetch enough for cache if no filters
-      orderBy: { timestamp: 'desc' },
-      include: {
-        family: { select: { id: true, name: true, email: true, preferred_language: true } },
-        notifications: {
-          where: { read: true },
-          select: { id: true, read_at: true },
-          take: 1,
+  let total: number;
+  let unreadCount: number;
+  
+  type TrackingEventWithRelations = Prisma.TrackingEventGetPayload<{
+    include: {
+      family: { select: { id: true, name: true, email: true, preferred_language: true } },
+      notifications: {
+        where: { read: true },
+        select: { id: true, read_at: true },
+        take: 1,
+      },
+    },
+  }>;
+
+  let events: TrackingEventWithRelations[];
+
+  if (!hasFilters) {
+    // Use stampede-protected caching for default counts
+    [total, unreadCount, events] = await Promise.all([
+      getOrSetCachedCount(NOTIFICATION_CACHE_KEYS.totalCount(weddingId), () => 
+        prisma.trackingEvent.count({ where: { wedding_id: weddingId } })
+      ),
+      getOrSetCachedCount(NOTIFICATION_CACHE_KEYS.unreadCount(weddingId), () => 
+        prisma.trackingEvent.count({
+          where: {
+            wedding_id: weddingId,
+            notifications: { none: { read: true } },
+          },
+        })
+      ),
+      prisma.trackingEvent.findMany({
+        where: whereClause,
+        skip,
+        take: Math.max(limit, cacheSize),
+        orderBy: { timestamp: 'desc' },
+        include: {
+          family: { select: { id: true, name: true, email: true, preferred_language: true } },
+          notifications: {
+            where: { read: true },
+            select: { id: true, read_at: true },
+            take: 1,
+          },
         },
-      },
-    }),
-    prisma.trackingEvent.count({
-      where: {
-        wedding_id: weddingId,
-        notifications: { none: { read: true } },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } else {
+    // Dynamic query - no caching for filters for now
+    [total, events, unreadCount] = await Promise.all([
+      prisma.trackingEvent.count({ where: whereClause }),
+      prisma.trackingEvent.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { timestamp: 'desc' },
+        include: {
+          family: { select: { id: true, name: true, email: true, preferred_language: true } },
+          notifications: {
+            where: { read: true },
+            select: { id: true, read_at: true },
+            take: 1,
+          },
+        },
+      }),
+      prisma.trackingEvent.count({
+        where: {
+          wedding_id: weddingId,
+          notifications: { none: { read: true } },
+        },
+      }),
+    ]);
+  }
 
   const notifications = events.map((event) => {
     const readNotification = event.notifications[0];
@@ -254,13 +304,9 @@ export async function listNotificationsHandler(
     };
   });
 
-  // 2. Update cache if this was a "default" query
+  // 2. Update list cache if this was a "default" query
   if (!hasFilters) {
-    await Promise.all([
-      setCachedNotifications(weddingId, notifications as unknown as Notification[]),
-      setCachedUnreadCount(weddingId, unreadCount),
-      setCachedTotalCount(weddingId, total),
-    ]);
+    await setCachedNotifications(weddingId, notifications as unknown as Notification[]);
   }
 
   const response: APIResponse<PaginatedResponse<Notification> & { unread_count: number }> = {

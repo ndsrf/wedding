@@ -45,10 +45,16 @@ describe('Notification Cache Service', () => {
 
   describe('Unread Count', () => {
     it('should get cached unread count', async () => {
-      mockRedis.get.mockResolvedValue('5');
+      mockRedis.get.mockResolvedValue(JSON.stringify({ value: 5, expiry: Date.now() + 60000 }));
       const result = await getCachedUnreadCount(weddingId);
       expect(result).toBe(5);
       expect(mockRedis.get).toHaveBeenCalledWith(expect.stringContaining(weddingId));
+    });
+
+    it('should get cached unread count (legacy string format)', async () => {
+      mockRedis.get.mockResolvedValue('7');
+      const result = await getCachedUnreadCount(weddingId);
+      expect(result).toBe(7);
     });
 
     it('should return null when count is not cached', async () => {
@@ -61,7 +67,7 @@ describe('Notification Cache Service', () => {
       await setCachedUnreadCount(weddingId, 10);
       expect(mockRedis.set).toHaveBeenCalledWith(
         expect.stringContaining(weddingId),
-        '10',
+        expect.stringContaining('"value":10'),
         'EX',
         expect.any(Number)
       );
@@ -87,7 +93,7 @@ describe('Notification Cache Service', () => {
 
   describe('Total Count', () => {
     it('should get cached total count', async () => {
-      mockRedis.get.mockResolvedValue('100');
+      mockRedis.get.mockResolvedValue(JSON.stringify({ value: 100, expiry: Date.now() + 60000 }));
       const result = await getCachedTotalCount(weddingId);
       expect(result).toBe(100);
     });
@@ -96,7 +102,7 @@ describe('Notification Cache Service', () => {
       await setCachedTotalCount(weddingId, 150);
       expect(mockRedis.set).toHaveBeenCalledWith(
         expect.stringContaining('total_count'),
-        '150',
+        expect.stringContaining('"value":150'),
         'EX',
         expect.any(Number)
       );
