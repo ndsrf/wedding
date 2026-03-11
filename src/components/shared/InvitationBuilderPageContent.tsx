@@ -16,7 +16,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { InvitationTemplateEditor } from '@/components/admin/InvitationTemplateEditor';
@@ -116,6 +116,11 @@ export function InvitationBuilderPageContent({
 
   const templateApi = `${apiPaths.apiBase}/invitation-template`;
 
+  const seedById = useMemo(
+    () => new Map(systemSeeds.map((s) => [s.id, s])),
+    [systemSeeds],
+  );
+
   // Load initial data
   useEffect(() => {
     loadData();
@@ -170,7 +175,7 @@ export function InvitationBuilderPageContent({
 
       let design: TemplateDesign;
       if (selectedSeed) {
-        const seed = systemSeeds.find((s) => s.id === selectedSeed);
+        const seed = seedById.get(selectedSeed);
         if (!seed) throw new Error('Selected template not found');
         design = seed.design;
       } else {
@@ -239,7 +244,10 @@ export function InvitationBuilderPageContent({
 
     try {
       const res = await fetch(`${templateApi}/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete template');
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || 'Failed to delete template');
+      }
       setUserTemplates((prev) => prev.filter((t) => t.id !== id));
       setError(null);
     } catch (err) {
@@ -250,7 +258,10 @@ export function InvitationBuilderPageContent({
   const handleDuplicateTemplate = async (id: string) => {
     try {
       const res = await fetch(`${templateApi}/${id}/duplicate`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to duplicate template');
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || 'Failed to duplicate template');
+      }
       const duplicate = await res.json();
       setUserTemplates((prev) => [duplicate, ...prev]);
       setError(null);
@@ -285,7 +296,10 @@ export function InvitationBuilderPageContent({
         body: JSON.stringify({ name }),
       });
 
-      if (!res.ok) throw new Error('Failed to rename template');
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || 'Failed to rename template');
+      }
 
       const updated = (await res.json()) as UserTemplate;
       setUserTemplates((prev) => prev.map((tpl) => (tpl.id === id ? updated : tpl)));
@@ -295,6 +309,12 @@ export function InvitationBuilderPageContent({
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to rename template');
     }
+  };
+
+  const handleCancelPicker = () => {
+    setView('list');
+    setNewTemplateName('');
+    setSelectedSeed(null);
   };
 
   const handleExportTemplate = async (template: UserTemplate) => {
@@ -474,7 +494,7 @@ export function InvitationBuilderPageContent({
                     {template.based_on_preset && (
                       <p className="text-sm text-gray-600 mb-4">
                         {t('basedOn')}:{' '}
-                        {systemSeeds.find((s) => s.id === template.based_on_preset)?.name}
+                        {seedById.get(template.based_on_preset!)?.name}
                       </p>
                     )}
 
@@ -539,7 +559,7 @@ export function InvitationBuilderPageContent({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center">
               <button
-                onClick={() => { setView('list'); setNewTemplateName(''); setSelectedSeed(null); }}
+                onClick={handleCancelPicker}
                 className="text-gray-600 hover:text-gray-700 mr-4"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -612,7 +632,7 @@ export function InvitationBuilderPageContent({
 
           <div className="flex gap-3">
             <button
-              onClick={() => { setView('list'); setNewTemplateName(''); setSelectedSeed(null); }}
+              onClick={handleCancelPicker}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 transition font-medium"
               disabled={isSavingTemplate}
             >
