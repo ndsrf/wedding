@@ -17,6 +17,13 @@ import type { Notification } from '@/types/models';
 import { API_ERROR_CODES } from '@/types/api';
 import type { Prisma } from '@prisma/client';
 import * as XLSX from 'xlsx';
+import { 
+  getCachedNotifications, 
+  setCachedNotifications, 
+  invalidateAllNotificationCache,
+  getCachedUnreadCount,
+  setCachedUnreadCount
+} from './cache';
 
 // ============================================================================
 // SHARED ERROR HANDLER
@@ -153,6 +160,34 @@ export async function listNotificationsHandler(
   });
 
   const { page, limit, family_id, event_type, channel, read, date_from, date_to } = queryParams;
+
+  // 1. Try to use Redis cache for the first page with no filters
+  const hasFilters = family_id || event_type || channel || read !== undefined || date_from || date_to;
+  const isFirstPage = page === 1;
+  const cacheSize = parseInt(process.env.NOTIFICATIONS_CACHE_SIZE || '100', 10);
+
+  if (!hasFilters && isFirstPage && limit <= cacheSize) {
+    const cachedItems = await getCachedNotifications(weddingId);
+    const cachedUnread = await getCachedUnreadCount(weddingId);
+
+    if (cachedItems !== null && cachedUnread !== null) {
+      // We need the total count to properly return pagination, but if we're only caching 100,
+      // we might still need a quick count from DB for 'total'.
+      // Actually, let's just fetch 'total' from DB as it's a simple indexed count.
+      const total = await prisma.trackingEvent.count({ where: { wedding_id: weddingId } });
+      
+      const response: APIResponse<PaginatedResponse<Notification> & { unread_count: number }> = {
+        success: true,
+        data: {
+          items: cachedItems.slice(0, limit) as unknown as Notification[],
+          pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+          unread_count: cachedUnread,
+        },
+      };
+      return NextResponse.json(response, { status: 200 });
+    }
+  }
+
   const skip = (page - 1) * limit;
 
   const whereClause: Prisma.TrackingEventWhereInput = { wedding_id: weddingId };
@@ -178,7 +213,7 @@ export async function listNotificationsHandler(
   const events = await prisma.trackingEvent.findMany({
     where: whereClause,
     skip,
-    take: limit,
+    take: Math.max(limit, hasFilters ? limit : cacheSize), // Fetch enough for cache if no filters
     orderBy: { timestamp: 'desc' },
     include: {
       family: { select: { id: true, name: true, email: true, preferred_language: true } },
@@ -205,7 +240,7 @@ export async function listNotificationsHandler(
       family_id: event.family_id,
       event_type: event.event_type,
       channel: event.channel,
-      details: event.metadata || {},
+      details: (event.metadata as Record<string, unknown>) || {},
       read: !!readNotification,
       read_at: readNotification?.read_at || null,
       admin_id: actorId,
@@ -216,10 +251,16 @@ export async function listNotificationsHandler(
     };
   });
 
+  // 2. Update cache if this was a "default" query
+  if (!hasFilters) {
+    await setCachedNotifications(weddingId, notifications as unknown as Notification[]);
+    await setCachedUnreadCount(weddingId, unreadCount);
+  }
+
   const response: APIResponse<PaginatedResponse<Notification> & { unread_count: number }> = {
     success: true,
     data: {
-      items: notifications as unknown as Notification[],
+      items: notifications.slice(0, limit) as unknown as Notification[],
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       unread_count: unreadCount,
     },
@@ -259,37 +300,43 @@ export async function markNotificationReadHandler(
       data: { read: true, read_at: new Date() },
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: { ...updatedNotification, details: (updatedNotification.details as Record<string, unknown>) || {} },
-      },
-      { status: 200 },
-    );
-  }
-
-  const readAt = new Date();
-  const newNotification = await prisma.notification.create({
-    data: {
-      wedding_id: trackingEvent.wedding_id,
-      family_id: trackingEvent.family_id,
-      event_type: trackingEvent.event_type,
-      channel: trackingEvent.channel,
-      tracking_event_id: trackingEventId,
-      details: { original_metadata: trackingEvent.metadata || {}, marked_read_by: actorId },
-      read: true,
-      read_at: readAt,
-      admin_id: actorId,
-    },
-  });
+  // Invalidate cache
+  await invalidateAllNotificationCache(weddingId);
 
   return NextResponse.json(
     {
       success: true,
-      data: { ...newNotification, details: (newNotification.details as Record<string, unknown>) || {} },
+      data: { ...updatedNotification, details: (updatedNotification.details as Record<string, unknown>) || {} },
     },
     { status: 200 },
   );
+}
+
+const readAt = new Date();
+const newNotification = await prisma.notification.create({
+  data: {
+    wedding_id: trackingEvent.wedding_id,
+    family_id: trackingEvent.family_id,
+    event_type: trackingEvent.event_type,
+    channel: trackingEvent.channel,
+    tracking_event_id: trackingEventId,
+    details: { original_metadata: trackingEvent.metadata || {}, marked_read_by: actorId },
+    read: true,
+    read_at: readAt,
+    admin_id: actorId,
+  },
+});
+
+// Invalidate cache
+await invalidateAllNotificationCache(weddingId);
+
+return NextResponse.json(
+  {
+    success: true,
+    data: { ...newNotification, details: (newNotification.details as Record<string, unknown>) || {} },
+  },
+  { status: 200 },
+);
 }
 
 /**
@@ -344,6 +391,9 @@ export async function bulkMarkNotificationsReadHandler(
       }),
     ),
   ]);
+
+  // Invalidate cache
+  await invalidateAllNotificationCache(weddingId);
 
   return NextResponse.json({ success: true, count: foundIds.length }, { status: 200 });
 }

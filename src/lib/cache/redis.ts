@@ -51,7 +51,7 @@ export const CACHE_TTL = {
 let _client: Redis | null = null;
 let _connectAttempted = false;
 
-function getClient(): Redis | null {
+export function getClient(): Redis | null {
   if (_connectAttempted) return _client;
   _connectAttempted = true;
 

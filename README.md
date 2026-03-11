@@ -670,6 +670,7 @@ You can use the same secret for all environments or generate separate ones for b
 - `TWILIO_PHONE_NUMBER` - Twilio phone number for SMS (format: +1234567890)
 - `TWILIO_WHATSAPP_NUMBER` - Twilio WhatsApp number (format: +1234567890 or whatsapp:+1234567890)
 - `REDIS_URL` - Redis connection string (optional caching)
+- `NOTIFICATIONS_CACHE_SIZE` - How many notifications to cache in Redis per wedding (default: 100)
 - `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
 - `MASTER_ADMIN_EMAILS` - Comma-separated admin emails
 

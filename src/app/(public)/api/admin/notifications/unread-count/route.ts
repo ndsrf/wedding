@@ -9,10 +9,11 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
+import { getCachedUnreadCount, setCachedUnreadCount } from '@/lib/notifications/cache';
 
 /**
  * GET /api/admin/notifications/unread-count
- * Get accurate unread count using relational query
+ * Get accurate unread count using relational query (with Redis caching)
  */
 export async function GET(_request: NextRequest) {
   try {
@@ -30,7 +31,18 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json(response, { status: 403 });
     }
 
-    // Calculate accurate unread count using a single count query
+    // 1. Try to get from Redis cache
+    const cachedCount = await getCachedUnreadCount(user.wedding_id);
+    if (cachedCount !== null) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          unread_count: cachedCount,
+        },
+      }, { status: 200 });
+    }
+
+    // 2. Cache miss - Calculate accurate unread count using a single count query
     // TrackingEvents that have NO Notification records with read=true
     const unreadCount = await prisma.trackingEvent.count({
       where: {
@@ -42,6 +54,9 @@ export async function GET(_request: NextRequest) {
         },
       },
     });
+
+    // 3. Update Redis cache
+    await setCachedUnreadCount(user.wedding_id, unreadCount);
 
     return NextResponse.json({
       success: true,
