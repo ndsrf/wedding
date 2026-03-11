@@ -33,7 +33,7 @@ export async function POST(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return duplicateInvitationTemplateHandler(weddingId, templateId);
+    return await duplicateInvitationTemplateHandler(weddingId, templateId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

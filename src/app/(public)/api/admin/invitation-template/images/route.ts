@@ -27,7 +27,7 @@ export async function GET() {
       );
     }
 
-    return listInvitationImagesHandler(user.wedding_id);
+    return await listInvitationImagesHandler(user.wedding_id);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return uploadInvitationImageHandler(user.wedding_id, req);
+    return await uploadInvitationImageHandler(user.wedding_id, req);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

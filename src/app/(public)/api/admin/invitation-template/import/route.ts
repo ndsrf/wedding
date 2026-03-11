@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return importInvitationTemplateHandler(user.wedding_id, req);
+    return await importInvitationTemplateHandler(user.wedding_id, req);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

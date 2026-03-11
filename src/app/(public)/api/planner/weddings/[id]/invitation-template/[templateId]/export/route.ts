@@ -30,7 +30,7 @@ export async function GET(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return exportInvitationTemplateHandler(weddingId, templateId);
+    return await exportInvitationTemplateHandler(weddingId, templateId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

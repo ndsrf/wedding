@@ -34,7 +34,7 @@ export async function GET(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return getInvitationTemplateHandler(weddingId, templateId);
+    return await getInvitationTemplateHandler(weddingId, templateId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -56,7 +56,7 @@ export async function PUT(
     if (denied) return denied;
 
     const body = await req.json();
-    return updateInvitationTemplateHandler(weddingId, templateId, body);
+    return await updateInvitationTemplateHandler(weddingId, templateId, body);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -77,7 +77,7 @@ export async function DELETE(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return deleteInvitationTemplateHandler(weddingId, templateId);
+    return await deleteInvitationTemplateHandler(weddingId, templateId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

@@ -33,7 +33,7 @@ export async function GET(
       );
     }
 
-    return getInvitationTemplateHandler(user.wedding_id, templateId);
+    return await getInvitationTemplateHandler(user.wedding_id, templateId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -55,7 +55,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    return updateInvitationTemplateHandler(user.wedding_id, templateId, body);
+    return await updateInvitationTemplateHandler(user.wedding_id, templateId, body);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -76,7 +76,7 @@ export async function DELETE(
       );
     }
 
-    return deleteInvitationTemplateHandler(user.wedding_id, templateId);
+    return await deleteInvitationTemplateHandler(user.wedding_id, templateId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

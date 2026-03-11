@@ -27,7 +27,7 @@ export async function GET() {
       );
     }
 
-    return listInvitationTemplatesHandler(user.wedding_id);
+    return await listInvitationTemplatesHandler(user.wedding_id);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    return createInvitationTemplateHandler(user.wedding_id, body);
+    return await createInvitationTemplateHandler(user.wedding_id, body);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

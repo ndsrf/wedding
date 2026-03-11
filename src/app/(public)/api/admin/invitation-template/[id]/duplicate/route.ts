@@ -29,7 +29,7 @@ export async function POST(
       );
     }
 
-    return duplicateInvitationTemplateHandler(user.wedding_id, templateId);
+    return await duplicateInvitationTemplateHandler(user.wedding_id, templateId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

@@ -32,7 +32,7 @@ export async function GET(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return listInvitationTemplatesHandler(weddingId);
+    return await listInvitationTemplatesHandler(weddingId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -54,7 +54,7 @@ export async function POST(
     if (denied) return denied;
 
     const body = await req.json();
-    return createInvitationTemplateHandler(weddingId, body);
+    return await createInvitationTemplateHandler(weddingId, body);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }

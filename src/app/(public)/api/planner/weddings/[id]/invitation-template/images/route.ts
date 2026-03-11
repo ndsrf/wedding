@@ -32,7 +32,7 @@ export async function GET(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return listInvitationImagesHandler(weddingId);
+    return await listInvitationImagesHandler(weddingId);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
@@ -53,7 +53,7 @@ export async function POST(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return uploadInvitationImageHandler(weddingId, req);
+    return await uploadInvitationImageHandler(weddingId, req);
   } catch (error) {
     return handleInvitationTemplateApiError(error);
   }
