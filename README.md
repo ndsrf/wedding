@@ -19,9 +19,10 @@ The Wedding Management App enables wedding planners to manage multiple weddings 
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14+ (App Router), React 18+, Tailwind CSS
+- **Frontend**: Next.js 15+ (App Router), React 19+, Tailwind CSS
 - **Backend**: Next.js API Routes, NextAuth.js (OAuth)
 - **Database**: PostgreSQL 15+ with Prisma ORM
+- **Observability**: HyperDX.io (OpenTelemetry), Vercel Analytics
 - **Deployment**: Docker containers, GitHub Actions CI/CD
 - **Languages**: TypeScript, multi-language i18n support
 

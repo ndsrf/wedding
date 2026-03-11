@@ -39,6 +39,8 @@
     "@ai-sdk/openai": "^3.0.41",
     "@auth/prisma-adapter": "^2.11.1",
     "@google/genai": "^1.44.0",
+    "@hyperdx/browser": "^0.22.0",
+    "@hyperdx/node-opentelemetry": "^0.10.3",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@react-email/components": "^1.0.0",

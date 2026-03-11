@@ -19,7 +19,6 @@ const nextConfig = {
     } : false,
   },
   experimental: {
-    after: true,
     serverActions: {
       bodySizeLimit: '5mb',
     },
@@ -28,6 +27,13 @@ const nextConfig = {
   },
   // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
   serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas'],
+  // Optional: Ignore OpenTelemetry warnings in webpack
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.ignoreWarnings = [{ module: /opentelemetry/ }];
+    }
+    return config;
+  },
   env: {
     // Automatically enable Facebook login if credentials are provided
     // Can be manually overridden by setting NEXT_PUBLIC_FACEBOOK_ENABLED in .env

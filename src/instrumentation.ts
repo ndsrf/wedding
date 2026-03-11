@@ -7,6 +7,16 @@
 export async function register() {
   // Only run on server side
   if (process.env.NEXT_RUNTIME === 'nodejs') {
+    // Initialize HyperDX
+    if (process.env.HYPERDX_API_KEY) {
+      const { init } = await import('@hyperdx/node-opentelemetry');
+      init({
+        apiKey: process.env.HYPERDX_API_KEY,
+        service: 'wedding-management-app',
+      });
+      console.log('[Server] HyperDX initialized');
+    }
+
     const { runStartupMigrations } = await import('@/lib/db/migrationManager');
 
     console.log('[Server] Initializing application...');

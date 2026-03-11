@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import { getLanguageFromRequest } from '@/lib/i18n/server';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
+import HyperDXProvider from '@/components/observability/HyperDXProvider';
 import '../globals.css'
 
 export default async function PublicLayout({
@@ -16,6 +17,7 @@ export default async function PublicLayout({
   return (
     <html lang={locale}>
       <body>
+        <HyperDXProvider />
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
