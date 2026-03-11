@@ -82,9 +82,9 @@ export function AdminInviteForm({ onSubmit, onCancel, weddingCountry = 'ES' }: A
       setFormData({ name: '', email: '', phone: '' });
       setPhonePrefix(defaultPrefix);
       setErrors({});
-    } catch (error: any) {
+    } catch (error) {
       console.error('[FORM DEBUG] Form submission error:', error);
-      setSubmitError(error.message || t('planner.admins.inviteError'));
+      setSubmitError((error instanceof Error && error.message) || t('planner.admins.inviteError'));
     } finally {
       setIsSubmitting(false);
     }
