@@ -106,7 +106,18 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('[INVITE DEBUG] Error response:', errorData);
-        throw new Error(errorData.error?.message || t('planner.admins.inviteError'));
+        
+        // Map specific error codes to translated messages
+        let errorMessage = t('planner.admins.inviteError');
+        if (errorData.error?.code === 'ADMIN_EMAIL_ALREADY_EXISTS') {
+          errorMessage = t('planner.admins.emailAlreadyRegistered');
+        } else if (errorData.error?.code === 'ADMIN_PHONE_ALREADY_EXISTS') {
+          errorMessage = t('planner.admins.phoneAlreadyRegistered');
+        } else if (errorData.error?.message) {
+          errorMessage = errorData.error.message;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();

@@ -534,6 +534,8 @@
       "emailPlaceholder": "admin@esempio.com",
       "inviteSent": "Invito inviato con successo",
       "inviteError": "Errore durante l'invito dell'amministratore",
+      "emailAlreadyRegistered": "Questa email è già registrata come amministratore per un altro matrimonio attivo",
+      "phoneAlreadyRegistered": "Questo numero di telefono è già registrato come amministratore per un altro matrimonio attivo",
       "remove": "Rimuovi Amministratore",
       "confirmRemove": "Sei sicuro di voler rimuovere questo amministratore?",
       "invitationNote": "L'amministratore riceverà un'email di invito con le istruzioni per accedere a questo matrimonio.",

@@ -542,6 +542,8 @@
       "emailPlaceholder": "admin@example.com",
       "inviteSent": "Invitation sent successfully",
       "inviteError": "Failed to invite admin",
+      "emailAlreadyRegistered": "This email is already registered as an admin for another active wedding",
+      "phoneAlreadyRegistered": "This phone number is already registered as an admin for another active wedding",
       "remove": "Remove Admin",
       "confirmRemove": "Are you sure you want to remove this admin?",
       "invitationNote": "The admin will receive an invitation email with instructions to sign in and access this wedding.",
