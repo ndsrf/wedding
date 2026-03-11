@@ -1,7 +1,7 @@
 /**
- * Wedding Planner - Notifications API Route
+ * Wedding Planner - Export Notifications API Route
  *
- * GET /api/planner/weddings/:id/notifications
+ * POST /api/planner/weddings/:id/notifications/export
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,9 +9,9 @@ import { requireRole } from '@/lib/auth/middleware';
 import { API_ERROR_CODES } from '@/types/api';
 import type { APIResponse } from '@/types/api';
 import { validatePlannerAccess } from '@/lib/guests/planner-access';
-import { listNotificationsHandler, handleNotificationApiError } from '@/lib/notifications/api-handlers';
+import { exportNotificationsHandler, handleNotificationApiError } from '@/lib/notifications/api-handlers';
 
-export async function GET(
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -30,8 +30,8 @@ export async function GET(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    return listNotificationsHandler(weddingId, new URL(request.url).searchParams, user.id);
+    return exportNotificationsHandler(weddingId, request);
   } catch (error) {
-    return handleNotificationApiError(error, { operation: 'fetch notifications' });
+    return handleNotificationApiError(error, { operation: 'export notifications' });
   }
 }
