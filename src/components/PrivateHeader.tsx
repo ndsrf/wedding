@@ -86,7 +86,7 @@ export default function PrivateHeader({
           {(title || subtitle) && (
             <div className="hidden md:block flex-1 text-center px-4">
               {title && (
-                <h1 className="text-lg font-bold text-gray-900 font-['Playfair_Display']">
+                <h1 className="text-lg font-bold text-gray-900 font-playfair">
                   {title}
                 </h1>
               )}
@@ -114,7 +114,7 @@ export default function PrivateHeader({
         {(title || subtitle) && (
           <div className="md:hidden pb-3 border-t border-gray-100 pt-3 mt-1">
             {title && (
-              <h1 className="text-lg font-bold text-gray-900 font-['Playfair_Display']">
+              <h1 className="text-lg font-bold text-gray-900 font-playfair">
                 {title}
               </h1>
             )}

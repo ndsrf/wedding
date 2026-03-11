@@ -178,7 +178,7 @@ export default async function AdminDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 leading-tight font-['Playfair_Display']">
+              <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 leading-tight font-playfair">
                 {stats.couple_names}
               </h1>
               <p className="mt-1 sm:mt-2 text-gray-500 text-xs sm:text-sm">

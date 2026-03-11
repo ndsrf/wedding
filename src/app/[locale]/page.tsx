@@ -99,7 +99,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 </svg>
               </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 font-['Playfair_Display']">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 font-playfair">
                 {t('landing.hero.title')}
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
@@ -162,7 +162,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-['Playfair_Display']">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
               {t('landing.features.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -268,7 +268,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-rose-50 via-white to-pink-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-['Playfair_Display']">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
               {t('landing.testimonials.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -359,7 +359,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-['Playfair_Display']">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
               {t('landing.pricing.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -498,7 +498,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-rose-600 to-pink-600">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-['Playfair_Display']">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-playfair">
             {t('landing.cta.title')}
           </h2>
           <p className="text-xl text-white/90 mb-10">
