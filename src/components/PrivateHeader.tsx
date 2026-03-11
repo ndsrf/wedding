@@ -70,12 +70,12 @@ export default function PrivateHeader({
                 </span>
               </button>
             )}
-            <Link href="/" className="flex items-center">
+            <Link href="/" prefetch={false} className="flex items-center">
               <Image
                 src="/images/nupci.webp"
                 alt={commercialName}
-                width={400}
-                height={160}
+                width={240}
+                height={96}
                 className="h-24 w-auto"
                 priority
               />
@@ -102,6 +102,7 @@ export default function PrivateHeader({
             <LanguageSwitcher />
             <Link
               href="/api/auth/signout"
+              prefetch={false}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-rose-300 transition-all"
             >
               {t('common.navigation.logout')}

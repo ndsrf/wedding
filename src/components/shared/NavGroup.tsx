@@ -29,6 +29,7 @@ export function NavGroup({ title, headerIcon, headerBgClass, hoverTextClass, ite
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             className={`text-xs text-gray-600 ${hoverTextClass} hover:underline flex items-center gap-1 transition-colors`}
           >
             {item.icon}

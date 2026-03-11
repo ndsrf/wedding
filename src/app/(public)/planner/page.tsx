@@ -92,6 +92,7 @@ export default async function PlannerDashboardPage() {
   const createWeddingButton = (
     <Link
       href="/planner/weddings?action=create"
+      prefetch={false}
       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-md hover:shadow-lg"
     >
       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,7 +113,7 @@ export default async function PlannerDashboardPage() {
       {/* Dashboard Title */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <h1 className="text-2xl font-bold text-gray-900">{t('planner.dashboard.title')}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-['Playfair_Display']">{t('planner.dashboard.title')}</h1>
           <p className="mt-0.5 text-sm text-gray-500">{t('planner.dashboard.subtitle')}</p>
         </div>
       </div>
@@ -181,7 +182,7 @@ export default async function PlannerDashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">{t('planner.dashboard.upcomingWeddings')}</h2>
-              <Link href="/planner/weddings" className="text-sm text-rose-600 hover:text-rose-700 font-medium">
+              <Link href="/planner/weddings" prefetch={false} className="text-sm text-rose-600 hover:text-rose-700 font-medium">
                 {t('planner.dashboard.allWeddings')} &rarr;
               </Link>
             </div>
@@ -196,6 +197,7 @@ export default async function PlannerDashboardPage() {
                   <Link
                     key={wedding.id}
                     href={`/planner/weddings/${wedding.id}`}
+                    prefetch={false}
                     className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-rose-200 transition-all"
                   >
                     <div className="flex-shrink-0 w-14 h-16 bg-gradient-to-b from-rose-500 to-pink-600 text-white rounded-xl flex flex-col items-center justify-center shadow-md">
@@ -234,6 +236,7 @@ export default async function PlannerDashboardPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <Link
               href="/planner/weddings"
+              prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-purple-200 hover:bg-purple-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center group-hover:bg-purple-100 transition-colors">
@@ -249,6 +252,7 @@ export default async function PlannerDashboardPage() {
 
             <Link
               href="/planner/weddings?action=create"
+              prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-rose-200 hover:bg-rose-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center group-hover:bg-rose-100 transition-colors">
@@ -264,6 +268,7 @@ export default async function PlannerDashboardPage() {
 
             <Link
               href="/planner/checklist-template"
+              prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-green-200 hover:bg-green-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
@@ -279,6 +284,7 @@ export default async function PlannerDashboardPage() {
 
             <Link
               href="/planner/providers"
+              prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-orange-200 hover:bg-orange-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
@@ -294,6 +300,7 @@ export default async function PlannerDashboardPage() {
 
             <Link
               href="/planner/templates"
+              prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-pink-200 hover:bg-pink-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center group-hover:bg-pink-100 transition-colors">
@@ -309,6 +316,7 @@ export default async function PlannerDashboardPage() {
 
             <Link
               href="/planner/locations"
+              prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-cyan-200 hover:bg-cyan-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">

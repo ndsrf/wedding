@@ -194,6 +194,7 @@ export function UpcomingTasksWidget() {
         <h2 className="text-lg font-medium text-gray-900">{t('title')}</h2>
         <Link
           href="/admin/checklist"
+          prefetch={false}
           className="text-sm font-medium text-purple-600 hover:text-purple-500"
         >
           View all
@@ -315,6 +316,7 @@ export function UpcomingTasksWidget() {
             <Link
               key={task.id}
               href="/admin/checklist"
+              prefetch={false}
               className={`block ${styles.bg} ${styles.border} rounded-lg p-4 hover:opacity-75 transition-opacity`}
             >
               <div className="flex items-start justify-between">

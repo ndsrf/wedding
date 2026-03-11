@@ -178,7 +178,7 @@ export default async function AdminDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 leading-tight font-['Playfair_Display']">
                 {stats.couple_names}
               </h1>
               <p className="mt-1 sm:mt-2 text-gray-500 text-xs sm:text-sm">
@@ -323,6 +323,7 @@ export default async function AdminDashboardPage() {
             {/* Guest Management - most important, featured */}
             <Link
               href="/admin/guests"
+              prefetch={false}
               className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-purple-100 shadow-sm p-6 hover:shadow-md hover:border-purple-300 hover:bg-purple-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-md shadow-purple-200 group-hover:shadow-purple-300 transition-shadow">
@@ -347,6 +348,7 @@ export default async function AdminDashboardPage() {
             {/* Configure Wedding - prominent */}
             <Link
               href="/admin/configure"
+              prefetch={false}
               className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-indigo-100 shadow-sm p-6 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-indigo-200 group-hover:shadow-indigo-300 transition-shadow">

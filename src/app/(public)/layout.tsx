@@ -16,6 +16,27 @@ export default async function PublicLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        {/* Preload critical fonts for optimal FCP */}
+        <link
+          rel="preload"
+          href="/fonts/playfair/playfair-display-700.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/playfair/playfair-display-400.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        {/* Resource hints for external resources */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+      </head>
       <body>
         <HyperDXProvider />
         <NextIntlClientProvider locale={locale} messages={messages}>
