@@ -174,17 +174,70 @@ grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageConte
 | Screen | Admin path | Planner path | Status |
 |--------|-----------|--------------|--------|
 | Guests | `/admin/guests` | `/planner/weddings/[id]/guests` | ✅ Done |
-| Notifications | `/admin/notifications` | `/planner/weddings/[id]/notifications` | ⬜ Pending |
+| Notifications | `/admin/notifications` | `/planner/weddings/[id]/notifications` | ✅ Done |
 | Menu | `/admin/menu` | `/planner/weddings/[id]/menu` | ✅ Done |
 | Tasting | `/admin/tasting` | `/planner/weddings/[id]/tasting` | ✅ Done |
 | Seating | `/admin/seating` | `/planner/weddings/[id]/seating` | ⬜ Pending |
 | Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ⬜ Pending |
 | Reports | `/admin/reports` | `/planner/weddings/[id]/reports` | ⬜ Pending |
-| Providers | `/admin/providers` | `/planner/weddings/[id]/providers` | ⬜ Pending |
+| Providers | `/admin/providers` | `/planner/weddings/[id]/providers` | ✅ Done |
 | Invitation Builder | `/admin/invitation-builder` | `/planner/weddings/[id]/invitation-builder` | ✅ Done |
 | Templates | `/admin/templates` | `/planner/weddings/[id]/templates` | ⬜ Pending |
 
 > Not all screens need consolidation. Evaluate if the planner version has meaningful differences before merging.
+
+---
+
+## Completed: Notifications Page
+
+### UI Consolidation
+
+**Shared component:** `src/components/shared/NotificationsPageContent.tsx`
+
+**Differences resolved:**
+| Difference | Resolution |
+|-----------|-----------|
+| API base paths | `apiPaths` bag passed as prop (notifications, notificationRead, notificationsMarkRead, notificationsExport, remindersPreview, reminders) |
+| Header/nav | `header` React slot prop |
+| Planner missing export endpoint | Created `POST /api/planner/weddings/:id/notifications/export/route.ts` |
+| Planner event_type enum gap | Shared handler includes all event types (`MESSAGE_RECEIVED`, `AI_REPLY_SENT`) |
+| `ReminderModal apiBase` | Derived from `apiPaths.reminders` (strips `/reminders` suffix) |
+| Inline `validatePlannerAccess` copies | Replaced with shared `validatePlannerAccess` from `src/lib/guests/planner-access.ts` |
+
+### API Consolidation
+
+**Shared handlers:** `src/lib/notifications/api-handlers.ts`
+
+Business logic for 4 operations extracted into shared functions:
+`listNotificationsHandler`, `markNotificationReadHandler`, `bulkMarkNotificationsReadHandler`, `exportNotificationsHandler`, `handleNotificationApiError`.
+
+**Shared access guard:** reuses `src/lib/guests/planner-access.ts`
+
+**New planner route:** `src/app/(public)/api/planner/weddings/[id]/notifications/export/route.ts` — previously missing; planners can now export notifications.
+
+**All 8 API route files** (4 admin + 4 planner) reduced to ~30-line auth-and-dispatch wrappers. Three inline copies of `validatePlannerAccess` removed from planner routes.
+
+---
+
+## Completed: Providers Page
+
+### UI Consolidation
+
+**Shared component:** `src/components/shared/ProvidersPageContent.tsx`
+
+The `WeddingProviders` component was already shared for content rendering. `ProvidersPageContent` adds a thin wrapper providing the page shell (`min-h-screen` layout + `<main>` container) with a `header` slot.
+
+**Differences resolved:**
+| Difference | Resolution |
+|-----------|-----------|
+| Page shell duplication | Extracted into `ProvidersPageContent` accepting `weddingId`, `isPlanner`, `header` props |
+| Back link href | Admin passes `/admin`, planner passes `/planner/weddings/${id}` in their `header` slot |
+| `Promise<params>` pattern in planner page | Replaced with `useParams()` from `next/navigation` |
+| Wedding name subtitle in planner header | Planner thin page fetches couple names and injects into its `header` slot |
+
+### API Consolidation
+
+No API consolidation needed — both admin and planner providers pages already share the same API endpoints (`/api/weddings/[id]/providers`, `/api/weddings/[id]/payments`). The `WeddingProviders` component handles all API calls internally.
 
 ---
 
