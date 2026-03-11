@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
 /* Wedding Invitation Fonts */
 
 /* Critical: Playfair Display (Local fonts for optimal FCP) */
@@ -20,11 +23,9 @@
 /* Non-Critical: Lazy load other fonts for invitation templates */
 /* These fonts are loaded asynchronously to avoid blocking initial render */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-playfair: 'Playfair Display', serif;
 
-@layer utilities {
   @keyframes blob {
     0%, 100% {
       transform: translate(0, 0) scale(1);
@@ -37,17 +38,19 @@
     }
   }
 
-  .animate-blob {
-    animation: blob 7s infinite;
-  }
+  --animate-blob: blob 7s infinite;
+}
 
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
+@utility animation-delay-2000 {
+  animation-delay: 2s;
+}
 
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
+@utility animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+@utility text-balance {
+  text-wrap: balance;
 }
 
 :root {
@@ -58,12 +61,6 @@
 body {
   color: var(--foreground);
   background: var(--background);
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
 }
 
 /* Rich Text Editor Styles */
