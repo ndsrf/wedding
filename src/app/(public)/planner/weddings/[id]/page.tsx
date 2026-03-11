@@ -108,13 +108,16 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
         console.error('[INVITE DEBUG] Error response:', errorData);
         
         // Map specific error codes to translated messages
-        let errorMessage = t('planner.admins.inviteError');
-        if (errorData.error?.code === 'ADMIN_EMAIL_ALREADY_EXISTS') {
-          errorMessage = t('planner.admins.emailAlreadyRegistered');
-        } else if (errorData.error?.code === 'ADMIN_PHONE_ALREADY_EXISTS') {
-          errorMessage = t('planner.admins.phoneAlreadyRegistered');
-        } else if (errorData.error?.message) {
-          errorMessage = errorData.error.message;
+        let errorMessage;
+        switch (errorData.error?.code) {
+          case 'ADMIN_EMAIL_ALREADY_EXISTS':
+            errorMessage = t('planner.admins.emailAlreadyRegistered');
+            break;
+          case 'ADMIN_PHONE_ALREADY_EXISTS':
+            errorMessage = t('planner.admins.phoneAlreadyRegistered');
+            break;
+          default:
+            errorMessage = errorData.error?.message || t('planner.admins.inviteError');
         }
         
         throw new Error(errorMessage);
