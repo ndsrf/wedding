@@ -139,14 +139,13 @@ export function GuestFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onCancel} />
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-start justify-center p-4">
+      {/* Backdrop (clickable area outside modal) */}
+      <div className="fixed inset-0" onClick={onCancel} aria-hidden="true" />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <form onSubmit={handleSubmit} className="p-6" noValidate>
+      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full my-8">
+        <form onSubmit={handleSubmit} className="p-6" noValidate>
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">

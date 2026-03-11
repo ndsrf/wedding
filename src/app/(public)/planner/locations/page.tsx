@@ -284,8 +284,8 @@ export default function LocationsPage() {
 
       {/* Create/Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 bg-gray-500/75 flex items-start justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full my-8 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               {editingLocation ? 'Edit Location' : 'Add Location'}
             </h2>
