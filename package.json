@@ -41,8 +41,10 @@
     "@google/genai": "^1.44.0",
     "@hyperdx/browser": "^0.22.0",
     "@hyperdx/node-opentelemetry": "^0.10.3",
+    "@opentelemetry/instrumentation-undici": "^0.23.0",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
+    "@prisma/instrumentation": "^7.5.0",
     "@react-email/components": "^1.0.0",
     "@vercel/analytics": "^2.0.0",
     "@vercel/blob": "^2.0.0",
@@ -105,6 +107,16 @@
     "typescript": "^5.7.3"
   },
   "overrides": {
+    "@opentelemetry/instrumentation": "0.57.2",
+    "@opentelemetry/api": "1.9.0",
+    "@opentelemetry/instrumentation-undici": {
+      "@opentelemetry/instrumentation": "0.57.2",
+      "@opentelemetry/api": "1.9.0"
+    },
+    "@prisma/instrumentation": {
+      "@opentelemetry/instrumentation": "0.57.2",
+      "@opentelemetry/api": "1.9.0"
+    },
     "@babel/runtime": ">=7.26.10",
     "hono": "^4.12.7",
     "https-proxy-agent": "^7.0.0",

@@ -147,6 +147,7 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
     messages,
     tools: buildTools({ weddingId, plannerId, role }),
     stopWhen: stepCountIs(5),
+    experimental_telemetry: { isEnabled: true },
     onStepFinish: (step) => {
       console.log(`[RAG-CHAT] Step finished. toolCalls: ${step.toolCalls?.length ?? 0}`);
       if (step.toolResults && step.toolResults.length > 0) {
@@ -212,6 +213,7 @@ export async function generateRagReply(params: RagChatParams): Promise<string | 
     messages,
     tools: buildTools({ weddingId, plannerId, role }),
     stopWhen: stepCountIs(5),
+    experimental_telemetry: { isEnabled: true },
   });
 
   const text = await result.text;

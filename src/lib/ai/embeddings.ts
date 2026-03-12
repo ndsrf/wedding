@@ -27,7 +27,11 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
     const batch = texts.slice(i, i + BATCH_SIZE);
-    const { embeddings } = await embedMany({ model, values: batch });
+    const { embeddings } = await embedMany({
+      model,
+      values: batch,
+      experimental_telemetry: { isEnabled: true },
+    });
     results.push(...embeddings);
   }
 

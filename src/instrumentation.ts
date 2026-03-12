@@ -10,11 +10,19 @@ export async function register() {
     // Initialize HyperDX
     if (process.env.HYPERDX_API_KEY) {
       const { init } = await import('@hyperdx/node-opentelemetry');
+      const { PrismaInstrumentation } = await import('@prisma/instrumentation');
+      const { UndiciInstrumentation } = await import('@opentelemetry/instrumentation-undici');
       init({
         apiKey: process.env.HYPERDX_API_KEY,
         service: 'wedding-management-app',
+        advancedNetworkCapture: true,
+        betaMode: true,
+        additionalInstrumentations: [
+          new PrismaInstrumentation() as any,
+          new UndiciInstrumentation() as any,
+        ],
       });
-      console.log('[Server] HyperDX initialized');
+      console.log('[Server] HyperDX initialized with Prisma, Fetch (Undici), and Advanced Network tracing');
     }
 
     const { runStartupMigrations } = await import('@/lib/db/migrationManager');
