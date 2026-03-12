@@ -5,24 +5,35 @@
  */
 
 export async function register() {
+  console.log('[Server] Registering instrumentation...');
+  
   // Only run on server side
   if (process.env.NEXT_RUNTIME === 'nodejs') {
+    console.log('[Server] Runtime: nodejs - Initializing HyperDX');
+    
     // Initialize HyperDX
     if (process.env.HYPERDX_API_KEY) {
-      const { init } = await import('@hyperdx/node-opentelemetry');
-      const { PrismaInstrumentation } = await import('@prisma/instrumentation');
-      const { UndiciInstrumentation } = await import('@opentelemetry/instrumentation-undici');
-      init({
-        apiKey: process.env.HYPERDX_API_KEY,
-        service: 'wedding-management-app',
-        advancedNetworkCapture: true,
-        betaMode: true,
-        additionalInstrumentations: [
-          new PrismaInstrumentation() as any,
-          new UndiciInstrumentation() as any,
-        ],
-      });
-      console.log('[Server] HyperDX initialized with Prisma, Fetch (Undici), and Advanced Network tracing');
+      console.log('[Server] HYPERDX_API_KEY found. Initializing SDK...');
+      try {
+        const { init } = await import('@hyperdx/node-opentelemetry');
+        const { PrismaInstrumentation } = await import('@prisma/instrumentation');
+        const { UndiciInstrumentation } = await import('@opentelemetry/instrumentation-undici');
+        init({
+          apiKey: process.env.HYPERDX_API_KEY,
+          service: 'wedding-management-app',
+          advancedNetworkCapture: true,
+          betaMode: true,
+          additionalInstrumentations: [
+            new PrismaInstrumentation() as any,
+            new UndiciInstrumentation() as any,
+          ],
+        });
+        console.log('[Server] ✓ HyperDX initialized with Prisma, Fetch (Undici), and Advanced Network tracing');
+      } catch (err) {
+        console.error('[Server] ✗ Failed to initialize HyperDX:', err);
+      }
+    } else {
+      console.warn('[Server] ⚠ HYPERDX_API_KEY not found in environment. Tracing will be disabled.');
     }
 
     const { runStartupMigrations } = await import('@/lib/db/migrationManager');
