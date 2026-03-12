@@ -107,16 +107,6 @@
     "typescript": "^5.7.3"
   },
   "overrides": {
-    "@opentelemetry/instrumentation": "0.213.0",
-    "@opentelemetry/api": "1.9.0",
-    "@opentelemetry/instrumentation-undici": {
-      "@opentelemetry/instrumentation": "0.213.0",
-      "@opentelemetry/api": "1.9.0"
-    },
-    "@prisma/instrumentation": {
-      "@opentelemetry/instrumentation": "0.213.0",
-      "@opentelemetry/api": "1.9.0"
-    },
     "@babel/runtime": ">=7.26.10",
     "hono": "^4.12.7",
     "https-proxy-agent": "^7.0.0",
