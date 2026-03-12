@@ -30,7 +30,10 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
     const { embeddings } = await embedMany({
       model,
       values: batch,
-      experimental_telemetry: { isEnabled: true },
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: 'ai-embed-many',
+      },
     });
     results.push(...embeddings);
   }

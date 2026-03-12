@@ -18,17 +18,25 @@ export async function register() {
         const { init } = await import('@hyperdx/node-opentelemetry');
         const { PrismaInstrumentation } = await import('@prisma/instrumentation');
         const { UndiciInstrumentation } = await import('@opentelemetry/instrumentation-undici');
+        const { PgInstrumentation } = await import('@opentelemetry/instrumentation-pg');
+        const { IORedisInstrumentation } = await import('@opentelemetry/instrumentation-ioredis');
         init({
           apiKey: process.env.HYPERDX_API_KEY,
           service: 'wedding-management-app',
           advancedNetworkCapture: true,
           betaMode: true,
+          // @ts-expect-error - internal HyperDX option
+          EXPERIMENTAL_OTEL_LEVEL: 'verbose',
+          /* eslint-disable @typescript-eslint/no-explicit-any */
           additionalInstrumentations: [
             new PrismaInstrumentation() as any,
             new UndiciInstrumentation() as any,
+            new PgInstrumentation() as any,
+            new IORedisInstrumentation() as any,
           ],
+          /* eslint-enable @typescript-eslint/no-explicit-any */
         });
-        console.log('[Server] ✓ HyperDX initialized with Prisma, Fetch (Undici), and Advanced Network tracing');
+        console.log('[Server] ✓ HyperDX initialized with Prisma, Fetch (Undici), PG, Redis, and Advanced Network tracing');
       } catch (err) {
         console.error('[Server] ✗ Failed to initialize HyperDX:', err);
       }

@@ -7,6 +7,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { trace } from '@opentelemetry/api';
 import type {
   ChecklistWithSections,
   ChecklistTaskData,
@@ -423,66 +424,76 @@ export async function getUpcomingTasks(
   assigned_to?: TaskAssignment,
   limit: number = 5
 ): Promise<UpcomingTask[]> {
-  // Build where clause
-  const where: Record<string, unknown> = {
-    wedding_id,
-    template_id: null,
-    completed: false,
-    due_date: { not: null }, // Only tasks with due dates
-  };
+  return trace.getTracer('checklist-service').startActiveSpan('getUpcomingTasks', async (span) => {
+    try {
+      span.setAttribute('wedding.id', wedding_id);
+      if (assigned_to) span.setAttribute('task.assigned_to', assigned_to);
+      span.setAttribute('query.limit', limit);
 
-  if (assigned_to) {
-    where.assigned_to = assigned_to;
-  }
+      // Build where clause
+      const where: Record<string, unknown> = {
+        wedding_id,
+        template_id: null,
+        completed: false,
+        due_date: { not: null }, // Only tasks with due dates
+      };
 
-  // Fetch tasks with section information
-  const tasks = await prisma.checklistTask.findMany({
-    where,
-    include: {
-      section: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    orderBy: [
-      { due_date: 'asc' },
-      { order: 'asc' },
-    ],
-    take: limit,
-  });
-
-  // Calculate urgency and format results
-  const now = new Date();
-  const upcomingTasks: UpcomingTask[] = tasks.map((task) => {
-    let days_until_due: number | null = null;
-    let urgency_color: 'red' | 'orange' | 'green' = 'green';
-
-    if (task.due_date) {
-      const dueDate = new Date(task.due_date);
-      const diffTime = dueDate.getTime() - now.getTime();
-      days_until_due = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      // Color coding: red for past due or due today, orange for <30 days, green for >=30 days
-      if (days_until_due < 0) {
-        urgency_color = 'red';
-      } else if (days_until_due < 30) {
-        urgency_color = 'orange';
-      } else {
-        urgency_color = 'green';
+      if (assigned_to) {
+        where.assigned_to = assigned_to;
       }
+
+      // Fetch tasks with section information
+      const tasks = await prisma.checklistTask.findMany({
+        where,
+        include: {
+          section: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: [
+          { due_date: 'asc' },
+          { order: 'asc' },
+        ],
+        take: limit,
+      });
+
+      // Calculate urgency and format results
+      const now = new Date();
+      const upcomingTasks: UpcomingTask[] = tasks.map((task) => {
+        let days_until_due: number | null = null;
+        let urgency_color: 'red' | 'orange' | 'green' = 'green';
+
+        if (task.due_date) {
+          const dueDate = new Date(task.due_date);
+          const diffTime = dueDate.getTime() - now.getTime();
+          days_until_due = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          // Color coding: red for past due or due today, orange for <30 days, green for >=30 days
+          if (days_until_due < 0) {
+            urgency_color = 'red';
+          } else if (days_until_due < 30) {
+            urgency_color = 'orange';
+          } else {
+            urgency_color = 'green';
+          }
+        }
+
+        return {
+          ...task,
+          section_name: task.section?.name || null,
+          wedding_id: task.wedding_id!,
+          days_until_due,
+          urgency_color,
+        };
+      });
+
+      return upcomingTasks;
+    } finally {
+      span.end();
     }
-
-    return {
-      ...task,
-      section_name: task.section?.name || null,
-      wedding_id: task.wedding_id!,
-      days_until_due,
-      urgency_color,
-    };
   });
-
-  return upcomingTasks;
 }
 
 /**
