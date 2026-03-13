@@ -127,87 +127,99 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Calculate stats for each wedding
-    const weddingsWithStats = await Promise.all(
-      weddings.map(async (wedding) => {
-        // Get RSVP stats
-        const families = await prisma.family.findMany({
-          where: { wedding_id: wedding.id },
-          include: {
-            members: true,
-            gifts: true,
-          },
-        });
+    // Fetch all families + members + gifts for the current page in one batched query
+    // instead of one query per wedding (N+1 problem).
+    const weddingIds = weddings.map((w) => w.id);
+    const allFamilies = await prisma.family.findMany({
+      where: { wedding_id: { in: weddingIds } },
+      select: {
+        id: true,
+        wedding_id: true,
+        members: { select: { id: true, attending: true } },
+        gifts: { select: { id: true, status: true } },
+      },
+    });
 
-        const guest_count = families.reduce((sum, family) => sum + family.members.length, 0);
-        const rsvp_count = families.filter((family) =>
-          family.members.some((member) => member.attending !== null)
-        ).length;
-        const rsvp_completion_percentage =
-          families.length > 0 ? Math.round((rsvp_count / families.length) * 100) : 0;
-                const attending_count = families.reduce(
-                  (sum, family) => sum + family.members.filter((member) => member.attending === true).length,
-                  0
-                );        const payment_received_count = families.filter((family) =>
-          family.gifts.some((gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED')
-        ).length;
+    // Group families by wedding_id for O(1) lookup
+    const familiesByWedding = new Map<string, typeof allFamilies>();
+    for (const family of allFamilies) {
+      const list = familiesByWedding.get(family.wedding_id) ?? [];
+      list.push(family);
+      familiesByWedding.set(family.wedding_id, list);
+    }
 
-        return {
-          id: wedding.id,
-          planner_id: wedding.planner_id,
-          theme_id: wedding.theme_id,
-          couple_names: wedding.couple_names,
-          wedding_date: wedding.wedding_date,
-          wedding_time: wedding.wedding_time,
-          location: wedding.location,
-          main_event_location_id: wedding.main_event_location_id,
-          rsvp_cutoff_date: wedding.rsvp_cutoff_date,
-          dress_code: wedding.dress_code,
-          additional_info: wedding.additional_info,
-          payment_tracking_mode: wedding.payment_tracking_mode,
-          gift_iban: wedding.gift_iban,
-          allow_guest_additions: wedding.allow_guest_additions,
-          default_language: wedding.default_language,
-          wedding_country: wedding.wedding_country,
-          status: wedding.status,
-          is_disabled: wedding.is_disabled,
-          disabled_at: wedding.disabled_at,
-          disabled_by: wedding.disabled_by,
-          deleted_at: wedding.deleted_at,
-          deleted_by: wedding.deleted_by,
-          created_at: wedding.created_at,
-          created_by: wedding.created_by,
-          updated_at: wedding.updated_at,
-          updated_by: wedding.updated_by,
-          short_url_initials: wedding.short_url_initials,
-          // RSVP Configuration fields
-          transportation_question_enabled: wedding.transportation_question_enabled,
-          transportation_question_text: wedding.transportation_question_text,
-          dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
-          save_the_date_enabled: wedding.save_the_date_enabled,
-          whatsapp_mode: wedding.whatsapp_mode,
-          extra_question_1_enabled: wedding.extra_question_1_enabled,
-          extra_question_1_text: wedding.extra_question_1_text,
-          extra_question_2_enabled: wedding.extra_question_2_enabled,
-          extra_question_2_text: wedding.extra_question_2_text,
-          extra_question_3_enabled: wedding.extra_question_3_enabled,
-          extra_question_3_text: wedding.extra_question_3_text,
-          extra_info_1_enabled: wedding.extra_info_1_enabled,
-          extra_info_1_label: wedding.extra_info_1_label,
-          extra_info_2_enabled: wedding.extra_info_2_enabled,
-          extra_info_2_label: wedding.extra_info_2_label,
-          extra_info_3_enabled: wedding.extra_info_3_enabled,
-          extra_info_3_label: wedding.extra_info_3_label,
-          wedding_day_theme_id: (wedding as unknown as { wedding_day_theme_id?: string | null }).wedding_day_theme_id ?? null,
-          wedding_day_invitation_template_id: (wedding as unknown as { wedding_day_invitation_template_id?: string | null }).wedding_day_invitation_template_id ?? null,
-          guest_count,
-          rsvp_count,
-          rsvp_completion_percentage,
-          attending_count,
-          payment_received_count,
-        };
-      })
-    );
+    const weddingsWithStats = weddings.map((wedding) => {
+      const families = familiesByWedding.get(wedding.id) ?? [];
+
+      const guest_count = families.reduce((sum, family) => sum + family.members.length, 0);
+      const rsvp_count = families.filter((family) =>
+        family.members.some((member) => member.attending !== null)
+      ).length;
+      const rsvp_completion_percentage =
+        families.length > 0 ? Math.round((rsvp_count / families.length) * 100) : 0;
+      const attending_count = families.reduce(
+        (sum, family) => sum + family.members.filter((member) => member.attending === true).length,
+        0
+      );
+      const payment_received_count = families.filter((family) =>
+        family.gifts.some((gift) => gift.status === 'RECEIVED' || gift.status === 'CONFIRMED')
+      ).length;
+
+      return {
+        id: wedding.id,
+        planner_id: wedding.planner_id,
+        theme_id: wedding.theme_id,
+        couple_names: wedding.couple_names,
+        wedding_date: wedding.wedding_date,
+        wedding_time: wedding.wedding_time,
+        location: wedding.location,
+        main_event_location_id: wedding.main_event_location_id,
+        rsvp_cutoff_date: wedding.rsvp_cutoff_date,
+        dress_code: wedding.dress_code,
+        additional_info: wedding.additional_info,
+        payment_tracking_mode: wedding.payment_tracking_mode,
+        gift_iban: wedding.gift_iban,
+        allow_guest_additions: wedding.allow_guest_additions,
+        default_language: wedding.default_language,
+        wedding_country: wedding.wedding_country,
+        status: wedding.status,
+        is_disabled: wedding.is_disabled,
+        disabled_at: wedding.disabled_at,
+        disabled_by: wedding.disabled_by,
+        deleted_at: wedding.deleted_at,
+        deleted_by: wedding.deleted_by,
+        created_at: wedding.created_at,
+        created_by: wedding.created_by,
+        updated_at: wedding.updated_at,
+        updated_by: wedding.updated_by,
+        short_url_initials: wedding.short_url_initials,
+        // RSVP Configuration fields
+        transportation_question_enabled: wedding.transportation_question_enabled,
+        transportation_question_text: wedding.transportation_question_text,
+        dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
+        save_the_date_enabled: wedding.save_the_date_enabled,
+        whatsapp_mode: wedding.whatsapp_mode,
+        extra_question_1_enabled: wedding.extra_question_1_enabled,
+        extra_question_1_text: wedding.extra_question_1_text,
+        extra_question_2_enabled: wedding.extra_question_2_enabled,
+        extra_question_2_text: wedding.extra_question_2_text,
+        extra_question_3_enabled: wedding.extra_question_3_enabled,
+        extra_question_3_text: wedding.extra_question_3_text,
+        extra_info_1_enabled: wedding.extra_info_1_enabled,
+        extra_info_1_label: wedding.extra_info_1_label,
+        extra_info_2_enabled: wedding.extra_info_2_enabled,
+        extra_info_2_label: wedding.extra_info_2_label,
+        extra_info_3_enabled: wedding.extra_info_3_enabled,
+        extra_info_3_label: wedding.extra_info_3_label,
+        wedding_day_theme_id: (wedding as unknown as { wedding_day_theme_id?: string | null }).wedding_day_theme_id ?? null,
+        wedding_day_invitation_template_id: (wedding as unknown as { wedding_day_invitation_template_id?: string | null }).wedding_day_invitation_template_id ?? null,
+        guest_count,
+        rsvp_count,
+        rsvp_completion_percentage,
+        attending_count,
+        payment_received_count,
+      };
+    });
 
     const response: ListPlannerWeddingsResponse = {
       success: true,
