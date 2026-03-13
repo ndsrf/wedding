@@ -82,12 +82,19 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
         }),
-        prisma.family.count({
-          where: {
-            wedding_id: user.wedding_id,
-            gifts: { some: { status: { in: ['RECEIVED', 'CONFIRMED'] } } },
-          },
-        }),
+        // Avoid a correlated EXISTS scan across families by querying the gifts
+        // table directly. Gift rows already carry wedding_id, so we can use
+        // @@index([wedding_id, status]) and get DISTINCT family_ids in one pass.
+        prisma.gift
+          .findMany({
+            where: {
+              wedding_id: user.wedding_id,
+              status: { in: ['RECEIVED', 'CONFIRMED'] },
+            },
+            distinct: ['family_id'],
+            select: { family_id: true },
+          })
+          .then((rows) => rows.length),
       ]);
 
     if (!wedding) {
