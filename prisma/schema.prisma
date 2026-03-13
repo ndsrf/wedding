@@ -211,6 +211,7 @@ model ItineraryItem {
   @@index([wedding_id])
   @@index([location_id])
   @@index([wedding_id, order])
+  @@index([wedding_id, date_time])
   @@map("itinerary_items")
 }
 
