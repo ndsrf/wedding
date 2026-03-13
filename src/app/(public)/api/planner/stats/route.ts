@@ -57,7 +57,7 @@ export async function GET(_request: NextRequest) {
         FROM families f
         LEFT JOIN family_members fm ON fm.family_id = f.id
         WHERE f.wedding_id = ANY(
-          SELECT id FROM weddings WHERE planner_id = ${user.planner_id}::uuid
+          SELECT id FROM weddings WHERE planner_id = ${user.planner_id}
         )
       `,
       prisma.wedding.count({ where: { planner_id: user.planner_id } }),

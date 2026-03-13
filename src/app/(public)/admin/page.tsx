@@ -109,7 +109,7 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         prisma.$queryRaw<[{ count: bigint }]>`
           SELECT COUNT(DISTINCT family_id) AS count
           FROM gifts
-          WHERE wedding_id = ${user.wedding_id}::uuid
+          WHERE wedding_id = ${user.wedding_id}
             AND status = ANY(ARRAY['RECEIVED','CONFIRMED']::"GiftStatus"[])
         `,
       ]);
