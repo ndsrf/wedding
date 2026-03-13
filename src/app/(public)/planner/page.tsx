@@ -12,11 +12,20 @@ import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { UpcomingTasksWidget } from '@/components/planner/UpcomingTasksWidget';
 import PrivateHeader from '@/components/PrivateHeader';
+import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import type { PlannerStats } from '@/types/api';
 import type { AuthenticatedUser } from '@/types/api';
 
 /**
- * Get planner statistics directly from database
+ * Get planner statistics directly from database, with Redis caching.
+ *
+ * Query strategy:
+ * - A single $queryRaw aggregate replaces the two separate family.count queries
+ *   that each generated an expensive LEFT JOIN families → weddings.
+ *   The raw query uses ANY(subquery) so Postgres can use the weddings(planner_id)
+ *   index to fetch the wedding IDs first, then the families(wedding_id) index for
+ *   the families, and families_with_rsvp + total_guests are computed in a single pass.
+ * - Results are cached in Redis (TTL = 5 min) so the DB is skipped on repeated loads.
  */
 async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
   try {
@@ -24,52 +33,68 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
       return null;
     }
 
-    // Get total wedding count
-    const wedding_count = await prisma.wedding.count({
-      where: { planner_id: user.planner_id },
-    });
+    // Serve from Redis on cache hit — all DB queries skipped
+    const cacheKey = CACHE_KEYS.plannerStats(user.planner_id);
+    const cached = await getCached<PlannerStats>(cacheKey);
+    if (cached) {
+      // Rehydrate date fields serialised as ISO strings in Redis
+      return {
+        ...cached,
+        upcoming_weddings: cached.upcoming_weddings.map((w) => ({
+          ...w,
+          wedding_date: new Date(w.wedding_date),
+        })),
+      } as unknown as PlannerStats;
+    }
 
-    // Calculate stats using aggregate queries (avoids loading all families + members into memory)
-    const [total_guests, totalFamilies, familiesWithRSVP] = await Promise.all([
-      prisma.familyMember.count({
-        where: { family: { wedding: { planner_id: user.planner_id } } },
-      }),
-      prisma.family.count({
-        where: { wedding: { planner_id: user.planner_id } },
-      }),
-      prisma.family.count({
+    const today = new Date();
+
+    // Run all three data-fetching operations in parallel
+    const [aggregateStats, wedding_count, upcoming_weddings] = await Promise.all([
+      // Single aggregate replaces two separate family.count Prisma queries:
+      //  - family.count({ where: { wedding: { planner_id } } })
+      //  - family.count({ where: { wedding: { planner_id }, members: { some: { attending: { not: null } } } } })
+      // Uses ANY(subquery) instead of LEFT JOIN so the planner_id → wedding_id path
+      // is resolved via indexes without loading the join into the sort/hash buffer.
+      // total_guests replaces the familyMember.count 3-level join too.
+      prisma.$queryRaw<[{ total_families: number; total_guests: number; families_with_rsvp: number }]>`
+        SELECT
+          COUNT(DISTINCT f.id)::int                                               AS total_families,
+          COUNT(fm.id)::int                                                       AS total_guests,
+          COUNT(DISTINCT CASE WHEN fm.attending IS NOT NULL THEN f.id END)::int   AS families_with_rsvp
+        FROM families f
+        LEFT JOIN family_members fm ON fm.family_id = f.id
+        WHERE f.wedding_id = ANY(
+          SELECT id FROM weddings WHERE planner_id = ${user.planner_id}::uuid
+        )
+      `,
+      prisma.wedding.count({ where: { planner_id: user.planner_id } }),
+      prisma.wedding.findMany({
         where: {
-          wedding: { planner_id: user.planner_id },
-          members: { some: { attending: { not: null } } },
+          planner_id: user.planner_id,
+          wedding_date: { gte: today },
+          status: 'ACTIVE',
         },
+        orderBy: { wedding_date: 'asc' },
+        take: 5,
       }),
     ]);
 
+    const row = aggregateStats[0] ?? { total_families: 0, total_guests: 0, families_with_rsvp: 0 };
     const rsvp_completion_percentage =
-      totalFamilies > 0 ? Math.round((familiesWithRSVP / totalFamilies) * 100) : 0;
+      row.total_families > 0 ? Math.round((row.families_with_rsvp / row.total_families) * 100) : 0;
 
-    // Get upcoming weddings (future weddings, sorted by date)
-    const today = new Date();
-    const upcoming_weddings = await prisma.wedding.findMany({
-      where: {
-        planner_id: user.planner_id,
-        wedding_date: {
-          gte: today,
-        },
-        status: 'ACTIVE',
-      },
-      orderBy: {
-        wedding_date: 'asc',
-      },
-      take: 5,
-    });
-
-    return {
+    const stats: PlannerStats = {
       wedding_count,
-      total_guests,
+      total_guests: row.total_guests,
       rsvp_completion_percentage,
       upcoming_weddings,
     };
+
+    // Populate cache so repeated loads within the TTL window skip the DB
+    await setCached(cacheKey, stats, CACHE_TTL.WEDDING_STATS);
+
+    return stats;
   } catch (error) {
     console.error('Error fetching stats:', error);
     return null;
