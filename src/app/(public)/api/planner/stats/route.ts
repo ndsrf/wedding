@@ -30,59 +30,39 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json(response, { status: 403 });
     }
 
-    // Get total wedding count
-    const wedding_count = await prisma.wedding.count({
-      where: { planner_id: user.planner_id },
-    });
+    const today = new Date();
 
-    // Get all weddings for the planner
-    const weddings = await prisma.wedding.findMany({
-      where: { planner_id: user.planner_id },
-      include: {
-        families: {
-          include: {
-            members: true,
+    // Run all aggregate queries in parallel — no data loaded into memory
+    const [wedding_count, total_guests, totalFamilies, familiesWithRSVP, upcoming_weddings] =
+      await Promise.all([
+        prisma.wedding.count({
+          where: { planner_id: user.planner_id },
+        }),
+        prisma.familyMember.count({
+          where: { family: { wedding: { planner_id: user.planner_id } } },
+        }),
+        prisma.family.count({
+          where: { wedding: { planner_id: user.planner_id } },
+        }),
+        prisma.family.count({
+          where: {
+            wedding: { planner_id: user.planner_id },
+            members: { some: { attending: { not: null } } },
           },
-        },
-      },
-    });
-
-    // Calculate total guests across all weddings
-    const total_guests = weddings.reduce(
-      (sum, wedding) =>
-        sum + wedding.families.reduce((familySum, family) => familySum + family.members.length, 0),
-      0
-    );
-
-    // Calculate RSVP completion percentage
-    let totalFamilies = 0;
-    let familiesWithRSVP = 0;
-
-    weddings.forEach((wedding) => {
-      totalFamilies += wedding.families.length;
-      familiesWithRSVP += wedding.families.filter((family) =>
-        family.members.some((member) => member.attending !== null)
-      ).length;
-    });
+        }),
+        prisma.wedding.findMany({
+          where: {
+            planner_id: user.planner_id,
+            wedding_date: { gte: today },
+            status: 'ACTIVE',
+          },
+          orderBy: { wedding_date: 'asc' },
+          take: 5,
+        }),
+      ]);
 
     const rsvp_completion_percentage =
       totalFamilies > 0 ? Math.round((familiesWithRSVP / totalFamilies) * 100) : 0;
-
-    // Get upcoming weddings (future weddings, sorted by date)
-    const today = new Date();
-    const upcoming_weddings = await prisma.wedding.findMany({
-      where: {
-        planner_id: user.planner_id,
-        wedding_date: {
-          gte: today,
-        },
-        status: 'ACTIVE',
-      },
-      orderBy: {
-        wedding_date: 'asc',
-      },
-      take: 5, // Limit to next 5 weddings
-    });
 
     const stats: PlannerStats = {
       wedding_count,

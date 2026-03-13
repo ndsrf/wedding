@@ -151,6 +151,7 @@ model Wedding {
   @@index([is_disabled])
   @@index([status, is_disabled])
   @@index([main_event_location_id])
+  @@index([planner_id, status, wedding_date])
   @@map("weddings")
 }
 
