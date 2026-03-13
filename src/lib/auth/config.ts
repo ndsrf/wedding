@@ -19,7 +19,7 @@ import type { AuthenticatedUser } from '@/types/api';
 // How often to re-validate user role (in milliseconds)
 // Configurable via ROLE_REVALIDATION_INTERVAL_MINUTES env var, defaults to 60 minutes
 const ROLE_REVALIDATION_INTERVAL =
-  (parseInt(process.env.ROLE_REVALIDATION_INTERVAL_MINUTES ?? '60', 10) || 60) * 60 * 1000;
+  (Math.max(0, parseInt(process.env.ROLE_REVALIDATION_INTERVAL_MINUTES ?? '60', 10)) || 60) * 60 * 1000;
 
 // ============================================================================
 // NEXTAUTH CONFIGURATION
