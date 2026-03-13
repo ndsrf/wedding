@@ -16,6 +16,7 @@ import { NupciBot } from '@/components/admin/NupciBot';
 import NotificationBell from '@/components/admin/NotificationBell';
 import PrivateHeader from '@/components/PrivateHeader';
 import { NavGroup } from '@/components/shared/NavGroup';
+import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface ItinerarySummaryItem {
@@ -49,10 +50,30 @@ interface AdminPageData {
 
 // Single function fetches all data needed by the admin page in one round-trip,
 // replacing the separate wizard-check query and the stats queries.
+// Results are cached in Redis (TTL = WEDDING_STATS = 5 min) and invalidated
+// on every guest/wedding mutation, so the DB is only hit on cache misses.
 async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData | null> {
   try {
     if (!user.wedding_id) {
       return null;
+    }
+
+    // Check Redis cache first — avoids all 5 stat queries on repeated loads
+    const cacheKey = CACHE_KEYS.adminDashboard(user.wedding_id);
+    const cached = await getCached<AdminPageData>(cacheKey);
+    if (cached) {
+      // Dates are serialised as ISO strings in Redis; rehydrate them
+      return {
+        ...cached,
+        stats: {
+          ...cached.stats,
+          wedding_date: new Date(cached.stats.wedding_date),
+          itinerary: cached.stats.itinerary.map((item) => ({
+            ...item,
+            date_time: new Date(item.date_time),
+          })),
+        },
+      };
     }
 
     // main_event_location is intentionally NOT included here.
@@ -60,7 +81,7 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
     // used only to compute is_main on each itinerary item. The location data we need
     // (name, address, google_maps_url) is already fetched via itinerary_items → location,
     // so there is no need for an extra SELECT … FROM locations WHERE id = $1 query.
-    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedCount] =
+    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedRows] =
       await Promise.all([
         prisma.wedding.findUnique({
           where: { id: user.wedding_id },
@@ -82,25 +103,22 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
         }),
-        // Avoid a correlated EXISTS scan across families by querying the gifts
-        // table directly. Gift rows already carry wedding_id, so we can use
-        // @@index([wedding_id, status]) and get DISTINCT family_ids in one pass.
-        prisma.gift
-          .findMany({
-            where: {
-              wedding_id: user.wedding_id,
-              status: { in: ['RECEIVED', 'CONFIRMED'] },
-            },
-            distinct: ['family_id'],
-            select: { family_id: true },
-          })
-          .then((rows) => rows.length),
+        // COUNT(DISTINCT family_id) in one aggregate — uses the covering index
+        // (wedding_id, status, family_id) for an index-only scan. Much cheaper
+        // than findMany+distinct which streams every matching row to Node.
+        prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(DISTINCT family_id) AS count
+          FROM gifts
+          WHERE wedding_id = ${user.wedding_id}::uuid
+            AND status = ANY(ARRAY['RECEIVED','CONFIRMED']::"GiftStatus"[])
+        `,
       ]);
 
     if (!wedding) {
       return null;
     }
 
+    const paymentReceivedCount = Number(paymentReceivedRows[0]?.count ?? 0);
     const rsvpCompletionPercentage =
       totalFamilies > 0 ? Math.round((rsvpCount / totalFamilies) * 100) : 0;
 
@@ -110,7 +128,7 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
       (weddingDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    return {
+    const pageData: AdminPageData = {
       wizardCompleted: wedding.wizard_completed,
       wizardSkipped: wedding.wizard_skipped,
       stats: {
@@ -134,6 +152,11 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         days_until_wedding: daysUntilWedding,
       },
     };
+
+    // Populate cache so subsequent requests skip the DB entirely
+    await setCached(cacheKey, pageData, CACHE_TTL.WEDDING_STATS);
+
+    return pageData;
   } catch (error) {
     console.error('Error fetching admin page data:', error);
     return null;

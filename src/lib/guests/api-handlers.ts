@@ -282,7 +282,10 @@ export async function createGuestHandler(
   try {
     const input = createFamilySchema.parse({ ...(body as object), wedding_id: weddingId });
     const family = await createFamily(input, actorId);
-    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
 
     const response: APIResponse = { success: true, data: family };
     return NextResponse.json(response, { status: 201 });
@@ -336,7 +339,10 @@ export async function updateGuestHandler(
   try {
     const validatedData = updateFamilySchema.parse(body);
     const family = await updateFamily(familyId, weddingId, validatedData, actorId);
-    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
 
     const response: UpdateGuestResponse = { success: true, data: family };
     return NextResponse.json(response, { status: 200 });
@@ -359,7 +365,10 @@ export async function deleteGuestHandler(
 ): Promise<NextResponse> {
   try {
     const result = await deleteFamily(familyId, weddingId, actorId);
-    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
 
     const response: APIResponse = { success: true, data: result };
     return NextResponse.json(response, { status: 200 });
@@ -404,7 +413,10 @@ export async function bulkDeleteGuestsHandler(
       return (await tx.family.deleteMany({ where: { id: { in: family_ids } } })).count;
     });
 
-    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
     const response: APIResponse = { success: true, data: { deleted_count: count } };
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
@@ -482,7 +494,10 @@ export async function bulkUpdateGuestsHandler(
       return { updatedFamilies, updatedMembers };
     });
 
-    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
     const response: APIResponse = {
       success: true,
       data: { updated_families: result.updatedFamilies, updated_members: result.updatedMembers },
@@ -610,7 +625,10 @@ export async function importGuestsHandler(
       return NextResponse.json(body, { status: 400 });
     }
 
-    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
     const response: APIResponse = {
       success: true,
       data: {
@@ -711,7 +729,10 @@ export async function importVcfGuestsHandler(
       return NextResponse.json(body, { status: 400 });
     }
 
-    await invalidateCache(CACHE_KEYS.adminWedding(weddingId));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
     const response: APIResponse = {
       success: true,
       data: {
