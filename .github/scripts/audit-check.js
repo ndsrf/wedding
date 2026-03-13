@@ -38,6 +38,8 @@ const ACCEPTED_GHSAS = [
   'GHSA-3ppc-4f35-3m26', // ReDoS via repeated wildcards
   // ajv - MODERATE severity
   'GHSA-2g4f-4pwh-qvx6', // ReDoS when using $data option (via eslint dev dependency)
+  // flatted - HIGH severity (false positive: installed version 3.4.1 already patched, vuln range <3.4.0)
+  'GHSA-25h7-pfq9-p65f', // Unbounded recursion DoS in parse() — fixed in 3.4.0, we have 3.4.1
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];

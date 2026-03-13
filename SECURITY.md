@@ -122,6 +122,12 @@ This document tracks known security vulnerabilities that have been assessed and 
 
 ### Recently Fixed
 
+#### 2026-03-13
+- **flatted < 3.4.0** (HIGH): Unbounded recursion DoS in parse() revive phase
+  - Not a real vulnerability for this project: lock file already resolves to `flatted@3.4.1` (patched)
+  - Added GHSA to accepted list to suppress transient CI false-positive
+  - [GHSA-25h7-pfq9-p65f](https://github.com/advisories/GHSA-25h7-pfq9-p65f)
+
 #### 2026-03-11
 - **@babel/runtime < 7.26.10** (MODERATE): Inefficient RegExp complexity
   - Fixed by adding override to package.json: `"@babel/runtime": ">=7.26.10"`
