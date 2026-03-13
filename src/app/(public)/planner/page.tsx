@@ -33,18 +33,24 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
       return null;
     }
 
-    // Serve from Redis on cache hit — all DB queries skipped
+    // Serve from Redis on cache hit — all DB queries skipped.
+    // Redis serialises Date fields as ISO strings; define a cache-specific type
+    // so the rehydration below is type-safe without a double-cast.
+    type CachedPlannerStats = Omit<PlannerStats, 'upcoming_weddings'> & {
+      upcoming_weddings: Array<
+        Omit<PlannerStats['upcoming_weddings'][number], 'wedding_date'> & { wedding_date: string }
+      >;
+    };
     const cacheKey = CACHE_KEYS.plannerStats(user.planner_id);
-    const cached = await getCached<PlannerStats>(cacheKey);
+    const cached = await getCached<CachedPlannerStats>(cacheKey);
     if (cached) {
-      // Rehydrate date fields serialised as ISO strings in Redis
       return {
         ...cached,
         upcoming_weddings: cached.upcoming_weddings.map((w) => ({
           ...w,
           wedding_date: new Date(w.wedding_date),
-        })),
-      } as unknown as PlannerStats;
+        })) as PlannerStats['upcoming_weddings'],
+      };
     }
 
     const today = new Date();

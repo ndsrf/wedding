@@ -149,7 +149,7 @@ export async function GET() {
       return NextResponse.json(response, { status: 404 });
     }
 
-    const paymentReceivedCount = Number((paymentReceivedCountRows as [{ count: bigint }])[0]?.count ?? 0);
+    const paymentReceivedCount = Number(paymentReceivedCountRows[0]?.count ?? 0);
 
     // Check if wedding is deleted - treat as not found for admins
     if (wedding.status === 'DELETED') {

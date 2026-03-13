@@ -22,7 +22,7 @@ import { API_ERROR_CODES } from '@/types/api';
 import type { Prisma } from '@prisma/client';
 import { createFamily, getFamilyWithMembers, updateFamily, deleteFamily } from '@/lib/guests/crud';
 import { createFamilySchema, updateFamilySchema } from '@/lib/guests/validation';
-import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
+import { getCached, invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 import { exportGuestData, exportGuestDataSimplified } from '@/lib/excel/export';
 import type { ExportFormat } from '@/lib/excel/export';
 import { importGuestList } from '@/lib/excel/import';
@@ -131,6 +131,31 @@ const bulkUpdateSchema = z.object({
 });
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+// ============================================================================
+// CACHE INVALIDATION HELPER
+// ============================================================================
+
+/**
+ * Invalidate all stats caches that are affected by a guest mutation on weddingId.
+ * Resolves the planner_id via the adminWedding cache first (no extra DB round-trip
+ * when the cache is warm) and falls back to a lightweight DB lookup.
+ */
+async function invalidateStatsForWedding(weddingId: string): Promise<void> {
+  // Try to get planner_id from the already-cached wedding details
+  const cached = await getCached<{ planner_id: string | null }>(CACHE_KEYS.adminWedding(weddingId));
+  const plannerId =
+    cached?.planner_id ??
+    (await prisma.wedding.findUnique({ where: { id: weddingId }, select: { planner_id: true } }))
+      ?.planner_id ??
+    null;
+
+  await Promise.all([
+    invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+    invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ...(plannerId ? [invalidateCache(CACHE_KEYS.plannerStats(plannerId))] : []),
+  ]);
+}
 
 // ============================================================================
 // LIST GUESTS
@@ -282,10 +307,7 @@ export async function createGuestHandler(
   try {
     const input = createFamilySchema.parse({ ...(body as object), wedding_id: weddingId });
     const family = await createFamily(input, actorId);
-    await Promise.all([
-      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
-      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ]);
+    await invalidateStatsForWedding(weddingId);
 
     const response: APIResponse = { success: true, data: family };
     return NextResponse.json(response, { status: 201 });
@@ -339,10 +361,7 @@ export async function updateGuestHandler(
   try {
     const validatedData = updateFamilySchema.parse(body);
     const family = await updateFamily(familyId, weddingId, validatedData, actorId);
-    await Promise.all([
-      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
-      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ]);
+    await invalidateStatsForWedding(weddingId);
 
     const response: UpdateGuestResponse = { success: true, data: family };
     return NextResponse.json(response, { status: 200 });
@@ -365,10 +384,7 @@ export async function deleteGuestHandler(
 ): Promise<NextResponse> {
   try {
     const result = await deleteFamily(familyId, weddingId, actorId);
-    await Promise.all([
-      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
-      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ]);
+    await invalidateStatsForWedding(weddingId);
 
     const response: APIResponse = { success: true, data: result };
     return NextResponse.json(response, { status: 200 });
@@ -413,10 +429,7 @@ export async function bulkDeleteGuestsHandler(
       return (await tx.family.deleteMany({ where: { id: { in: family_ids } } })).count;
     });
 
-    await Promise.all([
-      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
-      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ]);
+    await invalidateStatsForWedding(weddingId);
     const response: APIResponse = { success: true, data: { deleted_count: count } };
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
@@ -494,10 +507,7 @@ export async function bulkUpdateGuestsHandler(
       return { updatedFamilies, updatedMembers };
     });
 
-    await Promise.all([
-      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
-      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ]);
+    await invalidateStatsForWedding(weddingId);
     const response: APIResponse = {
       success: true,
       data: { updated_families: result.updatedFamilies, updated_members: result.updatedMembers },
@@ -625,10 +635,7 @@ export async function importGuestsHandler(
       return NextResponse.json(body, { status: 400 });
     }
 
-    await Promise.all([
-      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
-      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ]);
+    await invalidateStatsForWedding(weddingId);
     const response: APIResponse = {
       success: true,
       data: {
@@ -729,10 +736,7 @@ export async function importVcfGuestsHandler(
       return NextResponse.json(body, { status: 400 });
     }
 
-    await Promise.all([
-      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
-      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ]);
+    await invalidateStatsForWedding(weddingId);
     const response: APIResponse = {
       success: true,
       data: {
