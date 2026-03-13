@@ -32,7 +32,6 @@ interface WeddingStats {
   couple_names: string;
   wedding_date: Date;
   location: string | null;
-  main_event_location: { name: string; address: string | null; google_maps_url: string | null } | null;
   itinerary: ItinerarySummaryItem[];
   guest_count: number;
   rsvp_count: number;
@@ -42,18 +41,30 @@ interface WeddingStats {
   days_until_wedding: number;
 }
 
-async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | null> {
+interface AdminPageData {
+  wizardCompleted: boolean;
+  wizardSkipped: boolean;
+  stats: WeddingStats;
+}
+
+// Single function fetches all data needed by the admin page in one round-trip,
+// replacing the separate wizard-check query and the stats queries.
+async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData | null> {
   try {
     if (!user.wedding_id) {
       return null;
     }
 
+    // main_event_location is intentionally NOT included here.
+    // The main_event_location_id FK is available on the wedding record itself and is
+    // used only to compute is_main on each itinerary item. The location data we need
+    // (name, address, google_maps_url) is already fetched via itinerary_items → location,
+    // so there is no need for an extra SELECT … FROM locations WHERE id = $1 query.
     const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedCount] =
       await Promise.all([
         prisma.wedding.findUnique({
           where: { id: user.wedding_id },
           include: {
-            main_event_location: true,
             itinerary_items: {
               include: { location: true },
               orderBy: { date_time: 'asc' },
@@ -71,12 +82,19 @@ async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | 
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
         }),
-        prisma.family.count({
-          where: {
-            wedding_id: user.wedding_id,
-            gifts: { some: { status: { in: ['RECEIVED', 'CONFIRMED'] } } },
-          },
-        }),
+        // Avoid a correlated EXISTS scan across families by querying the gifts
+        // table directly. Gift rows already carry wedding_id, so we can use
+        // @@index([wedding_id, status]) and get DISTINCT family_ids in one pass.
+        prisma.gift
+          .findMany({
+            where: {
+              wedding_id: user.wedding_id,
+              status: { in: ['RECEIVED', 'CONFIRMED'] },
+            },
+            distinct: ['family_id'],
+            select: { family_id: true },
+          })
+          .then((rows) => rows.length),
       ]);
 
     if (!wedding) {
@@ -93,34 +111,31 @@ async function getWeddingStats(user: AuthenticatedUser): Promise<WeddingStats | 
     );
 
     return {
-      couple_names: wedding.couple_names,
-      wedding_date: wedding.wedding_date,
-      location: wedding.location,
-      main_event_location: wedding.main_event_location
-        ? {
-            name: wedding.main_event_location.name,
-            address: wedding.main_event_location.address,
-            google_maps_url: wedding.main_event_location.google_maps_url,
-          }
-        : null,
-      itinerary: wedding.itinerary_items.map((item) => ({
-        location_name: item.location.name,
-        item_type: item.item_type,
-        address: item.location.address,
-        google_maps_url: item.location.google_maps_url,
-        date_time: item.date_time,
-        notes: item.notes,
-        is_main: item.location_id === wedding.main_event_location_id,
-      })),
-      guest_count: totalGuests,
-      rsvp_count: rsvpCount,
-      rsvp_completion_percentage: rsvpCompletionPercentage,
-      attending_count: attendingCount,
-      payment_received_count: paymentReceivedCount,
-      days_until_wedding: daysUntilWedding,
+      wizardCompleted: wedding.wizard_completed,
+      wizardSkipped: wedding.wizard_skipped,
+      stats: {
+        couple_names: wedding.couple_names,
+        wedding_date: wedding.wedding_date,
+        location: wedding.location,
+        itinerary: wedding.itinerary_items.map((item) => ({
+          location_name: item.location.name,
+          item_type: item.item_type,
+          address: item.location.address,
+          google_maps_url: item.location.google_maps_url,
+          date_time: item.date_time,
+          notes: item.notes,
+          is_main: item.location_id === wedding.main_event_location_id,
+        })),
+        guest_count: totalGuests,
+        rsvp_count: rsvpCount,
+        rsvp_completion_percentage: rsvpCompletionPercentage,
+        attending_count: attendingCount,
+        payment_received_count: paymentReceivedCount,
+        days_until_wedding: daysUntilWedding,
+      },
     };
   } catch (error) {
-    console.error('Error fetching wedding stats:', error);
+    console.error('Error fetching admin page data:', error);
     return null;
   }
 }
@@ -133,24 +148,18 @@ export default async function AdminDashboardPage() {
     redirect('/api/auth/signin');
   }
 
-  // Check if wizard should be shown
-  if (user.wedding_id) {
-    const wedding = await prisma.wedding.findUnique({
-      where: { id: user.wedding_id },
-      select: {
-        wizard_completed: true,
-        wizard_skipped: true,
-      },
-    });
+  // Single query replaces both the wizard-check query and the stats queries.
+  const [{ t }, pageData] = await Promise.all([
+    getTranslations(),
+    getAdminPageData(user),
+  ]);
 
-    // Redirect to wizard if not completed and not skipped
-    if (wedding && !wedding.wizard_completed && !wedding.wizard_skipped) {
-      redirect('/admin/wizard');
-    }
+  // Redirect to wizard if not completed and not skipped
+  if (pageData && !pageData.wizardCompleted && !pageData.wizardSkipped) {
+    redirect('/admin/wizard');
   }
 
-  const { t } = await getTranslations();
-  const stats = await getWeddingStats(user);
+  const stats = pageData?.stats ?? null;
 
   if (!stats) {
     return (
