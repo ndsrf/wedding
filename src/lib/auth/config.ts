@@ -17,7 +17,9 @@ import type { AuthenticatedUser } from '@/types/api';
 // ============================================================================
 
 // How often to re-validate user role (in milliseconds)
-const ROLE_REVALIDATION_INTERVAL = 60 * 1000; // 1 minute
+// Configurable via ROLE_REVALIDATION_INTERVAL_MINUTES env var, defaults to 60 minutes
+const ROLE_REVALIDATION_INTERVAL =
+  (parseInt(process.env.ROLE_REVALIDATION_INTERVAL_MINUTES ?? '60', 10) || 60) * 60 * 1000;
 
 // ============================================================================
 // NEXTAUTH CONFIGURATION
@@ -169,7 +171,7 @@ export const authOptions: NextAuthConfig = {
       if (trigger === 'update' && token.user?.email) {
         try {
           const authProvider = mapAuthProvider(token.user.last_login_provider);
-          const roleInfo = await detectUserRole(token.user.email, authProvider);
+          const roleInfo = await detectUserRole(token.user.email, authProvider, token.user.role);
 
           token.user = {
             ...token.user,
@@ -192,7 +194,7 @@ export const authOptions: NextAuthConfig = {
       if (token.user?.email && now - lastCheck > ROLE_REVALIDATION_INTERVAL) {
         try {
           const authProvider = mapAuthProvider(token.user.last_login_provider);
-          const roleInfo = await detectUserRole(token.user.email, authProvider);
+          const roleInfo = await detectUserRole(token.user.email, authProvider, token.user.role);
 
           // Check if role has changed
           if (roleInfo.role !== token.user.role) {

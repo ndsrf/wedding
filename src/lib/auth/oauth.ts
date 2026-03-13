@@ -68,9 +68,10 @@ export function isMasterAdmin(email: string): boolean {
  *
  * @param email - User email
  * @param authProvider - OAuth provider used
+ * @param knownRole - Previously detected role; used to skip unnecessary DB checks on revalidation
  * @returns User role and associated IDs
  */
-export async function detectUserRole(email: string, authProvider: AuthProvider) {
+export async function detectUserRole(email: string, authProvider: AuthProvider, knownRole?: string) {
   // Check master admin first (no caching, always check config file)
   if (isMasterAdmin(email)) {
     // Check if master admin record exists, create if not
@@ -99,10 +100,13 @@ export async function detectUserRole(email: string, authProvider: AuthProvider) 
     };
   }
 
-  // Check wedding planner
-  const planner = await prisma.weddingPlanner.findUnique({
-    where: { email },
-  });
+  // Check wedding planner — skip if we already know this is a non-planner role
+  const skipPlannerCheck = knownRole === 'wedding_admin' || knownRole === 'master_admin';
+  const planner = skipPlannerCheck
+    ? null
+    : await prisma.weddingPlanner.findUnique({
+        where: { email },
+      });
 
   console.log(`[Auth Debug] Checking planner for ${email}:`, planner ? 'Found' : 'Not Found');
 
