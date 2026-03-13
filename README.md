@@ -673,6 +673,7 @@ You can use the same secret for all environments or generate separate ones for b
 - `NOTIFICATIONS_CACHE_SIZE` - How many notifications to cache in Redis per wedding (default: 100)
 - `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
 - `MASTER_ADMIN_EMAILS` - Comma-separated admin emails
+- `ROLE_REVALIDATION_INTERVAL_MINUTES` - How often (in minutes) to re-validate a logged-in user's role against the database; lower values detect permission changes faster, higher values reduce DB load (default: 60)
 
 ### SSL/HTTPS Configuration
 
