@@ -23,8 +23,12 @@ import type Redis from 'ioredis';
 export const CACHE_KEYS = {
   /** Full wedding details + stats for the /admin/configure page */
   adminWedding: (weddingId: string) => `wedding:admin:${weddingId}`,
+  /** Dashboard stats + wizard state for the /admin SSR page */
+  adminDashboard: (weddingId: string) => `wedding:admin:dashboard:${weddingId}`,
   /** Full wedding details + stats for /planner/weddings/:id */
   plannerWeddingDetail: (weddingId: string) => `wedding:planner:detail:${weddingId}`,
+  /** KPI stats for the /planner dashboard page + stats API */
+  plannerStats: (plannerId: string) => `planner:stats:${plannerId}`,
   /** Upcoming tasks widget for the couple's /admin dashboard */
   adminUpcomingTasks: (weddingId: string) => `wedding:admin:tasks:${weddingId}`,
   /** Upcoming tasks widget for the planner dashboard (across all weddings) */

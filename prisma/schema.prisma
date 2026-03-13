@@ -416,6 +416,7 @@ model Gift {
   @@index([status])
   @@index([reference_code_used])
   @@index([wedding_id, status])
+  @@index([wedding_id, status, family_id])
   @@map("gifts")
 }
 

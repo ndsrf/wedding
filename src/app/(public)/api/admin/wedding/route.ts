@@ -108,7 +108,7 @@ export async function GET() {
     }
 
     // Fetch wedding core data and stats in parallel (avoids loading all families into memory)
-    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedCount] =
+    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedCountRows] =
       await Promise.all([
         prisma.wedding.findUnique({
           where: { id: user.wedding_id },
@@ -128,12 +128,14 @@ export async function GET() {
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
         }),
-        prisma.family.count({
-          where: {
-            wedding_id: user.wedding_id,
-            gifts: { some: { status: { in: ['RECEIVED', 'CONFIRMED'] } } },
-          },
-        }),
+        // COUNT(DISTINCT family_id) — uses the covering index (wedding_id, status, family_id)
+        // for an index-only scan instead of a correlated EXISTS across families.
+        prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(DISTINCT family_id) AS count
+          FROM gifts
+          WHERE wedding_id = ${user.wedding_id}
+            AND status = ANY(ARRAY['RECEIVED','CONFIRMED']::"GiftStatus"[])
+        `,
       ]);
 
     if (!wedding) {
@@ -146,6 +148,8 @@ export async function GET() {
       };
       return NextResponse.json(response, { status: 404 });
     }
+
+    const paymentReceivedCount = Number(paymentReceivedCountRows[0]?.count ?? 0);
 
     // Check if wedding is deleted - treat as not found for admins
     if (wedding.status === 'DELETED') {
@@ -502,8 +506,11 @@ export async function PATCH(request: NextRequest) {
       invalidateWeddingPageCache(user.wedding_id);
     }
 
-    // Invalidate the admin wedding cache so the next GET fetches fresh data
-    await invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id));
+    // Invalidate caches so the next page/API load fetches fresh data
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id)),
+      invalidateCache(CACHE_KEYS.adminDashboard(user.wedding_id)),
+    ]);
 
     const response: UpdateWeddingConfigResponse = {
       success: true,
