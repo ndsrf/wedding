@@ -357,17 +357,21 @@ export async function syncNewTemplateItemsToWeddings(
 
   if (weddings.length === 0) return;
 
-  for (const wedding of weddings) {
-    try {
-      await applyNewItemsToWedding(
-        wedding.id,
-        wedding.wedding_date,
-        brandNewSections,
-        newTasksBySection
-      );
-    } catch (error) {
-      console.error(`Failed to sync template items to wedding ${wedding.id}:`, error);
-    }
+  const BATCH_SIZE = 10;
+  for (let i = 0; i < weddings.length; i += BATCH_SIZE) {
+    const batch = weddings.slice(i, i + BATCH_SIZE);
+    await Promise.all(
+      batch.map((wedding) =>
+        applyNewItemsToWedding(
+          wedding.id,
+          wedding.wedding_date,
+          brandNewSections,
+          newTasksBySection
+        ).catch((error) => {
+          console.error(`Failed to sync template items to wedding ${wedding.id}:`, error);
+        })
+      )
+    );
   }
 }
 
