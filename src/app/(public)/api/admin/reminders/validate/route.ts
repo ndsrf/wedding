@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });

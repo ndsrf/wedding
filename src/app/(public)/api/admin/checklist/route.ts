@@ -357,7 +357,7 @@ export async function POST(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });
@@ -559,7 +559,7 @@ export async function PATCH(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });
@@ -667,7 +667,7 @@ export async function DELETE(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid request parameters',
-          details: error.errors,
+          details: error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });

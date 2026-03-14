@@ -129,7 +129,7 @@ export async function POST(
     return NextResponse.json({ data: weddingProvider });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     // Handle unique constraint violation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

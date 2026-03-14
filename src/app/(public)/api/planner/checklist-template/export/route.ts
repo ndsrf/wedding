@@ -22,12 +22,12 @@ const exportQuerySchema = z.object({
     .string()
     .transform((val) => val === 'true' || val === '1')
     .pipe(z.boolean())
-    .default('true'),
+    .default(true),
   relativeDates: z
     .string()
     .transform((val) => val !== 'false' && val !== '0')
     .pipe(z.boolean())
-    .default('true'),
+    .default(true),
 });
 
 // ============================================================================
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid query parameters',
-          details: error.errors,
+          details: error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });

@@ -202,7 +202,7 @@ export async function PATCH(
           error: {
             code: API_ERROR_CODES.VALIDATION_ERROR,
             message: 'Invalid theme data',
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 }
