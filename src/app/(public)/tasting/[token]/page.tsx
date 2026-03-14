@@ -17,6 +17,7 @@
 import { useState, useEffect, useCallback, useRef, use } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import { XMarkIcon, ChevronDownIcon } from '@/components/shared/NavIcons';
 import Footer from '@/components/Footer';
 
 const LANGUAGES = [
@@ -316,9 +317,7 @@ function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate, searchQuery, r
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={lightboxUrl} alt="" className="max-w-full max-h-full rounded-xl shadow-2xl object-contain" onClick={e => e.stopPropagation()} />
           <button className="absolute top-4 right-4 text-white/80 hover:text-white" onClick={() => setLightboxUrl(null)}>
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <XMarkIcon className="w-8 h-8" />
           </button>
         </div>
       )}
@@ -338,12 +337,9 @@ function MyScoresTab({ data, token, onScoreUpdate, onImageUpdate, searchQuery, r
                 className="w-full flex items-center justify-between gap-2 pb-1 border-b border-gray-200 text-left"
               >
                 <h2 className="text-lg font-semibold text-gray-800">{section.name}</h2>
-                <svg
+                <ChevronDownIcon
                   className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${collapsed ? '-rotate-90' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
               {!collapsed && (
                 <div className="mt-3 space-y-4">
@@ -496,9 +492,7 @@ function AllScoresTab({ data, searchQuery }: { data: TastingData; searchQuery: s
             className="absolute top-4 right-4 text-white/80 hover:text-white"
             onClick={() => setLightboxUrl(null)}
           >
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <XMarkIcon className="w-8 h-8" />
           </button>
         </div>
       )}
@@ -518,12 +512,9 @@ function AllScoresTab({ data, searchQuery }: { data: TastingData; searchQuery: s
                 className="w-full flex items-center justify-between gap-2 pb-1 border-b border-gray-200 text-left"
               >
                 <h2 className="text-lg font-semibold text-gray-800">{section.name}</h2>
-                <svg
+                <ChevronDownIcon
                   className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${collapsed ? '-rotate-90' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
               {!collapsed && (
                 <div className="mt-3 space-y-4">
@@ -625,9 +616,7 @@ function AverageScoresTab({ data, searchQuery }: { data: TastingData; searchQuer
             className="absolute top-4 right-4 text-white/80 hover:text-white"
             onClick={() => setLightboxUrl(null)}
           >
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <XMarkIcon className="w-8 h-8" />
           </button>
         </div>
       )}
@@ -668,12 +657,9 @@ function AverageScoresTab({ data, searchQuery }: { data: TastingData; searchQuer
                 className="w-full flex items-center justify-between gap-2 pb-1 border-b border-gray-200 text-left"
               >
                 <h2 className="text-lg font-semibold text-gray-800">{section.name}</h2>
-                <svg
+                <ChevronDownIcon
                   className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${collapsed ? '-rotate-90' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
               {!collapsed && (
                 <div className="mt-3 space-y-3">

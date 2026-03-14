@@ -20,6 +20,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { InvitationTemplateEditor } from '@/components/admin/InvitationTemplateEditor';
+import { ChevronLeftIcon } from '@/components/shared/NavIcons';
 import type {
   SystemTemplateSeed,
   TemplateDesign,
@@ -385,9 +386,7 @@ export function InvitationBuilderPageContent({
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center">
                 <Link href={backHref} className="text-gray-600 hover:text-gray-700 mr-4">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <ChevronLeftIcon className="h-6 w-6" />
                 </Link>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
@@ -562,9 +561,7 @@ export function InvitationBuilderPageContent({
                 onClick={handleCancelPicker}
                 className="text-gray-600 hover:text-gray-700 mr-4"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
+                <ChevronLeftIcon className="h-6 w-6" />
               </button>
               <h1 className="text-2xl font-bold text-gray-900">{t('createTemplate')}</h1>
             </div>
@@ -663,9 +660,7 @@ export function InvitationBuilderPageContent({
                 onClick={() => { setView('list'); setCurrentTemplate(null); }}
                 className="text-gray-600 hover:text-gray-700 mr-4"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
+                <ChevronLeftIcon className="h-6 w-6" />
               </button>
               <h1 className="text-2xl font-bold text-gray-900">{currentTemplate.name}</h1>
             </div>
