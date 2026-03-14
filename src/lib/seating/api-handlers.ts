@@ -555,7 +555,20 @@ export async function splitFamilyHandler(
 // ============================================================================
 
 const saveLayoutSchema = z.object({
-  layout_elements: z.any(),
+  layout_elements: z.array(z.object({
+    id: z.string(),
+    type: z.enum(['line', 'text']),
+    x1: z.number().optional(),
+    y1: z.number().optional(),
+    x2: z.number().optional(),
+    y2: z.number().optional(),
+    text: z.string().optional(),
+    x: z.number().optional(),
+    y: z.number().optional(),
+    fontSize: z.number().optional(),
+    size: z.number().optional(),
+    color: z.string().optional(),
+  })),
   tables: z
     .array(
       z.object({
