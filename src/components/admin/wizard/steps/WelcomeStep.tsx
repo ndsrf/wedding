@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { ArrowRightSolidIcon, CheckCircleSolidIcon } from '@/components/shared/NavIcons';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface WelcomeStepProps {

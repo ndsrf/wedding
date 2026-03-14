@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { ArrowLeftSolidIcon, ArrowRightSolidIcon, CheckCircleSolidIcon } from '@/components/shared/NavIcons';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface SeatingStepProps {
