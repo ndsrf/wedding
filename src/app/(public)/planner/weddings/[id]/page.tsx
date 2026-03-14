@@ -19,6 +19,16 @@ import type { WeddingAdmin } from '@prisma/client';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { NavGroup } from '@/components/shared/NavGroup';
 
+const CHECKLIST_PATH = 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4';
+
+function ChecklistIcon({ className }: { className: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={CHECKLIST_PATH} />
+    </svg>
+  );
+}
+
 interface WeddingDetailPageProps {
   params: Promise<{ id: string }>;
 }
@@ -330,20 +340,12 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
               title={t('admin.dashboard.tasksAndFinances')}
               headerBgClass="bg-teal-50"
               hoverTextClass="hover:text-teal-600"
-              headerIcon={
-                <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              }
+              headerIcon={<ChecklistIcon className="h-5 w-5 text-teal-600" />}
               items={[
                 {
                   href: `/planner/weddings/${weddingId}/checklist`,
                   label: t('admin.dashboard.checklist'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                  ),
+                  icon: <ChecklistIcon className="h-3 w-3" />,
                 },
                 {
                   href: `/planner/weddings/${weddingId}/providers`,
