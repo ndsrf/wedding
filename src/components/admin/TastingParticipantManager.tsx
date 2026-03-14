@@ -223,17 +223,14 @@ export function TastingParticipantManager({
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error?.message ?? 'Failed to send');
+      onParticipantsChange(participants.map(p =>
+        p.id === participant.id ? { ...p, invite_sent_at: new Date().toISOString() } : p
+      ));
       if (data.data?.mode === 'LINKS' && data.data?.wa_url) {
         window.open(data.data.wa_url, '_blank', 'noopener,noreferrer');
         setWaUrl(data.data.wa_url);
-        onParticipantsChange(participants.map(p =>
-          p.id === participant.id ? { ...p, invite_sent_at: new Date().toISOString() } : p
-        ));
       } else {
         setSendSuccess(t('participants.sent'));
-        onParticipantsChange(participants.map(p =>
-          p.id === participant.id ? { ...p, invite_sent_at: new Date().toISOString() } : p
-        ));
         setTimeout(() => { setSendingId(null); setSendSuccess(null); }, 2500);
       }
     } catch (err) {

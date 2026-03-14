@@ -62,7 +62,7 @@ export function TastingPageContent({
           setParticipants(p ?? []);
         }
         if (data.wedding_language) setWeddingLanguage(data.wedding_language as Language);
-        if (data.whatsapp_mode) setWhatsappMode(data.whatsapp_mode as 'BUSINESS' | 'LINKS');
+        if (data.whatsapp_mode === 'BUSINESS' || data.whatsapp_mode === 'LINKS') setWhatsappMode(data.whatsapp_mode);
       }
     } catch {
       setError(t('error'));
