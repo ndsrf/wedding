@@ -17,6 +17,18 @@ import NotificationBell from '@/components/admin/NotificationBell';
 import PrivateHeader from '@/components/PrivateHeader';
 import { NavGroup } from '@/components/shared/NavGroup';
 import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import {
+  UsersIcon,
+  ChevronRightIcon,
+  ChecklistIcon,
+  ClipboardIcon,
+  BuildingIcon,
+  EnvelopeIcon,
+  PencilEditIcon,
+  DocumentTextIcon,
+  CurrencyIcon,
+  SeatingIcon,
+} from '@/components/shared/NavIcons';
 import type { AuthenticatedUser } from '@/types/api';
 
 interface ItinerarySummaryItem {
@@ -257,9 +269,7 @@ export default async function AdminDashboardPage() {
                 <p className="text-sm text-gray-500 mt-1">{t('admin.dashboard.metricTitles.totalGuests')}</p>
               </div>
               <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
-                <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+                <UsersIcon className="h-5 w-5 text-blue-500" />
               </div>
             </div>
             <div className="mt-3 h-1 rounded-full bg-blue-100">
@@ -310,9 +320,7 @@ export default async function AdminDashboardPage() {
                 <p className="text-sm text-gray-500 mt-1">{t('admin.dashboard.metricTitles.paymentsReceived')}</p>
               </div>
               <div className="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
-                <svg className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <CurrencyIcon className="h-5 w-5 text-amber-500" />
               </div>
             </div>
             <div className="mt-3 h-1 rounded-full bg-amber-100">
@@ -359,9 +367,7 @@ export default async function AdminDashboardPage() {
               className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-purple-100 shadow-sm p-6 hover:shadow-md hover:border-purple-300 hover:bg-purple-50/30 transition-all"
             >
               <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-md shadow-purple-200 group-hover:shadow-purple-300 transition-shadow">
-                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+                <UsersIcon className="h-8 w-8 text-white" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -372,9 +378,7 @@ export default async function AdminDashboardPage() {
                 </div>
                 <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.guestListSubtitle')}</p>
               </div>
-              <svg className="h-5 w-5 text-gray-300 group-hover:text-purple-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-purple-400 transition-colors flex-shrink-0" />
             </Link>
 
             {/* Configure Wedding - prominent */}
@@ -393,9 +397,7 @@ export default async function AdminDashboardPage() {
                 <h3 className="text-base font-bold text-gray-900">{t('admin.dashboard.configure')}</h3>
                 <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.configureSubtitle')}</p>
               </div>
-              <svg className="h-5 w-5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" />
             </Link>
           </div>
 
@@ -406,38 +408,22 @@ export default async function AdminDashboardPage() {
               title={t('admin.dashboard.tasksAndFinances')}
               headerBgClass="bg-teal-50"
               hoverTextClass="hover:text-teal-600"
-              headerIcon={
-                <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              }
+              headerIcon={<ChecklistIcon className="h-5 w-5 text-teal-600" />}
               items={[
                 {
                   href: '/admin/checklist',
                   label: t('admin.dashboard.checklist'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                  ),
+                  icon: <ChecklistIcon className="h-3 w-3" />,
                 },
                 {
                   href: '/admin/providers',
                   label: t('admin.dashboard.expenses'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  ),
+                  icon: <BuildingIcon className="h-3 w-3" />,
                 },
                 {
                   href: '/admin/payments',
                   label: t('admin.dashboard.payments'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ),
+                  icon: <CurrencyIcon className="h-3 w-3" />,
                 },
               ]}
             />
@@ -447,29 +433,17 @@ export default async function AdminDashboardPage() {
               title={t('admin.dashboard.invitationsAndTemplates')}
               headerBgClass="bg-pink-50"
               hoverTextClass="hover:text-pink-600"
-              headerIcon={
-                <svg className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              }
+              headerIcon={<EnvelopeIcon className="h-5 w-5 text-pink-600" />}
               items={[
                 {
                   href: '/admin/invitation-builder',
                   label: t('admin.dashboard.invitationBuilder'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  ),
+                  icon: <PencilEditIcon className="h-3 w-3" />,
                 },
                 {
                   href: '/admin/templates',
                   label: t('admin.dashboard.templates'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  ),
+                  icon: <DocumentTextIcon className="h-3 w-3" />,
                 },
               ]}
             />
@@ -484,29 +458,17 @@ export default async function AdminDashboardPage() {
                 {
                   href: '/admin/tasting',
                   label: t('admin.tastingMenu.tasting'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  ),
+                  icon: <ClipboardIcon className="h-3 w-3" />,
                 },
                 {
                   href: '/admin/menu',
                   label: t('admin.tastingMenu.weddingMenu'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  ),
+                  icon: <ClipboardIcon className="h-3 w-3" />,
                 },
                 {
                   href: '/admin/seating',
                   label: t('admin.dashboard.seatingPlan'),
-                  icon: (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12 L15 9 L18 13 L8 16 Z M5 12 V5 M15 9 V2 M5 5 L15 2 M8 16 L7 22 M18 13 L17 22 M5 12 L4 18" />
-                    </svg>
-                  ),
+                  icon: <SeatingIcon className="h-3 w-3" />,
                 },
               ]}
             />
