@@ -429,19 +429,22 @@ async function applyNewItemsToWedding(
 
       if (!weddingSection) continue;
 
-      const maxTaskOrderResult = await tx.checklistTask.aggregate({
-        where: { section_id: weddingSection.id },
-        _max: { order: true },
-      });
+      // Fetch existing task titles and max order in parallel to avoid N+1 queries
+      const [maxTaskOrderResult, existingTasks] = await Promise.all([
+        tx.checklistTask.aggregate({
+          where: { section_id: weddingSection.id },
+          _max: { order: true },
+        }),
+        tx.checklistTask.findMany({
+          where: { section_id: weddingSection.id },
+          select: { title: true },
+        }),
+      ]);
       let nextTaskOrder = (maxTaskOrderResult._max.order ?? -1) + 1;
+      const existingTaskTitles = new Set(existingTasks.map((t) => t.title));
 
       for (const taskData of tasks) {
-        // Skip if task with same title already exists in this section
-        const exists = await tx.checklistTask.findFirst({
-          where: { section_id: weddingSection.id, title: taskData.title },
-          select: { id: true },
-        });
-        if (exists) continue;
+        if (existingTaskTitles.has(taskData.title)) continue;
 
         const absoluteDueDate = resolveTaskDueDate(taskData.due_date_relative, weddingDate);
 
