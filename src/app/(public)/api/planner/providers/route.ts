@@ -54,6 +54,30 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Sync new provider to all existing non-deleted weddings (non-blocking)
+    prisma.wedding
+      .findMany({
+        where: { planner_id: user.planner_id, status: { not: 'DELETED' } },
+        select: { id: true },
+      })
+      .then((weddings) =>
+        prisma.weddingProvider.createMany({
+          data: weddings.map((w) => ({
+            wedding_id: w.id,
+            category_id: validated.category_id,
+            provider_id: provider.id,
+            name: provider.name,
+            contact_name: provider.contact_name ?? null,
+            email: provider.email ?? null,
+            phone: provider.phone ?? null,
+            website: provider.website ?? null,
+            social_media: provider.social_media ?? null,
+          })),
+          skipDuplicates: true,
+        })
+      )
+      .catch((err) => console.error('Failed to sync provider to weddings:', err));
+
     return NextResponse.json({ data: provider });
   } catch (error) {
     if (error instanceof z.ZodError) {
