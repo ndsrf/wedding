@@ -1,14 +1,16 @@
 /**
- * Wedding Planner – Tables API Route
+ * Wedding Planner – Seating Layout API Route
  *
- * POST /api/planner/weddings/:id/seating/tables – upsert (create/update/delete) tables
+ * POST /api/planner/weddings/:id/seating/layout – save canvas layout and table positions
+ *
+ * Previously missing on the planner side; added during the seating consolidation.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { API_ERROR_CODES } from '@/types/api';
 import { validatePlannerAccess } from '@/lib/guests/planner-access';
-import { upsertTablesHandler } from '@/lib/seating/api-handlers';
+import { saveLayoutHandler } from '@/lib/seating/api-handlers';
 
 export async function POST(
   request: NextRequest,
@@ -27,5 +29,5 @@ export async function POST(
   const denied = await validatePlannerAccess(user.planner_id, weddingId);
   if (denied) return denied;
 
-  return upsertTablesHandler(weddingId, request);
+  return saveLayoutHandler(weddingId, request);
 }

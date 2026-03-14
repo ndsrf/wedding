@@ -177,7 +177,7 @@ grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageConte
 | Notifications | `/admin/notifications` | `/planner/weddings/[id]/notifications` | ✅ Done |
 | Menu | `/admin/menu` | `/planner/weddings/[id]/menu` | ✅ Done |
 | Tasting | `/admin/tasting` | `/planner/weddings/[id]/tasting` | ✅ Done |
-| Seating | `/admin/seating` | `/planner/weddings/[id]/seating` | ⬜ Pending |
+| Seating | `/admin/seating` | `/planner/weddings/[id]/seating` | ✅ Done |
 | Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ⬜ Pending |
 | Reports | `/admin/reports` | `/planner/weddings/[id]/reports` | ⬜ Pending |
 | Providers | `/admin/providers` | `/planner/weddings/[id]/providers` | ✅ Done |
@@ -363,3 +363,35 @@ Business logic for 10 operations extracted into shared functions:
 **New planner route:** `src/app/(public)/api/planner/weddings/[id]/invitation-template/[templateId]/duplicate/route.ts` — this endpoint was previously missing, so planners could not duplicate templates.
 
 **All 12 API route files** (6 admin + 6 planner) reduced to ~25-line auth-and-dispatch wrappers. The planner routes now use `validatePlannerAccess` consistently instead of inline ownership checks.
+
+---
+
+## Completed: Seating Page
+
+### UI Consolidation
+
+**Shared component:** `src/components/shared/SeatingPageContent.tsx`
+
+**Differences resolved:**
+| Difference | Resolution |
+|-----------|-----------|
+| API base paths | `apiBase` prop (`/api/admin/seating` vs `/api/planner/weddings/:id/seating`) |
+| Header/nav | `header` React slot prop |
+| Admin tab order (config, assignment, layout) vs planner (assignment, config, no layout) | Standardised on admin order; planner now gets layout tab too |
+| Planner `SeatingAssignment` was POSTing to a PATCH-only route (broken) | Planner route now exports `POST` instead of `PATCH` |
+| Planner tables schema missing type/color/width/height/x/y/rotation fields | Shared handler uses the full admin schema |
+| Planner GET response missing `layout_elements` | Shared `getSeatingPlanHandler` always includes `layout_elements` |
+| Inline `validatePlannerAccess` copies in planner seating routes | Replaced with shared `validatePlannerAccess` from `src/lib/guests/planner-access.ts` |
+
+### API Consolidation
+
+**Shared handlers:** `src/lib/seating/api-handlers.ts`
+
+Business logic for 6 operations extracted into shared functions:
+`getSeatingPlanHandler`, `updateSeatingAssignmentsHandler`, `upsertTablesHandler`, `randomAssignHandler`, `splitFamilyHandler`, `saveLayoutHandler`.
+
+**Shared access guard:** reuses `src/lib/guests/planner-access.ts`
+
+**New planner route:** `src/app/(public)/api/planner/weddings/[id]/seating/layout/route.ts` — previously missing; planners can now save and use the visual seating layout editor.
+
+**All 10 API route files** (5 admin + 5 planner) reduced to ~20-line auth-and-dispatch wrappers. Three inline copies of `validatePlannerAccess` removed from planner routes. Security fix: planner routes now consistently verify planner ownership via `validatePlannerAccess` upfront.
