@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid wedding date format',
-          details: formValidation.error.errors,
+          details: formValidation.error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid import data',
-          details: error.errors,
+          details: error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });

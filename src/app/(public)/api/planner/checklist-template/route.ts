@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid template data',
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });
@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
           message: 'Invalid template data',
-          details: error.errors,
+          details: error.issues,
         },
       };
       return NextResponse.json(response, { status: 400 });

@@ -59,7 +59,7 @@ export function handleNotificationApiError(
       error: {
         code: API_ERROR_CODES.VALIDATION_ERROR,
         message: `Validation error in ${context.operation}`,
-        details: error.errors,
+        details: error.issues,
       },
     };
     return NextResponse.json(body, { status: 400 });

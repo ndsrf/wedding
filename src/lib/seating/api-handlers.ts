@@ -217,7 +217,7 @@ export async function updateSeatingAssignmentsHandler(
           error: {
             code: API_ERROR_CODES.VALIDATION_ERROR,
             message: 'Invalid assignment data',
-            details: error.errors,
+            details: error.issues,
           },
         },
         { status: 400 }
@@ -325,7 +325,7 @@ export async function upsertTablesHandler(
           error: {
             code: API_ERROR_CODES.VALIDATION_ERROR,
             message: 'Invalid table data',
-            details: error.errors,
+            details: error.issues,
           },
         },
         { status: 400 }
@@ -536,7 +536,7 @@ export async function splitFamilyHandler(
           error: {
             code: API_ERROR_CODES.VALIDATION_ERROR,
             message: 'Invalid split data',
-            details: error.errors,
+            details: error.issues,
           },
         },
         { status: 400 }
@@ -624,7 +624,7 @@ export async function saveLayoutHandler(
           error: {
             code: API_ERROR_CODES.VALIDATION_ERROR,
             message: 'Invalid layout data',
-            details: error.errors,
+            details: error.issues,
           },
         },
         { status: 400 }

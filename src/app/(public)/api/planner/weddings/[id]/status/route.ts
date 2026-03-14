@@ -18,7 +18,7 @@ import { WeddingStatus } from '@prisma/client';
 // Validation schema for status updates
 const updateStatusSchema = z.object({
   action: z.enum(['disable', 'enable', 'delete', 'undelete'], {
-    errorMap: () => ({ message: 'Invalid action. Must be one of: disable, enable, delete, undelete' }),
+    error: 'Invalid action. Must be one of: disable, enable, delete, undelete',
   }),
 });
 
@@ -56,7 +56,7 @@ export async function PATCH(
         success: false,
         error: {
           code: API_ERROR_CODES.VALIDATION_ERROR,
-          message: validationResult.error.errors[0]?.message || 'Invalid input',
+          message: validationResult.error.issues[0]?.message || 'Invalid input',
         },
       };
       return NextResponse.json(response, { status: 400 });

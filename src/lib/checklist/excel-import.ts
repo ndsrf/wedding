@@ -31,14 +31,14 @@ import {
  * Zod schema for validating TaskAssignment enum
  */
 const taskAssignmentSchema = z.enum(['WEDDING_PLANNER', 'COUPLE', 'OTHER'], {
-  errorMap: () => ({ message: 'Must be WEDDING_PLANNER, COUPLE, or OTHER' }),
+  error: 'Must be WEDDING_PLANNER, COUPLE, or OTHER',
 });
 
 /**
  * Zod schema for validating TaskStatus enum
  */
 const taskStatusSchema = z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED'], {
-  errorMap: () => ({ message: 'Must be PENDING, IN_PROGRESS, or COMPLETED' }),
+  error: 'Must be PENDING, IN_PROGRESS, or COMPLETED',
 });
 
 /**
@@ -327,7 +327,7 @@ export function validateImportData(
       validatedRows.push(validated as ChecklistImportRow);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           const fieldValue = err.path.length > 0 && err.path[0] in row
             ? row[err.path[0] as keyof ChecklistImportRow]
             : undefined;

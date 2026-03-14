@@ -105,8 +105,8 @@ export function validateCreateTemplate(data: unknown) {
         data: null,
         error: {
           code: "VALIDATION_ERROR",
-          message: error.errors[0]?.message || "Validation failed",
-          details: error.errors,
+          message: error.issues[0]?.message || "Validation failed",
+          details: error.issues,
         },
       };
     }
@@ -126,8 +126,8 @@ export function validateUpdateTemplate(data: unknown) {
         data: null,
         error: {
           code: "VALIDATION_ERROR",
-          message: error.errors[0]?.message || "Validation failed",
-          details: error.errors,
+          message: error.issues[0]?.message || "Validation failed",
+          details: error.issues,
         },
       };
     }
@@ -147,8 +147,8 @@ export function validateListTemplatesQuery(data: unknown) {
         data: null,
         error: {
           code: "VALIDATION_ERROR",
-          message: error.errors[0]?.message || "Validation failed",
-          details: error.errors,
+          message: error.issues[0]?.message || "Validation failed",
+          details: error.issues,
         },
       };
     }
@@ -168,8 +168,8 @@ export function validatePreviewTemplate(data: unknown) {
         data: null,
         error: {
           code: "VALIDATION_ERROR",
-          message: error.errors[0]?.message || "Validation failed",
-          details: error.errors,
+          message: error.issues[0]?.message || "Validation failed",
+          details: error.issues,
         },
       };
     }
