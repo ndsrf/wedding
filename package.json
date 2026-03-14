@@ -110,6 +110,9 @@
     "@babel/runtime": ">=7.26.10",
     "hono": "^4.12.7",
     "https-proxy-agent": "^8.0.0",
+    "twilio": {
+      "https-proxy-agent": "^7.0.0"
+    },
     "serialize-javascript": "^7.0.4",
     "test-exclude": "^8.0.0"
   }
