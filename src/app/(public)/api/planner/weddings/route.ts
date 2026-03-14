@@ -118,6 +118,7 @@ export async function GET(request: NextRequest) {
       include: {
         theme: true,
         planner: true,
+        main_event_location: true,
         _count: {
           select: {
             families: true,
@@ -167,6 +168,7 @@ export async function GET(request: NextRequest) {
 
       return {
         ...wedding,
+        location: wedding.main_event_location?.name ?? wedding.location,
         guest_count,
         rsvp_count,
         rsvp_completion_percentage,
