@@ -325,24 +325,37 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
 
           {/* Secondary Actions */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {/* Checklist */}
-            <Link
-              href={`/planner/weddings/${weddingId}/checklist`}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-teal-200 hover:bg-teal-50/20 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center group-hover:bg-teal-100 transition-colors">
-                <svg className="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Tasks & Finances — grouped */}
+            <NavGroup
+              title={t('admin.dashboard.tasksAndFinances')}
+              headerBgClass="bg-teal-50"
+              hoverTextClass="hover:text-teal-600"
+              headerIcon={
+                <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900">{t('planner.checklist.title') || 'Checklist'}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{t('planner.checklist.description') || 'Tasks & progress'}</p>
-              </div>
-              <svg className="h-4 w-4 text-gray-300 group-hover:text-teal-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+              }
+              items={[
+                {
+                  href: `/planner/weddings/${weddingId}/checklist`,
+                  label: t('admin.dashboard.checklist'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: `/planner/weddings/${weddingId}/providers`,
+                  label: t('admin.dashboard.expenses'),
+                  icon: (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
 
             {/* Invitations & Templates — grouped */}
             <NavGroup
