@@ -15,6 +15,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import { PlusIcon, ChevronDownIcon } from '@/components/shared/NavIcons';
 import { useTranslations } from 'next-intl';
 import type {
   ChecklistSectionWithTasks,
@@ -745,9 +746,7 @@ export function ChecklistEditor({
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm min-h-[44px] font-medium flex items-center"
                 aria-label="Add new section"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                <PlusIcon className="w-4 h-4 mr-2" />
                 {t('addSection') || 'Add Section'}
               </button>
               <button
@@ -849,22 +848,12 @@ export function ChecklistEditor({
                 ) : (
                   <h3 className="text-sm font-medium text-gray-900">{section.name}</h3>
                 )}
-                <svg
+                <ChevronDownIcon
                   className={`h-5 w-5 text-gray-500 transition-transform ${
                     expandedSections.has(section.id) ? 'transform rotate-180' : ''
                   }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
                   aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                />
               </button>
               {!readOnly && (
                 <div className="flex items-center gap-2 ml-2">
@@ -873,9 +862,7 @@ export function ChecklistEditor({
                     className="p-1 text-purple-600 hover:text-purple-800 rounded hover:bg-purple-50 min-h-[32px] min-w-[32px] flex items-center justify-center"
                     title={t('addTask') || 'Add Task'}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
+                    <PlusIcon className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDeleteSection(section.id)}
@@ -1056,9 +1043,7 @@ export function ChecklistEditor({
                   className="p-1 text-purple-600 hover:text-purple-800 rounded hover:bg-purple-50 min-h-[32px] min-w-[32px] flex items-center justify-center"
                   title={t('addTask') || 'Add Task'}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
+                  <PlusIcon className="w-5 h-5" />
                 </button>
               )}
             </div>
@@ -1160,21 +1145,11 @@ export function ChecklistEditor({
                 ) : (
                   <h3 className="text-sm font-medium text-gray-900">{section.name}</h3>
                 )}
-                <svg
+                <ChevronDownIcon
                   className={`h-5 w-5 text-gray-500 transition-transform ${
                     expandedSections.has(section.id) ? 'transform rotate-180' : ''
                   }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                />
               </button>
               {!readOnly && (
                 <div className="flex items-center gap-1">
@@ -1183,9 +1158,7 @@ export function ChecklistEditor({
                     className="p-1 text-purple-600"
                     title={t('addTask') || 'Add Task'}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
+                    <PlusIcon className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDeleteSection(section.id)}
@@ -1345,9 +1318,7 @@ export function ChecklistEditor({
                   onClick={() => handleAddTask(null)}
                   className="p-1 text-purple-600"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
+                  <PlusIcon className="w-5 h-5" />
                 </button>
               )}
             </div>

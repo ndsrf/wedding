@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { ArrowRightSolidIcon, CheckCircleSolidIcon } from '@/components/shared/NavIcons';
 import type { WeddingWithRelations } from '../WeddingWizard';
 
 interface WelcomeStepProps {
@@ -54,13 +55,7 @@ export function WelcomeStep({ wedding, onNext }: WelcomeStepProps) {
           ].map((feature) => (
             <div key={feature} className="flex items-start space-x-3">
               <div className="flex-shrink-0">
-                <svg className="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <CheckCircleSolidIcon className="h-6 w-6 text-green-500" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">{t(`features.${feature}.title`)}</p>
@@ -96,13 +91,7 @@ export function WelcomeStep({ wedding, onNext }: WelcomeStepProps) {
           className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
         >
           {t('getStarted')}
-          <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ArrowRightSolidIcon className="ml-2 -mr-1 w-5 h-5" />
         </button>
       </div>
     </div>

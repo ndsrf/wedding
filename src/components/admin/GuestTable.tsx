@@ -10,6 +10,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import { CheckmarkIcon, ChevronDownIcon } from '@/components/shared/NavIcons';
 import type { FamilyWithMembers, GiftStatus } from '@/types/models';
 
 interface GuestWithStatus extends FamilyWithMembers {
@@ -346,9 +347,7 @@ export function GuestTable({
                           title={t('admin.guests.copyInvLink')}
                         >
                           {copiedIds.has(guest.id) ? (
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                            <CheckmarkIcon className="w-5 h-5" />
                           ) : (
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -435,14 +434,9 @@ export function GuestTable({
                 </span>
 
                 {/* Expand/Collapse Icon */}
-                <svg
+                <ChevronDownIcon
                   className={`h-5 w-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </div>
 
               {/* Expanded View - Show on Click */}
@@ -542,9 +536,7 @@ export function GuestTable({
                             title={t('admin.guests.copyInvLink')}
                           >
                             {copiedIds.has(guest.id) ? (
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
+                              <CheckmarkIcon className="w-5 h-5" />
                             ) : (
                               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />

@@ -23,6 +23,7 @@ import { GuestTimelineModal } from '@/components/admin/GuestTimelineModal';
 import { BulkEditModal, type BulkEditUpdates } from '@/components/admin/BulkEditModal';
 import type { FamilyWithMembers, GiftStatus, Language, Channel } from '@/types/models';
 import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
+import { CheckmarkIcon, XMarkIcon } from '@/components/shared/NavIcons';
 
 // ============================================================================
 // TYPES
@@ -1129,23 +1130,13 @@ export function GuestsPageContent({
           >
             <div className="flex items-start">
               {notification.type === 'success' ? (
-                <svg
+                <CheckmarkIcon
                   className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                />
               ) : (
-                <svg
+                <XMarkIcon
                   className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                />
               )}
               <p
                 className={`text-sm ${
