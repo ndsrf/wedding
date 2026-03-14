@@ -242,7 +242,7 @@ const upsertTablesSchema = z.object({
       number: z.number().int().positive(),
       name: z.string().nullable().optional(),
       capacity: z.number().int().positive(),
-      type: z.string().optional().default('circle'),
+      type: z.enum(['circle', 'square', 'rectangle']).optional().default('circle'),
       color: z.string().nullable().optional(),
       width: z.number().nullable().optional(),
       height: z.number().nullable().optional(),
