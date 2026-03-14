@@ -46,6 +46,7 @@ export function TastingPageContent({
   const [menu, setMenu] = useState<TastingMenu | null>(null);
   const [participants, setParticipants] = useState<TastingParticipant[]>([]);
   const [weddingLanguage, setWeddingLanguage] = useState<Language>('ES');
+  const [whatsappMode, setWhatsappMode] = useState<'BUSINESS' | 'LINKS'>('BUSINESS');
 
   const fetchData = useCallback(async () => {
     try {
@@ -61,6 +62,7 @@ export function TastingPageContent({
           setParticipants(p ?? []);
         }
         if (data.wedding_language) setWeddingLanguage(data.wedding_language as Language);
+        if (data.whatsapp_mode) setWhatsappMode(data.whatsapp_mode as 'BUSINESS' | 'LINKS');
       }
     } catch {
       setError(t('error'));
@@ -142,6 +144,7 @@ export function TastingPageContent({
                 onParticipantsChange={setParticipants}
                 readOnly={isReadOnly}
                 weddingLanguage={weddingLanguage}
+                whatsappMode={whatsappMode}
               />
             )}
           </>

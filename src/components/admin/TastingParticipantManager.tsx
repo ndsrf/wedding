@@ -26,6 +26,7 @@ interface Props {
   onParticipantsChange: (participants: TastingParticipant[]) => void;
   readOnly?: boolean;
   weddingLanguage?: 'ES' | 'EN' | 'FR' | 'IT' | 'DE';
+  whatsappMode?: 'BUSINESS' | 'LINKS';
 }
 
 type Language = 'ES' | 'EN' | 'FR' | 'IT' | 'DE';
@@ -112,7 +113,7 @@ function ParticipantFormFields({
 }
 
 export function TastingParticipantManager({
-  participants, apiBase, onParticipantsChange, readOnly = false, weddingLanguage = 'ES',
+  participants, apiBase, onParticipantsChange, readOnly = false, weddingLanguage = 'ES', whatsappMode = 'BUSINESS',
 }: Props) {
   const t = useTranslations('admin.tastingMenu');
 
@@ -223,7 +224,11 @@ export function TastingParticipantManager({
       const data = await res.json();
       if (!data.success) throw new Error(data.error?.message ?? 'Failed to send');
       if (data.data?.mode === 'LINKS' && data.data?.wa_url) {
+        window.open(data.data.wa_url, '_blank', 'noopener,noreferrer');
         setWaUrl(data.data.wa_url);
+        onParticipantsChange(participants.map(p =>
+          p.id === participant.id ? { ...p, invite_sent_at: new Date().toISOString() } : p
+        ));
       } else {
         setSendSuccess(t('participants.sent'));
         onParticipantsChange(participants.map(p =>
@@ -319,6 +324,7 @@ export function TastingParticipantManager({
 
                   {sendingId === p.id && waUrl && (
                     <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                      onClick={() => { setWaUrl(null); setSendingId(null); }}
                       className="mt-2 inline-block text-xs px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
                       📲 {t('participants.inviteModal.whatsappButton')}
                     </a>
@@ -351,10 +357,14 @@ export function TastingParticipantManager({
                       )}
                       <button
                         onClick={() => handleSend(p)}
-                        disabled={sendingId === p.id && !waUrl}
+                        disabled={sendingId === p.id && !waUrl && !sendSuccess && !sendError}
                         title={`${t('participants.send')} via ${preferredChannel(p)}`}
                         className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50">
-                        {sendingId === p.id && !waUrl && !sendSuccess && !sendError ? '…' : '↗ Send'}
+                        {sendingId === p.id && !waUrl && !sendSuccess && !sendError
+                          ? '…'
+                          : preferredChannel(p) === 'WHATSAPP' && whatsappMode === 'LINKS'
+                            ? '📲 WhatsApp'
+                            : '↗ Send'}
                       </button>
                     </div>
                   )}

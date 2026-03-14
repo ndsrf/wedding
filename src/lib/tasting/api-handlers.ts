@@ -113,7 +113,7 @@ export async function getTastingMenuHandler(weddingId: string) {
     }),
     prisma.wedding.findUnique({
       where: { id: weddingId },
-      select: { default_language: true },
+      select: { default_language: true, whatsapp_mode: true },
     }),
   ]);
 
@@ -138,6 +138,7 @@ export async function getTastingMenuHandler(weddingId: string) {
     success: true,
     data: menu,
     wedding_language: wedding?.default_language ?? 'ES',
+    whatsapp_mode: wedding?.whatsapp_mode ?? 'BUSINESS',
   });
 }
 
