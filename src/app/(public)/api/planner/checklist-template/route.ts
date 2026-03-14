@@ -13,6 +13,7 @@ import {
   getTemplate,
   saveTemplate,
   deleteTemplate,
+  syncNewTemplateItemsToWeddings,
 } from '@/lib/checklist/template';
 import type {
   CreateTemplateSectionData,
@@ -196,11 +197,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 });
     }
 
+    // Capture old template sections before saving (for sync comparison)
+    const oldTemplate = await getTemplate(user.planner_id);
+
     // Save template
     const template = await saveTemplate(user.planner_id, {
       planner_id: user.planner_id,
       sections: sections as CreateTemplateSectionData[],
     });
+
+    // Sync newly added items to all existing weddings (non-blocking)
+    syncNewTemplateItemsToWeddings(
+      user.planner_id,
+      oldTemplate?.sections ?? [],
+      sections as CreateTemplateSectionData[]
+    ).catch((err) => console.error('Failed to sync template items to weddings:', err));
 
     const response: APIResponse = {
       success: true,

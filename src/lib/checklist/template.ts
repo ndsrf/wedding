@@ -9,7 +9,10 @@ import { prisma } from '@/lib/db/prisma';
 import { convertRelativeDateToAbsolute } from './date-converter';
 import type {
   CreateTemplateData,
+  CreateTemplateSectionData,
+  CreateTemplateTaskData,
   ChecklistTemplateWithSections,
+  ChecklistSectionWithTasks,
   RelativeDateFormat,
 } from '@/types/checklist';
 
@@ -296,4 +299,187 @@ export async function deleteTemplate(planner_id: string): Promise<boolean> {
   });
 
   return result.count > 0;
+}
+
+// ============================================================================
+// SYNC NEW TEMPLATE ITEMS TO EXISTING WEDDINGS
+// ============================================================================
+
+/**
+ * Sync newly added template items to all existing weddings of a planner.
+ *
+ * Called after saveTemplate() to propagate additions to existing weddings.
+ * Only adds items - never removes or modifies existing wedding tasks.
+ * Matches sections and tasks by name/title.
+ *
+ * @param planner_id - The wedding planner's ID
+ * @param oldSections - Sections from the template BEFORE the update
+ * @param newSections - Sections from the new template data
+ */
+export async function syncNewTemplateItemsToWeddings(
+  planner_id: string,
+  oldSections: ChecklistSectionWithTasks[],
+  newSections: CreateTemplateSectionData[]
+): Promise<void> {
+  // Build lookup: old section name → set of task titles
+  const oldSectionMap = new Map<string, Set<string>>();
+  for (const section of oldSections) {
+    oldSectionMap.set(section.name, new Set(section.tasks.map((t) => t.title)));
+  }
+
+  // Identify entirely new sections
+  const brandNewSections: CreateTemplateSectionData[] = [];
+  // Identify new tasks added to existing sections
+  const newTasksBySection: Array<{ sectionName: string; tasks: CreateTemplateTaskData[] }> = [];
+
+  for (const section of newSections) {
+    const oldTaskTitles = oldSectionMap.get(section.name);
+    if (oldTaskTitles === undefined) {
+      // Entire section is new
+      brandNewSections.push(section);
+    } else {
+      const newTasks = section.tasks.filter((t) => !oldTaskTitles.has(t.title));
+      if (newTasks.length > 0) {
+        newTasksBySection.push({ sectionName: section.name, tasks: newTasks });
+      }
+    }
+  }
+
+  if (brandNewSections.length === 0 && newTasksBySection.length === 0) {
+    return;
+  }
+
+  // Get all non-deleted weddings for this planner
+  const weddings = await prisma.wedding.findMany({
+    where: { planner_id, status: { not: 'DELETED' } },
+    select: { id: true, wedding_date: true },
+  });
+
+  if (weddings.length === 0) return;
+
+  for (const wedding of weddings) {
+    try {
+      await applyNewItemsToWedding(
+        wedding.id,
+        wedding.wedding_date,
+        brandNewSections,
+        newTasksBySection
+      );
+    } catch (error) {
+      console.error(`Failed to sync template items to wedding ${wedding.id}:`, error);
+    }
+  }
+}
+
+/**
+ * Apply new template sections/tasks to a single wedding.
+ */
+async function applyNewItemsToWedding(
+  wedding_id: string,
+  weddingDate: Date | null,
+  brandNewSections: CreateTemplateSectionData[],
+  newTasksBySection: Array<{ sectionName: string; tasks: CreateTemplateTaskData[] }>
+): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    // Add entirely new sections with their tasks
+    if (brandNewSections.length > 0) {
+      const maxOrderResult = await tx.checklistSection.aggregate({
+        where: { wedding_id },
+        _max: { order: true },
+      });
+      let nextOrder = (maxOrderResult._max.order ?? -1) + 1;
+
+      for (const sectionData of brandNewSections) {
+        const newSection = await tx.checklistSection.create({
+          data: {
+            wedding_id,
+            template_id: null,
+            name: sectionData.name,
+            order: nextOrder++,
+          },
+        });
+
+        for (const taskData of sectionData.tasks) {
+          const absoluteDueDate = resolveTaskDueDate(taskData.due_date_relative, weddingDate);
+
+          await tx.checklistTask.create({
+            data: {
+              section_id: newSection.id,
+              wedding_id,
+              template_id: null,
+              title: taskData.title,
+              description: taskData.description,
+              assigned_to: taskData.assigned_to,
+              due_date: absoluteDueDate,
+              due_date_relative: null,
+              status: 'PENDING',
+              completed: false,
+              order: taskData.order,
+            },
+          });
+        }
+      }
+    }
+
+    // Add new tasks to existing sections (matched by section name)
+    for (const { sectionName, tasks } of newTasksBySection) {
+      const weddingSection = await tx.checklistSection.findFirst({
+        where: { wedding_id, name: sectionName },
+      });
+
+      if (!weddingSection) continue;
+
+      const maxTaskOrderResult = await tx.checklistTask.aggregate({
+        where: { section_id: weddingSection.id },
+        _max: { order: true },
+      });
+      let nextTaskOrder = (maxTaskOrderResult._max.order ?? -1) + 1;
+
+      for (const taskData of tasks) {
+        // Skip if task with same title already exists in this section
+        const exists = await tx.checklistTask.findFirst({
+          where: { section_id: weddingSection.id, title: taskData.title },
+          select: { id: true },
+        });
+        if (exists) continue;
+
+        const absoluteDueDate = resolveTaskDueDate(taskData.due_date_relative, weddingDate);
+
+        await tx.checklistTask.create({
+          data: {
+            section_id: weddingSection.id,
+            wedding_id,
+            template_id: null,
+            title: taskData.title,
+            description: taskData.description,
+            assigned_to: taskData.assigned_to,
+            due_date: absoluteDueDate,
+            due_date_relative: null,
+            status: 'PENDING',
+            completed: false,
+            order: nextTaskOrder++,
+          },
+        });
+      }
+    }
+  });
+}
+
+/**
+ * Convert a relative due date string to an absolute date given the wedding date.
+ * Returns null if no date or conversion fails.
+ */
+function resolveTaskDueDate(
+  due_date_relative: string | null,
+  weddingDate: Date | null
+): Date | null {
+  if (!due_date_relative || !weddingDate) return null;
+  try {
+    return convertRelativeDateToAbsolute(
+      due_date_relative as RelativeDateFormat,
+      weddingDate
+    );
+  } catch {
+    return null;
+  }
 }
