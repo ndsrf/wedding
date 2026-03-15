@@ -570,7 +570,9 @@
       "plannerTasksTitle": "Mes Tâches",
       "coupleTasksTitle": "Tâches des Mariés",
       "noPlannerTasks": "Aucune tâche organisateur en attente",
-      "noCoupleTasks": "Aucune tâche des mariés en attente"
+      "noCoupleTasks": "Aucune tâche des mariés en attente",
+      "otherTasksTitle": "Autres Tâches",
+      "noOtherTasks": "Aucune autre tâche en attente"
     },
     "providers": {
       "title": "Gestion des Prestataires",

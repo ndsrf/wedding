@@ -15,6 +15,7 @@ import {
   updateSection,
   deleteSection,
 } from '@/lib/checklist/crud';
+import { invalidateChecklistCaches } from '@/lib/checklist/cache';
 import { prisma } from '@/lib/db/prisma';
 
 // ============================================================================
@@ -102,6 +103,8 @@ export async function POST(request: NextRequest) {
 
     const section = await createSection(validatedData);
 
+    await invalidateChecklistCaches(validatedData.wedding_id, user.planner_id);
+
     return NextResponse.json({ success: true, data: section }, { status: 201 });
   } catch (error: unknown) {
     console.error('Error creating section:', error);
@@ -132,6 +135,8 @@ export async function PATCH(request: NextRequest) {
 
     const { section_id, wedding_id, ...updateData } = validatedData;
     const section = await updateSection(section_id, wedding_id, updateData);
+
+    await invalidateChecklistCaches(wedding_id, user.planner_id);
 
     return NextResponse.json({ success: true, data: section }, { status: 200 });
   } catch (error: unknown) {
@@ -169,6 +174,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     await deleteSection(sectionId, weddingId);
+
+    await invalidateChecklistCaches(weddingId, user.planner_id);
 
     return NextResponse.json({ success: true, data: { message: 'Section deleted successfully' } }, { status: 200 });
   } catch (error: unknown) {

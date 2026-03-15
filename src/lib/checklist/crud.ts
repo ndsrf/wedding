@@ -510,7 +510,7 @@ export async function getUpcomingTasks(
 export async function getUpcomingTasksForPlanner(
   planner_id: string,
   limit_per_wedding: number = 3
-): Promise<{ plannerTasks: UpcomingTask[]; coupleTasks: UpcomingTask[] }> {
+): Promise<{ plannerTasks: UpcomingTask[]; coupleTasks: UpcomingTask[]; otherTasks: UpcomingTask[] }> {
   // 1. Get all active, non-deleted weddings for this planner (1 query)
   const weddings = await prisma.wedding.findMany({
     where: {
@@ -524,18 +524,18 @@ export async function getUpcomingTasksForPlanner(
     },
   });
 
-  if (weddings.length === 0) return { plannerTasks: [], coupleTasks: [] };
+  if (weddings.length === 0) return { plannerTasks: [], coupleTasks: [], otherTasks: [] };
 
   const weddingMap = new Map(weddings.map((w) => [w.id, w.couple_names]));
 
-  // 2. Fetch WEDDING_PLANNER and COUPLE tasks across all weddings in a single query
+  // 2. Fetch WEDDING_PLANNER, COUPLE and OTHER tasks across all weddings in a single query
   const rawTasks = await prisma.checklistTask.findMany({
     where: {
       wedding_id: { in: weddings.map((w) => w.id) },
       template_id: null,
       completed: false,
       due_date: { not: null },
-      assigned_to: { in: ['WEDDING_PLANNER', 'COUPLE'] },
+      assigned_to: { in: ['WEDDING_PLANNER', 'COUPLE', 'OTHER'] },
     },
     include: {
       section: { select: { name: true } },
@@ -546,14 +546,21 @@ export async function getUpcomingTasksForPlanner(
   // 3. Split by assignee, group by wedding_id, take top `limit_per_wedding` per wedding per type
   const countByWeddingPlanner = new Map<string, number>();
   const countByWeddingCouple = new Map<string, number>();
+  const countByWeddingOther = new Map<string, number>();
   const now = new Date();
   const plannerTasks: UpcomingTask[] = [];
   const coupleTasks: UpcomingTask[] = [];
+  const otherTasks: UpcomingTask[] = [];
 
   for (const task of rawTasks) {
     const weddingId = task.wedding_id!;
-    const isPlanner = task.assigned_to === 'WEDDING_PLANNER';
-    const countMap = isPlanner ? countByWeddingPlanner : countByWeddingCouple;
+    const assignedTo = task.assigned_to;
+    const countMap =
+      assignedTo === 'WEDDING_PLANNER'
+        ? countByWeddingPlanner
+        : assignedTo === 'COUPLE'
+          ? countByWeddingCouple
+          : countByWeddingOther;
 
     const count = countMap.get(weddingId) ?? 0;
     if (count >= limit_per_wedding) continue;
@@ -581,10 +588,12 @@ export async function getUpcomingTasksForPlanner(
       wedding_couple_names: weddingMap.get(weddingId),
     };
 
-    if (isPlanner) {
+    if (assignedTo === 'WEDDING_PLANNER') {
       plannerTasks.push(upcomingTask);
-    } else {
+    } else if (assignedTo === 'COUPLE') {
       coupleTasks.push(upcomingTask);
+    } else {
+      otherTasks.push(upcomingTask);
     }
   }
 
@@ -597,6 +606,7 @@ export async function getUpcomingTasksForPlanner(
 
   plannerTasks.sort(sortByDueDate);
   coupleTasks.sort(sortByDueDate);
+  otherTasks.sort(sortByDueDate);
 
-  return { plannerTasks, coupleTasks };
+  return { plannerTasks, coupleTasks, otherTasks };
 }

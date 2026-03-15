@@ -574,7 +574,9 @@
       "plannerTasksTitle": "Mis Tareas",
       "coupleTasksTitle": "Tareas de la Pareja",
       "noPlannerTasks": "No hay tareas del organizador pendientes",
-      "noCoupleTasks": "No hay tareas de la pareja pendientes"
+      "noCoupleTasks": "No hay tareas de la pareja pendientes",
+      "otherTasksTitle": "Otras Tareas",
+      "noOtherTasks": "No hay otras tareas pendientes"
     },
     "providers": {
       "title": "Gestión de Proveedores",

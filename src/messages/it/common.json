@@ -570,7 +570,9 @@
       "plannerTasksTitle": "I Miei Compiti",
       "coupleTasksTitle": "Compiti della Coppia",
       "noPlannerTasks": "Nessun compito organizzatore in sospeso",
-      "noCoupleTasks": "Nessun compito della coppia in sospeso"
+      "noCoupleTasks": "Nessun compito della coppia in sospeso",
+      "otherTasksTitle": "Altri Compiti",
+      "noOtherTasks": "Nessun altro compito in sospeso"
     },
     "providers": {
       "title": "Gestione Fornitori",

@@ -578,7 +578,9 @@
       "plannerTasksTitle": "My Tasks",
       "coupleTasksTitle": "Couple's Tasks",
       "noPlannerTasks": "No pending planner tasks",
-      "noCoupleTasks": "No pending couple tasks"
+      "noCoupleTasks": "No pending couple tasks",
+      "otherTasksTitle": "Other Tasks",
+      "noOtherTasks": "No pending other tasks"
     },
     "providers": {
       "title": "Provider Management",

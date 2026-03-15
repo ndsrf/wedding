@@ -23,6 +23,7 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 interface SplitUpcomingTasks {
   plannerTasks: UpcomingTask[];
   coupleTasks: UpcomingTask[];
+  otherTasks: UpcomingTask[];
 }
 
 const getUrgencyStyles = (urgencyColor: string) => {
@@ -168,7 +169,7 @@ function TaskColumn({ tasks, title, emptyMessage, headerColor, headerBg, icon }:
 
 export function UpcomingTasksWidget() {
   const t = useTranslations();
-  const [data, setData] = useState<SplitUpcomingTasks>({ plannerTasks: [], coupleTasks: [] });
+  const [data, setData] = useState<SplitUpcomingTasks>({ plannerTasks: [], coupleTasks: [], otherTasks: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -185,7 +186,7 @@ export function UpcomingTasksWidget() {
           throw new Error(result.error?.message || 'Failed to fetch upcoming tasks');
         }
 
-        setData(result.data ?? { plannerTasks: [], coupleTasks: [] });
+        setData(result.data ?? { plannerTasks: [], coupleTasks: [], otherTasks: [] });
       } catch (err) {
         console.error('Error fetching upcoming tasks:', err);
         setError(err instanceof Error ? err.message : 'Failed to load tasks');
@@ -234,8 +235,8 @@ export function UpcomingTasksWidget() {
     );
   }
 
-  const { plannerTasks, coupleTasks } = data;
-  const hasAnyTask = plannerTasks.length > 0 || coupleTasks.length > 0;
+  const { plannerTasks, coupleTasks, otherTasks } = data;
+  const hasAnyTask = plannerTasks.length > 0 || coupleTasks.length > 0 || otherTasks.length > 0;
 
   if (!hasAnyTask) {
     return (
@@ -286,8 +287,8 @@ export function UpcomingTasksWidget() {
         </Link>
       </div>
 
-      {/* Two-column grid — side-by-side on sm+, stacked on mobile */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
+      {/* Three-column grid — stacked on mobile, 2-col on sm, 3-col on lg */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
         <TaskColumn
           tasks={plannerTasks}
           title={t('planner.upcomingTasks.plannerTasksTitle')}
@@ -319,6 +320,24 @@ export function UpcomingTasksWidget() {
                 strokeLinejoin="round"
                 strokeWidth={2}
                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          }
+        />
+
+        <TaskColumn
+          tasks={otherTasks}
+          title={t('planner.upcomingTasks.otherTasksTitle')}
+          emptyMessage={t('planner.upcomingTasks.noOtherTasks')}
+          headerColor="text-amber-700"
+          headerBg="bg-amber-50"
+          icon={
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
           }

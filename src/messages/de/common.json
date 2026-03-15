@@ -570,7 +570,9 @@
       "plannerTasksTitle": "Meine Aufgaben",
       "coupleTasksTitle": "Aufgaben des Paares",
       "noPlannerTasks": "Keine ausstehenden Planer-Aufgaben",
-      "noCoupleTasks": "Keine ausstehenden Aufgaben des Paares"
+      "noCoupleTasks": "Keine ausstehenden Aufgaben des Paares",
+      "otherTasksTitle": "Weitere Aufgaben",
+      "noOtherTasks": "Keine weiteren ausstehenden Aufgaben"
     },
     "providers": {
       "title": "Dienstleisterverwaltung",
