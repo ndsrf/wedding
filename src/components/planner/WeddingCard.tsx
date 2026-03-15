@@ -92,9 +92,7 @@ export function WeddingCard({ wedding }: WeddingCardProps) {
                 statusColors[effectiveStatus] ?? statusColors.ACTIVE
               }`}
             >
-              {effectiveStatus === 'DISABLED'
-                ? t('planner.weddings.disabled')
-                : t(`planner.weddings.statusLabels.${effectiveStatus}`)}
+              {t(`planner.weddings.statusLabels.${effectiveStatus}`)}
             </span>
           </div>
         </div>

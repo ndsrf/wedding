@@ -201,13 +201,16 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
     day: 'numeric',
   });
 
+  const effectiveStatus = wedding.is_disabled ? 'DISABLED' : wedding.status;
+
   const statusColors: Record<string, string> = {
     ACTIVE: 'bg-green-100 text-green-700',
+    DISABLED: 'bg-yellow-100 text-yellow-700',
     ARCHIVED: 'bg-gray-100 text-gray-600',
     COMPLETED: 'bg-blue-100 text-blue-700',
     DELETED: 'bg-red-100 text-red-700',
   };
-  const statusColor = statusColors[wedding.status] ?? 'bg-gray-100 text-gray-600';
+  const statusColor = statusColors[effectiveStatus] ?? 'bg-gray-100 text-gray-600';
 
   return (
     <div className="min-h-screen">
@@ -227,7 +230,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{wedding.couple_names}</h1>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusColor}`}>
-                  {t(`planner.weddings.statusLabels.${wedding.status}`)}
+                  {t(`planner.weddings.statusLabels.${effectiveStatus}`)}
                 </span>
               </div>
               <p className="mt-1 text-sm text-gray-500">
@@ -451,7 +454,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
             <h2 className="text-base font-semibold text-gray-900 mb-5">{t('planner.weddings.weddingInfo')}</h2>
             <div className="space-y-0">
               {[
-                { label: t('planner.weddings.status'), value: t(`planner.weddings.statusLabels.${wedding.status}`) },
+                { label: t('planner.weddings.status'), value: t(`planner.weddings.statusLabels.${effectiveStatus}`) },
                 { label: t('planner.weddings.defaultLanguage'), value: t(`common.languages.${wedding.default_language}`) },
                 { label: t('planner.weddings.paymentMode'), value: wedding.payment_tracking_mode },
                 {

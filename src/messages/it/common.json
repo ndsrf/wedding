@@ -426,6 +426,7 @@
       "at": "alle",
       "statusLabels": {
         "ACTIVE": "Attivo",
+        "DISABLED": "Disabilitato",
         "ARCHIVED": "Archiviato",
         "COMPLETED": "Completato"
       },
