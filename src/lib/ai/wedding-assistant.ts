@@ -29,6 +29,13 @@ export interface InvitationTemplateContext {
   design: TemplateDesign;
 }
 
+export interface LocationContext {
+  address?: string | null;
+  url?: string | null;
+  google_maps_url?: string | null;
+  notes?: string | null;
+}
+
 // ============================================================================
 // LANGUAGE SUPPORT
 // ============================================================================
@@ -91,7 +98,8 @@ function buildSystemPrompt(
   language: string,
   appUrl: string,
   rsvpUrl?: string | null,
-  invitationTemplate?: InvitationTemplateContext | null
+  invitationTemplate?: InvitationTemplateContext | null,
+  location?: LocationContext | null
 ): string {
   const lang = language in LANGUAGE_NAMES ? language : 'EN';
   const languageName = LANGUAGE_NAMES[lang];
@@ -108,6 +116,18 @@ function buildSystemPrompt(
   prompt += `- Date: ${weddingDate}\n`;
   prompt += `- Time: ${wedding.wedding_time}\n`;
   prompt += `- Venue/Location: ${wedding.location}\n`;
+  if (location?.address) {
+    prompt += `- Address: ${location.address}\n`;
+  }
+  if (location?.url) {
+    prompt += `- Venue Website: ${location.url}\n`;
+  }
+  if (location?.google_maps_url) {
+    prompt += `- Google Maps: ${location.google_maps_url}\n`;
+  }
+  if (location?.notes) {
+    prompt += `- Location Notes: ${location.notes}\n`;
+  }
   prompt += `- RSVP Deadline: ${cutoffDate}\n`;
 
   if (wedding.dress_code) {
@@ -247,6 +267,7 @@ async function generateWithGemini(systemPrompt: string, userMessage: string): Pr
  * @param language           - Language code (ES, EN, FR, IT, DE)
  * @param rsvpUrl            - Optional short RSVP URL to use instead of generating a long one
  * @param invitationTemplate - Optional active invitation template whose text blocks are added to the AI context
+ * @param location           - Optional main event location details (address, website, Google Maps, notes)
  * @returns AI-generated reply string, or null if no provider is available / call fails
  */
 export async function generateWeddingReply(
@@ -255,10 +276,11 @@ export async function generateWeddingReply(
   family: FamilyContext | null,
   language = 'EN',
   rsvpUrl?: string | null,
-  invitationTemplate?: InvitationTemplateContext | null
+  invitationTemplate?: InvitationTemplateContext | null,
+  location?: LocationContext | null
 ): Promise<string | null> {
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate);
+  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location);
 
   // Determine provider: explicit env var → fallback to whichever key is present
   const provider =

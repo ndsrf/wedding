@@ -435,5 +435,54 @@ describe('generateWeddingReply', () => {
       await generateWeddingReply('Can I bring a plus one?', baseWedding, baseFamily, 'EN');
       expect(captureSystemPrompt()).toContain('additional family members');
     });
+
+    it('includes location address when provided', async () => {
+      await generateWeddingReply('Where is the venue?', baseWedding, baseFamily, 'EN', null, null, {
+        address: 'Carrer de la Pau 12, Barcelona',
+        url: null,
+        google_maps_url: null,
+        notes: null,
+      });
+      expect(captureSystemPrompt()).toContain('Carrer de la Pau 12, Barcelona');
+    });
+
+    it('includes venue website when provided', async () => {
+      await generateWeddingReply('Where is the venue?', baseWedding, baseFamily, 'EN', null, null, {
+        address: null,
+        url: 'https://venue.example.com',
+        google_maps_url: null,
+        notes: null,
+      });
+      expect(captureSystemPrompt()).toContain('https://venue.example.com');
+    });
+
+    it('includes Google Maps URL when provided', async () => {
+      await generateWeddingReply('Where is the venue?', baseWedding, baseFamily, 'EN', null, null, {
+        address: null,
+        url: null,
+        google_maps_url: 'https://maps.google.com/?q=venue',
+        notes: null,
+      });
+      expect(captureSystemPrompt()).toContain('https://maps.google.com/?q=venue');
+    });
+
+    it('includes location notes when provided', async () => {
+      await generateWeddingReply('Where is the venue?', baseWedding, baseFamily, 'EN', null, null, {
+        address: null,
+        url: null,
+        google_maps_url: null,
+        notes: 'Ring the doorbell on arrival',
+      });
+      expect(captureSystemPrompt()).toContain('Ring the doorbell on arrival');
+    });
+
+    it('omits location fields when no location is provided', async () => {
+      await generateWeddingReply('Where is the venue?', baseWedding, baseFamily, 'EN', null, null, null);
+      const prompt = captureSystemPrompt();
+      expect(prompt).not.toContain('Address:');
+      expect(prompt).not.toContain('Venue Website:');
+      expect(prompt).not.toContain('Google Maps:');
+      expect(prompt).not.toContain('Location Notes:');
+    });
   });
 });
