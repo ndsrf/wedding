@@ -13,6 +13,7 @@ import {
 } from '@/lib/checklist/excel-import';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
+import { invalidateChecklistCaches } from '@/lib/checklist/cache';
 import { prisma } from '@/lib/db/prisma';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -228,6 +229,9 @@ export async function POST(request: NextRequest) {
       };
       return NextResponse.json(response, { status: 500 });
     }
+
+    // Invalidate upcoming tasks caches — import can add/change many tasks at once
+    await invalidateChecklistCaches(weddingId, user.planner_id);
 
     const response: APIResponse = {
       success: true,
