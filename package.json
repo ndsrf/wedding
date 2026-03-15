@@ -47,7 +47,7 @@
     "@react-email/components": "^1.0.0",
     "@vercel/analytics": "^2.0.0",
     "@vercel/blob": "^2.0.0",
-    "@vercel/otel": "^1.14.0",
+    "@vercel/otel": "^2.1.1",
     "@vercel/speed-insights": "^2.0.0",
     "ai": "^6.0.116",
     "dotenv": "^17.2.3",
@@ -108,6 +108,7 @@
   },
   "overrides": {
     "@babel/runtime": ">=7.26.10",
+    "@opentelemetry/resources": "^2.0.0",
     "hono": "^4.12.7",
     "https-proxy-agent": "^8.0.0",
     "twilio": {
