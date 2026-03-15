@@ -33,6 +33,12 @@ export const CACHE_KEYS = {
   adminUpcomingTasks: (weddingId: string) => `wedding:admin:tasks:${weddingId}`,
   /** Upcoming tasks widget for the planner dashboard (across all weddings) */
   plannerUpcomingTasks: (plannerId: string) => `planner:tasks:${plannerId}`,
+  /** Rendered PNG bytes (base64) for the static locale favicon */
+  localeIcon: () => `icon:locale:static`,
+  /** Rendered PNG bytes (base64) for the per-wedding admin favicon */
+  adminIcon: (weddingId: string) => `icon:admin:${weddingId}`,
+  /** Rendered PNG bytes (base64) for the per-planner favicon */
+  plannerIcon: (plannerId: string) => `icon:planner:${plannerId}`,
 } as const;
 
 // ============================================================================
@@ -46,6 +52,10 @@ export const CACHE_TTL = {
   WEDDING_DETAILS: 600, // 10 minutes
   /** Upcoming task widgets — refreshed when tasks are completed or created */
   UPCOMING_TASKS: 120, // 2 minutes
+  /** Static locale favicon — never changes, long TTL */
+  ICON_STATIC: 604800, // 7 days
+  /** Per-user dynamic favicons — refreshed on next request after TTL */
+  ICON_DYNAMIC: 3600, // 1 hour
 } as const;
 
 // ============================================================================
