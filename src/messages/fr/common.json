@@ -566,7 +566,11 @@
       "task": "Tâche",
       "viewAllWeddings": "Voir tous les mariages",
       "noTasks": "Aucune tâche à venir",
-      "noTasksDescription": "Toutes les tâches sont terminées ou il n'y a pas de tâches qui vous sont assignées dans tous les mariages."
+      "noTasksDescription": "Toutes les tâches sont terminées ou il n'y a aucune tâche en attente dans tous les mariages.",
+      "plannerTasksTitle": "Mes Tâches",
+      "coupleTasksTitle": "Tâches des Mariés",
+      "noPlannerTasks": "Aucune tâche organisateur en attente",
+      "noCoupleTasks": "Aucune tâche des mariés en attente"
     },
     "providers": {
       "title": "Gestion des Prestataires",

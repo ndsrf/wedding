@@ -566,7 +566,11 @@
       "task": "Aufgabe",
       "viewAllWeddings": "Alle Hochzeiten anzeigen",
       "noTasks": "Keine bevorstehenden Aufgaben",
-      "noTasksDescription": "Alle Aufgaben sind abgeschlossen oder es gibt keine Aufgaben, die Ihnen über alle Hochzeiten zugewiesen sind."
+      "noTasksDescription": "Alle Aufgaben sind abgeschlossen oder es gibt keine ausstehenden Aufgaben für alle Hochzeiten.",
+      "plannerTasksTitle": "Meine Aufgaben",
+      "coupleTasksTitle": "Aufgaben des Paares",
+      "noPlannerTasks": "Keine ausstehenden Planer-Aufgaben",
+      "noCoupleTasks": "Keine ausstehenden Aufgaben des Paares"
     },
     "providers": {
       "title": "Dienstleisterverwaltung",

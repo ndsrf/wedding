@@ -46,18 +46,18 @@ export async function GET(_request: NextRequest) {
 
     // Check Redis cache first
     const cacheKey = CACHE_KEYS.plannerUpcomingTasks(plannerId);
-    const cached = await getCached<UpcomingTask[]>(cacheKey);
+    const cached = await getCached<{ plannerTasks: UpcomingTask[]; coupleTasks: UpcomingTask[] }>(cacheKey);
 
     const upcomingTasks = cached ?? await (async () => {
       const tasks = await getUpcomingTasksForPlanner(
         plannerId,
-        DEFAULT_UPCOMING_TASKS_LIMIT.PLANNER // 3 tasks per wedding
+        DEFAULT_UPCOMING_TASKS_LIMIT.PLANNER // 3 tasks per wedding per assignee type
       );
       await setCached(cacheKey, tasks, CACHE_TTL.UPCOMING_TASKS);
       return tasks;
     })();
 
-    const response: APIResponse<UpcomingTask[]> = {
+    const response: APIResponse<{ plannerTasks: UpcomingTask[]; coupleTasks: UpcomingTask[] }> = {
       success: true,
       data: upcomingTasks,
     };

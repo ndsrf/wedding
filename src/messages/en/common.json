@@ -574,7 +574,11 @@
       "task": "Task",
       "viewAllWeddings": "View all weddings",
       "noTasks": "No upcoming tasks",
-      "noTasksDescription": "All tasks are completed or there are no tasks assigned to you across all weddings."
+      "noTasksDescription": "All tasks are completed or there are no pending tasks across all weddings.",
+      "plannerTasksTitle": "My Tasks",
+      "coupleTasksTitle": "Couple's Tasks",
+      "noPlannerTasks": "No pending planner tasks",
+      "noCoupleTasks": "No pending couple tasks"
     },
     "providers": {
       "title": "Provider Management",

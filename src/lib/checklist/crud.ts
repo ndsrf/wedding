@@ -499,17 +499,18 @@ export async function getUpcomingTasks(
 /**
  * Get upcoming tasks for planner dashboard widget
  *
- * Returns tasks across multiple weddings, grouped by wedding.
- * Used for the planner dashboard to show tasks from all their weddings.
+ * Returns tasks across multiple weddings split by assignee type.
+ * Fetches WEDDING_PLANNER and COUPLE tasks in a single DB query then
+ * splits in code to avoid multiple round-trips.
  *
  * @param planner_id - The wedding planner's ID
- * @param limit_per_wedding - Maximum tasks per wedding (default: 3)
- * @returns Array of upcoming tasks with wedding context
+ * @param limit_per_wedding - Maximum tasks per wedding per assignee type (default: 3)
+ * @returns Split arrays of upcoming tasks with wedding context
  */
 export async function getUpcomingTasksForPlanner(
   planner_id: string,
   limit_per_wedding: number = 3
-): Promise<UpcomingTask[]> {
+): Promise<{ plannerTasks: UpcomingTask[]; coupleTasks: UpcomingTask[] }> {
   // 1. Get all active, non-deleted weddings for this planner (1 query)
   const weddings = await prisma.wedding.findMany({
     where: {
@@ -523,18 +524,18 @@ export async function getUpcomingTasksForPlanner(
     },
   });
 
-  if (weddings.length === 0) return [];
+  if (weddings.length === 0) return { plannerTasks: [], coupleTasks: [] };
 
   const weddingMap = new Map(weddings.map((w) => [w.id, w.couple_names]));
 
-  // 2. Fetch all WEDDING_PLANNER tasks across all weddings in a single query
+  // 2. Fetch WEDDING_PLANNER and COUPLE tasks across all weddings in a single query
   const rawTasks = await prisma.checklistTask.findMany({
     where: {
       wedding_id: { in: weddings.map((w) => w.id) },
       template_id: null,
       completed: false,
       due_date: { not: null },
-      assigned_to: 'WEDDING_PLANNER',
+      assigned_to: { in: ['WEDDING_PLANNER', 'COUPLE'] },
     },
     include: {
       section: { select: { name: true } },
@@ -542,16 +543,21 @@ export async function getUpcomingTasksForPlanner(
     orderBy: [{ due_date: 'asc' }, { order: 'asc' }],
   });
 
-  // 3. Group by wedding_id and take top `limit_per_wedding` per wedding
-  const countByWedding = new Map<string, number>();
+  // 3. Split by assignee, group by wedding_id, take top `limit_per_wedding` per wedding per type
+  const countByWeddingPlanner = new Map<string, number>();
+  const countByWeddingCouple = new Map<string, number>();
   const now = new Date();
-  const allTasks: UpcomingTask[] = [];
+  const plannerTasks: UpcomingTask[] = [];
+  const coupleTasks: UpcomingTask[] = [];
 
   for (const task of rawTasks) {
     const weddingId = task.wedding_id!;
-    const count = countByWedding.get(weddingId) ?? 0;
+    const isPlanner = task.assigned_to === 'WEDDING_PLANNER';
+    const countMap = isPlanner ? countByWeddingPlanner : countByWeddingCouple;
+
+    const count = countMap.get(weddingId) ?? 0;
     if (count >= limit_per_wedding) continue;
-    countByWedding.set(weddingId, count + 1);
+    countMap.set(weddingId, count + 1);
 
     let days_until_due: number | null = null;
     let urgency_color: 'red' | 'orange' | 'green' = 'green';
@@ -566,22 +572,31 @@ export async function getUpcomingTasksForPlanner(
       }
     }
 
-    allTasks.push({
+    const upcomingTask: UpcomingTask = {
       ...task,
       section_name: task.section?.name || null,
       wedding_id: weddingId,
       days_until_due,
       urgency_color,
       wedding_couple_names: weddingMap.get(weddingId),
-    });
+    };
+
+    if (isPlanner) {
+      plannerTasks.push(upcomingTask);
+    } else {
+      coupleTasks.push(upcomingTask);
+    }
   }
 
-  // 4. Sort globally by due date across all weddings
-  allTasks.sort((a, b) => {
+  // 4. Sort each list globally by due date
+  const sortByDueDate = (a: UpcomingTask, b: UpcomingTask) => {
     if (!a.due_date) return 1;
     if (!b.due_date) return -1;
     return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-  });
+  };
 
-  return allTasks;
+  plannerTasks.sort(sortByDueDate);
+  coupleTasks.sort(sortByDueDate);
+
+  return { plannerTasks, coupleTasks };
 }
