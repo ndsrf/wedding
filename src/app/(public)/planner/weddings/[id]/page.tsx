@@ -209,11 +209,6 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
   };
   const statusColor = statusColors[wedding.status] ?? 'bg-gray-100 text-gray-600';
 
-  // Show seating & gift tracking only within 2 months of the wedding
-  const today = new Date();
-  const daysUntilWedding = Math.ceil((weddingDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  const showLateStageActions = daysUntilWedding > 0 && daysUntilWedding <= 60;
-
   return (
     <div className="min-h-screen">
       {/* Top Header: Logo, Language, Sign-out */}
@@ -446,27 +441,6 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-
-            {/* Gift/Payment Tracking — conditional: within 2 months */}
-            {showLateStageActions && (
-              <Link
-                href={`/planner/weddings/${weddingId}/providers`}
-                className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/20 transition-all"
-              >
-                <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                  <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900">{t('admin.dashboard.payments')}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t('admin.dashboard.paymentsSubtitle')}</p>
-                </div>
-                <svg className="h-4 w-4 text-gray-300 group-hover:text-amber-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            )}
           </div>
         </div>
 
