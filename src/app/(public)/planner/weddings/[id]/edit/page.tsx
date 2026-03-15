@@ -154,8 +154,11 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
         throw new Error('Failed to update wedding status');
       }
 
-      // Refresh wedding data
-      await fetchWedding();
+      const result = await response.json();
+      // Merge the updated fields (is_disabled, disabled_at, status) directly into
+      // local state — avoids a second GET that the browser would serve from its
+      // own Cache-Control cache before the TTL expires.
+      setWedding((prev) => prev ? { ...prev, ...result.data } : prev);
     } catch (err) {
       console.error('Error toggling wedding status:', err);
       alert('Failed to update wedding status. Please try again.');
