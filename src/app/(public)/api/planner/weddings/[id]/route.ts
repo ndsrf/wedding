@@ -13,6 +13,7 @@ import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import { toInitials } from '@/lib/wedding-utils';
 import type {
   APIResponse,
   GetWeddingResponse,
@@ -434,6 +435,15 @@ export async function PATCH(
 
     // Invalidate the planner wedding detail cache
     await invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId));
+
+    // Invalidate admin favicon if couple initials changed
+    if (validatedData.couple_names !== undefined) {
+      const oldInitials = toInitials(existingWedding.couple_names);
+      const newInitials = toInitials(validatedData.couple_names);
+      if (oldInitials !== newInitials) {
+        await invalidateCache(CACHE_KEYS.adminIcon(weddingId));
+      }
+    }
 
     const response: UpdateWeddingResponse = {
       success: true,

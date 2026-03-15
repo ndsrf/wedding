@@ -14,6 +14,7 @@ import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import { toInitials } from '@/lib/wedding-utils';
 import type { ThemeConfig } from '@/types/theme';
 import type { Theme } from '@/types/models';
 import type {
@@ -362,7 +363,7 @@ export async function PATCH(request: NextRequest) {
     // Fetch current wedding to check for changes
     const currentWedding = await prisma.wedding.findUnique({
       where: { id: user.wedding_id },
-      select: { theme_id: true, wedding_day_theme_id: true },
+      select: { theme_id: true, wedding_day_theme_id: true, couple_names: true },
     });
 
     if (!currentWedding) {
@@ -511,6 +512,15 @@ export async function PATCH(request: NextRequest) {
       invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id)),
       invalidateCache(CACHE_KEYS.adminDashboard(user.wedding_id)),
     ]);
+
+    // Invalidate admin favicon if couple initials changed
+    if (validatedData.couple_names !== undefined) {
+      const oldInitials = toInitials(currentWedding.couple_names);
+      const newInitials = toInitials(validatedData.couple_names);
+      if (oldInitials !== newInitials) {
+        await invalidateCache(CACHE_KEYS.adminIcon(user.wedding_id));
+      }
+    }
 
     const response: UpdateWeddingConfigResponse = {
       success: true,

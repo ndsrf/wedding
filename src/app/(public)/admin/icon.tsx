@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/prisma'
+import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis'
+import { toInitials } from '@/lib/wedding-utils'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -11,66 +13,9 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-export default async function Icon() {
-  let initials = 'W'; // Default
-  
-  try {
-    const session = await auth()
-    
-    if (session?.user?.wedding_id) {
-      const wedding = await prisma.wedding.findUnique({
-        where: { id: session.user.wedding_id },
-        select: { couple_names: true }
-      });
-      
-      if (wedding?.couple_names) {
-        const names = wedding.couple_names;
-        // Clean up
-        const words = names
-          .replace(/\s+(&|and|y|et)\s+/i, ' ') // replace connector words with space
-          .replace(/[^a-zA-Z0-9\s]/g, '') // remove special chars
-          .split(/\s+/)
-          .filter(w => w.length > 0);
-          
-        if (words.length >= 2) {
-          initials = (words[0][0] + words[1][0]).toUpperCase();
-        } else if (words.length === 1) {
-          initials = words[0].substring(0, 2).toUpperCase();
-        }
-      }
-    }
-    
-    // If we have a session but no wedding_id (e.g. planner accessing admin routes? unlikely given the structure),
-    // or if we found the wedding, we return the custom icon.
-    
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#4f46e5', // Indigo-600
-            color: 'white',
-            borderRadius: '50%',
-            fontSize: 14,
-            fontWeight: 700,
-            fontFamily: 'sans-serif',
-          }}
-        >
-          {initials}
-        </div>
-      ),
-      { ...size }
-    )
+const ICON_CACHE_CONTROL = `private, max-age=${CACHE_TTL.ICON}`;
 
-  } catch (e) {
-    console.error('Error generating admin icon:', e)
-  }
-
-  // Fallback
+function renderIcon(initials: string, background: string) {
   return new ImageResponse(
     (
       <div
@@ -80,10 +25,10 @@ export default async function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#9ca3af', // gray-400
+          background,
           color: 'white',
           borderRadius: '50%',
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: 700,
           fontFamily: 'sans-serif',
         }}
@@ -93,4 +38,43 @@ export default async function Icon() {
     ),
     { ...size }
   )
+}
+
+export default async function Icon() {
+  try {
+    const session = await auth()
+
+    if (session?.user?.wedding_id) {
+      const weddingId = session.user.wedding_id;
+      const cacheKey = CACHE_KEYS.adminIcon(weddingId);
+      const cached = await getCached<string>(cacheKey);
+
+      if (cached) {
+        return new Response(Buffer.from(cached, 'base64'), {
+          headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
+        });
+      }
+
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        select: { couple_names: true }
+      });
+
+      const initials = toInitials(wedding?.couple_names);
+      const imageResponse = renderIcon(initials, '#4f46e5');
+      const buffer = Buffer.from(await imageResponse.arrayBuffer());
+      await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON);
+
+      return new Response(buffer, {
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
+      });
+    }
+
+    return renderIcon('W', '#4f46e5');
+  } catch (e) {
+    console.error('Error generating admin icon:', e)
+  }
+
+  // Fallback
+  return renderIcon('W', '#9ca3af');
 }

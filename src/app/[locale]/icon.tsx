@@ -1,13 +1,26 @@
 import { ImageResponse } from 'next/og';
+import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 
 // This icon is for the root landing page and public pages
 // Route-specific icons (admin, planner, rsvp, master) will override this
 
 export const size = { width: 32, height: 32 };
 export const contentType = 'image/png';
+export const runtime = 'nodejs';
 
-export default function Icon() {
-  return new ImageResponse(
+const ICON_CACHE_CONTROL = `public, max-age=${CACHE_TTL.ICON}`;
+
+export default async function Icon() {
+  const cacheKey = CACHE_KEYS.localeIcon();
+  const cached = await getCached<string>(cacheKey);
+
+  if (cached) {
+    return new Response(Buffer.from(cached, 'base64'), {
+      headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
+    });
+  }
+
+  const imageResponse = new ImageResponse(
     (
       <div
         style={{
@@ -28,4 +41,11 @@ export default function Icon() {
     ),
     { ...size }
   );
+
+  const buffer = Buffer.from(await imageResponse.arrayBuffer());
+  await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON);
+
+  return new Response(buffer, {
+    headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
+  });
 }
