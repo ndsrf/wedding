@@ -22,7 +22,7 @@ export async function register() {
       // @vercel/otel also respects OTEL_EXPORTER_OTLP_ENDPOINT /
       // OTEL_EXPORTER_OTLP_HEADERS env vars as an alternative.
       ...(process.env.HYPERDX_API_KEY && {
-        endpoint: process.env.HYPERDX_ENDPOINT ?? 'https://in-otel.hyperdx.io',
+        endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io',
         headers: { authorization: process.env.HYPERDX_API_KEY },
       }),
     });
