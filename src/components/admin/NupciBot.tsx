@@ -208,18 +208,26 @@ function PanelHeader({
 
 const STORAGE_KEY = 'nupcibot_state';
 
-function loadBotState(): { isOpen: boolean; screen: Screen; chatHistory: ChatMessage[] } {
+const VALID_SCREENS: Screen[] = ['menu', 'message-planner', 'chat'];
+
+const DEFAULT_BOT_STATE: { isOpen: boolean; screen: Screen; chatHistory: ChatMessage[] } = {
+  isOpen: false,
+  screen: 'menu',
+  chatHistory: [],
+};
+
+function loadBotState(): typeof DEFAULT_BOT_STATE {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return { isOpen: false, screen: 'menu', chatHistory: [] };
+    if (!raw) return DEFAULT_BOT_STATE;
     const parsed = JSON.parse(raw);
     return {
       isOpen: parsed.isOpen === true,
-      screen: parsed.screen === 'chat' ? 'chat' : 'menu',
-      chatHistory: Array.isArray(parsed.chatHistory) ? parsed.chatHistory : [],
+      screen: VALID_SCREENS.includes(parsed.screen) ? parsed.screen : DEFAULT_BOT_STATE.screen,
+      chatHistory: Array.isArray(parsed.chatHistory) ? parsed.chatHistory : DEFAULT_BOT_STATE.chatHistory,
     };
   } catch {
-    return { isOpen: false, screen: 'menu', chatHistory: [] };
+    return DEFAULT_BOT_STATE;
   }
 }
 
@@ -268,9 +276,12 @@ export function NupciBot() {
     if (saved.chatHistory.length > 0) setChatHistory(saved.chatHistory);
   }, []);
 
-  // Persist open/screen/history to sessionStorage whenever they change
+  // Only persist state when the bot is open — prevents re-saving cleared state
+  // after handleClose calls clearBotState()
   useEffect(() => {
-    saveBotState({ isOpen, screen, chatHistory });
+    if (isOpen) {
+      saveBotState({ isOpen, screen, chatHistory });
+    }
   }, [isOpen, screen, chatHistory]);
 
   useEffect(() => {
@@ -283,17 +294,20 @@ export function NupciBot() {
     setIsOpen((v) => !v);
   }
 
-  // Explicit close: clears all conversation state and sessionStorage
+  // Explicit close: clears sessionStorage immediately, then resets internal
+  // state after the panel's closing animation has finished (300 ms)
   function handleClose() {
     setIsOpen(false);
-    setScreen('menu');
-    setMessageSent(false);
-    setSendError('');
-    setTopic('');
-    setPlannerMessage('');
-    setChatHistory([]);
-    setChatInput('');
     clearBotState();
+    setTimeout(() => {
+      setScreen('menu');
+      setMessageSent(false);
+      setSendError('');
+      setTopic('');
+      setPlannerMessage('');
+      setChatHistory([]);
+      setChatInput('');
+    }, 300);
   }
 
   function handleBack() {
