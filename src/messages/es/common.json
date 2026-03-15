@@ -576,7 +576,20 @@
       "noPlannerTasks": "No hay tareas del organizador pendientes",
       "noCoupleTasks": "No hay tareas de la pareja pendientes",
       "otherTasksTitle": "Otras Tareas",
-      "noOtherTasks": "No hay otras tareas pendientes"
+      "noOtherTasks": "No hay otras tareas pendientes",
+      "loading": "Cargando...",
+      "urgencyOverdue": "Vencida",
+      "urgencyDueToday": "Vence hoy",
+      "urgencyDueSoon": "Vence pronto",
+      "urgencyUpcoming": "Próxima",
+      "urgencyNoDeadline": "Sin fecha límite",
+      "dueDateDaysOverdue": "{count}d vencida",
+      "dueDateToday": "hoy",
+      "dueDateDaysUntil": "{count}d",
+      "collapseSection": "Contraer {title}",
+      "expandSection": "Expandir {title}",
+      "taskSingular": "tarea",
+      "taskPlural": "tareas"
     },
     "providers": {
       "title": "Gestión de Proveedores",

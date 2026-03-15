@@ -580,7 +580,20 @@
       "noPlannerTasks": "No pending planner tasks",
       "noCoupleTasks": "No pending couple tasks",
       "otherTasksTitle": "Other Tasks",
-      "noOtherTasks": "No pending other tasks"
+      "noOtherTasks": "No pending other tasks",
+      "loading": "Loading...",
+      "urgencyOverdue": "Overdue",
+      "urgencyDueToday": "Due today",
+      "urgencyDueSoon": "Due soon",
+      "urgencyUpcoming": "Upcoming",
+      "urgencyNoDeadline": "No deadline",
+      "dueDateDaysOverdue": "{count}d overdue",
+      "dueDateToday": "today",
+      "dueDateDaysUntil": "{count}d",
+      "collapseSection": "Collapse {title}",
+      "expandSection": "Expand {title}",
+      "taskSingular": "task",
+      "taskPlural": "tasks"
     },
     "providers": {
       "title": "Provider Management",

@@ -572,7 +572,20 @@
       "noPlannerTasks": "Keine ausstehenden Planer-Aufgaben",
       "noCoupleTasks": "Keine ausstehenden Aufgaben des Paares",
       "otherTasksTitle": "Weitere Aufgaben",
-      "noOtherTasks": "Keine weiteren ausstehenden Aufgaben"
+      "noOtherTasks": "Keine weiteren ausstehenden Aufgaben",
+      "loading": "Laden...",
+      "urgencyOverdue": "Überfällig",
+      "urgencyDueToday": "Fällig heute",
+      "urgencyDueSoon": "Bald fällig",
+      "urgencyUpcoming": "Demnächst",
+      "urgencyNoDeadline": "Kein Fälligkeitsdatum",
+      "dueDateDaysOverdue": "{count}T überfällig",
+      "dueDateToday": "heute",
+      "dueDateDaysUntil": "{count}T",
+      "collapseSection": "{title} einklappen",
+      "expandSection": "{title} ausklappen",
+      "taskSingular": "Aufgabe",
+      "taskPlural": "Aufgaben"
     },
     "providers": {
       "title": "Dienstleisterverwaltung",
