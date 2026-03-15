@@ -57,15 +57,16 @@ export async function GET(_request: NextRequest) {
         FROM families f
         LEFT JOIN family_members fm ON fm.family_id = f.id
         WHERE f.wedding_id = ANY(
-          SELECT id FROM weddings WHERE planner_id = ${user.planner_id} AND status = 'ACTIVE' AND deleted_at IS NULL
+          SELECT id FROM weddings WHERE planner_id = ${user.planner_id} AND status = 'ACTIVE' AND deleted_at IS NULL AND is_disabled = false
         )
       `,
-      prisma.wedding.count({ where: { planner_id: user.planner_id, status: 'ACTIVE', deleted_at: null } }),
+      prisma.wedding.count({ where: { planner_id: user.planner_id, status: 'ACTIVE', deleted_at: null, is_disabled: false } }),
       prisma.wedding.findMany({
         where: {
           planner_id: user.planner_id,
           wedding_date: { gte: today },
           status: 'ACTIVE',
+          is_disabled: false,
         },
         orderBy: { wedding_date: 'asc' },
         take: 5,

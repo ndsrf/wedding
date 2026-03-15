@@ -571,6 +571,7 @@ export async function getUpcomingTasksForPlanner(
         w.planner_id  = ${planner_id}
         AND w.status      = 'ACTIVE'
         AND w.deleted_at  IS NULL
+        AND w.is_disabled = false
         AND t.template_id IS NULL
         AND t.completed   = false
     )
