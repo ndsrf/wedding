@@ -3,9 +3,9 @@
 import { SessionProvider } from 'next-auth/react';
 import type { ReactNode } from 'react';
 import Footer from '@/components/Footer';
-// TODO: import a planner-specific NupciBot variant here once the planner
-// context (system prompt, available actions, data sources) is defined.
-// import { NupciBotPlanner } from '@/components/planner/NupciBotPlanner';
+// TODO: import NupciBot here once the planner context (system prompt,
+// available actions, data sources) is defined.
+// import { NupciBot } from '@/components/shared/NupciBot';
 
 export default function PlannerLayout({ children }: { children: ReactNode }) {
   return (
