@@ -18,6 +18,13 @@ export async function register() {
         new PrismaInstrumentation() as any,
         new UndiciInstrumentation() as any,
       ],
+      // Send traces to HyperDX when API key is configured.
+      // @vercel/otel also respects OTEL_EXPORTER_OTLP_ENDPOINT /
+      // OTEL_EXPORTER_OTLP_HEADERS env vars as an alternative.
+      ...(process.env.HYPERDX_API_KEY && {
+        endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io',
+        headers: { authorization: process.env.HYPERDX_API_KEY },
+      }),
     });
     
     console.log('[Server] ✓ @vercel/otel initialized with Prisma and Undici tracing');
