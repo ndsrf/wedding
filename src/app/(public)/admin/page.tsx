@@ -12,7 +12,6 @@ import { prisma } from '@/lib/db/prisma';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 import { UpcomingTasksWidget } from '@/components/admin/UpcomingTasksWidget';
 import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
-import { NupciBot } from '@/components/admin/NupciBot';
 import NotificationBell from '@/components/admin/NotificationBell';
 import PrivateHeader from '@/components/PrivateHeader';
 import { NavGroup } from '@/components/shared/NavGroup';
@@ -476,8 +475,6 @@ export default async function AdminDashboardPage() {
         </div>
       </main>
 
-      {/* NupciBot floating assistant */}
-      <NupciBot />
     </div>
   );
 }

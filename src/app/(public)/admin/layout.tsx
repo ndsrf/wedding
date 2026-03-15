@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react';
 import type { ReactNode } from 'react';
 import { WeddingAccessValidator } from '@/components/admin/WeddingAccessValidator';
 import Footer from '@/components/Footer';
+import { NupciBot } from '@/components/shared/NupciBot';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </div>
           <Footer />
         </div>
+        <NupciBot />
       </WeddingAccessValidator>
     </SessionProvider>
   );
