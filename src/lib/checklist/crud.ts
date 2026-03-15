@@ -435,7 +435,6 @@ export async function getUpcomingTasks(
         wedding_id,
         template_id: null,
         completed: false,
-        due_date: { not: null }, // Only tasks with due dates
       };
 
       if (assigned_to) {
@@ -453,7 +452,7 @@ export async function getUpcomingTasks(
           },
         },
         orderBy: [
-          { due_date: 'asc' },
+          { due_date: { sort: 'asc', nulls: 'last' } },
           { order: 'asc' },
         ],
         take: limit,
@@ -534,13 +533,12 @@ export async function getUpcomingTasksForPlanner(
       wedding_id: { in: weddings.map((w) => w.id) },
       template_id: null,
       completed: false,
-      due_date: { not: null },
       assigned_to: { in: ['WEDDING_PLANNER', 'COUPLE', 'OTHER'] },
     },
     include: {
       section: { select: { name: true } },
     },
-    orderBy: [{ due_date: 'asc' }, { order: 'asc' }],
+    orderBy: [{ due_date: { sort: 'asc', nulls: 'last' } }, { order: 'asc' }],
   });
 
   // 3. Split by assignee, group by wedding_id, take top `limit_per_wedding` per wedding per type
