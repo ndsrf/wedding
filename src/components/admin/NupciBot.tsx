@@ -204,6 +204,37 @@ function PanelHeader({
   );
 }
 
+// ── Session storage helpers ─────────────────────────────────────────────────
+
+const STORAGE_KEY = 'nupcibot_state';
+
+function loadBotState(): { isOpen: boolean; screen: Screen; chatHistory: ChatMessage[] } {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return { isOpen: false, screen: 'menu', chatHistory: [] };
+    const parsed = JSON.parse(raw);
+    return {
+      isOpen: parsed.isOpen === true,
+      screen: parsed.screen === 'chat' ? 'chat' : 'menu',
+      chatHistory: Array.isArray(parsed.chatHistory) ? parsed.chatHistory : [],
+    };
+  } catch {
+    return { isOpen: false, screen: 'menu', chatHistory: [] };
+  }
+}
+
+function saveBotState(state: { isOpen: boolean; screen: Screen; chatHistory: ChatMessage[] }) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch { /* ignore */ }
+}
+
+function clearBotState() {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch { /* ignore */ }
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
 
 export function NupciBot() {
@@ -229,6 +260,19 @@ export function NupciBot() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Restore state from sessionStorage on mount
+  useEffect(() => {
+    const saved = loadBotState();
+    if (saved.isOpen) setIsOpen(true);
+    if (saved.screen) setScreen(saved.screen);
+    if (saved.chatHistory.length > 0) setChatHistory(saved.chatHistory);
+  }, []);
+
+  // Persist open/screen/history to sessionStorage whenever they change
+  useEffect(() => {
+    saveBotState({ isOpen, screen, chatHistory });
+  }, [isOpen, screen, chatHistory]);
+
   useEffect(() => {
     if (screen === 'chat' && chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -239,18 +283,17 @@ export function NupciBot() {
     setIsOpen((v) => !v);
   }
 
+  // Explicit close: clears all conversation state and sessionStorage
   function handleClose() {
     setIsOpen(false);
-    // Reset all state when closing so the next open starts fresh
-    setTimeout(() => {
-      setScreen('menu');
-      setMessageSent(false);
-      setSendError('');
-      setTopic('');
-      setPlannerMessage('');
-      setChatHistory([]);
-      setChatInput('');
-    }, 300);
+    setScreen('menu');
+    setMessageSent(false);
+    setSendError('');
+    setTopic('');
+    setPlannerMessage('');
+    setChatHistory([]);
+    setChatInput('');
+    clearBotState();
   }
 
   function handleBack() {
@@ -272,7 +315,6 @@ export function NupciBot() {
 
   // ── Navigate: reports ──
   function handleViewReports() {
-    handleClose();
     router.push('/admin/reports');
   }
 
