@@ -278,7 +278,10 @@ export async function PATCH(
         return NextResponse.json(response, { status: 400 });
     }
 
-    await invalidateCache(CACHE_KEYS.plannerStats(user.planner_id));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.plannerStats(user.planner_id)),
+      invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
+    ]);
 
     const response: UpdateWeddingStatusResponse = {
       success: true,
