@@ -249,7 +249,7 @@ export interface PlannerStats {
   wedding_count: number;
   total_guests: number;
   rsvp_completion_percentage: number;
-  upcoming_weddings: (Wedding & { main_event_location: Location | null })[];
+  upcoming_weddings: (Wedding & { main_event_location: Pick<Location, 'name'> | null })[];
 }
 
 export type PlannerStatsResponse = APIResponse<PlannerStats>;

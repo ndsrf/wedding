@@ -84,7 +84,7 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
         },
         orderBy: { wedding_date: 'asc' },
         take: 5,
-        include: { main_event_location: true },
+        include: { main_event_location: { select: { name: true } } },
       }),
     ]);
 
