@@ -41,7 +41,7 @@ export default async function Icon() {
   );
 
   const buffer = Buffer.from(await imageResponse.arrayBuffer());
-  await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON_STATIC);
+  await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON);
 
   return new Response(buffer, {
     headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=604800' },

@@ -52,10 +52,8 @@ export const CACHE_TTL = {
   WEDDING_DETAILS: 600, // 10 minutes
   /** Upcoming task widgets — refreshed when tasks are completed or created */
   UPCOMING_TASKS: 120, // 2 minutes
-  /** Static locale favicon — never changes, long TTL */
-  ICON_STATIC: 604800, // 7 days
-  /** Per-user dynamic favicons — refreshed on next request after TTL */
-  ICON_DYNAMIC: 3600, // 1 hour
+  /** All favicons — 1 week TTL, invalidated on relevant data changes */
+  ICON: 604800, // 7 days
 } as const;
 
 // ============================================================================

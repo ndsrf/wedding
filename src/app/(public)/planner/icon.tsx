@@ -46,7 +46,7 @@ export default async function Icon() {
 
       if (cached) {
         return new Response(Buffer.from(cached, 'base64'), {
-          headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=3600' },
+          headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=604800' },
         });
       }
 
@@ -96,10 +96,10 @@ export default async function Icon() {
       }
 
       const buffer = Buffer.from(await imageResponse.arrayBuffer());
-      await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON_DYNAMIC);
+      await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON);
 
       return new Response(buffer, {
-        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=3600' },
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=604800' },
       });
     }
   } catch (e) {
