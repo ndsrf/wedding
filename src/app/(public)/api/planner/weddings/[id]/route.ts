@@ -21,6 +21,7 @@ import type {
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import { Language, LocationType, PaymentMode, WhatsAppMode } from '@prisma/client';
+import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 
 // Validation schema for updating a wedding
 const updateWeddingSchema = z
@@ -160,7 +161,7 @@ export async function GET(
       couple_names: wedding.couple_names,
       wedding_date: wedding.wedding_date,
       wedding_time: wedding.wedding_time,
-      location: wedding.location,
+      location: getWeddingDisplayLocation(wedding),
       main_event_location_id: wedding.main_event_location_id,
       rsvp_cutoff_date: wedding.rsvp_cutoff_date,
       dress_code: wedding.dress_code,
