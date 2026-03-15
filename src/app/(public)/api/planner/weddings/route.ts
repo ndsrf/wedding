@@ -20,6 +20,7 @@ import type {
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import { Language, LocationType, PaymentMode, WeddingStatus } from '@prisma/client';
+import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 
 // Validation schema for creating a wedding
 const createWeddingSchema = z.object({
@@ -168,7 +169,7 @@ export async function GET(request: NextRequest) {
 
       return {
         ...wedding,
-        location: wedding.main_event_location?.name ?? wedding.location,
+        location: getWeddingDisplayLocation(wedding),
         guest_count,
         rsvp_count,
         rsvp_completion_percentage,
