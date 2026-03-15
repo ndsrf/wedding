@@ -280,6 +280,7 @@ export async function PATCH(
 
     await Promise.all([
       invalidateCache(CACHE_KEYS.plannerStats(user.planner_id)),
+      invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)),
       invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
     ]);
 

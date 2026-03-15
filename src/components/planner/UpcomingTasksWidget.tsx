@@ -241,7 +241,7 @@ export function UpcomingTasksWidget() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch('/api/planner/upcoming-tasks');
+        const response = await fetch('/api/planner/upcoming-tasks', { cache: 'no-store' });
         const result: APIResponse<SplitUpcomingTasks> = await response.json();
 
         if (!response.ok || !result.success) {

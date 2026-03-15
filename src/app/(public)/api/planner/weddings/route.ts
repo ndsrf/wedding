@@ -376,7 +376,10 @@ export async function POST(request: NextRequest) {
       // This is not critical - planner can still manually create checklist if needed
     }
 
-    await invalidateCache(CACHE_KEYS.plannerStats(user.planner_id));
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.plannerStats(user.planner_id)),
+      invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)),
+    ]);
 
     const response: CreateWeddingResponse = {
       success: true,

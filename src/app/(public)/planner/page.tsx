@@ -72,10 +72,10 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
         FROM families f
         LEFT JOIN family_members fm ON fm.family_id = f.id
         WHERE f.wedding_id = ANY(
-          SELECT id FROM weddings WHERE planner_id = ${user.planner_id}
+          SELECT id FROM weddings WHERE planner_id = ${user.planner_id} AND status = 'ACTIVE' AND deleted_at IS NULL
         )
       `,
-      prisma.wedding.count({ where: { planner_id: user.planner_id } }),
+      prisma.wedding.count({ where: { planner_id: user.planner_id, status: 'ACTIVE', deleted_at: null } }),
       prisma.wedding.findMany({
         where: {
           planner_id: user.planner_id,

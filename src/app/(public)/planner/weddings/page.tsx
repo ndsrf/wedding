@@ -95,8 +95,10 @@ function PlannerWeddingsContent() {
         throw new Error(errorData.error?.message || t('planner.weddings.createError'));
       }
 
-      // Refresh weddings list
+      // Refresh weddings list and bust Next.js router cache so /planner
+      // dashboard also re-renders with fresh stats on next visit.
       await fetchWeddings();
+      router.refresh();
 
       // Close form
       setShowForm(false);

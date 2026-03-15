@@ -184,7 +184,8 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
         throw new Error('Failed to delete wedding');
       }
 
-      // Redirect to weddings list
+      // Bust Next.js router cache so /planner and /planner/weddings re-render.
+      router.refresh();
       router.push('/planner/weddings');
     } catch (err) {
       console.error('Error deleting wedding:', err);
