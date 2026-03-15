@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 import type {
   APIResponse,
   UpdateWeddingStatusResponse,
@@ -276,6 +277,12 @@ export async function PATCH(
         };
         return NextResponse.json(response, { status: 400 });
     }
+
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.plannerStats(user.planner_id)),
+      invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)),
+      invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
+    ]);
 
     const response: UpdateWeddingStatusResponse = {
       success: true,

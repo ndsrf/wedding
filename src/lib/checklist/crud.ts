@@ -15,6 +15,7 @@ import type {
   TaskOrderUpdate,
   UpcomingTask,
   TaskAssignment,
+  TaskStatus,
   ChecklistSectionWithTasks,
 } from '@/types/checklist';
 import type { ChecklistTask } from '@prisma/client';
@@ -435,7 +436,6 @@ export async function getUpcomingTasks(
         wedding_id,
         template_id: null,
         completed: false,
-        due_date: { not: null }, // Only tasks with due dates
       };
 
       if (assigned_to) {
@@ -453,7 +453,7 @@ export async function getUpcomingTasks(
           },
         },
         orderBy: [
-          { due_date: 'asc' },
+          { due_date: { sort: 'asc', nulls: 'last' } },
           { order: 'asc' },
         ],
         take: limit,
@@ -496,12 +496,38 @@ export async function getUpcomingTasks(
   });
 }
 
+// Row shape returned by the window-function raw query below.
+interface PlannerRawTaskRow {
+  id: string;
+  section_id: string | null;
+  wedding_id: string;
+  template_id: string | null;
+  title: string;
+  description: string | null;
+  assigned_to: string;
+  due_date: Date | null;
+  due_date_relative: string | null;
+  status: string;
+  completed: boolean;
+  completed_at: Date | null;
+  completed_by: string | null;
+  order: number;
+  created_at: Date;
+  updated_at: Date;
+  section_name: string | null;
+  wedding_couple_names: string | null;
+}
+
 /**
  * Get upcoming tasks for planner dashboard widget
  *
- * Returns tasks across multiple weddings split by assignee type.
- * Fetches WEDDING_PLANNER and COUPLE tasks in a single DB query then
- * splits in code to avoid multiple round-trips.
+ * Uses a single raw SQL query with a ROW_NUMBER() window function partitioned
+ * by (wedding_id, assigned_to) to enforce the per-wedding limit at the database
+ * level. This avoids fetching all incomplete tasks into memory and filtering
+ * in application code, which would be expensive when many undated tasks exist.
+ *
+ * Undated tasks (due_date IS NULL) are included and sorted after dated tasks
+ * via NULLS LAST.
  *
  * @param planner_id - The wedding planner's ID
  * @param limit_per_wedding - Maximum tasks per wedding per assignee type (default: 3)
@@ -511,66 +537,67 @@ export async function getUpcomingTasksForPlanner(
   planner_id: string,
   limit_per_wedding: number = 3
 ): Promise<{ plannerTasks: UpcomingTask[]; coupleTasks: UpcomingTask[]; otherTasks: UpcomingTask[] }> {
-  // 1. Get all active, non-deleted weddings for this planner (1 query)
-  const weddings = await prisma.wedding.findMany({
-    where: {
-      planner_id,
-      status: 'ACTIVE',
-      deleted_at: null,
-    },
-    select: {
-      id: true,
-      couple_names: true,
-    },
-  });
+  // Single query: joins weddings inline (no separate round-trip), ranks tasks
+  // within each (wedding_id, assigned_to) partition, and filters to the top N.
+  const rows = await prisma.$queryRaw<PlannerRawTaskRow[]>`
+    WITH ranked AS (
+      SELECT
+        t.id,
+        t.section_id,
+        t.wedding_id,
+        t.template_id,
+        t.title,
+        t.description,
+        t.assigned_to,
+        t.due_date,
+        t.due_date_relative,
+        t.status,
+        t.completed,
+        t.completed_at,
+        t.completed_by,
+        t."order",
+        t.created_at,
+        t.updated_at,
+        s.name              AS section_name,
+        w.couple_names      AS wedding_couple_names,
+        ROW_NUMBER() OVER (
+          PARTITION BY t.wedding_id, t.assigned_to
+          ORDER BY t.due_date ASC NULLS LAST, t."order" ASC
+        )                   AS rn
+      FROM checklist_tasks t
+      JOIN  weddings          w ON w.id = t.wedding_id
+      LEFT JOIN checklist_sections s ON s.id = t.section_id
+      WHERE
+        w.planner_id  = ${planner_id}
+        AND w.status      = 'ACTIVE'
+        AND w.deleted_at  IS NULL
+        AND w.is_disabled = false
+        AND t.template_id IS NULL
+        AND t.completed   = false
+    )
+    SELECT
+      id, section_id, wedding_id, template_id, title, description,
+      assigned_to, due_date, due_date_relative, status, completed,
+      completed_at, completed_by, "order", created_at, updated_at,
+      section_name, wedding_couple_names
+    FROM ranked
+    WHERE rn <= ${limit_per_wedding}
+    ORDER BY due_date ASC NULLS LAST, "order" ASC
+  `;
 
-  if (weddings.length === 0) return { plannerTasks: [], coupleTasks: [], otherTasks: [] };
+  if (rows.length === 0) return { plannerTasks: [], coupleTasks: [], otherTasks: [] };
 
-  const weddingMap = new Map(weddings.map((w) => [w.id, w.couple_names]));
-
-  // 2. Fetch WEDDING_PLANNER, COUPLE and OTHER tasks across all weddings in a single query
-  const rawTasks = await prisma.checklistTask.findMany({
-    where: {
-      wedding_id: { in: weddings.map((w) => w.id) },
-      template_id: null,
-      completed: false,
-      due_date: { not: null },
-      assigned_to: { in: ['WEDDING_PLANNER', 'COUPLE', 'OTHER'] },
-    },
-    include: {
-      section: { select: { name: true } },
-    },
-    orderBy: [{ due_date: 'asc' }, { order: 'asc' }],
-  });
-
-  // 3. Split by assignee, group by wedding_id, take top `limit_per_wedding` per wedding per type
-  const countByWeddingPlanner = new Map<string, number>();
-  const countByWeddingCouple = new Map<string, number>();
-  const countByWeddingOther = new Map<string, number>();
   const now = new Date();
   const plannerTasks: UpcomingTask[] = [];
   const coupleTasks: UpcomingTask[] = [];
   const otherTasks: UpcomingTask[] = [];
 
-  for (const task of rawTasks) {
-    const weddingId = task.wedding_id!;
-    const assignedTo = task.assigned_to;
-    const countMap =
-      assignedTo === 'WEDDING_PLANNER'
-        ? countByWeddingPlanner
-        : assignedTo === 'COUPLE'
-          ? countByWeddingCouple
-          : countByWeddingOther;
-
-    const count = countMap.get(weddingId) ?? 0;
-    if (count >= limit_per_wedding) continue;
-    countMap.set(weddingId, count + 1);
-
+  for (const row of rows) {
     let days_until_due: number | null = null;
     let urgency_color: 'red' | 'orange' | 'green' = 'green';
 
-    if (task.due_date) {
-      const diffTime = new Date(task.due_date).getTime() - now.getTime();
+    if (row.due_date) {
+      const diffTime = new Date(row.due_date).getTime() - now.getTime();
       days_until_due = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       if (days_until_due < 0) {
         urgency_color = 'red';
@@ -579,34 +606,24 @@ export async function getUpcomingTasksForPlanner(
       }
     }
 
-    const upcomingTask: UpcomingTask = {
-      ...task,
-      section_name: task.section?.name || null,
-      wedding_id: weddingId,
+    const task = {
+      ...row,
+      assigned_to: row.assigned_to as TaskAssignment,
+      status: row.status as TaskStatus,
+      wedding_couple_names: row.wedding_couple_names ?? undefined,
+      section_name: row.section_name,
       days_until_due,
       urgency_color,
-      wedding_couple_names: weddingMap.get(weddingId),
-    };
+    } as UpcomingTask;
 
-    if (assignedTo === 'WEDDING_PLANNER') {
-      plannerTasks.push(upcomingTask);
-    } else if (assignedTo === 'COUPLE') {
-      coupleTasks.push(upcomingTask);
+    if (row.assigned_to === 'WEDDING_PLANNER') {
+      plannerTasks.push(task);
+    } else if (row.assigned_to === 'COUPLE') {
+      coupleTasks.push(task);
     } else {
-      otherTasks.push(upcomingTask);
+      otherTasks.push(task);
     }
   }
-
-  // 4. Sort each list globally by due date
-  const sortByDueDate = (a: UpcomingTask, b: UpcomingTask) => {
-    if (!a.due_date) return 1;
-    if (!b.due_date) return -1;
-    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-  };
-
-  plannerTasks.sort(sortByDueDate);
-  coupleTasks.sort(sortByDueDate);
-  otherTasks.sort(sortByDueDate);
 
   return { plannerTasks, coupleTasks, otherTasks };
 }

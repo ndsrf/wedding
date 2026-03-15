@@ -26,9 +26,13 @@ export function WeddingCard({ wedding }: WeddingCardProps) {
     day: 'numeric',
   });
 
+  // A disabled wedding keeps status=ACTIVE in the DB but must show as disabled.
+  const effectiveStatus = wedding.is_disabled ? 'DISABLED' : wedding.status;
+
   // Determine status badge color
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     ACTIVE: 'bg-green-100 text-green-800',
+    DISABLED: 'bg-yellow-100 text-yellow-800',
     ARCHIVED: 'bg-gray-100 text-gray-800',
     COMPLETED: 'bg-blue-100 text-blue-800',
     DELETED: 'bg-red-100 text-red-800',
@@ -85,10 +89,10 @@ export function WeddingCard({ wedding }: WeddingCardProps) {
           <div className="flex items-center gap-2">
             <span
               className={`px-3 py-1 rounded-full text-xs font-medium ${
-                statusColors[wedding.status]
+                statusColors[effectiveStatus] ?? statusColors.ACTIVE
               }`}
             >
-              {t(`planner.weddings.statusLabels.${wedding.status}`)}
+              {t(`planner.weddings.statusLabels.${effectiveStatus}`)}
             </span>
           </div>
         </div>

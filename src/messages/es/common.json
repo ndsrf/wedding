@@ -457,6 +457,7 @@
       "at": "a las",
       "statusLabels": {
         "ACTIVE": "Activa",
+        "DISABLED": "Deshabilitada",
         "ARCHIVED": "Archivada",
         "COMPLETED": "Completada"
       },

@@ -461,6 +461,7 @@
       "at": "at",
       "statusLabels": {
         "ACTIVE": "Active",
+        "DISABLED": "Disabled",
         "ARCHIVED": "Archived",
         "COMPLETED": "Completed"
       },
