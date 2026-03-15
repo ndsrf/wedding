@@ -8,13 +8,15 @@ export const size = { width: 32, height: 32 };
 export const contentType = 'image/png';
 export const runtime = 'nodejs';
 
+const ICON_CACHE_CONTROL = `public, max-age=${CACHE_TTL.ICON}`;
+
 export default async function Icon() {
   const cacheKey = CACHE_KEYS.localeIcon();
   const cached = await getCached<string>(cacheKey);
 
   if (cached) {
     return new Response(Buffer.from(cached, 'base64'), {
-      headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=604800' },
+      headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
     });
   }
 
@@ -44,6 +46,6 @@ export default async function Icon() {
   await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON);
 
   return new Response(buffer, {
-    headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=604800' },
+    headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
   });
 }

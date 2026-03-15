@@ -13,6 +13,7 @@ import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import { toInitials } from '@/lib/wedding-utils';
 import type {
   APIResponse,
   GetWeddingResponse,
@@ -22,18 +23,6 @@ import type {
 import { API_ERROR_CODES } from '@/types/api';
 import { Language, LocationType, PaymentMode, WhatsAppMode } from '@prisma/client';
 import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
-
-function toInitials(names: string | null): string {
-  if (!names) return 'W';
-  const words = names
-    .replace(/\s+(&|and|y|et)\s+/i, ' ')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .split(/\s+/)
-    .filter(w => w.length > 0);
-  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
-  if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
-  return 'W';
-}
 
 // Validation schema for updating a wedding
 const updateWeddingSchema = z

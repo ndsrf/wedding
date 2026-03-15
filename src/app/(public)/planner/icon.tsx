@@ -12,6 +12,8 @@ export const size = {
 }
 export const contentType = 'image/png'
 
+const ICON_CACHE_CONTROL = `private, max-age=${CACHE_TTL.ICON}`;
+
 function fallbackIcon() {
   return new ImageResponse(
     (
@@ -46,7 +48,7 @@ export default async function Icon() {
 
       if (cached) {
         return new Response(Buffer.from(cached, 'base64'), {
-          headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=604800' },
+          headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
         });
       }
 
@@ -99,7 +101,7 @@ export default async function Icon() {
       await setCached(cacheKey, buffer.toString('base64'), CACHE_TTL.ICON);
 
       return new Response(buffer, {
-        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=604800' },
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE_CONTROL },
       });
     }
   } catch (e) {

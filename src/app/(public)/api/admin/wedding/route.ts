@@ -14,6 +14,7 @@ import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import { toInitials } from '@/lib/wedding-utils';
 import type { ThemeConfig } from '@/types/theme';
 import type { Theme } from '@/types/models';
 import type {
@@ -22,18 +23,6 @@ import type {
   UpdateWeddingConfigResponse,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-
-function toInitials(names: string | null): string {
-  if (!names) return 'W';
-  const words = names
-    .replace(/\s+(&|and|y|et)\s+/i, ' ')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .split(/\s+/)
-    .filter(w => w.length > 0);
-  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
-  if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
-  return 'W';
-}
 
 // Validation schema for updating wedding config
 const updateWeddingConfigSchema = z.object({
