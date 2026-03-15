@@ -12,6 +12,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
 import { ensureWeddingInitials } from '@/lib/short-url';
+import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -374,6 +375,8 @@ export async function POST(request: NextRequest) {
       console.error('Failed to copy checklist template to wedding:', error);
       // This is not critical - planner can still manually create checklist if needed
     }
+
+    await invalidateCache(CACHE_KEYS.plannerStats(user.planner_id));
 
     const response: CreateWeddingResponse = {
       success: true,
