@@ -69,6 +69,7 @@ export async function GET(_request: NextRequest) {
         },
         orderBy: { wedding_date: 'asc' },
         take: 5,
+        include: { main_event_location: { select: { name: true } } },
       }),
     ]);
 

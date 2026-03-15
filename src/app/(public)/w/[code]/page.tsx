@@ -15,6 +15,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/db/prisma';
+import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 import { getLanguageFromRequest } from '@/lib/i18n/server';
 import type { Language } from '@/lib/i18n/config';
 import WeddingLookupForm from './WeddingLookupForm';
@@ -65,6 +66,7 @@ export default async function WeddingLandingPage({ params }: Props) {
       wedding_date: true,
       wedding_time: true,
       location: true,
+      main_event_location: { select: { name: true } },
       dress_code: true,
       additional_info: true,
       default_language: true,
@@ -87,7 +89,7 @@ export default async function WeddingLandingPage({ params }: Props) {
         coupleNames: wedding.couple_names,
         weddingDate: wedding.wedding_date.toISOString(),
         weddingTime: wedding.wedding_time,
-        location: wedding.location ?? undefined,
+        location: getWeddingDisplayLocation(wedding) ?? undefined,
         dressCode: wedding.dress_code ?? undefined,
         additionalInfo: wedding.additional_info ?? undefined,
         defaultLanguage: wedding.default_language.toLowerCase() as Language,

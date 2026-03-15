@@ -4,6 +4,7 @@
  */
 
 import { prisma } from "@/lib/db";
+import { getWeddingDisplayLocation } from "@/lib/wedding-utils";
 import {
   renderTemplate,
   type TemplateVariables,
@@ -45,7 +46,7 @@ export async function sendSaveTheDate(
     const family = await prisma.family.findUnique({
       where: { id: family_id },
       include: {
-        wedding: true,
+        wedding: { include: { main_event_location: true } },
         members: {
           orderBy: { created_at: "asc" },
         },
@@ -135,7 +136,7 @@ export async function sendSaveTheDate(
       coupleNames: family.wedding.couple_names,
       weddingDate,
       weddingTime: family.wedding.wedding_time,
-      location: family.wedding.location ?? '',
+      location: getWeddingDisplayLocation(family.wedding) ?? '',
       magicLink: `${baseUrl}${shortPath}`,
       rsvpCutoffDate,
       ...(family.reference_code && { referenceCode: family.reference_code }),

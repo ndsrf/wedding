@@ -13,6 +13,7 @@ import { prisma } from '@/lib/db/prisma';
 import { UpcomingTasksWidget } from '@/components/planner/UpcomingTasksWidget';
 import PrivateHeader from '@/components/PrivateHeader';
 import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 import type { PlannerStats } from '@/types/api';
 import type { AuthenticatedUser } from '@/types/api';
 
@@ -83,6 +84,7 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
         },
         orderBy: { wedding_date: 'asc' },
         take: 5,
+        include: { main_event_location: { select: { name: true } } },
       }),
     ]);
 
@@ -239,8 +241,8 @@ export default async function PlannerDashboardPage() {
                       <h3 className="text-base font-semibold text-gray-900 truncate group-hover:text-rose-600 transition-colors">
                         {wedding.couple_names}
                       </h3>
-                      {wedding.location && (
-                        <p className="text-sm text-gray-500 truncate mt-0.5">{wedding.location}</p>
+                      {getWeddingDisplayLocation(wedding) && (
+                        <p className="text-sm text-gray-500 truncate mt-0.5">{getWeddingDisplayLocation(wedding)}</p>
                       )}
                       <p className="text-xs text-gray-400 mt-1">
                         {daysUntil > 1 ? `${daysUntil} days away` : daysUntil === 1 ? 'Tomorrow' : 'Today'}

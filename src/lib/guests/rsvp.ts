@@ -6,6 +6,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 import { cache } from 'react';
 import { validateMagicLinkLite } from '@/lib/auth/magic-link';
 import { trackLinkOpened } from '@/lib/tracking/events';
@@ -84,7 +85,7 @@ export const getRSVPPageData = cache(async (
       // invitation template, assemble, and populate the cache.
       const wedding = await prisma.wedding.findUnique({
         where: { id: weddingId },
-        include: { theme: true, wedding_day_theme: true },
+        include: { theme: true, wedding_day_theme: true, main_event_location: true },
       });
 
       if (!wedding) {
@@ -164,7 +165,7 @@ export const getRSVPPageData = cache(async (
           couple_names: wedding.couple_names,
           wedding_date: wedding.wedding_date.toISOString(),
           wedding_time: wedding.wedding_time,
-          location: wedding.location,
+          location: getWeddingDisplayLocation(wedding),
           rsvp_cutoff_date: wedding.rsvp_cutoff_date.toISOString(),
           dress_code: wedding.dress_code,
           additional_info: wedding.additional_info,
