@@ -83,7 +83,7 @@ export async function GET(
       const response: GetWeddingResponse = { success: true, data: cached as GetWeddingResponse['data'] };
       return NextResponse.json(response, {
         status: 200,
-        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
       });
     }
 
@@ -130,27 +130,34 @@ export async function GET(
       return NextResponse.json(response, { status: 403 });
     }
 
-    // Calculate stats using aggregate queries (avoids loading all families into memory)
-    const [guest_count, totalFamilies, rsvp_count, attending_count, payment_received_count] =
-      await Promise.all([
-        prisma.familyMember.count({ where: { family: { wedding_id: wedding.id } } }),
-        prisma.family.count({ where: { wedding_id: wedding.id } }),
-        prisma.family.count({
-          where: {
-            wedding_id: wedding.id,
-            members: { some: { attending: { not: null } } },
-          },
-        }),
-        prisma.familyMember.count({
-          where: { family: { wedding_id: wedding.id }, attending: true },
-        }),
-        prisma.family.count({
-          where: {
-            wedding_id: wedding.id,
-            gifts: { some: { status: { in: ['RECEIVED', 'CONFIRMED'] } } },
-          },
-        }),
-      ]);
+    // Single aggregate query replaces 5 separate COUNT round-trips.
+    // Uses one pass over families + LEFT JOINs to members and a covering-index
+    // subquery for gifts, so the planner pays only one network RTT to the DB.
+    const [statsRow] = await prisma.$queryRaw<
+      [{ total_families: number; guest_count: number; rsvp_count: number; attending_count: number; payment_received_count: number }]
+    >`
+      SELECT
+        COUNT(DISTINCT f.id)::int                                                    AS total_families,
+        COUNT(fm.id)::int                                                            AS guest_count,
+        COUNT(DISTINCT CASE WHEN fm.attending IS NOT NULL THEN f.id END)::int        AS rsvp_count,
+        COUNT(CASE WHEN fm.attending = true THEN 1 END)::int                        AS attending_count,
+        (
+          SELECT COUNT(DISTINCT f2.id)::int
+          FROM families f2
+          WHERE f2.wedding_id = ${weddingId}
+            AND EXISTS (
+              SELECT 1 FROM gifts g
+              WHERE g.family_id = f2.id
+                AND g.status IN ('RECEIVED', 'CONFIRMED')
+            )
+        )                                                                            AS payment_received_count
+      FROM families f
+      LEFT JOIN family_members fm ON fm.family_id = f.id
+      WHERE f.wedding_id = ${weddingId}
+    `;
+
+    const { total_families: totalFamilies, guest_count, rsvp_count, attending_count, payment_received_count } =
+      statsRow ?? { total_families: 0, guest_count: 0, rsvp_count: 0, attending_count: 0, payment_received_count: 0 };
 
     const rsvp_completion_percentage =
       totalFamilies > 0 ? Math.round((rsvp_count / totalFamilies) * 100) : 0;
@@ -223,7 +230,7 @@ export async function GET(
 
     return NextResponse.json(response, {
       status: 200,
-      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-cache' },
     });
   } catch (error: unknown) {
     // Handle authentication errors
@@ -433,8 +440,13 @@ export async function PATCH(
       void revalidateWeddingRSVPPages(weddingId);
     }
 
-    // Invalidate the planner wedding detail cache
-    await invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId));
+    // Invalidate all caches that include wedding config fields
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
+      invalidateCache(CACHE_KEYS.plannerWeddingsList(user.planner_id)),
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
+    ]);
 
     // Invalidate admin favicon if couple initials changed
     if (validatedData.couple_names !== undefined) {

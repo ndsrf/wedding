@@ -65,7 +65,7 @@ export async function GET(_request: NextRequest) {
       status: 200,
       headers: {
         'X-Cache': cached ? 'HIT' : 'MISS',
-        'Cache-Control': 'private, max-age=120, stale-while-revalidate=60',
+        'Cache-Control': 'no-cache',
       },
     });
   } catch (error: unknown) {

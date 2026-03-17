@@ -282,6 +282,9 @@ export async function PATCH(
       invalidateCache(CACHE_KEYS.plannerStats(user.planner_id)),
       invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)),
       invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
+      invalidateCache(CACHE_KEYS.plannerWeddingsList(user.planner_id)),
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
     ]);
 
     const response: UpdateWeddingStatusResponse = {

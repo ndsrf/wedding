@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 
 const createLocationSchema = z.object({
   name: z.string().min(1, 'Location name is required'),
@@ -16,6 +17,14 @@ export async function GET(_request: NextRequest) {
     const user = await requireRole('planner');
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const cacheKey = CACHE_KEYS.plannerLocations(user.planner_id);
+    const cached = await getCached<import('@prisma/client').Location[]>(cacheKey);
+    if (cached) {
+      return NextResponse.json({ data: cached }, {
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
+      });
+    }
+
     const locations = await prisma.location.findMany({
       where: { planner_id: user.planner_id },
       orderBy: [
@@ -23,7 +32,10 @@ export async function GET(_request: NextRequest) {
       ],
     });
 
-    return NextResponse.json({ data: locations });
+    await setCached(cacheKey, locations, CACHE_TTL.WEDDING_DETAILS);
+    return NextResponse.json({ data: locations }, {
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-cache' },
+    });
   } catch (error) {
     console.error('Error fetching locations:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -49,6 +61,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    await invalidateCache(CACHE_KEYS.plannerLocations(user.planner_id));
     return NextResponse.json({ data: location });
   } catch (error) {
     if (error instanceof z.ZodError) {

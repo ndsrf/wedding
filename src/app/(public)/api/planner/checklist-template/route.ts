@@ -102,7 +102,7 @@ export async function GET() {
 
     return NextResponse.json(response, {
       status: 200,
-      headers: { 'Cache-Control': 'private, max-age=600, stale-while-revalidate=300' },
+      headers: { 'Cache-Control': 'no-cache' },
     });
   } catch (error: unknown) {
     // Handle authentication errors

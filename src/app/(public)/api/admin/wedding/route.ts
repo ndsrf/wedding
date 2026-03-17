@@ -104,7 +104,7 @@ export async function GET() {
       const response: GetWeddingDetailsResponse = { success: true, data: cached as GetWeddingDetailsResponse['data'] };
       return NextResponse.json(response, {
         status: 200,
-        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
       });
     }
 
@@ -296,7 +296,7 @@ export async function GET() {
 
     return NextResponse.json(response, {
       status: 200,
-      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-cache' },
     });
   } catch (error: unknown) {
     // Handle authentication errors
@@ -363,7 +363,7 @@ export async function PATCH(request: NextRequest) {
     // Fetch current wedding to check for changes
     const currentWedding = await prisma.wedding.findUnique({
       where: { id: user.wedding_id },
-      select: { theme_id: true, wedding_day_theme_id: true, couple_names: true },
+      select: { theme_id: true, wedding_day_theme_id: true, couple_names: true, planner_id: true },
     });
 
     if (!currentWedding) {
@@ -511,6 +511,10 @@ export async function PATCH(request: NextRequest) {
     await Promise.all([
       invalidateCache(CACHE_KEYS.adminWedding(user.wedding_id)),
       invalidateCache(CACHE_KEYS.adminDashboard(user.wedding_id)),
+      invalidateCache(CACHE_KEYS.plannerWeddingDetail(user.wedding_id)),
+      ...(currentWedding.planner_id
+        ? [invalidateCache(CACHE_KEYS.plannerWeddingsList(currentWedding.planner_id))]
+        : []),
     ]);
 
     // Invalidate admin favicon if couple initials changed

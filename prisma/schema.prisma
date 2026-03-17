@@ -319,6 +319,9 @@ model Family {
 
   @@unique([wedding_id, short_url_code])
   @@index([wedding_id])
+  @@index([wedding_id, name])
+  @@index([wedding_id, channel_preference])
+  @@index([wedding_id, invited_by_admin_id])
   @@index([magic_token])
   @@index([reference_code])
   @@index([email])

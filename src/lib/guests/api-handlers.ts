@@ -153,7 +153,13 @@ async function invalidateStatsForWedding(weddingId: string): Promise<void> {
   await Promise.all([
     invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
     invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
-    ...(plannerId ? [invalidateCache(CACHE_KEYS.plannerStats(plannerId))] : []),
+    invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
+    ...(plannerId
+      ? [
+          invalidateCache(CACHE_KEYS.plannerStats(plannerId)),
+          invalidateCache(CACHE_KEYS.plannerWeddingsList(plannerId)),
+        ]
+      : []),
   ]);
 }
 
