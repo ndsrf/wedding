@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
     const isDefaultQuery = page === 1 && limit === 50 && !status;
     const cacheKey = CACHE_KEYS.plannerWeddingsList(user.planner_id);
 
-    type WeddingsListPayload = { items: object[]; pagination: object };
+    type WeddingsListPayload = NonNullable<ListPlannerWeddingsResponse['data']>
     if (isDefaultQuery) {
       const cached = await getCached<WeddingsListPayload>(cacheKey);
       if (cached) {
