@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest) {
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const cacheKey = CACHE_KEYS.plannerLocations(user.planner_id);
-    const cached = await getCached<object[]>(cacheKey);
+    const cached = await getCached<import('@prisma/client').Location[]>(cacheKey);
     if (cached) {
       return NextResponse.json({ data: cached }, {
         headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=600, stale-while-revalidate=120' },
