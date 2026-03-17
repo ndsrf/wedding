@@ -83,7 +83,7 @@ export async function GET(
       const response: GetWeddingResponse = { success: true, data: cached as GetWeddingResponse['data'] };
       return NextResponse.json(response, {
         status: 200,
-        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
       });
     }
 
@@ -230,7 +230,7 @@ export async function GET(
 
     return NextResponse.json(response, {
       status: 200,
-      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-cache' },
     });
   } catch (error: unknown) {
     // Handle authentication errors
