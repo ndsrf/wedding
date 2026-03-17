@@ -1,25 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { NotificationsPageContent } from '@/components/shared/NotificationsPageContent';
 
 export default function NotificationsPage() {
   const t = useTranslations();
   const { id: weddingId } = useParams() as { id: string };
-  const [weddingName, setWeddingName] = useState('');
+  const weddingName = useCoupleNames(weddingId);
   useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.notifications.title')}` : `Nupci - ${t('admin.notifications.title')}`);
-
-  useEffect(() => {
-    if (!weddingId) return;
-    fetch(`/api/planner/weddings/${weddingId}`)
-      .then(r => r.json())
-      .then(data => { if (data.success) setWeddingName(data.data?.couple_names ?? ''); })
-      .catch(() => {});
-  }, [weddingId]);
 
   return (
     <NotificationsPageContent

@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { cacheCoupleName } from '@/hooks/useCoupleNames';
 import { WeddingForm } from '@/components/planner/WeddingForm';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import type { Wedding, Theme, ItineraryItem } from '@/types/models';
@@ -45,6 +46,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
 
       const data = await response.json();
       setWedding(data.data);
+      if (data.data?.couple_names) cacheCoupleName(weddingId, data.data.couple_names);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
       console.error('Error fetching wedding:', err);

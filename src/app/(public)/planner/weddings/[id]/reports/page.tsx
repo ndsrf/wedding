@@ -6,12 +6,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { use } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { ReportsView } from '@/components/admin/ReportsView';
-import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface ReportsPageProps {
   params: Promise<{ id: string }>;
@@ -19,34 +19,9 @@ interface ReportsPageProps {
 
 export default function ReportsPage({ params }: ReportsPageProps) {
   const t = useTranslations();
-  const [weddingId, setWeddingId] = useState<string | null>(null);
-  const [weddingName, setWeddingName] = useState('');
+  const { id: weddingId } = use(params);
+  const weddingName = useCoupleNames(weddingId);
   useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.reports.title')}` : `Nupci - ${t('admin.reports.title')}`);
-
-  useEffect(() => {
-    params.then(({ id }) => {
-      setWeddingId(id);
-    });
-  }, [params]);
-
-  useEffect(() => {
-    if (!weddingId) return;
-    fetch(`/api/planner/weddings/${weddingId}`)
-      .then(r => r.json())
-      .then(data => { if (data.success) setWeddingName(data.data?.couple_names ?? ''); })
-      .catch(() => {});
-  }, [weddingId]);
-
-  if (!weddingId) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <WeddingSpinner size="md" />
-          <p className="mt-2 text-sm text-gray-500">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

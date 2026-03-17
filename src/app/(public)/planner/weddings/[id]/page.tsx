@@ -11,6 +11,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { cacheCoupleName } from '@/hooks/useCoupleNames';
 import { X, Calendar } from 'lucide-react';
 import { AdminInviteForm } from '@/components/planner/AdminInviteForm';
 import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
@@ -37,7 +38,6 @@ interface WeddingDetailPageProps {
 export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
   const t = useTranslations();
   const locale = useLocale();
-  useDocumentTitle(wedding ? `Nupci - ${wedding.couple_names}` : 'Nupci');
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const [wedding, setWedding] = useState<(WeddingWithStats & {
     wedding_admins?: WeddingAdmin[];
@@ -48,6 +48,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showInviteForm, setShowInviteForm] = useState(false);
+  useDocumentTitle(wedding ? `Nupci - ${wedding.couple_names}` : 'Nupci');
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -73,6 +74,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
 
       const data = await response.json();
       setWedding(data.data);
+      if (weddingId && data.data?.couple_names) cacheCoupleName(weddingId, data.data.couple_names);
 
       // Fetch admins separately (if wedding has wedding_admins relation)
       if (data.data.wedding_admins) {

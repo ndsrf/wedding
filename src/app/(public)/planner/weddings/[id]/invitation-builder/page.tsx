@@ -10,9 +10,10 @@
 
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { use } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { InvitationBuilderPageContent } from '@/components/shared/InvitationBuilderPageContent';
 
 interface PageProps {
@@ -23,16 +24,8 @@ export default function PlannerInvitationBuilderPage({ params }: PageProps) {
   const { id: weddingId } = use(params);
   const t = useTranslations();
   const apiBase = `/api/planner/weddings/${weddingId}`;
-  const [weddingName, setWeddingName] = useState('');
+  const weddingName = useCoupleNames(weddingId);
   useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.invitationBuilder.title')}` : `Nupci - ${t('admin.invitationBuilder.title')}`);
-
-  useEffect(() => {
-    if (!weddingId) return;
-    fetch(`/api/planner/weddings/${weddingId}`)
-      .then(r => r.json())
-      .then(data => { if (data.success) setWeddingName(data.data?.couple_names ?? ''); })
-      .catch(() => {});
-  }, [weddingId]);
 
   return (
     <InvitationBuilderPageContent
