@@ -10,6 +10,15 @@ import { getTranslations } from '@/lib/i18n/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { ChecklistTemplateEditor } from '@/components/planner/ChecklistTemplateEditor';
 
+export async function generateMetadata() {
+  try {
+    const { t } = await getTranslations();
+    return { title: `Nupci - ${t('planner.checklistTemplate.title')}` };
+  } catch {
+    return { title: 'Nupci' };
+  }
+}
+
 export default async function ChecklistTemplatePage() {
   // Check authentication - redirect if not planner
   try {

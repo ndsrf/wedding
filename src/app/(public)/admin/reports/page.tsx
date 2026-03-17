@@ -6,7 +6,29 @@
 
 import Link from 'next/link';
 import { getTranslations } from '@/lib/i18n/server';
+import { requireRole } from '@/lib/auth/middleware';
+import { prisma } from '@/lib/db/prisma';
 import { ReportsView } from '@/components/admin/ReportsView';
+
+export async function generateMetadata() {
+  try {
+    const [{ t }, user] = await Promise.all([
+      getTranslations(),
+      requireRole('wedding_admin').catch(() => null),
+    ]);
+    if (!user?.wedding_id) return { title: `Nupci - ${t('admin.reports.title')}` };
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: user.wedding_id },
+      select: { couple_names: true },
+    });
+    const coupleNames = wedding?.couple_names;
+    return {
+      title: coupleNames ? `Nupci - ${coupleNames} - ${t('admin.reports.title')}` : `Nupci - ${t('admin.reports.title')}`,
+    };
+  } catch {
+    return { title: 'Nupci' };
+  }
+}
 
 export default async function ReportsPage() {
   const { t } = await getTranslations();

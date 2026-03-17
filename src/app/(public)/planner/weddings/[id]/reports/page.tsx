@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ReportsView } from '@/components/admin/ReportsView';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
@@ -19,12 +20,22 @@ interface ReportsPageProps {
 export default function ReportsPage({ params }: ReportsPageProps) {
   const t = useTranslations();
   const [weddingId, setWeddingId] = useState<string | null>(null);
+  const [weddingName, setWeddingName] = useState('');
+  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.reports.title')}` : `Nupci - ${t('admin.reports.title')}`);
 
   useEffect(() => {
     params.then(({ id }) => {
       setWeddingId(id);
     });
   }, [params]);
+
+  useEffect(() => {
+    if (!weddingId) return;
+    fetch(`/api/planner/weddings/${weddingId}`)
+      .then(r => r.json())
+      .then(data => { if (data.success) setWeddingName(data.data?.couple_names ?? ''); })
+      .catch(() => {});
+  }, [weddingId]);
 
   if (!weddingId) {
     return (

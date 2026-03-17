@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import type { Language, PlannerMessageTemplate, MessageTemplate, TemplateType, Channel } from '@prisma/client';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
 import { getAvailablePlaceholders } from '@/lib/templates';
@@ -26,6 +27,7 @@ export default function PlannerTemplatesPage() {
   const { status } = useSession();
   const t = useTranslations('admin.templates');
   const commonT = useTranslations('common');
+  useDocumentTitle(`Nupci - ${t('title')}`);
   const [templates, setTemplates] = useState<PlannerMessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

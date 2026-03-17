@@ -10,6 +10,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { MapPin, Plus, Edit2, Trash2, ExternalLink } from 'lucide-react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 interface Location {
@@ -28,6 +29,7 @@ interface Location {
 type LocationFormData = Omit<Location, 'id' | '_count'>;
 
 export default function LocationsPage() {
+  useDocumentTitle('Nupci - Localizaciones');
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

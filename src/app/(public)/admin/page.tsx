@@ -174,6 +174,26 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
   }
 }
 
+export async function generateMetadata() {
+  try {
+    const [{ t }, user] = await Promise.all([
+      getTranslations(),
+      requireRole('wedding_admin').catch(() => null),
+    ]);
+    if (!user?.wedding_id) return { title: `Nupci - ${t('admin.dashboard.title')}` };
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: user.wedding_id },
+      select: { couple_names: true },
+    });
+    const coupleNames = wedding?.couple_names;
+    return {
+      title: coupleNames ? `Nupci - ${coupleNames}` : `Nupci - ${t('admin.dashboard.title')}`,
+    };
+  } catch {
+    return { title: 'Nupci' };
+  }
+}
+
 export default async function AdminDashboardPage() {
   let user;
   try {

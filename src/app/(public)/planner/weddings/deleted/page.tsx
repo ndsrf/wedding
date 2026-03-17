@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { WeddingCard } from '@/components/planner/WeddingCard';
 import { Info, ArrowLeft } from 'lucide-react';
 import type { WeddingWithStats } from '@/types/models';
@@ -17,6 +18,7 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 export default function DeletedWeddingsPage() {
   const t = useTranslations();
+  useDocumentTitle(`Nupci - ${t('planner.weddings.deletedWeddings')}`);
   const [weddings, setWeddings] = useState<WeddingWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

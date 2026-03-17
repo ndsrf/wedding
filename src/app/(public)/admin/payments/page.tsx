@@ -9,6 +9,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { PaymentList } from '@/components/admin/PaymentList';
 import { PaymentForm } from '@/components/admin/PaymentForm';
 import type { GiftStatus } from '@/types/models';
@@ -43,6 +45,8 @@ type GuestStatusFilter = 'all' | 'attending' | 'not_attending';
 
 export default function PaymentsPage() {
   const t = useTranslations();
+  const { coupleNames } = useWeddingAccess();
+  useDocumentTitle(coupleNames ? `Nupci - ${coupleNames} - ${t('admin.payments.title')}` : `Nupci - ${t('admin.payments.title')}`);
   const [payments, setPayments] = useState<PaymentItem[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
   const [filters, setFilters] = useState<Filters>({});

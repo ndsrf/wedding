@@ -12,9 +12,13 @@
 import { useTranslations } from 'next-intl';
 import PrivateHeader from '@/components/PrivateHeader';
 import { MenuPageContent } from '@/components/shared/MenuPageContent';
+import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 export default function AdminMenuPage() {
   const t = useTranslations('admin.menu');
+  const { coupleNames } = useWeddingAccess();
+  useDocumentTitle(coupleNames ? `Nupci - ${coupleNames} - ${t('title')}` : `Nupci - ${t('title')}`);
 
   return (
     <MenuPageContent

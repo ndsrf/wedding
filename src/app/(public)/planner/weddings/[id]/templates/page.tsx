@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import type { MessageTemplate, Language } from '@prisma/client';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
 import { TemplatePreview } from '@/components/admin/TemplatePreview';
@@ -42,6 +43,7 @@ export default function PlannerWeddingTemplatesPage({ params }: PageProps) {
   const [placeholders] = useState(getAvailablePlaceholders());
   const [saveTheDateEnabled, setSaveTheDateEnabled] = useState(false);
   const [weddingName, setWeddingName] = useState<string>('');
+  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('title')}` : `Nupci - ${t('title')}`);
 
   const apiBaseUrl = `/api/planner/weddings/${weddingId}`;
 

@@ -110,6 +110,15 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
   }
 }
 
+export async function generateMetadata() {
+  try {
+    const { t } = await getTranslations();
+    return { title: `Nupci - ${t('planner.dashboard.title')}` };
+  } catch {
+    return { title: 'Nupci' };
+  }
+}
+
 export default async function PlannerDashboardPage() {
   // Check authentication - redirect if not planner
   let user;

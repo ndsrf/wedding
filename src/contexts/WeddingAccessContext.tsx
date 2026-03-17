@@ -14,12 +14,14 @@ export interface WeddingAccessContextType {
   isDisabled: boolean;
   isDeleted: boolean;
   isReadOnly: boolean; // Convenience flag: true when disabled
+  coupleNames: string;
 }
 
 const defaultContext: WeddingAccessContextType = {
   isDisabled: false,
   isDeleted: false,
   isReadOnly: false,
+  coupleNames: '',
 };
 
 export const WeddingAccessContext = createContext<WeddingAccessContextType>(defaultContext);
@@ -36,17 +38,20 @@ interface WeddingAccessProviderProps {
   children: ReactNode;
   isDisabled: boolean;
   isDeleted: boolean;
+  coupleNames: string;
 }
 
 export function WeddingAccessProvider({
   children,
   isDisabled,
   isDeleted,
+  coupleNames,
 }: WeddingAccessProviderProps) {
   const value: WeddingAccessContextType = {
     isDisabled,
     isDeleted,
     isReadOnly: isDisabled, // Disabled means read-only
+    coupleNames,
   };
 
   return (

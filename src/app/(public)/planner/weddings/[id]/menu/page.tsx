@@ -14,6 +14,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { MenuPageContent } from '@/components/shared/MenuPageContent';
 
 export default function PlannerMenuPage() {
@@ -21,6 +22,7 @@ export default function PlannerMenuPage() {
   const weddingId = params.id as string;
   const t = useTranslations('admin.menu');
   const [weddingName, setWeddingName] = useState('');
+  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('title')}` : `Nupci - ${t('title')}`);
 
   useEffect(() => {
     fetch(`/api/planner/weddings/${weddingId}`)

@@ -7,14 +7,26 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { SeatingPageContent } from '@/components/shared/SeatingPageContent';
 
 export default function PlannerSeatingPage() {
   const { id: weddingId } = useParams() as { id: string };
   const t = useTranslations();
+  const [weddingName, setWeddingName] = useState('');
+  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.seating.title')}` : `Nupci - ${t('admin.seating.title')}`);
+
+  useEffect(() => {
+    if (!weddingId) return;
+    fetch(`/api/planner/weddings/${weddingId}`)
+      .then(r => r.json())
+      .then(data => { if (data.success) setWeddingName(data.data?.couple_names ?? ''); })
+      .catch(() => {});
+  }, [weddingId]);
 
   return (
     <SeatingPageContent

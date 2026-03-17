@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ProvidersPageContent } from '@/components/shared/ProvidersPageContent';
 
 export default function PlannerWeddingProvidersPage() {
   const t = useTranslations();
   const { id: weddingId } = useParams() as { id: string };
   const [weddingName, setWeddingName] = useState('');
+  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('planner.providers.title')}` : `Nupci - ${t('planner.providers.title')}`);
 
   useEffect(() => {
     fetch(`/api/planner/weddings/${weddingId}`)
