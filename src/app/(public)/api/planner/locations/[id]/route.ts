@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 
 const updateLocationSchema = z.object({
   name: z.string().min(1, 'Location name is required'),
@@ -75,6 +76,7 @@ export async function PATCH(
       },
     });
 
+    await invalidateCache(CACHE_KEYS.plannerLocations(user.planner_id));
     return NextResponse.json({ data: location });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -129,6 +131,7 @@ export async function DELETE(
       where: { id },
     });
 
+    await invalidateCache(CACHE_KEYS.plannerLocations(user.planner_id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting location:', error);

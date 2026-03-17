@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
 
 const updateProviderSchema = z.object({
   category_id: z.string().uuid(),
@@ -48,6 +49,7 @@ export async function PUT(
       },
     });
 
+    await invalidateCache(CACHE_KEYS.plannerProviders(user.planner_id));
     return NextResponse.json({ data: provider });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -80,6 +82,7 @@ export async function DELETE(
       where: { id },
     });
 
+    await invalidateCache(CACHE_KEYS.plannerProviders(user.planner_id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting provider:', error);

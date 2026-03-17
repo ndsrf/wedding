@@ -29,6 +29,12 @@ export const CACHE_KEYS = {
   plannerWeddingDetail: (weddingId: string) => `wedding:planner:detail:${weddingId}`,
   /** KPI stats for the /planner dashboard page + stats API */
   plannerStats: (plannerId: string) => `planner:stats:${plannerId}`,
+  /** Paginated weddings list for GET /api/planner/weddings (default params only) */
+  plannerWeddingsList: (plannerId: string) => `planner:weddings:list:${plannerId}`,
+  /** Provider list for GET /api/planner/providers */
+  plannerProviders: (plannerId: string) => `planner:providers:${plannerId}`,
+  /** Location list for GET /api/planner/locations */
+  plannerLocations: (plannerId: string) => `planner:locations:${plannerId}`,
   /** Upcoming tasks widget for the couple's /admin dashboard */
   adminUpcomingTasks: (weddingId: string) => `wedding:admin:tasks:${weddingId}`,
   /** Upcoming tasks widget for the planner dashboard (across all weddings) */

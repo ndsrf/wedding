@@ -12,7 +12,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
 import { ensureWeddingInitials } from '@/lib/short-url';
-import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -106,6 +106,23 @@ export async function GET(request: NextRequest) {
       where.status = status.toUpperCase() as WeddingStatus;
     }
 
+    // Cache the default list (page=1, limit=50, no status filter) — the most
+    // common request pattern when opening /planner/weddings.
+    const isDefaultQuery = page === 1 && limit === 50 && !status;
+    const cacheKey = CACHE_KEYS.plannerWeddingsList(user.planner_id);
+
+    type WeddingsListPayload = { items: object[]; pagination: object };
+    if (isDefaultQuery) {
+      const cached = await getCached<WeddingsListPayload>(cacheKey);
+      if (cached) {
+        const response: ListPlannerWeddingsResponse = { success: true, data: cached as ListPlannerWeddingsResponse['data'] };
+        return NextResponse.json(response, {
+          status: 200,
+          headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+        });
+      }
+    }
+
     // Get total count for pagination
     const total = await prisma.wedding.count({ where });
 
@@ -179,20 +196,29 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const response: ListPlannerWeddingsResponse = {
-      success: true,
-      data: {
-        items: weddingsWithStats,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+    const payload: WeddingsListPayload = {
+      items: weddingsWithStats,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     };
 
-    return NextResponse.json(response, { status: 200 });
+    if (isDefaultQuery) {
+      await setCached(cacheKey, payload, CACHE_TTL.WEDDING_STATS);
+    }
+
+    const response: ListPlannerWeddingsResponse = {
+      success: true,
+      data: payload as ListPlannerWeddingsResponse['data'],
+    };
+
+    return NextResponse.json(response, {
+      status: 200,
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+    });
   } catch (error: unknown) {
     // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';
@@ -379,6 +405,7 @@ export async function POST(request: NextRequest) {
     await Promise.all([
       invalidateCache(CACHE_KEYS.plannerStats(user.planner_id)),
       invalidateCache(CACHE_KEYS.plannerUpcomingTasks(user.planner_id)),
+      invalidateCache(CACHE_KEYS.plannerWeddingsList(user.planner_id)),
     ]);
 
     const response: CreateWeddingResponse = {
