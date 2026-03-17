@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
         const response: ListPlannerWeddingsResponse = { success: true, data: cached as ListPlannerWeddingsResponse['data'] };
         return NextResponse.json(response, {
           status: 200,
-          headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+          headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
         });
       }
     }
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, {
       status: 200,
-      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=300, stale-while-revalidate=600' },
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-cache' },
     });
   } catch (error: unknown) {
     // Handle authentication errors

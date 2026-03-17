@@ -24,7 +24,7 @@ export async function GET(_request: NextRequest) {
     const cached = await getCached<object[]>(cacheKey);
     if (cached) {
       return NextResponse.json({ data: cached }, {
-        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'private, max-age=600, stale-while-revalidate=120' },
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
       });
     }
 
@@ -36,7 +36,7 @@ export async function GET(_request: NextRequest) {
 
     await setCached(cacheKey, providers, CACHE_TTL.WEDDING_DETAILS);
     return NextResponse.json({ data: providers }, {
-      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'private, max-age=600, stale-while-revalidate=120' },
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-cache' },
     });
   } catch (error) {
     console.error('Error fetching providers:', error);

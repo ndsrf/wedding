@@ -440,10 +440,12 @@ export async function PATCH(
       void revalidateWeddingRSVPPages(weddingId);
     }
 
-    // Invalidate the planner wedding detail and list caches
+    // Invalidate all caches that include wedding config fields
     await Promise.all([
       invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
       invalidateCache(CACHE_KEYS.plannerWeddingsList(user.planner_id)),
+      invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
+      invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
     ]);
 
     // Invalidate admin favicon if couple initials changed
