@@ -9,7 +9,7 @@ import { useEffect, use } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { TastingPageContent } from '@/components/shared/TastingPageContent';
 
@@ -23,7 +23,7 @@ export default function PlannerTastingPage({ params }: PageProps) {
   const router = useRouter();
   const t = useTranslations('admin.tastingMenu');
   const weddingName = useCoupleNames(weddingId);
-  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('title')}` : `Nupci - ${t('title')}`);
+  useDocumentTitle(buildNupciTitle(t('title'), weddingName));
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/signin');

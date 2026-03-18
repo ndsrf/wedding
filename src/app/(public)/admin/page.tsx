@@ -186,8 +186,9 @@ export async function generateMetadata() {
       select: { couple_names: true },
     });
     const coupleNames = wedding?.couple_names;
+    const pageTitle = t('admin.dashboard.title');
     return {
-      title: coupleNames ? `Nupci - ${coupleNames}` : `Nupci - ${t('admin.dashboard.title')}`,
+      title: coupleNames ? `Nupci - ${coupleNames} - ${pageTitle}` : `Nupci - ${pageTitle}`,
     };
   } catch {
     return { title: 'Nupci' };

@@ -13,7 +13,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { GuestsPageContent } from '@/components/shared/GuestsPageContent';
 
@@ -22,7 +22,7 @@ export default function GuestsPage() {
   const params = useParams();
   const weddingId = params.id as string;
   const weddingName = useCoupleNames(weddingId);
-  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.guests.title')}` : `Nupci - ${t('admin.guests.title')}`);
+  useDocumentTitle(buildNupciTitle(t('admin.guests.title'), weddingName));
   const plannerBase = `/api/planner/weddings/${weddingId}`;
 
   return (

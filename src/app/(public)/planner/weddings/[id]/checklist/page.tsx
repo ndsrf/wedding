@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { ChecklistEditor } from '@/components/admin/ChecklistEditor';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
@@ -22,7 +22,7 @@ export default function ChecklistPage({ params }: ChecklistPageProps) {
   const t = useTranslations();
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const weddingName = useCoupleNames(weddingId);
-  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.checklist.title')}` : `Nupci - ${t('admin.checklist.title')}`);
+  useDocumentTitle(buildNupciTitle(t('admin.checklist.title'), weddingName));
 
   useEffect(() => {
     params.then(({ id }) => setWeddingId(id));

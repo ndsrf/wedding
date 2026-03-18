@@ -10,7 +10,7 @@
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { SeatingPageContent } from '@/components/shared/SeatingPageContent';
 
@@ -18,7 +18,7 @@ export default function PlannerSeatingPage() {
   const { id: weddingId } = useParams() as { id: string };
   const t = useTranslations();
   const weddingName = useCoupleNames(weddingId);
-  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.seating.title')}` : `Nupci - ${t('admin.seating.title')}`);
+  useDocumentTitle(buildNupciTitle(t('admin.seating.title'), weddingName));
 
   return (
     <SeatingPageContent

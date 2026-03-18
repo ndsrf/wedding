@@ -12,7 +12,7 @@
 
 import { use } from 'react';
 import { useTranslations } from 'next-intl';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { InvitationBuilderPageContent } from '@/components/shared/InvitationBuilderPageContent';
 
@@ -25,7 +25,7 @@ export default function PlannerInvitationBuilderPage({ params }: PageProps) {
   const t = useTranslations();
   const apiBase = `/api/planner/weddings/${weddingId}`;
   const weddingName = useCoupleNames(weddingId);
-  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.invitationBuilder.title')}` : `Nupci - ${t('admin.invitationBuilder.title')}`);
+  useDocumentTitle(buildNupciTitle(t('admin.invitationBuilder.title'), weddingName));
 
   return (
     <InvitationBuilderPageContent

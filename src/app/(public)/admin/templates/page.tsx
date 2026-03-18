@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import type { MessageTemplate, Language } from '@prisma/client';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
 import { TemplatePreview } from '@/components/admin/TemplatePreview';
@@ -30,7 +30,7 @@ export default function TemplatesPage() {
   const t = useTranslations('admin.templates');
   const commonT = useTranslations('common');
   const { coupleNames } = useWeddingAccess();
-  useDocumentTitle(coupleNames ? `Nupci - ${coupleNames} - ${t('title')}` : `Nupci - ${t('title')}`);
+  useDocumentTitle(buildNupciTitle(t('title'), coupleNames));
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -13,12 +13,12 @@
 import { useTranslations } from 'next-intl';
 import { InvitationBuilderPageContent } from '@/components/shared/InvitationBuilderPageContent';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 export default function AdminInvitationBuilderPage() {
   const t = useTranslations();
   const { coupleNames } = useWeddingAccess();
-  useDocumentTitle(coupleNames ? `Nupci - ${coupleNames} - ${t('admin.invitationBuilder.title')}` : `Nupci - ${t('admin.invitationBuilder.title')}`);
+  useDocumentTitle(buildNupciTitle(t('admin.invitationBuilder.title'), coupleNames));
 
   return (
     <InvitationBuilderPageContent

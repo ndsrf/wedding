@@ -13,7 +13,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { MenuPageContent } from '@/components/shared/MenuPageContent';
 
@@ -22,7 +22,7 @@ export default function PlannerMenuPage() {
   const weddingId = params.id as string;
   const t = useTranslations('admin.menu');
   const weddingName = useCoupleNames(weddingId);
-  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('title')}` : `Nupci - ${t('title')}`);
+  useDocumentTitle(buildNupciTitle(t('title'), weddingName));
 
   return (
     <MenuPageContent

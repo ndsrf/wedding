@@ -9,7 +9,7 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { ReportsView } from '@/components/admin/ReportsView';
 
@@ -21,7 +21,7 @@ export default function ReportsPage({ params }: ReportsPageProps) {
   const t = useTranslations();
   const { id: weddingId } = use(params);
   const weddingName = useCoupleNames(weddingId);
-  useDocumentTitle(weddingName ? `Nupci - ${weddingName} - ${t('admin.reports.title')}` : `Nupci - ${t('admin.reports.title')}`);
+  useDocumentTitle(buildNupciTitle(t('admin.reports.title'), weddingName));
 
   return (
     <div className="min-h-screen bg-gray-50">

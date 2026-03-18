@@ -13,7 +13,7 @@ import { useTranslations, useFormatter } from 'next-intl';
 import { WeddingConfigForm } from '@/components/admin/WeddingConfigForm';
 import PrivateHeader from '@/components/PrivateHeader';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import type { UpdateWeddingConfigRequest, WeddingDetails } from '@/types/api';
 
 export default function ConfigureWeddingPage() {
@@ -21,7 +21,7 @@ export default function ConfigureWeddingPage() {
   const t = useTranslations('admin.configure');
   const format = useFormatter();
   const { coupleNames } = useWeddingAccess();
-  useDocumentTitle(coupleNames ? `Nupci - ${coupleNames} - ${t('title')}` : `Nupci - ${t('title')}`);
+  useDocumentTitle(buildNupciTitle(t('title'), coupleNames));
   const [wedding, setWedding] = useState<WeddingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

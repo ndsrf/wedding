@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { TastingPageContent } from '@/components/shared/TastingPageContent';
 
 export default function AdminTastingPage() {
@@ -18,7 +18,7 @@ export default function AdminTastingPage() {
   const { status } = useSession();
   const router = useRouter();
   const { isReadOnly, coupleNames } = useWeddingAccess();
-  useDocumentTitle(coupleNames ? `Nupci - ${coupleNames} - ${t('title')}` : `Nupci - ${t('title')}`);
+  useDocumentTitle(buildNupciTitle(t('title'), coupleNames));
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/signin');

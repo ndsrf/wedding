@@ -13,3 +13,11 @@ export function useDocumentTitle(title: string) {
     }
   }, [title]);
 }
+
+/**
+ * Builds a consistent "Nupci - [coupleNames] - pageTitle" or
+ * "Nupci - pageTitle" string for use with useDocumentTitle.
+ */
+export function buildNupciTitle(pageTitle: string, coupleNames?: string): string {
+  return coupleNames ? `Nupci - ${coupleNames} - ${pageTitle}` : `Nupci - ${pageTitle}`;
+}
