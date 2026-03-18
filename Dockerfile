@@ -9,7 +9,7 @@ FROM node:24-alpine AS deps
 WORKDIR /app
 
 # Copy package files for dependency installation
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json* .npmrc* ./
 
 # Copy Prisma schema files (required for postinstall hook)
 COPY prisma ./prisma/
@@ -63,7 +63,7 @@ FROM deps AS prune
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json* .npmrc* ./
 
 # Prune devDependencies
 RUN npm prune --omit=dev
