@@ -27,7 +27,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
   const { id: weddingId } = use(params);
   const router = useRouter();
   const [wedding, setWedding] = useState<(Wedding & { itinerary_items?: ItineraryItem[] }) | null>(null);
-  useDocumentTitle(wedding ? `Nupci - ${wedding.couple_names} - ${t('planner.weddings.edit')}` : 'Nupci');
+  useDocumentTitle(`Nupci - ${wedding ? `${wedding.couple_names} - ` : ''}${t('planner.weddings.edit')}`);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
