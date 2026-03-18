@@ -1,24 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { ProvidersPageContent } from '@/components/shared/ProvidersPageContent';
 
 export default function PlannerWeddingProvidersPage() {
   const t = useTranslations();
   const { id: weddingId } = useParams() as { id: string };
-  const [weddingName, setWeddingName] = useState('');
-
-  useEffect(() => {
-    fetch(`/api/planner/weddings/${weddingId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success && data.data) setWeddingName(data.data.couple_names || '');
-      })
-      .catch(console.error);
-  }, [weddingId]);
+  const weddingName = useCoupleNames(weddingId);
+  useDocumentTitle(buildNupciTitle(t('planner.providers.title'), weddingName));
 
   return (
     <ProvidersPageContent

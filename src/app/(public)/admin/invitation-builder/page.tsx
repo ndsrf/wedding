@@ -10,9 +10,16 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { InvitationBuilderPageContent } from '@/components/shared/InvitationBuilderPageContent';
+import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 export default function AdminInvitationBuilderPage() {
+  const t = useTranslations();
+  const { coupleNames } = useWeddingAccess();
+  useDocumentTitle(buildNupciTitle(t('admin.invitationBuilder.title'), coupleNames));
+
   return (
     <InvitationBuilderPageContent
       apiPaths={{

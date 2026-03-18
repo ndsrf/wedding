@@ -3,9 +3,13 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { NotificationsPageContent } from '@/components/shared/NotificationsPageContent';
+import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 export default function NotificationsPage() {
   const t = useTranslations();
+  const { coupleNames } = useWeddingAccess();
+  useDocumentTitle(buildNupciTitle(t('admin.notifications.title'), coupleNames));
 
   return (
     <NotificationsPageContent

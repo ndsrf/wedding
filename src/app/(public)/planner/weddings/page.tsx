@@ -11,6 +11,7 @@ import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { WeddingCard } from '@/components/planner/WeddingCard';
 import { WeddingForm } from '@/components/planner/WeddingForm';
 import type { WeddingWithStats, Theme } from '@/types/models';
@@ -19,6 +20,7 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 function PlannerWeddingsContent() {
   const t = useTranslations();
+  useDocumentTitle(`Nupci - ${t('planner.weddings.title')}`);
   const router = useRouter();
   const searchParams = useSearchParams();
   const showCreateForm = searchParams.get('action') === 'create';

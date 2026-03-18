@@ -10,6 +10,8 @@ import React, { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { cacheCoupleName } from '@/hooks/useCoupleNames';
 import { WeddingForm } from '@/components/planner/WeddingForm';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import type { Wedding, Theme, ItineraryItem } from '@/types/models';
@@ -24,8 +26,8 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
   const t = useTranslations();
   const { id: weddingId } = use(params);
   const router = useRouter();
-
   const [wedding, setWedding] = useState<(Wedding & { itinerary_items?: ItineraryItem[] }) | null>(null);
+  useDocumentTitle(`Nupci - ${wedding ? `${wedding.couple_names} - ` : ''}${t('planner.weddings.edit')}`);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
 
       const data = await response.json();
       setWedding(data.data);
+      if (data.data?.couple_names) cacheCoupleName(weddingId, data.data.couple_names);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
       console.error('Error fetching wedding:', err);

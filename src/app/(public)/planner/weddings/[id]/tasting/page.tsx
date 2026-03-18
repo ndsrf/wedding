@@ -5,9 +5,12 @@
 
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useEffect, use } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { TastingPageContent } from '@/components/shared/TastingPageContent';
 
 interface PageProps {
@@ -18,21 +21,13 @@ export default function PlannerTastingPage({ params }: PageProps) {
   const { id: weddingId } = use(params);
   const { status } = useSession();
   const router = useRouter();
-  const [weddingName, setWeddingName] = useState('');
+  const t = useTranslations('admin.tastingMenu');
+  const weddingName = useCoupleNames(weddingId);
+  useDocumentTitle(buildNupciTitle(t('title'), weddingName));
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/signin');
   }, [status, router]);
-
-  useEffect(() => {
-    if (status !== 'authenticated') return;
-    fetch(`/api/planner/weddings/${weddingId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) setWeddingName(data.data?.couple_names ?? '');
-      })
-      .catch(() => {});
-  }, [status, weddingId]);
 
   return (
     <TastingPageContent

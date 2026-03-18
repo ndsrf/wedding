@@ -11,6 +11,9 @@
 'use client';
 
 import { use } from 'react';
+import { useTranslations } from 'next-intl';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { InvitationBuilderPageContent } from '@/components/shared/InvitationBuilderPageContent';
 
 interface PageProps {
@@ -19,7 +22,10 @@ interface PageProps {
 
 export default function PlannerInvitationBuilderPage({ params }: PageProps) {
   const { id: weddingId } = use(params);
+  const t = useTranslations();
   const apiBase = `/api/planner/weddings/${weddingId}`;
+  const weddingName = useCoupleNames(weddingId);
+  useDocumentTitle(buildNupciTitle(t('admin.invitationBuilder.title'), weddingName));
 
   return (
     <InvitationBuilderPageContent

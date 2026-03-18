@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ProviderLibrary } from '@/components/planner/providers/ProviderLibrary';
 
 export default function ProvidersPage() {
   const t = useTranslations();
+  useDocumentTitle(`Nupci - ${t('planner.providers.title')}`);
 
   return (
     <div className="min-h-screen bg-gray-50">

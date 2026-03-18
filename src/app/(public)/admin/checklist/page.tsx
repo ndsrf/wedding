@@ -12,13 +12,15 @@ import { useTranslations } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { ChecklistEditor } from '@/components/admin/ChecklistEditor';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import PrivateHeader from '@/components/PrivateHeader';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 export default function ChecklistPage() {
   const t = useTranslations();
   const { data: session, status } = useSession();
-  const { isReadOnly } = useWeddingAccess();
+  const { isReadOnly, coupleNames } = useWeddingAccess();
+  useDocumentTitle(buildNupciTitle(t('admin.checklist.title'), coupleNames));
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

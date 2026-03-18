@@ -12,11 +12,13 @@
 import PrivateHeader from '@/components/PrivateHeader';
 import { GuestsPageContent } from '@/components/shared/GuestsPageContent';
 import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
+import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useTranslations } from 'next-intl';
 
 export default function GuestsPage() {
   const t = useTranslations();
-  const { isReadOnly } = useWeddingAccess();
+  const { isReadOnly, coupleNames } = useWeddingAccess();
+  useDocumentTitle(buildNupciTitle(t('admin.guests.title'), coupleNames));
 
   return (
     <GuestsPageContent

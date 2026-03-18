@@ -3,6 +3,27 @@ import { ProvidersPageContent } from '@/components/shared/ProvidersPageContent';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getTranslations } from '@/lib/i18n/server';
+import { prisma } from '@/lib/db/prisma';
+
+export async function generateMetadata() {
+  try {
+    const [{ t }, user] = await Promise.all([
+      getTranslations(),
+      requireRole('wedding_admin').catch(() => null),
+    ]);
+    if (!user?.wedding_id) return { title: `Nupci - ${t('admin.dashboard.providers')}` };
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: user.wedding_id },
+      select: { couple_names: true },
+    });
+    const coupleNames = wedding?.couple_names;
+    return {
+      title: coupleNames ? `Nupci - ${coupleNames} - ${t('admin.dashboard.providers')}` : `Nupci - ${t('admin.dashboard.providers')}`,
+    };
+  } catch {
+    return { title: 'Nupci' };
+  }
+}
 
 export default async function AdminWeddingProvidersPage() {
   const { t } = await getTranslations();
