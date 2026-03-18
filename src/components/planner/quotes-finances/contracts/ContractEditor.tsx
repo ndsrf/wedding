@@ -60,6 +60,7 @@ export function ContractEditor({
   currentUser,
 }: ContractEditorProps) {
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
+  const providerRef = useRef<{ awareness: { on: (e: string, cb: () => void) => void; off: (e: string, cb: () => void) => void; getStates: () => Map<number, unknown>; setLocalStateField: (k: string, v: unknown) => void; clientID?: number } } | null>(null);
   const [collaborationReady, setCollaborationReady] = useState(false);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
 
@@ -77,7 +78,7 @@ export function ContractEditor({
         const authRes = await fetch(`/api/planner/contracts/${contractId}/liveblocks-auth`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentUser ? {} : {}),
+          body: JSON.stringify({}),
         });
         if (!authRes.ok || destroyed) return;
         const { token } = await authRes.json();
@@ -87,16 +88,21 @@ export function ContractEditor({
         const provider = new LiveblocksYjsProvider(room, ydocRef.current);
 
         if (!destroyed) {
-          provider.awareness.on('change', () => {
+          providerRef.current = provider as typeof providerRef.current;
+
+          const handleAwarenessChange = () => {
             const states = provider.awareness.getStates();
+            const clientID = (provider.awareness as { clientID?: number }).clientID;
             const users: Collaborator[] = [];
             states.forEach((state, clientId) => {
-              if ((state as { user?: unknown }).user && clientId !== (provider.awareness as { clientID?: number }).clientID) {
+              if ((state as { user?: unknown }).user && clientId !== clientID) {
                 users.push((state as { user: Collaborator }).user);
               }
             });
             setCollaborators(users);
-          });
+          };
+
+          provider.awareness.on('change', handleAwarenessChange);
 
           if (currentUser) {
             provider.awareness.setLocalStateField('user', {
@@ -109,6 +115,7 @@ export function ContractEditor({
           setCollaborationReady(true);
 
           cleanup = () => {
+            provider.awareness.off('change', handleAwarenessChange);
             provider.destroy();
             room.disconnect();
           };
@@ -134,12 +141,16 @@ export function ContractEditor({
         TextAlign.configure({ types: ['heading', 'paragraph'] }),
         Placeholder.configure({ placeholder: 'Start writing the contract...' }),
         Collaboration.configure({ document: ydocRef.current }),
-        CollaborationCursor.configure({
-          provider: { awareness: new (class { on() {} off() {} } )() } as never,
-          user: currentUser
-            ? { name: currentUser.name, color: currentUser.color ?? '#e11d48' }
-            : undefined,
-        }),
+        ...(collaborationReady && providerRef.current
+          ? [
+              CollaborationCursor.configure({
+                provider: providerRef.current,
+                user: currentUser
+                  ? { name: currentUser.name, color: currentUser.color ?? '#e11d48' }
+                  : { name: 'Anonymous', color: '#94a3b8' },
+              }),
+            ]
+          : []),
       ],
       content: initialContent ?? { type: 'doc', content: [{ type: 'paragraph' }] },
       editable: !readOnly,
