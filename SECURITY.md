@@ -6,6 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
+Last updated: 2026-03-18
 Last updated: 2026-03-11
 Last updated: 2026-02-19
 Last updated: 2026-02-18
@@ -101,6 +102,23 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Dev-only dependency, not included in production bundles
   - Worst case impact: slow linting in CI, not a production security issue
 - **Mitigation**: Development-only dependency, not included in production bundles
+
+##### next.js - Unbounded next/image Disk Cache Growth
+- **Package**: next 10.0.0 - 16.1.6 (current: ^15.1.6)
+- **CVE**: [GHSA-3x4c-7xq6-9pq8](https://github.com/advisories/GHSA-3x4c-7xq6-9pq8)
+- **Status**: Fix requires major version upgrade to next@16.1.7+ (breaking change from 15.x)
+- **Usage**: Core application framework
+- **Risk Assessment**:
+  - Moderate severity, CWE-400 (Uncontrolled Resource Consumption)
+  - Affects `next/image` disk cache only — attacker must trigger many distinct image requests
+  - Wedding app has limited, known image assets; not a high-volume image service
+  - Disk exhaustion would cause service degradation, not data breach or code execution
+  - Deployed on Vercel where ephemeral file system resets mitigate persistent cache growth
+- **Mitigation**:
+  - Hosted on Vercel (ephemeral filesystem limits persistent cache accumulation)
+  - Limited image variants in use (fixed sizes, controlled sources)
+  - Application is not a high-traffic public image service
+- **Future Plan**: Upgrade to Next.js 16.x after evaluating breaking changes and compatibility with next-auth, next-intl, and other dependencies
 
 ##### undici - Unbounded Decompression Chain
 - **Package**: undici < 6.23.0 (via @vercel/blob@0.27.3)

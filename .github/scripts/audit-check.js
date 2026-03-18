@@ -24,6 +24,9 @@ const ACCEPTED_GHSAS = [
   'GHSA-r354-f388-2fhh', // IPv4 validation bypass
   'GHSA-w332-q679-j88p', // Arbitrary key read
 
+  // next.js - MODERATE severity
+  'GHSA-3x4c-7xq6-9pq8', // Unbounded next/image disk cache growth (fix requires Next.js 16.x major upgrade)
+
   // lodash - MODERATE severity
   'GHSA-xxjr-mmjv-4gpg', // Prototype Pollution
 
