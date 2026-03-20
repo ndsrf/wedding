@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
+import type { InvoicePrefillData } from '../contracts/ContractsList';
 
 export interface Invoice {
   id: string;
@@ -56,7 +57,12 @@ const STATUS_STYLES: Record<string, string> = {
 
 type View = 'list' | 'form' | 'detail';
 
-export function InvoicesList() {
+interface InvoicesListProps {
+  externalPrefill?: InvoicePrefillData | null;
+  onExternalPrefillConsumed?: () => void;
+}
+
+export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: InvoicesListProps) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [readyQuotes, setReadyQuotes] = useState<ReadyQuote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +70,16 @@ export function InvoicesList() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
   const [prefillQuote, setPrefillQuote] = useState<ReadyQuote | null>(null);
+  const [externalFormData, setExternalFormData] = useState<InvoicePrefillData | null>(null);
+
+  useEffect(() => {
+    if (externalPrefill) {
+      setExternalFormData(externalPrefill);
+      setPrefillQuote(null);
+      setView('form');
+      onExternalPrefillConsumed?.();
+    }
+  }, [externalPrefill]); // onExternalPrefillConsumed is intentionally excluded — it's a stable callback
 
   async function fetchData() {
     const [invoiceRes, quoteRes] = await Promise.all([
@@ -97,11 +113,19 @@ export function InvoicesList() {
       body: JSON.stringify(data),
     });
     setPrefillQuote(null);
+    setExternalFormData(null);
     setView('list');
     fetchData();
   }
 
+  function handleCancelForm() {
+    setView('list');
+    setPrefillQuote(null);
+    setExternalFormData(null);
+  }
+
   function handleCreateFromQuote(q: ReadyQuote) {
+    setExternalFormData(null);
     setPrefillQuote(q);
     setView('form');
   }
@@ -132,32 +156,35 @@ export function InvoicesList() {
   const selectedInvoice = selectedId ? invoices.find((i) => i.id === selectedId) ?? null : null;
 
   if (view === 'form') {
-    const prefill = prefillQuote
-      ? {
-          client_name: prefillQuote.couple_names,
-          client_email: prefillQuote.client_email ?? '',
-          currency: prefillQuote.currency,
-          quote_id: prefillQuote.id,
-        }
-      : {};
+    const prefill = externalFormData
+      ? externalFormData
+      : prefillQuote
+        ? {
+            client_name: prefillQuote.couple_names,
+            client_email: prefillQuote.client_email ?? '',
+            currency: prefillQuote.currency,
+            quote_id: prefillQuote.id,
+          }
+        : {};
+
+    const formTitle = externalFormData?.client_name
+      ? `New Invoice – ${externalFormData.client_name}`
+      : prefillQuote
+        ? `New Invoice – ${prefillQuote.couple_names}`
+        : 'New Invoice';
 
     return (
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={() => { setView('list'); setPrefillQuote(null); }}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
+          <button onClick={handleCancelForm} className="text-sm text-gray-500 hover:text-gray-700">
             ← Back
           </button>
-          <h3 className="text-base font-semibold text-gray-900">
-            {prefillQuote ? `New Invoice – ${prefillQuote.couple_names}` : 'New Invoice'}
-          </h3>
+          <h3 className="text-base font-semibold text-gray-900">{formTitle}</h3>
         </div>
         <InvoiceForm
           initialData={prefill}
           onSave={handleSave}
-          onCancel={() => { setView('list'); setPrefillQuote(null); }}
+          onCancel={handleCancelForm}
         />
       </div>
     );

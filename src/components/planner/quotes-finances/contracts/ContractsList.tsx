@@ -3,6 +3,20 @@
 import { useState, useEffect } from 'react';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
 
+export interface InvoicePrefillData {
+  customer_id?: string | null;
+  quote_id?: string;
+  client_name?: string;
+  client_email?: string;
+  currency?: string;
+  tax_rate?: number | '';
+  line_items?: { name: string; description: string; quantity: number; unit_price: number; total: number }[];
+}
+
+interface ContractsListProps {
+  onCreateInvoice?: (prefill: InvoicePrefillData) => void;
+}
+
 interface Contract {
   id: string;
   title: string;
@@ -33,11 +47,12 @@ const CONTRACT_STATUS_LABELS: Record<string, string> = {
   CANCELLED: 'Cancelled',
 };
 
-export function ContractsList() {
+export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTemplates, setShowTemplates] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [creatingInvoiceId, setCreatingInvoiceId] = useState<string | null>(null);
   const [sendForm, setSendForm] = useState<{ email: string; name: string; message: string }>({
     email: '',
     name: '',
@@ -92,6 +107,33 @@ export function ContractsList() {
       setSendError('Network error — check your connection and try again.');
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleCreateInvoice(contract: Contract) {
+    if (!contract.quote || !onCreateInvoice) return;
+    setCreatingInvoiceId(contract.id);
+    try {
+      const res = await fetch(`/api/planner/quotes/${contract.quote.id}`);
+      if (!res.ok) return;
+      const { data: quote } = await res.json();
+      onCreateInvoice({
+        customer_id: quote.customer_id ?? null,
+        quote_id: quote.id,
+        client_name: quote.couple_names,
+        client_email: quote.client_email ?? '',
+        currency: quote.currency,
+        tax_rate: quote.tax_rate != null ? Number(quote.tax_rate) : '',
+        line_items: (quote.line_items ?? []).map((li: { name: string; description: string | null; quantity: unknown; unit_price: unknown; total: unknown }) => ({
+          name: li.name,
+          description: li.description ?? '',
+          quantity: Number(li.quantity),
+          unit_price: Number(li.unit_price),
+          total: Number(li.total),
+        })),
+      });
+    } finally {
+      setCreatingInvoiceId(null);
     }
   }
 
@@ -288,6 +330,22 @@ export function ContractsList() {
                     >
                       View Signing
                     </a>
+                  )}
+                  {contract.status === 'SIGNED' && contract.quote && onCreateInvoice && (
+                    <button
+                      onClick={() => handleCreateInvoice(contract)}
+                      disabled={creatingInvoiceId === contract.id}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-60 rounded-lg transition-colors ml-auto"
+                    >
+                      {creatingInvoiceId === contract.id ? (
+                        <span className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                      )}
+                      Create Invoice
+                    </button>
                   )}
                 </div>
               </div>

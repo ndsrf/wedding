@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ContractsList } from './contracts/ContractsList';
+import { ContractsList, type InvoicePrefillData } from './contracts/ContractsList';
 import { QuotesList } from './quotes/QuotesList';
 import { InvoicesList } from './invoices/InvoicesList';
 
@@ -43,6 +43,12 @@ const TABS = [
 export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPageProps) {
   const resolvedInitial = VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'quotes';
   const [activeTab, setActiveTab] = useState<Tab>(resolvedInitial);
+  const [invoicePrefill, setInvoicePrefill] = useState<InvoicePrefillData | null>(null);
+
+  function handleCreateInvoice(prefill: InvoicePrefillData) {
+    setInvoicePrefill(prefill);
+    setActiveTab('invoices');
+  }
 
   const defaultCurrency = summary?.currency ?? 'EUR';
 
@@ -102,8 +108,13 @@ export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPagePr
         </div>
         <div className="p-6">
           {activeTab === 'quotes' && <QuotesList />}
-          {activeTab === 'contracts' && <ContractsList />}
-          {activeTab === 'invoices' && <InvoicesList />}
+          {activeTab === 'contracts' && <ContractsList onCreateInvoice={handleCreateInvoice} />}
+          {activeTab === 'invoices' && (
+            <InvoicesList
+              externalPrefill={invoicePrefill}
+              onExternalPrefillConsumed={() => setInvoicePrefill(null)}
+            />
+          )}
         </div>
       </div>
     </div>
