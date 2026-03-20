@@ -156,7 +156,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/rsvp') ||
     pathname.startsWith('/api/guest') ||
     pathname.startsWith('/w/') ||
-    pathname === '/w'
+    pathname === '/w' ||
+    pathname.startsWith('/c/')
   ) {
     const response = NextResponse.next();
     response.headers.set('x-priority', 'high');

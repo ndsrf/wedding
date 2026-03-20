@@ -56,12 +56,12 @@ export function ContractsList() {
 
   useEffect(() => { fetchContracts(); }, []);
 
-  function openEditor(id: string) {
-    window.open(`/planner/contracts/${id}`, '_blank');
+  function openEditor(shareToken: string) {
+    window.open(`/planner/contracts/${shareToken}`, '_blank');
   }
 
-  function copyShareLink(token: string) {
-    const url = `${window.location.origin}/contract/${token}`;
+  function copyShareLink(shareToken: string) {
+    const url = `${window.location.origin}/c/${shareToken}`;
     navigator.clipboard.writeText(url).catch(() => {});
     alert('Share link copied to clipboard');
   }
@@ -208,7 +208,7 @@ export function ContractsList() {
                 {/* Actions */}
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
                   <button
-                    onClick={() => openEditor(contract.id)}
+                    onClick={() => openEditor(contract.share_token)}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
