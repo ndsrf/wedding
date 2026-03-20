@@ -15,30 +15,59 @@ const sendSchema = z.object({
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  let user;
   try {
-    const user = await requireRole('planner');
-    if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { id } = await params;
+    user = await requireRole('planner');
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const contract = await prisma.contract.findFirst({
+  const { id } = await params;
+
+  // 1. Load contract from DB
+  let contract;
+  try {
+    contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
     });
-    if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  } catch (error) {
+    console.error('send-for-signing: DB lookup error:', error);
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  }
+  if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (contract.status === 'SIGNED') {
+    return NextResponse.json({ error: 'Contract is already signed' }, { status: 400 });
+  }
 
-    if (contract.status === 'SIGNED') {
-      return NextResponse.json({ error: 'Contract is already signed' }, { status: 400 });
-    }
-
+  // 2. Parse and validate request body
+  let data: z.infer<typeof sendSchema>;
+  try {
     const body = await request.json();
-    const data = sendSchema.parse(body);
+    data = sendSchema.parse(body);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.issues }, { status: 422 });
+    }
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
 
-    const planner = await prisma.weddingPlanner.findUnique({
+  // 3. Fetch planner name for PDF
+  let planner;
+  try {
+    planner = await prisma.weddingPlanner.findUnique({
       where: { id: user.planner_id },
       select: { name: true },
     });
+  } catch (error) {
+    console.error('send-for-signing: planner lookup error:', error);
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  }
 
-    // Generate PDF from current content
-    const buffer = await renderToBuffer(
+  // 4. Generate PDF from contract content
+  let buffer: Buffer;
+  try {
+    buffer = await renderToBuffer(
       React.createElement(ContractPDF, {
         title: contract.title,
         content: contract.content as { type: string; content?: never[] },
@@ -47,23 +76,45 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         createdAt: contract.created_at,
       }) as never
     );
+  } catch (error) {
+    console.error('send-for-signing: PDF generation error:', error);
+    return NextResponse.json({ error: 'Failed to generate contract PDF' }, { status: 500 });
+  }
 
-    const blob = await put(`contracts/${id}/signing-${Date.now()}.pdf`, buffer, {
+  // 5. Upload PDF to Vercel Blob
+  let blob;
+  try {
+    blob = await put(`contracts/${id}/signing-${Date.now()}.pdf`, buffer, {
       access: 'public',
       contentType: 'application/pdf',
     });
+  } catch (error) {
+    console.error('send-for-signing: blob upload error:', error);
+    return NextResponse.json({ error: 'Failed to upload contract PDF' }, { status: 500 });
+  }
 
-    // Create Dropbox Sign signature request
-    const signingResult = await createSignatureRequest({
+  // 6. Create Dropbox Sign signature request
+  let signingResult;
+  try {
+    signingResult = await createSignatureRequest({
       pdfUrl: blob.url,
       signerEmail: data.signer_email,
       signerName: data.signer_name,
       title: contract.title,
       message: data.message,
     });
+  } catch (error) {
+    console.error('send-for-signing: Dropbox Sign API error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create signature request. Check Dropbox Sign credentials.' },
+      { status: 502 }
+    );
+  }
 
-    // Update contract with signing info
-    const updated = await prisma.contract.update({
+  // 7. Persist signing details to DB
+  let updated;
+  try {
+    updated = await prisma.contract.update({
       where: { id },
       data: {
         status: 'SIGNING',
@@ -72,18 +123,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         signing_url: signingResult.signUrl ?? null,
       },
     });
-
-    return NextResponse.json({
-      data: {
-        contract: updated,
-        sign_url: signingResult.signUrl,
-      },
-    });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 422 });
-    }
-    console.error('Send for signing error:', error);
-    return NextResponse.json({ error: 'Failed to send for signing' }, { status: 500 });
+    console.error('send-for-signing: DB update error:', error);
+    return NextResponse.json({ error: 'Failed to save signing details' }, { status: 500 });
   }
+
+  return NextResponse.json({
+    data: {
+      contract: updated,
+      sign_url: signingResult.signUrl,
+    },
+  });
 }

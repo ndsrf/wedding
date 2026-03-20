@@ -46,7 +46,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     if (!quote) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     return NextResponse.json({ data: quote });
-  } catch {
+  } catch (error) {
+    console.error('GET /api/planner/quotes/[id] error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -107,6 +108,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 422 });
     }
+    console.error('PATCH /api/planner/quotes/[id] error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -122,7 +124,8 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     await prisma.quote.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('DELETE /api/planner/quotes/[id] error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

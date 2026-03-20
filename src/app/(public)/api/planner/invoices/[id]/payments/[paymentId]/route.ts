@@ -39,7 +39,8 @@ export async function DELETE(
     });
 
     return NextResponse.json({ data: result });
-  } catch {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (error) {
+    console.error('DELETE /api/planner/invoices/[id]/payments/[paymentId] error:', error);
+    return NextResponse.json({ error: 'Failed to delete payment' }, { status: 500 });
   }
 }

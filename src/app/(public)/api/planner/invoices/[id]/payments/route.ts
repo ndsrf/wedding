@@ -69,6 +69,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 422 });
     }
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('POST /api/planner/invoices/[id]/payments error:', error);
+    return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 });
   }
 }
