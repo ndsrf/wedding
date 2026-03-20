@@ -13,17 +13,17 @@ const lineItemSchema = z.object({
 
 const createQuoteSchema = z.object({
   couple_names: z.string().min(1),
-  event_date: z.preprocess((v) => v || null, z.string().datetime().optional().nullable()),
+  event_date: z.string().datetime().optional().nullable(),
   location: z.string().optional().nullable(),
-  client_email: z.string().email().optional().nullable().or(z.literal('')),
+  client_email: z.string().email().optional().nullable(),
   client_phone: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   currency: z.string().default('EUR'),
   subtotal: z.number().min(0),
-  discount: z.preprocess((v) => (v === '' ? null : v), z.number().min(0).optional().nullable()),
-  tax_rate: z.preprocess((v) => (v === '' ? null : v), z.number().min(0).max(100).optional().nullable()),
+  discount: z.number().min(0).optional().nullable(),
+  tax_rate: z.number().min(0).max(100).optional().nullable(),
   total: z.number().min(0),
-  expires_at: z.preprocess((v) => v || null, z.string().datetime().optional().nullable()),
+  expires_at: z.string().datetime().optional().nullable(),
   line_items: z.array(lineItemSchema).min(1),
 });
 
@@ -60,13 +60,7 @@ export async function POST(request: NextRequest) {
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    console.log('[quotes POST] body:', JSON.stringify(body));
-    const parseResult = createQuoteSchema.safeParse(body);
-    if (!parseResult.success) {
-      console.log('[quotes POST] validation failed:', JSON.stringify(parseResult.error.issues));
-      return NextResponse.json({ error: parseResult.error.issues }, { status: 422 });
-    }
-    const data = parseResult.data;
+    const data = createQuoteSchema.parse(body);
 
     const quote = await prisma.quote.create({
       data: {

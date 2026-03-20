@@ -44,7 +44,7 @@ export function QuotesList() {
 
   useEffect(() => { fetchQuotes(); }, []);
 
-  async function handleSave(data: object & { subtotal: number; total: number }) {
+  async function handleSave(data: Record<string, unknown>) {
     if (editingId) {
       await fetch(`/api/planner/quotes/${editingId}`, {
         method: 'PATCH',

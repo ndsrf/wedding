@@ -27,7 +27,7 @@ interface QuoteFormData {
 
 interface QuoteFormProps {
   initialData?: Partial<QuoteFormData> & { id?: string };
-  onSave: (data: QuoteFormData & { subtotal: number; total: number }) => Promise<void>;
+  onSave: (data: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -88,7 +88,21 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave({ ...form, subtotal, total });
+      await onSave({
+        ...form,
+        subtotal,
+        total,
+        // Coerce optional numeric fields: '' → null
+        discount: form.discount === '' ? null : Number(form.discount),
+        tax_rate: form.tax_rate === '' ? null : Number(form.tax_rate),
+        // Coerce optional string fields: '' → null
+        event_date: form.event_date || null,
+        expires_at: form.expires_at || null,
+        client_email: form.client_email || null,
+        client_phone: form.client_phone || null,
+        location: form.location || null,
+        notes: form.notes || null,
+      });
     } finally {
       setSaving(false);
     }
