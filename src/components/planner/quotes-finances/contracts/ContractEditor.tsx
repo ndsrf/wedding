@@ -5,7 +5,6 @@ import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { useEffect, useState, useRef } from 'react';
 import * as Y from 'yjs';
 
@@ -59,10 +58,9 @@ export function ContractEditor({
   currentUser,
 }: ContractEditorProps) {
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
-  const providerRef = useRef<{ awareness: { on: (e: string, cb: () => void) => void; off: (e: string, cb: () => void) => void; getStates: () => Map<number, unknown>; setLocalStateField: (k: string, v: unknown) => void; clientID?: number } } | null>(null);
-  const [collaborationReady, setCollaborationReady] = useState(false);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
 
+  // Initialise Liveblocks for real-time text sync (Yjs) and presence
   useEffect(() => {
     let destroyed = false;
     let cleanup: (() => void) | undefined;
@@ -87,11 +85,25 @@ export function ContractEditor({
         const provider = new LiveblocksYjsProvider(room, ydocRef.current);
 
         if (!destroyed) {
-          providerRef.current = provider as typeof providerRef.current;
+          const awareness = provider.awareness as {
+            on: (e: string, cb: () => void) => void;
+            off: (e: string, cb: () => void) => void;
+            getStates: () => Map<number, unknown>;
+            setLocalStateField: (k: string, v: unknown) => void;
+            clientID?: number;
+          };
+
+          if (currentUser) {
+            awareness.setLocalStateField('user', {
+              id: currentUser.id,
+              name: currentUser.name,
+              color: currentUser.color ?? '#e11d48',
+            });
+          }
 
           const handleAwarenessChange = () => {
-            const states = provider.awareness.getStates();
-            const clientID = (provider.awareness as { clientID?: number }).clientID;
+            const states = awareness.getStates();
+            const clientID = awareness.clientID;
             const users: Collaborator[] = [];
             states.forEach((state, clientId) => {
               if ((state as { user?: unknown }).user && clientId !== clientID) {
@@ -101,20 +113,10 @@ export function ContractEditor({
             setCollaborators(users);
           };
 
-          provider.awareness.on('change', handleAwarenessChange);
-
-          if (currentUser) {
-            provider.awareness.setLocalStateField('user', {
-              id: currentUser.id,
-              name: currentUser.name,
-              color: currentUser.color ?? '#e11d48',
-            });
-          }
-
-          setCollaborationReady(true);
+          awareness.on('change', handleAwarenessChange);
 
           cleanup = () => {
-            provider.awareness.off('change', handleAwarenessChange);
+            awareness.off('change', handleAwarenessChange);
             provider.destroy();
             room.disconnect();
           };
@@ -132,6 +134,8 @@ export function ContractEditor({
     };
   }, [contractId, currentUser]);
 
+  // Editor is created once — stable deps [] prevents destroy/recreate on
+  // collaboration state changes, which would crash the ySyncPlugin.
   const editor = useEditor(
     {
       extensions: [
@@ -139,16 +143,6 @@ export function ContractEditor({
         TextAlign.configure({ types: ['heading', 'paragraph'] }),
         Placeholder.configure({ placeholder: 'Start writing the contract...' }),
         Collaboration.configure({ document: ydocRef.current }),
-        ...(collaborationReady && providerRef.current
-          ? [
-              CollaborationCursor.configure({
-                provider: providerRef.current,
-                user: currentUser
-                  ? { name: currentUser.name, color: currentUser.color ?? '#e11d48' }
-                  : { name: 'Anonymous', color: '#94a3b8' },
-              }),
-            ]
-          : []),
       ],
       content: initialContent ?? { type: 'doc', content: [{ type: 'paragraph' }] },
       editable: !readOnly,
@@ -157,7 +151,7 @@ export function ContractEditor({
       },
       immediatelyRender: false,
     },
-    [collaborationReady]
+    []
   );
 
   if (!editor) return null;
