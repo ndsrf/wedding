@@ -106,8 +106,8 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
     <div className="min-h-screen bg-gray-50">
       {/* Sticky header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => window.close()}
               className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
@@ -118,7 +118,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
               </svg>
             </button>
             <div className="min-w-0">
-              <h1 className="text-base font-bold text-gray-900 font-playfair truncate">{contract.title}</h1>
+              <h1 className="text-sm sm:text-base font-bold text-gray-900 font-playfair truncate">{contract.title}</h1>
               <p className="text-xs text-gray-500 mt-0.5">Shared by {contract.planner.name}</p>
             </div>
           </div>
@@ -156,14 +156,14 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
             <span>
-              <strong>Text selected</strong> — add a comment in the sidebar to flag this section for your planner.
+              <strong>Text selected</strong> — add a comment below to flag this section for your planner.
             </span>
           </div>
         </div>
       )}
 
       {/* Editor + comments sidebar */}
-      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6 items-start">
+      <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-6 lg:flex-row lg:items-start">
         {/* Read-only contract */}
         <div className="flex-1 min-w-0">
           <ContractEditor
@@ -183,13 +183,13 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
             onSelectionChange={setSelectedText}
           />
           <p className="text-center text-xs text-gray-400 mt-4">
-            Select any text and add a comment in the sidebar to flag it for your wedding planner.
+            Select any text and add a comment below to flag it for your wedding planner.
           </p>
         </div>
 
         {/* Comments sidebar */}
-        <div className="w-72 flex-shrink-0">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sticky top-20 max-h-[calc(100vh-6rem)] overflow-hidden flex flex-col">
+        <div className="w-full lg:w-72 lg:flex-shrink-0">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden lg:flex lg:flex-col">
             <ContractCommentsSidebar
               ydocRef={ydocRef}
               authorName={clientName}
