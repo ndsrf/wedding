@@ -76,7 +76,7 @@ export function ContractCommentsSidebar({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-gray-900">
           Comments
@@ -139,7 +139,7 @@ export function ContractCommentsSidebar({
       )}
 
       {/* Comments list */}
-      <div className="space-y-3 flex-1 overflow-y-auto">
+      <div className="space-y-3 overflow-y-auto lg:flex-1">
         {comments.length === 0 && !addingComment && (
           <div className="text-center py-8">
             <div className="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-2">

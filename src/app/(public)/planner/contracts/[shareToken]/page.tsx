@@ -106,8 +106,8 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
     <div className="min-h-screen bg-gray-50">
       {/* Sticky header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => window.close()}
               className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
@@ -118,10 +118,12 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
               </svg>
             </button>
             <div className="min-w-0">
-              <h1 className="text-base font-bold text-gray-900 font-playfair truncate">{contract.title}</h1>
-              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-0.5 ${STATUS_STYLES[contract.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                {STATUS_LABELS[contract.status] ?? contract.status}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-sm sm:text-base font-bold text-gray-900 font-playfair truncate">{contract.title}</h1>
+                <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[contract.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                  {STATUS_LABELS[contract.status] ?? contract.status}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 text-xs">
@@ -132,7 +134,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       </div>
 
       {/* Editor + comments sidebar */}
-      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6 items-start">
+      <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-6 lg:flex-row lg:items-start">
         <div className="flex-1 min-w-0">
           <ContractEditor
             contractId={contract.id}
@@ -144,8 +146,8 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
           />
         </div>
 
-        <div className="w-72 flex-shrink-0">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sticky top-20 max-h-[calc(100vh-6rem)] overflow-hidden flex flex-col">
+        <div className="w-full lg:w-72 lg:flex-shrink-0">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden lg:flex lg:flex-col">
             <ContractCommentsSidebar
               ydocRef={ydocRef}
               authorName={plannerName}
