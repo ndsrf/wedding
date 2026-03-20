@@ -44,6 +44,7 @@ export function ContractsList() {
     message: '',
   });
   const [sendError, setSendError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   async function fetchContracts() {
@@ -72,17 +73,25 @@ export function ContractsList() {
   async function handleSendForSigning(contractId: string, e: React.FormEvent) {
     e.preventDefault();
     setSendError(null);
-    const res = await fetch(`/api/planner/contracts/${contractId}/send-for-signing`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sendForm),
-    });
-    if (res.ok) {
-      setSendingId(null);
-      fetchContracts();
-    } else {
-      const json = await res.json().catch(() => ({}));
-      setSendError(json.error ?? 'Failed to send for signing');
+    setSending(true);
+    try {
+      const res = await fetch(`/api/planner/contracts/${contractId}/send-for-signing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sendForm),
+      });
+      if (res.ok) {
+        setSendingId(null);
+        fetchContracts();
+      } else {
+        const json = await res.json().catch(() => ({}));
+        const msg = json.error ?? `Server error ${res.status}`;
+        setSendError(msg);
+      }
+    } catch {
+      setSendError('Network error — check your connection and try again.');
+    } finally {
+      setSending(false);
     }
   }
 
@@ -189,18 +198,30 @@ export function ContractsList() {
                         />
                       </div>
                     </div>
-                    {sendError && <p className="text-xs text-red-600">{sendError}</p>}
+                    {sendError && (
+                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <svg className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p className="text-xs text-red-700">{sendError}</p>
+                      </div>
+                    )}
                     <div className="flex gap-2">
                       <button
                         type="submit"
-                        className="px-3 py-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+                        disabled={sending}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg transition-colors"
                       >
-                        Send
+                        {sending && (
+                          <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        )}
+                        {sending ? 'Sending…' : 'Send'}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setSendingId(null)}
-                        className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        disabled={sending}
+                        onClick={() => { setSendingId(null); setSendError(null); }}
+                        className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-60 transition-colors"
                       >
                         Cancel
                       </button>

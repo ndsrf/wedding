@@ -119,8 +119,7 @@ export function ContractEditor({
       destroyed = true;
       cleanup?.();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contractId]);
+  }, [contractId]); // authExtra and currentUser are intentionally excluded — they are stable after mount
 
   const editor = useEditor(
     {
