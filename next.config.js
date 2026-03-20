@@ -78,7 +78,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https:",
+      "connect-src 'self' https: wss://api.liveblocks.io",
       "frame-src 'self' https://accounts.google.com https://www.facebook.com https://www.google.com",
       "frame-ancestors 'self'",
       "form-action 'self' https://accounts.google.com https://www.facebook.com",

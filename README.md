@@ -16,6 +16,7 @@ The Wedding Management App enables wedding planners to manage multiple weddings 
 - **Multi-language support** (Spanish, English, French, Italian, German)
 - **Mobile-first design** optimized for WhatsApp in-app browsers
 - **Custom theme system** for wedding branding
+- **Quotes & Finances** — full income management for wedding planners (quotes, contracts, eSignature, invoices)
 
 ## Tech Stack
 
@@ -25,6 +26,9 @@ The Wedding Management App enables wedding planners to manage multiple weddings 
 - **Observability**: HyperDX.io (OpenTelemetry), Vercel Analytics
 - **Deployment**: Docker containers, GitHub Actions CI/CD
 - **Languages**: TypeScript, multi-language i18n support
+- **PDF generation**: `@react-pdf/renderer` (server-side)
+- **Real-time collaboration**: TipTap rich-text editor + Liveblocks YJS (hosted WebSocket backend)
+- **eSignature**: Dropbox Sign (HelloSign) API
 
 ## Getting Started
 
@@ -78,6 +82,100 @@ npm run format
 # Build for production
 npm run build
 ```
+
+## Quotes & Finances
+
+The `/planner/quotes-finances` section gives wedding planners a complete income management workflow:
+
+### Quotes
+
+Create lightweight quote records (separate from weddings) with line items, discounts, and tax. Generate a branded PDF and send it to prospective clients. Track status through its lifecycle:
+
+```
+DRAFT → SENT → ACCEPTED / REJECTED / EXPIRED
+```
+
+Once a quote is accepted, convert it directly into a contract with one click.
+
+**Routes**
+- `GET/POST /api/planner/quotes` — list / create quotes
+- `GET/PATCH/DELETE /api/planner/quotes/[id]`
+- `POST /api/planner/quotes/[id]/generate-pdf` — renders `QuotePDF` via `@react-pdf/renderer`, stores in Vercel Blob
+- `POST /api/planner/quotes/[id]/contract` — creates a `Contract` (optionally from a template)
+
+### Contract Templates
+
+Reusable rich-text templates authored with a TipTap editor. Templates are stored as ProseMirror JSON and can be applied when creating a contract from a quote.
+
+**Routes**
+- `GET/POST /api/planner/contract-templates`
+- `GET/PATCH/DELETE /api/planner/contract-templates/[id]`
+
+### Collaborative Contracts
+
+Once a contract is created, the planner shares a unique link with the client. Both parties can edit the document simultaneously using a **real-time collaborative TipTap editor** backed by Liveblocks (hosted YJS):
+
+- Live presence cursors showing who else is editing
+- Full formatting toolbar (Bold, Italic, Underline, H1–H3, lists, text align)
+- Client access via share token — no account required
+
+After finalisation the planner generates a PDF and sends it for electronic signing via **Dropbox Sign**.
+
+Contract status lifecycle:
+```
+DRAFT → SHARED → SIGNING → SIGNED / CANCELLED
+```
+
+**Routes**
+- `GET/PATCH /api/planner/contracts/[id]`
+- `POST /api/planner/contracts/[id]/liveblocks-auth` — issues Liveblocks room token (supports both planner auth and client share token)
+- `POST /api/planner/contracts/[id]/generate-pdf`
+- `POST /api/planner/contracts/[id]/send-for-signing` — renders PDF → Vercel Blob → Dropbox Sign signature request
+- `GET /api/planner/contracts/shared/[shareToken]` — public, no auth required
+- `POST /api/webhooks/dropbox-sign` — receives `signature_request_signed` event and marks contract `SIGNED`
+
+**Client-facing page**: `/planner/contracts/[shareToken]`
+
+### Invoices & Payments
+
+Create invoices with line items, tax, and currency. Record partial or full payments. The system automatically recalculates `amount_paid` and updates invoice status:
+
+```
+DRAFT → ISSUED → PARTIAL → PAID
+                          → OVERDUE
+CANCELLED
+```
+
+Each invoice shows a payment progress bar and remaining balance. Generate a PDF at any time.
+
+**Routes**
+- `GET/POST /api/planner/invoices`
+- `GET/PATCH/DELETE /api/planner/invoices/[id]`
+- `POST /api/planner/invoices/[id]/payments` — records a payment, recalculates totals
+- `DELETE /api/planner/invoices/[id]/payments/[paymentId]` — removes a payment, reverts status
+- `POST /api/planner/invoices/[id]/generate-pdf`
+
+### Required Environment Variables
+
+| Variable | Description |
+|---|---|
+| `LIVEBLOCKS_SECRET` | Secret key from [liveblocks.io](https://liveblocks.io) dashboard (Settings → API Keys) |
+| `DROPBOX_SIGN_API_KEY` | API key from [app.hellosign.com](https://app.hellosign.com) → API → API Settings |
+| `DROPBOX_SIGN_CLIENT_ID` | App client ID for embedded signing widget (optional — omit to use email-redirect flow) |
+
+### New Database Models
+
+| Model | Purpose |
+|---|---|
+| `ContractTemplate` | Reusable rich-text contract templates |
+| `Quote` | Lightweight prospective-client quote |
+| `QuoteLineItem` | Line items on a quote |
+| `Contract` | Collaborative contract linked to a quote |
+| `Invoice` | Client invoice |
+| `InvoiceLineItem` | Line items on an invoice |
+| `InvoicePayment` | Individual payment receipt against an invoice |
+
+---
 
 ## Database Migrations
 

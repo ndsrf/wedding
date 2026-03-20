@@ -38,6 +38,11 @@ model WeddingPlanner {
   providers           Provider[]
   message_templates   PlannerMessageTemplate[]
   locations           Location[]
+  contract_templates  ContractTemplate[]
+  customers           Customer[]
+  quotes              Quote[]
+  contracts           Contract[]
+  invoices            Invoice[]
 
   @@index([enabled])
   @@map("wedding_planners")
@@ -112,6 +117,7 @@ model Wedding {
   is_disabled                     Boolean            @default(false)
   gift_iban                       String?
   couple_table_id                 String?
+  customer_id                     String?
   wizard_completed                Boolean            @default(false)
   wizard_current_step             Int?
   wizard_completed_at             DateTime?
@@ -137,6 +143,7 @@ model Wedding {
   photos                          WeddingPhoto[]
   tasting_menu                    TastingMenu?
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer                        Customer?          @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   theme                           Theme?             @relation("WeddingTheme", fields: [theme_id], references: [id])
   wedding_day_theme               Theme?             @relation("WeddingDayTheme", fields: [wedding_day_theme_id], references: [id])
   wedding_day_invitation_template InvitationTemplate? @relation("WeddingDayInvitationTemplate", fields: [wedding_day_invitation_template_id], references: [id])
@@ -152,6 +159,7 @@ model Wedding {
   @@index([status, is_disabled])
   @@index([main_event_location_id])
   @@index([planner_id, status, wedding_date])
+  @@index([customer_id])
   @@map("weddings")
 }
 
@@ -765,6 +773,211 @@ enum PhotoSource {
   WHATSAPP
   UPLOAD
   GOOGLE_PHOTOS
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum ContractStatus {
+  DRAFT
+  SHARED
+  SIGNING
+  SIGNED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// -----------------------------------------------------------------------------
+// QUOTES & FINANCES — Planner income management
+// -----------------------------------------------------------------------------
+
+model Customer {
+  id         String         @id @default(uuid())
+  planner_id String
+  name       String
+  email      String?
+  phone      String?
+  notes      String?        @db.Text
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  planner    WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  weddings   Wedding[]
+  quotes     Quote[]
+  contracts  Contract[]
+  invoices   Invoice[]
+
+  @@index([planner_id])
+  @@index([planner_id, name])
+  @@map("customers")
+}
+
+model ContractTemplate {
+  id         String         @id @default(uuid())
+  planner_id String
+  name       String
+  content    Json           // TipTap ProseMirror JSON
+  is_default Boolean        @default(false)
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  planner    WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  contracts  Contract[]
+
+  @@index([planner_id])
+  @@map("contract_templates")
+}
+
+model Quote {
+  id                      String         @id @default(uuid())
+  planner_id              String
+  customer_id             String?
+  couple_names            String
+  event_date              DateTime?
+  location                String?
+  client_email            String?
+  client_phone            String?
+  notes                   String?        @db.Text
+  status                  QuoteStatus    @default(DRAFT)
+  currency                String         @default("EUR")
+  subtotal                Decimal        @db.Decimal(10, 2)
+  discount                Decimal?       @db.Decimal(10, 2)
+  tax_rate                Decimal?       @db.Decimal(5, 2)
+  total                   Decimal        @db.Decimal(10, 2)
+  pdf_url                 String?
+  expires_at              DateTime?
+  converted_to_wedding_id String?
+  created_at              DateTime       @default(now())
+  updated_at              DateTime       @updatedAt
+  planner                 WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer                Customer?      @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  line_items              QuoteLineItem[]
+  contracts               Contract[]
+  invoices                Invoice[]
+
+  @@index([planner_id])
+  @@index([customer_id])
+  @@index([status])
+  @@map("quotes")
+}
+
+model QuoteLineItem {
+  id          String  @id @default(uuid())
+  quote_id    String
+  name        String
+  description String?
+  quantity    Decimal @db.Decimal(10, 2)
+  unit_price  Decimal @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+  quote       Quote   @relation(fields: [quote_id], references: [id], onDelete: Cascade)
+
+  @@index([quote_id])
+  @@map("quote_line_items")
+}
+
+model Contract {
+  id                   String            @id @default(uuid())
+  planner_id           String
+  customer_id          String?
+  quote_id             String?
+  contract_template_id String?
+  title                String
+  content              Json              // TipTap ProseMirror JSON (working copy)
+  status               ContractStatus    @default(DRAFT)
+  share_token          String            @unique @default(uuid())
+  liveblocks_room_id   String?           @unique
+  signing_request_id   String?
+  signing_url          String?
+  signed_pdf_url       String?
+  signed_at            DateTime?
+  signer_email         String?
+  created_at           DateTime          @default(now())
+  updated_at           DateTime          @updatedAt
+  planner              WeddingPlanner    @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer             Customer?         @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  quote                Quote?            @relation(fields: [quote_id], references: [id], onDelete: SetNull)
+  template             ContractTemplate? @relation(fields: [contract_template_id], references: [id], onDelete: SetNull)
+
+  @@index([planner_id])
+  @@index([customer_id])
+  @@index([quote_id])
+  @@index([status])
+  @@map("contracts")
+}
+
+model Invoice {
+  id             String          @id @default(uuid())
+  planner_id     String
+  customer_id    String?
+  quote_id       String?
+  invoice_number String          @unique
+  client_name    String
+  client_email   String?
+  description    String?         @db.Text
+  currency       String          @default("EUR")
+  subtotal       Decimal         @db.Decimal(10, 2)
+  tax_rate       Decimal?        @db.Decimal(5, 2)
+  tax_amount     Decimal?        @db.Decimal(10, 2)
+  total          Decimal         @db.Decimal(10, 2)
+  amount_paid    Decimal         @default(0) @db.Decimal(10, 2)
+  status         InvoiceStatus   @default(DRAFT)
+  issued_at      DateTime?
+  due_date       DateTime?
+  pdf_url        String?
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  planner        WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer       Customer?       @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  quote          Quote?          @relation(fields: [quote_id], references: [id], onDelete: SetNull)
+  line_items     InvoiceLineItem[]
+  payments       InvoicePayment[]
+
+  @@index([planner_id])
+  @@index([customer_id])
+  @@index([status])
+  @@index([quote_id])
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id          String  @id @default(uuid())
+  invoice_id  String
+  name        String
+  description String?
+  quantity    Decimal @db.Decimal(10, 2)
+  unit_price  Decimal @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+  invoice     Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+
+  @@index([invoice_id])
+  @@map("invoice_line_items")
+}
+
+model InvoicePayment {
+  id           String        @id @default(uuid())
+  invoice_id   String
+  amount       Decimal       @db.Decimal(10, 2)
+  currency     String        @default("EUR")
+  payment_date DateTime
+  method       PaymentMethod @default(BANK_TRANSFER)
+  reference    String?
+  notes        String?       @db.Text
+  created_at   DateTime      @default(now())
+  invoice      Invoice       @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+
+  @@index([invoice_id])
+  @@map("invoice_payments")
 }
 
 // -----------------------------------------------------------------------------

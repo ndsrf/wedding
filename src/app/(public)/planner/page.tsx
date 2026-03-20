@@ -273,6 +273,60 @@ export default async function PlannerDashboardPage() {
           <UpcomingTasksWidget />
         </div>
 
+        {/* Quotes & Finances */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quotes &amp; Finances</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link
+              href="/planner/quotes-finances?tab=contracts"
+              prefetch={false}
+              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Contracts</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Send & manage client contracts</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/planner/quotes-finances?tab=quotes"
+              prefetch={false}
+              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Quotes</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Create and send quotes to clients</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/planner/quotes-finances?tab=invoices"
+              prefetch={false}
+              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Invoices &amp; Payments</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Track invoices and record payments</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         {/* Quick Links */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('planner.dashboard.quickActions')}</h2>
@@ -373,6 +427,7 @@ export default async function PlannerDashboardPage() {
                 <p className="text-xs text-gray-500 mt-0.5">Manage ceremony venues and event locations</p>
               </div>
             </Link>
+
           </div>
         </div>
 
