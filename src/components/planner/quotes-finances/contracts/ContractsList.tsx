@@ -44,6 +44,7 @@ export function ContractsList() {
     message: '',
   });
   const [sendError, setSendError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   async function fetchContracts() {
     const res = await fetch('/api/planner/contracts');
@@ -60,10 +61,12 @@ export function ContractsList() {
     window.open(`/planner/contracts/${shareToken}`, '_blank');
   }
 
-  function copyShareLink(shareToken: string) {
+  function copyShareLink(contractId: string, shareToken: string) {
     const url = `${window.location.origin}/c/${shareToken}`;
-    navigator.clipboard.writeText(url).catch(() => {});
-    alert('Share link copied to clipboard');
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(contractId);
+      setTimeout(() => setCopiedId(null), 2000);
+    }).catch(() => {});
   }
 
   async function handleSendForSigning(contractId: string, e: React.FormEvent) {
@@ -217,13 +220,24 @@ export function ContractsList() {
                     Edit
                   </button>
                   <button
-                    onClick={() => copyShareLink(contract.share_token)}
+                    onClick={() => copyShareLink(contract.id, contract.share_token)}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    Share Link
+                    {copiedId === contract.id ? (
+                      <>
+                        <svg className="h-3.5 w-3.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-green-700">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Share Link
+                      </>
+                    )}
                   </button>
                   {contract.status !== 'SIGNED' && contract.status !== 'CANCELLED' && (
                     <button

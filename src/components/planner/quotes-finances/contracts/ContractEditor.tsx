@@ -5,14 +5,8 @@ import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import Collaboration from '@tiptap/extension-collaboration';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import * as Y from 'yjs';
-
-interface Collaborator {
-  id: string;
-  name: string;
-  color: string;
-}
 
 interface ContractEditorProps {
   contractId: string;
@@ -20,6 +14,15 @@ interface ContractEditorProps {
   onChange?: (content: object) => void;
   readOnly?: boolean;
   currentUser?: { id: string; name: string; color?: string };
+  /** Extra fields forwarded to the liveblocks-auth request body (e.g. share_token for clients) */
+  authExtra?: Record<string, unknown>;
+  /** Use an externally-managed Y.Doc so a sibling component (e.g. comments sidebar)
+   *  can share the same Yjs document without a second Liveblocks connection. */
+  externalYdocRef?: React.MutableRefObject<Y.Doc>;
+  /** Called once after the Liveblocks provider is initialised and the Y.Doc is ready */
+  onYDocReady?: (ydoc: Y.Doc) => void;
+  /** Called when selection changes – useful for the comment-on-selection feature */
+  onSelectionChange?: (selectedText: string) => void;
 }
 
 function ToolbarButton({
@@ -56,11 +59,14 @@ export function ContractEditor({
   onChange,
   readOnly = false,
   currentUser,
+  authExtra,
+  externalYdocRef,
+  onYDocReady,
+  onSelectionChange,
 }: ContractEditorProps) {
-  const ydocRef = useRef<Y.Doc>(new Y.Doc());
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const internalYdocRef = useRef<Y.Doc>(new Y.Doc());
+  const ydocRef = externalYdocRef ?? internalYdocRef;
 
-  // Initialise Liveblocks for real-time text sync (Yjs) and presence
   useEffect(() => {
     let destroyed = false;
     let cleanup: (() => void) | undefined;
@@ -75,7 +81,7 @@ export function ContractEditor({
         const authRes = await fetch(`/api/planner/contracts/${contractId}/liveblocks-auth`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
+          body: JSON.stringify(authExtra ?? {}),
         });
         if (!authRes.ok || destroyed) return;
         const { token } = await authRes.json();
@@ -85,38 +91,19 @@ export function ContractEditor({
         const provider = new LiveblocksYjsProvider(room, ydocRef.current);
 
         if (!destroyed) {
-          const awareness = provider.awareness as {
-            on: (e: string, cb: () => void) => void;
-            off: (e: string, cb: () => void) => void;
-            getStates: () => Map<number, unknown>;
-            setLocalStateField: (k: string, v: unknown) => void;
-            clientID?: number;
-          };
-
           if (currentUser) {
-            awareness.setLocalStateField('user', {
+            (provider.awareness as {
+              setLocalStateField: (k: string, v: unknown) => void;
+            }).setLocalStateField('user', {
               id: currentUser.id,
               name: currentUser.name,
               color: currentUser.color ?? '#e11d48',
             });
           }
 
-          const handleAwarenessChange = () => {
-            const states = awareness.getStates();
-            const clientID = awareness.clientID;
-            const users: Collaborator[] = [];
-            states.forEach((state, clientId) => {
-              if ((state as { user?: unknown }).user && clientId !== clientID) {
-                users.push((state as { user: Collaborator }).user);
-              }
-            });
-            setCollaborators(users);
-          };
-
-          awareness.on('change', handleAwarenessChange);
+          onYDocReady?.(ydocRef.current);
 
           cleanup = () => {
-            awareness.off('change', handleAwarenessChange);
             provider.destroy();
             room.disconnect();
           };
@@ -132,10 +119,9 @@ export function ContractEditor({
       destroyed = true;
       cleanup?.();
     };
-  }, [contractId, currentUser]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contractId]);
 
-  // Editor is created once — stable deps [] prevents destroy/recreate on
-  // collaboration state changes, which would crash the ySyncPlugin.
   const editor = useEditor(
     {
       extensions: [
@@ -149,6 +135,15 @@ export function ContractEditor({
       onUpdate: ({ editor }) => {
         onChange?.(editor.getJSON());
       },
+      onSelectionUpdate: ({ editor }) => {
+        if (!onSelectionChange) return;
+        const { from, to } = editor.state.selection;
+        if (from === to) {
+          onSelectionChange('');
+        } else {
+          onSelectionChange(editor.state.doc.textBetween(from, to, ' '));
+        }
+      },
       immediatelyRender: false,
     },
     []
@@ -158,21 +153,6 @@ export function ContractEditor({
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-      {collaborators.length > 0 && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-700">
-          <span className="font-medium">Also editing:</span>
-          {collaborators.map((c) => (
-            <span
-              key={c.id}
-              className="px-2 py-0.5 rounded-full text-white text-xs font-medium"
-              style={{ backgroundColor: c.color }}
-            >
-              {c.name}
-            </span>
-          ))}
-        </div>
-      )}
-
       {!readOnly && (
         <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-100 bg-gray-50">
           <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
