@@ -17,8 +17,14 @@ interface Quote {
   total: string | number;
   expires_at: string | null;
   created_at: string;
-  contracts: { id: string; status: string }[];
+  contracts: { id: string; status: string; share_token?: string }[];
   invoices: { id: string; status: string }[];
+}
+
+interface ContractTemplate {
+  id: string;
+  name: string;
+  is_default: boolean;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -29,12 +35,27 @@ const STATUS_STYLES: Record<string, string> = {
   EXPIRED: 'bg-orange-100 text-orange-700',
 };
 
+const CONTRACT_STATUS_STYLES: Record<string, string> = {
+  DRAFT: 'text-gray-500',
+  SHARED: 'text-blue-600',
+  SIGNING: 'text-amber-600',
+  SIGNED: 'text-green-600',
+  CANCELLED: 'text-red-500',
+};
+
 export function QuotesList() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
+
+  // Contract creation state
+  const [contractQuoteId, setContractQuoteId] = useState<string | null>(null);
+  const [contractTitle, setContractTitle] = useState('');
+  const [contractTemplateId, setContractTemplateId] = useState('');
+  const [templates, setTemplates] = useState<ContractTemplate[]>([]);
+  const [creatingContract, setCreatingContract] = useState(false);
 
   async function fetchQuotes() {
     const res = await fetch('/api/planner/quotes');
@@ -46,6 +67,45 @@ export function QuotesList() {
   }
 
   useEffect(() => { fetchQuotes(); }, []);
+
+  async function fetchTemplates() {
+    if (templates.length > 0) return;
+    const res = await fetch('/api/planner/contract-templates');
+    if (res.ok) {
+      const json = await res.json();
+      setTemplates(json.data ?? []);
+      const def = (json.data ?? []).find((t: ContractTemplate) => t.is_default);
+      if (def) setContractTemplateId(def.id);
+    }
+  }
+
+  function openCreateContract(quote: Quote) {
+    setContractTitle(`Contract – ${quote.couple_names}`);
+    setContractTemplateId('');
+    setContractQuoteId(quote.id);
+    fetchTemplates();
+  }
+
+  async function handleCreateContract(e: React.FormEvent) {
+    e.preventDefault();
+    if (!contractQuoteId) return;
+    setCreatingContract(true);
+    const res = await fetch(`/api/planner/quotes/${contractQuoteId}/contract`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: contractTitle,
+        contract_template_id: contractTemplateId || null,
+      }),
+    });
+    setCreatingContract(false);
+    if (res.ok) {
+      const json = await res.json();
+      setContractQuoteId(null);
+      fetchQuotes();
+      window.open(`/planner/contracts/${json.data.share_token}`, '_blank');
+    }
+  }
 
   async function handleSave(data: Record<string, unknown>) {
     if (editingId) {
@@ -181,6 +241,26 @@ export function QuotesList() {
                     {quote.location && <span>📍 {quote.location}</span>}
                     {quote.client_email && <span>✉ {quote.client_email}</span>}
                   </div>
+
+                  {/* Existing contracts for this quote */}
+                  {quote.contracts.length > 0 && (
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {quote.contracts.map((c) => (
+                        <a
+                          key={c.id}
+                          href={c.share_token ? `/planner/contracts/${c.share_token}` : '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2 ${CONTRACT_STATUS_STYLES[c.status] ?? 'text-gray-500'}`}
+                        >
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          {c.status} contract
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className="text-lg font-bold text-gray-900">
@@ -191,6 +271,58 @@ export function QuotesList() {
                   )}
                 </div>
               </div>
+
+              {/* Create contract inline form */}
+              {contractQuoteId === quote.id && (
+                <form
+                  onSubmit={handleCreateContract}
+                  className="mt-3 p-4 bg-purple-50 rounded-xl border border-purple-100 space-y-3"
+                >
+                  <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">New Contract</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Title *</label>
+                      <input
+                        required
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                        value={contractTitle}
+                        onChange={(e) => setContractTitle(e.target.value)}
+                      />
+                    </div>
+                    {templates.length > 0 && (
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Template (optional)</label>
+                        <select
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                          value={contractTemplateId}
+                          onChange={(e) => setContractTemplateId(e.target.value)}
+                        >
+                          <option value="">— Blank contract —</option>
+                          {templates.map((t) => (
+                            <option key={t.id} value={t.id}>{t.name}{t.is_default ? ' (default)' : ''}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={creatingContract}
+                      className="px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition-colors"
+                    >
+                      {creatingContract ? 'Creating…' : 'Create & Open Editor'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setContractQuoteId(null)}
+                      className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* Actions */}
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
@@ -237,6 +369,17 @@ export function QuotesList() {
                       Reject
                     </button>
                   </>
+                )}
+                {quote.status === 'ACCEPTED' && (
+                  <button
+                    onClick={() => openCreateContract(quote)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    </svg>
+                    New Contract
+                  </button>
                 )}
                 <button
                   onClick={() => handleDelete(quote.id)}
