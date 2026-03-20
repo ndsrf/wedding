@@ -33,7 +33,11 @@ export async function generateMetadata() {
   return { title: 'Nupci – Quotes & Finances' };
 }
 
-export default async function QuotesFinancesServerPage() {
+export default async function QuotesFinancesServerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   let user;
   try {
     user = await requireRole('planner');
@@ -41,6 +45,7 @@ export default async function QuotesFinancesServerPage() {
     redirect('/api/auth/signin');
   }
 
+  const { tab } = await searchParams;
   const summary = user.planner_id ? await getFinancialSummary(user.planner_id) : null;
 
   return (
@@ -55,7 +60,7 @@ export default async function QuotesFinancesServerPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <QuotesFinancesPage summary={summary ?? undefined} />
+        <QuotesFinancesPage summary={summary ?? undefined} initialTab={tab} />
       </main>
     </div>
   );

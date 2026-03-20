@@ -13,7 +13,7 @@ const lineItemSchema = z.object({
 
 const createQuoteSchema = z.object({
   couple_names: z.string().min(1),
-  event_date: z.string().datetime().optional().nullable(),
+  event_date: z.preprocess((v) => v || null, z.string().datetime().optional().nullable()),
   location: z.string().optional().nullable(),
   client_email: z.string().email().optional().nullable().or(z.literal('')),
   client_phone: z.string().optional().nullable(),
@@ -23,7 +23,7 @@ const createQuoteSchema = z.object({
   discount: z.number().min(0).optional().nullable(),
   tax_rate: z.number().min(0).max(100).optional().nullable(),
   total: z.number().min(0),
-  expires_at: z.string().datetime().optional().nullable(),
+  expires_at: z.preprocess((v) => v || null, z.string().datetime().optional().nullable()),
   line_items: z.array(lineItemSchema).min(1),
 });
 

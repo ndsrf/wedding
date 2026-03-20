@@ -35,6 +35,16 @@ export interface Invoice {
   }[];
 }
 
+interface ReadyQuote {
+  id: string;
+  couple_names: string;
+  client_email: string | null;
+  currency: string;
+  total: string | number;
+  contract: { id: string; status: string } | null;
+  invoices: { id: string }[];
+}
+
 const STATUS_STYLES: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-600',
   ISSUED: 'bg-blue-100 text-blue-700',
@@ -48,21 +58,37 @@ type View = 'list' | 'form' | 'detail';
 
 export function InvoicesList() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [readyQuotes, setReadyQuotes] = useState<ReadyQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [prefillQuote, setPrefillQuote] = useState<ReadyQuote | null>(null);
 
-  async function fetchInvoices() {
-    const res = await fetch('/api/planner/invoices');
-    if (res.ok) {
-      const json = await res.json();
+  async function fetchData() {
+    const [invoiceRes, quoteRes] = await Promise.all([
+      fetch('/api/planner/invoices'),
+      fetch('/api/planner/quotes?status=ACCEPTED'),
+    ]);
+
+    if (invoiceRes.ok) {
+      const json = await invoiceRes.json();
       setInvoices(json.data ?? []);
     }
+
+    if (quoteRes.ok) {
+      const json = await quoteRes.json();
+      // Only quotes with a contract that aren't already fully invoiced
+      const accepted: ReadyQuote[] = (json.data ?? []).filter(
+        (q: ReadyQuote) => q.contract && q.invoices.length === 0,
+      );
+      setReadyQuotes(accepted);
+    }
+
     setLoading(false);
   }
 
-  useEffect(() => { fetchInvoices(); }, []);
+  useEffect(() => { fetchData(); }, []);
 
   async function handleSave(data: Record<string, unknown>) {
     await fetch('/api/planner/invoices', {
@@ -70,8 +96,14 @@ export function InvoicesList() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    setPrefillQuote(null);
     setView('list');
-    fetchInvoices();
+    fetchData();
+  }
+
+  function handleCreateFromQuote(q: ReadyQuote) {
+    setPrefillQuote(q);
+    setView('form');
   }
 
   async function handleGeneratePdf(id: string) {
@@ -79,8 +111,8 @@ export function InvoicesList() {
     const res = await fetch(`/api/planner/invoices/${id}/generate-pdf`, { method: 'POST' });
     if (res.ok) {
       const { data } = await res.json();
-      window.open(data.pdf_url, '_blank');
-      fetchInvoices();
+      if (data?.pdf_url) window.open(data.pdf_url, '_blank');
+      fetchData();
     }
     setGenerating(null);
   }
@@ -88,7 +120,7 @@ export function InvoicesList() {
   async function handleDelete(id: string) {
     if (!confirm('Delete this invoice?')) return;
     await fetch(`/api/planner/invoices/${id}`, { method: 'DELETE' });
-    fetchInvoices();
+    fetchData();
   }
 
   if (loading) return (
@@ -100,17 +132,32 @@ export function InvoicesList() {
   const selectedInvoice = selectedId ? invoices.find((i) => i.id === selectedId) ?? null : null;
 
   if (view === 'form') {
+    const prefill = prefillQuote
+      ? {
+          client_name: prefillQuote.couple_names,
+          client_email: prefillQuote.client_email ?? '',
+          currency: prefillQuote.currency,
+          quote_id: prefillQuote.id,
+        }
+      : {};
+
     return (
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => setView('list')} className="text-sm text-gray-500 hover:text-gray-700">
+          <button
+            onClick={() => { setView('list'); setPrefillQuote(null); }}
+            className="text-sm text-gray-500 hover:text-gray-700"
+          >
             ← Back
           </button>
-          <h3 className="text-base font-semibold text-gray-900">New Invoice</h3>
+          <h3 className="text-base font-semibold text-gray-900">
+            {prefillQuote ? `New Invoice – ${prefillQuote.couple_names}` : 'New Invoice'}
+          </h3>
         </div>
         <InvoiceForm
+          initialData={prefill}
           onSave={handleSave}
-          onCancel={() => setView('list')}
+          onCancel={() => { setView('list'); setPrefillQuote(null); }}
         />
       </div>
     );
@@ -121,17 +168,48 @@ export function InvoicesList() {
       <InvoiceDetail
         invoice={selectedInvoice}
         onBack={() => { setView('list'); setSelectedId(null); }}
-        onRefresh={fetchInvoices}
+        onRefresh={fetchData}
       />
     );
   }
 
   return (
     <div>
+      {/* Ready to invoice — accepted quotes with contract but no invoice yet */}
+      {readyQuotes.length > 0 && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <h4 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+            <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Ready to Invoice ({readyQuotes.length})
+          </h4>
+          <div className="space-y-2">
+            {readyQuotes.map((q) => (
+              <div key={q.id} className="flex items-center justify-between bg-white rounded-lg border border-amber-100 px-4 py-3">
+                <div>
+                  <span className="text-sm font-semibold text-gray-900">{q.couple_names}</span>
+                  <span className="ml-3 text-sm text-gray-500">
+                    {new Intl.NumberFormat('en', { style: 'currency', currency: q.currency }).format(Number(q.total))}
+                  </span>
+                  <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Contract signed</span>
+                </div>
+                <button
+                  onClick={() => handleCreateFromQuote(q)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-lg hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
+                >
+                  Create Invoice
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-gray-900">Invoices</h3>
         <button
-          onClick={() => setView('form')}
+          onClick={() => { setPrefillQuote(null); setView('form'); }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,6 +251,11 @@ export function InvoicesList() {
                       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
                         {invoice.status}
                       </span>
+                      {invoice.quote && (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                          Quote #{invoice.quote.couple_names}
+                        </span>
+                      )}
                     </div>
                     {invoice.due_date && (
                       <p className="text-xs text-gray-500 mt-1">
@@ -211,7 +294,7 @@ export function InvoicesList() {
                     onClick={() => { setSelectedId(invoice.id); setView('detail'); }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    View & Payments
+                    View &amp; Payments
                   </button>
                   <button
                     onClick={() => handleGeneratePdf(invoice.id)}
@@ -219,8 +302,15 @@ export function InvoicesList() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     {generating === invoice.id ? (
-                      <span className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full" />
-                    ) : 'PDF'}
+                      <span className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full inline-block" />
+                    ) : (
+                      <>
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        PDF
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={() => handleDelete(invoice.id)}

@@ -15,8 +15,11 @@ interface FinancialSummary {
   currency: string;
 }
 
+const VALID_TABS = ['quotes', 'invoices', 'contract-templates'] as const;
+
 interface QuotesFinancesPageProps {
   summary?: FinancialSummary;
+  initialTab?: string;
 }
 
 const TABS = [
@@ -37,8 +40,9 @@ const TABS = [
   )},
 ];
 
-export function QuotesFinancesPage({ summary }: QuotesFinancesPageProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('quotes');
+export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPageProps) {
+  const resolvedInitial = VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'quotes';
+  const [activeTab, setActiveTab] = useState<Tab>(resolvedInitial);
 
   const defaultCurrency = summary?.currency ?? 'EUR';
 
