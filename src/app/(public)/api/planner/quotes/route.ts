@@ -60,7 +60,13 @@ export async function POST(request: NextRequest) {
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const data = createQuoteSchema.parse(body);
+    console.log('[quotes POST] body:', JSON.stringify(body));
+    const parseResult = createQuoteSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.log('[quotes POST] validation failed:', JSON.stringify(parseResult.error.issues));
+      return NextResponse.json({ error: parseResult.error.issues }, { status: 422 });
+    }
+    const data = parseResult.data;
 
     const quote = await prisma.quote.create({
       data: {
