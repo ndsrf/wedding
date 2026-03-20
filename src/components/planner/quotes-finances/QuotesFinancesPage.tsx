@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ContractTemplatesList } from './contract-templates/ContractTemplatesList';
+import { ContractsList } from './contracts/ContractsList';
 import { QuotesList } from './quotes/QuotesList';
 import { InvoicesList } from './invoices/InvoicesList';
 
-type Tab = 'quotes' | 'invoices' | 'contract-templates';
+type Tab = 'quotes' | 'contracts' | 'invoices';
 
 interface FinancialSummary {
   total_quotes: number;
@@ -15,7 +15,7 @@ interface FinancialSummary {
   currency: string;
 }
 
-const VALID_TABS = ['quotes', 'invoices', 'contract-templates'] as const;
+const VALID_TABS = ['quotes', 'contracts', 'invoices'] as const;
 
 interface QuotesFinancesPageProps {
   summary?: FinancialSummary;
@@ -28,14 +28,14 @@ const TABS = [
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   )},
+  { id: 'contracts' as Tab, label: 'Contracts', icon: (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+    </svg>
+  )},
   { id: 'invoices' as Tab, label: 'Invoices & Payments', icon: (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-  )},
-  { id: 'contract-templates' as Tab, label: 'Contract Templates', icon: (
-    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
     </svg>
   )},
 ];
@@ -102,8 +102,8 @@ export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPagePr
         </div>
         <div className="p-6">
           {activeTab === 'quotes' && <QuotesList />}
+          {activeTab === 'contracts' && <ContractsList />}
           {activeTab === 'invoices' && <InvoicesList />}
-          {activeTab === 'contract-templates' && <ContractTemplatesList />}
         </div>
       </div>
     </div>

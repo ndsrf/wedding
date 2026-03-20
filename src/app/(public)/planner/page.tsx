@@ -278,7 +278,7 @@ export default async function PlannerDashboardPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quotes &amp; Finances</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/planner/quotes-finances?tab=contract-templates"
+              href="/planner/quotes-finances?tab=contracts"
               prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/30 transition-all"
             >
@@ -288,8 +288,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Contract Templates</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Reusable contracts with placeholders</p>
+                <h3 className="text-sm font-semibold text-gray-900">Contracts</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Send & manage client contracts</p>
               </div>
             </Link>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface LineItem {
   id?: string;
@@ -11,7 +11,15 @@ interface LineItem {
   total: number;
 }
 
+interface CustomerSuggestion {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+}
+
 interface QuoteFormData {
+  customer_id: string | null;
   couple_names: string;
   event_date: string;
   location: string;
@@ -40,6 +48,7 @@ function emptyItem(): LineItem {
 export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<QuoteFormData>({
+    customer_id: initialData?.customer_id ?? null,
     couple_names: initialData?.couple_names ?? '',
     event_date: initialData?.event_date ?? '',
     location: initialData?.location ?? '',
@@ -52,6 +61,60 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
     expires_at: initialData?.expires_at ?? '',
     line_items: initialData?.line_items?.length ? initialData.line_items : [emptyItem()],
   });
+
+  // Customer autocomplete state
+  const [suggestions, setSuggestions] = useState<CustomerSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerSuggestion | null>(null);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchCustomers = useCallback(async (q: string) => {
+    if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    try {
+      const res = await fetch(`/api/planner/customers?q=${encodeURIComponent(q)}`);
+      if (!res.ok) return;
+      const json = await res.json();
+      setSuggestions(json.data ?? []);
+      setShowSuggestions(true);
+    } catch { /* ignore */ }
+  }, []);
+
+  function handleNameChange(value: string) {
+    setForm((p) => ({ ...p, couple_names: value, customer_id: null }));
+    setSelectedCustomer(null);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => searchCustomers(value), 250);
+  }
+
+  function selectCustomer(c: CustomerSuggestion) {
+    setSelectedCustomer(c);
+    setForm((p) => ({
+      ...p,
+      customer_id: c.id,
+      couple_names: c.name,
+      client_email: c.email ?? p.client_email,
+      client_phone: c.phone ?? p.client_phone,
+    }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  }
+
+  function clearCustomer() {
+    setSelectedCustomer(null);
+    setForm((p) => ({ ...p, customer_id: null }));
+  }
 
   function updateItem(index: number, field: keyof LineItem, value: string | number) {
     setForm((prev) => {
@@ -92,10 +155,8 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
         ...form,
         subtotal,
         total,
-        // Coerce optional numeric fields: '' → null
         discount: form.discount === '' ? null : Number(form.discount),
         tax_rate: form.tax_rate === '' ? null : Number(form.tax_rate),
-        // Coerce optional string fields: '' → null
         event_date: form.event_date || null,
         expires_at: form.expires_at || null,
         client_email: form.client_email || null,
@@ -114,16 +175,58 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Client Information</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="sm:col-span-2">
+          {/* Customer name with autocomplete */}
+          <div className="sm:col-span-2" ref={wrapperRef}>
             <label className="block text-xs font-medium text-gray-700 mb-1">Couple / Client Name *</label>
-            <input
-              required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-              value={form.couple_names}
-              onChange={(e) => setForm((p) => ({ ...p, couple_names: e.target.value }))}
-              placeholder="Sarah & James"
-            />
+            <div className="relative">
+              <input
+                required
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                value={form.couple_names}
+                onChange={(e) => handleNameChange(e.target.value)}
+                onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+                placeholder="Sarah & James"
+                autoComplete="off"
+              />
+              {selectedCustomer && (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  <span className="text-xs bg-rose-100 text-rose-700 rounded-full px-2 py-0.5 font-medium">Existing customer</span>
+                  <button type="button" onClick={clearCustomer} className="text-gray-400 hover:text-gray-600">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {showSuggestions && suggestions.length > 0 && (
+                <ul className="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  {suggestions.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onClick={() => selectCustomer(c)}
+                        className="w-full text-left px-4 py-2.5 hover:bg-rose-50 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-gray-900">{c.name}</span>
+                        {(c.email || c.phone) && (
+                          <span className="text-xs text-gray-500 ml-2">
+                            {[c.email, c.phone].filter(Boolean).join(' · ')}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                  <li className="border-t border-gray-100 px-4 py-2 text-xs text-gray-400 italic">
+                    Not listed? Keep typing to create a new customer.
+                  </li>
+                </ul>
+              )}
+            </div>
+            {!selectedCustomer && form.couple_names.length >= 2 && suggestions.length === 0 && (
+              <p className="text-xs text-gray-400 mt-1">No existing customers found — a new one will be created on save.</p>
+            )}
           </div>
+
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Event Date</label>
             <input
@@ -178,7 +281,6 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
           </div>
         </div>
 
-        {/* Table header */}
         <div className="hidden sm:grid sm:grid-cols-12 gap-2 mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
           <div className="sm:col-span-5">Description</div>
           <div className="sm:col-span-2 text-right">Qty</div>
@@ -207,10 +309,7 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
               </div>
               <div className="col-span-4 sm:col-span-2">
                 <input
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  required
+                  type="number" min="0.01" step="0.01" required
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
                   value={item.quantity}
                   onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
@@ -218,10 +317,7 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
               </div>
               <div className="col-span-4 sm:col-span-2">
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
+                  type="number" min="0" step="0.01" required
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
                   value={item.unit_price}
                   onChange={(e) => updateItem(index, 'unit_price', Number(e.target.value))}
@@ -267,34 +363,26 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
             <div className="text-sm font-medium text-gray-900 text-right">
               {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(subtotal)}
             </div>
-
             <div className="text-sm text-gray-500">Discount ({form.currency})</div>
             <div>
               <input
-                type="number"
-                min="0"
-                step="0.01"
+                type="number" min="0" step="0.01"
                 className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
                 value={form.discount}
                 placeholder="0"
                 onChange={(e) => setForm((p) => ({ ...p, discount: e.target.value === '' ? '' : Number(e.target.value) }))}
               />
             </div>
-
             <div className="text-sm text-gray-500">Tax rate (%)</div>
             <div>
               <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
+                type="number" min="0" max="100" step="0.1"
                 className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
                 value={form.tax_rate}
                 placeholder="0"
                 onChange={(e) => setForm((p) => ({ ...p, tax_rate: e.target.value === '' ? '' : Number(e.target.value) }))}
               />
             </div>
-
             <div className="text-base font-bold text-gray-900 border-t border-rose-200 pt-2">Total</div>
             <div className="text-base font-bold text-rose-600 text-right border-t border-rose-200 pt-2">
               {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(total)}

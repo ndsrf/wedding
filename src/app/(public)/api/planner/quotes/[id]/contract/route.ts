@@ -21,8 +21,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
     if (!quote) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Check if contract already exists
-    const existing = await prisma.contract.findUnique({ where: { quote_id: quoteId } });
+    // Check if a DRAFT contract already exists for this quote (reuse if so)
+    const existing = await prisma.contract.findFirst({
+      where: { quote_id: quoteId, status: 'DRAFT' },
+    });
     if (existing) return NextResponse.json({ data: existing });
 
     const body = await request.json();
@@ -40,6 +42,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const contract = await prisma.contract.create({
       data: {
         planner_id: user.planner_id,
+        customer_id: quote.customer_id ?? null,
         quote_id: quoteId,
         contract_template_id: data.contract_template_id ?? null,
         title: data.title,

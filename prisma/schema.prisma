@@ -39,6 +39,7 @@ model WeddingPlanner {
   message_templates   PlannerMessageTemplate[]
   locations           Location[]
   contract_templates  ContractTemplate[]
+  customers           Customer[]
   quotes              Quote[]
   contracts           Contract[]
   invoices            Invoice[]
@@ -116,6 +117,7 @@ model Wedding {
   is_disabled                     Boolean            @default(false)
   gift_iban                       String?
   couple_table_id                 String?
+  customer_id                     String?
   wizard_completed                Boolean            @default(false)
   wizard_current_step             Int?
   wizard_completed_at             DateTime?
@@ -141,6 +143,7 @@ model Wedding {
   photos                          WeddingPhoto[]
   tasting_menu                    TastingMenu?
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer                        Customer?          @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   theme                           Theme?             @relation("WeddingTheme", fields: [theme_id], references: [id])
   wedding_day_theme               Theme?             @relation("WeddingDayTheme", fields: [wedding_day_theme_id], references: [id])
   wedding_day_invitation_template InvitationTemplate? @relation("WeddingDayInvitationTemplate", fields: [wedding_day_invitation_template_id], references: [id])
@@ -156,6 +159,7 @@ model Wedding {
   @@index([status, is_disabled])
   @@index([main_event_location_id])
   @@index([planner_id, status, wedding_date])
+  @@index([customer_id])
   @@map("weddings")
 }
 
@@ -800,6 +804,26 @@ enum InvoiceStatus {
 // QUOTES & FINANCES — Planner income management
 // -----------------------------------------------------------------------------
 
+model Customer {
+  id         String         @id @default(uuid())
+  planner_id String
+  name       String
+  email      String?
+  phone      String?
+  notes      String?        @db.Text
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  planner    WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  weddings   Wedding[]
+  quotes     Quote[]
+  contracts  Contract[]
+  invoices   Invoice[]
+
+  @@index([planner_id])
+  @@index([planner_id, name])
+  @@map("customers")
+}
+
 model ContractTemplate {
   id         String         @id @default(uuid())
   planner_id String
@@ -818,6 +842,7 @@ model ContractTemplate {
 model Quote {
   id                      String         @id @default(uuid())
   planner_id              String
+  customer_id             String?
   couple_names            String
   event_date              DateTime?
   location                String?
@@ -836,11 +861,13 @@ model Quote {
   created_at              DateTime       @default(now())
   updated_at              DateTime       @updatedAt
   planner                 WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer                Customer?      @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   line_items              QuoteLineItem[]
-  contract                Contract?
+  contracts               Contract[]
   invoices                Invoice[]
 
   @@index([planner_id])
+  @@index([customer_id])
   @@index([status])
   @@map("quotes")
 }
@@ -862,7 +889,8 @@ model QuoteLineItem {
 model Contract {
   id                   String            @id @default(uuid())
   planner_id           String
-  quote_id             String?           @unique
+  customer_id          String?
+  quote_id             String?
   contract_template_id String?
   title                String
   content              Json              // TipTap ProseMirror JSON (working copy)
@@ -877,10 +905,13 @@ model Contract {
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
   planner              WeddingPlanner    @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer             Customer?         @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   quote                Quote?            @relation(fields: [quote_id], references: [id], onDelete: SetNull)
   template             ContractTemplate? @relation(fields: [contract_template_id], references: [id], onDelete: SetNull)
 
   @@index([planner_id])
+  @@index([customer_id])
+  @@index([quote_id])
   @@index([status])
   @@map("contracts")
 }
@@ -888,6 +919,7 @@ model Contract {
 model Invoice {
   id             String          @id @default(uuid())
   planner_id     String
+  customer_id    String?
   quote_id       String?
   invoice_number String          @unique
   client_name    String
@@ -906,11 +938,13 @@ model Invoice {
   created_at     DateTime        @default(now())
   updated_at     DateTime        @updatedAt
   planner        WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer       Customer?       @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   quote          Quote?          @relation(fields: [quote_id], references: [id], onDelete: SetNull)
   line_items     InvoiceLineItem[]
   payments       InvoicePayment[]
 
   @@index([planner_id])
+  @@index([customer_id])
   @@index([status])
   @@index([quote_id])
   @@map("invoices")

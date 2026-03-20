@@ -12,9 +12,10 @@ const lineItemSchema = z.object({
 });
 
 const createInvoiceSchema = z.object({
+  customer_id: z.string().optional().nullable(),
   quote_id: z.string().uuid().optional().nullable(),
   client_name: z.string().min(1),
-  client_email: z.string().email().optional().nullable().or(z.literal('')),
+  client_email: z.string().email().optional().nullable(),
   description: z.string().optional().nullable(),
   currency: z.string().default('EUR'),
   subtotal: z.number().min(0),
@@ -49,6 +50,7 @@ export async function GET(request: NextRequest) {
         ...(status ? { status: status as never } : {}),
       },
       include: {
+        customer: { select: { id: true, name: true, email: true, phone: true } },
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
         quote: { select: { id: true, couple_names: true } },
@@ -81,6 +83,7 @@ export async function POST(request: NextRequest) {
     const invoice = await prisma.invoice.create({
       data: {
         planner_id: user.planner_id,
+        customer_id: data.customer_id ?? null,
         quote_id: data.quote_id ?? null,
         invoice_number: invoiceNumber,
         client_name: data.client_name,
@@ -103,7 +106,11 @@ export async function POST(request: NextRequest) {
           })),
         },
       },
-      include: { line_items: true, payments: true },
+      include: {
+        customer: { select: { id: true, name: true, email: true, phone: true } },
+        line_items: true,
+        payments: true,
+      },
     });
 
     return NextResponse.json({ data: invoice }, { status: 201 });

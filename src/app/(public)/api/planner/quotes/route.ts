@@ -12,6 +12,7 @@ const lineItemSchema = z.object({
 });
 
 const createQuoteSchema = z.object({
+  customer_id: z.string().optional().nullable(),
   couple_names: z.string().min(1),
   event_date: z.string().datetime().optional().nullable(),
   location: z.string().optional().nullable(),
@@ -41,8 +42,9 @@ export async function GET(request: NextRequest) {
         ...(status ? { status: status as never } : {}),
       },
       include: {
+        customer: { select: { id: true, name: true, email: true, phone: true } },
         line_items: true,
-        contract: { select: { id: true, status: true } },
+        contracts: { select: { id: true, status: true } },
         invoices: { select: { id: true, status: true, total: true, amount_paid: true } },
       },
       orderBy: { created_at: 'desc' },
@@ -62,9 +64,24 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createQuoteSchema.parse(body);
 
+    // If no existing customer selected, create one from the form data
+    let customerId = data.customer_id ?? null;
+    if (!customerId) {
+      const newCustomer = await prisma.customer.create({
+        data: {
+          planner_id: user.planner_id,
+          name: data.couple_names,
+          email: data.client_email || null,
+          phone: data.client_phone || null,
+        },
+      });
+      customerId = newCustomer.id;
+    }
+
     const quote = await prisma.quote.create({
       data: {
         planner_id: user.planner_id,
+        customer_id: customerId,
         couple_names: data.couple_names,
         event_date: data.event_date ? new Date(data.event_date) : null,
         location: data.location ?? null,
@@ -87,7 +104,10 @@ export async function POST(request: NextRequest) {
           })),
         },
       },
-      include: { line_items: true },
+      include: {
+        customer: { select: { id: true, name: true, email: true, phone: true } },
+        line_items: true,
+      },
     });
 
     return NextResponse.json({ data: quote }, { status: 201 });

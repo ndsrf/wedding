@@ -13,6 +13,7 @@ const lineItemSchema = z.object({
 });
 
 const updateQuoteSchema = z.object({
+  customer_id: z.string().optional().nullable(),
   couple_names: z.string().min(1).optional(),
   event_date: z.string().datetime().optional().nullable(),
   location: z.string().optional().nullable(),
@@ -38,8 +39,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const quote = await prisma.quote.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
+        customer: { select: { id: true, name: true, email: true, phone: true } },
         line_items: true,
-        contract: { select: { id: true, status: true, share_token: true } },
+        contracts: { select: { id: true, status: true, share_token: true } },
         invoices: { select: { id: true, invoice_number: true, status: true, total: true, amount_paid: true } },
       },
     });
@@ -85,6 +87,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return tx.quote.update({
         where: { id },
         data: {
+          ...(quoteData.customer_id !== undefined && { customer_id: quoteData.customer_id }),
           ...(quoteData.couple_names !== undefined && { couple_names: quoteData.couple_names }),
           ...(quoteData.event_date !== undefined && { event_date: quoteData.event_date ? new Date(quoteData.event_date) : null }),
           ...(quoteData.location !== undefined && { location: quoteData.location }),
@@ -99,7 +102,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(quoteData.expires_at !== undefined && { expires_at: quoteData.expires_at ? new Date(quoteData.expires_at) : null }),
           ...(quoteData.status !== undefined && { status: quoteData.status }),
         },
-        include: { line_items: true },
+        include: {
+          customer: { select: { id: true, name: true, email: true, phone: true } },
+          line_items: true,
+        },
       });
     });
 

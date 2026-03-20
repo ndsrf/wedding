@@ -5,16 +5,19 @@ import { QuoteForm } from './QuoteForm';
 
 interface Quote {
   id: string;
+  customer_id: string | null;
+  customer: { id: string; name: string; email: string | null; phone: string | null } | null;
   couple_names: string;
   event_date: string | null;
   location: string | null;
   client_email: string | null;
+  client_phone: string | null;
   status: string;
   currency: string;
   total: string | number;
   expires_at: string | null;
   created_at: string;
-  contract: { id: string; status: string } | null;
+  contracts: { id: string; status: string }[];
   invoices: { id: string; status: string }[];
 }
 
@@ -108,10 +111,12 @@ export function QuotesList() {
         </div>
         <QuoteForm
           initialData={editingQuote ? {
+            customer_id: editingQuote.customer_id ?? null,
             couple_names: editingQuote.couple_names,
             event_date: editingQuote.event_date ?? '',
             location: editingQuote.location ?? '',
             client_email: editingQuote.client_email ?? '',
+            client_phone: editingQuote.client_phone ?? '',
           } : undefined}
           onSave={handleSave}
           onCancel={() => { setShowForm(false); setEditingId(null); }}
@@ -162,8 +167,10 @@ export function QuotesList() {
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[quote.status] ?? 'bg-gray-100 text-gray-600'}`}>
                       {quote.status}
                     </span>
-                    {quote.contract && (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Contract</span>
+                    {quote.contracts.length > 0 && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                        {quote.contracts.length === 1 ? 'Contract' : `${quote.contracts.length} Contracts`}
+                      </span>
                     )}
                     {quote.invoices.length > 0 && (
                       <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Invoiced</span>

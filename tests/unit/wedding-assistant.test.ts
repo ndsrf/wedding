@@ -93,6 +93,7 @@ const baseWedding = {
   google_photos_refresh_token: null,
   google_photos_access_token: null,
   google_photos_token_expiry: null,
+  customer_id: null,
 };
 
 const baseFamily = {
