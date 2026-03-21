@@ -22,10 +22,12 @@ interface QuoteRef {
 
 interface CreateWeddingDialogProps {
   coupleNames: string;
+  contractId: string;
+  customerId: string | null;
   onClose: () => void;
 }
 
-function CreateWeddingDialog({ coupleNames, onClose }: CreateWeddingDialogProps) {
+function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: CreateWeddingDialogProps) {
   type Fields = { couple_names: string; wedding_date: string; wedding_time: string; rsvp_cutoff_date: string };
   const [fields, setFields] = useState<Fields>({
     couple_names: coupleNames,
@@ -57,6 +59,9 @@ function CreateWeddingDialog({ coupleNames, onClose }: CreateWeddingDialogProps)
           allow_guest_additions: true,
           default_language: 'ES',
           whatsapp_mode: 'BUSINESS',
+          // Traceability / billing links
+          contract_id: contractId,
+          ...(customerId ? { customer_id: customerId } : {}),
         }),
       });
       if (!res.ok) {
@@ -179,6 +184,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [quote, setQuote] = useState<QuoteRef | null>(null);
+  const [contractCustomerId, setContractCustomerId] = useState<string | null>(null);
   const [showCreateWedding, setShowCreateWedding] = useState(false);
 
   // Shared Y.Doc: editor + comments sidebar share the same Liveblocks connection
@@ -212,6 +218,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       .then((r) => (r.ok ? r.json() : null))
       .then((res) => {
         if (res?.data?.quote) setQuote(res.data.quote);
+        if (res?.data?.customer_id) setContractCustomerId(res.data.customer_id);
       })
       .catch(() => {});
   }, [contract?.id]);
@@ -323,6 +330,8 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       {showCreateWedding && (
         <CreateWeddingDialog
           coupleNames={quote?.couple_names ?? contract.title.replace(/^Contract\s*[–-]\s*/i, '')}
+          contractId={contract.id}
+          customerId={contractCustomerId}
           onClose={() => setShowCreateWedding(false)}
         />
       )}
