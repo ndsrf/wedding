@@ -902,6 +902,7 @@ model Contract {
   signed_pdf_url       String?
   signed_at            DateTime?
   signer_email         String?
+  signer_name          String?
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
   planner              WeddingPlanner    @relation(fields: [planner_id], references: [id], onDelete: Cascade)
