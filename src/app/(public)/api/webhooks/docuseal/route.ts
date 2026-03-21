@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
+import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
+
+// ── Webhook payload schemas ───────────────────────────────────────────────────
+
+const documentSchema = z.object({ url: z.string().optional() });
+
+// submission.completed — the `data` object is the submission itself
+const submissionCompletedDataSchema = z.object({
+  id: z.number(),
+  documents: z.array(documentSchema).optional(),
+});
+
+// form.completed — the `data` object is the submitter; nested `submission` holds docs
+const formCompletedDataSchema = z.object({
+  submission_id: z.number(),
+  submission: z
+    .object({ documents: z.array(documentSchema).optional() })
+    .optional(),
+});
+
+const webhookEventSchema = z.object({
+  event_type: z.string(),
+  data: z.record(z.string(), z.unknown()).optional(),
+});
 
 /**
  * Verify the DocuSeal webhook HMAC-SHA256 signature (optional).
@@ -27,33 +51,39 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
-  let event: Record<string, unknown>;
+  let parsed: z.infer<typeof webhookEventSchema>;
   try {
-    event = JSON.parse(rawBody);
+    parsed = webhookEventSchema.parse(JSON.parse(rawBody));
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid JSON or unexpected payload shape' }, { status: 400 });
   }
 
-  const eventType = event.event_type as string | undefined;
-  const data = event.data as Record<string, unknown> | undefined;
+  const { event_type: eventType, data } = parsed;
 
   try {
     if (eventType === 'submission.completed' && data) {
-      // All signers on a submission have signed
-      const submissionId = data.id as number | undefined;
-      const documents = (data.documents as Array<{ url?: string }> | undefined) ?? [];
-      await handleSubmissionCompleted(submissionId, documents[0]?.url ?? null);
+      // All signers on a submission have signed — data IS the submission object
+      const result = submissionCompletedDataSchema.safeParse(data);
+      if (result.success) {
+        const { id: submissionId, documents = [] } = result.data;
+        await handleSubmissionCompleted(submissionId, documents[0]?.url ?? null);
+      } else {
+        console.warn('DocuSeal submission.completed: unexpected data shape', result.error.issues);
+      }
     } else if (eventType === 'form.completed' && data) {
-      // Individual submitter has completed signing
-      const submissionId = data.submission_id as number | undefined;
-      const submission = data.submission as Record<string, unknown> | undefined;
-      const documents =
-        (submission?.documents as Array<{ url?: string }> | undefined) ?? [];
-      await handleSubmissionCompleted(submissionId, documents[0]?.url ?? null);
+      // Individual submitter has completed signing — data IS the submitter object
+      const result = formCompletedDataSchema.safeParse(data);
+      if (result.success) {
+        const { submission_id: submissionId, submission } = result.data;
+        const documents = submission?.documents ?? [];
+        await handleSubmissionCompleted(submissionId, documents[0]?.url ?? null);
+      } else {
+        console.warn('DocuSeal form.completed: unexpected data shape', result.error.issues);
+      }
     }
   } catch (error) {
     console.error('DocuSeal webhook processing error:', error);
-    // Still return 200 to prevent retries for application errors
+    // Still return 200 to prevent DocuSeal from retrying application errors
   }
 
   return NextResponse.json({ received: true });

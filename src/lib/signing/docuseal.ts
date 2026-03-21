@@ -102,6 +102,7 @@ export async function createDocuSealSubmission(params: {
     throw new Error(`DocuSeal submission creation failed (${submissionRes.status}): ${text}`);
   }
 
+  // The /submissions endpoint always returns an array of submitters (one per role)
   const submitters = await submissionRes.json() as Array<{
     id: number;
     submission_id: number;
@@ -109,7 +110,7 @@ export async function createDocuSealSubmission(params: {
     embed_src: string;
   }>;
 
-  const submitter = Array.isArray(submitters) ? submitters[0] : submitters;
+  const submitter = submitters[0];
 
   return {
     templateId,
@@ -118,23 +119,4 @@ export async function createDocuSealSubmission(params: {
     slug: submitter.slug,
     embedSrc: submitter.embed_src,
   };
-}
-
-/**
- * Fetch the signed PDF download URL from a completed DocuSeal submission.
- */
-export async function getSubmissionSignedPdfUrl(submissionId: number): Promise<string | null> {
-  try {
-    const base = getApiBase();
-    const res = await fetch(`${base}/submissions/${submissionId}`, {
-      headers: { 'X-Auth-Token': getApiKey() },
-    });
-    if (!res.ok) return null;
-    const data = await res.json() as {
-      documents?: Array<{ url?: string }>;
-    };
-    return data.documents?.[0]?.url ?? null;
-  } catch {
-    return null;
-  }
 }

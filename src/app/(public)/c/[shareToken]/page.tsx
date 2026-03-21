@@ -45,10 +45,19 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
       .finally(() => setLoading(false));
   }, [shareToken]);
 
-  // Listen for DocuSeal completion messages from the iframe
+  // Listen for DocuSeal completion messages from the iframe.
+  // We derive the allowed origin from the signing URL so this works for both
+  // cloud (https://docuseal.com) and self-hosted installations.
   useEffect(() => {
+    // Determine the expected postMessage origin from the embed URL
+    const signingOrigin = contract?.signing_url
+      ? (() => { try { return new URL(contract.signing_url).origin; } catch { return null; } })()
+      : null;
+
     function handleMessage(event: MessageEvent) {
-      // DocuSeal emits 'completed' event from the embed iframe
+      // Reject messages from unexpected origins to prevent spoofing
+      if (signingOrigin && event.origin !== signingOrigin) return;
+
       if (
         event.data &&
         typeof event.data === 'object' &&
@@ -61,13 +70,13 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
           fetch(`/api/planner/contracts/shared/${shareToken}`)
             .then((r) => r.json())
             .then((res) => { if (!res.error) setContract(res.data); })
-            .catch(() => {});
+            .catch((err) => console.error('Failed to refresh contract status after signing:', err));
         }
       }
     }
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [shareToken]);
+  }, [shareToken, contract?.signing_url]);
 
   if (loading) {
     return (
