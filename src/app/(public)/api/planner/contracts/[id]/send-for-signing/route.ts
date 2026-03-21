@@ -7,9 +7,13 @@ import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { createDocuSealSubmission } from '@/lib/signing/docuseal';
 import { put } from '@vercel/blob';
 import React from 'react';
-// pdf-parse is CommonJS-only; require avoids the ESM default-export type error
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ numpages: number }>;
+
+/** Count pages in a PDF buffer by scanning for /Type /Page entries (no external deps). */
+function countPdfPages(buffer: Buffer): number {
+  const str = buffer.toString('latin1');
+  const matches = str.match(/\/Type\s*\/Page[^s]/g);
+  return matches ? matches.length : 2;
+}
 
 const sendSchema = z.object({
   signer_email: z.string().email(),
@@ -85,15 +89,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   // 5. Count pages so DocuSeal knows which page is the signature page
-  let totalPages: number;
-  try {
-    const pdfData = await pdfParse(buffer);
-    totalPages = pdfData.numpages;
-  } catch (error) {
-    console.error('send-for-signing: PDF page count error:', error);
-    // Fall back: signature page is assumed to be page 2 (index 1)
-    totalPages = 2;
-  }
+  const totalPages = countPdfPages(buffer);
   const signaturePage = totalPages - 1; // 0-indexed
 
   // 6. Upload PDF to Vercel Blob (needs to be publicly accessible for DocuSeal)
