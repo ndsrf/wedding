@@ -129,7 +129,7 @@ export function ContractEditor({
                 if (fragment.length === 0 && initialContentRef.current && editorRef.current) {
                   editorRef.current.commands.setContent(
                     initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
-                    false, // don't emit an update so we don't trigger an immediate save
+                    { emitUpdate: false }, // don't emit an update so we don't trigger an immediate save
                   );
                 }
               }, 0);
