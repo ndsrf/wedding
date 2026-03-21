@@ -99,7 +99,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       const res = await fetch(`/api/planner/contracts/${contractId}/send-for-signing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sendForm),
+        body: JSON.stringify({ signer_email: sendForm.email, signer_name: sendForm.name, message: sendForm.message }),
       });
       if (res.ok) {
         setSendingId(null);
