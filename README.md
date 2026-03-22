@@ -162,7 +162,7 @@ Each invoice shows a payment progress bar and remaining balance. Generate a PDF 
 | `LIVEBLOCKS_SECRET` | Yes | Secret key from [liveblocks.io](https://liveblocks.io) dashboard (Settings → API Keys) |
 | `DOCUSEAL_API_KEY` | Yes | API key from your DocuSeal dashboard → Settings → API |
 | `DOCUSEAL_API_URL` | No | Override the DocuSeal API base URL for self-hosted instances (default: `https://api.docuseal.com`) |
-| `DOCUSEAL_WEBHOOK_SECRET` | No | Shared secret for verifying webhook HMAC-SHA256 signatures (recommended in production) |
+| `DOCUSEAL_WEBHOOK_SECRET` | No | Shared secret token for verifying incoming webhooks (recommended in production). Must match the custom header value configured in DocuSeal. |
 
 ### DocuSeal Webhook Setup
 
@@ -171,7 +171,7 @@ Each invoice shows a payment progress bar and remaining balance. Generate a PDF 
 3. Subscribe to the following events:
    - `submission.completed` — fires when all signers have signed (primary event)
    - `form.completed` — fires when an individual signer completes their form (fallback)
-4. Optionally set a **Signing Secret** and copy the value into `DOCUSEAL_WEBHOOK_SECRET`. When set, every incoming webhook is verified against an HMAC-SHA256 signature in the `x-docuseal-signature` header; requests that fail verification are rejected with `401`.
+4. Optionally add a custom header for security: set the header name to `x-docuseal-signature` and the value to a secret string of your choice. Copy that same value into `DOCUSEAL_WEBHOOK_SECRET` in your environment. When set, every incoming webhook is verified by comparing the header value directly against the secret; requests that fail verification are rejected with `401`.
 
 ### New Database Models
 
