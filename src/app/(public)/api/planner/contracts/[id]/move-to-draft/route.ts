@@ -23,10 +23,14 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       const apiKey = process.env.DOCUSEAL_API_KEY;
       if (apiKey) {
         try {
-          await fetch(`${apiBase}/submissions/${contract.signing_request_id}/archive`, {
+          const archiveRes = await fetch(`${apiBase}/submissions/${contract.signing_request_id}/archive`, {
             method: 'PUT',
             headers: { 'X-Auth-Token': apiKey, 'Content-Type': 'application/json' },
           });
+          if (!archiveRes.ok) {
+            const body = await archiveRes.text().catch(() => '');
+            console.warn(`DocuSeal archive failed (${archiveRes.status}): ${body}`);
+          }
         } catch (e) {
           // Non-fatal: log but proceed with moving to draft
           console.warn('Failed to archive DocuSeal submission:', e);
