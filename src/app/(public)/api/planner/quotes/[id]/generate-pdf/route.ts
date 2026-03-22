@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { QuotePDF } from '@/lib/pdf/quote-pdf';
-import { put } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -18,7 +18,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     });
     if (!quote) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // If PDF already exists and quote hasn't changed, return the existing URL
+    // Return cached PDF if it exists and no changes have been made
     if (quote.pdf_url) {
       return NextResponse.json({ data: { pdf_url: quote.pdf_url, quote } });
     }
@@ -36,11 +36,17 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }) as never
     );
 
-    // Use stable filename so re-generation overwrites the same file
-    const blob = await put(`quotes/${id}/quote.pdf`, buffer, {
+    // Delete the old blob first so we always upload to a fresh URL.
+    // Vercel Blob serves URLs with Cache-Control: immutable — reusing the same
+    // URL after overwriting means browsers and CDN keep serving the old file.
+    if (quote.pdf_url?.startsWith('http')) {
+      try { await del(quote.pdf_url); } catch { /* non-fatal */ }
+    }
+
+    // Unique path per generation guarantees a new URL each time
+    const blob = await put(`quotes/${id}/quote-${Date.now()}.pdf`, buffer, {
       access: 'public',
       contentType: 'application/pdf',
-      allowOverwrite: true,
     });
 
     const updated = await prisma.quote.update({

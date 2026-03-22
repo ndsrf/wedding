@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
-import { put } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -37,11 +37,16 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }) as never
     );
 
-    // Use stable filename so re-generation overwrites the same file
-    const blob = await put(`contracts/${id}/contract.pdf`, buffer, {
+    // Delete the old blob first, then upload to a unique path.
+    // Vercel Blob serves URLs with Cache-Control: immutable — reusing the same
+    // URL after overwriting means browsers and CDN keep serving the old file.
+    if (contract.pdf_url?.startsWith('http')) {
+      try { await del(contract.pdf_url); } catch { /* non-fatal */ }
+    }
+
+    const blob = await put(`contracts/${id}/contract-${Date.now()}.pdf`, buffer, {
       access: 'public',
       contentType: 'application/pdf',
-      allowOverwrite: true,
     });
 
     await prisma.contract.update({
