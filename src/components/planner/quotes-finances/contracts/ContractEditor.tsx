@@ -5,11 +5,19 @@ import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import Collaboration from '@tiptap/extension-collaboration';
+import { ySyncPluginKey, yXmlFragmentToProsemirrorJSON } from '@tiptap/y-tiptap';
 import { useEffect, useRef } from 'react';
 import * as Y from 'yjs';
 
 // Fragment name TipTap's Collaboration extension uses in the Yjs doc
 const YJS_FRAGMENT = 'default';
+
+/** Returns true when the node array is exactly two identical halves (Yjs CRDT duplication artifact). */
+function isDoubledContent(nodes: unknown[]): boolean {
+  if (nodes.length < 2 || nodes.length % 2 !== 0) return false;
+  const mid = nodes.length / 2;
+  return JSON.stringify(nodes.slice(0, mid)) === JSON.stringify(nodes.slice(mid));
+}
 
 interface ContractEditorProps {
   contractId: string;
@@ -70,10 +78,12 @@ export function ContractEditor({
   const internalYdocRef = useRef<Y.Doc>(new Y.Doc());
   const ydocRef = externalYdocRef ?? internalYdocRef;
 
-  // Refs so the Liveblocks effect can access the latest editor and initial content
+  // Refs so the Liveblocks effect can access the latest editor, content and callbacks
   // without needing them as effect dependencies (they're stable after mount).
   const editorRef = useRef<Editor | null>(null);
   const initialContentRef = useRef(initialContent);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   useEffect(() => {
     let destroyed = false;
@@ -127,11 +137,32 @@ export function ContractEditor({
           function seedIfEmpty() {
             if (destroyed) return;
             const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
+
             if (fragment.length === 0 && initialContentRef.current && editorRef.current) {
+              // Fresh room — seed from DB content.
               editorRef.current.commands.setContent(
                 initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
-                { emitUpdate: false }, // don't emit an update so we don't trigger an immediate save
+                { emitUpdate: false },
               );
+            } else if (fragment.length > 0 && editorRef.current) {
+              // Room has content.  Detect the CRDT duplication artifact caused by the
+              // previous fix (room 'connected' + setTimeout): if the node array is
+              // exactly two identical halves, cut it back to one and persist to DB.
+              try {
+                const fragmentJSON = yXmlFragmentToProsemirrorJSON(fragment) as { content?: unknown[] };
+                const nodes = fragmentJSON.content ?? [];
+                if (isDoubledContent(nodes)) {
+                  const fixed = { ...fragmentJSON, content: nodes.slice(0, nodes.length / 2) };
+                  editorRef.current.commands.setContent(
+                    fixed as Parameters<Editor['commands']['setContent']>[0],
+                    { emitUpdate: false },
+                  );
+                  // Persist the corrected content to the database.
+                  onChangeRef.current?.(fixed as object);
+                }
+              } catch {
+                // Non-fatal — if conversion fails, leave content as-is.
+              }
             }
           }
 
@@ -184,7 +215,11 @@ export function ContractEditor({
       // callback above via `setContent` once the fragment is confirmed empty.
       content: undefined,
       editable: !readOnly,
-      onUpdate: ({ editor }) => {
+      onUpdate: ({ editor, transaction }) => {
+        // Skip saves that originated from Yjs / Liveblocks — those are not user
+        // edits and would overwrite the DB with whatever Liveblocks has (which may
+        // be corrupted).  Only persist genuine local edits.
+        if (transaction.getMeta(ySyncPluginKey)?.isChangeOrigin) return;
         onChange?.(editor.getJSON());
       },
       onSelectionUpdate: ({ editor }) => {
