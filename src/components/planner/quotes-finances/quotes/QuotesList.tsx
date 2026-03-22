@@ -70,6 +70,7 @@ export function QuotesList() {
   const [contractQuoteId, setContractQuoteId] = useState<string | null>(null);
   const [contractTitle, setContractTitle] = useState('');
   const [contractTemplateId, setContractTemplateId] = useState('');
+  const [contractFillWithAI, setContractFillWithAI] = useState(false);
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [creatingContract, setCreatingContract] = useState(false);
 
@@ -98,6 +99,7 @@ export function QuotesList() {
   function openCreateContract(quote: Quote) {
     setContractTitle(`Contract – ${quote.couple_names}`);
     setContractTemplateId('');
+    setContractFillWithAI(false);
     setContractQuoteId(quote.id);
     fetchTemplates();
   }
@@ -114,13 +116,30 @@ export function QuotesList() {
         contract_template_id: contractTemplateId || null,
       }),
     });
-    setCreatingContract(false);
-    if (res.ok) {
-      const json = await res.json();
-      setContractQuoteId(null);
-      fetchQuotes();
-      window.open(`/planner/contracts/${json.data.share_token}`, '_blank');
+    if (!res.ok) { setCreatingContract(false); return; }
+    const json = await res.json();
+
+    if (contractFillWithAI && json.data?.id) {
+      try {
+        const fillRes = await fetch(`/api/planner/contracts/${json.data.id}/fill-with-ai`, { method: 'POST' });
+        if (fillRes.ok) {
+          const fillJson = await fillRes.json();
+          if (fillJson.data?.comments?.length) {
+            localStorage.setItem(
+              `contract-ai-comments-${json.data.id}`,
+              JSON.stringify(fillJson.data.comments),
+            );
+          }
+        }
+      } catch {
+        // Non-fatal: open editor without AI comments
+      }
     }
+
+    setCreatingContract(false);
+    setContractQuoteId(null);
+    fetchQuotes();
+    window.open(`/planner/contracts/${json.data.share_token}`, '_blank');
   }
 
   async function handleSave(data: Record<string, unknown>) {
@@ -353,13 +372,25 @@ export function QuotesList() {
                       </div>
                     )}
                   </div>
+                  <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
+                    <input
+                      type="checkbox"
+                      className="w-3.5 h-3.5 rounded border-gray-300 text-purple-600 focus:ring-purple-300"
+                      checked={contractFillWithAI}
+                      onChange={(e) => setContractFillWithAI(e.target.checked)}
+                    />
+                    <span className="text-xs font-medium text-purple-700">Fill with AI</span>
+                    <span className="text-xs text-gray-400">(auto-detect &amp; fill placeholders using client and quote data)</span>
+                  </label>
                   <div className="flex gap-2">
                     <button
                       type="submit"
                       disabled={creatingContract}
                       className="px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition-colors"
                     >
-                      {creatingContract ? 'Creating…' : 'Create & Open Editor'}
+                      {creatingContract
+                        ? contractFillWithAI ? 'Filling with AI…' : 'Creating…'
+                        : 'Create & Open Editor'}
                     </button>
                     <button
                       type="button"

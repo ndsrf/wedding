@@ -190,6 +190,25 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   // Shared Y.Doc: editor + comments sidebar share the same Liveblocks connection
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
 
+  function handleYDocReady(ydoc: Y.Doc) {
+    if (!contract?.id) return;
+    const key = `contract-ai-comments-${contract.id}`;
+    try {
+      const stored = localStorage.getItem(key);
+      if (!stored) return;
+      const comments = JSON.parse(stored) as import('@/components/planner/quotes-finances/contracts/ContractCommentsSidebar').CommentData[];
+      if (!Array.isArray(comments) || comments.length === 0) return;
+      const commentsArray = ydoc.getArray<import('@/components/planner/quotes-finances/contracts/ContractCommentsSidebar').CommentData>('comments');
+      // Only inject if comments array is currently empty (don't duplicate on re-opens)
+      if (commentsArray.length === 0) {
+        commentsArray.push(comments);
+      }
+      localStorage.removeItem(key);
+    } catch {
+      // Non-fatal
+    }
+  }
+
   useEffect(() => {
     params.then((p) => setShareToken(p.shareToken));
   }, [params]);
@@ -311,6 +330,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
             readOnly={contract.status === 'SIGNED'}
             onChange={handleSaveContent}
             externalYdocRef={ydocRef}
+            onYDocReady={handleYDocReady}
             currentUser={{ id: 'planner', name: plannerName, color: '#e11d48' }}
           />
         </div>
