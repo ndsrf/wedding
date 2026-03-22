@@ -29,6 +29,7 @@ model WeddingPlanner {
   legal_name          String?
   vat_number          String?
   address             String?
+  company_email       String?
   phone               String?
   whatsapp            String?
   instagram           String?

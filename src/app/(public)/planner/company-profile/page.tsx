@@ -31,6 +31,7 @@ export default async function CompanyProfileServerPage() {
       whatsapp: true,
       instagram: true,
       website: true,
+      company_email: true,
       logo_url: true,
       signature_url: true,
     },

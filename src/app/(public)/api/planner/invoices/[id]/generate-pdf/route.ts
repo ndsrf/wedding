@@ -30,6 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       select: {
         name: true,
         email: true,
+        company_email: true,
         legal_name: true,
         vat_number: true,
         address: true,
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         invoice,
         company: {
           name: planner?.name ?? 'Wedding Planner',
-          email: planner?.email,
+          email: planner?.company_email || planner?.email,
           logoUrl: toAbsoluteUrl(planner?.logo_url),
           legalName: planner?.legal_name ?? undefined,
           vatNumber: planner?.vat_number ?? undefined,
