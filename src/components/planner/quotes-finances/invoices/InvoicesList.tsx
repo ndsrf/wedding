@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
 import type { InvoicePrefillData } from '../contracts/ContractsList';
@@ -351,22 +352,22 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                         {invoice.status}
                       </span>
                       {invoice.quote && (
-                        <a
+                        <Link
                           href="/planner/quotes-finances?tab=quotes"
                           className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
                           title={`Go to quote: ${invoice.quote.couple_names}`}
                         >
                           Quote
-                        </a>
+                        </Link>
                       )}
                       {invoice.quote?.contracts[0] && (
-                        <a
+                        <Link
                           href="/planner/quotes-finances?tab=contracts"
                           className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
                           title={`Go to contract: ${invoice.quote.contracts[0].title}`}
                         >
                           Contract
-                        </a>
+                        </Link>
                       )}
                     </div>
                     {invoice.due_date && (
