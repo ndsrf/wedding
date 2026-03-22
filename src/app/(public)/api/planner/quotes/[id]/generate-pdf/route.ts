@@ -44,7 +44,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         quote,
         company: {
           name: planner?.name ?? 'Wedding Planner',
-          email: planner?.company_email ?? planner?.email,
+          email: planner?.company_email || planner?.email,
           logoUrl: toAbsoluteUrl(planner?.logo_url),
           legalName: planner?.legal_name ?? undefined,
           vatNumber: planner?.vat_number ?? undefined,
