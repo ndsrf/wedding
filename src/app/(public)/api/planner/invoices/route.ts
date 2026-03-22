@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         customer: { select: { id: true, name: true, email: true, phone: true } },
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
-        quote: { select: { id: true, couple_names: true } },
+        quote: { select: { id: true, couple_names: true, contracts: { select: { id: true, title: true }, take: 1 } } },
       },
       orderBy: { created_at: 'desc' },
     });

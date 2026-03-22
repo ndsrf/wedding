@@ -23,7 +23,7 @@ export interface Invoice {
   status: string;
   pdf_url: string | null;
   created_at: string;
-  quote: { id: string; couple_names: string } | null;
+  quote: { id: string; couple_names: string; contracts: { id: string; title: string }[] } | null;
   line_items: {
     id: string;
     name: string;
@@ -351,12 +351,22 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                         {invoice.status}
                       </span>
                       {invoice.quote && (
-                        <span
-                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700"
-                          title={`Quote for ${invoice.quote.couple_names}`}
+                        <a
+                          href="/planner/quotes-finances?tab=quotes"
+                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+                          title={`Go to quote: ${invoice.quote.couple_names}`}
                         >
-                          {invoice.quote.couple_names}
-                        </span>
+                          Quote
+                        </a>
+                      )}
+                      {invoice.quote?.contracts[0] && (
+                        <a
+                          href="/planner/quotes-finances?tab=contracts"
+                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
+                          title={`Go to contract: ${invoice.quote.contracts[0].title}`}
+                        >
+                          Contract
+                        </a>
                       )}
                     </div>
                     {invoice.due_date && (
