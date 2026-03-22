@@ -15,6 +15,8 @@ const lineItemSchema = z.object({
 const updateSchema = z.object({
   client_name: z.string().min(1).optional(),
   client_email: z.string().email().optional().nullable().or(z.literal('')),
+  client_id_number: z.string().optional().nullable(),
+  client_address: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   currency: z.string().optional(),
   subtotal: z.number().min(0).optional(),

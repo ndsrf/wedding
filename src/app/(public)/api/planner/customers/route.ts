@@ -8,6 +8,7 @@ const createCustomerSchema = z.object({
   email: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
   id_number: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
 });
 
@@ -99,6 +100,7 @@ export async function POST(request: NextRequest) {
         email: data.email ?? null,
         phone: data.phone ?? null,
         id_number: data.id_number ?? null,
+        address: data.address ?? null,
         notes: data.notes ?? null,
       },
     });

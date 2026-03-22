@@ -17,6 +17,7 @@ interface CustomerSuggestion {
   email: string | null;
   phone: string | null;
   id_number: string | null;
+  address: string | null;
 }
 
 interface QuoteFormData {
@@ -27,6 +28,7 @@ interface QuoteFormData {
   client_email: string;
   client_phone: string;
   client_id_number: string;
+  client_address: string;
   notes: string;
   currency: string;
   discount: number | '';
@@ -58,6 +60,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
     client_email: initialData?.client_email ?? '',
     client_phone: initialData?.client_phone ?? '',
     client_id_number: initialData?.client_id_number ?? '',
+    client_address: initialData?.client_address ?? '',
     notes: initialData?.notes ?? '',
     currency: initialData?.currency ?? 'EUR',
     discount: initialData?.discount ?? '',
@@ -111,6 +114,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
       client_email: c.email ?? p.client_email,
       client_phone: c.phone ?? p.client_phone,
       client_id_number: c.id_number ?? p.client_id_number,
+      client_address: c.address ?? p.client_address,
     }));
     setSuggestions([]);
     setShowSuggestions(false);
@@ -167,6 +171,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
         client_email: form.client_email || null,
         client_phone: form.client_phone || null,
         client_id_number: form.client_id_number || null,
+        client_address: form.client_address || null,
         location: form.location || null,
         notes: form.notes || null,
       });
@@ -285,6 +290,17 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
               value={form.client_id_number}
               onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_id_number: e.target.value }))}
               placeholder="DNI, NIE, Passport…"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Client Address</label>
+            <textarea
+              readOnly={readOnly}
+              rows={2}
+              className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
+              value={form.client_address}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_address: e.target.value }))}
+              placeholder="Street, City, Country…"
             />
           </div>
         </div>

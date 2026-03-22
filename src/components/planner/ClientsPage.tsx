@@ -46,6 +46,7 @@ interface Customer {
   email: string | null;
   phone: string | null;
   id_number: string | null;
+  address: string | null;
   notes: string | null;
   created_at: string;
   quotes: CustomerQuote[];
@@ -108,6 +109,144 @@ function PaymentBar({ invoice }: { invoice: CustomerInvoice }) {
   );
 }
 
+interface EditClientModalProps {
+  customer: Customer;
+  onClose: () => void;
+  onUpdated: (customer: Customer) => void;
+}
+
+function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps) {
+  const [name, setName] = useState(customer.name);
+  const [email, setEmail] = useState(customer.email ?? '');
+  const [phone, setPhone] = useState(customer.phone ?? '');
+  const [idNumber, setIdNumber] = useState(customer.id_number ?? '');
+  const [address, setAddress] = useState(customer.address ?? '');
+  const [notes, setNotes] = useState(customer.notes ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setSaving(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/planner/customers/${customer.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim() || null,
+          phone: phone.trim() || null,
+          id_number: idNumber.trim() || null,
+          address: address.trim() || null,
+          notes: notes.trim() || null,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to update client');
+      const json = await res.json();
+      onUpdated({ ...customer, ...json.data });
+    } catch (error) {
+      console.error('Failed to update client:', error);
+      setError('Failed to update client. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900">Edit Client</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ID / Passport Number</label>
+            <input
+              type="text"
+              value={idNumber}
+              onChange={(e) => setIdNumber(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+              placeholder="Street, City, Country..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+            />
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !name.trim()}
+              className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 rounded-lg transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 interface AddClientModalProps {
   onClose: () => void;
   onCreated: (customer: Customer) => void;
@@ -118,6 +257,7 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [idNumber, setIdNumber] = useState('');
+  const [address, setAddress] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -135,6 +275,7 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
           email: email.trim() || null,
           phone: phone.trim() || null,
           id_number: idNumber.trim() || null,
+          address: address.trim() || null,
         }),
       });
       if (!res.ok) throw new Error('Failed to create client');
@@ -202,6 +343,16 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
               placeholder="DNI, NIE, Passport..."
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+              placeholder="Street, City, Country..."
+            />
+          </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-3 pt-2">
             <button
@@ -228,9 +379,10 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
 interface CustomerCardProps {
   customer: Customer;
   onDeleted: (id: string) => void;
+  onEdit: (customer: Customer) => void;
 }
 
-function CustomerCard({ customer, onDeleted }: CustomerCardProps) {
+function CustomerCard({ customer, onDeleted, onEdit }: CustomerCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -286,6 +438,9 @@ function CustomerCard({ customer, onDeleted }: CustomerCardProps) {
             {customer.id_number && (
               <span className="text-xs text-gray-400">ID: {customer.id_number}</span>
             )}
+            {customer.address && (
+              <span className="text-xs text-gray-400 truncate max-w-[200px]">{customer.address}</span>
+            )}
           </div>
         </div>
 
@@ -306,6 +461,15 @@ function CustomerCard({ customer, onDeleted }: CustomerCardProps) {
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => onEdit(customer)}
+            className="p-1.5 text-gray-300 hover:text-teal-500 transition-colors rounded-lg hover:bg-teal-50"
+            title="Edit client"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
           {!hasLinkedData && (
             <>
               {showDeleteConfirm ? (
@@ -464,6 +628,7 @@ export default function ClientsPage() {
   const [contractFilter, setContractFilter] = useState('');
   const [invoiceFilter, setInvoiceFilter] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -501,6 +666,13 @@ export default function ClientsPage() {
 
   function handleDeleted(id: string) {
     setCustomers((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  function handleUpdated(updated: Customer) {
+    setCustomers((prev) =>
+      prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+    );
+    setEditingCustomer(null);
   }
 
   return (
@@ -625,13 +797,20 @@ export default function ClientsPage() {
         <div className="space-y-3">
           <p className="text-xs text-gray-400 px-1">{customers.length} client{customers.length !== 1 ? 's' : ''}</p>
           {customers.map((customer) => (
-            <CustomerCard key={customer.id} customer={customer} onDeleted={handleDeleted} />
+            <CustomerCard key={customer.id} customer={customer} onDeleted={handleDeleted} onEdit={setEditingCustomer} />
           ))}
         </div>
       )}
 
       {showAddModal && (
         <AddClientModal onClose={() => setShowAddModal(false)} onCreated={handleCreated} />
+      )}
+      {editingCustomer && (
+        <EditClientModal
+          customer={editingCustomer}
+          onClose={() => setEditingCustomer(null)}
+          onUpdated={handleUpdated}
+        />
       )}
     </div>
   );

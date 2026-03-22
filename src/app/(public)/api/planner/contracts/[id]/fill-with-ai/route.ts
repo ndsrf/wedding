@@ -100,6 +100,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       (customer?.email ?? quote?.client_email) ? `  Email: ${customer?.email ?? quote?.client_email}` : null,
       (customer?.phone ?? quote?.client_phone) ? `  Phone: ${customer?.phone ?? quote?.client_phone}` : null,
       customer?.id_number ? `  ID/Passport number: ${customer.id_number}` : null,
+      (customer?.address ?? quote?.client_address) ? `  Address: ${customer?.address ?? quote?.client_address}` : null,
       customer?.notes ? `  Notes: ${customer.notes}` : null,
     ].filter(Boolean).join('\n');
 
@@ -163,7 +164,7 @@ Rules:
 - Only return the JSON object, no other text
 - For sourceField, use ONLY one of these exact keys (or null if not mappable):
   planner_name, planner_email, planner_phone, planner_address, planner_vat, planner_website,
-  couple_names, client_email, client_phone, client_id_number,
+  couple_names, client_email, client_phone, client_id_number, client_address,
   event_date, event_location, total_amount`;
 
     const { text } = await generateText({
