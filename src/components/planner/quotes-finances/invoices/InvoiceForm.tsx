@@ -24,6 +24,7 @@ interface InvoiceFormData {
   client_email: string;
   description: string;
   currency: string;
+  discount: number | '';
   tax_rate: number | '';
   due_date: string;
   issued_at: string;
@@ -31,7 +32,7 @@ interface InvoiceFormData {
 }
 
 interface InvoiceFormProps {
-  initialData?: Partial<InvoiceFormData>;
+  initialData?: Partial<InvoiceFormData & { discount?: number | '' }>;
   onSave: (data: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
 }
@@ -51,6 +52,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
     client_email: initialData?.client_email ?? '',
     description: initialData?.description ?? '',
     currency: initialData?.currency ?? 'EUR',
+    discount: initialData?.discount ?? '',
     tax_rate: initialData?.tax_rate ?? '',
     due_date: initialData?.due_date ?? '',
     issued_at: initialData?.issued_at ?? new Date().toISOString(),
@@ -124,9 +126,10 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
   }
 
   const subtotal = form.line_items.reduce((sum, item) => sum + (item.total || 0), 0);
+  const discountAmt = Number(form.discount) || 0;
   const taxRate = Number(form.tax_rate) || 0;
-  const taxAmount = subtotal * (taxRate / 100);
-  const total = subtotal + taxAmount;
+  const taxAmount = (subtotal - discountAmt) * (taxRate / 100);
+  const total = subtotal - discountAmt + taxAmount;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -137,6 +140,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
         customer_id: form.customer_id || null,
         quote_id: form.quote_id || null,
         client_email: form.client_email || null,
+        discount: form.discount === '' ? null : Number(form.discount),
         tax_rate: form.tax_rate === '' ? null : form.tax_rate,
         subtotal,
         tax_amount: taxAmount,
@@ -324,6 +328,14 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
             <div className="text-sm font-medium text-gray-900 text-right">
               {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(subtotal)}
             </div>
+            <div className="text-sm text-gray-500">Discount ({form.currency})</div>
+            <input
+              type="number" min="0" step="0.01"
+              className="border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
+              value={form.discount}
+              placeholder="0"
+              onChange={(e) => setForm((p) => ({ ...p, discount: e.target.value === '' ? '' : Number(e.target.value) }))}
+            />
             <div className="text-sm text-gray-500">Tax rate (%)</div>
             <input
               type="number" min="0" max="100" step="0.1"

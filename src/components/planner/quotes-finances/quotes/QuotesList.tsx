@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react';
 import { QuoteForm } from './QuoteForm';
 
+interface LineItem {
+  id?: string;
+  name: string;
+  description: string | null;
+  quantity: number | string;
+  unit_price: number | string;
+  total: number | string;
+}
+
 interface Quote {
   id: string;
   customer_id: string | null;
@@ -12,12 +21,18 @@ interface Quote {
   location: string | null;
   client_email: string | null;
   client_phone: string | null;
-  status: string;
+  notes: string | null;
   currency: string;
+  subtotal: string | number;
+  discount: string | number | null;
+  tax_rate: string | number | null;
   total: string | number;
   expires_at: string | null;
+  pdf_url: string | null;
+  status: string;
   created_at: string;
-  contracts: { id: string; status: string; share_token?: string }[];
+  line_items: LineItem[];
+  contracts: { id: string; status: string; share_token?: string; signed_pdf_url?: string | null }[];
   invoices: { id: string; status: string }[];
 }
 
@@ -48,6 +63,7 @@ export function QuotesList() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
 
   // Contract creation state
@@ -114,6 +130,8 @@ export function QuotesList() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      // Immediately clear pdf_url in local state so the UI reflects that it needs regeneration
+      setQuotes((prev) => prev.map((q) => q.id === editingId ? { ...q, pdf_url: null } : q));
     } else {
       await fetch('/api/planner/quotes', {
         method: 'POST',
@@ -135,9 +153,15 @@ export function QuotesList() {
     fetchQuotes();
   }
 
-  async function handleGeneratePdf(id: string) {
-    setGenerating(id);
-    const res = await fetch(`/api/planner/quotes/${id}/generate-pdf`, { method: 'POST' });
+  async function handlePdf(quote: Quote) {
+    // If PDF already exists and quote hasn't changed, just open it
+    if (quote.pdf_url) {
+      window.open(quote.pdf_url, '_blank');
+      return;
+    }
+    // Otherwise generate it
+    setGenerating(quote.id);
+    const res = await fetch(`/api/planner/quotes/${quote.id}/generate-pdf`, { method: 'POST' });
     if (res.ok) {
       const { data } = await res.json();
       window.open(data.pdf_url, '_blank');
@@ -159,27 +183,46 @@ export function QuotesList() {
   );
 
   const editingQuote = editingId ? quotes.find((q) => q.id === editingId) : null;
+  const viewingQuote = viewingId ? quotes.find((q) => q.id === viewingId) : null;
 
   if (showForm) {
+    const isView = viewingId !== null && editingId === null;
+    const quoteData = editingQuote ?? viewingQuote;
     return (
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => { setShowForm(false); setEditingId(null); }} className="text-sm text-gray-500 hover:text-gray-700">
+          <button onClick={() => { setShowForm(false); setEditingId(null); setViewingId(null); }} className="text-sm text-gray-500 hover:text-gray-700">
             ← Back
           </button>
-          <h3 className="text-base font-semibold text-gray-900">{editingId ? 'Edit Quote' : 'New Quote'}</h3>
+          <h3 className="text-base font-semibold text-gray-900">
+            {isView ? 'View Quote' : editingId ? 'Edit Quote' : 'New Quote'}
+          </h3>
         </div>
         <QuoteForm
-          initialData={editingQuote ? {
-            customer_id: editingQuote.customer_id ?? null,
-            couple_names: editingQuote.couple_names,
-            event_date: editingQuote.event_date ?? '',
-            location: editingQuote.location ?? '',
-            client_email: editingQuote.client_email ?? '',
-            client_phone: editingQuote.client_phone ?? '',
+          readOnly={isView}
+          initialData={quoteData ? {
+            customer_id: quoteData.customer_id ?? null,
+            couple_names: quoteData.couple_names,
+            event_date: quoteData.event_date ?? '',
+            location: quoteData.location ?? '',
+            client_email: quoteData.client_email ?? '',
+            client_phone: quoteData.client_phone ?? '',
+            notes: quoteData.notes ?? '',
+            currency: quoteData.currency,
+            discount: quoteData.discount != null ? Number(quoteData.discount) : '',
+            tax_rate: quoteData.tax_rate != null ? Number(quoteData.tax_rate) : '',
+            expires_at: quoteData.expires_at ?? '',
+            line_items: quoteData.line_items.map((li) => ({
+              id: li.id,
+              name: li.name,
+              description: li.description ?? '',
+              quantity: Number(li.quantity),
+              unit_price: Number(li.unit_price),
+              total: Number(li.total),
+            })),
           } : undefined}
-          onSave={handleSave}
-          onCancel={() => { setShowForm(false); setEditingId(null); }}
+          onSave={isView ? async () => {} : handleSave}
+          onCancel={() => { setShowForm(false); setEditingId(null); setViewingId(null); }}
         />
       </div>
     );
@@ -190,7 +233,7 @@ export function QuotesList() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-gray-900">Quotes</h3>
         <button
-          onClick={() => { setShowForm(true); setEditingId(null); }}
+          onClick={() => { setShowForm(true); setEditingId(null); setViewingId(null); }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -245,20 +288,25 @@ export function QuotesList() {
                   {/* Existing contracts for this quote */}
                   {quote.contracts.length > 0 && (
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      {quote.contracts.map((c) => (
-                        <a
-                          key={c.id}
-                          href={c.share_token ? `/planner/contracts/${c.share_token}` : '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2 ${CONTRACT_STATUS_STYLES[c.status] ?? 'text-gray-500'}`}
-                        >
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                          {c.status} contract
-                        </a>
-                      ))}
+                      {quote.contracts.map((c) => {
+                        const href = c.status === 'SIGNED' && c.signed_pdf_url
+                          ? c.signed_pdf_url
+                          : c.share_token ? `/planner/contracts/${c.share_token}` : '#';
+                        return (
+                          <a
+                            key={c.id}
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2 ${CONTRACT_STATUS_STYLES[c.status] ?? 'text-gray-500'}`}
+                          >
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            {c.status} contract
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -327,25 +375,49 @@ export function QuotesList() {
               {/* Actions */}
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
                 <button
-                  onClick={() => handleGeneratePdf(quote.id)}
+                  onClick={() => handlePdf(quote)}
                   disabled={generating === quote.id}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    quote.pdf_url
+                      ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                      : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                  }`}
+                  title={quote.pdf_url ? 'Download existing PDF' : 'PDF needs to be generated'}
                 >
                   {generating === quote.id ? (
-                    <span className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full" />
+                    <span className="animate-spin w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full" />
                   ) : (
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   )}
-                  PDF
+                  {quote.pdf_url ? 'Download PDF' : 'Generate PDF'}
                 </button>
-                <button
-                  onClick={() => { setEditingId(quote.id); setShowForm(true); }}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Edit
-                </button>
+
+                {/* Edit only in DRAFT mode; otherwise View */}
+                {quote.status === 'DRAFT' ? (
+                  <button
+                    onClick={() => { setEditingId(quote.id); setViewingId(null); setShowForm(true); }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setViewingId(quote.id); setEditingId(null); setShowForm(true); }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View
+                  </button>
+                )}
+
                 {quote.status === 'DRAFT' && (
                   <button
                     onClick={() => handleStatusChange(quote.id, 'SENT')}
@@ -381,12 +453,16 @@ export function QuotesList() {
                     New Contract
                   </button>
                 )}
-                <button
-                  onClick={() => handleDelete(quote.id)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
-                >
-                  Delete
-                </button>
+
+                {/* Delete only in DRAFT mode */}
+                {quote.status === 'DRAFT' && (
+                  <button
+                    onClick={() => handleDelete(quote.id)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))}

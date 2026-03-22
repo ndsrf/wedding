@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
 import type { InvoicePrefillData } from '../contracts/ContractsList';
@@ -10,14 +11,20 @@ export interface Invoice {
   invoice_number: string;
   client_name: string;
   client_email: string | null;
+  description: string | null;
   currency: string;
+  subtotal: string | number;
+  discount: string | number | null;
+  tax_rate: string | number | null;
+  tax_amount: string | number | null;
+  due_date: string | null;
+  issued_at: string | null;
   total: string | number;
   amount_paid: string | number;
   status: string;
-  issued_at: string | null;
-  due_date: string | null;
+  pdf_url: string | null;
   created_at: string;
-  quote: { id: string; couple_names: string } | null;
+  quote: { id: string; couple_names: string; contracts: { id: string; title: string }[] } | null;
   line_items: {
     id: string;
     name: string;
@@ -55,7 +62,7 @@ const STATUS_STYLES: Record<string, string> = {
   CANCELLED: 'bg-gray-100 text-gray-400',
 };
 
-type View = 'list' | 'form' | 'detail';
+type View = 'list' | 'new' | 'edit' | 'detail';
 
 interface InvoicesListProps {
   externalPrefill?: InvoicePrefillData | null;
@@ -68,6 +75,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
   const [prefillQuote, setPrefillQuote] = useState<ReadyQuote | null>(null);
   const [externalFormData, setExternalFormData] = useState<InvoicePrefillData | null>(null);
@@ -76,7 +84,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     if (externalPrefill) {
       setExternalFormData(externalPrefill);
       setPrefillQuote(null);
-      setView('form');
+      setView('new');
       onExternalPrefillConsumed?.();
     }
   }, [externalPrefill]); // onExternalPrefillConsumed is intentionally excluded — it's a stable callback
@@ -94,7 +102,6 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
     if (quoteRes.ok) {
       const json = await quoteRes.json();
-      // Only quotes with a contract that aren't already fully invoiced
       const accepted: ReadyQuote[] = (json.data ?? []).filter(
         (q: ReadyQuote) => q.contract && q.invoices.length === 0,
       );
@@ -106,7 +113,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
   useEffect(() => { fetchData(); }, []);
 
-  async function handleSave(data: Record<string, unknown>) {
+  async function handleCreate(data: Record<string, unknown>) {
     await fetch('/api/planner/invoices', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -118,24 +125,51 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     fetchData();
   }
 
+  async function handleEdit(data: Record<string, unknown>) {
+    if (!editingId) return;
+    await fetch(`/api/planner/invoices/${editingId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    // Immediately clear pdf_url in local state so the UI reflects that it needs regeneration
+    setInvoices((prev) => prev.map((i) => i.id === editingId ? { ...i, pdf_url: null } : i));
+    setEditingId(null);
+    setView('list');
+    fetchData();
+  }
+
   function handleCancelForm() {
     setView('list');
     setPrefillQuote(null);
     setExternalFormData(null);
+    setEditingId(null);
   }
 
   function handleCreateFromQuote(q: ReadyQuote) {
     setExternalFormData(null);
     setPrefillQuote(q);
-    setView('form');
+    setEditingId(null);
+    setView('new');
   }
 
-  async function handleGeneratePdf(id: string) {
-    setGenerating(id);
-    const res = await fetch(`/api/planner/invoices/${id}/generate-pdf`, { method: 'POST' });
+  function handleOpenEdit(invoice: Invoice) {
+    setEditingId(invoice.id);
+    setView('edit');
+  }
+
+  async function handleGeneratePdf(invoice: Invoice) {
+    // If PDF exists and hasn't been cleared, just open it
+    if (invoice.pdf_url) {
+      window.open(invoice.pdf_url, '_blank');
+      return;
+    }
+    // Otherwise generate fresh PDF (fetches latest data from DB)
+    setGenerating(invoice.id);
+    const res = await fetch(`/api/planner/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
     if (res.ok) {
       const { data } = await res.json();
-      if (data?.pdf_url) window.open(data.pdf_url, '_blank');
+      window.open(data.pdf_url, '_blank');
       fetchData();
     }
     setGenerating(null);
@@ -154,8 +188,9 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   );
 
   const selectedInvoice = selectedId ? invoices.find((i) => i.id === selectedId) ?? null : null;
+  const editingInvoice = editingId ? invoices.find((i) => i.id === editingId) ?? null : null;
 
-  if (view === 'form') {
+  if (view === 'new') {
     const prefill = externalFormData
       ? externalFormData
       : prefillQuote
@@ -183,7 +218,44 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         </div>
         <InvoiceForm
           initialData={prefill}
-          onSave={handleSave}
+          onSave={handleCreate}
+          onCancel={handleCancelForm}
+        />
+      </div>
+    );
+  }
+
+  if (view === 'edit' && editingInvoice) {
+    const prefill = {
+      client_name: editingInvoice.client_name,
+      client_email: editingInvoice.client_email ?? '',
+      description: editingInvoice.description ?? '',
+      currency: editingInvoice.currency,
+      discount: editingInvoice.discount !== null ? Number(editingInvoice.discount) : ('' as const),
+      tax_rate: editingInvoice.tax_rate !== null ? Number(editingInvoice.tax_rate) : ('' as const),
+      due_date: editingInvoice.due_date ? editingInvoice.due_date.substring(0, 10) : '',
+      issued_at: editingInvoice.issued_at ?? new Date().toISOString(),
+      quote_id: editingInvoice.quote?.id ?? '',
+      line_items: editingInvoice.line_items.map((li) => ({
+        name: li.name,
+        description: li.description ?? '',
+        quantity: Number(li.quantity),
+        unit_price: Number(li.unit_price),
+        total: Number(li.total),
+      })),
+    };
+
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <button onClick={handleCancelForm} className="text-sm text-gray-500 hover:text-gray-700">
+            ← Back
+          </button>
+          <h3 className="text-base font-semibold text-gray-900">Edit Invoice – {editingInvoice.client_name}</h3>
+        </div>
+        <InvoiceForm
+          initialData={prefill}
+          onSave={handleEdit}
           onCancel={handleCancelForm}
         />
       </div>
@@ -236,7 +308,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-gray-900">Invoices</h3>
         <button
-          onClick={() => { setPrefillQuote(null); setView('form'); }}
+          onClick={() => { setPrefillQuote(null); setView('new'); }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -256,7 +328,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
           <h3 className="text-sm font-semibold text-gray-900">No invoices yet</h3>
           <p className="text-xs text-gray-500 mt-1">Create an invoice to track your payments.</p>
           <button
-            onClick={() => setView('form')}
+            onClick={() => setView('new')}
             className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
           >
             Create Invoice
@@ -268,6 +340,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
             const total = Number(invoice.total);
             const paid = Number(invoice.amount_paid);
             const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
+            const isDraft = invoice.status === 'DRAFT';
             return (
               <div key={invoice.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -279,9 +352,22 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                         {invoice.status}
                       </span>
                       {invoice.quote && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                          Quote #{invoice.quote.couple_names}
-                        </span>
+                        <Link
+                          href="/planner/quotes-finances?tab=quotes"
+                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+                          title={`Go to quote: ${invoice.quote.couple_names}`}
+                        >
+                          Quote
+                        </Link>
+                      )}
+                      {invoice.quote?.contracts[0] && (
+                        <Link
+                          href="/planner/quotes-finances?tab=contracts"
+                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
+                          title={`Go to contract: ${invoice.quote.contracts[0].title}`}
+                        >
+                          Contract
+                        </Link>
                       )}
                     </div>
                     {invoice.due_date && (
@@ -317,6 +403,17 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                 </div>
 
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
+                  {isDraft && (
+                    <button
+                      onClick={() => handleOpenEdit(invoice)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit
+                    </button>
+                  )}
                   <button
                     onClick={() => { setSelectedId(invoice.id); setView('detail'); }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
@@ -324,27 +421,36 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                     View &amp; Payments
                   </button>
                   <button
-                    onClick={() => handleGeneratePdf(invoice.id)}
+                    onClick={() => handleGeneratePdf(invoice)}
                     disabled={generating === invoice.id}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      invoice.pdf_url
+                        ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                        : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                    }`}
+                    title={invoice.pdf_url ? 'Download existing PDF' : 'PDF needs to be generated'}
                   >
                     {generating === invoice.id ? (
-                      <span className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full inline-block" />
+                      <span className="animate-spin w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full inline-block" />
                     ) : (
                       <>
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        PDF
+                        {invoice.pdf_url ? 'Download PDF' : 'Generate PDF'}
                       </>
                     )}
                   </button>
-                  <button
-                    onClick={() => handleDelete(invoice.id)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
-                  >
-                    Delete
-                  </button>
+
+                  {/* Delete only available in DRAFT mode */}
+                  {isDraft && (
+                    <button
+                      onClick={() => handleDelete(invoice.id)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             );

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { del } from '@vercel/blob';
 
 const lineItemSchema = z.object({
   name: z.string().min(1),
@@ -17,6 +18,7 @@ const updateSchema = z.object({
   description: z.string().optional().nullable(),
   currency: z.string().optional(),
   subtotal: z.number().min(0).optional(),
+  discount: z.number().min(0).optional().nullable(),
   tax_rate: z.number().min(0).max(100).optional().nullable(),
   tax_amount: z.number().min(0).optional().nullable(),
   total: z.number().min(0).optional(),
@@ -61,6 +63,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const data = updateSchema.parse(body);
     const { line_items: lineItems, ...invoiceData } = data;
 
+    // Clear cached PDF when content changes
+    const pdfFields = [
+      'client_name', 'client_email', 'description', 'currency', 'subtotal',
+      'discount', 'tax_rate', 'tax_amount', 'total', 'due_date', 'issued_at'
+    ];
+    const contentChanged = lineItems !== undefined || pdfFields.some(field => field in invoiceData);
+
     const updated = await prisma.$transaction(async (tx) => {
       if (lineItems !== undefined) {
         await tx.invoiceLineItem.deleteMany({ where: { invoice_id: id } });
@@ -84,14 +93,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(invoiceData.description !== undefined && { description: invoiceData.description }),
           ...(invoiceData.currency !== undefined && { currency: invoiceData.currency }),
           ...(invoiceData.subtotal !== undefined && { subtotal: invoiceData.subtotal }),
+          ...(invoiceData.discount !== undefined && { discount: invoiceData.discount }),
           ...(invoiceData.tax_rate !== undefined && { tax_rate: invoiceData.tax_rate }),
           ...(invoiceData.tax_amount !== undefined && { tax_amount: invoiceData.tax_amount }),
           ...(invoiceData.total !== undefined && { total: invoiceData.total }),
           ...(invoiceData.due_date !== undefined && { due_date: invoiceData.due_date ? new Date(invoiceData.due_date) : null }),
           ...(invoiceData.issued_at !== undefined && { issued_at: invoiceData.issued_at ? new Date(invoiceData.issued_at) : null }),
           ...(invoiceData.status !== undefined && { status: invoiceData.status }),
+          ...(contentChanged && { pdf_url: null }),
         },
-        include: { line_items: true, payments: true },
+        include: { line_items: true, payments: { orderBy: { payment_date: 'desc' } }, quote: { select: { id: true, couple_names: true } } },
       });
     });
 
@@ -112,6 +123,15 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     const existing = await prisma.invoice.findFirst({ where: { id, planner_id: user.planner_id } });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    // Delete the PDF blob if it exists
+    if (existing.pdf_url) {
+      try {
+        await del(existing.pdf_url);
+      } catch (e) {
+        console.warn('Failed to delete invoice PDF blob:', e);
+      }
+    }
 
     await prisma.invoice.delete({ where: { id } });
     return NextResponse.json({ success: true });

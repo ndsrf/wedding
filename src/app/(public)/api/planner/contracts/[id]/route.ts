@@ -41,6 +41,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const body = await request.json();
     const data = updateSchema.parse(body);
 
+    // Clear cached PDF when content or title changes
+    const contentChanged = data.title !== undefined || data.content !== undefined;
+
     const updated = await prisma.contract.update({
       where: { id },
       data: {
@@ -48,6 +51,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         ...(data.content !== undefined && { content: data.content as Prisma.InputJsonValue }),
         ...(data.status !== undefined && { status: data.status }),
         ...(data.signer_email !== undefined && { signer_email: data.signer_email }),
+        ...(contentChanged && { pdf_url: null }),
       },
     });
 

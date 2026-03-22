@@ -3,20 +3,26 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/lib/pdf/invoice-pdf';
-import { put } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
 import React from 'react';
 
-export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole('planner');
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
+    const force = new URL(request.url).searchParams.get('force') === 'true';
 
     const invoice = await prisma.invoice.findFirst({
       where: { id, planner_id: user.planner_id },
       include: { line_items: true, payments: { orderBy: { payment_date: 'desc' } } },
     });
     if (!invoice) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    // Return cached PDF unless a regeneration is needed
+    if (invoice.pdf_url && !force) {
+      return NextResponse.json({ data: { pdf_url: invoice.pdf_url, invoice } });
+    }
 
     const planner = await prisma.weddingPlanner.findUnique({
       where: { id: user.planner_id },
@@ -31,6 +37,14 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }) as never
     );
 
+    // Delete the old blob first so we always upload to a fresh URL.
+    // Vercel Blob serves URLs with Cache-Control: immutable — reusing the same
+    // URL after overwriting means browsers and CDN keep serving the old file.
+    if (invoice.pdf_url?.startsWith('http')) {
+      try { await del(invoice.pdf_url); } catch { /* non-fatal */ }
+    }
+
+    // Unique path per generation guarantees a new URL each time
     const blob = await put(`invoices/${id}/invoice-${Date.now()}.pdf`, buffer, {
       access: 'public',
       contentType: 'application/pdf',

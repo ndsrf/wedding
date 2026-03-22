@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
-import { put } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -16,6 +16,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       where: { id, planner_id: user.planner_id },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    // If a cached PDF URL exists, return it
+    if (contract.pdf_url) {
+      return NextResponse.json({ data: { pdf_url: contract.pdf_url } });
+    }
 
     const planner = await prisma.weddingPlanner.findUnique({
       where: { id: user.planner_id },
@@ -32,9 +37,21 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }) as never
     );
 
+    // Delete the old blob first, then upload to a unique path.
+    // Vercel Blob serves URLs with Cache-Control: immutable — reusing the same
+    // URL after overwriting means browsers and CDN keep serving the old file.
+    if (contract.pdf_url?.startsWith('http')) {
+      try { await del(contract.pdf_url); } catch { /* non-fatal */ }
+    }
+
     const blob = await put(`contracts/${id}/contract-${Date.now()}.pdf`, buffer, {
       access: 'public',
       contentType: 'application/pdf',
+    });
+
+    await prisma.contract.update({
+      where: { id },
+      data: { pdf_url: blob.url },
     });
 
     return NextResponse.json({ data: { pdf_url: blob.url } });

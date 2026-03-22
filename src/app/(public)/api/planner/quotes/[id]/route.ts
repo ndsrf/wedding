@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { del } from '@vercel/blob';
 
 const lineItemSchema = z.object({
   id: z.string().optional(), // existing items have an id
@@ -84,6 +85,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         });
       }
 
+      // Determine if any content fields changed (not just status) — clear pdf_url so it gets regenerated
+      const pdfFields = [
+        'couple_names', 'event_date', 'location', 'client_email', 'client_phone',
+        'notes', 'currency', 'subtotal', 'discount', 'tax_rate', 'total', 'expires_at'
+      ];
+      const contentChanged = lineItems !== undefined || pdfFields.some(field => field in quoteData);
+
       return tx.quote.update({
         where: { id },
         data: {
@@ -101,6 +109,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(quoteData.total !== undefined && { total: quoteData.total }),
           ...(quoteData.expires_at !== undefined && { expires_at: quoteData.expires_at ? new Date(quoteData.expires_at) : null }),
           ...(quoteData.status !== undefined && { status: quoteData.status }),
+          // Clear cached PDF when content changes so it gets regenerated
+          ...(contentChanged && { pdf_url: null }),
         },
         include: {
           customer: { select: { id: true, name: true, email: true, phone: true } },
@@ -127,6 +137,15 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     const existing = await prisma.quote.findFirst({ where: { id, planner_id: user.planner_id } });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    // Delete the PDF blob if it exists
+    if (existing.pdf_url) {
+      try {
+        await del(existing.pdf_url);
+      } catch (e) {
+        console.warn('Failed to delete quote PDF blob:', e);
+      }
+    }
 
     await prisma.quote.delete({ where: { id } });
     return NextResponse.json({ success: true });

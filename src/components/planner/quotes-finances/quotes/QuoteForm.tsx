@@ -37,6 +37,7 @@ interface QuoteFormProps {
   initialData?: Partial<QuoteFormData> & { id?: string };
   onSave: (data: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
+  readOnly?: boolean;
 }
 
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF'];
@@ -45,7 +46,7 @@ function emptyItem(): LineItem {
   return { name: '', description: '', quantity: 1, unit_price: 0, total: 0 };
 }
 
-export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
+export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: QuoteFormProps) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<QuoteFormData>({
     customer_id: initialData?.customer_id ?? null,
@@ -169,6 +170,8 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
     }
   }
 
+  const inputClass = `w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Client Info */}
@@ -181,21 +184,24 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
             <div className="relative">
               <input
                 required
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                readOnly={readOnly}
+                className={inputClass}
                 value={form.couple_names}
-                onChange={(e) => handleNameChange(e.target.value)}
-                onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+                onChange={(e) => !readOnly && handleNameChange(e.target.value)}
+                onFocus={() => { if (!readOnly && suggestions.length > 0) setShowSuggestions(true); }}
                 placeholder="Sarah & James"
                 autoComplete="off"
               />
               {selectedCustomer && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                   <span className="text-xs bg-rose-100 text-rose-700 rounded-full px-2 py-0.5 font-medium">Existing customer</span>
-                  <button type="button" onClick={clearCustomer} className="text-gray-400 hover:text-gray-600">
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  {!readOnly && (
+                    <button type="button" onClick={clearCustomer} className="text-gray-400 hover:text-gray-600">
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               )}
               {showSuggestions && suggestions.length > 0 && (
@@ -231,17 +237,19 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
             <label className="block text-xs font-medium text-gray-700 mb-1">Event Date</label>
             <input
               type="date"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+              readOnly={readOnly}
+              className={inputClass}
               value={form.event_date ? form.event_date.slice(0, 10) : ''}
-              onChange={(e) => setForm((p) => ({ ...p, event_date: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, event_date: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Location</label>
             <input
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+              readOnly={readOnly}
+              className={inputClass}
               value={form.location}
-              onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, location: e.target.value }))}
               placeholder="Barcelona, Spain"
             />
           </div>
@@ -249,17 +257,19 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
             <label className="block text-xs font-medium text-gray-700 mb-1">Client Email</label>
             <input
               type="email"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+              readOnly={readOnly}
+              className={inputClass}
               value={form.client_email}
-              onChange={(e) => setForm((p) => ({ ...p, client_email: e.target.value }))}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_email: e.target.value }))}
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Client Phone</label>
             <input
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+              readOnly={readOnly}
+              className={inputClass}
               value={form.client_phone}
-              onChange={(e) => setForm((p) => ({ ...p, client_phone: e.target.value }))}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_phone: e.target.value }))}
             />
           </div>
         </div>
@@ -272,15 +282,19 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
           <div className="flex items-center gap-3">
             <label className="text-xs font-medium text-gray-700">Currency</label>
             <select
-              className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+              disabled={readOnly}
+              className={`border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
               value={form.currency}
-              onChange={(e) => setForm((p) => ({ ...p, currency: e.target.value }))}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, currency: e.target.value }))}
             >
               {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
         </div>
 
+        {readOnly && (
+          <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-3">This quote is read-only. Only draft quotes can be edited.</p>
+        )}
         <div className="hidden sm:grid sm:grid-cols-12 gap-2 mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
           <div className="sm:col-span-5">Description</div>
           <div className="sm:col-span-2 text-right">Qty</div>
@@ -295,32 +309,36 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
               <div className="col-span-12 sm:col-span-5">
                 <input
                   required
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  readOnly={readOnly}
+                  className={inputClass}
                   placeholder="Service name"
                   value={item.name}
-                  onChange={(e) => updateItem(index, 'name', e.target.value)}
+                  onChange={(e) => !readOnly && updateItem(index, 'name', e.target.value)}
                 />
                 <input
-                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rose-300 text-gray-500"
+                  readOnly={readOnly}
+                  className={`w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rose-300 text-gray-500 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
                   placeholder="Optional description"
                   value={item.description}
-                  onChange={(e) => updateItem(index, 'description', e.target.value)}
+                  onChange={(e) => !readOnly && updateItem(index, 'description', e.target.value)}
                 />
               </div>
               <div className="col-span-4 sm:col-span-2">
                 <input
                   type="number" min="0.01" step="0.01" required
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  readOnly={readOnly}
+                  className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
                   value={item.quantity}
-                  onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
+                  onChange={(e) => !readOnly && updateItem(index, 'quantity', Number(e.target.value))}
                 />
               </div>
               <div className="col-span-4 sm:col-span-2">
                 <input
                   type="number" min="0" step="0.01" required
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  readOnly={readOnly}
+                  className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
                   value={item.unit_price}
-                  onChange={(e) => updateItem(index, 'unit_price', Number(e.target.value))}
+                  onChange={(e) => !readOnly && updateItem(index, 'unit_price', Number(e.target.value))}
                 />
               </div>
               <div className="col-span-3 sm:col-span-2 flex items-center justify-end">
@@ -329,7 +347,7 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
                 </span>
               </div>
               <div className="col-span-1 flex items-center justify-center">
-                {form.line_items.length > 1 && (
+                {!readOnly && form.line_items.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeItem(index)}
@@ -345,16 +363,18 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={addItem}
-          className="mt-3 flex items-center gap-1.5 text-sm text-rose-600 hover:text-rose-700 font-medium"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add line item
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={addItem}
+            className="mt-3 flex items-center gap-1.5 text-sm text-rose-600 hover:text-rose-700 font-medium"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add line item
+          </button>
+        )}
 
         {/* Totals */}
         <div className="mt-6 pt-4 border-t border-gray-100">
@@ -367,20 +387,22 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
             <div>
               <input
                 type="number" min="0" step="0.01"
-                className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
+                readOnly={readOnly}
+                className={`w-full border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
                 value={form.discount}
                 placeholder="0"
-                onChange={(e) => setForm((p) => ({ ...p, discount: e.target.value === '' ? '' : Number(e.target.value) }))}
+                onChange={(e) => !readOnly && setForm((p) => ({ ...p, discount: e.target.value === '' ? '' : Number(e.target.value) }))}
               />
             </div>
             <div className="text-sm text-gray-500">Tax rate (%)</div>
             <div>
               <input
                 type="number" min="0" max="100" step="0.1"
-                className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
+                readOnly={readOnly}
+                className={`w-full border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
                 value={form.tax_rate}
                 placeholder="0"
-                onChange={(e) => setForm((p) => ({ ...p, tax_rate: e.target.value === '' ? '' : Number(e.target.value) }))}
+                onChange={(e) => !readOnly && setForm((p) => ({ ...p, tax_rate: e.target.value === '' ? '' : Number(e.target.value) }))}
               />
             </div>
             <div className="text-base font-bold text-gray-900 border-t border-rose-200 pt-2">Total</div>
@@ -399,18 +421,20 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
             <label className="block text-xs font-medium text-gray-700 mb-1">Valid Until</label>
             <input
               type="date"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+              readOnly={readOnly}
+              className={inputClass}
               value={form.expires_at ? form.expires_at.slice(0, 10) : ''}
-              onChange={(e) => setForm((p) => ({ ...p, expires_at: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, expires_at: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
             />
           </div>
           <div className="sm:col-span-2">
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
             <textarea
               rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
+              readOnly={readOnly}
+              className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
               value={form.notes}
-              onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, notes: e.target.value }))}
               placeholder="Additional notes or terms..."
             />
           </div>
@@ -423,15 +447,17 @@ export function QuoteForm({ initialData, onSave, onCancel }: QuoteFormProps) {
           onClick={onCancel}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
         >
-          Cancel
+          {readOnly ? 'Close' : 'Cancel'}
         </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all shadow-sm"
-        >
-          {saving ? 'Saving…' : 'Save Quote'}
-        </button>
+        {!readOnly && (
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all shadow-sm"
+          >
+            {saving ? 'Saving…' : 'Save Quote'}
+          </button>
+        )}
       </div>
     </form>
   );

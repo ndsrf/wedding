@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
 
 export interface InvoicePrefillData {
@@ -9,6 +9,7 @@ export interface InvoicePrefillData {
   client_name?: string;
   client_email?: string;
   currency?: string;
+  discount?: number | '';
   tax_rate?: number | '';
   line_items?: { name: string; description: string; quantity: number; unit_price: number; total: number }[];
 }
@@ -26,6 +27,8 @@ interface Contract {
   share_token: string;
   signing_url: string | null;
   signed_at: string | null;
+  pdf_url: string | null;
+  signed_pdf_url: string | null;
   created_at: string;
   customer: { id: string; name: string; email: string | null } | null;
   quote: { id: string; couple_names: string; currency: string; total: string | number } | null;
@@ -54,10 +57,8 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const [showTemplates, setShowTemplates] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [creatingInvoiceId, setCreatingInvoiceId] = useState<string | null>(null);
-  const [manualSignId, setManualSignId] = useState<string | null>(null);
-  const [manualSignFile, setManualSignFile] = useState<File | null>(null);
-  const [manualSignError, setManualSignError] = useState<string | null>(null);
-  const [manualSigning, setManualSigning] = useState(false);
+  const [creatingWeddingId, setCreatingWeddingId] = useState<string | null>(null);
+  const [movingToDraftId, setMovingToDraftId] = useState<string | null>(null);
   const [sendForm, setSendForm] = useState<{ email: string; name: string; message: string }>({
     email: '',
     name: '',
@@ -67,6 +68,9 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const [sending, setSending] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [generatingPdfId, setGeneratingPdfId] = useState<string | null>(null);
+  const [manualSigningId, setManualSigningId] = useState<string | null>(null);
+  const manualSignInputRef = useRef<HTMLInputElement | null>(null);
+  const [manualSignTarget, setManualSignTarget] = useState<string | null>(null);
 
   async function fetchContracts() {
     const res = await fetch('/api/planner/contracts');
@@ -78,6 +82,15 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   }
 
   useEffect(() => { fetchContracts(); }, []);
+
+  // Refresh when the user returns to this tab (e.g. after editing a contract in a new tab)
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === 'visible') fetchContracts();
+    }
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
 
   function openEditor(shareToken: string) {
     window.open(`/planner/contracts/${shareToken}`, '_blank');
@@ -116,53 +129,77 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
     }
   }
 
-  async function handleManualSign(contractId: string, e: React.FormEvent) {
-    e.preventDefault();
-    if (!manualSignFile) return;
-    setManualSignError(null);
-    setManualSigning(true);
+  async function handleMoveToDraft(contractId: string) {
+    if (!confirm('Move this contract back to Draft? This will cancel the pending DocuSeal signature request.')) return;
+    setMovingToDraftId(contractId);
     try {
-      const formData = new FormData();
-      formData.append('file', manualSignFile);
-      const res = await fetch(`/api/planner/contracts/${contractId}/manual-sign`, {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch(`/api/planner/contracts/${contractId}/move-to-draft`, { method: 'POST' });
       if (res.ok) {
-        setManualSignId(null);
-        setManualSignFile(null);
         fetchContracts();
-      } else {
-        const json = await res.json().catch(() => ({}));
-        setManualSignError(json.error ?? `Server error ${res.status}`);
       }
-    } catch {
-      setManualSignError('Network error — check your connection and try again.');
     } finally {
-      setManualSigning(false);
+      setMovingToDraftId(null);
     }
   }
 
-  async function handleGeneratePdf(contractId: string, title: string) {
-    setGeneratingPdfId(contractId);
+  async function handleDownloadPdf(contract: Contract) {
+    // For signed contracts, return the signed DocuSeal PDF
+    if (contract.status === 'SIGNED' && contract.signed_pdf_url) {
+      window.open(contract.signed_pdf_url, '_blank');
+      return;
+    }
+
+    // If we have a cached PDF URL, just open it
+    if (contract.pdf_url) {
+      window.open(contract.pdf_url, '_blank');
+      return;
+    }
+
+    // Generate the PDF
+    setGeneratingPdfId(contract.id);
     try {
-      const res = await fetch(`/api/planner/contracts/${contractId}/generate-pdf`, { method: 'POST' });
+      const res = await fetch(`/api/planner/contracts/${contract.id}/generate-pdf`, { method: 'POST' });
       if (res.ok) {
         const json = await res.json();
         const url = json.data?.pdf_url;
         if (url) {
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${title}.pdf`;
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          window.open(url, '_blank');
+          fetchContracts();
         }
       }
     } finally {
       setGeneratingPdfId(null);
+    }
+  }
+
+  async function handleDownloadAudit(contractId: string) {
+    const res = await fetch(`/api/planner/contracts/${contractId}/audit-pdf`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data?.audit_url) {
+        window.open(json.data.audit_url, '_blank');
+      }
+    }
+  }
+
+  async function handleManualSignUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !manualSignTarget) return;
+    setManualSigningId(manualSignTarget);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`/api/planner/contracts/${manualSignTarget}/manual-sign`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        fetchContracts();
+      }
+    } finally {
+      setManualSigningId(null);
+      setManualSignTarget(null);
+      if (manualSignInputRef.current) manualSignInputRef.current.value = '';
     }
   }
 
@@ -179,6 +216,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
         client_name: quote.couple_names,
         client_email: quote.client_email ?? '',
         currency: quote.currency,
+        discount: quote.discount != null ? Number(quote.discount) : '',
         tax_rate: quote.tax_rate != null ? Number(quote.tax_rate) : '',
         line_items: (quote.line_items ?? []).map((li: { name: string; description: string | null; quantity: unknown; unit_price: unknown; total: unknown }) => ({
           name: li.name,
@@ -193,6 +231,18 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
     }
   }
 
+  async function handleCreateWedding(contract: Contract) {
+    setCreatingWeddingId(contract.id);
+    try {
+      // Navigate to the weddings creation page with the contract pre-linked
+      const params = new URLSearchParams({ action: 'create', contract_id: contract.id });
+      if (contract.customer) params.set('couple_names', contract.customer.name);
+      window.location.href = `/planner/weddings?${params.toString()}`;
+    } finally {
+      setCreatingWeddingId(null);
+    }
+  }
+
   if (loading) return (
     <div className="flex items-center justify-center h-32">
       <div className="animate-spin w-6 h-6 border-4 border-rose-500 border-t-transparent rounded-full" />
@@ -201,6 +251,15 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
 
   return (
     <div className="space-y-6">
+      {/* Hidden file input for manual signing */}
+      <input
+        ref={manualSignInputRef}
+        type="file"
+        accept="application/pdf,image/*"
+        className="hidden"
+        onChange={handleManualSignUpload}
+      />
+
       {/* Contracts list */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -258,7 +317,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                   )}
                 </div>
 
-                {/* Send-for-signing form (inline) */}
+                {/* Send-for-signing form (inline) — only in DRAFT status */}
                 {sendingId === contract.id && (
                   <form
                     onSubmit={(e) => handleSendForSigning(contract.id, e)}
@@ -327,75 +386,42 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                   </form>
                 )}
 
-                {/* Manual sign form (inline) */}
-                {manualSignId === contract.id && (
-                  <form
-                    onSubmit={(e) => handleManualSign(contract.id, e)}
-                    className="mt-3 p-4 bg-violet-50 rounded-xl border border-violet-100 space-y-3"
-                  >
-                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Upload Signed Document</h5>
-                    <p className="text-xs text-gray-500">Upload the signed contract (PDF or image) to mark this contract as signed.</p>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Signed Document *</label>
-                      <input
-                        required
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                        className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-100 file:text-violet-700 hover:file:bg-violet-200 cursor-pointer"
-                        onChange={(e) => {
-                          setManualSignFile(e.target.files?.[0] ?? null);
-                          setManualSignError(null);
-                        }}
-                      />
-                      <p className="text-[11px] text-gray-400 mt-1">PDF, JPG, PNG or WebP · Max 20 MB</p>
-                    </div>
-                    {manualSignError && (
-                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <svg className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <p className="text-xs text-red-700">{manualSignError}</p>
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={manualSigning || !manualSignFile}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg transition-colors"
-                      >
-                        {manualSigning && (
-                          <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        )}
-                        {manualSigning ? 'Uploading…' : 'Mark as Signed'}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={manualSigning}
-                        onClick={() => { setManualSignId(null); setManualSignFile(null); setManualSignError(null); }}
-                        className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-60 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-
                 {/* Actions */}
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
+                  {/* Edit only in DRAFT; otherwise View */}
+                  {contract.status === 'DRAFT' ? (
+                    <button
+                      onClick={() => openEditor(contract.share_token)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => openEditor(contract.share_token)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View
+                    </button>
+                  )}
+
+                  {/* Download PDF — shows signed PDF if signed */}
                   <button
-                    onClick={() => openEditor(contract.share_token)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleGeneratePdf(contract.id, contract.title)}
+                    onClick={() => handleDownloadPdf(contract)}
                     disabled={generatingPdfId === contract.id}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-60 rounded-lg transition-colors"
-                    title="Download PDF for manual signing"
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-60 ${
+                      contract.status === 'SIGNED' || contract.pdf_url
+                        ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                        : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                    }`}
+                    title={contract.status === 'SIGNED' ? 'Download signed PDF' : (contract.pdf_url ? 'Download PDF' : 'PDF needs to be generated')}
                   >
                     {generatingPdfId === contract.id ? (
                       <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -404,8 +430,23 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     )}
-                    Download PDF
+                    {contract.status === 'SIGNED' ? 'Download Signed PDF' : (contract.pdf_url ? 'Download PDF' : 'Generate PDF')}
                   </button>
+
+                  {/* Audit PDF — only for SIGNED contracts with DocuSeal */}
+                  {contract.status === 'SIGNED' && contract.signed_pdf_url && (
+                    <button
+                      onClick={() => handleDownloadAudit(contract.id)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                      title="Download audit trail PDF"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      </svg>
+                      Audit
+                    </button>
+                  )}
+
                   <button
                     onClick={() => copyShareLink(contract.id, contract.share_token)}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
@@ -426,7 +467,9 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                       </>
                     )}
                   </button>
-                  {contract.status !== 'SIGNED' && contract.status !== 'CANCELLED' && (
+
+                  {/* DRAFT: Send for Signing + Manual Sign */}
+                  {contract.status === 'DRAFT' && (
                     <>
                       <button
                         onClick={() => {
@@ -436,7 +479,6 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                             message: '',
                           });
                           setSendError(null);
-                          setManualSignId(null);
                           setSendingId(sendingId === contract.id ? null : contract.id);
                         }}
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
@@ -447,29 +489,53 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         Send for Signing
                       </button>
                       <button
+                        disabled={manualSigningId === contract.id}
                         onClick={() => {
-                          setManualSignFile(null);
-                          setManualSignError(null);
-                          setSendingId(null);
-                          setManualSignId(manualSignId === contract.id ? null : contract.id);
+                          setManualSignTarget(contract.id);
+                          manualSignInputRef.current?.click();
                         }}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 disabled:opacity-60 rounded-lg transition-colors"
+                        title="Upload a pre-signed PDF or image"
                       >
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        Manually Sign
+                        {manualSigningId === contract.id ? (
+                          <span className="w-3 h-3 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                          </svg>
+                        )}
+                        Manual Sign
                       </button>
                     </>
                   )}
-                  {contract.status === 'SIGNING' && contract.signing_url && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg">
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                      Awaiting DocuSeal signature
-                    </span>
+
+                  {/* SIGNING: Move to Draft (cancel DocuSeal), no edit, no manually sign */}
+                  {contract.status === 'SIGNING' && (
+                    <>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg">
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Awaiting DocuSeal signature
+                      </span>
+                      <button
+                        onClick={() => handleMoveToDraft(contract.id)}
+                        disabled={movingToDraftId === contract.id}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-60 rounded-lg transition-colors"
+                      >
+                        {movingToDraftId === contract.id ? (
+                          <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                          </svg>
+                        )}
+                        Move to Draft
+                      </button>
+                    </>
                   )}
+
+                  {/* SIGNED: Create Invoice + Create Wedding */}
                   {contract.status === 'SIGNED' && contract.quote && onCreateInvoice && (
                     <button
                       onClick={() => handleCreateInvoice(contract)}
@@ -484,6 +550,22 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         </svg>
                       )}
                       Create Invoice
+                    </button>
+                  )}
+                  {contract.status === 'SIGNED' && (
+                    <button
+                      onClick={() => handleCreateWedding(contract)}
+                      disabled={creatingWeddingId === contract.id}
+                      className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 disabled:opacity-60 rounded-lg transition-colors ${!(contract.status === 'SIGNED' && contract.quote && onCreateInvoice) ? 'ml-auto' : ''}`}
+                    >
+                      {creatingWeddingId === contract.id ? (
+                        <span className="w-3 h-3 border-2 border-rose-600 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      )}
+                      Create Wedding
                     </button>
                   )}
                 </div>
