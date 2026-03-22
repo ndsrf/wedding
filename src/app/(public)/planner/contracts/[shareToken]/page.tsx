@@ -185,6 +185,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   const [saved, setSaved] = useState(false);
   const [quote, setQuote] = useState<QuoteRef | null>(null);
   const [contractCustomerId, setContractCustomerId] = useState<string | null>(null);
+  const [contractTemplateId, setContractTemplateId] = useState<string | null>(null);
   const [showCreateWedding, setShowCreateWedding] = useState(false);
 
   // Shared Y.Doc: editor + comments sidebar share the same Liveblocks connection
@@ -238,6 +239,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       .then((res) => {
         if (res?.data?.quote) setQuote(res.data.quote);
         if (res?.data?.customer_id) setContractCustomerId(res.data.customer_id);
+        if (res?.data?.contract_template_id) setContractTemplateId(res.data.contract_template_id);
       })
       .catch(() => {});
   }, [contract?.id]);
@@ -342,6 +344,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
               authorName={plannerName}
               authorColor="#e11d48"
               isPlanner
+              contractTemplateId={contractTemplateId}
             />
           </div>
         </div>

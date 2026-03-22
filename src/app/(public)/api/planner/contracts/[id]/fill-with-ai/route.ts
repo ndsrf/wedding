@@ -202,6 +202,9 @@ Rules:
       authorName: 'AI Assistant',
       authorColor: '#7c3aed',
       timestamp: Date.now(),
+      isAiFilled: p.filled,
+      aiValue: p.filled ? (p.value ?? undefined) : undefined,
+      aiDescription: p.description,
     }));
 
     return NextResponse.json({ data: { comments, filledCount: placeholders.filter((p) => p.filled).length, totalCount: placeholders.length } });
