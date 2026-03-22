@@ -5,6 +5,7 @@ import { requireRole } from '@/lib/auth/middleware';
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
+  company_email: z.string().email().optional().nullable().or(z.literal('')),
   legal_name: z.string().optional().nullable(),
   vat_number: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
@@ -25,6 +26,7 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
+        company_email: true,
         legal_name: true,
         vat_number: true,
         address: true,
@@ -64,6 +66,7 @@ export async function PATCH(request: NextRequest) {
         id: true,
         name: true,
         email: true,
+        company_email: true,
         legal_name: true,
         vat_number: true,
         address: true,

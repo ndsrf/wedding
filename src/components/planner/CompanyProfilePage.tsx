@@ -7,6 +7,7 @@ interface CompanyProfile {
   id: string;
   name: string;
   email: string;
+  company_email: string | null;
   legal_name: string | null;
   vat_number: string | null;
   address: string | null;
@@ -26,6 +27,7 @@ export function CompanyProfilePage({ initialProfile }: Props) {
   const [profile, setProfile] = useState<CompanyProfile>(initialProfile);
   const [form, setForm] = useState({
     name: initialProfile.name,
+    company_email: initialProfile.company_email ?? '',
     legal_name: initialProfile.legal_name ?? '',
     vat_number: initialProfile.vat_number ?? '',
     address: initialProfile.address ?? '',
@@ -52,6 +54,7 @@ export function CompanyProfilePage({ initialProfile }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name || undefined,
+          company_email: form.company_email || null,
           legal_name: form.legal_name || null,
           vat_number: form.vat_number || null,
           address: form.address || null,
@@ -146,6 +149,17 @@ export function CompanyProfilePage({ initialProfile }: Props) {
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
                 placeholder="Legal business name"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company Email</label>
+              <input
+                type="email"
+                value={form.company_email}
+                onChange={(e) => setForm((f) => ({ ...f, company_email: e.target.value }))}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                placeholder="contact@yourcompany.com"
+              />
+              <p className="mt-1 text-xs text-gray-400">Shown on quotes and invoices instead of your login email</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">VAT / Tax Number</label>
