@@ -20,6 +20,8 @@ const updateQuoteSchema = z.object({
   location: z.string().optional().nullable(),
   client_email: z.string().email().optional().nullable(),
   client_phone: z.string().optional().nullable(),
+  client_id_number: z.string().optional().nullable(),
+  client_address: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   currency: z.string().optional(),
   subtotal: z.number().min(0).optional(),
