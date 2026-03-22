@@ -50,7 +50,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const result = await prisma.contractTemplate.update({
       where: { id },
-      data: { placeholder_rules: updated },
+      data: { placeholder_rules: updated as unknown as import('@prisma/client').Prisma.InputJsonValue },
     });
 
     return NextResponse.json({ data: result.placeholder_rules });
