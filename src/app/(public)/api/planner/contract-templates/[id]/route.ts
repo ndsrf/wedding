@@ -54,7 +54,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         ...(data.is_default !== undefined && { is_default: data.is_default }),
         // Wipe remembered placeholder rules whenever the template body changes —
         // the placeholders themselves may have been added, removed, or renamed.
-        ...(data.content !== undefined && { placeholder_rules: null }),
+        ...(data.content !== undefined && { placeholder_rules: Prisma.JsonNull }),
       },
     });
 
