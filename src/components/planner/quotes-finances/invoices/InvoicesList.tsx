@@ -16,6 +16,7 @@ export interface Invoice {
   status: string;
   issued_at: string | null;
   due_date: string | null;
+  pdf_url: string | null;
   created_at: string;
   quote: { id: string; couple_names: string } | null;
   line_items: {
@@ -130,9 +131,15 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     setView('form');
   }
 
-  async function handleGeneratePdf(id: string) {
-    setGenerating(id);
-    const res = await fetch(`/api/planner/invoices/${id}/generate-pdf`, { method: 'POST' });
+  async function handleGeneratePdf(invoice: Invoice) {
+    // If PDF exists, just open it
+    if (invoice.pdf_url) {
+      window.open(invoice.pdf_url, '_blank');
+      return;
+    }
+
+    setGenerating(invoice.id);
+    const res = await fetch(`/api/planner/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
     if (res.ok) {
       const { data } = await res.json();
       if (data?.pdf_url) window.open(data.pdf_url, '_blank');
@@ -279,9 +286,17 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                         {invoice.status}
                       </span>
                       {invoice.quote && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                          Quote #{invoice.quote.couple_names}
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Navigate to quotes tab — can't do cross-tab navigation easily,
+                            // so we show as a badge with the client name
+                          }}
+                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 cursor-default"
+                          title={`Quote for ${invoice.quote.couple_names}`}
+                        >
+                          {invoice.quote.couple_names}
+                        </button>
                       )}
                     </div>
                     {invoice.due_date && (
@@ -324,7 +339,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                     View &amp; Payments
                   </button>
                   <button
-                    onClick={() => handleGeneratePdf(invoice.id)}
+                    onClick={() => handleGeneratePdf(invoice)}
                     disabled={generating === invoice.id}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                   >
@@ -335,16 +350,20 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        PDF
+                        {invoice.pdf_url ? 'Download PDF' : 'Generate PDF'}
                       </>
                     )}
                   </button>
-                  <button
-                    onClick={() => handleDelete(invoice.id)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
-                  >
-                    Delete
-                  </button>
+
+                  {/* Delete only available in DRAFT mode */}
+                  {invoice.status === 'DRAFT' && (
+                    <button
+                      onClick={() => handleDelete(invoice.id)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             );

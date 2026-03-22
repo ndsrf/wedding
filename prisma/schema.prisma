@@ -902,6 +902,7 @@ model Contract {
   liveblocks_room_id   String?           @unique
   signing_request_id   String?
   signing_url          String?
+  pdf_url              String?
   signed_pdf_url       String?
   signed_at            DateTime?
   signer_email         String?
@@ -932,6 +933,7 @@ model Invoice {
   description    String?         @db.Text
   currency       String          @default("EUR")
   subtotal       Decimal         @db.Decimal(10, 2)
+  discount       Decimal?        @db.Decimal(10, 2)
   tax_rate       Decimal?        @db.Decimal(5, 2)
   tax_amount     Decimal?        @db.Decimal(10, 2)
   total          Decimal         @db.Decimal(10, 2)

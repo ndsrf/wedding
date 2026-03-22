@@ -18,6 +18,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     });
     if (!invoice) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+    // If PDF already exists and invoice hasn't changed, return the existing URL
+    if (invoice.pdf_url) {
+      return NextResponse.json({ data: { pdf_url: invoice.pdf_url, invoice } });
+    }
+
     const planner = await prisma.weddingPlanner.findUnique({
       where: { id: user.planner_id },
       select: { name: true, email: true },
@@ -31,9 +36,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }) as never
     );
 
-    const blob = await put(`invoices/${id}/invoice-${Date.now()}.pdf`, buffer, {
+    // Use stable filename so re-generation overwrites the same file
+    const blob = await put(`invoices/${id}/invoice.pdf`, buffer, {
       access: 'public',
       contentType: 'application/pdf',
+      allowOverwrite: true,
     });
 
     const updated = await prisma.invoice.update({

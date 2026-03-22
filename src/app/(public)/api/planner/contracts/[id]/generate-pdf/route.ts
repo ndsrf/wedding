@@ -17,6 +17,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+    // If a cached PDF URL exists, return it
+    if (contract.pdf_url) {
+      return NextResponse.json({ data: { pdf_url: contract.pdf_url } });
+    }
+
     const planner = await prisma.weddingPlanner.findUnique({
       where: { id: user.planner_id },
       select: { name: true },
@@ -32,9 +37,16 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }) as never
     );
 
-    const blob = await put(`contracts/${id}/contract-${Date.now()}.pdf`, buffer, {
+    // Use stable filename so re-generation overwrites the same file
+    const blob = await put(`contracts/${id}/contract.pdf`, buffer, {
       access: 'public',
       contentType: 'application/pdf',
+      allowOverwrite: true,
+    });
+
+    await prisma.contract.update({
+      where: { id },
+      data: { pdf_url: blob.url },
     });
 
     return NextResponse.json({ data: { pdf_url: blob.url } });

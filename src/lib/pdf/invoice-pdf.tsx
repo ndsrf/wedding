@@ -231,6 +231,12 @@ export function InvoicePDF({ invoice, plannerName, plannerEmail }: InvoicePDFPro
             <Text style={styles.totalsLabel}>Subtotal</Text>
             <Text style={styles.totalsValue}>{formatCurrency(invoice.subtotal, invoice.currency)}</Text>
           </View>
+          {invoice.discount && Number(invoice.discount) > 0 && (
+            <View style={styles.totalsRow}>
+              <Text style={styles.totalsLabel}>Discount</Text>
+              <Text style={styles.totalsValue}>- {formatCurrency(invoice.discount, invoice.currency)}</Text>
+            </View>
+          )}
           {invoice.tax_rate && Number(invoice.tax_rate) > 0 && (
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>Tax ({Number(invoice.tax_rate)}%)</Text>
