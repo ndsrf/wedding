@@ -55,6 +55,10 @@ const createWeddingSchema = z.object({
   payment_tracking_mode: z.nativeEnum(PaymentMode),
   allow_guest_additions: z.boolean(),
   default_language: z.nativeEnum(Language),
+  /** Customer record to link (for billing / traceability) */
+  customer_id: z.string().uuid().optional().nullable(),
+  /** Originating contract to link (for billing / traceability) */
+  contract_id: z.string().uuid().optional().nullable(),
 });
 
 // Validation schema for query parameters
@@ -358,6 +362,9 @@ export async function POST(request: NextRequest) {
         save_the_date_enabled: true,
         status: 'ACTIVE',
         created_by: user.id,
+        // Traceability / billing links (optional, set when created from a contract)
+        ...(validatedData.customer_id ? { customer_id: validatedData.customer_id } : {}),
+        ...(validatedData.contract_id ? { contract_id: validatedData.contract_id } : {}),
       },
     });
 

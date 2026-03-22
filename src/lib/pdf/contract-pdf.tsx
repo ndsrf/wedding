@@ -66,20 +66,70 @@ const styles = StyleSheet.create({
   },
   bullet: { width: 16, fontSize: 10 },
   listText: { flex: 1, fontSize: 10 },
-  signatureSection: {
-    marginTop: 48,
+  footer: {
+    position: 'absolute',
+    bottom: 24,
+    left: 56,
+    right: 56,
+    textAlign: 'center',
+    fontSize: 8,
+    color: '#d1d5db',
+  },
+
+  // ── Dedicated signature page ───────────────────────────────────────────────
+  signaturePage: {
+    fontFamily: 'Helvetica',
+    fontSize: 11,
+    paddingTop: 80,
+    paddingBottom: 56,
+    paddingHorizontal: 56,
+    color: '#1a1a1a',
+  },
+  sigPageTitle: {
+    fontSize: 22,
+    fontFamily: 'Helvetica-Bold',
+    color: '#1a1a1a',
+    marginBottom: 12,
+  },
+  sigPageSubtitle: {
+    fontSize: 10,
+    color: '#6b7280',
+    marginBottom: 48,
+    lineHeight: 1.5,
+  },
+  sigRow: {
     flexDirection: 'row',
     gap: 32,
   },
-  signatureBlock: { flex: 1 },
-  signatureLine: {
+  sigBlock: {
+    flex: 1,
+  },
+  sigRole: {
+    fontSize: 9,
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  sigName: {
+    fontSize: 13,
+    fontFamily: 'Helvetica-Bold',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  // The actual line where DocuSeal overlays the signature widget
+  sigLine: {
     borderBottomWidth: 1,
     borderBottomColor: '#9ca3af',
     marginBottom: 6,
-    marginTop: 24,
+    height: 48,
   },
-  signatureLabel: { fontSize: 9, color: '#6b7280' },
-  footer: {
+  sigDateLabel: {
+    fontSize: 9,
+    color: '#6b7280',
+    marginTop: 4,
+  },
+  sigPageFooter: {
     position: 'absolute',
     bottom: 24,
     left: 56,
@@ -200,6 +250,7 @@ export function ContractPDF({ title, content, plannerName, signerName, createdAt
 
   return (
     <Document>
+      {/* ── Page 1+: Contract content ─────────────────────────────────────── */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.brandName}>{plannerName}</Text>
@@ -207,7 +258,14 @@ export function ContractPDF({ title, content, plannerName, signerName, createdAt
           <View style={styles.contractMeta}>
             {createdAt && (
               <Text style={styles.metaItem}>
-                Date: <Text style={styles.metaBold}>{new Date(createdAt).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+                Date:{' '}
+                <Text style={styles.metaBold}>
+                  {new Date(createdAt).toLocaleDateString('en', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </Text>
               </Text>
             )}
           </View>
@@ -217,19 +275,49 @@ export function ContractPDF({ title, content, plannerName, signerName, createdAt
           {nodes.map((node, i) => renderNode(node, i))}
         </View>
 
-        {/* Signature Section */}
-        <View style={styles.signatureSection}>
-          <View style={styles.signatureBlock}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Wedding Planner – {plannerName}</Text>
+        <Text style={styles.footer}>
+          This document is confidential and constitutes a binding agreement upon signature by both parties.
+        </Text>
+      </Page>
+
+      {/* ── Dedicated signature page (always the final page) ──────────────── */}
+      {/*
+       * This page is always the last page of the PDF.
+       * When submitting to DocuSeal for online signing, the signature fields
+       * are placed at known coordinates on this page (x≈0.52, y≈0.25, w≈0.38, h≈0.10).
+       * For manual/offline signing, the lines and labels serve as guidance.
+       */}
+      <Page size="A4" style={styles.signaturePage}>
+        <Text style={styles.sigPageTitle}>Contract Signatures</Text>
+        <Text style={styles.sigPageSubtitle}>
+          By signing below, both parties confirm their agreement to all terms and conditions set out in this contract.
+        </Text>
+
+        <View style={styles.sigRow}>
+          {/* Left: Planner signature (static — signed offline or pre-signed) */}
+          <View style={styles.sigBlock}>
+            <Text style={styles.sigRole}>Wedding Planner</Text>
+            <Text style={styles.sigName}>{plannerName}</Text>
+            <View style={styles.sigLine} />
+            <Text style={styles.sigDateLabel}>Signature &amp; Date</Text>
           </View>
-          <View style={styles.signatureBlock}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Client – {signerName ?? 'Client'}</Text>
+
+          {/* Right: Client signature — DocuSeal overlays its widget here */}
+          <View style={styles.sigBlock}>
+            <Text style={styles.sigRole}>Client / Signer</Text>
+            <Text style={styles.sigName}>{signerName ?? 'Client'}</Text>
+            {/*
+             * DocuSeal signature field target area.
+             * DocuSeal places the interactive signature widget here when
+             * the template is created with:
+             *   areas: [{ x: 0.52, y: 0.25, w: 0.38, h: 0.10, page: <lastPage> }]
+             */}
+            <View style={styles.sigLine} />
+            <Text style={styles.sigDateLabel}>Signature &amp; Date</Text>
           </View>
         </View>
 
-        <Text style={styles.footer}>
+        <Text style={styles.sigPageFooter}>
           This document is confidential and constitutes a binding agreement upon signature by both parties.
         </Text>
       </Page>

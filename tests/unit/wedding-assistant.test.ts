@@ -94,6 +94,7 @@ const baseWedding = {
   google_photos_access_token: null,
   google_photos_token_expiry: null,
   customer_id: null,
+  contract_id: null,
 };
 
 const baseFamily = {
@@ -296,7 +297,7 @@ describe('generateWeddingReply', () => {
       ['FR', 'French', 'contacter les mariés directement'],
       ['IT', 'Italian', 'contattare direttamente gli sposi'],
       ['DE', 'German', 'Brautleute gerne direkt kontaktieren'],
-    ])('language %s → instructs model to respond in %s and uses correct suffix', async (lang, langLabel, suffix) => {
+    ])('language %s → instructs model to respond in %s and uses correct suffix', async (lang: string, langLabel: string, suffix: string) => {
       await generateWeddingReply('Hello?', baseWedding, baseFamily, lang);
       const prompt = captureSystemPrompt();
       expect(prompt).toContain(langLabel);

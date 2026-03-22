@@ -193,6 +193,10 @@ export interface CreateWeddingRequest {
   default_language: Language;
   wedding_country?: string;
   whatsapp_mode?: import('@prisma/client').WhatsAppMode;
+  /** Customer record to link for billing / traceability */
+  customer_id?: string | null;
+  /** Originating contract to link for billing / traceability */
+  contract_id?: string | null;
 }
 
 export type CreateWeddingResponse = APIResponse<Wedding>;

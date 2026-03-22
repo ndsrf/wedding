@@ -4,9 +4,15 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
-import { createSignatureRequest } from '@/lib/signing/dropbox-sign';
-import { put } from '@vercel/blob';
+import { createDocuSealSubmission } from '@/lib/signing/docuseal';
 import React from 'react';
+
+/** Count pages in a PDF buffer by scanning for /Type /Page entries (no external deps). */
+function countPdfPages(buffer: Buffer): number {
+  const str = buffer.toString('latin1');
+  const matches = str.match(/\/Type\s*\/Page[^s]/g);
+  return matches ? matches.length : 2;
+}
 
 const sendSchema = z.object({
   signer_email: z.string().email(),
@@ -64,7 +70,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
 
-  // 4. Generate PDF from contract content
+  // 4. Generate PDF — content on page(s) 0..n-2, dedicated signature page always last
   let buffer: Buffer;
   try {
     buffer = await renderToBuffer(
@@ -81,32 +87,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: 'Failed to generate contract PDF' }, { status: 500 });
   }
 
-  // 5. Upload PDF to Vercel Blob
-  let blob;
-  try {
-    blob = await put(`contracts/${id}/signing-${Date.now()}.pdf`, buffer, {
-      access: 'public',
-      contentType: 'application/pdf',
-    });
-  } catch (error) {
-    console.error('send-for-signing: blob upload error:', error);
-    return NextResponse.json({ error: 'Failed to upload contract PDF' }, { status: 500 });
-  }
+  // 5. Count pages so DocuSeal knows which page is the signature page
+  const totalPages = countPdfPages(buffer);
+  const signaturePage = totalPages - 1; // 0-indexed
 
-  // 6. Create Dropbox Sign signature request
+  // 6. Create DocuSeal template + submission (buffer sent as base64 — no Blob upload needed)
   let signingResult;
   try {
-    signingResult = await createSignatureRequest({
-      pdfUrl: blob.url,
+    signingResult = await createDocuSealSubmission({
+      pdfBuffer: buffer,
+      title: contract.title,
       signerEmail: data.signer_email,
       signerName: data.signer_name,
-      title: contract.title,
-      message: data.message,
+      signaturePage,
     });
   } catch (error) {
-    console.error('send-for-signing: Dropbox Sign API error:', error);
+    console.error('send-for-signing: DocuSeal API error:', error);
     return NextResponse.json(
-      { error: 'Failed to create signature request. Check Dropbox Sign credentials.' },
+      { error: 'Failed to create DocuSeal signature request. Check DOCUSEAL_API_KEY.' },
       { status: 502 }
     );
   }
@@ -119,8 +117,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: {
         status: 'SIGNING',
         signer_email: data.signer_email,
-        signing_request_id: signingResult.signatureRequestId,
-        signing_url: signingResult.signUrl ?? null,
+        signer_name: data.signer_name,
+        // signing_request_id stores the DocuSeal submission ID (for webhook matching)
+        signing_request_id: String(signingResult.submissionId),
+        // signing_url stores the DocuSeal embed_src (for iframe embedding on client page)
+        signing_url: signingResult.embedSrc,
       },
     });
   } catch (error) {
@@ -131,7 +132,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   return NextResponse.json({
     data: {
       contract: updated,
-      sign_url: signingResult.signUrl,
+      embed_src: signingResult.embedSrc,
+      slug: signingResult.slug,
     },
   });
 }

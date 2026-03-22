@@ -8,6 +8,9 @@ import Collaboration from '@tiptap/extension-collaboration';
 import { useEffect, useRef } from 'react';
 import * as Y from 'yjs';
 
+// Fragment name TipTap's Collaboration extension uses in the Yjs doc
+const YJS_FRAGMENT = 'default';
+
 interface ContractEditorProps {
   contractId: string;
   initialContent?: object | null;
@@ -67,6 +70,11 @@ export function ContractEditor({
   const internalYdocRef = useRef<Y.Doc>(new Y.Doc());
   const ydocRef = externalYdocRef ?? internalYdocRef;
 
+  // Refs so the Liveblocks effect can access the latest editor and initial content
+  // without needing them as effect dependencies (they're stable after mount).
+  const editorRef = useRef<Editor | null>(null);
+  const initialContentRef = useRef(initialContent);
+
   useEffect(() => {
     let destroyed = false;
     let cleanup: (() => void) | undefined;
@@ -103,7 +111,33 @@ export function ContractEditor({
 
           onYDocReady?.(ydocRef.current);
 
+          // Seed template/DB content into the Yjs doc the first time this room
+          // is opened.  The Collaboration extension ignores the editor `content`
+          // prop and uses the Yjs doc directly, so a brand-new room would show a
+          // blank editor even when a template was chosen.  We wait until the room
+          // is connected (meaning any existing Yjs state has been applied), then
+          // seed only when the fragment is still empty.
+          const unsubStatus = room.subscribe(
+            'status',
+            (status: string) => {
+              if (status !== 'connected') return;
+              unsubStatus();
+              // setTimeout(0) lets any synchronous Yjs state application finish first
+              setTimeout(() => {
+                if (destroyed) return;
+                const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
+                if (fragment.length === 0 && initialContentRef.current && editorRef.current) {
+                  editorRef.current.commands.setContent(
+                    initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
+                    { emitUpdate: false }, // don't emit an update so we don't trigger an immediate save
+                  );
+                }
+              }, 0);
+            }
+          );
+
           cleanup = () => {
+            unsubStatus();
             provider.destroy();
             room.disconnect();
           };
@@ -147,6 +181,9 @@ export function ContractEditor({
     },
     []
   );
+
+  // Keep the ref in sync so the Liveblocks effect can always access the current editor
+  editorRef.current = editor;
 
   if (!editor) return null;
 

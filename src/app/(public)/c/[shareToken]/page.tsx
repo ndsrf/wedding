@@ -23,6 +23,8 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
   const [clientName, setClientName] = useState('');
   const [nameSubmitted, setNameSubmitted] = useState(false);
   const [selectedText, setSelectedText] = useState('');
+  const [showSigningWidget, setShowSigningWidget] = useState(false);
+  const [signingComplete, setSigningComplete] = useState(false);
 
   // Shared Y.Doc between editor (for Liveblocks sync) and comments sidebar
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
@@ -42,6 +44,39 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
       .catch(() => setError('Failed to load contract'))
       .finally(() => setLoading(false));
   }, [shareToken]);
+
+  // Listen for DocuSeal completion messages from the iframe.
+  // We derive the allowed origin from the signing URL so this works for both
+  // cloud (https://docuseal.com) and self-hosted installations.
+  useEffect(() => {
+    // Determine the expected postMessage origin from the embed URL
+    const signingOrigin = contract?.signing_url
+      ? (() => { try { return new URL(contract.signing_url).origin; } catch { return null; } })()
+      : null;
+
+    function handleMessage(event: MessageEvent) {
+      // Reject messages from unexpected origins to prevent spoofing
+      if (signingOrigin && event.origin !== signingOrigin) return;
+
+      if (
+        event.data &&
+        typeof event.data === 'object' &&
+        (event.data.type === 'completed' || event.data.type === 'docuseal:completed')
+      ) {
+        setSigningComplete(true);
+        setShowSigningWidget(false);
+        // Reload contract to reflect SIGNED status
+        if (shareToken) {
+          fetch(`/api/planner/contracts/shared/${shareToken}`)
+            .then((r) => r.json())
+            .then((res) => { if (!res.error) setContract(res.data); })
+            .catch((err) => console.error('Failed to refresh contract status after signing:', err));
+        }
+      }
+    }
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [shareToken, contract?.signing_url]);
 
   if (loading) {
     return (
@@ -99,8 +134,46 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
     );
   }
 
+  // ── DocuSeal embedded signing modal ────────────────────────────────────────
+  if (showSigningWidget && contract.signing_url) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-white border-b border-gray-100 shadow-sm">
+          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+            <div>
+              <h1 className="text-sm font-bold text-gray-900 font-playfair">{contract.title}</h1>
+              <p className="text-xs text-gray-500">Sign the contract below</p>
+            </div>
+            <button
+              onClick={() => setShowSigningWidget(false)}
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Back to contract
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-6">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden" style={{ minHeight: '80vh' }}>
+            <iframe
+              src={contract.signing_url}
+              className="w-full"
+              style={{ height: '85vh', border: 'none' }}
+              title="Sign contract"
+              allow="camera"
+            />
+          </div>
+          <p className="text-center text-xs text-gray-400 mt-3">
+            Powered by DocuSeal. Your signature is legally binding.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Contract review ────────────────────────────────────────────────────────
   const clientColor = '#7c3aed';
+  const isSigned = contract.status === 'SIGNED' || signingComplete;
+  const canSign = contract.status === 'SIGNING' && !!contract.signing_url && !signingComplete;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,22 +196,23 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
             </div>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
-            {contract.status === 'SIGNED' ? (
+            {isSigned ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Signed
               </span>
-            ) : contract.status === 'SIGNING' && contract.signing_url ? (
-              <a
-                href={contract.signing_url}
-                target="_blank"
-                rel="noopener noreferrer"
+            ) : canSign ? (
+              <button
+                onClick={() => setShowSigningWidget(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white rounded-full text-xs font-semibold hover:bg-rose-700 transition-colors"
               >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
                 Sign Now
-              </a>
+              </button>
             ) : (
               <span className="inline-flex items-center px-3 py-1.5 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold">
                 Review Mode
@@ -147,6 +221,42 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
           </div>
         </div>
       </div>
+
+      {/* Sign Now banner (when contract is ready to sign) */}
+      {canSign && (
+        <div className="max-w-7xl mx-auto px-4 pt-4">
+          <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-rose-800">
+              <svg className="h-5 w-5 text-rose-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>
+                <strong>Ready to sign</strong> — review the contract below, then click Sign Now to add your digital signature.
+              </span>
+            </div>
+            <button
+              onClick={() => setShowSigningWidget(true)}
+              className="flex-shrink-0 px-4 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-semibold hover:bg-rose-700 transition-colors"
+            >
+              Sign Now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Signing complete banner */}
+      {signingComplete && (
+        <div className="max-w-7xl mx-auto px-4 pt-4">
+          <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-green-800">
+            <svg className="h-5 w-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>
+              <strong>Signed successfully!</strong> Your planner will receive a copy of the signed contract.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Hint banner */}
       {selectedText && (

@@ -118,6 +118,7 @@ model Wedding {
   gift_iban                       String?
   couple_table_id                 String?
   customer_id                     String?
+  contract_id                     String?            // Originating contract for traceability / billing
   wizard_completed                Boolean            @default(false)
   wizard_current_step             Int?
   wizard_completed_at             DateTime?
@@ -144,6 +145,7 @@ model Wedding {
   tasting_menu                    TastingMenu?
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   customer                        Customer?          @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  contract                        Contract?          @relation("WeddingContract", fields: [contract_id], references: [id], onDelete: SetNull)
   theme                           Theme?             @relation("WeddingTheme", fields: [theme_id], references: [id])
   wedding_day_theme               Theme?             @relation("WeddingDayTheme", fields: [wedding_day_theme_id], references: [id])
   wedding_day_invitation_template InvitationTemplate? @relation("WeddingDayInvitationTemplate", fields: [wedding_day_invitation_template_id], references: [id])
@@ -160,6 +162,7 @@ model Wedding {
   @@index([main_event_location_id])
   @@index([planner_id, status, wedding_date])
   @@index([customer_id])
+  @@index([contract_id])
   @@map("weddings")
 }
 
@@ -902,12 +905,14 @@ model Contract {
   signed_pdf_url       String?
   signed_at            DateTime?
   signer_email         String?
+  signer_name          String?
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
   planner              WeddingPlanner    @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   customer             Customer?         @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   quote                Quote?            @relation(fields: [quote_id], references: [id], onDelete: SetNull)
   template             ContractTemplate? @relation(fields: [contract_template_id], references: [id], onDelete: SetNull)
+  weddings             Wedding[]         @relation("WeddingContract")
 
   @@index([planner_id])
   @@index([customer_id])

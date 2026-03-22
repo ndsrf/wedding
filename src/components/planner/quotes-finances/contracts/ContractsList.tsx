@@ -22,6 +22,7 @@ interface Contract {
   title: string;
   status: string;
   signer_email: string | null;
+  signer_name: string | null;
   share_token: string;
   signing_url: string | null;
   signed_at: string | null;
@@ -65,6 +66,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const [sendError, setSendError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [generatingPdfId, setGeneratingPdfId] = useState<string | null>(null);
 
   async function fetchContracts() {
     const res = await fetch('/api/planner/contracts');
@@ -97,7 +99,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       const res = await fetch(`/api/planner/contracts/${contractId}/send-for-signing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sendForm),
+        body: JSON.stringify({ signer_email: sendForm.email, signer_name: sendForm.name, message: sendForm.message }),
       });
       if (res.ok) {
         setSendingId(null);
@@ -138,6 +140,29 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       setManualSignError('Network error — check your connection and try again.');
     } finally {
       setManualSigning(false);
+    }
+  }
+
+  async function handleGeneratePdf(contractId: string, title: string) {
+    setGeneratingPdfId(contractId);
+    try {
+      const res = await fetch(`/api/planner/contracts/${contractId}/generate-pdf`, { method: 'POST' });
+      if (res.ok) {
+        const json = await res.json();
+        const url = json.data?.pdf_url;
+        if (url) {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${title}.pdf`;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      }
+    } finally {
+      setGeneratingPdfId(null);
     }
   }
 
@@ -239,7 +264,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                     onSubmit={(e) => handleSendForSigning(contract.id, e)}
                     className="mt-3 p-4 bg-amber-50 rounded-xl border border-amber-100 space-y-3"
                   >
-                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Send for Signing</h5>
+                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Send for Online Signing via DocuSeal</h5>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">Signer Email *</label>
@@ -367,6 +392,21 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                     Edit
                   </button>
                   <button
+                    onClick={() => handleGeneratePdf(contract.id, contract.title)}
+                    disabled={generatingPdfId === contract.id}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-60 rounded-lg transition-colors"
+                    title="Download PDF for manual signing"
+                  >
+                    {generatingPdfId === contract.id ? (
+                      <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    )}
+                    Download PDF
+                  </button>
+                  <button
                     onClick={() => copyShareLink(contract.id, contract.share_token)}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                   >
@@ -392,7 +432,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         onClick={() => {
                           setSendForm({
                             email: contract.signer_email ?? contract.customer?.email ?? '',
-                            name: contract.customer?.name ?? '',
+                            name: contract.signer_name ?? contract.customer?.name ?? '',
                             message: '',
                           });
                           setSendError(null);
@@ -422,15 +462,13 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                       </button>
                     </>
                   )}
-                  {contract.signing_url && (
-                    <a
-                      href={contract.signing_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                    >
-                      View Signing
-                    </a>
+                  {contract.status === 'SIGNING' && contract.signing_url && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg">
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      Awaiting DocuSeal signature
+                    </span>
                   )}
                   {contract.status === 'SIGNED' && contract.quote && onCreateInvoice && (
                     <button
