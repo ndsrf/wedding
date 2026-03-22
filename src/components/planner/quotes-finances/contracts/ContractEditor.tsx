@@ -114,30 +114,42 @@ export function ContractEditor({
           // Seed template/DB content into the Yjs doc the first time this room
           // is opened.  The Collaboration extension ignores the editor `content`
           // prop and uses the Yjs doc directly, so a brand-new room would show a
-          // blank editor even when a template was chosen.  We wait until the room
-          // is connected (meaning any existing Yjs state has been applied), then
-          // seed only when the fragment is still empty.
-          const unsubStatus = room.subscribe(
-            'status',
-            (status: string) => {
-              if (status !== 'connected') return;
-              unsubStatus();
-              // setTimeout(0) lets any synchronous Yjs state application finish first
-              setTimeout(() => {
-                if (destroyed) return;
-                const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
-                if (fragment.length === 0 && initialContentRef.current && editorRef.current) {
-                  editorRef.current.commands.setContent(
-                    initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
-                    { emitUpdate: false }, // don't emit an update so we don't trigger an immediate save
-                  );
-                }
-              }, 0);
+          // blank editor even when a template was chosen.
+          //
+          // We must wait until the provider has fully synced the initial
+          // Liveblocks state before checking whether the fragment is empty.
+          // room.status 'connected' fires when the WebSocket handshake completes,
+          // but the Yjs binary updates are delivered asynchronously afterwards —
+          // a setTimeout(0) is NOT sufficient and causes content duplication:
+          // the fragment appears empty, we seed it, and then Liveblocks delivers
+          // the stored state on top.  Using provider.on('sync') guarantees we
+          // check only after the full initial Yjs state has been applied.
+          function seedIfEmpty() {
+            if (destroyed) return;
+            const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
+            if (fragment.length === 0 && initialContentRef.current && editorRef.current) {
+              editorRef.current.commands.setContent(
+                initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
+                { emitUpdate: false }, // don't emit an update so we don't trigger an immediate save
+              );
             }
-          );
+          }
+
+          // Cast to access standard Yjs Observable API (synced + sync event)
+          const typedProvider = provider as unknown as {
+            synced: boolean;
+            on: (event: string, fn: (isSynced: boolean) => void) => void;
+          };
+          if (typedProvider.synced) {
+            // Already synced (e.g. state was available synchronously)
+            seedIfEmpty();
+          } else {
+            typedProvider.on('sync', (isSynced: boolean) => {
+              if (isSynced) seedIfEmpty();
+            });
+          }
 
           cleanup = () => {
-            unsubStatus();
             provider.destroy();
             room.disconnect();
           };
