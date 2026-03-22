@@ -47,6 +47,7 @@ export async function createDocuSealSubmission(params: {
   signerName: string;
   /** 0-indexed page number where the signature field should appear (last page of the PDF) */
   signaturePage: number;
+  // Note: DocuSeal uses 1-based page numbers; conversion happens internally.
 }): Promise<DocuSealSubmissionResult> {
   const base = getApiBase();
   const hdrs = headers();
@@ -79,6 +80,9 @@ export async function createDocuSealSubmission(params: {
     dataUriPrefix: fileDataUri.slice(0, 40),
   });
 
+  // DocuSeal uses 1-based page indexing; callers pass 0-based.
+  const docusealPage = params.signaturePage + 1;
+
   // DocuSeal /templates/pdf: fields must be nested inside `documents`, not `submitters`.
   // Each field needs a `role` property that matches a submitter name.
   const templateFields = [
@@ -88,7 +92,7 @@ export async function createDocuSealSubmission(params: {
       role: 'Client',
       required: true,
       areas: [
-        { x: 0.52, y: 0.25, w: 0.38, h: 0.1, page: params.signaturePage },
+        { x: 0.52, y: 0.25, w: 0.38, h: 0.1, page: docusealPage },
       ],
     },
     {
@@ -97,7 +101,7 @@ export async function createDocuSealSubmission(params: {
       role: 'Client',
       required: false,
       areas: [
-        { x: 0.52, y: 0.37, w: 0.25, h: 0.05, page: params.signaturePage },
+        { x: 0.52, y: 0.37, w: 0.25, h: 0.05, page: docusealPage },
       ],
     },
   ];
@@ -149,7 +153,7 @@ export async function createDocuSealSubmission(params: {
   // Step 2: Create a submission from the template
   const submissionBody = {
     template_id: templateId,
-    send_email: false,
+    send_email: true,
     submitters: [
       { role: 'Client', email: params.signerEmail, name: params.signerName },
     ],
