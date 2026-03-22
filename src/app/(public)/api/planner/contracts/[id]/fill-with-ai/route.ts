@@ -3,7 +3,19 @@ import { generateText } from 'ai';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { getChatModel } from '@/lib/ai/provider';
-import type { CommentData } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
+
+interface CommentData {
+  id: string;
+  selectedText: string;
+  text: string;
+  authorName: string;
+  authorColor: string;
+  timestamp: number;
+  isAiFilled?: boolean;
+  aiValue?: string;
+  aiDescription?: string;
+  aiSourceField?: string;
+}
 
 // ---------------------------------------------------------------------------
 // TipTap ProseMirror JSON helpers

@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import type { PlaceholderRule } from '@/app/(public)/api/planner/contract-templates/[id]/placeholder-rules/route';
+
+interface PlaceholderRule {
+  placeholder: string;
+  description: string;
+  sourceField?: string;
+  rememberedAt: string;
+}
 
 // ---------------------------------------------------------------------------
 // TipTap helpers
