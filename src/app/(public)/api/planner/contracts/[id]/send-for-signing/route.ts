@@ -5,6 +5,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { createDocuSealSubmission } from '@/lib/signing/docuseal';
+import { toAbsoluteUrl } from '@/lib/images/processor';
 import React from 'react';
 
 /** Count pages in a PDF buffer by scanning for /Type /Page entries (no external deps). */
@@ -58,12 +59,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  // 3. Fetch planner name for PDF
+  // 3. Fetch company info for PDF
   let planner;
   try {
     planner = await prisma.weddingPlanner.findUnique({
       where: { id: user.planner_id },
-      select: { name: true },
+      select: {
+        name: true,
+        email: true,
+        legal_name: true,
+        vat_number: true,
+        address: true,
+        phone: true,
+        website: true,
+        logo_url: true,
+        signature_url: true,
+      },
     });
   } catch (error) {
     console.error('send-for-signing: planner lookup error:', error);
@@ -77,7 +88,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       React.createElement(ContractPDF, {
         title: contract.title,
         content: contract.content as { type: string; content?: never[] },
-        plannerName: planner?.name ?? 'Wedding Planner',
+        company: {
+          name: planner?.name ?? 'Wedding Planner',
+          email: planner?.email,
+          logoUrl: toAbsoluteUrl(planner?.logo_url),
+          legalName: planner?.legal_name ?? undefined,
+          vatNumber: planner?.vat_number ?? undefined,
+          address: planner?.address ?? undefined,
+          phone: planner?.phone ?? undefined,
+          website: planner?.website ?? undefined,
+          signatureUrl: toAbsoluteUrl(planner?.signature_url),
+        },
         signerName: data.signer_name,
         createdAt: contract.created_at,
       }) as never

@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { QuotePDF } from '@/lib/pdf/quote-pdf';
 import { put, del } from '@vercel/blob';
+import { toAbsoluteUrl } from '@/lib/images/processor';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -25,14 +26,31 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const planner = await prisma.weddingPlanner.findUnique({
       where: { id: user.planner_id },
-      select: { name: true, email: true },
+      select: {
+        name: true,
+        email: true,
+        legal_name: true,
+        vat_number: true,
+        address: true,
+        phone: true,
+        website: true,
+        logo_url: true,
+      },
     });
 
     const buffer = await renderToBuffer(
       React.createElement(QuotePDF, {
         quote,
-        plannerName: planner?.name ?? 'Wedding Planner',
-        plannerEmail: planner?.email,
+        company: {
+          name: planner?.name ?? 'Wedding Planner',
+          email: planner?.email,
+          logoUrl: toAbsoluteUrl(planner?.logo_url),
+          legalName: planner?.legal_name ?? undefined,
+          vatNumber: planner?.vat_number ?? undefined,
+          address: planner?.address ?? undefined,
+          phone: planner?.phone ?? undefined,
+          website: planner?.website ?? undefined,
+        },
       }) as never
     );
 

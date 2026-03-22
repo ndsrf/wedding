@@ -6,6 +6,7 @@ import {
   Text,
   View,
   StyleSheet,
+  Image,
 } from '@react-pdf/renderer';
 import type { Prisma } from '@prisma/client';
 
@@ -25,7 +26,17 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 32,
+  },
+  headerLeft: {
+    flexDirection: 'column',
+    gap: 6,
+  },
+  logo: {
+    maxWidth: 120,
+    maxHeight: 48,
+    objectFit: 'contain',
   },
   brandName: {
     fontSize: 22,
@@ -151,13 +162,23 @@ function formatCurrency(amount: number | string | { toNumber: () => number }, cu
   return new Intl.NumberFormat('en', { style: 'currency', currency }).format(num);
 }
 
-interface InvoicePDFProps {
-  invoice: InvoiceWithDetails;
-  plannerName: string;
-  plannerEmail?: string;
+export interface CompanyInfo {
+  name: string;
+  email?: string;
+  logoUrl?: string;
+  legalName?: string;
+  vatNumber?: string;
+  address?: string;
+  phone?: string;
+  website?: string;
 }
 
-export function InvoicePDF({ invoice, plannerName, plannerEmail }: InvoicePDFProps) {
+interface InvoicePDFProps {
+  invoice: InvoiceWithDetails;
+  company: CompanyInfo;
+}
+
+export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
   const total = Number(invoice.total);
   const amountPaid = Number(invoice.amount_paid);
   const balanceDue = total - amountPaid;
@@ -167,8 +188,12 @@ export function InvoicePDF({ invoice, plannerName, plannerEmail }: InvoicePDFPro
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.brandName}>{plannerName}</Text>
+          <View style={styles.headerLeft}>
+            {company.logoUrl ? (
+              <Image src={company.logoUrl} style={styles.logo} />
+            ) : (
+              <Text style={styles.brandName}>{company.name}</Text>
+            )}
             <Text style={styles.docTitle}>Invoice</Text>
           </View>
           <View style={styles.metaRight}>
@@ -200,8 +225,12 @@ export function InvoicePDF({ invoice, plannerName, plannerEmail }: InvoicePDFPro
           </View>
           <View style={styles.clientBlock}>
             <Text style={styles.sectionTitle}>From</Text>
-            <Text style={styles.clientName}>{plannerName}</Text>
-            {plannerEmail && <Text style={styles.clientDetail}>{plannerEmail}</Text>}
+            <Text style={styles.clientName}>{company.legalName ?? company.name}</Text>
+            {company.vatNumber && <Text style={styles.clientDetail}>VAT: {company.vatNumber}</Text>}
+            {company.address && <Text style={styles.clientDetail}>{company.address}</Text>}
+            {company.phone && <Text style={styles.clientDetail}>{company.phone}</Text>}
+            {company.email && <Text style={styles.clientDetail}>{company.email}</Text>}
+            {company.website && <Text style={styles.clientDetail}>{company.website}</Text>}
           </View>
         </View>
 
