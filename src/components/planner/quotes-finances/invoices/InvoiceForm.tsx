@@ -16,6 +16,7 @@ interface CustomerSuggestion {
   email: string | null;
   phone: string | null;
   id_number: string | null;
+  address: string | null;
 }
 
 interface InvoiceFormData {
@@ -24,6 +25,7 @@ interface InvoiceFormData {
   client_name: string;
   client_email: string;
   client_id_number: string;
+  client_address: string;
   description: string;
   currency: string;
   discount: number | '';
@@ -53,6 +55,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
     client_name: initialData?.client_name ?? '',
     client_email: initialData?.client_email ?? '',
     client_id_number: initialData?.client_id_number ?? '',
+    client_address: initialData?.client_address ?? '',
     description: initialData?.description ?? '',
     currency: initialData?.currency ?? 'EUR',
     discount: initialData?.discount ?? '',
@@ -105,6 +108,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
       client_name: c.name,
       client_email: c.email ?? p.client_email,
       client_id_number: c.id_number ?? p.client_id_number,
+      client_address: c.address ?? p.client_address,
     }));
     setSuggestions([]);
     setShowSuggestions(false);
@@ -145,6 +149,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
         quote_id: form.quote_id || null,
         client_email: form.client_email || null,
         client_id_number: form.client_id_number || null,
+        client_address: form.client_address || null,
         discount: form.discount === '' ? null : Number(form.discount),
         tax_rate: form.tax_rate === '' ? null : form.tax_rate,
         subtotal,
@@ -227,6 +232,16 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
               value={form.client_id_number}
               onChange={(e) => setForm((p) => ({ ...p, client_id_number: e.target.value }))}
               placeholder="DNI, NIE, Passport…"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Client Address</label>
+            <textarea
+              rows={2}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
+              value={form.client_address}
+              onChange={(e) => setForm((p) => ({ ...p, client_address: e.target.value }))}
+              placeholder="Street, City, Country…"
             />
           </div>
           <div>

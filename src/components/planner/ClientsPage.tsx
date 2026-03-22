@@ -46,6 +46,7 @@ interface Customer {
   email: string | null;
   phone: string | null;
   id_number: string | null;
+  address: string | null;
   notes: string | null;
   created_at: string;
   quotes: CustomerQuote[];
@@ -119,6 +120,7 @@ function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps)
   const [email, setEmail] = useState(customer.email ?? '');
   const [phone, setPhone] = useState(customer.phone ?? '');
   const [idNumber, setIdNumber] = useState(customer.id_number ?? '');
+  const [address, setAddress] = useState(customer.address ?? '');
   const [notes, setNotes] = useState(customer.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -137,6 +139,7 @@ function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps)
           email: email.trim() || null,
           phone: phone.trim() || null,
           id_number: idNumber.trim() || null,
+          address: address.trim() || null,
           notes: notes.trim() || null,
         }),
       });
@@ -202,6 +205,16 @@ function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps)
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+              placeholder="Street, City, Country..."
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
             <textarea
               value={notes}
@@ -243,6 +256,7 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [idNumber, setIdNumber] = useState('');
+  const [address, setAddress] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -260,6 +274,7 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
           email: email.trim() || null,
           phone: phone.trim() || null,
           id_number: idNumber.trim() || null,
+          address: address.trim() || null,
         }),
       });
       if (!res.ok) throw new Error('Failed to create client');
@@ -325,6 +340,16 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
               onChange={(e) => setIdNumber(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               placeholder="DNI, NIE, Passport..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+              placeholder="Street, City, Country..."
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -411,6 +436,9 @@ function CustomerCard({ customer, onDeleted, onEdit }: CustomerCardProps) {
             )}
             {customer.id_number && (
               <span className="text-xs text-gray-400">ID: {customer.id_number}</span>
+            )}
+            {customer.address && (
+              <span className="text-xs text-gray-400 truncate max-w-[200px]">{customer.address}</span>
             )}
           </div>
         </div>

@@ -9,7 +9,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const { id } = await params;
     const body = await request.json();
-    const { name, email, phone, id_number, notes } = body;
+    const { name, email, phone, id_number, address, notes } = body;
 
     if (!name?.trim()) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
@@ -30,6 +30,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         email: email?.trim() || null,
         phone: phone?.trim() || null,
         id_number: id_number?.trim() || null,
+        address: address?.trim() || null,
         notes: notes?.trim() || null,
       },
     });

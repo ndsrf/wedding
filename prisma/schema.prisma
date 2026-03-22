@@ -823,6 +823,7 @@ model Customer {
   email      String?
   phone      String?
   id_number  String?
+  address    String?        @db.Text
   notes      String?        @db.Text
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
@@ -862,6 +863,7 @@ model Quote {
   location                String?
   client_email            String?
   client_phone            String?
+  client_address          String?        @db.Text
   notes                   String?        @db.Text
   status                  QuoteStatus    @default(DRAFT)
   currency                String         @default("EUR")
@@ -943,6 +945,7 @@ model Invoice {
   client_name      String
   client_email     String?
   client_id_number String?
+  client_address   String?         @db.Text
   description      String?         @db.Text
   currency       String          @default("EUR")
   subtotal       Decimal         @db.Decimal(10, 2)
