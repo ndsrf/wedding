@@ -163,7 +163,14 @@ export function ContractEditor({
         Placeholder.configure({ placeholder: 'Start writing the contract...' }),
         Collaboration.configure({ document: ydocRef.current }),
       ],
-      content: initialContent ?? { type: 'doc', content: [{ type: 'paragraph' }] },
+      // Do NOT pass content here – the Collaboration extension owns the editor
+      // content entirely through the Yjs document.  Passing `content` would seed
+      // the Yjs XmlFragment immediately on creation; when Liveblocks then syncs
+      // the room's stored Yjs state on top, both copies end up in the document
+      // causing the template to be appended on every subsequent open.
+      // Initial seeding (first-time-only) is handled in the Liveblocks status
+      // callback above via `setContent` once the fragment is confirmed empty.
+      content: undefined,
       editable: !readOnly,
       onUpdate: ({ editor }) => {
         onChange?.(editor.getJSON());
