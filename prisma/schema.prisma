@@ -904,6 +904,7 @@ model Contract {
   signing_url          String?
   pdf_url              String?
   signed_pdf_url       String?
+  audit_url            String?
   signed_at            DateTime?
   signer_email         String?
   signer_name          String?

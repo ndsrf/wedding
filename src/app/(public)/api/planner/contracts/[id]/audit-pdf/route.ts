@@ -13,17 +13,21 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+    // Manually signed — return the locally generated audit PDF
     if (!contract.signing_request_id) {
-      return NextResponse.json({ error: 'No DocuSeal submission found for this contract' }, { status: 404 });
+      if (!contract.audit_url) {
+        return NextResponse.json({ error: 'No audit record found for this contract' }, { status: 404 });
+      }
+      return NextResponse.json({ data: { audit_url: contract.audit_url } });
     }
 
+    // DocuSeal-signed — fetch audit log URL from DocuSeal
     const apiBase = (process.env.DOCUSEAL_API_URL ?? 'https://api.docuseal.com').replace(/\/$/, '');
     const apiKey = process.env.DOCUSEAL_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'DocuSeal API key not configured' }, { status: 500 });
     }
 
-    // Fetch the submission details from DocuSeal to get the audit log URL
     const res = await fetch(`${apiBase}/submissions/${contract.signing_request_id}`, {
       headers: { 'X-Auth-Token': apiKey },
     });
