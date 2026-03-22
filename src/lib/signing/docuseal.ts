@@ -112,10 +112,20 @@ export async function createDocuSealSubmission(params: {
     ],
   };
 
+  const submitter0 = templateBody.submitters[0];
   logDocuSeal('POST /templates/pdf', {
     url: `${base}/templates/pdf`,
-    bodyKeys: Object.keys(templateBody),
-    documentNameSent: templateBody.documents[0].name,
+    document: {
+      name: templateBody.documents[0].name,
+      fileSet: !!templateBody.documents[0].file,
+      fileLength: templateBody.documents[0].file.length,
+      filePrefix: templateBody.documents[0].file.slice(0, 40),
+    },
+    submitter: {
+      name: submitter0.name,
+      fieldCount: submitter0.fields.length,
+      fieldNames: submitter0.fields.map((f) => f.name),
+    },
   });
 
   const templateRes = await fetch(`${base}/templates/pdf`, {
