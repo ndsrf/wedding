@@ -9,6 +9,7 @@ export interface InvoicePrefillData {
   client_name?: string;
   client_email?: string;
   currency?: string;
+  discount?: number | '';
   tax_rate?: number | '';
   line_items?: { name: string; description: string; quantity: number; unit_price: number; total: number }[];
 }
@@ -215,6 +216,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
         client_name: quote.couple_names,
         client_email: quote.client_email ?? '',
         currency: quote.currency,
+        discount: quote.discount != null ? Number(quote.discount) : '',
         tax_rate: quote.tax_rate != null ? Number(quote.tax_rate) : '',
         line_items: (quote.line_items ?? []).map((li: { name: string; description: string | null; quantity: unknown; unit_price: unknown; total: unknown }) => ({
           name: li.name,
