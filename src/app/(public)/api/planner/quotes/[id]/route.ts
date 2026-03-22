@@ -86,19 +86,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       }
 
       // Determine if any content fields changed (not just status) — clear pdf_url so it gets regenerated
-      const contentChanged = lineItems !== undefined ||
-        quoteData.couple_names !== undefined ||
-        quoteData.event_date !== undefined ||
-        quoteData.location !== undefined ||
-        quoteData.client_email !== undefined ||
-        quoteData.client_phone !== undefined ||
-        quoteData.notes !== undefined ||
-        quoteData.currency !== undefined ||
-        quoteData.subtotal !== undefined ||
-        quoteData.discount !== undefined ||
-        quoteData.tax_rate !== undefined ||
-        quoteData.total !== undefined ||
-        quoteData.expires_at !== undefined;
+      const pdfFields = [
+        'couple_names', 'event_date', 'location', 'client_email', 'client_phone',
+        'notes', 'currency', 'subtotal', 'discount', 'tax_rate', 'total', 'expires_at'
+      ];
+      const contentChanged = lineItems !== undefined || pdfFields.some(field => field in quoteData);
 
       return tx.quote.update({
         where: { id },
