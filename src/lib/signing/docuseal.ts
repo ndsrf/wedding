@@ -65,12 +65,21 @@ export async function createDocuSealSubmission(params: {
   });
 
   // Step 1: Create a one-time template from the PDF (base64-encoded), with signature field defined
+  // Use Buffer.from() to handle both Buffer and Uint8Array returns from renderToBuffer
+  const base64Pdf = Buffer.from(params.pdfBuffer).toString('base64');
+  logDocuSeal('PDF buffer info', {
+    inputType: Object.prototype.toString.call(params.pdfBuffer),
+    inputByteLength: params.pdfBuffer.byteLength,
+    base64Length: base64Pdf.length,
+    base64Prefix: base64Pdf.slice(0, 20),
+  });
+
   const templateBody = {
     name: params.title,
     documents: [
       {
         name: `${params.title}.pdf`,
-        file: params.pdfBuffer.toString('base64'),
+        file: base64Pdf,
       },
     ],
     submitters: [{ name: 'Client' }],
@@ -100,7 +109,6 @@ export async function createDocuSealSubmission(params: {
     url: `${base}/templates/pdf`,
     bodyKeys: Object.keys(templateBody),
     documentNameSent: templateBody.documents[0].name,
-    base64Length: templateBody.documents[0].file.length,
   });
 
   const templateRes = await fetch(`${base}/templates/pdf`, {
