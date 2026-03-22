@@ -160,8 +160,8 @@ export function ContractEditor({
                   // Persist the corrected content to the database.
                   onChangeRef.current?.(fixed as object);
                 }
-              } catch {
-                // Non-fatal — if conversion fails, leave content as-is.
+              } catch (err) {
+                console.warn('ContractEditor: could not check/repair doubled content', err);
               }
             }
           }
