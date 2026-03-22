@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
 import type { InvoicePrefillData } from '../contracts/ContractsList';
+import { FilterBar } from '../FilterBar';
+import { Pagination } from '../Pagination';
 
 export interface Invoice {
   id: string;
@@ -79,6 +81,10 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   const [generating, setGenerating] = useState<string | null>(null);
   const [prefillQuote, setPrefillQuote] = useState<ReadyQuote | null>(null);
   const [externalFormData, setExternalFormData] = useState<InvoicePrefillData | null>(null);
+  const [nameFilter, setNameFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     if (externalPrefill) {
@@ -272,6 +278,22 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     );
   }
 
+  const filteredInvoices = invoices.filter((inv) => {
+    const nameMatch = nameFilter.trim() === '' || inv.client_name.toLowerCase().includes(nameFilter.toLowerCase());
+    const statusMatch = statusFilter.length === 0 || statusFilter.includes(inv.status);
+    return nameMatch && statusMatch;
+  });
+  const pagedInvoices = filteredInvoices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const INVOICE_STATUS_OPTIONS = [
+    { value: 'DRAFT', label: 'Draft' },
+    { value: 'ISSUED', label: 'Issued' },
+    { value: 'PARTIAL', label: 'Partial' },
+    { value: 'PAID', label: 'Paid' },
+    { value: 'OVERDUE', label: 'Overdue' },
+    { value: 'CANCELLED', label: 'Cancelled' },
+  ];
+
   return (
     <div>
       {/* Ready to invoice — accepted quotes with contract but no invoice yet */}
@@ -305,6 +327,15 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         </div>
       )}
 
+      <FilterBar
+        nameValue={nameFilter}
+        onNameChange={(v) => { setNameFilter(v); setPage(1); }}
+        namePlaceholder="Search by client name…"
+        statusOptions={INVOICE_STATUS_OPTIONS}
+        selectedStatuses={statusFilter}
+        onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
+      />
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-gray-900">Invoices</h3>
         <button
@@ -318,25 +349,35 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         </button>
       </div>
 
-      {invoices.length === 0 ? (
+      {filteredInvoices.length === 0 ? (
         <div className="bg-white rounded-xl border border-dashed border-gray-200 p-12 text-center">
           <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900">No invoices yet</h3>
-          <p className="text-xs text-gray-500 mt-1">Create an invoice to track your payments.</p>
-          <button
-            onClick={() => setView('new')}
-            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
-          >
-            Create Invoice
-          </button>
+          {nameFilter || statusFilter.length > 0 ? (
+            <>
+              <h3 className="text-sm font-semibold text-gray-900">No invoices match your filters</h3>
+              <p className="text-xs text-gray-500 mt-1">Try adjusting your search or status filters.</p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-sm font-semibold text-gray-900">No invoices yet</h3>
+              <p className="text-xs text-gray-500 mt-1">Create an invoice to track your payments.</p>
+              <button
+                onClick={() => setView('new')}
+                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
+              >
+                Create Invoice
+              </button>
+            </>
+          )}
         </div>
       ) : (
+        <>
         <div className="space-y-3">
-          {invoices.map((invoice) => {
+          {pagedInvoices.map((invoice) => {
             const total = Number(invoice.total);
             const paid = Number(invoice.amount_paid);
             const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
@@ -456,6 +497,8 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
             );
           })}
         </div>
+        <Pagination total={filteredInvoices.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </>
       )}
     </div>
   );

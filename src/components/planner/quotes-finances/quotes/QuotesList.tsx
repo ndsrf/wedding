@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { QuoteForm } from './QuoteForm';
+import { FilterBar } from '../FilterBar';
+import { Pagination } from '../Pagination';
 
 interface LineItem {
   id?: string;
@@ -65,6 +67,10 @@ export function QuotesList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [nameFilter, setNameFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   // Contract creation state
   const [contractQuoteId, setContractQuoteId] = useState<string | null>(null);
@@ -204,6 +210,21 @@ export function QuotesList() {
   const editingQuote = editingId ? quotes.find((q) => q.id === editingId) : null;
   const viewingQuote = viewingId ? quotes.find((q) => q.id === viewingId) : null;
 
+  const filteredQuotes = quotes.filter((q) => {
+    const nameMatch = nameFilter.trim() === '' || q.couple_names.toLowerCase().includes(nameFilter.toLowerCase());
+    const statusMatch = statusFilter.length === 0 || statusFilter.includes(q.status);
+    return nameMatch && statusMatch;
+  });
+  const pagedQuotes = filteredQuotes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const QUOTE_STATUS_OPTIONS = [
+    { value: 'DRAFT', label: 'Draft' },
+    { value: 'SENT', label: 'Sent' },
+    { value: 'ACCEPTED', label: 'Accepted' },
+    { value: 'REJECTED', label: 'Rejected' },
+    { value: 'EXPIRED', label: 'Expired' },
+  ];
+
   if (showForm) {
     const isView = viewingId !== null && editingId === null;
     const quoteData = editingQuote ?? viewingQuote;
@@ -262,25 +283,44 @@ export function QuotesList() {
         </button>
       </div>
 
-      {quotes.length === 0 ? (
+      <FilterBar
+        nameValue={nameFilter}
+        onNameChange={(v) => { setNameFilter(v); setPage(1); }}
+        namePlaceholder="Search by couple name…"
+        statusOptions={QUOTE_STATUS_OPTIONS}
+        selectedStatuses={statusFilter}
+        onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
+      />
+
+      {filteredQuotes.length === 0 ? (
         <div className="bg-white rounded-xl border border-dashed border-gray-200 p-12 text-center">
           <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <svg className="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900">No quotes yet</h3>
-          <p className="text-xs text-gray-500 mt-1">Create your first quote to send to a potential client.</p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
-          >
-            Create Quote
-          </button>
+          {nameFilter || statusFilter.length > 0 ? (
+            <>
+              <h3 className="text-sm font-semibold text-gray-900">No quotes match your filters</h3>
+              <p className="text-xs text-gray-500 mt-1">Try adjusting your search or status filters.</p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-sm font-semibold text-gray-900">No quotes yet</h3>
+              <p className="text-xs text-gray-500 mt-1">Create your first quote to send to a potential client.</p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
+              >
+                Create Quote
+              </button>
+            </>
+          )}
         </div>
       ) : (
+        <>
         <div className="space-y-3">
-          {quotes.map((quote) => (
+          {pagedQuotes.map((quote) => (
             <div key={quote.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -498,6 +538,8 @@ export function QuotesList() {
             </div>
           ))}
         </div>
+        <Pagination total={filteredQuotes.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </>
       )}
     </div>
   );
