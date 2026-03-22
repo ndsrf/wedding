@@ -3,7 +3,19 @@ import { generateText } from 'ai';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { getChatModel } from '@/lib/ai/provider';
-import type { CommentData } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
+
+interface CommentData {
+  id: string;
+  selectedText: string;
+  text: string;
+  authorName: string;
+  authorColor: string;
+  timestamp: number;
+  isAiFilled?: boolean;
+  aiValue?: string;
+  aiDescription?: string;
+  aiSourceField?: string;
+}
 
 // ---------------------------------------------------------------------------
 // TipTap ProseMirror JSON helpers
@@ -46,9 +58,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
-        quote: {
-          include: { line_items: true },
-        },
+        quote: { include: { line_items: true } },
         customer: true,
       },
     });
@@ -69,7 +79,9 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       },
     });
 
-    // Build context string for the AI
+    const quote = contract.quote;
+    const customer = contract.customer;
+
     const plannerInfo = [
       `Wedding Planner / Company:`,
       `  Name: ${planner?.legal_name ?? planner?.name ?? 'Unknown'}`,
@@ -80,9 +92,6 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       planner?.vat_number ? `  VAT/Tax number: ${planner.vat_number}` : null,
       planner?.website ? `  Website: ${planner.website}` : null,
     ].filter(Boolean).join('\n');
-
-    const quote = contract.quote;
-    const customer = contract.customer;
 
     const clientInfo = [
       `Client / Couple:`,
@@ -109,7 +118,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 The planner has a contract template with placeholders (typically written as [PLACEHOLDER], {{PLACEHOLDER}}, or similar bracketed formats). Your job is to:
 1. Identify ALL placeholders in the contract text
 2. For each placeholder, determine if it can be filled using the provided data
-3. For placeholders that CAN be filled automatically, provide the fill value
+3. For placeholders that CAN be filled automatically, provide the fill value AND the sourceField key
 4. For placeholders that CANNOT be filled (missing data), explain what needs to be provided
 
 ## Available Data
@@ -133,13 +142,15 @@ Return a JSON object with this exact structure:
       "placeholder": "exact placeholder text as it appears in the contract, e.g. [CLIENT_NAME]",
       "filled": true,
       "value": "the actual value to insert",
-      "description": "brief explanation of what was used to fill this"
+      "description": "brief explanation of what was used to fill this",
+      "sourceField": "couple_names"
     },
     {
       "placeholder": "[VENUE_ADDRESS]",
       "filled": false,
       "value": null,
-      "description": "Venue full address — not available in the data, needs to be filled manually"
+      "description": "Venue full address — not available in the data, needs to be filled manually",
+      "sourceField": null
     }
   ]
 }
@@ -149,7 +160,11 @@ Rules:
 - Use the exact placeholder text as it appears in the contract (including brackets)
 - For dates, use the format "Day Month Year" (e.g. "15 June 2025")
 - For amounts, include the currency symbol
-- Only return the JSON object, no other text`;
+- Only return the JSON object, no other text
+- For sourceField, use ONLY one of these exact keys (or null if not mappable):
+  planner_name, planner_email, planner_phone, planner_address, planner_vat, planner_website,
+  couple_names, client_email, client_phone, client_id_number,
+  event_date, event_location, total_amount`;
 
     const { text } = await generateText({
       model: getChatModel(),
@@ -163,6 +178,7 @@ Rules:
       filled: boolean;
       value: string | null;
       description: string;
+      sourceField: string | null;
     }> = [];
 
     try {
@@ -173,10 +189,9 @@ Rules:
       }
     } catch (error) {
       console.error('Failed to parse AI response JSON:', { error, text });
-      // If parsing fails, return no fills
     }
 
-    // Apply auto-fills to contract content
+    // Apply AI fills to contract content
     let updatedContent = contract.content as TipTapNode;
     for (const p of placeholders) {
       if (p.filled && p.value) {
@@ -192,7 +207,7 @@ Rules:
       });
     }
 
-    // Build comments for all placeholders (both filled and unfilled)
+    // Build comments for all placeholders (filled and unfilled)
     const comments: CommentData[] = placeholders.map((p) => ({
       id: Math.random().toString(36).slice(2),
       selectedText: p.placeholder,
@@ -202,6 +217,10 @@ Rules:
       authorName: 'AI Assistant',
       authorColor: '#7c3aed',
       timestamp: Date.now(),
+      isAiFilled: p.filled,
+      aiValue: p.filled ? (p.value ?? undefined) : undefined,
+      aiDescription: p.description,
+      aiSourceField: p.sourceField ?? undefined,
     }));
 
     return NextResponse.json({ data: { comments, filledCount: placeholders.filter((p) => p.filled).length, totalCount: placeholders.length } });

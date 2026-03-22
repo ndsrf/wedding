@@ -838,15 +838,16 @@ model Customer {
 }
 
 model ContractTemplate {
-  id         String         @id @default(uuid())
-  planner_id String
-  name       String
-  content    Json           // TipTap ProseMirror JSON
-  is_default Boolean        @default(false)
-  created_at DateTime       @default(now())
-  updated_at DateTime       @updatedAt
-  planner    WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
-  contracts  Contract[]
+  id                String         @id @default(uuid())
+  planner_id        String
+  name              String
+  content           Json           // TipTap ProseMirror JSON
+  is_default        Boolean        @default(false)
+  placeholder_rules Json?          // Array of {placeholder, description, rememberedAt}
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  planner           WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  contracts         Contract[]
 
   @@index([planner_id])
   @@map("contract_templates")

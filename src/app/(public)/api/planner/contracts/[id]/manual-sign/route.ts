@@ -158,7 +158,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    // eslint-disable-next-line prefer-const
     let buffer: Buffer = Buffer.from(arrayBuffer);
 
     if (buffer.byteLength > MAX_BYTES) {

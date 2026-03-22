@@ -185,6 +185,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   const [saved, setSaved] = useState(false);
   const [quote, setQuote] = useState<QuoteRef | null>(null);
   const [contractCustomerId, setContractCustomerId] = useState<string | null>(null);
+  const [contractTemplateId, setContractTemplateId] = useState<string | null>(null);
   const [showCreateWedding, setShowCreateWedding] = useState(false);
 
   // Shared Y.Doc: editor + comments sidebar share the same Liveblocks connection
@@ -215,19 +216,45 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
 
   useEffect(() => {
     if (!shareToken) return;
-    fetch(`/api/planner/contracts/shared/${shareToken}`)
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.error) setError(res.error);
-        else setContract(res.data);
-      })
-      .catch(() => setError('Failed to load contract'))
-      .finally(() => setLoading(false));
 
+    // Fire-and-forget planner name fetch
     fetch('/api/planner/me')
       .then((r) => (r.ok ? r.json() : null))
       .then((res) => { if (res?.name) setPlannerName(res.name); })
       .catch(() => {});
+
+    // Sequential: fetch contract → silently apply template rules → init editor
+    (async () => {
+      try {
+        const r = await fetch(`/api/planner/contracts/shared/${shareToken}`);
+        const res = await r.json();
+        if (res.error) { setError(res.error); return; }
+
+        let contractData = res.data as ContractData;
+
+        // Apply remembered placeholder rules before the editor initialises so the
+        // filled content is what gets rendered — no comments generated.
+        if (contractData?.id) {
+          try {
+            const fillRes = await fetch(`/api/planner/contracts/${contractData.id}/apply-template-rules`, { method: 'POST' });
+            if (fillRes.ok) {
+              const fillJson = await fillRes.json();
+              if (fillJson.data?.filledCount > 0 && fillJson.data?.content) {
+                contractData = { ...contractData, content: fillJson.data.content };
+              }
+            }
+          } catch {
+            // Non-fatal — editor falls back to the un-filled content
+          }
+        }
+
+        setContract(contractData);
+      } catch {
+        setError('Failed to load contract');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [shareToken]);
 
   // Once we have the contract id, fetch the planner-authenticated details to get quote data
@@ -238,6 +265,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       .then((res) => {
         if (res?.data?.quote) setQuote(res.data.quote);
         if (res?.data?.customer_id) setContractCustomerId(res.data.customer_id);
+        if (res?.data?.contract_template_id) setContractTemplateId(res.data.contract_template_id);
       })
       .catch(() => {});
   }, [contract?.id]);
@@ -342,6 +370,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
               authorName={plannerName}
               authorColor="#e11d48"
               isPlanner
+              contractTemplateId={contractTemplateId}
             />
           </div>
         </div>

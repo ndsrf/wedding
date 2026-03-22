@@ -14,10 +14,8 @@ export async function register() {
 
     registerOTel({
       serviceName: 'wedding-management-app',
-      instrumentations: [
-        new PrismaInstrumentation() as any,
-        new UndiciInstrumentation() as any,
-      ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      instrumentations: [new PrismaInstrumentation() as any, new UndiciInstrumentation() as any],
       // Send traces to HyperDX when API key is configured.
       // @vercel/otel also respects OTEL_EXPORTER_OTLP_ENDPOINT /
       // OTEL_EXPORTER_OTLP_HEADERS env vars as an alternative.

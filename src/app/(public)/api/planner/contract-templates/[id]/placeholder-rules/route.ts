@@ -1,0 +1,63 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { prisma } from '@/lib/db/prisma';
+import { requireRole } from '@/lib/auth/middleware';
+
+/**
+ * A remembered placeholder fill rule stored on the contract template.
+ * `sourceField` is a machine-readable key that the fill-with-ai route uses
+ * to resolve the value programmatically from contract/quote/customer data,
+ * without calling the AI again.
+ */
+export interface PlaceholderRule {
+  placeholder: string;
+  description: string;
+  /** One of the known source field keys, or undefined for unmappable placeholders */
+  sourceField?: string;
+  rememberedAt: string;
+}
+
+const bodySchema = z.object({
+  placeholder: z.string().min(1),
+  description: z.string(),
+  sourceField: z.string().optional(),
+});
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await requireRole('planner');
+    if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { id } = await params;
+
+    const template = await prisma.contractTemplate.findFirst({
+      where: { id, planner_id: user.planner_id },
+    });
+    if (!template) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    const body = await request.json();
+    const { placeholder, description, sourceField } = bodySchema.parse(body);
+
+    const existing = (template.placeholder_rules ?? []) as unknown as PlaceholderRule[];
+    // Upsert: replace existing rule for the same placeholder, or add new
+    const filtered = existing.filter((r) => r.placeholder !== placeholder);
+    const newRule: PlaceholderRule = {
+      placeholder,
+      description,
+      ...(sourceField ? { sourceField } : {}),
+      rememberedAt: new Date().toISOString(),
+    };
+    const updated = [...filtered, newRule];
+
+    const result = await prisma.contractTemplate.update({
+      where: { id },
+      data: { placeholder_rules: updated as unknown as import('@prisma/client').Prisma.InputJsonValue },
+    });
+
+    return NextResponse.json({ data: result.placeholder_rules });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.issues }, { status: 422 });
+    }
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
