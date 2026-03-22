@@ -127,22 +127,19 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   async function handleEdit(data: Record<string, unknown>) {
     if (!editingId) return;
     const targetId = editingId;
+    setEditingId(null);
+    setView('list');
     const res = await fetch(`/api/planner/invoices/${targetId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    setEditingId(null);
-    setView('list');
     if (res.ok) {
-      // Regenerate PDF immediately so the fresh version is ready to download
-      setGenerating(targetId);
-      const pdfRes = await fetch(`/api/planner/invoices/${targetId}/generate-pdf?force=true`, { method: 'POST' });
-      if (pdfRes.ok) {
-        const { data: pdfData } = await pdfRes.json();
-        setInvoices((prev) => prev.map((i) => i.id === targetId ? { ...i, pdf_url: pdfData?.pdf_url ?? null } : i));
+      const { data: updated } = await res.json();
+      // PATCH already regenerated the PDF — update local state directly
+      if (updated) {
+        setInvoices((prev) => prev.map((i) => i.id === targetId ? { ...i, ...updated } : i));
       }
-      setGenerating(null);
     }
     fetchData();
   }

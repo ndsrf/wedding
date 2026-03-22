@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import { del } from '@vercel/blob';
+import { del, put } from '@vercel/blob';
+import { renderToBuffer } from '@react-pdf/renderer';
+import { InvoicePDF } from '@/lib/pdf/invoice-pdf';
+import React from 'react';
 
 const lineItemSchema = z.object({
   name: z.string().min(1),
@@ -100,12 +103,42 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(invoiceData.due_date !== undefined && { due_date: invoiceData.due_date ? new Date(invoiceData.due_date) : null }),
           ...(invoiceData.issued_at !== undefined && { issued_at: invoiceData.issued_at ? new Date(invoiceData.issued_at) : null }),
           ...(invoiceData.status !== undefined && { status: invoiceData.status }),
-          // Clear cached PDF when content changes
           ...(contentChanged && { pdf_url: null }),
         },
-        include: { line_items: true, payments: true },
+        include: { line_items: true, payments: { orderBy: { payment_date: 'desc' } }, quote: { select: { id: true, couple_names: true } } },
       });
     });
+
+    // Regenerate PDF immediately when content changed so the client always gets fresh data
+    if (contentChanged) {
+      try {
+        const planner = await prisma.weddingPlanner.findUnique({
+          where: { id: user.planner_id },
+          select: { name: true, email: true },
+        });
+        const buffer = await renderToBuffer(
+          React.createElement(InvoicePDF, {
+            invoice: updated,
+            plannerName: planner?.name ?? 'Wedding Planner',
+            plannerEmail: planner?.email,
+          }) as never,
+        );
+        const blob = await put(`invoices/${id}/invoice.pdf`, buffer, {
+          access: 'public',
+          contentType: 'application/pdf',
+          allowOverwrite: true,
+        });
+        const withPdf = await prisma.invoice.update({
+          where: { id },
+          data: { pdf_url: blob.url },
+          include: { line_items: true, payments: { orderBy: { payment_date: 'desc' } }, quote: { select: { id: true, couple_names: true } } },
+        });
+        return NextResponse.json({ data: withPdf });
+      } catch (pdfErr) {
+        console.error('PDF regeneration failed after PATCH:', pdfErr);
+        // Return the updated invoice without PDF — client will show Generate PDF button
+      }
+    }
 
     return NextResponse.json({ data: updated });
   } catch (error) {
