@@ -79,40 +79,43 @@ export async function createDocuSealSubmission(params: {
     dataUriPrefix: fileDataUri.slice(0, 40),
   });
 
+  // DocuSeal /templates/pdf: fields must be nested inside `documents`, not `submitters`.
+  // Each field needs a `role` property that matches a submitter name.
+  const templateFields = [
+    {
+      name: 'Signature',
+      type: 'signature',
+      role: 'Client',
+      required: true,
+      areas: [
+        { x: 0.52, y: 0.25, w: 0.38, h: 0.1, page: params.signaturePage },
+      ],
+    },
+    {
+      name: 'Date',
+      type: 'date',
+      role: 'Client',
+      required: false,
+      areas: [
+        { x: 0.52, y: 0.37, w: 0.25, h: 0.05, page: params.signaturePage },
+      ],
+    },
+  ];
+
   const templateBody = {
     name: params.title,
     documents: [
       {
         name: `${params.title}.pdf`,
         file: fileDataUri,
+        fields: templateFields,
       },
     ],
     submitters: [
-      {
-        name: 'Client',
-        fields: [
-          {
-            name: 'Signature',
-            type: 'signature',
-            required: true,
-            areas: [
-              { x: 0.52, y: 0.25, w: 0.38, h: 0.1, page: params.signaturePage },
-            ],
-          },
-          {
-            name: 'Date',
-            type: 'date',
-            required: false,
-            areas: [
-              { x: 0.52, y: 0.37, w: 0.25, h: 0.05, page: params.signaturePage },
-            ],
-          },
-        ],
-      },
+      { name: 'Client' },
     ],
   };
 
-  const submitter0 = templateBody.submitters[0];
   logDocuSeal('POST /templates/pdf', {
     url: `${base}/templates/pdf`,
     document: {
@@ -120,11 +123,8 @@ export async function createDocuSealSubmission(params: {
       fileSet: !!templateBody.documents[0].file,
       fileLength: templateBody.documents[0].file.length,
       filePrefix: templateBody.documents[0].file.slice(0, 40),
-    },
-    submitter: {
-      name: submitter0.name,
-      fieldCount: submitter0.fields.length,
-      fieldNames: submitter0.fields.map((f) => f.name),
+      fieldCount: templateFields.length,
+      fieldNames: templateFields.map((f) => f.name),
     },
   });
 
