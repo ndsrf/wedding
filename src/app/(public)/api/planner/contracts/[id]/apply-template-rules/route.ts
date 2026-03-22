@@ -97,11 +97,11 @@ function resolveSourceField(sourceField: string, ctx: ResolveContext): string | 
  * placeholders are no longer present in the text so replaceAll is a no-op).
  * Does not modify SIGNED or CANCELLED contracts.
  */
-export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole('planner');
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { id } = params;
+    const { id } = await params;
 
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },

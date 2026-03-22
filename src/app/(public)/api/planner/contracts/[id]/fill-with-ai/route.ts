@@ -36,11 +36,11 @@ function replacePlaceholder(node: TipTapNode, placeholder: string, value: string
 // Route handler
 // ---------------------------------------------------------------------------
 
-export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole('planner');
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { id } = params;
+    const { id } = await params;
 
     // Load contract with related data
     const contract = await prisma.contract.findFirst({
