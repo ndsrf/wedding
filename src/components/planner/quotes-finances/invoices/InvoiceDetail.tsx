@@ -147,12 +147,24 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
               </tbody>
             </table>
 
-            <div className="mt-4 pt-4 border-t border-gray-100 text-right space-y-1">
+            <div className="mt-4 pt-4 border-t border-gray-100 space-y-1">
               <div className="flex justify-end gap-8 text-sm">
                 <span className="text-gray-500">Subtotal</span>
-                <span className="font-medium w-24 text-right">{fmt(invoice.total)}</span>
+                <span className="font-medium w-24 text-right">{fmt(invoice.subtotal)}</span>
               </div>
-              <div className="flex justify-end gap-8 text-base font-bold">
+              {invoice.discount !== null && Number(invoice.discount) > 0 && (
+                <div className="flex justify-end gap-8 text-sm">
+                  <span className="text-gray-500">Discount</span>
+                  <span className="font-medium w-24 text-right text-green-600">- {fmt(invoice.discount)}</span>
+                </div>
+              )}
+              {invoice.tax_rate !== null && Number(invoice.tax_rate) > 0 && (
+                <div className="flex justify-end gap-8 text-sm">
+                  <span className="text-gray-500">Tax ({Number(invoice.tax_rate)}%)</span>
+                  <span className="font-medium w-24 text-right">{fmt(invoice.tax_amount ?? 0)}</span>
+                </div>
+              )}
+              <div className="flex justify-end gap-8 text-base font-bold pt-1 border-t border-gray-100">
                 <span>Total</span>
                 <span className="text-rose-600 w-24 text-right">{fmt(invoice.total)}</span>
               </div>

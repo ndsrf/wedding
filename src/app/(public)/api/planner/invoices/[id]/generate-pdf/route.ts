@@ -6,11 +6,12 @@ import { InvoicePDF } from '@/lib/pdf/invoice-pdf';
 import { put } from '@vercel/blob';
 import React from 'react';
 
-export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole('planner');
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
+    const force = new URL(request.url).searchParams.get('force') === 'true';
 
     const invoice = await prisma.invoice.findFirst({
       where: { id, planner_id: user.planner_id },
@@ -18,8 +19,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     });
     if (!invoice) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // If PDF already exists and invoice hasn't changed, return the existing URL
-    if (invoice.pdf_url) {
+    // Return cached PDF unless force-regeneration is requested
+    if (invoice.pdf_url && !force) {
       return NextResponse.json({ data: { pdf_url: invoice.pdf_url, invoice } });
     }
 

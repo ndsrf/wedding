@@ -12,8 +12,10 @@ export interface Invoice {
   client_email: string | null;
   description: string | null;
   currency: string;
+  subtotal: string | number;
   discount: string | number | null;
   tax_rate: string | number | null;
+  tax_amount: string | number | null;
   due_date: string | null;
   issued_at: string | null;
   total: string | number;
@@ -135,7 +137,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     if (res.ok) {
       // Regenerate PDF immediately so the fresh version is ready to download
       setGenerating(targetId);
-      const pdfRes = await fetch(`/api/planner/invoices/${targetId}/generate-pdf`, { method: 'POST' });
+      const pdfRes = await fetch(`/api/planner/invoices/${targetId}/generate-pdf?force=true`, { method: 'POST' });
       if (pdfRes.ok) {
         const { data: pdfData } = await pdfRes.json();
         setInvoices((prev) => prev.map((i) => i.id === targetId ? { ...i, pdf_url: pdfData?.pdf_url ?? null } : i));
