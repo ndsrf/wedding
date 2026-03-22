@@ -26,6 +26,14 @@ model WeddingPlanner {
   last_login_provider AuthProvider?
   preferred_language  Language                   @default(EN)
   logo_url            String?
+  legal_name          String?
+  vat_number          String?
+  address             String?
+  phone               String?
+  whatsapp            String?
+  instagram           String?
+  website             String?
+  signature_url       String?
   enabled             Boolean                    @default(true)
   subscription_status SubscriptionStatus         @default(ACTIVE)
   created_at          DateTime                   @default(now())

@@ -1,38 +1,53 @@
 
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
   page: {
     fontFamily: 'Helvetica',
     fontSize: 11,
-    paddingTop: 56,
+    paddingTop: 80,
     paddingBottom: 56,
     paddingHorizontal: 56,
     color: '#1a1a1a',
     lineHeight: 1.6,
   },
-  header: {
+  // Fixed header shown on every content page
+  pageHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 56,
+    paddingTop: 16,
+    paddingBottom: 12,
     borderBottomWidth: 2,
     borderBottomColor: '#e11d48',
-    paddingBottom: 16,
-    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#ffffff',
+  },
+  pageHeaderLeft: {
+    flexDirection: 'column',
+    gap: 2,
+  },
+  logo: {
+    maxWidth: 100,
+    maxHeight: 36,
+    objectFit: 'contain',
   },
   brandName: {
-    fontSize: 20,
-    fontFamily: 'Helvetica-Bold',
-    color: '#e11d48',
-    marginBottom: 4,
-  },
-  contractTitle: {
     fontSize: 16,
     fontFamily: 'Helvetica-Bold',
-    color: '#1a1a1a',
+    color: '#e11d48',
+  },
+  contractTitle: {
+    fontSize: 11,
+    color: '#6b7280',
   },
   contractMeta: {
-    flexDirection: 'row',
-    gap: 32,
-    marginTop: 8,
+    textAlign: 'right',
   },
   metaItem: { fontSize: 9, color: '#6b7280' },
   metaBold: { fontFamily: 'Helvetica-Bold' },
@@ -123,6 +138,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#9ca3af',
     marginBottom: 6,
     height: 48,
+  },
+  sigImage: {
+    maxWidth: 180,
+    maxHeight: 56,
+    objectFit: 'contain',
+    marginBottom: 6,
   },
   sigDateLabel: {
     fontSize: 9,
@@ -237,26 +258,45 @@ function renderNode(node: DocNode, index: number): React.ReactNode {
   }
 }
 
+export interface CompanyInfo {
+  name: string;
+  email?: string;
+  logoUrl?: string;
+  legalName?: string;
+  vatNumber?: string;
+  address?: string;
+  phone?: string;
+  website?: string;
+  signatureUrl?: string;
+}
+
 interface ContractPDFProps {
   title: string;
   content: { type: string; content?: DocNode[] };
-  plannerName: string;
+  company: CompanyInfo;
   signerName?: string;
   createdAt?: Date;
 }
 
-export function ContractPDF({ title, content, plannerName, signerName, createdAt }: ContractPDFProps) {
+export function ContractPDF({ title, content, company, signerName, createdAt }: ContractPDFProps) {
   const nodes = content?.content ?? [];
 
   return (
     <Document>
       {/* ── Page 1+: Contract content ─────────────────────────────────────── */}
       <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.brandName}>{plannerName}</Text>
-          <Text style={styles.contractTitle}>{title}</Text>
-          <View style={styles.contractMeta}>
-            {createdAt && (
+        {/* Fixed header on every content page */}
+        <View style={styles.pageHeader} fixed>
+          <View style={styles.pageHeaderLeft}>
+            {company.logoUrl ? (
+              <Image src={company.logoUrl} style={styles.logo} />
+            ) : (
+              <Text style={styles.brandName}>{company.name}</Text>
+            )}
+            <Text style={styles.contractTitle}>{title}</Text>
+          </View>
+          {createdAt && (
+            <View style={styles.contractMeta}>
               <Text style={styles.metaItem}>
                 Date:{' '}
                 <Text style={styles.metaBold}>
@@ -267,15 +307,15 @@ export function ContractPDF({ title, content, plannerName, signerName, createdAt
                   })}
                 </Text>
               </Text>
-            )}
-          </View>
+            </View>
+          )}
         </View>
 
         <View style={styles.content}>
           {nodes.map((node, i) => renderNode(node, i))}
         </View>
 
-        <Text style={styles.footer}>
+        <Text style={styles.footer} fixed>
           This document is confidential and constitutes a binding agreement upon signature by both parties.
         </Text>
       </Page>
@@ -288,17 +328,32 @@ export function ContractPDF({ title, content, plannerName, signerName, createdAt
        * For manual/offline signing, the lines and labels serve as guidance.
        */}
       <Page size="A4" style={styles.signaturePage}>
+        {/* Header on signature page too */}
+        <View style={styles.pageHeader}>
+          <View style={styles.pageHeaderLeft}>
+            {company.logoUrl ? (
+              <Image src={company.logoUrl} style={styles.logo} />
+            ) : (
+              <Text style={styles.brandName}>{company.name}</Text>
+            )}
+          </View>
+        </View>
+
         <Text style={styles.sigPageTitle}>Contract Signatures</Text>
         <Text style={styles.sigPageSubtitle}>
           By signing below, both parties confirm their agreement to all terms and conditions set out in this contract.
         </Text>
 
         <View style={styles.sigRow}>
-          {/* Left: Planner signature (static — signed offline or pre-signed) */}
+          {/* Left: Planner signature (static — pre-signed or stamped) */}
           <View style={styles.sigBlock}>
             <Text style={styles.sigRole}>Wedding Planner</Text>
-            <Text style={styles.sigName}>{plannerName}</Text>
-            <View style={styles.sigLine} />
+            <Text style={styles.sigName}>{company.legalName ?? company.name}</Text>
+            {company.signatureUrl ? (
+              <Image src={company.signatureUrl} style={styles.sigImage} />
+            ) : (
+              <View style={styles.sigLine} />
+            )}
             <Text style={styles.sigDateLabel}>Signature &amp; Date</Text>
           </View>
 
