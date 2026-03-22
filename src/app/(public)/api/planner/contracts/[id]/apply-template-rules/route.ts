@@ -10,7 +10,6 @@ const PlaceholderRuleSchema = z.object({
   rememberedAt: z.string(),
 });
 
-type PlaceholderRule = z.infer<typeof PlaceholderRuleSchema>;
 
 // ---------------------------------------------------------------------------
 // TipTap helpers

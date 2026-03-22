@@ -15,8 +15,8 @@ export async function register() {
     registerOTel({
       serviceName: 'wedding-management-app',
       instrumentations: [
-        new PrismaInstrumentation() as any,
-        new UndiciInstrumentation() as any,
+        new PrismaInstrumentation() as unknown,
+        new UndiciInstrumentation() as unknown,
       ],
       // Send traces to HyperDX when API key is configured.
       // @vercel/otel also respects OTEL_EXPORTER_OTLP_ENDPOINT /
