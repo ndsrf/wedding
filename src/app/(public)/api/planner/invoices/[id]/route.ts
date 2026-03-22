@@ -64,18 +64,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { line_items: lineItems, ...invoiceData } = data;
 
     // Clear cached PDF when content changes
-    const contentChanged = lineItems !== undefined ||
-      invoiceData.client_name !== undefined ||
-      invoiceData.client_email !== undefined ||
-      invoiceData.description !== undefined ||
-      invoiceData.currency !== undefined ||
-      invoiceData.subtotal !== undefined ||
-      invoiceData.discount !== undefined ||
-      invoiceData.tax_rate !== undefined ||
-      invoiceData.tax_amount !== undefined ||
-      invoiceData.total !== undefined ||
-      invoiceData.due_date !== undefined ||
-      invoiceData.issued_at !== undefined;
+    const pdfFields = [
+      'client_name', 'client_email', 'description', 'currency', 'subtotal',
+      'discount', 'tax_rate', 'tax_amount', 'total', 'due_date', 'issued_at'
+    ];
+    const contentChanged = lineItems !== undefined || pdfFields.some(field => field in invoiceData);
 
     const updated = await prisma.$transaction(async (tx) => {
       if (lineItems !== undefined) {
