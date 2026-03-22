@@ -37,7 +37,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json();
     const { placeholder, description, sourceField } = bodySchema.parse(body);
 
-    const existing = (template.placeholder_rules ?? []) as PlaceholderRule[];
+    const existing = (template.placeholder_rules ?? []) as unknown as PlaceholderRule[];
     // Upsert: replace existing rule for the same placeholder, or add new
     const filtered = existing.filter((r) => r.placeholder !== placeholder);
     const newRule: PlaceholderRule = {
