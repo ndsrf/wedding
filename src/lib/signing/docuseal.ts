@@ -64,14 +64,19 @@ export async function createDocuSealSubmission(params: {
     signerName: params.signerName,
   });
 
-  // Step 1: Create a one-time template from the PDF (base64-encoded), with signature field defined
-  // Use Buffer.from() to handle both Buffer and Uint8Array returns from renderToBuffer
-  const base64Pdf = Buffer.from(params.pdfBuffer).toString('base64');
+  // Step 1: Create a one-time template from the PDF, with signature field defined
+  // Use Buffer.from() to handle both Buffer and Uint8Array returns from renderToBuffer.
+  // DocuSeal requires a data URI for the file field, not raw base64.
+  const rawBuffer = Buffer.from(params.pdfBuffer);
+  if (rawBuffer.length === 0) {
+    throw new Error('PDF buffer is empty — cannot send to DocuSeal');
+  }
+  const fileDataUri = `data:application/pdf;base64,${rawBuffer.toString('base64')}`;
   logDocuSeal('PDF buffer info', {
     inputType: Object.prototype.toString.call(params.pdfBuffer),
-    inputByteLength: params.pdfBuffer.byteLength,
-    base64Length: base64Pdf.length,
-    base64Prefix: base64Pdf.slice(0, 20),
+    byteLength: rawBuffer.length,
+    dataUriLength: fileDataUri.length,
+    dataUriPrefix: fileDataUri.slice(0, 40),
   });
 
   const templateBody = {
@@ -79,7 +84,7 @@ export async function createDocuSealSubmission(params: {
     documents: [
       {
         name: `${params.title}.pdf`,
-        file: base64Pdf,
+        file: fileDataUri,
       },
     ],
     submitters: [
