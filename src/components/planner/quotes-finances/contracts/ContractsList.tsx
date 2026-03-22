@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
+import { FilterBar } from '../FilterBar';
 
 export interface InvoicePrefillData {
   customer_id?: string | null;
@@ -71,6 +72,8 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const [manualSigningId, setManualSigningId] = useState<string | null>(null);
   const manualSignInputRef = useRef<HTMLInputElement | null>(null);
   const [manualSignTarget, setManualSignTarget] = useState<string | null>(null);
+  const [nameFilter, setNameFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   async function fetchContracts() {
     const res = await fetch('/api/planner/contracts');
@@ -249,6 +252,22 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
     </div>
   );
 
+  const filteredContracts = contracts.filter((c) => {
+    const nameMatch = nameFilter.trim() === '' ||
+      c.title.toLowerCase().includes(nameFilter.toLowerCase()) ||
+      (c.customer?.name ?? '').toLowerCase().includes(nameFilter.toLowerCase());
+    const statusMatch = statusFilter.length === 0 || statusFilter.includes(c.status);
+    return nameMatch && statusMatch;
+  });
+
+  const CONTRACT_STATUS_OPTIONS = [
+    { value: 'DRAFT', label: 'Draft' },
+    { value: 'SHARED', label: 'Shared' },
+    { value: 'SIGNING', label: 'Awaiting Signature' },
+    { value: 'SIGNED', label: 'Signed' },
+    { value: 'CANCELLED', label: 'Cancelled' },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Hidden file input for manual signing */}
@@ -267,19 +286,37 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
           <p className="text-xs text-gray-400">Contracts are created from accepted quotes</p>
         </div>
 
-        {contracts.length === 0 ? (
+        <FilterBar
+          nameValue={nameFilter}
+          onNameChange={setNameFilter}
+          namePlaceholder="Search by title or client…"
+          statusOptions={CONTRACT_STATUS_OPTIONS}
+          selectedStatuses={statusFilter}
+          onStatusChange={setStatusFilter}
+        />
+
+        {filteredContracts.length === 0 ? (
           <div className="bg-white rounded-xl border border-dashed border-gray-200 p-12 text-center">
             <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <svg className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
               </svg>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900">No contracts yet</h3>
-            <p className="text-xs text-gray-500 mt-1">Accept a quote and create a contract from it to get started.</p>
+            {nameFilter || statusFilter.length > 0 ? (
+              <>
+                <h3 className="text-sm font-semibold text-gray-900">No contracts match your filters</h3>
+                <p className="text-xs text-gray-500 mt-1">Try adjusting your search or status filters.</p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-sm font-semibold text-gray-900">No contracts yet</h3>
+                <p className="text-xs text-gray-500 mt-1">Accept a quote and create a contract from it to get started.</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
-            {contracts.map((contract) => (
+            {filteredContracts.map((contract) => (
               <div key={contract.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4">
