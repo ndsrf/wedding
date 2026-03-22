@@ -146,7 +146,8 @@ function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps)
       if (!res.ok) throw new Error('Failed to update client');
       const json = await res.json();
       onUpdated({ ...customer, ...json.data });
-    } catch {
+    } catch (error) {
+      console.error('Failed to update client:', error);
       setError('Failed to update client. Please try again.');
     } finally {
       setSaving(false);
