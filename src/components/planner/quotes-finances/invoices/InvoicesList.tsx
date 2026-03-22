@@ -124,15 +124,24 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
   async function handleEdit(data: Record<string, unknown>) {
     if (!editingId) return;
-    await fetch(`/api/planner/invoices/${editingId}`, {
+    const targetId = editingId;
+    const res = await fetch(`/api/planner/invoices/${targetId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    // Clear cached PDF in local state — server already clears it on content change
-    setInvoices((prev) => prev.map((i) => i.id === editingId ? { ...i, pdf_url: null } : i));
     setEditingId(null);
     setView('list');
+    if (res.ok) {
+      // Regenerate PDF immediately so the fresh version is ready to download
+      setGenerating(targetId);
+      const pdfRes = await fetch(`/api/planner/invoices/${targetId}/generate-pdf`, { method: 'POST' });
+      if (pdfRes.ok) {
+        const { data: pdfData } = await pdfRes.json();
+        setInvoices((prev) => prev.map((i) => i.id === targetId ? { ...i, pdf_url: pdfData?.pdf_url ?? null } : i));
+      }
+      setGenerating(null);
+    }
     fetchData();
   }
 
@@ -389,7 +398,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                 </div>
 
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
-                  {isDraft ? (
+                  {isDraft && (
                     <button
                       onClick={() => handleOpenEdit(invoice)}
                       className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
@@ -399,14 +408,13 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                       </svg>
                       Edit
                     </button>
-                  ) : (
-                    <button
-                      onClick={() => { setSelectedId(invoice.id); setView('detail'); }}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      View &amp; Payments
-                    </button>
                   )}
+                  <button
+                    onClick={() => { setSelectedId(invoice.id); setView('detail'); }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    View &amp; Payments
+                  </button>
                   <button
                     onClick={() => handleGeneratePdf(invoice)}
                     disabled={generating === invoice.id}
