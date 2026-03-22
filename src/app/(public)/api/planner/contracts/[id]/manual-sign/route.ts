@@ -74,7 +74,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Convert images to PDF so the signed document is always a PDF
     if (isImage) {
-      buffer = await convertImageToPdf(buffer, file.type);
+      buffer = await convertImageToPdf(buffer, file.type) as Buffer;
       contentType = 'application/pdf';
     }
 
