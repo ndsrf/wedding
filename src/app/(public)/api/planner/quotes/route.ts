@@ -18,6 +18,7 @@ const createQuoteSchema = z.object({
   location: z.string().optional().nullable(),
   client_email: z.string().email().optional().nullable(),
   client_phone: z.string().optional().nullable(),
+  client_id_number: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   currency: z.string().default('EUR'),
   subtotal: z.number().min(0),
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
           name: data.couple_names,
           email: data.client_email || null,
           phone: data.client_phone || null,
+          id_number: data.client_id_number || null,
         },
       });
       customerId = newCustomer.id;
