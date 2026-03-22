@@ -171,7 +171,8 @@ Rules:
         const parsed = JSON.parse(jsonMatch[0]);
         placeholders = parsed.placeholders ?? [];
       }
-    } catch {
+    } catch (error) {
+      console.error('Failed to parse AI response JSON:', { error, text });
       // If parsing fails, return no fills
     }
 
