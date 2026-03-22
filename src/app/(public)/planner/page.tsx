@@ -429,6 +429,22 @@ export default async function PlannerDashboardPage() {
             </Link>
 
             <Link
+              href="/planner/clients"
+              prefetch={false}
+              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-teal-200 hover:bg-teal-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center group-hover:bg-teal-100 transition-colors">
+                <svg className="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Clients</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Manage clients, quotes, contracts & invoices</p>
+              </div>
+            </Link>
+
+            <Link
               href="/planner/company-profile"
               prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"

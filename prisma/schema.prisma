@@ -821,6 +821,7 @@ model Customer {
   name       String
   email      String?
   phone      String?
+  id_number  String?
   notes      String?        @db.Text
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
