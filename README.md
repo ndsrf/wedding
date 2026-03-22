@@ -28,7 +28,7 @@ The Wedding Management App enables wedding planners to manage multiple weddings 
 - **Languages**: TypeScript, multi-language i18n support
 - **PDF generation**: `@react-pdf/renderer` (server-side)
 - **Real-time collaboration**: TipTap rich-text editor + Liveblocks YJS (hosted WebSocket backend)
-- **eSignature**: Dropbox Sign (HelloSign) API
+- **eSignature**: DocuSeal API (self-hosted or cloud)
 
 ## Getting Started
 
@@ -119,7 +119,7 @@ Once a contract is created, the planner shares a unique link with the client. Bo
 - Full formatting toolbar (Bold, Italic, Underline, H1–H3, lists, text align)
 - Client access via share token — no account required
 
-After finalisation the planner generates a PDF and sends it for electronic signing via **Dropbox Sign**.
+After finalisation the planner generates a PDF and sends it for electronic signing via **DocuSeal**. DocuSeal automatically emails the client a signing link; once signed, DocuSeal fires a webhook that marks the contract `SIGNED` and stores the signed PDF URL.
 
 Contract status lifecycle:
 ```
@@ -130,9 +130,9 @@ DRAFT → SHARED → SIGNING → SIGNED / CANCELLED
 - `GET/PATCH /api/planner/contracts/[id]`
 - `POST /api/planner/contracts/[id]/liveblocks-auth` — issues Liveblocks room token (supports both planner auth and client share token)
 - `POST /api/planner/contracts/[id]/generate-pdf`
-- `POST /api/planner/contracts/[id]/send-for-signing` — renders PDF → Vercel Blob → Dropbox Sign signature request
+- `POST /api/planner/contracts/[id]/send-for-signing` — renders PDF → creates DocuSeal template + submission → emails client signing link
 - `GET /api/planner/contracts/shared/[shareToken]` — public, no auth required
-- `POST /api/webhooks/dropbox-sign` — receives `signature_request_signed` event and marks contract `SIGNED`
+- `POST /api/webhooks/docuseal` — receives `submission.completed` / `form.completed` events and marks contract `SIGNED`
 
 **Client-facing page**: `/planner/contracts/[shareToken]`
 
@@ -157,11 +157,21 @@ Each invoice shows a payment progress bar and remaining balance. Generate a PDF 
 
 ### Required Environment Variables
 
-| Variable | Description |
-|---|---|
-| `LIVEBLOCKS_SECRET` | Secret key from [liveblocks.io](https://liveblocks.io) dashboard (Settings → API Keys) |
-| `DROPBOX_SIGN_API_KEY` | API key from [app.hellosign.com](https://app.hellosign.com) → API → API Settings |
-| `DROPBOX_SIGN_CLIENT_ID` | App client ID for embedded signing widget (optional — omit to use email-redirect flow) |
+| Variable | Required | Description |
+|---|---|---|
+| `LIVEBLOCKS_SECRET` | Yes | Secret key from [liveblocks.io](https://liveblocks.io) dashboard (Settings → API Keys) |
+| `DOCUSEAL_API_KEY` | Yes | API key from your DocuSeal dashboard → Settings → API |
+| `DOCUSEAL_API_URL` | No | Override the DocuSeal API base URL for self-hosted instances (default: `https://api.docuseal.com`) |
+| `DOCUSEAL_WEBHOOK_SECRET` | No | Shared secret for verifying webhook HMAC-SHA256 signatures (recommended in production) |
+
+### DocuSeal Webhook Setup
+
+1. In your DocuSeal dashboard go to **Settings → Webhooks → Add Webhook**.
+2. Set the URL to `https://<your-domain>/api/webhooks/docuseal`.
+3. Subscribe to the following events:
+   - `submission.completed` — fires when all signers have signed (primary event)
+   - `form.completed` — fires when an individual signer completes their form (fallback)
+4. Optionally set a **Signing Secret** and copy the value into `DOCUSEAL_WEBHOOK_SECRET`. When set, every incoming webhook is verified against an HMAC-SHA256 signature in the `x-docuseal-signature` header; requests that fail verification are rejected with `401`.
 
 ### New Database Models
 
