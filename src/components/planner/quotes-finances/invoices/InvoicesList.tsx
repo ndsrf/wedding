@@ -126,21 +126,15 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
   async function handleEdit(data: Record<string, unknown>) {
     if (!editingId) return;
-    const targetId = editingId;
-    setEditingId(null);
-    setView('list');
-    const res = await fetch(`/api/planner/invoices/${targetId}`, {
+    await fetch(`/api/planner/invoices/${editingId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (res.ok) {
-      const { data: updated } = await res.json();
-      // PATCH already regenerated the PDF — update local state directly
-      if (updated) {
-        setInvoices((prev) => prev.map((i) => i.id === targetId ? { ...i, ...updated } : i));
-      }
-    }
+    // Immediately clear pdf_url in local state so the UI reflects that it needs regeneration
+    setInvoices((prev) => prev.map((i) => i.id === editingId ? { ...i, pdf_url: null } : i));
+    setEditingId(null);
+    setView('list');
     fetchData();
   }
 
@@ -164,16 +158,17 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   }
 
   async function handleGeneratePdf(invoice: Invoice) {
+    // If PDF exists and hasn't been cleared, just open it
     if (invoice.pdf_url) {
       window.open(invoice.pdf_url, '_blank');
       return;
     }
-
+    // Otherwise generate fresh PDF (fetches latest data from DB)
     setGenerating(invoice.id);
     const res = await fetch(`/api/planner/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
     if (res.ok) {
       const { data } = await res.json();
-      if (data?.pdf_url) window.open(data.pdf_url, '_blank');
+      window.open(data.pdf_url, '_blank');
       fetchData();
     }
     setGenerating(null);
