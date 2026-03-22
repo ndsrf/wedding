@@ -102,6 +102,10 @@ export function ContractCommentsSidebar({
   // Whether all visible comments are selected
   const allChecked = filtered.length > 0 && filtered.every((c) => selectedIds.has(c.id));
   const someChecked = filtered.some((c) => selectedIds.has(c.id));
+  const selectedVisibleCount = useMemo(() => {
+    const filteredIds = new Set(filtered.map((c) => c.id));
+    return [...selectedIds].filter((id) => filteredIds.has(id)).length;
+  }, [selectedIds, filtered]);
 
   function handleAddComment() {
     if (!newComment.trim()) return;
@@ -271,7 +275,7 @@ export function ContractCommentsSidebar({
               />
               <span className="text-xs text-gray-500">
                 {allChecked ? 'Deselect all' : 'Select all'}
-                {someChecked && !allChecked && ` (${[...selectedIds].filter(id => filtered.some(c => c.id === id)).length} selected)`}
+                {someChecked && !allChecked && ` (${selectedVisibleCount} selected)`}
               </span>
             </div>
           )}

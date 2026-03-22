@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
-interface PlaceholderRule {
-  placeholder: string;
-  description: string;
-  sourceField?: string;
-  rememberedAt: string;
-}
+const PlaceholderRuleSchema = z.object({
+  placeholder: z.string(),
+  description: z.string(),
+  sourceField: z.string().optional(),
+  rememberedAt: z.string(),
+});
+
+type PlaceholderRule = z.infer<typeof PlaceholderRuleSchema>;
 
 // ---------------------------------------------------------------------------
 // TipTap helpers
@@ -124,7 +127,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ data: { filledCount: 0, content: contract.content } });
     }
 
-    const rules = (contract.template?.placeholder_rules ?? []) as unknown as PlaceholderRule[];
+    const rules = z.array(PlaceholderRuleSchema).catch([]).parse(contract.template?.placeholder_rules ?? []);
     if (rules.length === 0) {
       return NextResponse.json({ data: { filledCount: 0, content: contract.content } });
     }
