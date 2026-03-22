@@ -16,6 +16,8 @@ export interface CommentData {
   aiValue?: string;
   /** The AI description of how the value was derived */
   aiDescription?: string;
+  /** Machine-readable source field key, e.g. "couple_names", "event_date" */
+  aiSourceField?: string;
 }
 
 interface ContractCommentsSidebarProps {
@@ -155,6 +157,7 @@ export function ContractCommentsSidebar({
         body: JSON.stringify({
           placeholder: comment.selectedText,
           description: comment.aiDescription ?? comment.text,
+          sourceField: comment.aiSourceField,
         }),
       });
       if (!res.ok) throw new Error('Failed to save rule');

@@ -3,15 +3,24 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
+/**
+ * A remembered placeholder fill rule stored on the contract template.
+ * `sourceField` is a machine-readable key that the fill-with-ai route uses
+ * to resolve the value programmatically from contract/quote/customer data,
+ * without calling the AI again.
+ */
 export interface PlaceholderRule {
   placeholder: string;
   description: string;
+  /** One of the known source field keys, or undefined for unmappable placeholders */
+  sourceField?: string;
   rememberedAt: string;
 }
 
 const bodySchema = z.object({
   placeholder: z.string().min(1),
   description: z.string(),
+  sourceField: z.string().optional(),
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -26,12 +35,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!template) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const body = await request.json();
-    const { placeholder, description } = bodySchema.parse(body);
+    const { placeholder, description, sourceField } = bodySchema.parse(body);
 
     const existing = (template.placeholder_rules ?? []) as PlaceholderRule[];
     // Upsert: replace existing rule for the same placeholder, or add new
     const filtered = existing.filter((r) => r.placeholder !== placeholder);
-    const newRule: PlaceholderRule = { placeholder, description, rememberedAt: new Date().toISOString() };
+    const newRule: PlaceholderRule = {
+      placeholder,
+      description,
+      ...(sourceField ? { sourceField } : {}),
+      rememberedAt: new Date().toISOString(),
+    };
     const updated = [...filtered, newRule];
 
     const result = await prisma.contractTemplate.update({
