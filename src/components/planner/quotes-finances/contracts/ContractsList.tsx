@@ -372,8 +372,12 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                   <button
                     onClick={() => handleDownloadPdf(contract)}
                     disabled={generatingPdfId === contract.id}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-60 rounded-lg transition-colors"
-                    title={contract.status === 'SIGNED' ? 'Download signed PDF' : 'Download PDF'}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-60 ${
+                      contract.status === 'SIGNED' || contract.pdf_url
+                        ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                        : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                    }`}
+                    title={contract.status === 'SIGNED' ? 'Download signed PDF' : (contract.pdf_url ? 'Download PDF' : 'PDF needs to be generated')}
                   >
                     {generatingPdfId === contract.id ? (
                       <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />

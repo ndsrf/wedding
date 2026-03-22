@@ -32,7 +32,7 @@ interface Quote {
   status: string;
   created_at: string;
   line_items: LineItem[];
-  contracts: { id: string; status: string; share_token?: string }[];
+  contracts: { id: string; status: string; share_token?: string; signed_pdf_url?: string | null }[];
   invoices: { id: string; status: string }[];
 }
 
@@ -130,6 +130,8 @@ export function QuotesList() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      // Immediately clear pdf_url in local state so the UI reflects that it needs regeneration
+      setQuotes((prev) => prev.map((q) => q.id === editingId ? { ...q, pdf_url: null } : q));
     } else {
       await fetch('/api/planner/quotes', {
         method: 'POST',
@@ -286,20 +288,25 @@ export function QuotesList() {
                   {/* Existing contracts for this quote */}
                   {quote.contracts.length > 0 && (
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      {quote.contracts.map((c) => (
-                        <a
-                          key={c.id}
-                          href={c.share_token ? `/planner/contracts/${c.share_token}` : '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2 ${CONTRACT_STATUS_STYLES[c.status] ?? 'text-gray-500'}`}
-                        >
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                          {c.status} contract
-                        </a>
-                      ))}
+                      {quote.contracts.map((c) => {
+                        const href = c.status === 'SIGNED' && c.signed_pdf_url
+                          ? c.signed_pdf_url
+                          : c.share_token ? `/planner/contracts/${c.share_token}` : '#';
+                        return (
+                          <a
+                            key={c.id}
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2 ${CONTRACT_STATUS_STYLES[c.status] ?? 'text-gray-500'}`}
+                          >
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            {c.status} contract
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -370,10 +377,15 @@ export function QuotesList() {
                 <button
                   onClick={() => handlePdf(quote)}
                   disabled={generating === quote.id}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    quote.pdf_url
+                      ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                      : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                  }`}
+                  title={quote.pdf_url ? 'Download existing PDF' : 'PDF needs to be generated'}
                 >
                   {generating === quote.id ? (
-                    <span className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full" />
+                    <span className="animate-spin w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full" />
                   ) : (
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

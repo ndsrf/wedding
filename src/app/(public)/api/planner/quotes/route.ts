@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       include: {
         customer: { select: { id: true, name: true, email: true, phone: true } },
         line_items: true,
-        contracts: { select: { id: true, status: true, share_token: true } },
+        contracts: { select: { id: true, status: true, share_token: true, signed_pdf_url: true } },
         invoices: { select: { id: true, status: true, total: true, amount_paid: true } },
       },
       orderBy: { created_at: 'desc' },

@@ -24,6 +24,7 @@ export class VercelBlobStorageProvider implements StorageProvider {
     const blob = await put(filepath, buffer, {
       access: 'public',
       contentType: options?.contentType,
+      allowOverwrite: options?.allowOverwrite ?? false,
     });
 
     return {

@@ -17,6 +17,7 @@ export interface FileStats {
 export interface UploadOptions {
   contentType?: string;
   access?: 'public' | 'private';
+  allowOverwrite?: boolean;
 }
 
 /**

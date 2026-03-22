@@ -341,10 +341,15 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                   <button
                     onClick={() => handleGeneratePdf(invoice)}
                     disabled={generating === invoice.id}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      invoice.pdf_url
+                        ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                        : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                    }`}
+                    title={invoice.pdf_url ? 'Download existing PDF' : 'PDF needs to be generated'}
                   >
                     {generating === invoice.id ? (
-                      <span className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full inline-block" />
+                      <span className="animate-spin w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full inline-block" />
                     ) : (
                       <>
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
