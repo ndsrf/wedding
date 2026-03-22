@@ -63,7 +63,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    let buffer = Buffer.from(arrayBuffer);
+    // eslint-disable-next-line prefer-const
+    let buffer: Buffer = Buffer.from(arrayBuffer);
 
     if (buffer.byteLength > MAX_BYTES) {
       return NextResponse.json({ error: 'File exceeds 20 MB limit.' }, { status: 422 });
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Convert images to PDF so the signed document is always a PDF
     if (isImage) {
-      buffer = await convertImageToPdf(buffer, file.type) as Buffer;
+      buffer = await convertImageToPdf(buffer, file.type);
       contentType = 'application/pdf';
     }
 
