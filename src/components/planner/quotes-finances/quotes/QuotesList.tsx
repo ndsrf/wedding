@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { QuoteForm } from './QuoteForm';
 import { FilterBar } from '../FilterBar';
+import { Pagination } from '../Pagination';
 
 interface LineItem {
   id?: string;
@@ -68,6 +69,8 @@ export function QuotesList() {
   const [generating, setGenerating] = useState<string | null>(null);
   const [nameFilter, setNameFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   // Contract creation state
   const [contractQuoteId, setContractQuoteId] = useState<string | null>(null);
@@ -212,6 +215,7 @@ export function QuotesList() {
     const statusMatch = statusFilter.length === 0 || statusFilter.includes(q.status);
     return nameMatch && statusMatch;
   });
+  const pagedQuotes = filteredQuotes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const QUOTE_STATUS_OPTIONS = [
     { value: 'DRAFT', label: 'Draft' },
@@ -281,11 +285,11 @@ export function QuotesList() {
 
       <FilterBar
         nameValue={nameFilter}
-        onNameChange={setNameFilter}
+        onNameChange={(v) => { setNameFilter(v); setPage(1); }}
         namePlaceholder="Search by couple name…"
         statusOptions={QUOTE_STATUS_OPTIONS}
         selectedStatuses={statusFilter}
-        onStatusChange={setStatusFilter}
+        onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
       />
 
       {filteredQuotes.length === 0 ? (
@@ -315,7 +319,7 @@ export function QuotesList() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredQuotes.map((quote) => (
+          {pagedQuotes.map((quote) => (
             <div key={quote.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -533,6 +537,7 @@ export function QuotesList() {
             </div>
           ))}
         </div>
+        <Pagination total={filteredQuotes.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
       )}
     </div>
   );

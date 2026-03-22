@@ -6,6 +6,7 @@ import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
 import type { InvoicePrefillData } from '../contracts/ContractsList';
 import { FilterBar } from '../FilterBar';
+import { Pagination } from '../Pagination';
 
 export interface Invoice {
   id: string;
@@ -82,6 +83,8 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   const [externalFormData, setExternalFormData] = useState<InvoicePrefillData | null>(null);
   const [nameFilter, setNameFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     if (externalPrefill) {
@@ -280,6 +283,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     const statusMatch = statusFilter.length === 0 || statusFilter.includes(inv.status);
     return nameMatch && statusMatch;
   });
+  const pagedInvoices = filteredInvoices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const INVOICE_STATUS_OPTIONS = [
     { value: 'DRAFT', label: 'Draft' },
@@ -325,11 +329,11 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
       <FilterBar
         nameValue={nameFilter}
-        onNameChange={setNameFilter}
+        onNameChange={(v) => { setNameFilter(v); setPage(1); }}
         namePlaceholder="Search by client name…"
         statusOptions={INVOICE_STATUS_OPTIONS}
         selectedStatuses={statusFilter}
-        onStatusChange={setStatusFilter}
+        onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
       />
 
       <div className="flex items-center justify-between mb-4">
@@ -372,7 +376,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredInvoices.map((invoice) => {
+          {pagedInvoices.map((invoice) => {
             const total = Number(invoice.total);
             const paid = Number(invoice.amount_paid);
             const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
@@ -492,6 +496,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
             );
           })}
         </div>
+        <Pagination total={filteredInvoices.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
       )}
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
 import { FilterBar } from '../FilterBar';
+import { Pagination } from '../Pagination';
 
 export interface InvoicePrefillData {
   customer_id?: string | null;
@@ -74,6 +75,8 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const [manualSignTarget, setManualSignTarget] = useState<string | null>(null);
   const [nameFilter, setNameFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   async function fetchContracts() {
     const res = await fetch('/api/planner/contracts');
@@ -259,6 +262,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
     const statusMatch = statusFilter.length === 0 || statusFilter.includes(c.status);
     return nameMatch && statusMatch;
   });
+  const pagedContracts = filteredContracts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const CONTRACT_STATUS_OPTIONS = [
     { value: 'DRAFT', label: 'Draft' },
@@ -288,11 +292,11 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
 
         <FilterBar
           nameValue={nameFilter}
-          onNameChange={setNameFilter}
+          onNameChange={(v) => { setNameFilter(v); setPage(1); }}
           namePlaceholder="Search by title or client…"
           statusOptions={CONTRACT_STATUS_OPTIONS}
           selectedStatuses={statusFilter}
-          onStatusChange={setStatusFilter}
+          onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
         />
 
         {filteredContracts.length === 0 ? (
@@ -316,7 +320,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredContracts.map((contract) => (
+            {pagedContracts.map((contract) => (
               <div key={contract.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4">
@@ -609,6 +613,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
               </div>
             ))}
           </div>
+          <Pagination total={filteredContracts.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
 
