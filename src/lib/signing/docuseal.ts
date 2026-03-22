@@ -37,11 +37,11 @@ export interface DocuSealSubmissionResult {
 }
 
 /**
- * Create a DocuSeal template from a PDF URL, then immediately create a submission.
- * The signature field is placed on the given signaturePage (0-indexed).
+ * Create a DocuSeal template from a PDF buffer (base64-encoded), then immediately
+ * create a submission. The signature field is placed on the given signaturePage (0-indexed).
  */
 export async function createDocuSealSubmission(params: {
-  pdfUrl: string;
+  pdfBuffer: Buffer;
   title: string;
   signerEmail: string;
   signerName: string;
@@ -58,16 +58,21 @@ export async function createDocuSealSubmission(params: {
     apiKeyLength: apiKey.length,
     apiKeyPrefix: apiKey.slice(0, 8) + '...',
     title: params.title,
-    pdfUrl: params.pdfUrl,
+    pdfBufferBytes: params.pdfBuffer.length,
     signaturePage: params.signaturePage,
     signerEmail: params.signerEmail,
     signerName: params.signerName,
   });
 
-  // Step 1: Create a one-time template from the PDF, with signature field defined
+  // Step 1: Create a one-time template from the PDF (base64-encoded), with signature field defined
   const templateBody = {
     name: params.title,
-    documents: [{ name: `${params.title}.pdf`, url: params.pdfUrl }],
+    documents: [
+      {
+        name: `${params.title}.pdf`,
+        file: params.pdfBuffer.toString('base64'),
+      },
+    ],
     submitters: [{ name: 'Client' }],
     fields: [
       {
@@ -76,7 +81,6 @@ export async function createDocuSealSubmission(params: {
         role: 'Client',
         required: true,
         areas: [
-          // Right half of the page, in the client signature block area
           { x: 0.52, y: 0.25, w: 0.38, h: 0.1, page: params.signaturePage },
         ],
       },
@@ -92,7 +96,12 @@ export async function createDocuSealSubmission(params: {
     ],
   };
 
-  logDocuSeal('POST /templates/pdf', { url: `${base}/templates/pdf`, body: templateBody });
+  logDocuSeal('POST /templates/pdf', {
+    url: `${base}/templates/pdf`,
+    bodyKeys: Object.keys(templateBody),
+    documentNameSent: templateBody.documents[0].name,
+    base64Length: templateBody.documents[0].file.length,
+  });
 
   const templateRes = await fetch(`${base}/templates/pdf`, {
     method: 'POST',

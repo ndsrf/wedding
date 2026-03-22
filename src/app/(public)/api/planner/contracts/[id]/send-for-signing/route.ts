@@ -5,7 +5,6 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { createDocuSealSubmission } from '@/lib/signing/docuseal';
-import { put } from '@vercel/blob';
 import React from 'react';
 
 /** Count pages in a PDF buffer by scanning for /Type /Page entries (no external deps). */
@@ -92,23 +91,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const totalPages = countPdfPages(buffer);
   const signaturePage = totalPages - 1; // 0-indexed
 
-  // 6. Upload PDF to Vercel Blob (needs to be publicly accessible for DocuSeal)
-  let blob;
-  try {
-    blob = await put(`contracts/${id}/signing-${Date.now()}.pdf`, buffer, {
-      access: 'public',
-      contentType: 'application/pdf',
-    });
-  } catch (error) {
-    console.error('send-for-signing: blob upload error:', error);
-    return NextResponse.json({ error: 'Failed to upload contract PDF' }, { status: 500 });
-  }
-
-  // 7. Create DocuSeal template + submission
+  // 6. Create DocuSeal template + submission (buffer sent as base64 — no Blob upload needed)
   let signingResult;
   try {
     signingResult = await createDocuSealSubmission({
-      pdfUrl: blob.url,
+      pdfBuffer: buffer,
       title: contract.title,
       signerEmail: data.signer_email,
       signerName: data.signer_name,
@@ -122,7 +109,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
   }
 
-  // 8. Persist signing details to DB
+  // 7. Persist signing details to DB
   let updated;
   try {
     updated = await prisma.contract.update({
