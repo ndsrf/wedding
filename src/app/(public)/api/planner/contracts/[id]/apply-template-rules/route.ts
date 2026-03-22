@@ -124,7 +124,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ data: { filledCount: 0, content: contract.content } });
     }
 
-    const rules = (contract.template?.placeholder_rules ?? []) as PlaceholderRule[];
+    const rules = (contract.template?.placeholder_rules ?? []) as unknown as PlaceholderRule[];
     if (rules.length === 0) {
       return NextResponse.json({ data: { filledCount: 0, content: contract.content } });
     }
