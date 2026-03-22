@@ -375,6 +375,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
           )}
         </div>
       ) : (
+        <>
         <div className="space-y-3">
           {pagedInvoices.map((invoice) => {
             const total = Number(invoice.total);
@@ -497,6 +498,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
           })}
         </div>
         <Pagination total={filteredInvoices.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </>
       )}
     </div>
   );

@@ -319,6 +319,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
             )}
           </div>
         ) : (
+          <>
           <div className="space-y-3">
             {pagedContracts.map((contract) => (
               <div key={contract.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
@@ -614,6 +615,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
             ))}
           </div>
           <Pagination total={filteredContracts.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+          </>
         )}
       </div>
 
