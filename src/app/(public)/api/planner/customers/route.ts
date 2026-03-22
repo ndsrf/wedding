@@ -24,22 +24,25 @@ export async function GET(request: NextRequest) {
     const invoiceStatus = searchParams.get('invoice_status') ?? '';
 
     if (full) {
-      // Full customer list with related data for clients management page
+      // Full customer list with related data for clients management page.
+      // Status filters are applied in the database WHERE clause so only matching
+      // customers are fetched, avoiding transferring and filtering in-process.
       const customers = await prisma.customer.findMany({
         where: {
           planner_id: user.planner_id,
           ...(q ? { name: { contains: q, mode: 'insensitive' } } : {}),
+          ...(quoteStatus ? { quotes: { some: { status: quoteStatus as never } } } : {}),
+          ...(contractStatus ? { contracts: { some: { status: contractStatus as never } } } : {}),
+          ...(invoiceStatus ? { invoices: { some: { status: invoiceStatus as never } } } : {}),
         },
         orderBy: { name: 'asc' },
         include: {
           quotes: {
             select: { id: true, couple_names: true, status: true, total: true, currency: true, created_at: true },
-            ...(quoteStatus ? { where: { status: quoteStatus as never } } : {}),
             orderBy: { created_at: 'desc' },
           },
           contracts: {
             select: { id: true, title: true, status: true, created_at: true },
-            ...(contractStatus ? { where: { status: contractStatus as never } } : {}),
             orderBy: { created_at: 'desc' },
           },
           invoices: {
@@ -53,7 +56,6 @@ export async function GET(request: NextRequest) {
               due_date: true,
               created_at: true,
             },
-            ...(invoiceStatus ? { where: { status: invoiceStatus as never } } : {}),
             orderBy: { created_at: 'desc' },
           },
           weddings: {
@@ -63,19 +65,7 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      // If status filters are active, only return customers that have matching items
-      let filtered = customers;
-      if (quoteStatus) {
-        filtered = filtered.filter((c) => c.quotes.length > 0);
-      }
-      if (contractStatus) {
-        filtered = filtered.filter((c) => c.contracts.length > 0);
-      }
-      if (invoiceStatus) {
-        filtered = filtered.filter((c) => c.invoices.length > 0);
-      }
-
-      return NextResponse.json({ data: filtered });
+      return NextResponse.json({ data: customers });
     }
 
     // Simple search (used for dropdown autocomplete in forms)

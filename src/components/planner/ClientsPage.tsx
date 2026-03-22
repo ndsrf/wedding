@@ -234,6 +234,7 @@ function CustomerCard({ customer, onDeleted }: CustomerCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const hasLinkedData =
     customer.quotes.length > 0 ||
@@ -243,19 +244,22 @@ function CustomerCard({ customer, onDeleted }: CustomerCardProps) {
 
   async function handleDelete() {
     setDeleting(true);
+    setDeleteError('');
     try {
       const res = await fetch(`/api/planner/customers/${customer.id}`, { method: 'DELETE' });
       if (!res.ok) {
         const json = await res.json();
-        alert(json.error ?? 'Failed to delete client');
+        const msg = json.error ?? 'Failed to delete client';
+        console.error('[CustomerCard] delete failed:', msg);
+        setDeleteError(msg);
         return;
       }
       onDeleted(customer.id);
-    } catch {
-      alert('Failed to delete client');
+    } catch (err) {
+      console.error('[CustomerCard] delete error:', err);
+      setDeleteError('Failed to delete client. Please try again.');
     } finally {
       setDeleting(false);
-      setShowDeleteConfirm(false);
     }
   }
 
@@ -305,20 +309,25 @@ function CustomerCard({ customer, onDeleted }: CustomerCardProps) {
           {!hasLinkedData && (
             <>
               {showDeleteConfirm ? (
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="text-xs px-2 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-                  >
-                    {deleting ? '...' : 'Confirm'}
-                  </button>
-                  <button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      className="text-xs px-2 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                    >
+                      {deleting ? '...' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => { setShowDeleteConfirm(false); setDeleteError(''); }}
+                      className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {deleteError && (
+                    <p className="text-xs text-red-600 max-w-[200px] text-right">{deleteError}</p>
+                  )}
                 </div>
               ) : (
                 <button
