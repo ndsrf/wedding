@@ -10,6 +10,15 @@ function getApiKey(): string {
   return key;
 }
 
+function logDocuSeal(message: string, data?: unknown) {
+  const prefix = '[DocuSeal]';
+  if (data !== undefined) {
+    console.log(prefix, message, JSON.stringify(data, null, 2));
+  } else {
+    console.log(prefix, message);
+  }
+}
+
 function headers(): Record<string, string> {
   return {
     'X-Auth-Token': getApiKey(),
@@ -41,6 +50,19 @@ export async function createDocuSealSubmission(params: {
 }): Promise<DocuSealSubmissionResult> {
   const base = getApiBase();
   const hdrs = headers();
+  const apiKey = getApiKey();
+
+  logDocuSeal('Starting submission creation', {
+    apiBase: base,
+    apiKeySet: !!apiKey,
+    apiKeyLength: apiKey.length,
+    apiKeyPrefix: apiKey.slice(0, 8) + '...',
+    title: params.title,
+    pdfUrl: params.pdfUrl,
+    signaturePage: params.signaturePage,
+    signerEmail: params.signerEmail,
+    signerName: params.signerName,
+  });
 
   // Step 1: Create a one-time template from the PDF, with signature field defined
   const templateBody = {
@@ -70,35 +92,48 @@ export async function createDocuSealSubmission(params: {
     ],
   };
 
+  logDocuSeal('POST /templates/pdf', { url: `${base}/templates/pdf`, body: templateBody });
+
   const templateRes = await fetch(`${base}/templates/pdf`, {
     method: 'POST',
     headers: hdrs,
     body: JSON.stringify(templateBody),
   });
 
+  logDocuSeal('Template response', { status: templateRes.status, ok: templateRes.ok });
+
   if (!templateRes.ok) {
     const text = await templateRes.text();
+    logDocuSeal('Template creation FAILED', { status: templateRes.status, body: text });
     throw new Error(`DocuSeal template creation failed (${templateRes.status}): ${text}`);
   }
 
   const template = await templateRes.json() as { id: number };
   const templateId = template.id;
+  logDocuSeal('Template created', { templateId });
 
   // Step 2: Create a submission from the template
+  const submissionBody = {
+    template_id: templateId,
+    send_email: false,
+    submitters: [
+      { role: 'Client', email: params.signerEmail, name: params.signerName },
+    ],
+  };
+
+  logDocuSeal('POST /submissions', { url: `${base}/submissions`, body: submissionBody });
+
   const submissionRes = await fetch(`${base}/submissions`, {
     method: 'POST',
     headers: hdrs,
-    body: JSON.stringify({
-      template_id: templateId,
-      send_email: false,
-      submitters: [
-        { role: 'Client', email: params.signerEmail, name: params.signerName },
-      ],
-    }),
+    body: JSON.stringify(submissionBody),
   });
+
+  logDocuSeal('Submission response', { status: submissionRes.status, ok: submissionRes.ok });
 
   if (!submissionRes.ok) {
     const text = await submissionRes.text();
+    logDocuSeal('Submission creation FAILED', { status: submissionRes.status, body: text });
     throw new Error(`DocuSeal submission creation failed (${submissionRes.status}): ${text}`);
   }
 
@@ -111,6 +146,12 @@ export async function createDocuSealSubmission(params: {
   }>;
 
   const submitter = submitters[0];
+  logDocuSeal('Submission created successfully', {
+    submissionId: submitter.submission_id,
+    submitterId: submitter.id,
+    slug: submitter.slug,
+    embedSrcSet: !!submitter.embed_src,
+  });
 
   return {
     templateId,
