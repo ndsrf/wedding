@@ -16,6 +16,7 @@ interface CustomerSuggestion {
   name: string;
   email: string | null;
   phone: string | null;
+  id_number: string | null;
 }
 
 interface QuoteFormData {
@@ -25,6 +26,7 @@ interface QuoteFormData {
   location: string;
   client_email: string;
   client_phone: string;
+  client_id_number: string;
   notes: string;
   currency: string;
   discount: number | '';
@@ -55,6 +57,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
     location: initialData?.location ?? '',
     client_email: initialData?.client_email ?? '',
     client_phone: initialData?.client_phone ?? '',
+    client_id_number: initialData?.client_id_number ?? '',
     notes: initialData?.notes ?? '',
     currency: initialData?.currency ?? 'EUR',
     discount: initialData?.discount ?? '',
@@ -107,6 +110,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
       couple_names: c.name,
       client_email: c.email ?? p.client_email,
       client_phone: c.phone ?? p.client_phone,
+      client_id_number: c.id_number ?? p.client_id_number,
     }));
     setSuggestions([]);
     setShowSuggestions(false);
@@ -162,6 +166,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
         expires_at: form.expires_at || null,
         client_email: form.client_email || null,
         client_phone: form.client_phone || null,
+        client_id_number: form.client_id_number || null,
         location: form.location || null,
         notes: form.notes || null,
       });
@@ -270,6 +275,16 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
               className={inputClass}
               value={form.client_phone}
               onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_phone: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">ID / Passport Number</label>
+            <input
+              readOnly={readOnly}
+              className={inputClass}
+              value={form.client_id_number}
+              onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_id_number: e.target.value }))}
+              placeholder="DNI, NIE, Passport…"
             />
           </div>
         </div>
