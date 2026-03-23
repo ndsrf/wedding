@@ -226,6 +226,68 @@ Manage wedding photos:
 
 ---
 
+## Planner Pages & Features
+
+### Client Management (/planner/clients)
+Manage all clients (couples) associated with the planner:
+- View a list of all clients with their contact details (name, email, phone, address, ID number, notes).
+- See each client's linked weddings, quotes, contracts, and invoices at a glance.
+- Create, edit, and delete client records.
+- Centralizes the full client relationship history in one place.
+
+---
+
+### Location Management (/planner/locations)
+Create and manage reusable ceremony venues and event locations:
+- Store location details: name, address, Google Maps URL, website, and notes.
+- Reuse locations across multiple weddings and itinerary items.
+- Track which weddings and itinerary entries are using each location.
+- Prevent accidental deletion of locations that are currently in use.
+
+---
+
+### Quotes & Budgets (/planner/quotes-finances → Quotes tab)
+Create and manage professional quotes for clients:
+- Itemized line items with description, quantity, unit price, and total.
+- Apply discounts and tax rates; automatic subtotal/total calculation.
+- Quote statuses: Draft, Sent, Accepted, Rejected, Expired.
+- Set expiry dates and track acceptance.
+- Export quotes to PDF.
+- Convert an accepted quote into an invoice with one click.
+- Dashboard cards show: total quotes, accepted quotes, total invoiced amount, and amount received.
+
+---
+
+### Contracts & Digital Signature (/planner/quotes-finances → Contracts tab)
+Draft, share, and sign legally binding contracts:
+- Rich-text editor (TipTap/ProseMirror) for contract content.
+- Contract templates with AI-powered placeholder filling: the AI uses wedding/client context to auto-fill template placeholders.
+- Real-time collaborative editing via Liveblocks (multiple users can edit simultaneously).
+- Share contracts with clients via a unique secure link (no login required for clients).
+- Digital signature integration via DocuSeal:
+  - Request client signature (client receives a signing link).
+  - Sign manually on behalf of the client.
+  - Download signed PDF and audit trail PDF.
+- Contract statuses: Draft, Shared, Signing, Signed, Cancelled.
+- Comments and annotations sidebar for review.
+- Link contracts to quotes and customers.
+
+---
+
+### Invoices & Payment Tracking (/planner/quotes-finances → Invoices tab)
+Issue invoices and track payments with full pending payment management:
+- Create invoices with itemized line items, discounts, and tax rates.
+- Unique invoice numbers assigned automatically.
+- Invoice statuses: Draft, Issued, Partial, Paid, Overdue, Cancelled.
+- Record multiple partial payments per invoice:
+  - Payment methods: Cash, Bank Transfer, PayPal, Bizum, Revolut, Other.
+  - Each payment has amount, date, reference, and notes.
+- Real-time tracking of amount paid vs total amount outstanding.
+- Export invoices to PDF.
+- Convert quotes into invoices directly.
+
+---
+
 ### Wedding Details (/admin/wedding-details)
 View and edit wedding information:
 - Couple names, date, time, location

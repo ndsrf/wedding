@@ -157,6 +157,30 @@
         "giftTracking": {
           "title": "Registro e Tracciamento Regali",
           "description": "Aiuta le coppie a gestire la loro lista nozze e tracciare i regali ricevuti con promemoria automatici di ringraziamento."
+        },
+        "clientManagement": {
+          "title": "Gestione Clienti",
+          "description": "Centralizza tutte le informazioni dei tuoi clienti: dati di contatto, matrimoni collegati, contratti e storico delle comunicazioni in un unico posto."
+        },
+        "locations": {
+          "title": "Gestione Sedi e Location",
+          "description": "Archivia e organizza sedi cerimonia e location con indirizzi, link Google Maps e note. Riutilizzale per più matrimoni."
+        },
+        "quotesAndBudgets": {
+          "title": "Preventivi e Budget",
+          "description": "Crea preventivi professionali con voci dettagliate, sconti, tasse e date di scadenza. Invialo ai clienti e convertilo in fattura con un clic."
+        },
+        "contractsSignature": {
+          "title": "Contratti e Firma Digitale",
+          "description": "Redigi, condividi e raccogli firme digitali legalmente vincolanti sui contratti. Collaborazione in tempo reale, compilazione con IA e registro completo delle firme."
+        },
+        "invoicesPayments": {
+          "title": "Fatture e Pagamenti in Sospeso",
+          "description": "Emetti fatture, registra pagamenti parziali e monitora i saldi in sospeso. Supporta Contanti, Bonifico, PayPal, Bizum e altro ancora."
+        },
+        "menuTasting": {
+          "title": "Gestione Menu e Degustazione",
+          "description": "Crea menu di degustazione, invita partecipanti via WhatsApp o email, raccogli valutazioni e seleziona il menu finale del matrimonio tra i piatti degustati."
         }
       }
     },
@@ -2172,6 +2196,40 @@
       "nupcibot": {
         "title": "Assistente AI NupciBot",
         "content": "Il pulsante flottante di NupciBot ti offre quattro azioni rapide: riconfigurare il matrimonio, vedere i report, inviare un messaggio al tuo wedding planner via email, o aprire una chat AI per fare domande sulla piattaforma."
+      },
+      "clients": {
+        "title": "Gestione Clienti",
+        "path": "/planner/clients",
+        "content": "Centralizza tutti i dati dei tuoi clienti. Consulta preventivi, contratti, fatture e matrimoni collegati a ciascun cliente. Gestisci dati di contatto, note e la storia completa del rapporto."
+      },
+      "locations": {
+        "title": "Sedi e Location",
+        "path": "/planner/locations",
+        "content": "Crea e gestisci sedi cerimonia e location riutilizzabili. Archivia nome, indirizzo, link Google Maps, sito web e note. Tieni traccia di quali matrimoni e voci dell'itinerario usano ogni location e impedisci l'eliminazione accidentale di quelle in uso."
+      },
+      "quotes": {
+        "title": "Preventivi e Budget",
+        "path": "/planner/quotes-finances",
+        "content": "Crea preventivi professionali con voci dettagliate (quantità, prezzo unitario, totale), sconti e aliquote fiscali. Gestisci lo stato (Bozza, Inviato, Accettato, Rifiutato, Scaduto), imposta date di scadenza, esporta in PDF e converti i preventivi accettati in fatture con un clic."
+      },
+      "contracts": {
+        "title": "Contratti e Firma Digitale",
+        "path": "/planner/quotes-finances",
+        "content": "Redigi e modifica contratti con un editor di testo ricco. Usa modelli con compilazione automatica tramite IA. Condividili con i clienti tramite un link sicuro. Raccogli firme digitali legalmente vincolanti tramite l'integrazione con DocuSeal. Monitora lo stato completo della firma (Bozza → Condiviso → In firma → Firmato) con PDF di audit."
+      },
+      "invoices": {
+        "title": "Fatture e Tracciamento Pagamenti",
+        "path": "/planner/quotes-finances",
+        "content": "Emetti fatture con voci, sconti e tasse. Monitora lo stato di pagamento (Bozza, Emessa, Parziale, Pagata, Scaduta, Annullata). Registra più pagamenti parziali con il metodo (Contanti, Bonifico, PayPal, Bizum, Revolut) e controlla i saldi in sospeso in tempo reale."
+      },
+      "tasting": {
+        "title": "Menu di Degustazione",
+        "path": "/admin/tasting",
+        "content": "Crea un menu di degustazione con sezioni e piatti (con foto). Importa automaticamente menu di catering da PDF/immagini tramite IA. Invia link personalizzati ai partecipanti via WhatsApp, email o SMS. I partecipanti valutano i piatti da 1 a 10, aggiungono note e foto. Consulta i punteggi medi per piatto per scegliere il menu finale."
+      },
+      "menuSelection": {
+        "title": "Selezione del Menu Finale",
+        "content": "Dopo la degustazione, il planner seleziona il menu finale del matrimonio con un'interfaccia a due colonne: sposta i piatti da Disponibili a Selezionati, sezione per sezione, con i punteggi medi visibili. La selezione finale viene salvata e collegata al matrimonio."
       }
     }
   },

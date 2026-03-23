@@ -162,6 +162,30 @@
         "giftTracking": {
           "title": "Gift Registry & Tracking",
           "description": "Help couples manage their gift registry and track received gifts with automatic thank-you reminders."
+        },
+        "clientManagement": {
+          "title": "Client Management",
+          "description": "Centralize all your client information: contact details, linked weddings, contracts, and communication history in one place."
+        },
+        "locations": {
+          "title": "Venue & Location Management",
+          "description": "Store and organize ceremony venues and event locations with addresses, Google Maps links, and notes. Reuse across multiple weddings."
+        },
+        "quotesAndBudgets": {
+          "title": "Quotes & Budgets",
+          "description": "Create professional quotes with itemized line items, discounts, taxes, and expiry dates. Send to clients and convert to invoices with one click."
+        },
+        "contractsSignature": {
+          "title": "Contracts & Digital Signature",
+          "description": "Draft, share, and collect legally binding digital signatures on contracts. Real-time collaboration, AI-powered filling, and full signing audit trail."
+        },
+        "invoicesPayments": {
+          "title": "Invoices & Pending Payments",
+          "description": "Issue invoices, track partial payments, and monitor outstanding balances. Support for Cash, Bank Transfer, PayPal, Bizum, and more."
+        },
+        "menuTasting": {
+          "title": "Menu Management & Tasting",
+          "description": "Create tasting menus, invite participants via WhatsApp or email, collect ratings, and select the final wedding menu from tasted dishes."
         }
       }
     },
@@ -2250,6 +2274,40 @@
       "nupcibot": {
         "title": "NupciBot AI Assistant",
         "content": "The floating NupciBot button (bottom-right of the dashboard) gives you four quick actions: reconfigure your wedding via the setup wizard, view reports, send a message to your wedding planner by email, or open an AI chat to ask questions about the platform."
+      },
+      "clients": {
+        "title": "Client Management",
+        "path": "/planner/clients",
+        "content": "Centralize all client data in one place. View each client's associated quotes, contracts, invoices, and linked weddings. Manage contact details, notes, and the full relationship history."
+      },
+      "locations": {
+        "title": "Venue & Locations",
+        "path": "/planner/locations",
+        "content": "Create and manage reusable ceremony venues and event locations. Store name, address, Google Maps URL, website, and notes. Track which weddings and itinerary items use each location and prevent accidental deletion of locations in use."
+      },
+      "quotes": {
+        "title": "Quotes & Budgets",
+        "path": "/planner/quotes-finances",
+        "content": "Create professional quotes with itemized line items (quantity, unit price, total), discounts, and tax rates. Track status (Draft, Sent, Accepted, Rejected, Expired), set expiry dates, export to PDF, and convert accepted quotes into invoices in one click."
+      },
+      "contracts": {
+        "title": "Contracts & Digital Signature",
+        "path": "/planner/quotes-finances",
+        "content": "Draft and edit contracts with a rich-text editor. Use templates with AI-powered placeholder filling. Share with clients via a secure link. Collect legally binding digital signatures through DocuSeal integration. Track the full signing status (Draft → Shared → Signing → Signed) with audit trail PDF."
+      },
+      "invoices": {
+        "title": "Invoices & Payment Tracking",
+        "path": "/planner/quotes-finances",
+        "content": "Issue invoices with line items, discounts, and taxes. Track payment status (Draft, Issued, Partial, Paid, Overdue, Cancelled). Record multiple partial payments with method (Cash, Bank Transfer, PayPal, Bizum, Revolut) and monitor outstanding balances in real time."
+      },
+      "tasting": {
+        "title": "Tasting Menu",
+        "path": "/admin/tasting",
+        "content": "Create a tasting menu with sections and dishes (including photos). Import catering menus automatically from PDF/images using AI. Send personalized tasting links to participants via WhatsApp, Email, or SMS. Participants rate dishes 1–10, add notes and photos. View average scores per dish to inform the final menu selection."
+      },
+      "menuSelection": {
+        "title": "Menu Selection",
+        "content": "After the tasting, the planner selects the final wedding menu using a two-column interface: move dishes from Available to Selected, section by section, with average tasting scores shown. The final selection is saved and linked to the wedding."
       }
     }
   },

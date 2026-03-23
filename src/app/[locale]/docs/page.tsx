@@ -87,6 +87,42 @@ const FEATURE_ICONS: Record<string, React.ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
     </svg>
   ),
+  clients: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  ),
+  locations: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  ),
+  quotes: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+  contracts: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+    </svg>
+  ),
+  invoices: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+    </svg>
+  ),
+  tasting: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+    </svg>
+  ),
+  menuSelection: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+    </svg>
+  ),
 };
 
 const FEATURE_COLORS: Record<string, { icon: string; border: string; bg: string; badge: string; badgeText: string }> = {
@@ -102,12 +138,21 @@ const FEATURE_COLORS: Record<string, { icon: string; border: string; bg: string;
   payments:          { icon: 'text-yellow-600', border: 'border-yellow-100', bg: 'bg-yellow-50',  badge: 'bg-yellow-100', badgeText: 'text-yellow-700' },
   gallery:           { icon: 'text-purple-600', border: 'border-purple-100', bg: 'bg-purple-50',  badge: 'bg-purple-100', badgeText: 'text-purple-700' },
   nupcibot:          { icon: 'text-rose-600',   border: 'border-rose-100',   bg: 'bg-gradient-to-br from-rose-50 to-pink-50', badge: 'bg-rose-100', badgeText: 'text-rose-700' },
+  clients:           { icon: 'text-violet-600', border: 'border-violet-100', bg: 'bg-violet-50',   badge: 'bg-violet-100',  badgeText: 'text-violet-700' },
+  locations:         { icon: 'text-green-600',  border: 'border-green-100',  bg: 'bg-green-50',    badge: 'bg-green-100',   badgeText: 'text-green-700' },
+  quotes:            { icon: 'text-sky-600',    border: 'border-sky-100',    bg: 'bg-sky-50',      badge: 'bg-sky-100',     badgeText: 'text-sky-700' },
+  contracts:         { icon: 'text-slate-600',  border: 'border-slate-100',  bg: 'bg-slate-50',    badge: 'bg-slate-100',   badgeText: 'text-slate-700' },
+  invoices:          { icon: 'text-yellow-600', border: 'border-yellow-100', bg: 'bg-yellow-50',   badge: 'bg-yellow-100',  badgeText: 'text-yellow-700' },
+  tasting:           { icon: 'text-orange-600', border: 'border-orange-100', bg: 'bg-orange-50',   badge: 'bg-orange-100',  badgeText: 'text-orange-700' },
+  menuSelection:     { icon: 'text-lime-600',   border: 'border-lime-100',   bg: 'bg-lime-50',     badge: 'bg-lime-100',    badgeText: 'text-lime-700' },
 };
 
 const FEATURE_KEYS = [
   'guests', 'configure', 'templates', 'invitationBuilder',
   'notifications', 'reports', 'seating', 'checklist',
   'providers', 'payments', 'gallery', 'nupcibot',
+  'clients', 'locations', 'quotes', 'contracts',
+  'invoices', 'tasting', 'menuSelection',
 ] as const;
 
 export default async function DocsPage({ params }: { params: Promise<{ locale: string }> }) {
