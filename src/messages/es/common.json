@@ -2283,7 +2283,20 @@
       "menuSelection": {
         "title": "Selección del Menú Final",
         "content": "Tras la degustación, el organizador selecciona el menú final de boda con una interfaz de dos columnas: mueve los platos de Disponibles a Seleccionados, sección a sección, con las puntuaciones medias visibles. La selección final se guarda y vincula a la boda."
-      }
+      },
+      "rsvp": {
+        "title": "Confirmación de Asistencia",
+        "content": "Recibe un enlace mágico por WhatsApp, email o SMS, sin necesidad de cuenta. Confirma la asistencia de tu familia, indica restricciones alimentarias y preferencias de transporte, responde preguntas personalizadas y consulta los datos para el regalo. Puedes actualizar tu confirmación en cualquier momento antes de la fecha límite."
+      },
+      "tastingGuest": {
+        "title": "Experiencia de Degustación",
+        "content": "Recibe un enlace personalizado por WhatsApp, email o SMS. Puntuúa cada plato del 1 al 10, añade notas y sube fotos. Consulta las valoraciones del resto de participantes y las puntuaciones medias por plato. Las valoraciones se guardan automáticamente, sin necesidad de cuenta."
+      },
+      "goTo": "Ir a"
+    },
+    "personas": {
+      "select": "Selecciona tu perfil",
+      "hint": "Descubre las funciones relevantes para tu rol"
     }
   },
   "news": {

@@ -2230,7 +2230,20 @@
       "menuSelection": {
         "title": "Sélection du Menu Final",
         "content": "Après la dégustation, l'organisateur sélectionne le menu final du mariage avec une interface à deux colonnes : déplacez les plats des Disponibles vers les Sélectionnés, section par section, avec les scores moyens affichés. La sélection finale est enregistrée et liée au mariage."
-      }
+      },
+      "rsvp": {
+        "title": "Confirmation de Présence",
+        "content": "Recevez un lien magique par WhatsApp, e-mail ou SMS—aucun compte nécessaire. Confirmez la présence de votre famille, indiquez les restrictions alimentaires et préférences de transport, répondez aux questions personnalisées et consultez les coordonnées bancaires pour le cadeau. Vous pouvez modifier votre confirmation jusqu'à la date limite."
+      },
+      "tastingGuest": {
+        "title": "Expérience de Dégustation",
+        "content": "Recevez un lien personnalisé par WhatsApp, e-mail ou SMS. Notez chaque plat de 1 à 10 étoiles, ajoutez des notes de dégustation et uploadez des photos. Consultez les évaluations de tous les participants et les scores moyens par plat. Les notes s’enregistrent automatiquement—aucune connexion requise."
+      },
+      "goTo": "Aller à"
+    },
+    "personas": {
+      "select": "Choisissez votre profil",
+      "hint": "Découvrez les fonctionnalités adaptées à votre rôle"
     }
   },
   "news": {

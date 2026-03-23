@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       language,
       userName,
       user.wedding_id,
+      'admin',
     );
 
     if (!reply) {

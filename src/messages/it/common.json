@@ -2230,7 +2230,20 @@
       "menuSelection": {
         "title": "Selezione del Menu Finale",
         "content": "Dopo la degustazione, il planner seleziona il menu finale del matrimonio con un'interfaccia a due colonne: sposta i piatti da Disponibili a Selezionati, sezione per sezione, con i punteggi medi visibili. La selezione finale viene salvata e collegata al matrimonio."
-      }
+      },
+      "rsvp": {
+        "title": "Conferma di Partecipazione",
+        "content": "Ricevi un link magico via WhatsApp, email o SMS—nessun account necessario. Conferma la partecipazione della tua famiglia, indica le restrizioni alimentari e le preferenze di trasporto, rispondi alle domande personalizzate e visualizza i dettagli per il regalo. Puoi aggiornare la tua conferma in qualsiasi momento prima della data limite."
+      },
+      "tastingGuest": {
+        "title": "Esperienza di Degustazione",
+        "content": "Ricevi un link personalizzato via WhatsApp, email o SMS. Valuta ogni piatto da 1 a 10 stelle, aggiungi note di degustazione e carica foto. Visualizza le valutazioni di tutti gli altri partecipanti e i punteggi medi per piatto. Le valutazioni si salvano in tempo reale—nessun login richiesto."
+      },
+      "goTo": "Vai a"
+    },
+    "personas": {
+      "select": "Seleziona il tuo profilo",
+      "hint": "Scopri le funzionalità rilevanti per il tuo ruolo"
     }
   },
   "news": {

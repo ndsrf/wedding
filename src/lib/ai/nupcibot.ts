@@ -30,7 +30,12 @@ export interface ChatMessage {
 // PLATFORM KNOWLEDGE BASE
 // ============================================================================
 
-export const PLATFORM_DOCS = `
+// ============================================================================
+// PLATFORM KNOWLEDGE BASE
+// ============================================================================
+
+// Shared: intro, roles, cross-cutting concerns
+const PLATFORM_DOCS_SHARED = `
 # Nupci – Wedding Management Platform
 
 Nupci is a comprehensive, multi-tenant wedding management platform designed for professional wedding planners. It allows planners to manage multiple weddings simultaneously and gives each couple secure access to their own wedding data.
@@ -42,6 +47,43 @@ Nupci is a comprehensive, multi-tenant wedding management platform designed for 
 
 ---
 
+## WhatsApp Sending Modes
+- **Business mode**: Messages are sent automatically via the Twilio WhatsApp Business API.
+- **Links mode**: The admin opens pre-filled wa.me links in new browser tabs and sends messages manually.
+
+---
+
+## Guest RSVP Experience
+Guests receive a magic link (no account needed). The RSVP page shows:
+- Wedding details (couple names, date, time, location, dress code)
+- Family members to confirm attendance
+- Optional: dietary restrictions, transportation, accessibility needs, custom questions
+- Gift information (IBAN, reference code if applicable)
+Guests can edit their RSVP until the cutoff date.
+
+---
+
+## Multi-Language Support
+The platform supports English (EN), Spanish (ES), French (FR), Italian (IT), and German (DE).
+- Each guest family has a preferred language.
+- Message templates are available in all 5 languages.
+- The guest RSVP page automatically shows in the family's language.
+
+---
+
+## AI Features
+- **WhatsApp AI Replies**: The platform can automatically generate AI replies to guest WhatsApp messages using the wedding details as context.
+- **NupciBot**: The floating assistant (this bot!) can answer questions about the platform and help admins navigate features. It also lets admins send messages to their wedding planner.
+
+---
+
+## Authentication
+- Wedding Planners and Admins sign in via OAuth (Google, Facebook, Instagram, Apple, Microsoft).
+- Guests use magic links – no passwords or accounts needed.
+`;
+
+// Admin (couple): all /admin pages
+const PLATFORM_DOCS_ADMIN = `
 ## Admin Pages & Features
 
 ### Dashboard (/admin)
@@ -226,6 +268,19 @@ Manage wedding photos:
 
 ---
 
+---
+
+### Wedding Details (/admin/wedding-details)
+View and edit wedding information:
+- Couple names, date, time, location
+- RSVP cutoff date
+- WhatsApp sending mode (Business API via Twilio or WhatsApp Links)
+
+---
+`;
+
+// Planner: all /planner pages
+const PLATFORM_DOCS_PLANNER = `
 ## Planner Pages & Features
 
 ### Client Management (/planner/clients)
@@ -287,56 +342,27 @@ Issue invoices and track payments with full pending payment management:
 - Convert quotes into invoices directly.
 
 ---
-
-### Wedding Details (/admin/wedding-details)
-View and edit wedding information:
-- Couple names, date, time, location
-- RSVP cutoff date
-- WhatsApp sending mode (Business API via Twilio or WhatsApp Links)
-
----
-
-## WhatsApp Sending Modes
-- **Business mode**: Messages are sent automatically via the Twilio WhatsApp Business API.
-- **Links mode**: The admin opens pre-filled wa.me links in new browser tabs and sends messages manually.
-
----
-
-## Guest RSVP Experience
-Guests receive a magic link (no account needed). The RSVP page shows:
-- Wedding details (couple names, date, time, location, dress code)
-- Family members to confirm attendance
-- Optional: dietary restrictions, transportation, accessibility needs, custom questions
-- Gift information (IBAN, reference code if applicable)
-Guests can edit their RSVP until the cutoff date.
-
----
-
-## Multi-Language Support
-The platform supports English (EN), Spanish (ES), French (FR), Italian (IT), and German (DE).
-- Each guest family has a preferred language.
-- Message templates are available in all 5 languages.
-- The guest RSVP page automatically shows in the family's language.
-
----
-
-## AI Features
-- **WhatsApp AI Replies**: The platform can automatically generate AI replies to guest WhatsApp messages using the wedding details as context.
-- **NupciBot**: The floating assistant (this bot!) can answer questions about the platform and help admins navigate features. It also lets admins send messages to their wedding planner.
-
----
-
-## Authentication
-- Wedding Planners and Admins sign in via OAuth (Google, Facebook, Instagram, Apple, Microsoft).
-- Guests use magic links – no passwords or accounts needed.
 `;
 
+/**
+ * Returns role-specific platform documentation.
+ * Planners see their CRM/finance/menu tools; admins see the wedding management panel.
+ */
+export function getPlatformDocs(role: 'admin' | 'planner'): string {
+  return role === 'planner'
+    ? PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_PLANNER
+    : PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_ADMIN;
+}
+
+/** Full docs (shared + admin + planner) – kept for backward-compat seeding */
+export const PLATFORM_DOCS = PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_ADMIN + '\n\n' + PLATFORM_DOCS_PLANNER;
 // ============================================================================
 // PROMPT BUILDER
 // ============================================================================
 
 function buildSystemPrompt(
   language: string,
+  role: 'admin' | 'planner' = 'admin',
   userName?: string,
   weddingDate?: string,
   coupleNames?: string,
@@ -358,7 +384,11 @@ function buildSystemPrompt(
       ? `The wedding for ${coupleNames} is on ${weddingDate}. `
       : '';
 
-  return `You are NupciBot, a friendly and helpful AI assistant for the Nupci wedding management platform. You help wedding admins (couples) understand how to use the platform, navigate its features, and get the most out of it.
+  const roleDescription = role === 'planner'
+    ? 'You help wedding planners navigate their CRM, client management, finances, and wedding operations tools.'
+    : 'You help wedding admins (couples) understand how to use the platform, navigate its features, and get the most out of it.';
+
+  return `You are NupciBot, a friendly and helpful AI assistant for the Nupci wedding management platform. ${roleDescription}
 Today's date is ${today}. ${weddingLine}
 ${userLine}
 ${langInstruction}
@@ -366,7 +396,7 @@ ${langInstruction}
 
 Your knowledge about the platform is based on the following documentation:
 
-${PLATFORM_DOCS}
+${getPlatformDocs(role)}
 
 ## Instructions
 1. ${langInstruction}
@@ -463,6 +493,7 @@ export async function generateNupciBotReply(
   language = 'EN',
   userName?: string,
   weddingId?: string,
+  role: 'admin' | 'planner' = 'admin',
 ): Promise<string | null> {
   // Fetch wedding info if available
   let weddingDate: string | undefined;
@@ -483,7 +514,7 @@ export async function generateNupciBotReply(
     }
   }
 
-  const systemPrompt = buildSystemPrompt(language, userName, weddingDate, coupleNames);
+  const systemPrompt = buildSystemPrompt(language, role, userName, weddingDate, coupleNames);
 
   const provider =
     process.env.AI_PROVIDER ||

@@ -2230,7 +2230,20 @@
       "menuSelection": {
         "title": "Endgültige Menüauswahl",
         "content": "Nach der Verkostung wählt der Planer das endgültige Hochzeitsmenü mithilfe einer Zwei-Spalten-Oberfläche: Gerichte von Verfügbar nach Ausgewählt verschieben, abschnittsweise, mit angezeigten Durchschnittsbewertungen. Die endgültige Auswahl wird gespeichert und mit der Hochzeit verknüpft."
-      }
+      },
+      "rsvp": {
+        "title": "Hochzeits-RSVP",
+        "content": "Erhalten Sie einen Magic Link per WhatsApp, E-Mail oder SMS—kein Konto erforderlich. Bestätigen Sie die Teilnahme Ihrer Familie, geben Sie Ernährungseinschränkungen und Transportpräferenzen an, beantworten Sie individuelle Fragen und sehen Sie die Bankdaten für das Geschenk ein. Ihre Antwort kann bis zum Stichtag jederzeit aktualisiert werden."
+      },
+      "tastingGuest": {
+        "title": "Verkostungserlebnis",
+        "content": "Erhalten Sie einen personalisierten Verkostungslink per WhatsApp, E-Mail oder SMS. Bewerten Sie jedes Gericht von 1 bis 10 Sternen, fügen Sie Verkostungsnotizen hinzu und laden Sie Fotos hoch. Sehen Sie die Bewertungen aller anderen Teilnehmer und die Durchschnittswerte pro Gericht. Bewertungen werden automatisch gespeichert—keine Anmeldung erforderlich."
+      },
+      "goTo": "Gehe zu"
+    },
+    "personas": {
+      "select": "Profil auswählen",
+      "hint": "Entdecken Sie die für Ihre Rolle relevanten Funktionen"
     }
   },
   "news": {

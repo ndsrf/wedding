@@ -1785,9 +1785,8 @@
       "title": "Tasting Menu",
       "description": "Manage the food tasting experience for your wedding. Add sections, dishes, and participants.",
       "nav": "Food & Drinks",
-      "tasting": "Food Tasting",
-      "weddingMenu": "Wedding Menu",
       "tasting": "Tasting Menu",
+      "weddingMenu": "Wedding Menu",
       "menu": {
         "title": "Menu Setup",
         "menuTitle": "Menu Title",
@@ -2308,7 +2307,20 @@
       "menuSelection": {
         "title": "Menu Selection",
         "content": "After the tasting, the planner selects the final wedding menu using a two-column interface: move dishes from Available to Selected, section by section, with average tasting scores shown. The final selection is saved and linked to the wedding."
-      }
+      },
+      "rsvp": {
+        "title": "Wedding RSVP",
+        "content": "Receive a magic link via WhatsApp, email, or SMS—no account needed. Confirm attendance for your family, specify dietary restrictions and transportation preferences, answer any custom questions, and view gift details. You can update your RSVP any time before the cutoff date."
+      },
+      "tastingGuest": {
+        "title": "Tasting Experience",
+        "content": "Receive a personalised tasting link via WhatsApp, email, or SMS. Rate each dish from 1 to 10 stars, add tasting notes, and upload photos. View all other participants’ ratings and the average scores per dish. Ratings auto-save in real time—no login required."
+      },
+      "goTo": "Go to"
+    },
+    "personas": {
+      "select": "Select your profile",
+      "hint": "See the features relevant to your role"
     }
   },
   "news": {
