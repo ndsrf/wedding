@@ -162,6 +162,8 @@ Rules:
 - For dates, use the format "Day Month Year" (e.g. "15 June 2025")
 - For amounts, include the currency symbol
 - Only return the JSON object, no other text
+- client_name is the legal/physical person who signs the contract (the one whose ID number and address appear on the contract). Use client_name for placeholders like [CLIENT NAME], [NOMBRE DEL CLIENTE], [CONTRATANTE], etc.
+- couple_names is the combined name of both partners (e.g. "Ana & Carlos"). Only use couple_names when the placeholder clearly refers to the couple together, such as [COUPLE], [NOVIOS], [BRIDE AND GROOM], etc. Do NOT use couple_names for generic "client" or "name" placeholders.
 - For sourceField, use ONLY one of these exact keys (or null if not mappable):
   planner_name, planner_email, planner_phone, planner_address, planner_vat, planner_website,
   couple_names, client_name, client_email, client_phone, client_id_number, client_address, client_notes,
