@@ -157,6 +157,30 @@
         "giftTracking": {
           "title": "Geschenkregister & Verfolgung",
           "description": "Helfen Sie Paaren, ihr Geschenkregister zu verwalten und empfangene Geschenke mit automatischen Dankesbenachrichtigungen zu verfolgen."
+        },
+        "clientManagement": {
+          "title": "Kundenverwaltung",
+          "description": "Zentralisieren Sie alle Kundeninformationen: Kontaktdaten, verknüpfte Hochzeiten, Verträge und Kommunikationsverlauf an einem Ort."
+        },
+        "locations": {
+          "title": "Venues & Locations verwalten",
+          "description": "Speichern und organisieren Sie Zeremonienorte und Veranstaltungslocations mit Adressen, Google Maps-Links und Notizen. Für mehrere Hochzeiten wiederverwendbar."
+        },
+        "quotesAndBudgets": {
+          "title": "Angebote & Budgets",
+          "description": "Erstellen Sie professionelle Angebote mit detaillierten Positionen, Rabatten, Steuern und Verfallsdaten. An Kunden senden und mit einem Klick in Rechnungen umwandeln."
+        },
+        "contractsSignature": {
+          "title": "Verträge & Digitale Unterschrift",
+          "description": "Verträge erstellen, teilen und rechtsgültige digitale Unterschriften sammeln. Echtzeit-Zusammenarbeit, KI-gestützte Ausfüllung und vollständiger Prüfpfad."
+        },
+        "invoicesPayments": {
+          "title": "Rechnungen & offene Zahlungen",
+          "description": "Rechnungen ausstellen, Teilzahlungen erfassen und ausstehende Salden überwachen. Unterstützt Bargeld, Überweisung, PayPal, Bizum und mehr."
+        },
+        "menuTasting": {
+          "title": "Menüverwaltung & Verkostung",
+          "description": "Erstellen Sie Degustationsmenüs, laden Sie Teilnehmer per WhatsApp oder E-Mail ein, sammeln Sie Bewertungen und wählen Sie das endgültige Hochzeitsmenü aus den verkosteten Gerichten."
         }
       }
     },
@@ -2172,7 +2196,54 @@
       "nupcibot": {
         "title": "NupciBot KI-Assistent",
         "content": "Die schwebende NupciBot-Schaltfläche bietet vier Schnellaktionen: Hochzeit neu konfigurieren, Berichte anzeigen, eine E-Mail-Nachricht an Ihren Wedding Planner senden oder einen KI-Chat für Plattformfragen öffnen."
-      }
+      },
+      "clients": {
+        "title": "Kundenverwaltung",
+        "path": "/planner/clients",
+        "content": "Zentralisieren Sie alle Kundendaten. Einsehen von Angeboten, Verträgen, Rechnungen und verknüpften Hochzeiten pro Kunde. Kontaktdaten, Notizen und den vollständigen Beziehungsverlauf verwalten."
+      },
+      "locations": {
+        "title": "Venues & Locations",
+        "path": "/planner/locations",
+        "content": "Erstellen und verwalten Sie wiederverwendbare Zeremonienorte und Veranstaltungslocations. Speichern Sie Name, Adresse, Google Maps-Link, Website und Notizen. Verfolgen Sie, welche Hochzeiten und Itinerary-Elemente welche Location nutzen, und verhindern Sie das versehentliche Löschen genutzter Locations."
+      },
+      "quotes": {
+        "title": "Angebote & Budgets",
+        "path": "/planner/quotes-finances",
+        "content": "Erstellen Sie professionelle Angebote mit detaillierten Positionen (Menge, Stückpreis, Gesamtbetrag), Rabatten und Steuersätzen. Status verwalten (Entwurf, Gesendet, Angenommen, Abgelehnt, Abgelaufen), Verfallsdaten setzen, als PDF exportieren und angenommene Angebote mit einem Klick in Rechnungen umwandeln."
+      },
+      "contracts": {
+        "title": "Verträge & Digitale Unterschrift",
+        "path": "/planner/quotes-finances",
+        "content": "Verträge mit einem Rich-Text-Editor verfassen und bearbeiten. Vorlagen mit KI-gestützter Platzhalter-Ausfüllung verwenden. Mit Kunden über einen sicheren Link teilen. Rechtsgültige digitale Unterschriften über die DocuSeal-Integration sammeln. Vollständigen Unterzeichnungsstatus verfolgen (Entwurf → Geteilt → In Unterzeichnung → Unterzeichnet) mit Prüfpfad-PDF."
+      },
+      "invoices": {
+        "title": "Rechnungen & Zahlungsverfolgung",
+        "path": "/planner/quotes-finances",
+        "content": "Rechnungen mit Positionen, Rabatten und Steuern ausstellen. Zahlungsstatus verfolgen (Entwurf, Ausgestellt, Teilweise, Bezahlt, Überfällig, Storniert). Mehrere Teilzahlungen mit Methode (Bargeld, Überweisung, PayPal, Bizum, Revolut) erfassen und ausstehende Salden in Echtzeit überwachen."
+      },
+      "tasting": {
+        "title": "Degustationsmenü",
+        "path": "/admin/tasting",
+        "content": "Erstellen Sie ein Degustationsmenü mit Abschnitten und Gerichten (inkl. Fotos). Catering-Menüs automatisch aus PDF/Bildern per KI importieren. Personalisierte Tasting-Links an Teilnehmer per WhatsApp, E-Mail oder SMS senden. Teilnehmer bewerten Gerichte von 1–10, fügen Notizen und Fotos hinzu. Durchschnittswerte pro Gericht einsehen, um das endgültige Menü auszuwählen."
+      },
+      "menuSelection": {
+        "title": "Endgültige Menüauswahl",
+        "content": "Nach der Verkostung wählt der Planer das endgültige Hochzeitsmenü mithilfe einer Zwei-Spalten-Oberfläche: Gerichte von Verfügbar nach Ausgewählt verschieben, abschnittsweise, mit angezeigten Durchschnittsbewertungen. Die endgültige Auswahl wird gespeichert und mit der Hochzeit verknüpft."
+      },
+      "rsvp": {
+        "title": "Hochzeits-RSVP",
+        "content": "Erhalten Sie einen Magic Link per WhatsApp, E-Mail oder SMS—kein Konto erforderlich. Bestätigen Sie die Teilnahme Ihrer Familie, geben Sie Ernährungseinschränkungen und Transportpräferenzen an, beantworten Sie individuelle Fragen und sehen Sie die Bankdaten für das Geschenk ein. Ihre Antwort kann bis zum Stichtag jederzeit aktualisiert werden."
+      },
+      "tastingGuest": {
+        "title": "Verkostungserlebnis",
+        "content": "Erhalten Sie einen personalisierten Verkostungslink per WhatsApp, E-Mail oder SMS. Bewerten Sie jedes Gericht von 1 bis 10 Sternen, fügen Sie Verkostungsnotizen hinzu und laden Sie Fotos hoch. Sehen Sie die Bewertungen aller anderen Teilnehmer und die Durchschnittswerte pro Gericht. Bewertungen werden automatisch gespeichert—keine Anmeldung erforderlich."
+      },
+      "goTo": "Gehe zu"
+    },
+    "personas": {
+      "select": "Profil auswählen",
+      "hint": "Entdecken Sie die für Ihre Rolle relevanten Funktionen"
     }
   },
   "news": {

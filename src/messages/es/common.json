@@ -161,6 +161,30 @@
         "giftTracking": {
           "title": "Registro y Seguimiento de Regalos",
           "description": "Ayuda a las parejas a gestionar su registro de regalos y rastrear regalos recibidos con recordatorios automáticos de agradecimiento."
+        },
+        "clientManagement": {
+          "title": "Gestión de Clientes",
+          "description": "Centraliza toda la información de tus clientes: datos de contacto, bodas vinculadas, contratos e historial de comunicaciones en un solo lugar."
+        },
+        "locations": {
+          "title": "Gestión de Localizaciones",
+          "description": "Almacena y organiza lugares de ceremonia y localizaciones con direcciones, enlaces de Google Maps y notas. Reutilízalas en múltiples bodas."
+        },
+        "quotesAndBudgets": {
+          "title": "Presupuestos",
+          "description": "Crea presupuestos profesionales con partidas detalladas, descuentos, impuestos y fechas de vencimiento. Envíalos a clientes y conviértelos en facturas con un clic."
+        },
+        "contractsSignature": {
+          "title": "Contratos y Firma Digital",
+          "description": "Redacta, comparte y recopila firmas digitales legalmente vinculantes en contratos. Colaboración en tiempo real, relleno con IA y registro completo de firmas."
+        },
+        "invoicesPayments": {
+          "title": "Facturas y Pagos Pendientes",
+          "description": "Emite facturas, registra pagos parciales y controla saldos pendientes. Compatible con Efectivo, Transferencia, PayPal, Bizum y más."
+        },
+        "menuTasting": {
+          "title": "Gestión del Menú y Prueba",
+          "description": "Crea menús de degustación, invita a participantes por WhatsApp o email, recoge valoraciones y selecciona el menú final de boda a partir de los platos degustados."
         }
       }
     },
@@ -2225,7 +2249,54 @@
       "nupcibot": {
         "title": "Asistente IA NupciBot",
         "content": "El botón flotante de NupciBot te da cuatro acciones rápidas: reconfigurar tu boda, ver informes, enviar un mensaje a tu wedding planner por email, o abrir un chat de IA para hacer preguntas sobre la plataforma."
-      }
+      },
+      "clients": {
+        "title": "Gestión de Clientes",
+        "path": "/planner/clients",
+        "content": "Centraliza todos los datos de tus clientes. Consulta los presupuestos, contratos, facturas y bodas vinculadas a cada cliente. Gestiona datos de contacto, notas e historial completo de la relación."
+      },
+      "locations": {
+        "title": "Localizaciones y Venues",
+        "path": "/planner/locations",
+        "content": "Crea y gestiona lugares de ceremonia y localizaciones reutilizables. Almacena nombre, dirección, enlace de Google Maps, web y notas. Controla qué bodas y puntos del itinerario usan cada localización e impide eliminar las que están en uso."
+      },
+      "quotes": {
+        "title": "Presupuestos",
+        "path": "/planner/quotes-finances",
+        "content": "Crea presupuestos profesionales con partidas detalladas (cantidad, precio unitario, total), descuentos y tipos impositivos. Gestiona el estado (Borrador, Enviado, Aceptado, Rechazado, Caducado), fija fechas de vencimiento, exporta a PDF y convierte presupuestos aceptados en facturas con un clic."
+      },
+      "contracts": {
+        "title": "Contratos y Firma Digital",
+        "path": "/planner/quotes-finances",
+        "content": "Redacta y edita contratos con un editor de texto enriquecido. Usa plantillas con relleno automático por IA. Compártelos con clientes mediante un enlace seguro. Recoge firmas digitales legalmente vinculantes mediante la integración con DocuSeal. Sigue el estado completo de firma (Borrador → Compartido → Firmando → Firmado) con PDF de auditoría."
+      },
+      "invoices": {
+        "title": "Facturas y Seguimiento de Pagos",
+        "path": "/planner/quotes-finances",
+        "content": "Emite facturas con partidas, descuentos e impuestos. Controla el estado de pago (Borrador, Emitida, Parcial, Pagada, Vencida, Cancelada). Registra pagos parciales múltiples con su método (Efectivo, Transferencia, PayPal, Bizum, Revolut) y controla los saldos pendientes en tiempo real."
+      },
+      "tasting": {
+        "title": "Menú de Degustación",
+        "path": "/admin/tasting",
+        "content": "Crea un menú de degustación con secciones y platos (con fotos). Importa cartas de catering automáticamente desde PDF/imágenes con IA. Envía enlaces personalizados a participantes por WhatsApp, Email o SMS. Los participantes puntúan los platos del 1 al 10, añaden notas y fotos. Consulta las puntuaciones medias por plato para elegir el menú final."
+      },
+      "menuSelection": {
+        "title": "Selección del Menú Final",
+        "content": "Tras la degustación, el organizador selecciona el menú final de boda con una interfaz de dos columnas: mueve los platos de Disponibles a Seleccionados, sección a sección, con las puntuaciones medias visibles. La selección final se guarda y vincula a la boda."
+      },
+      "rsvp": {
+        "title": "Confirmación de Asistencia",
+        "content": "Recibe un enlace mágico por WhatsApp, email o SMS, sin necesidad de cuenta. Confirma la asistencia de tu familia, indica restricciones alimentarias y preferencias de transporte, responde preguntas personalizadas y consulta los datos para el regalo. Puedes actualizar tu confirmación en cualquier momento antes de la fecha límite."
+      },
+      "tastingGuest": {
+        "title": "Experiencia de Degustación",
+        "content": "Recibe un enlace personalizado por WhatsApp, email o SMS. Puntuúa cada plato del 1 al 10, añade notas y sube fotos. Consulta las valoraciones del resto de participantes y las puntuaciones medias por plato. Las valoraciones se guardan automáticamente, sin necesidad de cuenta."
+      },
+      "goTo": "Ir a"
+    },
+    "personas": {
+      "select": "Selecciona tu perfil",
+      "hint": "Descubre las funciones relevantes para tu rol"
     }
   },
   "news": {

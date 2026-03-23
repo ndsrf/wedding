@@ -157,6 +157,30 @@
         "giftTracking": {
           "title": "Registre et Suivi des Cadeaux",
           "description": "Aidez les couples à gérer leur liste de cadeaux et à suivre les cadeaux reçus avec des rappels de remerciement automatiques."
+        },
+        "clientManagement": {
+          "title": "Gestion des Clients",
+          "description": "Centralisez toutes les informations de vos clients : coordonnées, mariages liés, contrats et historique des communications en un seul endroit."
+        },
+        "locations": {
+          "title": "Gestion des Lieux",
+          "description": "Enregistrez et organisez les lieux de cérémonie et les salles de réception avec adresses, liens Google Maps et notes. Réutilisez-les pour plusieurs mariages."
+        },
+        "quotesAndBudgets": {
+          "title": "Devis et Budgets",
+          "description": "Créez des devis professionnels avec des postes détaillés, remises, taxes et dates d'expiration. Envoyez-les aux clients et convertissez-les en factures en un clic."
+        },
+        "contractsSignature": {
+          "title": "Contrats et Signature Numérique",
+          "description": "Rédigez, partagez et collectez des signatures numériques juridiquement contraignantes. Collaboration en temps réel, remplissage par IA et piste d'audit complète."
+        },
+        "invoicesPayments": {
+          "title": "Factures et Paiements en Attente",
+          "description": "Émettez des factures, enregistrez des paiements partiels et suivez les soldes impayés. Compatible avec Espèces, Virement, PayPal, Bizum et plus encore."
+        },
+        "menuTasting": {
+          "title": "Gestion du Menu et Dégustation",
+          "description": "Créez des menus de dégustation, invitez des participants via WhatsApp ou e-mail, collectez des évaluations et sélectionnez le menu final du mariage parmi les plats goûtés."
         }
       }
     },
@@ -2172,7 +2196,54 @@
       "nupcibot": {
         "title": "Assistant IA NupciBot",
         "content": "Le bouton flottant NupciBot vous offre quatre actions rapides : reconfigurer votre mariage, voir les rapports, envoyer un message à votre wedding planner par email, ou ouvrir un chat IA pour poser des questions sur la plateforme."
-      }
+      },
+      "clients": {
+        "title": "Gestion des Clients",
+        "path": "/planner/clients",
+        "content": "Centralisez toutes les données de vos clients. Consultez les devis, contrats, factures et mariages liés à chaque client. Gérez les coordonnées, les notes et l'historique complet de la relation."
+      },
+      "locations": {
+        "title": "Lieux et Salles de Réception",
+        "path": "/planner/locations",
+        "content": "Créez et gérez des lieux de cérémonie et salles réutilisables. Stockez le nom, l'adresse, le lien Google Maps, le site web et des notes. Suivez quels mariages et éléments d'itinéraire utilisent chaque lieu et empêchez la suppression accidentelle des lieux en cours d'utilisation."
+      },
+      "quotes": {
+        "title": "Devis et Budgets",
+        "path": "/planner/quotes-finances",
+        "content": "Créez des devis professionnels avec des postes détaillés (quantité, prix unitaire, total), remises et taux de TVA. Gérez le statut (Brouillon, Envoyé, Accepté, Refusé, Expiré), définissez des dates d'expiration, exportez en PDF et convertissez les devis acceptés en factures en un clic."
+      },
+      "contracts": {
+        "title": "Contrats et Signature Numérique",
+        "path": "/planner/quotes-finances",
+        "content": "Rédigez et modifiez des contrats avec un éditeur de texte enrichi. Utilisez des modèles avec remplissage automatique par IA. Partagez avec les clients via un lien sécurisé. Collectez des signatures numériques légalement contraignantes via l'intégration DocuSeal. Suivez le statut complet (Brouillon → Partagé → En signature → Signé) avec PDF d'audit."
+      },
+      "invoices": {
+        "title": "Factures et Suivi des Paiements",
+        "path": "/planner/quotes-finances",
+        "content": "Émettez des factures avec postes, remises et taxes. Suivez le statut de paiement (Brouillon, Émise, Partielle, Payée, En retard, Annulée). Enregistrez plusieurs paiements partiels avec leur méthode (Espèces, Virement, PayPal, Bizum, Revolut) et surveillez les soldes impayés en temps réel."
+      },
+      "tasting": {
+        "title": "Menu de Dégustation",
+        "path": "/admin/tasting",
+        "content": "Créez un menu de dégustation avec sections et plats (avec photos). Importez automatiquement des menus de traiteur depuis des PDF/images grâce à l'IA. Envoyez des liens personnalisés aux participants par WhatsApp, e-mail ou SMS. Les participants notent les plats de 1 à 10, ajoutent des notes et des photos. Consultez les scores moyens par plat pour choisir le menu final."
+      },
+      "menuSelection": {
+        "title": "Sélection du Menu Final",
+        "content": "Après la dégustation, l'organisateur sélectionne le menu final du mariage avec une interface à deux colonnes : déplacez les plats des Disponibles vers les Sélectionnés, section par section, avec les scores moyens affichés. La sélection finale est enregistrée et liée au mariage."
+      },
+      "rsvp": {
+        "title": "Confirmation de Présence",
+        "content": "Recevez un lien magique par WhatsApp, e-mail ou SMS—aucun compte nécessaire. Confirmez la présence de votre famille, indiquez les restrictions alimentaires et préférences de transport, répondez aux questions personnalisées et consultez les coordonnées bancaires pour le cadeau. Vous pouvez modifier votre confirmation jusqu'à la date limite."
+      },
+      "tastingGuest": {
+        "title": "Expérience de Dégustation",
+        "content": "Recevez un lien personnalisé par WhatsApp, e-mail ou SMS. Notez chaque plat de 1 à 10 étoiles, ajoutez des notes de dégustation et uploadez des photos. Consultez les évaluations de tous les participants et les scores moyens par plat. Les notes s’enregistrent automatiquement—aucune connexion requise."
+      },
+      "goTo": "Aller à"
+    },
+    "personas": {
+      "select": "Choisissez votre profil",
+      "hint": "Découvrez les fonctionnalités adaptées à votre rôle"
     }
   },
   "news": {

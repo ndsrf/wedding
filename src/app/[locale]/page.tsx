@@ -9,6 +9,103 @@ import { notFound } from 'next/navigation';
 import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
 import AMPLink from '@/components/AMPLink';
+import LandingFeatureCard from '@/components/LandingFeatureCard';
+
+const LANDING_FEATURES: Array<{
+  key: string;
+  bg: string;
+  border: string;
+  iconGradient: string;
+  iconPaths: string[];
+}> = [
+  {
+    key: 'guestManagement',
+    bg: 'from-rose-50 to-pink-50',
+    border: 'border-rose-100',
+    iconGradient: 'from-rose-500 to-pink-500',
+    iconPaths: ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
+  },
+  {
+    key: 'invitationDesigner',
+    bg: 'from-purple-50 to-indigo-50',
+    border: 'border-purple-100',
+    iconGradient: 'from-purple-500 to-indigo-500',
+    iconPaths: ['M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
+  },
+  {
+    key: 'multiChannel',
+    bg: 'from-blue-50 to-cyan-50',
+    border: 'border-blue-100',
+    iconGradient: 'from-blue-500 to-cyan-500',
+    iconPaths: ['M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+  },
+  {
+    key: 'taskManagement',
+    bg: 'from-emerald-50 to-teal-50',
+    border: 'border-emerald-100',
+    iconGradient: 'from-emerald-500 to-teal-500',
+    iconPaths: ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
+  },
+  {
+    key: 'seatingPlanner',
+    bg: 'from-amber-50 to-orange-50',
+    border: 'border-amber-100',
+    iconGradient: 'from-amber-500 to-orange-500',
+    iconPaths: ['M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z'],
+  },
+  {
+    key: 'giftTracking',
+    bg: 'from-fuchsia-50 to-pink-50',
+    border: 'border-fuchsia-100',
+    iconGradient: 'from-fuchsia-500 to-pink-500',
+    iconPaths: ['M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7'],
+  },
+  {
+    key: 'clientManagement',
+    bg: 'from-violet-50 to-purple-50',
+    border: 'border-violet-100',
+    iconGradient: 'from-violet-500 to-purple-500',
+    iconPaths: ['M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+  },
+  {
+    key: 'locations',
+    bg: 'from-green-50 to-lime-50',
+    border: 'border-green-100',
+    iconGradient: 'from-green-500 to-lime-500',
+    iconPaths: [
+      'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z',
+      'M15 11a3 3 0 11-6 0 3 3 0 016 0z',
+    ],
+  },
+  {
+    key: 'quotesAndBudgets',
+    bg: 'from-sky-50 to-blue-50',
+    border: 'border-sky-100',
+    iconGradient: 'from-sky-500 to-blue-500',
+    iconPaths: ['M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+  },
+  {
+    key: 'contractsSignature',
+    bg: 'from-slate-50 to-gray-50',
+    border: 'border-slate-100',
+    iconGradient: 'from-slate-500 to-gray-500',
+    iconPaths: ['M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z'],
+  },
+  {
+    key: 'invoicesPayments',
+    bg: 'from-yellow-50 to-amber-50',
+    border: 'border-yellow-100',
+    iconGradient: 'from-yellow-500 to-amber-500',
+    iconPaths: ['M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
+  },
+  {
+    key: 'menuTasting',
+    bg: 'from-orange-50 to-red-50',
+    border: 'border-orange-100',
+    iconGradient: 'from-orange-500 to-red-500',
+    iconPaths: ['M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'],
+  },
+];
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -171,95 +268,17 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1: Guest Management */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 hover:shadow-xl transition-shadow border border-rose-100">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center mb-6">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('landing.features.items.guestManagement.title')}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('landing.features.items.guestManagement.description')}
-              </p>
-            </div>
-
-            {/* Feature 2: Invitation Designer */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 hover:shadow-xl transition-shadow border border-purple-100">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mb-6">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('landing.features.items.invitationDesigner.title')}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('landing.features.items.invitationDesigner.description')}
-              </p>
-            </div>
-
-            {/* Feature 3: Multi-Channel Invitations */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 hover:shadow-xl transition-shadow border border-blue-100">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center mb-6">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('landing.features.items.multiChannel.title')}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('landing.features.items.multiChannel.description')}
-              </p>
-            </div>
-
-            {/* Feature 4: Task Management */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 hover:shadow-xl transition-shadow border border-emerald-100">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center mb-6">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('landing.features.items.taskManagement.title')}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('landing.features.items.taskManagement.description')}
-              </p>
-            </div>
-
-            {/* Feature 5: Seating Planner */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 hover:shadow-xl transition-shadow border border-amber-100">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center mb-6">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('landing.features.items.seatingPlanner.title')}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('landing.features.items.seatingPlanner.description')}
-              </p>
-            </div>
-
-            {/* Feature 6: Gift Tracking */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-fuchsia-50 to-pink-50 hover:shadow-xl transition-shadow border border-fuchsia-100">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 flex items-center justify-center mb-6">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {t('landing.features.items.giftTracking.title')}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t('landing.features.items.giftTracking.description')}
-              </p>
-            </div>
+            {LANDING_FEATURES.map((feature) => (
+              <LandingFeatureCard
+                key={feature.key}
+                title={t(`landing.features.items.${feature.key}.title`)}
+                description={t(`landing.features.items.${feature.key}.description`)}
+                iconPaths={feature.iconPaths}
+                bg={feature.bg}
+                border={feature.border}
+                iconGradient={feature.iconGradient}
+              />
+            ))}
           </div>
         </div>
       </section>
