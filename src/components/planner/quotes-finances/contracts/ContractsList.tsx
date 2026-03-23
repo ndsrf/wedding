@@ -219,8 +219,8 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       onCreateInvoice({
         customer_id: quote.customer_id ?? null,
         quote_id: quote.id,
-        client_name: quote.couple_names,
-        client_email: quote.client_email ?? '',
+        client_name: quote.customer?.name ?? quote.couple_names,
+        client_email: quote.customer?.email ?? '',
         currency: quote.currency,
         discount: quote.discount != null ? Number(quote.discount) : '',
         tax_rate: quote.tax_rate != null ? Number(quote.tax_rate) : '',

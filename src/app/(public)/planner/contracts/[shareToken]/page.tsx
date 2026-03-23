@@ -17,7 +17,7 @@ interface ContractData {
 
 interface QuoteRef {
   couple_names: string;
-  client_email: string | null;
+  customer: { email: string | null } | null;
 }
 
 interface CreateWeddingDialogProps {

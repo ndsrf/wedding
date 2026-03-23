@@ -17,12 +17,10 @@ interface LineItem {
 interface Quote {
   id: string;
   customer_id: string | null;
-  customer: { id: string; name: string; email: string | null; phone: string | null } | null;
+  customer: { id: string; name: string; email: string | null; phone: string | null; id_number: string | null; address: string | null; notes: string | null } | null;
   couple_names: string;
   event_date: string | null;
   location: string | null;
-  client_email: string | null;
-  client_phone: string | null;
   notes: string | null;
   currency: string;
   subtotal: string | number;
@@ -245,8 +243,10 @@ export function QuotesList() {
             couple_names: quoteData.couple_names,
             event_date: quoteData.event_date ?? '',
             location: quoteData.location ?? '',
-            client_email: quoteData.client_email ?? '',
-            client_phone: quoteData.client_phone ?? '',
+            client_email: quoteData.customer?.email ?? '',
+            client_phone: quoteData.customer?.phone ?? '',
+            client_id_number: quoteData.customer?.id_number ?? '',
+            client_address: quoteData.customer?.address ?? '',
             notes: quoteData.notes ?? '',
             currency: quoteData.currency,
             discount: quoteData.discount != null ? Number(quoteData.discount) : '',
@@ -341,7 +341,7 @@ export function QuotesList() {
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
                     {quote.event_date && <span>{new Date(quote.event_date).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
                     {quote.location && <span>📍 {quote.location}</span>}
-                    {quote.client_email && <span>✉ {quote.client_email}</span>}
+                    {quote.customer?.email && <span>✉ {quote.customer.email}</span>}
                   </div>
 
                   {/* Existing contracts for this quote */}

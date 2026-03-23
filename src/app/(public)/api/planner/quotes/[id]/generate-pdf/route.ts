@@ -15,7 +15,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const quote = await prisma.quote.findFirst({
       where: { id, planner_id: user.planner_id },
-      include: { line_items: true },
+      include: { line_items: true, customer: true },
     });
     if (!quote) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 

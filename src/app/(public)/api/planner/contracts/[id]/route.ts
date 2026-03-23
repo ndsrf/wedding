@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
-      include: { quote: { select: { id: true, couple_names: true, client_email: true } }, template: true },
+      include: { quote: { select: { id: true, couple_names: true, customer: { select: { email: true } } } }, template: true },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 

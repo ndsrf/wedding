@@ -18,6 +18,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const quote = await prisma.quote.findFirst({
       where: { id: quoteId, planner_id: user.planner_id },
+      include: { customer: { select: { email: true } } },
     });
     if (!quote) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         contract_template_id: data.contract_template_id ?? null,
         title: data.title,
         content: content as Prisma.InputJsonValue,
-        signer_email: quote.client_email ?? null,
+        signer_email: quote.customer?.email ?? null,
       },
     });
 

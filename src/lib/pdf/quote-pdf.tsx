@@ -11,7 +11,7 @@ import {
 import type { Prisma } from '@prisma/client';
 
 type QuoteWithLineItems = Prisma.QuoteGetPayload<{
-  include: { line_items: true };
+  include: { line_items: true; customer: true };
 }>;
 
 const styles = StyleSheet.create({
@@ -234,8 +234,9 @@ export function QuotePDF({ quote, company }: QuotePDFProps) {
           <View style={styles.clientBlock}>
             <Text style={styles.sectionTitle}>Quote For</Text>
             <Text style={styles.clientName}>{quote.couple_names}</Text>
-            {quote.client_email && <Text style={styles.clientDetail}>{quote.client_email}</Text>}
-            {quote.client_phone && <Text style={styles.clientDetail}>{quote.client_phone}</Text>}
+            {quote.customer?.email && <Text style={styles.clientDetail}>{quote.customer.email}</Text>}
+            {quote.customer?.phone && <Text style={styles.clientDetail}>{quote.customer.phone}</Text>}
+            {quote.customer?.address && <Text style={styles.clientDetail}>{quote.customer.address}</Text>}
             {quote.location && <Text style={styles.clientDetail}>{quote.location}</Text>}
             {quote.event_date && (
               <Text style={styles.clientDetail}>Event: {new Date(quote.event_date).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>

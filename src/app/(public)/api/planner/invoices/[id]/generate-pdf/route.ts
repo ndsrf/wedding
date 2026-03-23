@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const invoice = await prisma.invoice.findFirst({
       where: { id, planner_id: user.planner_id },
-      include: { line_items: true, payments: { orderBy: { payment_date: 'desc' } } },
+      include: { line_items: true, payments: { orderBy: { payment_date: 'desc' } }, customer: true },
     });
     if (!invoice) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 

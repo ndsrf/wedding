@@ -110,8 +110,10 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <p className="text-xs text-gray-500 mb-0.5">Client</p>
-                <p className="text-sm font-semibold text-gray-900">{invoice.client_name}</p>
-                {invoice.client_email && <p className="text-xs text-gray-500">{invoice.client_email}</p>}
+                <p className="text-sm font-semibold text-gray-900">{invoice.customer?.name ?? ''}</p>
+                {invoice.customer?.email && <p className="text-xs text-gray-500">{invoice.customer.email}</p>}
+                {invoice.customer?.phone && <p className="text-xs text-gray-500">{invoice.customer.phone}</p>}
+                {invoice.customer?.address && <p className="text-xs text-gray-500">{invoice.customer.address}</p>}
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-500 mb-0.5">Invoice #</p>

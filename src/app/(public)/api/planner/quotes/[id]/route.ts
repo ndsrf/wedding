@@ -18,6 +18,7 @@ const updateQuoteSchema = z.object({
   couple_names: z.string().min(1).optional(),
   event_date: z.string().datetime().optional().nullable(),
   location: z.string().optional().nullable(),
+  // Client contact fields — applied to the linked Customer record, not stored on Quote
   client_email: z.string().email().optional().nullable(),
   client_phone: z.string().optional().nullable(),
   client_id_number: z.string().optional().nullable(),
@@ -42,7 +43,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const quote = await prisma.quote.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true } },
+        customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         contracts: { select: { id: true, status: true, share_token: true } },
         invoices: { select: { id: true, invoice_number: true, status: true, total: true, amount_paid: true } },
@@ -69,7 +70,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const body = await request.json();
     const data = updateQuoteSchema.parse(body);
 
-    const { line_items: lineItems, ...quoteData } = data;
+    const { line_items: lineItems, client_email, client_phone, client_id_number, client_address, ...quoteData } = data;
+
+    // If client contact fields are provided, update the linked customer
+    const hasClientUpdate = client_email !== undefined || client_phone !== undefined
+      || client_id_number !== undefined || client_address !== undefined;
+    const customerId = quoteData.customer_id ?? existing.customer_id;
+
+    if (hasClientUpdate && customerId) {
+      await prisma.customer.updateMany({
+        where: { id: customerId, planner_id: user.planner_id },
+        data: {
+          ...(client_email !== undefined && { email: client_email || null }),
+          ...(client_phone !== undefined && { phone: client_phone || null }),
+          ...(client_id_number !== undefined && { id_number: client_id_number || null }),
+          ...(client_address !== undefined && { address: client_address || null }),
+        },
+      });
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       if (lineItems !== undefined) {
@@ -89,10 +107,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
       // Determine if any content fields changed (not just status) — clear pdf_url so it gets regenerated
       const pdfFields = [
-        'couple_names', 'event_date', 'location', 'client_email', 'client_phone',
+        'couple_names', 'event_date', 'location',
         'notes', 'currency', 'subtotal', 'discount', 'tax_rate', 'total', 'expires_at'
       ];
-      const contentChanged = lineItems !== undefined || pdfFields.some(field => field in quoteData);
+      const contentChanged = lineItems !== undefined || hasClientUpdate || pdfFields.some(field => field in quoteData);
 
       return tx.quote.update({
         where: { id },
@@ -101,8 +119,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(quoteData.couple_names !== undefined && { couple_names: quoteData.couple_names }),
           ...(quoteData.event_date !== undefined && { event_date: quoteData.event_date ? new Date(quoteData.event_date) : null }),
           ...(quoteData.location !== undefined && { location: quoteData.location }),
-          ...(quoteData.client_email !== undefined && { client_email: quoteData.client_email || null }),
-          ...(quoteData.client_phone !== undefined && { client_phone: quoteData.client_phone }),
           ...(quoteData.notes !== undefined && { notes: quoteData.notes }),
           ...(quoteData.currency !== undefined && { currency: quoteData.currency }),
           ...(quoteData.subtotal !== undefined && { subtotal: quoteData.subtotal }),
@@ -115,7 +131,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(contentChanged && { pdf_url: null }),
         },
         include: {
-          customer: { select: { id: true, name: true, email: true, phone: true } },
+          customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
           line_items: true,
         },
       });
