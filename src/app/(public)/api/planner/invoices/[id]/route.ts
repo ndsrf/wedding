@@ -40,7 +40,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const invoice = await prisma.invoice.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
         quote: { select: { id: true, couple_names: true } },
@@ -121,7 +121,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(contentChanged && { pdf_url: null }),
         },
         include: {
-          customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+          customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
           line_items: true,
           payments: { orderBy: { payment_date: 'desc' } },
           quote: { select: { id: true, couple_names: true } },

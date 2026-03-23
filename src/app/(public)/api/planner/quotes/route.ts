@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         ...(status ? { status: status as never } : {}),
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         contracts: { select: { id: true, status: true, share_token: true, signed_pdf_url: true } },
         invoices: { select: { id: true, status: true, total: true, amount_paid: true } },
@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
         data: {
           planner_id: user.planner_id,
           name: data.couple_names,
+          couple_names: data.couple_names,
           email: data.client_email || null,
           phone: data.client_phone || null,
           id_number: data.client_id_number || null,
@@ -82,10 +83,11 @@ export async function POST(request: NextRequest) {
       });
       customerId = newCustomer.id;
     } else {
-      // Update existing customer with any provided contact data
+      // Update existing customer with the latest couple_names and any provided contact data
       await prisma.customer.updateMany({
         where: { id: customerId, planner_id: user.planner_id },
         data: {
+          couple_names: data.couple_names,
           ...(data.client_email !== undefined && { email: data.client_email || null }),
           ...(data.client_phone !== undefined && { phone: data.client_phone || null }),
           ...(data.client_id_number !== undefined && { id_number: data.client_id_number || null }),
@@ -119,7 +121,7 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
       },
     });

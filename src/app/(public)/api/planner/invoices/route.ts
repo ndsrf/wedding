@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         ...(status ? { status: status as never } : {}),
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
         quote: { select: { id: true, couple_names: true, contracts: { select: { id: true, title: true }, take: 1 } } },
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         payments: true,
       },

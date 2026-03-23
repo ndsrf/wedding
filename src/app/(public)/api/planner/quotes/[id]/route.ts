@@ -43,7 +43,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const quote = await prisma.quote.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         contracts: { select: { id: true, status: true, share_token: true } },
         invoices: { select: { id: true, invoice_number: true, status: true, total: true, amount_paid: true } },
@@ -72,15 +72,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const { line_items: lineItems, client_email, client_phone, client_id_number, client_address, ...quoteData } = data;
 
-    // If client contact fields are provided, update the linked customer
+    // If client contact fields or couple_names are provided, update the linked customer
     const hasClientUpdate = client_email !== undefined || client_phone !== undefined
-      || client_id_number !== undefined || client_address !== undefined;
+      || client_id_number !== undefined || client_address !== undefined
+      || quoteData.couple_names !== undefined;
     const customerId = quoteData.customer_id ?? existing.customer_id;
 
     if (hasClientUpdate && customerId) {
       await prisma.customer.updateMany({
         where: { id: customerId, planner_id: user.planner_id },
         data: {
+          ...(quoteData.couple_names !== undefined && { couple_names: quoteData.couple_names }),
           ...(client_email !== undefined && { email: client_email || null }),
           ...(client_phone !== undefined && { phone: client_phone || null }),
           ...(client_id_number !== undefined && { id_number: client_id_number || null }),
@@ -131,7 +133,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(contentChanged && { pdf_url: null }),
         },
         include: {
-          customer: { select: { id: true, name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+          customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
           line_items: true,
         },
       });

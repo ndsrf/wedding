@@ -51,6 +51,7 @@ type ResolveContext = {
   } | null;
   customer: {
     name: string;
+    couple_names: string | null;
     email: string | null;
     phone: string | null;
     id_number: string | null;
@@ -75,7 +76,7 @@ function resolveSourceField(sourceField: string, ctx: ResolveContext): string | 
     case 'planner_address':  return planner?.address ?? null;
     case 'planner_vat':      return planner?.vat_number ?? null;
     case 'planner_website':  return planner?.website ?? null;
-    case 'couple_names':     return quote?.couple_names ?? customer?.name ?? null;
+    case 'couple_names':     return customer?.couple_names ?? quote?.couple_names ?? customer?.name ?? null;
     case 'client_name':      return customer?.name ?? null;
     case 'client_email':     return customer?.email ?? null;
     case 'client_phone':     return customer?.phone ?? null;
@@ -118,7 +119,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       where: { id, planner_id: user.planner_id },
       include: {
         quote: { select: { couple_names: true, event_date: true, location: true, total: true, currency: true } },
-        customer: { select: { name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         template: { select: { placeholder_rules: true } },
       },
     });

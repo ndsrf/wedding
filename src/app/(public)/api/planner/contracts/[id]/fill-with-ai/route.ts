@@ -59,7 +59,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       where: { id, planner_id: user.planner_id },
       include: {
         quote: { include: { line_items: true } },
-        customer: { select: { name: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        customer: { select: { name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
       },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -96,7 +96,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const clientInfo = [
       `Client / Couple:`,
       `  Name: ${customer?.name ?? quote?.couple_names ?? 'Unknown'}`,
-      quote?.couple_names && quote.couple_names !== customer?.name ? `  Couple names: ${quote.couple_names}` : null,
+      customer?.couple_names ? `  Couple names: ${customer.couple_names}` : (quote?.couple_names && quote.couple_names !== customer?.name ? `  Couple names: ${quote.couple_names}` : null),
       customer?.email ? `  Email: ${customer.email}` : null,
       customer?.phone ? `  Phone: ${customer.phone}` : null,
       customer?.id_number ? `  ID/Passport number: ${customer.id_number}` : null,

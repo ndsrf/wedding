@@ -817,14 +817,15 @@ enum InvoiceStatus {
 // -----------------------------------------------------------------------------
 
 model Customer {
-  id         String         @id @default(uuid())
-  planner_id String
-  name       String
-  email      String?
-  phone      String?
-  id_number  String?
-  address    String?        @db.Text
-  notes      String?        @db.Text
+  id           String         @id @default(uuid())
+  planner_id   String
+  name         String
+  couple_names String?
+  email        String?
+  phone        String?
+  id_number    String?
+  address      String?        @db.Text
+  notes        String?        @db.Text
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
   planner    WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)

@@ -14,6 +14,7 @@ interface LineItem {
 interface CustomerSuggestion {
   id: string;
   name: string;
+  couple_names: string | null;
   email: string | null;
   phone: string | null;
   id_number: string | null;
@@ -110,7 +111,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
     setForm((p) => ({
       ...p,
       customer_id: c.id,
-      couple_names: c.name,
+      couple_names: c.couple_names ?? c.name,
       client_email: c.email ?? p.client_email,
       client_phone: c.phone ?? p.client_phone,
       client_id_number: c.id_number ?? p.client_id_number,
