@@ -47,7 +47,7 @@ export interface Invoice {
 interface ReadyQuote {
   id: string;
   couple_names: string;
-  customer: { email: string | null } | null;
+  customer: { email: string | null; id_number: string | null; address: string | null } | null;
   currency: string;
   total: string | number;
   contract: { id: string; status: string } | null;
@@ -202,6 +202,8 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         ? {
             client_name: prefillQuote.couple_names,
             client_email: prefillQuote.customer?.email ?? '',
+            client_id_number: prefillQuote.customer?.id_number ?? '',
+            client_address: prefillQuote.customer?.address ?? '',
             currency: prefillQuote.currency,
             quote_id: prefillQuote.id,
           }
