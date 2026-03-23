@@ -272,6 +272,7 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
   const [phone, setPhone] = useState('');
   const [idNumber, setIdNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -291,6 +292,7 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
           phone: phone.trim() || null,
           id_number: idNumber.trim() || null,
           address: address.trim() || null,
+          notes: notes.trim() || null,
         }),
       });
       if (!res.ok) throw new Error('Failed to create client');
@@ -376,6 +378,15 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
               rows={2}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
               placeholder="Street, City, Country..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
