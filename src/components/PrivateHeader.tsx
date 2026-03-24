@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ReactNode } from 'react';
+import { useWeddingAccess } from '@/contexts/WeddingAccessContext';
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -31,6 +32,7 @@ export default function PrivateHeader({
 }: PrivateHeaderProps) {
   const t = useTranslations();
   const router = useRouter();
+  const { plannerLogoUrl } = useWeddingAccess();
 
   const handleBack = () => {
     if (backUrl) {
@@ -80,6 +82,19 @@ export default function PrivateHeader({
                 priority
               />
             </Link>
+            {plannerLogoUrl && (
+              <>
+                <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
+                <Image
+                  src={plannerLogoUrl}
+                  alt="Wedding planner"
+                  width={120}
+                  height={48}
+                  className="h-10 w-auto object-contain"
+                  unoptimized
+                />
+              </>
+            )}
           </div>
 
           {/* Center: Title and Subtitle */}

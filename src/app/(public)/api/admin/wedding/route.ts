@@ -114,7 +114,7 @@ export async function GET() {
         prisma.wedding.findUnique({
           where: { id: user.wedding_id },
           include: {
-            planner: { select: { name: true } },
+            planner: { select: { name: true, logo_url: true } },
             wedding_admins: true,
           },
         }),
@@ -282,6 +282,7 @@ export async function GET() {
       payment_received_count: paymentReceivedCount,
       // Additional details for admin view
       planner_name: wedding.planner.name,
+      planner_logo_url: wedding.planner?.logo_url ?? null,
       admin_count: wedding.wedding_admins.length,
       available_themes: availableThemes,
       customer_id: wedding.customer_id,

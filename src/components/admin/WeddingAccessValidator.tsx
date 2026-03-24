@@ -23,6 +23,8 @@ interface WeddingAccessValidatorProps {
   children: ReactNode;
 }
 
+const PLANNER_LOGO_CACHE_KEY = 'nupci:planner_logo_url';
+
 export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps) {
   const t = useTranslations();
   const router = useRouter();
@@ -30,6 +32,9 @@ export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps
   const [isDisabled, setIsDisabled] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [coupleNames, setCoupleNames] = useState('');
+  const [plannerLogoUrl, setPlannerLogoUrl] = useState<string | null>(() => {
+    try { return sessionStorage.getItem(PLANNER_LOGO_CACHE_KEY); } catch { return null; }
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +72,12 @@ export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps
           setIsDisabled(data.data.is_disabled || false);
           setIsDeleted(data.data.status === 'DELETED');
           setCoupleNames(data.data.couple_names || '');
+          const logoUrl = data.data.planner_logo_url ?? null;
+          setPlannerLogoUrl(logoUrl);
+          try {
+            if (logoUrl) sessionStorage.setItem(PLANNER_LOGO_CACHE_KEY, logoUrl);
+            else sessionStorage.removeItem(PLANNER_LOGO_CACHE_KEY);
+          } catch { /* sessionStorage unavailable */ }
 
           // If deleted, redirect to no-access
           if (data.data.status === 'DELETED') {
@@ -109,7 +120,7 @@ export function WeddingAccessValidator({ children }: WeddingAccessValidatorProps
   }
 
   return (
-    <WeddingAccessProvider isDisabled={isDisabled} isDeleted={isDeleted} coupleNames={coupleNames}>
+    <WeddingAccessProvider isDisabled={isDisabled} isDeleted={isDeleted} coupleNames={coupleNames} plannerLogoUrl={plannerLogoUrl}>
       {isDisabled && (
         <div className="bg-yellow-50 border-b-4 border-yellow-400">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center">

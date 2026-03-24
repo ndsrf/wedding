@@ -15,6 +15,7 @@ export interface WeddingAccessContextType {
   isDeleted: boolean;
   isReadOnly: boolean; // Convenience flag: true when disabled
   coupleNames: string;
+  plannerLogoUrl: string | null;
 }
 
 const defaultContext: WeddingAccessContextType = {
@@ -22,6 +23,7 @@ const defaultContext: WeddingAccessContextType = {
   isDeleted: false,
   isReadOnly: false,
   coupleNames: '',
+  plannerLogoUrl: null,
 };
 
 export const WeddingAccessContext = createContext<WeddingAccessContextType>(defaultContext);
@@ -39,6 +41,7 @@ interface WeddingAccessProviderProps {
   isDisabled: boolean;
   isDeleted: boolean;
   coupleNames: string;
+  plannerLogoUrl: string | null;
 }
 
 export function WeddingAccessProvider({
@@ -46,12 +49,14 @@ export function WeddingAccessProvider({
   isDisabled,
   isDeleted,
   coupleNames,
+  plannerLogoUrl,
 }: WeddingAccessProviderProps) {
   const value: WeddingAccessContextType = {
     isDisabled,
     isDeleted,
     isReadOnly: isDisabled, // Disabled means read-only
     coupleNames,
+    plannerLogoUrl,
   };
 
   return (
