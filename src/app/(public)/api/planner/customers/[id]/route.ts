@@ -18,7 +18,11 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     }
 
     return NextResponse.json({ data: customer });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (message.startsWith('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.error('[GET /api/planner/customers/[id]]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -58,7 +62,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json({ data: updated });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (message.startsWith('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.error('[PATCH /api/planner/customers/[id]]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -105,7 +113,11 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     await prisma.customer.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (message.startsWith('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.error('[DELETE /api/planner/customers/[id]]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
