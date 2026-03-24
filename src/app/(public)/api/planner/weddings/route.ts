@@ -344,6 +344,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 });
     }
 
+    // Narrowed to string (undefined case already returned above)
+    const plannerId = user.planner_id as string;
+
     // Enforce license wedding limit and create the wedding atomically so that
     // two concurrent requests cannot both pass the count check when only one
     // slot remains.
@@ -351,18 +354,18 @@ export async function POST(request: NextRequest) {
     try {
       wedding = await prisma.$transaction(async (tx) => {
         const license = await tx.plannerLicense.findUnique({
-          where: { planner_id: user.planner_id },
+          where: { planner_id: plannerId },
         });
         const maxWeddings = license?.max_weddings ?? 10;
         const currentCount = await tx.wedding.count({
-          where: { planner_id: user.planner_id, status: { not: WeddingStatus.DELETED } },
+          where: { planner_id: plannerId, status: { not: WeddingStatus.DELETED } },
         });
         if (currentCount >= maxWeddings) {
           throw Object.assign(new Error('WEDDING_LIMIT_REACHED'), { maxWeddings });
         }
         return tx.wedding.create({
           data: {
-            planner_id: user.planner_id,
+            planner_id: plannerId,
             couple_names: validatedData.couple_names,
             wedding_date: weddingDate,
             wedding_time: validatedData.wedding_time,
