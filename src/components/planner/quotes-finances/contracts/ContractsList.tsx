@@ -34,8 +34,8 @@ interface Contract {
   pdf_url: string | null;
   signed_pdf_url: string | null;
   created_at: string;
-  customer: { id: string; name: string; email: string | null } | null;
-  quote: { id: string; couple_names: string; currency: string; total: string | number } | null;
+  customer: { id: string; name: string; couple_names: string | null; email: string | null } | null;
+  quote: { id: string; couple_names: string; event_date: string | null; currency: string; total: string | number } | null;
   template: { id: string; name: string } | null;
 }
 
@@ -244,9 +244,14 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   async function handleCreateWedding(contract: Contract) {
     setCreatingWeddingId(contract.id);
     try {
-      // Navigate to the weddings creation page with the contract pre-linked
       const params = new URLSearchParams({ action: 'create', contract_id: contract.id });
-      if (contract.customer) params.set('couple_names', contract.customer.name);
+      if (contract.customer) {
+        params.set('customer_id', contract.customer.id);
+        params.set('customer_name', contract.customer.name);
+        const coupleNames = contract.customer.couple_names ?? contract.quote?.couple_names ?? contract.customer.name;
+        params.set('couple_names', coupleNames);
+      }
+      if (contract.quote?.event_date) params.set('event_date', contract.quote.event_date);
       window.location.href = `/planner/weddings?${params.toString()}`;
     } finally {
       setCreatingWeddingId(null);

@@ -10,8 +10,8 @@ export async function GET(_request: NextRequest) {
     const contracts = await prisma.contract.findMany({
       where: { planner_id: user.planner_id },
       include: {
-        customer: { select: { id: true, name: true, email: true } },
-        quote: { select: { id: true, couple_names: true, currency: true, total: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true } },
+        quote: { select: { id: true, couple_names: true, event_date: true, currency: true, total: true } },
         template: { select: { id: true, name: true } },
       },
       orderBy: { created_at: 'desc' },
