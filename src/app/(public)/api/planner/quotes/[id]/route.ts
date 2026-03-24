@@ -79,7 +79,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const customerId = quoteData.customer_id ?? existing.customer_id;
 
     if (hasClientUpdate && customerId) {
-      await prisma.customer.updateMany({
+      await prisma.customer.update({
         where: { id: customerId, planner_id: user.planner_id },
         data: {
           ...(quoteData.couple_names !== undefined && { couple_names: quoteData.couple_names }),
