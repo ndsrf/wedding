@@ -134,17 +134,29 @@ export function ContractEditor({
           // the fragment appears empty, we seed it, and then Liveblocks delivers
           // the stored state on top.  Using provider.on('sync') guarantees we
           // check only after the full initial Yjs state has been applied.
+          let seedCalled = false;
           function seedIfEmpty() {
             if (destroyed) return;
+            // With immediatelyRender: false, TipTap creates the editor in a useEffect,
+            // which runs in the same batch as this Liveblocks effect. For empty rooms
+            // the provider may be synced before the editor ref is populated — retry
+            // until the editor is available (up to ~1 s).
+            if (!editorRef.current) {
+              setTimeout(seedIfEmpty, 50);
+              return;
+            }
+            if (seedCalled) return;
+            seedCalled = true;
+
             const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
 
-            if (fragment.length === 0 && initialContentRef.current && editorRef.current) {
+            if (fragment.length === 0 && initialContentRef.current) {
               // Fresh room — seed from DB content.
               editorRef.current.commands.setContent(
                 initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
                 { emitUpdate: false },
               );
-            } else if (fragment.length > 0 && editorRef.current) {
+            } else if (fragment.length > 0) {
               // Room has content.  Detect the CRDT duplication artifact caused by the
               // previous fix (room 'connected' + setTimeout): if the node array is
               // exactly two identical halves, cut it back to one and persist to DB.
@@ -166,18 +178,20 @@ export function ContractEditor({
             }
           }
 
-          // Cast to access standard Yjs Observable API (synced + sync event)
+          // Cast to access standard Yjs Observable API (synced + sync event).
+          // LiveblocksYjsProvider emits both 'sync' and 'synced'; register both
+          // as a safety net in case the event name differs across versions.
           const typedProvider = provider as unknown as {
             synced: boolean;
             on: (event: string, fn: (isSynced: boolean) => void) => void;
           };
           if (typedProvider.synced) {
-            // Already synced (e.g. state was available synchronously)
+            // Already synced (e.g. empty room with no state to apply).
             seedIfEmpty();
           } else {
-            typedProvider.on('sync', (isSynced: boolean) => {
-              if (isSynced) seedIfEmpty();
-            });
+            const onSync = (isSynced: boolean) => { if (isSynced) seedIfEmpty(); };
+            typedProvider.on('sync', onSync);
+            typedProvider.on('synced', onSync);
           }
 
           cleanup = () => {
