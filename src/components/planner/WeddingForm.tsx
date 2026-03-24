@@ -214,6 +214,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
 
   const [errors, setErrors] = useState<Partial<Record<keyof WeddingFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof WeddingFormData, string>> = {};
@@ -255,6 +256,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       await onSubmit({
         ...formData,
@@ -262,6 +264,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
       });
     } catch (error) {
       console.error('Form submission error:', error);
+      setSubmitError(error instanceof Error ? error.message : t('planner.weddings.createError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -646,6 +649,13 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
           <strong>{t('planner.weddings.note.title')}</strong> {t('planner.weddings.note.content')}
         </p>
       </div>
+
+      {/* Submission Error */}
+      {submitError && (
+        <div className="rounded-md bg-red-50 border border-red-200 p-3">
+          <p className="text-sm text-red-700">{submitError}</p>
+        </div>
+      )}
 
       {/* Form Actions */}
       <div className="flex justify-end space-x-3 pt-4 pb-4 border-t">
