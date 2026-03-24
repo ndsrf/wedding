@@ -72,7 +72,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       || client_id_number !== undefined || client_address !== undefined;
 
     if (hasClientUpdate && existing.customer_id) {
-      await prisma.customer.updateMany({
+      await prisma.customer.update({
         where: { id: existing.customer_id, planner_id: user.planner_id },
         data: {
           ...(client_name !== undefined && { name: client_name }),
