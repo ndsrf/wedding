@@ -282,10 +282,18 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     );
   }
 
+  const now = new Date();
   const filteredInvoices = invoices.filter((inv) => {
     const clientName = inv.customer?.name ?? '';
     const nameMatch = nameFilter.trim() === '' || clientName.toLowerCase().includes(nameFilter.toLowerCase());
-    const statusMatch = statusFilter.length === 0 || statusFilter.includes(inv.status);
+    const isEffectivelyOverdue =
+      inv.status !== 'PAID' &&
+      inv.status !== 'CANCELLED' &&
+      inv.status !== 'DRAFT' &&
+      !!inv.due_date &&
+      new Date(inv.due_date) < now;
+    const effectiveStatus = isEffectivelyOverdue ? 'OVERDUE' : inv.status;
+    const statusMatch = statusFilter.length === 0 || statusFilter.includes(effectiveStatus) || statusFilter.includes(inv.status);
     return nameMatch && statusMatch;
   });
   const pagedInvoices = filteredInvoices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
