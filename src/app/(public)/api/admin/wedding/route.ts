@@ -284,6 +284,8 @@ export async function GET() {
       planner_name: wedding.planner.name,
       admin_count: wedding.wedding_admins.length,
       available_themes: availableThemes,
+      customer_id: wedding.customer_id,
+      contract_id: wedding.contract_id,
     };
 
     // Store in Redis for subsequent requests
