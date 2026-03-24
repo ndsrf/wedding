@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac, timingSafeEqual } from 'crypto';
+import { timingSafeEqual } from 'crypto';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 
@@ -28,29 +28,15 @@ const webhookEventSchema = z.object({
 });
 
 /**
- * Verify the DocuSeal webhook signature (optional).
+ * Verify the DocuSeal webhook HMAC-SHA256 signature (optional).
  * Set DOCUSEAL_WEBHOOK_SECRET in env to enable verification.
- *
- * DocuSeal supports two modes depending on version:
- *  - Older versions: sends the raw secret as the header value
- *  - Newer versions: sends an HMAC-SHA256 hex digest of the body
- * We accept either form so upgrades don't silently break webhooks.
  */
-function verifySignature(body: string, signatureHeader: string | null): boolean {
+function verifySignature(_body: string, signatureHeader: string | null): boolean {
   const secret = process.env.DOCUSEAL_WEBHOOK_SECRET;
   if (!secret) return true; // skip verification when secret not configured
   if (!signatureHeader) return false;
   try {
-    // Check HMAC-SHA256 digest first (preferred)
-    const hmacDigest = createHmac('sha256', secret).update(body).digest('hex');
-    const headerBuf = Buffer.from(signatureHeader);
-    const hmacBuf = Buffer.from(hmacDigest);
-    if (headerBuf.length === hmacBuf.length && timingSafeEqual(headerBuf, hmacBuf)) {
-      return true;
-    }
-    // Fall back to plain-secret comparison (some DocuSeal deployments)
-    const secretBuf = Buffer.from(secret);
-    return headerBuf.length === secretBuf.length && timingSafeEqual(headerBuf, secretBuf);
+    return timingSafeEqual(Buffer.from(signatureHeader), Buffer.from(secret));
   } catch {
     return false;
   }
