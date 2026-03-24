@@ -302,6 +302,7 @@ export interface DeleteThemeResponse {
 // GET /api/admin/wedding
 export interface WeddingDetails extends WeddingWithStats {
   planner_name: string;
+  planner_logo_url: string | null;
   admin_count: number;
   available_themes: Theme[];
 }
