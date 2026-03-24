@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       customerId = newCustomer.id;
     } else {
       // Update existing customer with any provided contact data
-      await prisma.customer.updateMany({
+      await prisma.customer.update({
         where: { id: customerId, planner_id: user.planner_id },
         data: {
           ...(data.client_name && { name: data.client_name }),
