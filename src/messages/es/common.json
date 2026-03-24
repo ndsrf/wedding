@@ -333,7 +333,10 @@
       "enable": "Habilitar",
       "disable": "Deshabilitar",
       "confirmDisable": "¿Estás seguro de que quieres deshabilitar este wedding planner?",
-      "logoUrl": "URL del Logo"
+      "logoUrl": "URL del Logo",
+      "manage": "Gestionar",
+      "actions": "Acciones",
+      "added": "Añadido"
     },
     "weddings": {
       "title": "Resumen de Bodas",
@@ -343,6 +346,28 @@
       "location": "Ubicación",
       "planner": "Wedding Planner",
       "guestCount": "Número de Invitados"
+    },
+    "license": {
+      "title": "Licencia y Límites",
+      "description": "Configura el número máximo de bodas y cuentas adicionales de wedding planner para esta empresa.",
+      "maxWeddings": "Máximo de Bodas",
+      "maxSubPlanners": "Máximo de Wedding Planners Adicionales",
+      "currentlyUsing": "usando actualmente {count}",
+      "confirmSave": "¿Guardar los cambios de licencia?",
+      "warnDeleteWeddings": "Atención: {count} boda(s) superan el nuevo límite y se eliminarán permanentemente. Esta acción no se puede deshacer.",
+      "warnDisableSubAccounts": "Atención: Algunas sub-cuentas superan el nuevo límite y serán deshabilitadas."
+    },
+    "subAccounts": {
+      "title": "Cuentas Adicionales de Wedding Planner",
+      "description": "Gestiona las cuentas de inicio de sesión adicionales para esta empresa de wedding planners.",
+      "name": "Nombre",
+      "email": "Correo Electrónico",
+      "namePlaceholder": "Nombre del wedding planner",
+      "emailPlaceholder": "planner@empresa.com",
+      "add": "Añadir Cuenta",
+      "empty": "Aún no hay cuentas adicionales.",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar esta cuenta? Ya no podrá iniciar sesión."
     }
   },
   "planner": {

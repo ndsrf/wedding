@@ -75,6 +75,7 @@ export async function PATCH(
         is_disabled: true,
         disabled_at: true,
         deleted_at: true,
+        license_deleted: true,
       },
     });
 
@@ -185,6 +186,18 @@ export async function PATCH(
             },
           };
           return NextResponse.json(response, { status: 400 });
+        }
+
+        // Block restore if deleted due to license downgrade
+        if (wedding.license_deleted) {
+          const response: APIResponse = {
+            success: false,
+            error: {
+              code: API_ERROR_CODES.FORBIDDEN,
+              message: 'This wedding was removed due to a license limit reduction and cannot be restored. Please contact support to upgrade your plan.',
+            },
+          };
+          return NextResponse.json(response, { status: 403 });
         }
 
         // Before reactivating, ensure none of this wedding's admins have an

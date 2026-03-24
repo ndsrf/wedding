@@ -328,6 +328,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Enforce license wedding limit
+    {
+      const license = await prisma.plannerLicense.findUnique({
+        where: { planner_id: user.planner_id },
+      });
+      const maxWeddings = license?.max_weddings ?? 10;
+      const currentCount = await prisma.wedding.count({
+        where: { planner_id: user.planner_id, status: { not: WeddingStatus.DELETED } },
+      });
+      if (currentCount >= maxWeddings) {
+        const response: APIResponse = {
+          success: false,
+          error: {
+            code: API_ERROR_CODES.FORBIDDEN,
+            message: `Wedding limit reached (${maxWeddings}). Please contact support to upgrade your plan.`,
+          },
+        };
+        return NextResponse.json(response, { status: 403 });
+      }
+    }
+
     // Validate dates
     const weddingDate = new Date(validatedData.wedding_date);
     const rsvpCutoffDate = new Date(validatedData.rsvp_cutoff_date);

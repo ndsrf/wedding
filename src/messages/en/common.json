@@ -336,7 +336,10 @@
       "enable": "Enable",
       "disable": "Disable",
       "confirmDisable": "Are you sure you want to disable this planner?",
-      "logoUrl": "Logo URL"
+      "logoUrl": "Logo URL",
+      "manage": "Manage",
+      "actions": "Actions",
+      "added": "Added"
     },
     "weddings": {
       "title": "Wedding Overview",
@@ -347,6 +350,28 @@
       "location": "Location",
       "planner": "Planner",
       "guestCount": "Guest Count"
+    },
+    "license": {
+      "title": "License & Limits",
+      "description": "Configure the maximum number of weddings and additional planner accounts for this company.",
+      "maxWeddings": "Maximum Weddings",
+      "maxSubPlanners": "Maximum Additional Planners",
+      "currentlyUsing": "currently using {count}",
+      "confirmSave": "Save license changes?",
+      "warnDeleteWeddings": "Warning: {count} wedding(s) exceed the new limit and will be permanently deleted. This cannot be undone.",
+      "warnDisableSubAccounts": "Warning: Some sub-accounts exceed the new limit and will be disabled."
+    },
+    "subAccounts": {
+      "title": "Additional Planner Accounts",
+      "description": "Manage extra login accounts for this planner company.",
+      "name": "Name",
+      "email": "Email",
+      "namePlaceholder": "Planner name",
+      "emailPlaceholder": "planner@company.com",
+      "add": "Add Account",
+      "empty": "No additional accounts yet.",
+      "delete": "Remove",
+      "confirmDelete": "Are you sure you want to remove this account? They will no longer be able to log in."
     }
   },
   "planner": {

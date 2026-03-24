@@ -329,7 +329,10 @@
       "enable": "Aktivieren",
       "disable": "Deaktivieren",
       "confirmDisable": "Sind Sie sicher, dass Sie diesen Planer deaktivieren möchten?",
-      "logoUrl": "Logo-URL"
+      "logoUrl": "Logo-URL",
+      "manage": "Verwalten",
+      "actions": "Aktionen",
+      "added": "Hinzugefügt"
     },
     "weddings": {
       "title": "Hochzeitsübersicht",
@@ -339,6 +342,28 @@
       "location": "Ort",
       "planner": "Planer",
       "guestCount": "Gästezahl"
+    },
+    "license": {
+      "title": "Lizenz & Limits",
+      "description": "Konfigurieren Sie die maximale Anzahl von Hochzeiten und zusätzlichen Planer-Konten für dieses Unternehmen.",
+      "maxWeddings": "Maximale Hochzeiten",
+      "maxSubPlanners": "Maximale zusätzliche Planer",
+      "currentlyUsing": "aktuell {count} in Verwendung",
+      "confirmSave": "Lizenzänderungen speichern?",
+      "warnDeleteWeddings": "Warnung: {count} Hochzeit(en) überschreiten das neue Limit und werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "warnDisableSubAccounts": "Warnung: Einige Sub-Konten überschreiten das neue Limit und werden deaktiviert."
+    },
+    "subAccounts": {
+      "title": "Zusätzliche Planer-Konten",
+      "description": "Verwalten Sie zusätzliche Anmeldekonten für dieses Planungsunternehmen.",
+      "name": "Name",
+      "email": "E-Mail",
+      "namePlaceholder": "Planername",
+      "emailPlaceholder": "planer@unternehmen.com",
+      "add": "Konto hinzufügen",
+      "empty": "Noch keine zusätzlichen Konten.",
+      "delete": "Entfernen",
+      "confirmDelete": "Sind Sie sicher, dass Sie dieses Konto entfernen möchten? Es kann sich nicht mehr anmelden."
     }
   },
   "planner": {

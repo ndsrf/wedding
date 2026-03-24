@@ -329,7 +329,10 @@
       "enable": "Abilita",
       "disable": "Disabilita",
       "confirmDisable": "Sei sicuro di voler disabilitare questo organizzatore?",
-      "logoUrl": "URL Logo"
+      "logoUrl": "URL Logo",
+      "manage": "Gestisci",
+      "actions": "Azioni",
+      "added": "Aggiunto"
     },
     "weddings": {
       "title": "Panoramica Matrimoni",
@@ -339,6 +342,28 @@
       "location": "Luogo",
       "planner": "Organizzatore",
       "guestCount": "Numero Ospiti"
+    },
+    "license": {
+      "title": "Licenza e Limiti",
+      "description": "Configura il numero massimo di matrimoni e account aggiuntivi per questa azienda.",
+      "maxWeddings": "Massimo Matrimoni",
+      "maxSubPlanners": "Massimo Wedding Planner Aggiuntivi",
+      "currentlyUsing": "attualmente usando {count}",
+      "confirmSave": "Salvare le modifiche alla licenza?",
+      "warnDeleteWeddings": "Attenzione: {count} matrimonio/i superano il nuovo limite e verranno eliminati definitivamente. Questa azione è irreversibile.",
+      "warnDisableSubAccounts": "Attenzione: Alcuni sub-account superano il nuovo limite e verranno disabilitati."
+    },
+    "subAccounts": {
+      "title": "Account Wedding Planner Aggiuntivi",
+      "description": "Gestisci gli account di accesso aggiuntivi per questa azienda di wedding planning.",
+      "name": "Nome",
+      "email": "Email",
+      "namePlaceholder": "Nome del wedding planner",
+      "emailPlaceholder": "planner@azienda.com",
+      "add": "Aggiungi Account",
+      "empty": "Nessun account aggiuntivo ancora.",
+      "delete": "Rimuovi",
+      "confirmDelete": "Sei sicuro di voler rimuovere questo account? Non potrà più accedere."
     }
   },
   "planner": {
