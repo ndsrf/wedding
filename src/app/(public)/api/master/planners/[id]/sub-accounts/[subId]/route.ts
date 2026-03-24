@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { API_ERROR_CODES } from '@/types/api';
@@ -46,26 +47,45 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const body = await request.json();
     const validated = updateSubAccountSchema.parse(body);
 
-    // When re-enabling, check that the license limit allows it
+    // When re-enabling, the limit check and the update must be atomic to
+    // prevent two concurrent requests from both passing the count check when
+    // only one slot remains.
     if (validated.enabled && !subAccount.enabled) {
       const planner = await prisma.weddingPlanner.findUnique({
         where: { id },
         include: { license: true },
       });
       const maxSubPlanners = planner?.license?.max_sub_planners ?? 2;
-      const currentCount = await prisma.plannerSubAccount.count({
-        where: { company_planner_id: id, enabled: true },
-      });
-      if (currentCount >= maxSubPlanners) {
-        const response: APIResponse = {
-          success: false,
-          error: {
-            code: API_ERROR_CODES.FORBIDDEN,
-            message: `Sub-account limit reached (${maxSubPlanners}). Upgrade the license first.`,
-          },
-        };
-        return NextResponse.json(response, { status: 403 });
+
+      let updated;
+      try {
+        updated = await prisma.$transaction(async (tx) => {
+          const currentCount = await tx.plannerSubAccount.count({
+            where: { company_planner_id: id, enabled: true },
+          });
+          if (currentCount >= maxSubPlanners) {
+            throw Object.assign(new Error('LIMIT_REACHED'), { maxSubPlanners });
+          }
+          return tx.plannerSubAccount.update({
+            where: { id: subId },
+            data: { enabled: true },
+          });
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      } catch (txError) {
+        if (txError instanceof Error && txError.message === 'LIMIT_REACHED') {
+          const response: APIResponse = {
+            success: false,
+            error: {
+              code: API_ERROR_CODES.FORBIDDEN,
+              message: `Sub-account limit reached (${maxSubPlanners}). Upgrade the license first.`,
+            },
+          };
+          return NextResponse.json(response, { status: 403 });
+        }
+        throw txError;
       }
+
+      return NextResponse.json({ success: true, data: updated });
     }
 
     const updated = await prisma.plannerSubAccount.update({

@@ -87,7 +87,6 @@ model PlannerSubAccount {
   planner             WeddingPlanner @relation(fields: [company_planner_id], references: [id], onDelete: Cascade)
 
   @@index([company_planner_id])
-  @@index([email])
   @@map("planner_sub_accounts")
 }
 

@@ -23,12 +23,10 @@ interface RouteContext {
 }
 
 async function getOrCreateLicense(plannerId: string) {
-  const existing = await prisma.plannerLicense.findUnique({
+  return prisma.plannerLicense.upsert({
     where: { planner_id: plannerId },
-  });
-  if (existing) return existing;
-  return prisma.plannerLicense.create({
-    data: { planner_id: plannerId },
+    update: {},
+    create: { planner_id: plannerId },
   });
 }
 
@@ -90,49 +88,50 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const newMaxWeddings = validated.max_weddings ?? license.max_weddings;
     const newMaxSubPlanners = validated.max_sub_planners ?? license.max_sub_planners;
 
-    // Enforce wedding limit if reduced
-    if (newMaxWeddings < license.max_weddings) {
-      const activeWeddings = await prisma.wedding.findMany({
-        where: { planner_id: id, status: { not: WeddingStatus.DELETED } },
-        orderBy: { created_at: 'asc' }, // oldest first → keep oldest, delete newest
-        select: { id: true },
-      });
-
-      if (activeWeddings.length > newMaxWeddings) {
-        // Keep the first newMaxWeddings, delete the rest (the newest ones)
-        const toDelete = activeWeddings.slice(newMaxWeddings).map((w) => w.id);
-        await prisma.wedding.updateMany({
-          where: { id: { in: toDelete } },
-          data: {
-            status: WeddingStatus.DELETED,
-            deleted_at: new Date(),
-            deleted_by: 'master_license',
-            license_deleted: true,
-          },
+    const updated = await prisma.$transaction(async (tx) => {
+      // Enforce wedding limit if reduced
+      if (newMaxWeddings < license.max_weddings) {
+        const activeWeddings = await tx.wedding.findMany({
+          where: { planner_id: id, status: { not: WeddingStatus.DELETED } },
+          orderBy: { created_at: 'asc' }, // oldest first → keep oldest, delete newest
+          select: { id: true },
         });
+
+        if (activeWeddings.length > newMaxWeddings) {
+          const toDelete = activeWeddings.slice(newMaxWeddings).map((w) => w.id);
+          await tx.wedding.updateMany({
+            where: { id: { in: toDelete } },
+            data: {
+              status: WeddingStatus.DELETED,
+              deleted_at: new Date(),
+              deleted_by: 'master_license',
+              license_deleted: true,
+            },
+          });
+        }
       }
-    }
 
-    // Enforce sub-planner limit if reduced
-    if (newMaxSubPlanners < license.max_sub_planners) {
-      const subAccounts = await prisma.plannerSubAccount.findMany({
-        where: { company_planner_id: id, enabled: true },
-        orderBy: { created_at: 'asc' }, // oldest first → keep oldest, disable newest
-        select: { id: true },
-      });
-
-      if (subAccounts.length > newMaxSubPlanners) {
-        const toDisable = subAccounts.slice(newMaxSubPlanners).map((s) => s.id);
-        await prisma.plannerSubAccount.updateMany({
-          where: { id: { in: toDisable } },
-          data: { enabled: false },
+      // Enforce sub-planner limit if reduced
+      if (newMaxSubPlanners < license.max_sub_planners) {
+        const subAccounts = await tx.plannerSubAccount.findMany({
+          where: { company_planner_id: id, enabled: true },
+          orderBy: { created_at: 'asc' }, // oldest first → keep oldest, disable newest
+          select: { id: true },
         });
-      }
-    }
 
-    const updated = await prisma.plannerLicense.update({
-      where: { planner_id: id },
-      data: { max_weddings: newMaxWeddings, max_sub_planners: newMaxSubPlanners },
+        if (subAccounts.length > newMaxSubPlanners) {
+          const toDisable = subAccounts.slice(newMaxSubPlanners).map((s) => s.id);
+          await tx.plannerSubAccount.updateMany({
+            where: { id: { in: toDisable } },
+            data: { enabled: false },
+          });
+        }
+      }
+
+      return tx.plannerLicense.update({
+        where: { planner_id: id },
+        data: { max_weddings: newMaxWeddings, max_sub_planners: newMaxSubPlanners },
+      });
     });
 
     return NextResponse.json({ success: true, data: updated });

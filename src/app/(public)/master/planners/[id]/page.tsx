@@ -66,15 +66,14 @@ export default function PlannerDetailPage() {
 
   // ─── Fetch planner info ──────────────────────────────────────────────────────
   const fetchPlanner = useCallback(async () => {
-    const res = await fetch(`/api/master/planners?page=1&limit=100`);
+    const res = await fetch(`/api/master/planners/${plannerId}`);
     if (!res.ok) {
       if (res.status === 401) { router.push('/api/auth/signin'); return; }
       throw new Error('Failed to load planner');
     }
     const data = await res.json();
-    const found = data.data?.items?.find((p: Planner) => p.id === plannerId);
-    if (!found) throw new Error('Planner not found');
-    setPlanner(found);
+    if (!data.success) throw new Error(data.error?.message || 'Planner not found');
+    setPlanner(data.data);
   }, [plannerId, router]);
 
   // ─── Fetch license ───────────────────────────────────────────────────────────

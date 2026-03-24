@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { API_ERROR_CODES } from '@/types/api';
@@ -86,21 +87,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const body = await request.json();
     const validated = createSubAccountSchema.parse(body);
 
-    // Check license limit
     const maxSubPlanners = planner.license?.max_sub_planners ?? 2;
-    const currentCount = await prisma.plannerSubAccount.count({
-      where: { company_planner_id: id, enabled: true },
-    });
-    if (currentCount >= maxSubPlanners) {
-      const response: APIResponse = {
-        success: false,
-        error: {
-          code: API_ERROR_CODES.FORBIDDEN,
-          message: `Sub-account limit reached (${maxSubPlanners}). Upgrade the license to add more.`,
-        },
-      };
-      return NextResponse.json(response, { status: 403 });
-    }
 
     // Check the email is not already in use by a main planner account or sub-account
     const [existingPlanner, existingSubAccount] = await Promise.all([
@@ -116,15 +103,41 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json(response, { status: 409 });
     }
 
-    const subAccount = await prisma.plannerSubAccount.create({
-      data: {
-        company_planner_id: id,
-        email: validated.email,
-        name: validated.name,
-        enabled: true,
-        created_by: adminUser.id,
-      },
-    });
+    // Wrap the limit check and creation in a serializable transaction to
+    // prevent two concurrent requests from both passing the count check when
+    // only one slot remains.
+    let subAccount;
+    try {
+      subAccount = await prisma.$transaction(async (tx) => {
+        const currentCount = await tx.plannerSubAccount.count({
+          where: { company_planner_id: id, enabled: true },
+        });
+        if (currentCount >= maxSubPlanners) {
+          throw Object.assign(new Error('LIMIT_REACHED'), { maxSubPlanners });
+        }
+        return tx.plannerSubAccount.create({
+          data: {
+            company_planner_id: id,
+            email: validated.email,
+            name: validated.name,
+            enabled: true,
+            created_by: adminUser.id,
+          },
+        });
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (txError) {
+      if (txError instanceof Error && txError.message === 'LIMIT_REACHED') {
+        const response: APIResponse = {
+          success: false,
+          error: {
+            code: API_ERROR_CODES.FORBIDDEN,
+            message: `Sub-account limit reached (${maxSubPlanners}). Upgrade the license to add more.`,
+          },
+        };
+        return NextResponse.json(response, { status: 403 });
+      }
+      throw txError;
+    }
 
     return NextResponse.json({ success: true, data: subAccount }, { status: 201 });
   } catch (error: unknown) {
