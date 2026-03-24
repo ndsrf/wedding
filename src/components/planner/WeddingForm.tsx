@@ -158,6 +158,21 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
       .catch(() => {});
   }, []);
 
+  // When editing, load the existing customer so the pill displays correctly
+  useEffect(() => {
+    const id = initialData?.customer_id;
+    if (!id || selectedCustomer) return;
+    fetch(`/api/planner/customers/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json?.data) {
+          setSelectedCustomer({ id: json.data.id, name: json.data.name, couple_names: json.data.couple_names ?? null });
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?.customer_id]);
+
   // Sync form data when initialData changes (important for edit mode)
   useEffect(() => {
     if (initialData) {

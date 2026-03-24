@@ -80,6 +80,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
     try {
       // Explicitly construct update payload with only the fields the API expects
       const updateData: Record<string, unknown> = {
+        customer_id: formData.customer_id ?? null,
         couple_names: formData.couple_names,
         wedding_date: formData.wedding_date,
         wedding_time: formData.wedding_time,
