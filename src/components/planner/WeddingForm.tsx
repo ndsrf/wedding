@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import type { CreateWeddingRequest, ItineraryItemRequest } from '@/types/api';
 import type { Theme, Wedding } from '@/types/models';
@@ -22,6 +22,12 @@ interface LocationOption {
   google_maps_url?: string | null;
 }
 
+interface CustomerOption {
+  id: string;
+  name: string;
+  couple_names: string | null;
+}
+
 interface ItineraryEntry extends ItineraryItemRequest {
   _key: string; // local-only unique key for React rendering
 }
@@ -29,6 +35,16 @@ interface ItineraryEntry extends ItineraryItemRequest {
 interface WeddingFormData extends Omit<CreateWeddingRequest, 'wedding_date' | 'rsvp_cutoff_date' | 'itinerary'> {
   wedding_date: string;
   rsvp_cutoff_date: string;
+  customer_id?: string | null;
+  contract_id?: string | null;
+}
+
+interface WeddingFormPrefill {
+  couple_names?: string;
+  wedding_date?: string;
+  customer_id?: string;
+  customer_name?: string;
+  contract_id?: string;
 }
 
 interface WeddingFormProps {
@@ -36,11 +52,65 @@ interface WeddingFormProps {
   onCancel: () => void;
   initialData?: Wedding & { itinerary_items?: Array<{ id: string; location_id: string; item_type?: LocationType; date_time: Date | string; notes?: string | null; order: number }> };
   themes?: Theme[];
+  prefill?: WeddingFormPrefill;
 }
 
-export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: WeddingFormProps) {
+export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], prefill }: WeddingFormProps) {
   const t = useTranslations();
   const [locations, setLocations] = useState<LocationOption[]>([]);
+
+  // Customer autocomplete
+  const [customerQuery, setCustomerQuery] = useState(prefill?.customer_name ?? '');
+  const [customerSuggestions, setCustomerSuggestions] = useState<CustomerOption[]>([]);
+  const [showCustomerSuggestions, setShowCustomerSuggestions] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerOption | null>(
+    prefill?.customer_id ? { id: prefill.customer_id, name: prefill.customer_name ?? '', couple_names: null } : null
+  );
+  const customerSearchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const customerWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (customerWrapperRef.current && !customerWrapperRef.current.contains(e.target as Node)) {
+        setShowCustomerSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchCustomers = useCallback(async (q: string) => {
+    if (q.length < 2) { setCustomerSuggestions([]); setShowCustomerSuggestions(false); return; }
+    try {
+      const res = await fetch(`/api/planner/customers?q=${encodeURIComponent(q)}`);
+      if (!res.ok) return;
+      const json = await res.json();
+      setCustomerSuggestions(json.data ?? []);
+      setShowCustomerSuggestions(true);
+    } catch { /* ignore */ }
+  }, []);
+
+  function handleCustomerQueryChange(value: string) {
+    setCustomerQuery(value);
+    setSelectedCustomer(null);
+    setFormData((p) => ({ ...p, customer_id: null }));
+    if (customerSearchTimeout.current) clearTimeout(customerSearchTimeout.current);
+    customerSearchTimeout.current = setTimeout(() => searchCustomers(value), 250);
+  }
+
+  function selectCustomer(c: CustomerOption) {
+    setSelectedCustomer(c);
+    setCustomerQuery(c.name);
+    setFormData((p) => ({ ...p, customer_id: c.id }));
+    setCustomerSuggestions([]);
+    setShowCustomerSuggestions(false);
+  }
+
+  function clearCustomer() {
+    setSelectedCustomer(null);
+    setCustomerQuery('');
+    setFormData((p) => ({ ...p, customer_id: null }));
+  }
   const [itinerary, setItinerary] = useState<ItineraryEntry[]>(() => {
     if (initialData?.itinerary_items) {
       return initialData.itinerary_items.map((item) => ({
@@ -59,10 +129,12 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
   // are now managed by the wedding admin in /admin/configure. Default values are set here
   // for wedding creation, but the wedding admin can change them later.
   const [formData, setFormData] = useState<WeddingFormData>({
-    couple_names: initialData?.couple_names || '',
+    customer_id: prefill?.customer_id ?? initialData?.customer_id ?? null,
+    contract_id: prefill?.contract_id ?? initialData?.contract_id ?? null,
+    couple_names: initialData?.couple_names || prefill?.couple_names || '',
     wedding_date: initialData?.wedding_date
       ? new Date(initialData.wedding_date).toISOString().split('T')[0]
-      : '',
+      : (prefill?.wedding_date ? new Date(prefill.wedding_date).toISOString().split('T')[0] : ''),
     wedding_time: initialData?.wedding_time || '',
     location: initialData?.location || '',
     main_event_location_id: initialData?.main_event_location_id || null,
@@ -85,6 +157,20 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
       .then((data) => setLocations(data.data || []))
       .catch(() => {});
   }, []);
+
+  // When editing, load the existing customer so the pill displays correctly
+  useEffect(() => {
+    const id = initialData?.customer_id;
+    if (!id || selectedCustomer) return;
+    fetch(`/api/planner/customers/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json?.data) {
+          setSelectedCustomer({ id: json.data.id, name: json.data.name, couple_names: json.data.couple_names ?? null });
+        }
+      })
+      .catch(() => {});
+  }, [initialData?.customer_id]); // eslint-disable-line
 
   // Sync form data when initialData changes (important for edit mode)
   useEffect(() => {
@@ -218,6 +304,47 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [] }: We
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Client / Customer */}
+      <div ref={customerWrapperRef} className="relative">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
+        {selectedCustomer ? (
+          <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+            <span className="flex-1 text-sm text-gray-900">{selectedCustomer.name}</span>
+            <button type="button" onClick={clearCustomer} className="text-gray-400 hover:text-gray-600">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <input
+            type="text"
+            value={customerQuery}
+            onChange={(e) => handleCustomerQueryChange(e.target.value)}
+            placeholder="Search client by name..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        )}
+        {showCustomerSuggestions && customerSuggestions.length > 0 && (
+          <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+            {customerSuggestions.map((c) => (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  onMouseDown={() => selectCustomer(c)}
+                  className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
+                >
+                  <span className="font-medium text-gray-900">{c.name}</span>
+                  {c.couple_names && c.couple_names !== c.name && (
+                    <span className="ml-2 text-gray-400 text-xs">{c.couple_names}</span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       {/* Couple Names */}
       <div>
         <label htmlFor="couple_names" className="block text-sm font-medium text-gray-700 mb-1">

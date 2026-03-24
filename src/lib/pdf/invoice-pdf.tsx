@@ -11,7 +11,7 @@ import {
 import type { Prisma } from '@prisma/client';
 
 type InvoiceWithDetails = Prisma.InvoiceGetPayload<{
-  include: { line_items: true; payments: true };
+  include: { line_items: true; payments: true; customer: true };
 }>;
 
 const styles = StyleSheet.create({
@@ -220,8 +220,11 @@ export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
         <View style={styles.clientRow}>
           <View style={styles.clientBlock}>
             <Text style={styles.sectionTitle}>Bill To</Text>
-            <Text style={styles.clientName}>{invoice.client_name}</Text>
-            {invoice.client_email && <Text style={styles.clientDetail}>{invoice.client_email}</Text>}
+            <Text style={styles.clientName}>{invoice.customer?.name ?? ''}</Text>
+            {invoice.customer?.id_number && <Text style={styles.clientDetail}>ID: {invoice.customer.id_number}</Text>}
+            {invoice.customer?.email && <Text style={styles.clientDetail}>{invoice.customer.email}</Text>}
+            {invoice.customer?.phone && <Text style={styles.clientDetail}>{invoice.customer.phone}</Text>}
+            {invoice.customer?.address && <Text style={styles.clientDetail}>{invoice.customer.address}</Text>}
           </View>
           <View style={styles.clientBlock}>
             <Text style={styles.sectionTitle}>From</Text>

@@ -43,6 +43,7 @@ interface CustomerWedding {
 interface Customer {
   id: string;
   name: string;
+  couple_names: string | null;
   email: string | null;
   phone: string | null;
   id_number: string | null;
@@ -117,6 +118,7 @@ interface EditClientModalProps {
 
 function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps) {
   const [name, setName] = useState(customer.name);
+  const [coupleNames, setCoupleNames] = useState(customer.couple_names ?? '');
   const [email, setEmail] = useState(customer.email ?? '');
   const [phone, setPhone] = useState(customer.phone ?? '');
   const [idNumber, setIdNumber] = useState(customer.id_number ?? '');
@@ -136,6 +138,7 @@ function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
+          couple_names: coupleNames.trim() || null,
           email: email.trim() || null,
           phone: phone.trim() || null,
           id_number: idNumber.trim() || null,
@@ -175,6 +178,16 @@ function EditClientModal({ customer, onClose, onUpdated }: EditClientModalProps)
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Couple Names</label>
+            <input
+              type="text"
+              value={coupleNames}
+              onChange={(e) => setCoupleNames(e.target.value)}
+              placeholder="e.g. Ana & Carlos"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
           </div>
@@ -254,10 +267,12 @@ interface AddClientModalProps {
 
 function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
   const [name, setName] = useState('');
+  const [coupleNames, setCoupleNames] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [idNumber, setIdNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -272,10 +287,12 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
+          couple_names: coupleNames.trim() || null,
           email: email.trim() || null,
           phone: phone.trim() || null,
           id_number: idNumber.trim() || null,
           address: address.trim() || null,
+          notes: notes.trim() || null,
         }),
       });
       if (!res.ok) throw new Error('Failed to create client');
@@ -311,6 +328,16 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               placeholder="e.g. María García"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Couple Names</label>
+            <input
+              type="text"
+              value={coupleNames}
+              onChange={(e) => setCoupleNames(e.target.value)}
+              placeholder="e.g. Ana & Carlos"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
           </div>
           <div>
@@ -351,6 +378,15 @@ function AddClientModal({ onClose, onCreated }: AddClientModalProps) {
               rows={2}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
               placeholder="Street, City, Country..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -428,6 +464,9 @@ function CustomerCard({ customer, onDeleted, onEdit }: CustomerCardProps) {
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-gray-900 truncate">{customer.name}</h3>
+          {customer.couple_names && (
+            <p className="text-xs text-teal-600 truncate">{customer.couple_names}</p>
+          )}
           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
             {customer.email && (
               <span className="text-xs text-gray-500 truncate">{customer.email}</span>

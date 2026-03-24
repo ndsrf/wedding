@@ -59,7 +59,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       where: { id, planner_id: user.planner_id },
       include: {
         quote: { include: { line_items: true } },
-        customer: true,
+        customer: { select: { name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
       },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -95,12 +95,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const clientInfo = [
       `Client / Couple:`,
-      `  Couple names: ${quote?.couple_names ?? customer?.name ?? 'Unknown'}`,
-      (customer?.name && customer.name !== quote?.couple_names) ? `  Customer name: ${customer.name}` : null,
-      (customer?.email ?? quote?.client_email) ? `  Email: ${customer?.email ?? quote?.client_email}` : null,
-      (customer?.phone ?? quote?.client_phone) ? `  Phone: ${customer?.phone ?? quote?.client_phone}` : null,
+      `  Name: ${customer?.name ?? quote?.couple_names ?? 'Unknown'}`,
+      customer?.couple_names ? `  Couple names: ${customer.couple_names}` : (quote?.couple_names && quote.couple_names !== customer?.name ? `  Couple names: ${quote.couple_names}` : null),
+      customer?.email ? `  Email: ${customer.email}` : null,
+      customer?.phone ? `  Phone: ${customer.phone}` : null,
       customer?.id_number ? `  ID/Passport number: ${customer.id_number}` : null,
-      (customer?.address ?? quote?.client_address) ? `  Address: ${customer?.address ?? quote?.client_address}` : null,
+      customer?.address ? `  Address: ${customer.address}` : null,
       customer?.notes ? `  Notes: ${customer.notes}` : null,
     ].filter(Boolean).join('\n');
 
@@ -162,9 +162,11 @@ Rules:
 - For dates, use the format "Day Month Year" (e.g. "15 June 2025")
 - For amounts, include the currency symbol
 - Only return the JSON object, no other text
+- client_name is the legal/physical person who signs the contract (the one whose ID number and address appear on the contract). Use client_name for placeholders like [CLIENT NAME], [NOMBRE DEL CLIENTE], [CONTRATANTE], etc.
+- couple_names is the combined name of both partners (e.g. "Ana & Carlos"). Only use couple_names when the placeholder clearly refers to the couple together, such as [COUPLE], [NOVIOS], [BRIDE AND GROOM], etc. Do NOT use couple_names for generic "client" or "name" placeholders.
 - For sourceField, use ONLY one of these exact keys (or null if not mappable):
   planner_name, planner_email, planner_phone, planner_address, planner_vat, planner_website,
-  couple_names, client_email, client_phone, client_id_number, client_address,
+  couple_names, client_name, client_email, client_phone, client_id_number, client_address, client_notes,
   event_date, event_location, total_amount`;
 
     const { text } = await generateText({

@@ -197,6 +197,10 @@ export interface Wedding {
   extra_info_3_label: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   layout_elements?: any | null; // JSON value for canvas elements
+
+  // CRM linkage
+  customer_id: string | null;
+  contract_id: string | null;
 }
 
 export interface WeddingAdmin {

@@ -5,6 +5,7 @@ import { requireRole } from '@/lib/auth/middleware';
 
 const createCustomerSchema = z.object({
   name: z.string().min(1),
+  couple_names: z.string().optional().nullable(),
   email: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
   id_number: z.string().optional().nullable(),
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
       data: {
         planner_id: user.planner_id,
         name: data.name,
+        couple_names: data.couple_names ?? null,
         email: data.email ?? null,
         phone: data.phone ?? null,
         id_number: data.id_number ?? null,

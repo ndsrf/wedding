@@ -14,6 +14,7 @@ const lineItemSchema = z.object({
 const createInvoiceSchema = z.object({
   customer_id: z.string().optional().nullable(),
   quote_id: z.string().uuid().optional().nullable(),
+  // Client contact fields — stored on the Customer record, not on the Invoice
   client_name: z.string().min(1),
   client_email: z.string().email().optional().nullable(),
   client_id_number: z.string().optional().nullable(),
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
         ...(status ? { status: status as never } : {}),
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
         quote: { select: { id: true, couple_names: true, contracts: { select: { id: true, title: true }, take: 1 } } },
@@ -83,16 +84,38 @@ export async function POST(request: NextRequest) {
 
     const invoiceNumber = await generateInvoiceNumber(planner.email);
 
+    // Resolve or create the customer record
+    let customerId = data.customer_id ?? null;
+    if (!customerId) {
+      const newCustomer = await prisma.customer.create({
+        data: {
+          planner_id: user.planner_id,
+          name: data.client_name,
+          email: data.client_email || null,
+          id_number: data.client_id_number || null,
+          address: data.client_address || null,
+        },
+      });
+      customerId = newCustomer.id;
+    } else {
+      // Update existing customer with any provided contact data
+      await prisma.customer.update({
+        where: { id: customerId, planner_id: user.planner_id },
+        data: {
+          ...(data.client_name && { name: data.client_name }),
+          ...(data.client_email !== undefined && { email: data.client_email || null }),
+          ...(data.client_id_number !== undefined && { id_number: data.client_id_number || null }),
+          ...(data.client_address !== undefined && { address: data.client_address || null }),
+        },
+      });
+    }
+
     const invoice = await prisma.invoice.create({
       data: {
         planner_id: user.planner_id,
-        customer_id: data.customer_id ?? null,
+        customer_id: customerId,
         quote_id: data.quote_id ?? null,
         invoice_number: invoiceNumber,
-        client_name: data.client_name,
-        client_email: data.client_email || null,
-        client_id_number: data.client_id_number ?? null,
-        client_address: data.client_address ?? null,
         description: data.description ?? null,
         currency: data.currency,
         subtotal: data.subtotal,
@@ -113,7 +136,7 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         payments: true,
       },

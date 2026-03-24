@@ -48,6 +48,7 @@ const updateWeddingSchema = z
     allow_guest_additions: z.boolean().optional(),
     default_language: z.nativeEnum(Language).optional(),
     whatsapp_mode: z.nativeEnum(WhatsAppMode).optional(),
+    customer_id: z.string().uuid().nullable().optional(),
   })
   .partial();
 
@@ -218,6 +219,8 @@ export async function GET(
       wedding_admins: wedding.wedding_admins,
       itinerary_items: wedding.itinerary_items,
       main_event_location: wedding.main_event_location,
+      customer_id: wedding.customer_id,
+      contract_id: wedding.contract_id,
     };
 
     // Store in Redis for subsequent requests
@@ -396,6 +399,7 @@ export async function PATCH(
       allow_guest_additions: boolean;
       default_language: Language;
       whatsapp_mode: WhatsAppMode;
+      customer_id: string | null;
       updated_by: string;
     }> = {
       ...restData,

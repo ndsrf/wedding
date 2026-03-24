@@ -16,6 +16,7 @@ const createQuoteSchema = z.object({
   couple_names: z.string().min(1),
   event_date: z.string().datetime().optional().nullable(),
   location: z.string().optional().nullable(),
+  // Client contact fields — stored on the Customer record, not on the Quote
   client_email: z.string().email().optional().nullable(),
   client_phone: z.string().optional().nullable(),
   client_id_number: z.string().optional().nullable(),
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
         ...(status ? { status: status as never } : {}),
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         contracts: { select: { id: true, status: true, share_token: true, signed_pdf_url: true } },
         invoices: { select: { id: true, status: true, total: true, amount_paid: true } },
@@ -66,13 +67,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createQuoteSchema.parse(body);
 
-    // If no existing customer selected, create one from the form data
+    // Resolve or create the customer record
     let customerId = data.customer_id ?? null;
     if (!customerId) {
       const newCustomer = await prisma.customer.create({
         data: {
           planner_id: user.planner_id,
           name: data.couple_names,
+          couple_names: data.couple_names,
           email: data.client_email || null,
           phone: data.client_phone || null,
           id_number: data.client_id_number || null,
@@ -80,6 +82,18 @@ export async function POST(request: NextRequest) {
         },
       });
       customerId = newCustomer.id;
+    } else {
+      // Update existing customer with the latest couple_names and any provided contact data
+      await prisma.customer.update({
+        where: { id: customerId, planner_id: user.planner_id },
+        data: {
+          couple_names: data.couple_names,
+          ...(data.client_email !== undefined && { email: data.client_email || null }),
+          ...(data.client_phone !== undefined && { phone: data.client_phone || null }),
+          ...(data.client_id_number !== undefined && { id_number: data.client_id_number || null }),
+          ...(data.client_address !== undefined && { address: data.client_address || null }),
+        },
+      });
     }
 
     const quote = await prisma.quote.create({
@@ -89,9 +103,6 @@ export async function POST(request: NextRequest) {
         couple_names: data.couple_names,
         event_date: data.event_date ? new Date(data.event_date) : null,
         location: data.location ?? null,
-        client_email: data.client_email || null,
-        client_phone: data.client_phone ?? null,
-        client_address: data.client_address ?? null,
         notes: data.notes ?? null,
         currency: data.currency,
         subtotal: data.subtotal,
@@ -110,7 +121,7 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, phone: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
       },
     });

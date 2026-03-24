@@ -51,14 +51,15 @@ type ResolveContext = {
   } | null;
   customer: {
     name: string;
+    couple_names: string | null;
     email: string | null;
     phone: string | null;
     id_number: string | null;
+    address: string | null;
+    notes: string | null;
   } | null;
   quote: {
     couple_names: string;
-    client_email: string | null;
-    client_phone: string | null;
     event_date: Date | null;
     location: string | null;
     total: unknown;
@@ -75,10 +76,13 @@ function resolveSourceField(sourceField: string, ctx: ResolveContext): string | 
     case 'planner_address':  return planner?.address ?? null;
     case 'planner_vat':      return planner?.vat_number ?? null;
     case 'planner_website':  return planner?.website ?? null;
-    case 'couple_names':     return quote?.couple_names ?? customer?.name ?? null;
-    case 'client_email':     return customer?.email ?? quote?.client_email ?? null;
-    case 'client_phone':     return customer?.phone ?? quote?.client_phone ?? null;
+    case 'couple_names':     return customer?.couple_names ?? quote?.couple_names ?? customer?.name ?? null;
+    case 'client_name':      return customer?.name ?? null;
+    case 'client_email':     return customer?.email ?? null;
+    case 'client_phone':     return customer?.phone ?? null;
     case 'client_id_number': return customer?.id_number ?? null;
+    case 'client_address':   return customer?.address ?? null;
+    case 'client_notes':     return customer?.notes ?? null;
     case 'event_date':
       return quote?.event_date
         ? new Date(quote.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -114,8 +118,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
-        quote: true,
-        customer: true,
+        quote: { select: { couple_names: true, event_date: true, location: true, total: true, currency: true } },
+        customer: { select: { name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         template: { select: { placeholder_rules: true } },
       },
     });

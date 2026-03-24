@@ -13,6 +13,7 @@ const lineItemSchema = z.object({
 });
 
 const updateSchema = z.object({
+  // Client contact fields — applied to the linked Customer record, not stored on Invoice
   client_name: z.string().min(1).optional(),
   client_email: z.string().email().optional().nullable().or(z.literal('')),
   client_id_number: z.string().optional().nullable(),
@@ -39,6 +40,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const invoice = await prisma.invoice.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
         quote: { select: { id: true, couple_names: true } },
@@ -63,14 +65,30 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const body = await request.json();
     const data = updateSchema.parse(body);
-    const { line_items: lineItems, ...invoiceData } = data;
+    const { line_items: lineItems, client_name, client_email, client_id_number, client_address, ...invoiceData } = data;
+
+    // If client contact fields are provided, update the linked customer
+    const hasClientUpdate = client_name !== undefined || client_email !== undefined
+      || client_id_number !== undefined || client_address !== undefined;
+
+    if (hasClientUpdate && existing.customer_id) {
+      await prisma.customer.update({
+        where: { id: existing.customer_id, planner_id: user.planner_id },
+        data: {
+          ...(client_name !== undefined && { name: client_name }),
+          ...(client_email !== undefined && { email: client_email || null }),
+          ...(client_id_number !== undefined && { id_number: client_id_number || null }),
+          ...(client_address !== undefined && { address: client_address || null }),
+        },
+      });
+    }
 
     // Clear cached PDF when content changes
     const pdfFields = [
-      'client_name', 'client_email', 'description', 'currency', 'subtotal',
+      'description', 'currency', 'subtotal',
       'discount', 'tax_rate', 'tax_amount', 'total', 'due_date', 'issued_at'
     ];
-    const contentChanged = lineItems !== undefined || pdfFields.some(field => field in invoiceData);
+    const contentChanged = lineItems !== undefined || hasClientUpdate || pdfFields.some(field => field in invoiceData);
 
     const updated = await prisma.$transaction(async (tx) => {
       if (lineItems !== undefined) {
@@ -90,8 +108,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return tx.invoice.update({
         where: { id },
         data: {
-          ...(invoiceData.client_name !== undefined && { client_name: invoiceData.client_name }),
-          ...(invoiceData.client_email !== undefined && { client_email: invoiceData.client_email || null }),
           ...(invoiceData.description !== undefined && { description: invoiceData.description }),
           ...(invoiceData.currency !== undefined && { currency: invoiceData.currency }),
           ...(invoiceData.subtotal !== undefined && { subtotal: invoiceData.subtotal }),
@@ -104,7 +120,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ...(invoiceData.status !== undefined && { status: invoiceData.status }),
           ...(contentChanged && { pdf_url: null }),
         },
-        include: { line_items: true, payments: { orderBy: { payment_date: 'desc' } }, quote: { select: { id: true, couple_names: true } } },
+        include: {
+          customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+          line_items: true,
+          payments: { orderBy: { payment_date: 'desc' } },
+          quote: { select: { id: true, couple_names: true } },
+        },
       });
     });
 

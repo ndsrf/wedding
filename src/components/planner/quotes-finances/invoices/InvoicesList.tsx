@@ -11,8 +11,7 @@ import { Pagination } from '../Pagination';
 export interface Invoice {
   id: string;
   invoice_number: string;
-  client_name: string;
-  client_email: string | null;
+  customer: { id: string; name: string; email: string | null; phone: string | null; id_number: string | null; address: string | null; notes: string | null } | null;
   description: string | null;
   currency: string;
   subtotal: string | number;
@@ -48,7 +47,7 @@ export interface Invoice {
 interface ReadyQuote {
   id: string;
   couple_names: string;
-  client_email: string | null;
+  customer: { email: string | null; id_number: string | null; address: string | null } | null;
   currency: string;
   total: string | number;
   contract: { id: string; status: string } | null;
@@ -202,7 +201,9 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       : prefillQuote
         ? {
             client_name: prefillQuote.couple_names,
-            client_email: prefillQuote.client_email ?? '',
+            client_email: prefillQuote.customer?.email ?? '',
+            client_id_number: prefillQuote.customer?.id_number ?? '',
+            client_address: prefillQuote.customer?.address ?? '',
             currency: prefillQuote.currency,
             quote_id: prefillQuote.id,
           }
@@ -233,8 +234,11 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
   if (view === 'edit' && editingInvoice) {
     const prefill = {
-      client_name: editingInvoice.client_name,
-      client_email: editingInvoice.client_email ?? '',
+      customer_id: editingInvoice.customer?.id ?? null,
+      client_name: editingInvoice.customer?.name ?? '',
+      client_email: editingInvoice.customer?.email ?? '',
+      client_id_number: editingInvoice.customer?.id_number ?? '',
+      client_address: editingInvoice.customer?.address ?? '',
       description: editingInvoice.description ?? '',
       currency: editingInvoice.currency,
       discount: editingInvoice.discount !== null ? Number(editingInvoice.discount) : ('' as const),
@@ -257,7 +261,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
           <button onClick={handleCancelForm} className="text-sm text-gray-500 hover:text-gray-700">
             ← Back
           </button>
-          <h3 className="text-base font-semibold text-gray-900">Edit Invoice – {editingInvoice.client_name}</h3>
+          <h3 className="text-base font-semibold text-gray-900">Edit Invoice – {editingInvoice.customer?.name ?? ''}</h3>
         </div>
         <InvoiceForm
           initialData={prefill}
@@ -279,7 +283,8 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   }
 
   const filteredInvoices = invoices.filter((inv) => {
-    const nameMatch = nameFilter.trim() === '' || inv.client_name.toLowerCase().includes(nameFilter.toLowerCase());
+    const clientName = inv.customer?.name ?? '';
+    const nameMatch = nameFilter.trim() === '' || clientName.toLowerCase().includes(nameFilter.toLowerCase());
     const statusMatch = statusFilter.length === 0 || statusFilter.includes(inv.status);
     return nameMatch && statusMatch;
   });
@@ -388,7 +393,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-mono text-gray-400">{invoice.invoice_number}</span>
-                      <h4 className="text-sm font-semibold text-gray-900">{invoice.client_name}</h4>
+                      <h4 className="text-sm font-semibold text-gray-900">{invoice.customer?.name ?? ''}</h4>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
                         {invoice.status}
                       </span>

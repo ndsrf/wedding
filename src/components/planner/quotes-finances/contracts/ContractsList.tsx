@@ -10,6 +10,8 @@ export interface InvoicePrefillData {
   quote_id?: string;
   client_name?: string;
   client_email?: string;
+  client_id_number?: string;
+  client_address?: string;
   currency?: string;
   discount?: number | '';
   tax_rate?: number | '';
@@ -32,8 +34,8 @@ interface Contract {
   pdf_url: string | null;
   signed_pdf_url: string | null;
   created_at: string;
-  customer: { id: string; name: string; email: string | null } | null;
-  quote: { id: string; couple_names: string; currency: string; total: string | number } | null;
+  customer: { id: string; name: string; couple_names: string | null; email: string | null } | null;
+  quote: { id: string; couple_names: string; event_date: string | null; currency: string; total: string | number } | null;
   template: { id: string; name: string } | null;
 }
 
@@ -219,8 +221,10 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       onCreateInvoice({
         customer_id: quote.customer_id ?? null,
         quote_id: quote.id,
-        client_name: quote.couple_names,
-        client_email: quote.client_email ?? '',
+        client_name: quote.customer?.name ?? quote.couple_names,
+        client_email: quote.customer?.email ?? '',
+        client_id_number: quote.customer?.id_number ?? '',
+        client_address: quote.customer?.address ?? '',
         currency: quote.currency,
         discount: quote.discount != null ? Number(quote.discount) : '',
         tax_rate: quote.tax_rate != null ? Number(quote.tax_rate) : '',
@@ -240,9 +244,14 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   async function handleCreateWedding(contract: Contract) {
     setCreatingWeddingId(contract.id);
     try {
-      // Navigate to the weddings creation page with the contract pre-linked
       const params = new URLSearchParams({ action: 'create', contract_id: contract.id });
-      if (contract.customer) params.set('couple_names', contract.customer.name);
+      if (contract.customer) {
+        params.set('customer_id', contract.customer.id);
+        params.set('customer_name', contract.customer.name);
+        const coupleNames = contract.customer.couple_names ?? contract.quote?.couple_names ?? contract.customer.name;
+        params.set('couple_names', coupleNames);
+      }
+      if (contract.quote?.event_date) params.set('event_date', contract.quote.event_date);
       window.location.href = `/planner/weddings?${params.toString()}`;
     } finally {
       setCreatingWeddingId(null);

@@ -25,6 +25,14 @@ function PlannerWeddingsContent() {
   const searchParams = useSearchParams();
   const showCreateForm = searchParams.get('action') === 'create';
 
+  const prefill = showCreateForm ? {
+    couple_names: searchParams.get('couple_names') ?? undefined,
+    wedding_date: searchParams.get('event_date') ?? undefined,
+    customer_id: searchParams.get('customer_id') ?? undefined,
+    customer_name: searchParams.get('customer_name') ?? undefined,
+    contract_id: searchParams.get('contract_id') ?? undefined,
+  } : undefined;
+
   const [weddings, setWeddings] = useState<WeddingWithStats[]>([]);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
@@ -242,6 +250,7 @@ function PlannerWeddingsContent() {
                 router.push('/planner/weddings');
               }}
               themes={themes}
+              prefill={prefill}
             />
           </div>
         </div>
