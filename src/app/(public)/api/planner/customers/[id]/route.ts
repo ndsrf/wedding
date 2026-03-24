@@ -2,6 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await requireRole('planner');
+    if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { id } = await params;
+
+    const customer = await prisma.customer.findFirst({
+      where: { id, planner_id: user.planner_id },
+    });
+
+    if (!customer) {
+      return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ data: customer });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (message.startsWith('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.error('[GET /api/planner/customers/[id]]', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole('planner');
@@ -37,7 +62,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json({ data: updated });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (message.startsWith('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.error('[PATCH /api/planner/customers/[id]]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -84,7 +113,11 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     await prisma.customer.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (message.startsWith('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.error('[DELETE /api/planner/customers/[id]]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
