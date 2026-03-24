@@ -329,7 +329,10 @@
       "enable": "Activer",
       "disable": "Désactiver",
       "confirmDisable": "Êtes-vous sûr de vouloir désactiver cet organisateur ?",
-      "logoUrl": "URL du Logo"
+      "logoUrl": "URL du Logo",
+      "manage": "Gérer",
+      "actions": "Actions",
+      "added": "Ajouté"
     },
     "weddings": {
       "title": "Aperçu des Mariages",
@@ -339,6 +342,28 @@
       "location": "Lieu",
       "planner": "Organisateur",
       "guestCount": "Nombre d'Invités"
+    },
+    "license": {
+      "title": "Licence et Limites",
+      "description": "Configurez le nombre maximum de mariages et de comptes organisateurs supplémentaires pour cette entreprise.",
+      "maxWeddings": "Maximum de Mariages",
+      "maxSubPlanners": "Maximum d'Organisateurs Supplémentaires",
+      "currentlyUsing": "utilisant actuellement {count}",
+      "confirmSave": "Sauvegarder les modifications de licence ?",
+      "warnDeleteWeddings": "Attention : {count} mariage(s) dépassent la nouvelle limite et seront supprimés définitivement. Cette action est irréversible.",
+      "warnDisableSubAccounts": "Attention : Certains sous-comptes dépassent la nouvelle limite et seront désactivés."
+    },
+    "subAccounts": {
+      "title": "Comptes Organisateurs Supplémentaires",
+      "description": "Gérez les comptes de connexion supplémentaires pour cette entreprise d'organisation.",
+      "name": "Nom",
+      "email": "Email",
+      "namePlaceholder": "Nom de l'organisateur",
+      "emailPlaceholder": "organisateur@entreprise.com",
+      "add": "Ajouter un Compte",
+      "empty": "Aucun compte supplémentaire pour l'instant.",
+      "delete": "Supprimer",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce compte ? Il ne pourra plus se connecter."
     }
   },
   "planner": {

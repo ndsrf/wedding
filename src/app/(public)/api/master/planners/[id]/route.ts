@@ -1,144 +1,65 @@
 /**
- * Master Admin - Individual Planner API Routes
+ * Master Admin - Single Planner API Routes
  *
- * PATCH /api/master/planners/:id - Update planner enabled status
+ * GET /api/master/planners/:id - Get a single wedding planner by ID
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import type { APIResponse, UpdatePlannerResponse, UpdatePlannerRequest } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-
-// Validation schema for updating a planner
-const updatePlannerSchema = z.object({
-  enabled: z.boolean().optional(),
-});
+import type { APIResponse } from '@/types/api';
 
 interface RouteContext {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
 /**
- * PATCH /api/master/planners/:id
- * Update planner enabled status
+ * GET /api/master/planners/:id
  */
-export async function PATCH(request: NextRequest, context: RouteContext) {
+export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    // Check authentication and require master_admin role
     await requireRole('master_admin');
+    const { id } = await context.params;
 
-    const params = await context.params;
-    const { id } = params;
-
-    // Validate planner ID format (UUID)
-    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      const response: APIResponse = {
-        success: false,
-        error: {
-          code: API_ERROR_CODES.VALIDATION_ERROR,
-          message: 'Invalid planner ID format',
-        },
-      };
-      return NextResponse.json(response, { status: 400 });
-    }
-
-    // Check if planner exists
-    const existingPlanner = await prisma.weddingPlanner.findUnique({
+    const planner = await prisma.weddingPlanner.findUnique({
       where: { id },
+      include: {
+        _count: { select: { weddings: true } },
+      },
     });
 
-    if (!existingPlanner) {
+    if (!planner) {
       const response: APIResponse = {
         success: false,
-        error: {
-          code: API_ERROR_CODES.NOT_FOUND,
-          message: 'Planner not found',
-        },
+        error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Planner not found' },
       };
       return NextResponse.json(response, { status: 404 });
     }
 
-    // Parse and validate request body
-    const body = await request.json();
-    const validatedData: UpdatePlannerRequest = updatePlannerSchema.parse(body);
-
-    // Check if there's actually something to update
-    if (validatedData.enabled === undefined) {
-      const response: APIResponse = {
-        success: false,
-        error: {
-          code: API_ERROR_CODES.VALIDATION_ERROR,
-          message: 'No fields to update',
-        },
-      };
-      return NextResponse.json(response, { status: 400 });
-    }
-
-    // Update the planner
-    const updatedPlanner = await prisma.weddingPlanner.update({
-      where: { id },
-      data: {
-        enabled: validatedData.enabled,
-      },
-    });
-
-    const response: UpdatePlannerResponse = {
-      success: true,
-      data: updatedPlanner,
+    const data = {
+      id: planner.id,
+      email: planner.email,
+      name: planner.name,
+      google_id: planner.google_id,
+      auth_provider: planner.auth_provider,
+      last_login_provider: planner.last_login_provider,
+      preferred_language: planner.preferred_language,
+      logo_url: planner.logo_url,
+      enabled: planner.enabled,
+      subscription_status: planner.subscription_status,
+      created_at: planner.created_at,
+      created_by: planner.created_by,
+      last_login_at: planner.last_login_at,
+      wedding_count: planner._count.weddings,
     };
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json({ success: true, data });
   } catch (error: unknown) {
-    // Handle authentication errors
-    const errorMessage = error instanceof Error ? error.message : '';
-    if (errorMessage.includes('UNAUTHORIZED')) {
-      const response: APIResponse = {
-        success: false,
-        error: {
-          code: API_ERROR_CODES.UNAUTHORIZED,
-          message: 'Authentication required',
-        },
-      };
-      return NextResponse.json(response, { status: 401 });
-    }
-
-    if (errorMessage.includes('FORBIDDEN')) {
-      const response: APIResponse = {
-        success: false,
-        error: {
-          code: API_ERROR_CODES.FORBIDDEN,
-          message: 'Master admin role required',
-        },
-      };
-      return NextResponse.json(response, { status: 403 });
-    }
-
-    // Handle validation errors
-    if (error instanceof z.ZodError) {
-      const response: APIResponse = {
-        success: false,
-        error: {
-          code: API_ERROR_CODES.VALIDATION_ERROR,
-          message: 'Invalid request data',
-          details: error.issues,
-        },
-      };
-      return NextResponse.json(response, { status: 400 });
-    }
-
-    // Handle unexpected errors
-    console.error('Error updating planner:', error);
-    const response: APIResponse = {
-      success: false,
-      error: {
-        code: API_ERROR_CODES.INTERNAL_ERROR,
-        message: 'Failed to update planner',
-      },
-    };
-    return NextResponse.json(response, { status: 500 });
+    const msg = error instanceof Error ? error.message : '';
+    if (msg.includes('UNAUTHORIZED')) return NextResponse.json({ success: false, error: { code: API_ERROR_CODES.UNAUTHORIZED, message: 'Authentication required' } }, { status: 401 });
+    if (msg.includes('FORBIDDEN')) return NextResponse.json({ success: false, error: { code: API_ERROR_CODES.FORBIDDEN, message: 'Master admin role required' } }, { status: 403 });
+    console.error('Error fetching planner:', error);
+    return NextResponse.json({ success: false, error: { code: API_ERROR_CODES.INTERNAL_ERROR, message: 'Failed to fetch planner' } }, { status: 500 });
   }
 }

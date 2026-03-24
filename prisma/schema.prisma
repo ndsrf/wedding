@@ -52,9 +52,42 @@ model WeddingPlanner {
   quotes              Quote[]
   contracts           Contract[]
   invoices            Invoice[]
+  license             PlannerLicense?
+  sub_accounts        PlannerSubAccount[]
 
   @@index([enabled])
   @@map("wedding_planners")
+}
+
+model PlannerLicense {
+  id               String         @id @default(uuid())
+  planner_id       String         @unique
+  max_weddings     Int            @default(10)
+  max_sub_planners Int            @default(2)
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+  planner          WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+
+  @@map("planner_licenses")
+}
+
+model PlannerSubAccount {
+  id                  String         @id @default(uuid())
+  company_planner_id  String
+  email               String         @unique
+  name                String
+  google_id           String?        @unique
+  auth_provider       AuthProvider   @default(GOOGLE)
+  last_login_provider AuthProvider?
+  preferred_language  Language       @default(EN)
+  enabled             Boolean        @default(true)
+  created_at          DateTime       @default(now())
+  created_by          String
+  last_login_at       DateTime?
+  planner             WeddingPlanner @relation(fields: [company_planner_id], references: [id], onDelete: Cascade)
+
+  @@index([company_planner_id])
+  @@map("planner_sub_accounts")
 }
 
 model Theme {
@@ -121,6 +154,7 @@ model Wedding {
   extra_info_3_label              String?
   deleted_at                      DateTime?
   deleted_by                      String?
+  license_deleted                 Boolean            @default(false)  // Deleted due to license downgrade; cannot be restored
   disabled_at                     DateTime?
   disabled_by                     String?
   is_disabled                     Boolean            @default(false)

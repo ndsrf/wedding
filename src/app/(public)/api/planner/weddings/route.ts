@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
@@ -328,7 +329,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate dates
+    // Validate dates before entering the transaction
     const weddingDate = new Date(validatedData.wedding_date);
     const rsvpCutoffDate = new Date(validatedData.rsvp_cutoff_date);
 
@@ -343,30 +344,63 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 });
     }
 
-    // Create the wedding
-    const wedding = await prisma.wedding.create({
-      data: {
-        planner_id: user.planner_id,
-        couple_names: validatedData.couple_names,
-        wedding_date: weddingDate,
-        wedding_time: validatedData.wedding_time,
-        location: validatedData.location,
-        main_event_location_id: validatedData.main_event_location_id ?? null,
-        rsvp_cutoff_date: rsvpCutoffDate,
-        dress_code: validatedData.dress_code,
-        additional_info: validatedData.additional_info,
-        theme_id: validatedData.theme_id,
-        payment_tracking_mode: validatedData.payment_tracking_mode,
-        allow_guest_additions: validatedData.allow_guest_additions,
-        default_language: validatedData.default_language,
-        save_the_date_enabled: true,
-        status: 'ACTIVE',
-        created_by: user.id,
-        // Traceability / billing links (optional, set when created from a contract)
-        ...(validatedData.customer_id ? { customer_id: validatedData.customer_id } : {}),
-        ...(validatedData.contract_id ? { contract_id: validatedData.contract_id } : {}),
-      },
-    });
+    // Narrowed to string (undefined case already returned above)
+    const plannerId = user.planner_id as string;
+
+    // Enforce license wedding limit and create the wedding atomically so that
+    // two concurrent requests cannot both pass the count check when only one
+    // slot remains.
+    let wedding;
+    try {
+      wedding = await prisma.$transaction(async (tx) => {
+        const license = await tx.plannerLicense.findUnique({
+          where: { planner_id: plannerId },
+        });
+        const maxWeddings = license?.max_weddings ?? 10;
+        const currentCount = await tx.wedding.count({
+          where: { planner_id: plannerId, status: { not: WeddingStatus.DELETED } },
+        });
+        if (currentCount >= maxWeddings) {
+          throw Object.assign(new Error('WEDDING_LIMIT_REACHED'), { maxWeddings });
+        }
+        return tx.wedding.create({
+          data: {
+            planner_id: plannerId,
+            couple_names: validatedData.couple_names,
+            wedding_date: weddingDate,
+            wedding_time: validatedData.wedding_time,
+            location: validatedData.location,
+            main_event_location_id: validatedData.main_event_location_id ?? null,
+            rsvp_cutoff_date: rsvpCutoffDate,
+            dress_code: validatedData.dress_code,
+            additional_info: validatedData.additional_info,
+            theme_id: validatedData.theme_id,
+            payment_tracking_mode: validatedData.payment_tracking_mode,
+            allow_guest_additions: validatedData.allow_guest_additions,
+            default_language: validatedData.default_language,
+            save_the_date_enabled: true,
+            status: 'ACTIVE',
+            created_by: user.id,
+            // Traceability / billing links (optional, set when created from a contract)
+            ...(validatedData.customer_id ? { customer_id: validatedData.customer_id } : {}),
+            ...(validatedData.contract_id ? { contract_id: validatedData.contract_id } : {}),
+          },
+        });
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (txError) {
+      if (txError instanceof Error && txError.message === 'WEDDING_LIMIT_REACHED') {
+        const err = txError as Error & { maxWeddings: number };
+        const response: APIResponse = {
+          success: false,
+          error: {
+            code: API_ERROR_CODES.FORBIDDEN,
+            message: `Wedding limit reached (${err.maxWeddings}). Please contact support to upgrade your plan.`,
+          },
+        };
+        return NextResponse.json(response, { status: 403 });
+      }
+      throw txError;
+    }
 
     // Assign unique short-URL initials (collision-safe: appends 2 random chars)
     await ensureWeddingInitials(wedding.id);

@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useNamespacedTranslations, useFormatDate } from '@/lib/i18n/client';
 
 interface Planner {
@@ -85,7 +86,7 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
                 {t('planners.lastLogin')}
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                Actions
+                {t('planners.actions')}
               </th>
             </tr>
           </thead>
@@ -128,7 +129,13 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
                     ? formatDate(planner.last_login_at, { dateStyle: 'short' })
                     : 'Never'}
                 </td>
-                <td className="px-6 py-5 whitespace-nowrap text-base">
+                <td className="px-6 py-5 whitespace-nowrap text-base flex gap-4 items-center">
+                  <Link
+                    href={`/master/planners/${planner.id}`}
+                    className="font-semibold text-purple-600 hover:text-purple-800 transition-colors"
+                  >
+                    {t('planners.manage')}
+                  </Link>
                   <button
                     onClick={() => handleToggleStatus(planner.id, planner.enabled)}
                     disabled={actioningId === planner.id}
@@ -197,21 +204,29 @@ export function PlannerList({ planners, onToggleStatus }: PlannerListProps) {
               </div>
             </div>
 
-            <button
-              onClick={() => handleToggleStatus(planner.id, planner.enabled)}
-              disabled={actioningId === planner.id}
-              className={`w-full py-2.5 px-4 rounded-xl font-semibold text-base ${
-                planner.enabled
-                  ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                  : 'bg-green-50 text-green-700 hover:bg-green-100'
-              } disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
-            >
-              {actioningId === planner.id
-                ? tCommon('loading')
-                : planner.enabled
-                  ? t('planners.disable')
-                  : t('planners.enable')}
-            </button>
+            <div className="flex gap-3">
+              <Link
+                href={`/master/planners/${planner.id}`}
+                className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-base text-center bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+              >
+                {t('planners.manage')}
+              </Link>
+              <button
+                onClick={() => handleToggleStatus(planner.id, planner.enabled)}
+                disabled={actioningId === planner.id}
+                className={`flex-1 py-2.5 px-4 rounded-xl font-semibold text-base ${
+                  planner.enabled
+                    ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                    : 'bg-green-50 text-green-700 hover:bg-green-100'
+                } disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+              >
+                {actioningId === planner.id
+                  ? tCommon('loading')
+                  : planner.enabled
+                    ? t('planners.disable')
+                    : t('planners.enable')}
+              </button>
+            </div>
           </div>
         ))}
       </div>

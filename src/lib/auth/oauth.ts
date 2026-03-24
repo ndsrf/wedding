@@ -102,37 +102,60 @@ export async function detectUserRole(email: string, authProvider: AuthProvider, 
 
   // Check wedding planner — skip if we already know this is a non-planner role
   const skipPlannerCheck = knownRole === 'wedding_admin' || knownRole === 'master_admin';
-  const planner = skipPlannerCheck
-    ? null
-    : await prisma.weddingPlanner.findUnique({
-        where: { email },
+
+  if (!skipPlannerCheck) {
+    const planner = await prisma.weddingPlanner.findUnique({ where: { email } });
+
+    console.log(`[Auth Debug] Checking planner for ${email}:`, planner ? 'Found' : 'Not Found');
+
+    if (planner) {
+      await prisma.weddingPlanner.update({
+        where: { id: planner.id },
+        data: { last_login_at: new Date(), last_login_provider: authProvider },
       });
 
-  console.log(`[Auth Debug] Checking planner for ${email}:`, planner ? 'Found' : 'Not Found');
+      if (!planner.enabled) {
+        throw new Error('PLANNER_DISABLED: Your planner account has been disabled. Please contact support.');
+      }
 
-  if (planner) {
-    // Update last login info
-    await prisma.weddingPlanner.update({
-      where: { id: planner.id },
-      data: {
-        last_login_at: new Date(),
-        last_login_provider: authProvider,
-      },
-    });
-
-    // Check if planner is enabled
-    if (!planner.enabled) {
-      throw new Error('PLANNER_DISABLED: Your planner account has been disabled. Please contact support.');
+      return {
+        role: 'planner' as const,
+        id: planner.id,
+        name: planner.name,
+        preferred_language: planner.preferred_language,
+        wedding_id: undefined,
+        planner_id: planner.id,
+      };
     }
 
-    return {
-      role: 'planner' as const,
-      id: planner.id,
-      name: planner.name,
-      preferred_language: planner.preferred_language,
-      wedding_id: undefined,
-      planner_id: planner.id,
-    };
+    // Check sub-account — a secondary login linked to a planner company
+    const subAccount = await prisma.plannerSubAccount.findUnique({
+      where: { email },
+      include: { planner: { select: { id: true, enabled: true } } },
+    });
+
+    if (subAccount) {
+      if (!subAccount.enabled) {
+        throw new Error('PLANNER_DISABLED: Your planner sub-account has been disabled. Please contact support.');
+      }
+      if (!subAccount.planner.enabled) {
+        throw new Error('PLANNER_DISABLED: The planner company account has been disabled. Please contact support.');
+      }
+
+      await prisma.plannerSubAccount.update({
+        where: { id: subAccount.id },
+        data: { last_login_at: new Date(), last_login_provider: authProvider },
+      });
+
+      return {
+        role: 'planner' as const,
+        id: subAccount.id,
+        name: subAccount.name,
+        preferred_language: subAccount.preferred_language,
+        wedding_id: undefined,
+        planner_id: subAccount.company_planner_id,
+      };
+    }
   }
 
   // Check wedding admin (may have access to multiple weddings, but we'll get the first one)
