@@ -19,6 +19,24 @@ function isDoubledContent(nodes: unknown[]): boolean {
   return JSON.stringify(nodes.slice(0, mid)) === JSON.stringify(nodes.slice(mid));
 }
 
+/**
+ * Returns true when the fragment is effectively empty — either truly empty or containing
+ * only the single empty paragraph that TipTap's ySyncPlugin inserts into a blank Y.Doc
+ * when the editor is first created (before Liveblocks has had a chance to sync).
+ */
+function isFragmentEffectivelyEmpty(fragment: Y.XmlFragment): boolean {
+  if (fragment.length === 0) return true;
+  try {
+    const json = yXmlFragmentToProsemirrorJSON(fragment) as { content?: { type: string; content?: unknown[] }[] };
+    const nodes = json.content ?? [];
+    if (nodes.length === 0) return true;
+    if (nodes.length === 1 && nodes[0].type === 'paragraph' && !nodes[0].content?.length) return true;
+  } catch {
+    // If we can't parse, assume not empty
+  }
+  return false;
+}
+
 interface ContractEditorProps {
   contractId: string;
   initialContent?: object | null;
@@ -150,8 +168,11 @@ export function ContractEditor({
 
             const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
 
-            if (fragment.length === 0 && initialContentRef.current) {
+            if (isFragmentEffectivelyEmpty(fragment) && initialContentRef.current) {
               // Fresh room — seed from DB content.
+              // Note: we check for "effectively empty" rather than strictly empty because
+              // TipTap's ySyncPlugin initialises a blank Y.Doc with a single empty paragraph
+              // before Liveblocks has synced, so fragment.length is 1 even for new rooms.
               editorRef.current.commands.setContent(
                 initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
                 { emitUpdate: false },
@@ -189,12 +210,22 @@ export function ContractEditor({
             // Already synced (e.g. empty room with no state to apply).
             seedIfEmpty();
           } else {
-            const onSync = (isSynced: boolean) => { if (isSynced) seedIfEmpty(); };
+            // Call seedIfEmpty unconditionally — it has its own seedCalled guard.
+            // Some LiveblocksYjsProvider versions emit the event with an object or
+            // undefined rather than a boolean, so we don't filter on the argument.
+            const onSync = () => { seedIfEmpty(); };
             typedProvider.on('sync', onSync);
             typedProvider.on('synced', onSync);
           }
 
+          // Hard fallback: if neither event fires within 5 s, seed anyway.
+          // This protects against providers that never emit 'sync'/'synced'.
+          const fallbackTimer = setTimeout(() => {
+            if (!seedCalled) seedIfEmpty();
+          }, 5000);
+
           cleanup = () => {
+            clearTimeout(fallbackTimer);
             provider.destroy();
             room.disconnect();
           };
