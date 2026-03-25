@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
+import { uploadFile } from '@/lib/storage';
 
 // ── Webhook payload schemas ───────────────────────────────────────────────────
 
@@ -43,21 +44,40 @@ function verifySignature(_body: string, signatureHeader: string | null): boolean
 }
 
 /**
- * Fetch the signed PDF URL for a submission directly from DocuSeal API.
- * Used as a fallback when the webhook payload doesn't include documents
- * (e.g. form.completed fires before PDF generation completes).
+ * Fetch signed PDF URL and audit log URL from the DocuSeal API.
+ * Used when the webhook payload doesn't include documents (e.g. form.completed
+ * fires before PDF generation completes) and to get the audit_log_url.
  */
-async function fetchSignedPdfUrlFromApi(submissionId: number): Promise<string | null> {
+async function fetchSubmissionFromApi(
+  submissionId: number
+): Promise<{ signedPdfUrl: string | null; auditLogUrl: string | null }> {
   const apiBase = (process.env.DOCUSEAL_API_URL ?? 'https://api.docuseal.com').replace(/\/$/, '');
   const apiKey = process.env.DOCUSEAL_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) return { signedPdfUrl: null, auditLogUrl: null };
   try {
     const res = await fetch(`${apiBase}/submissions/${submissionId}`, {
       headers: { 'X-Auth-Token': apiKey },
     });
+    if (!res.ok) return { signedPdfUrl: null, auditLogUrl: null };
+    const data = await res.json() as {
+      documents?: Array<{ url?: string }>;
+      audit_log_url?: string;
+    };
+    return {
+      signedPdfUrl: data.documents?.[0]?.url ?? null,
+      auditLogUrl: data.audit_log_url ?? null,
+    };
+  } catch {
+    return { signedPdfUrl: null, auditLogUrl: null };
+  }
+}
+
+/** Download a URL and return its content as a Buffer. Returns null on failure. */
+async function downloadBuffer(url: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(url);
     if (!res.ok) return null;
-    const data = await res.json() as { documents?: Array<{ url?: string }> };
-    return data.documents?.[0]?.url ?? null;
+    return Buffer.from(await res.arrayBuffer());
   } catch {
     return null;
   }
@@ -129,17 +149,46 @@ async function handleSubmissionCompleted(
     return;
   }
 
-  // If the webhook payload didn't include the signed PDF URL (common for
-  // form.completed events where PDF generation is still in progress),
-  // fetch it directly from the DocuSeal API.
-  let resolvedPdfUrl = signedPdfUrl;
-  if (!resolvedPdfUrl) {
-    resolvedPdfUrl = await fetchSignedPdfUrlFromApi(submissionId);
-    if (resolvedPdfUrl) {
-      console.log(`DocuSeal webhook: fetched signed PDF URL from API for submission ${submissionId}`);
-    } else {
-      console.warn(`DocuSeal webhook: signed PDF URL not available for submission ${submissionId}`);
-    }
+  // Always fetch from the API so we get the audit_log_url too. If the payload
+  // already included a signed PDF URL we use that, otherwise take it from the API.
+  const { signedPdfUrl: apiPdfUrl, auditLogUrl } = await fetchSubmissionFromApi(submissionId);
+  const resolvedDocusealPdfUrl = signedPdfUrl ?? apiPdfUrl;
+
+  if (!resolvedDocusealPdfUrl) {
+    console.warn(`DocuSeal webhook: signed PDF URL not available for submission ${submissionId}`);
+  }
+
+  // Download both PDFs from DocuSeal and re-upload to our own storage so the
+  // stored links remain valid independently of DocuSeal URL expiry.
+  const [signedBuffer, auditBuffer] = await Promise.all([
+    resolvedDocusealPdfUrl ? downloadBuffer(resolvedDocusealPdfUrl) : Promise.resolve(null),
+    auditLogUrl ? downloadBuffer(auditLogUrl) : Promise.resolve(null),
+  ]);
+
+  const storagePath = `contracts/${contract.id}/signed`;
+
+  const [signedUpload, auditUpload] = await Promise.all([
+    signedBuffer
+      ? uploadFile(`${storagePath}/signed-contract.pdf`, signedBuffer, {
+          contentType: 'application/pdf',
+          access: 'public',
+          allowOverwrite: true,
+        })
+      : Promise.resolve(null),
+    auditBuffer
+      ? uploadFile(`${storagePath}/audit.pdf`, auditBuffer, {
+          contentType: 'application/pdf',
+          access: 'public',
+          allowOverwrite: true,
+        })
+      : Promise.resolve(null),
+  ]);
+
+  if (signedUpload) {
+    console.log(`DocuSeal webhook: signed PDF stored at ${signedUpload.url} for contract ${contract.id}`);
+  }
+  if (auditUpload) {
+    console.log(`DocuSeal webhook: audit PDF stored at ${auditUpload.url} for contract ${contract.id}`);
   }
 
   await prisma.contract.update({
@@ -147,7 +196,9 @@ async function handleSubmissionCompleted(
     data: {
       status: 'SIGNED',
       signed_at: new Date(),
-      signed_pdf_url: resolvedPdfUrl ?? null,
+      // Use our own storage URL; fall back to DocuSeal URL if upload failed
+      signed_pdf_url: signedUpload?.url ?? resolvedDocusealPdfUrl ?? null,
+      audit_url: auditUpload?.url ?? auditLogUrl ?? null,
     },
   });
 }
