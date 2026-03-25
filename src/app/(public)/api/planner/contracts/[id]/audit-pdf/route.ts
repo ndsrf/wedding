@@ -13,15 +13,18 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Manually signed — return the locally generated audit PDF
-    if (!contract.signing_request_id) {
-      if (!contract.audit_url) {
-        return NextResponse.json({ error: 'No audit record found for this contract' }, { status: 404 });
-      }
+    // Return the stored audit URL if we have one (covers both manual-signed and
+    // DocuSeal-signed contracts where the audit PDF was downloaded at webhook time)
+    if (contract.audit_url) {
       return NextResponse.json({ data: { audit_url: contract.audit_url } });
     }
 
-    // DocuSeal-signed — fetch audit log URL from DocuSeal
+    // Manually signed without a stored audit URL — nothing to return
+    if (!contract.signing_request_id) {
+      return NextResponse.json({ error: 'No audit record found for this contract' }, { status: 404 });
+    }
+
+    // DocuSeal-signed but audit PDF not yet downloaded — fetch live from DocuSeal API
     const apiBase = (process.env.DOCUSEAL_API_URL ?? 'https://api.docuseal.com').replace(/\/$/, '');
     const apiKey = process.env.DOCUSEAL_API_KEY;
     if (!apiKey) {
