@@ -198,7 +198,7 @@ async function handleSubmissionCompleted(
       signed_at: new Date(),
       // Use our own storage URL; fall back to DocuSeal URL if upload failed
       signed_pdf_url: signedUpload?.url ?? resolvedDocusealPdfUrl ?? null,
-      audit_url: auditUpload?.url ?? null,
+      audit_url: auditUpload?.url ?? auditLogUrl ?? null,
     },
   });
 }
