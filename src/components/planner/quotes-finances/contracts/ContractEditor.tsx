@@ -46,7 +46,7 @@ interface ContractEditorProps {
   /** Extra fields forwarded to the liveblocks-auth request body (e.g. share_token for clients) */
   authExtra?: Record<string, unknown>;
   /** Use an externally-managed Y.Doc so a sibling component (e.g. comments sidebar)
-   *  can share the same Yjs document without a second Liveblocks connection. */
+   *  can share the same Liveblocks connection. */
   externalYdocRef?: React.MutableRefObject<Y.Doc>;
   /** Called once after the Liveblocks provider is initialised and the Y.Doc is ready */
   onYDocReady?: (ydoc: Y.Doc) => void;
@@ -139,26 +139,71 @@ export function ContractEditor({
 
           onYDocReady?.(ydocRef.current);
 
-          // Seed template/DB content into the Yjs doc the first time this room
-          // is opened.  The Collaboration extension ignores the editor `content`
-          // prop and uses the Yjs doc directly, so a brand-new room would show a
-          // blank editor even when a template was chosen.
+          // Seed template/DB content into the Yjs doc the first time this room is opened.
+          // The Collaboration extension owns the editor content through the Yjs doc; passing
+          // `content` to useEditor is ignored, and editor.commands.setContent() is unreliable
+          // when the ySyncPlugin is active (it can reset ProseMirror back to Y.Doc state).
           //
-          // We must wait until the provider has fully synced the initial
-          // Liveblocks state before checking whether the fragment is empty.
-          // room.status 'connected' fires when the WebSocket handshake completes,
-          // but the Yjs binary updates are delivered asynchronously afterwards —
-          // a setTimeout(0) is NOT sufficient and causes content duplication:
-          // the fragment appears empty, we seed it, and then Liveblocks delivers
-          // the stored state on top.  Using provider.on('sync') guarantees we
-          // check only after the full initial Yjs state has been applied.
+          // Correct approach: inject content DIRECTLY into the Y.Doc using y-prosemirror.
+          // The ySyncPlugin observes Y.Doc changes and updates the editor automatically.
+          //
+          // We must wait until the provider has fully synced before checking emptiness —
+          // so we use provider.synced / 'sync' event rather than room.status 'connected'.
           let seedCalled = false;
+
+          /**
+           * Writes initialContent directly into the Y.Doc XmlFragment so the
+           * ySyncPlugin picks it up and renders it in the editor.
+           */
+          async function seedContentIntoYDoc(): Promise<void> {
+            if (destroyed || !editorRef.current || !initialContentRef.current) return;
+            try {
+              // y-prosemirror is a transitive dep of @tiptap/extension-collaboration
+              // and is always bundled on the client side.
+              const { prosemirrorJSONToYDoc } = await import('y-prosemirror');
+              if (destroyed || !editorRef.current) return;
+
+              const schema = editorRef.current.schema;
+              // Build a temporary Y.Doc containing the initial content.
+              const tempDoc = prosemirrorJSONToYDoc(
+                schema,
+                initialContentRef.current as Record<string, unknown>,
+                YJS_FRAGMENT,
+              );
+
+              // Clear any existing content in the fragment (e.g. the ySyncPlugin's
+              // initial empty paragraph) before applying the seed content.
+              ydocRef.current.transact(() => {
+                const frag = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
+                if (frag.length > 0) frag.delete(0, frag.length);
+              });
+
+              // Merge the seed content into our Y.Doc. The ySyncPlugin observes
+              // this change and updates ProseMirror automatically.
+              Y.applyUpdate(ydocRef.current, Y.encodeStateAsUpdate(tempDoc));
+
+              // Persist to DB — onUpdate is filtered for Y.Doc-origin transactions,
+              // so we call onChange manually after the Y.Doc update propagates.
+              setTimeout(() => {
+                if (!destroyed && editorRef.current) {
+                  onChangeRef.current?.(editorRef.current.getJSON());
+                }
+              }, 50);
+            } catch (err) {
+              // Fallback: y-prosemirror unavailable — use setContent directly.
+              console.warn('ContractEditor: y-prosemirror seeding failed, using setContent fallback', err);
+              if (!destroyed && editorRef.current && initialContentRef.current) {
+                editorRef.current.commands.setContent(
+                  initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
+                );
+              }
+            }
+          }
+
           function seedIfEmpty() {
             if (destroyed) return;
-            // With immediatelyRender: false, TipTap creates the editor in a useEffect,
-            // which runs in the same batch as this Liveblocks effect. For empty rooms
-            // the provider may be synced before the editor ref is populated — retry
-            // until the editor is available (up to ~1 s).
+            // With immediatelyRender: false the editor is created in a useEffect.
+            // Retry until the ref is populated (up to ~1 s).
             if (!editorRef.current) {
               setTimeout(seedIfEmpty, 50);
               return;
@@ -169,18 +214,11 @@ export function ContractEditor({
             const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
 
             if (isFragmentEffectivelyEmpty(fragment) && initialContentRef.current) {
-              // Fresh room — seed from DB content.
-              // Note: we check for "effectively empty" rather than strictly empty because
-              // TipTap's ySyncPlugin initialises a blank Y.Doc with a single empty paragraph
-              // before Liveblocks has synced, so fragment.length is 1 even for new rooms.
-              editorRef.current.commands.setContent(
-                initialContentRef.current as Parameters<Editor['commands']['setContent']>[0],
-                { emitUpdate: false },
-              );
+              // Fresh room — seed from DB / template content directly into the Y.Doc.
+              void seedContentIntoYDoc();
             } else if (fragment.length > 0) {
-              // Room has content.  Detect the CRDT duplication artifact caused by the
-              // previous fix (room 'connected' + setTimeout): if the node array is
-              // exactly two identical halves, cut it back to one and persist to DB.
+              // Room has content. Detect the CRDT duplication artifact (two identical
+              // halves) caused by an older bug and repair it.
               try {
                 const fragmentJSON = yXmlFragmentToProsemirrorJSON(fragment) as { content?: unknown[] };
                 const nodes = fragmentJSON.content ?? [];
@@ -190,7 +228,6 @@ export function ContractEditor({
                     fixed as Parameters<Editor['commands']['setContent']>[0],
                     { emitUpdate: false },
                   );
-                  // Persist the corrected content to the database.
                   onChangeRef.current?.(fixed as object);
                 }
               } catch (err) {
@@ -199,27 +236,29 @@ export function ContractEditor({
             }
           }
 
-          // Cast to access standard Yjs Observable API (synced + sync event).
-          // LiveblocksYjsProvider emits both 'sync' and 'synced'; register both
-          // as a safety net in case the event name differs across versions.
+          // Cast to access standard Yjs Observable API.
           const typedProvider = provider as unknown as {
             synced: boolean;
-            on: (event: string, fn: (isSynced: boolean) => void) => void;
+            on: (event: string, fn: () => void) => void;
           };
+
           if (typedProvider.synced) {
-            // Already synced (e.g. empty room with no state to apply).
+            // Already synced (e.g. empty room with no stored state).
             seedIfEmpty();
           } else {
-            // Call seedIfEmpty unconditionally — it has its own seedCalled guard.
-            // Some LiveblocksYjsProvider versions emit the event with an object or
-            // undefined rather than a boolean, so we don't filter on the argument.
-            const onSync = () => { seedIfEmpty(); };
+            // Guard: only seed when the provider reports fully synced.
+            // Both 'sync' and 'synced' are emitted simultaneously by LiveblocksYjsProvider;
+            // we register both as a safety net but check .synced to avoid acting on
+            // 'sync' events emitted with isSynced=false during reconnects.
+            const onSync = () => {
+              if (!typedProvider.synced) return;
+              seedIfEmpty();
+            };
             typedProvider.on('sync', onSync);
             typedProvider.on('synced', onSync);
           }
 
           // Hard fallback: if neither event fires within 5 s, seed anyway.
-          // This protects against providers that never emit 'sync'/'synced'.
           const fallbackTimer = setTimeout(() => {
             if (!seedCalled) seedIfEmpty();
           }, 5000);
@@ -241,7 +280,7 @@ export function ContractEditor({
       destroyed = true;
       cleanup?.();
     };
-  }, [contractId]); // authExtra and currentUser are intentionally excluded — they are stable after mount
+  }, [contractId]); // authExtra and currentUser are intentionally excluded — stable after mount
 
   const editor = useEditor(
     {
@@ -251,19 +290,14 @@ export function ContractEditor({
         Placeholder.configure({ placeholder: 'Start writing the contract...' }),
         Collaboration.configure({ document: ydocRef.current }),
       ],
-      // Do NOT pass content here – the Collaboration extension owns the editor
-      // content entirely through the Yjs document.  Passing `content` would seed
-      // the Yjs XmlFragment immediately on creation; when Liveblocks then syncs
-      // the room's stored Yjs state on top, both copies end up in the document
-      // causing the template to be appended on every subsequent open.
-      // Initial seeding (first-time-only) is handled in the Liveblocks status
-      // callback above via `setContent` once the fragment is confirmed empty.
+      // Do NOT pass content here — the Collaboration extension owns the editor
+      // content entirely through the Yjs document. Initial seeding is handled
+      // via direct Y.Doc manipulation in the Liveblocks effect above.
       content: undefined,
       editable: !readOnly,
       onUpdate: ({ editor, transaction }) => {
         // Skip saves that originated from Yjs / Liveblocks — those are not user
-        // edits and would overwrite the DB with whatever Liveblocks has (which may
-        // be corrupted).  Only persist genuine local edits.
+        // edits and would overwrite the DB with whatever Liveblocks has.
         if (transaction.getMeta(ySyncPluginKey)?.isChangeOrigin) return;
         onChange?.(editor.getJSON());
       },
