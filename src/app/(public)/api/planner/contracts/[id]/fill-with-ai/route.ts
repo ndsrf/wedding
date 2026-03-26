@@ -61,7 +61,7 @@ function normalizeContent(node: TipTapNode): TipTapNode {
       JSON.stringify(lastNode.marks) === JSON.stringify(child.marks)
     ) {
       // Create a new object for lastNode to avoid in-place mutation of the original array items if they are reused
-      const mergedNode = { ...lastNode, text: (lastNode.text ?? '') + (child.text ?? '') };
+      const mergedNode: TipTapNode = { ...lastNode, text: (lastNode.text ?? '') + (child.text ?? '') };
       newContent[newContent.length - 1] = mergedNode;
       lastNode = mergedNode;
     } else {
