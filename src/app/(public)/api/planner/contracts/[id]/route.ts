@@ -63,3 +63,42 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await requireRole('planner');
+    if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { id } = await params;
+
+    const existing = await prisma.contract.findFirst({ where: { id, planner_id: user.planner_id } });
+    if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    // Only allow deleting DRAFT contracts
+    if (existing.status !== 'DRAFT') {
+      return NextResponse.json({ error: 'Only draft contracts can be deleted' }, { status: 400 });
+    }
+
+    // Delete PDF blobs if they exist
+    const { del } = await import('@vercel/blob');
+    if (existing.pdf_url) {
+      try {
+        await del(existing.pdf_url);
+      } catch (e) {
+        console.warn('Failed to delete contract PDF blob:', e);
+      }
+    }
+    if (existing.signed_pdf_url) {
+      try {
+        await del(existing.signed_pdf_url);
+      } catch (e) {
+        console.warn('Failed to delete contract signed PDF blob:', e);
+      }
+    }
+
+    await prisma.contract.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('DELETE /api/planner/contracts/[id] error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
