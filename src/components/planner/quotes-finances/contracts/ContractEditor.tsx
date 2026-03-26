@@ -81,6 +81,7 @@ export function ContractEditor({
   // Refs so the Liveblocks effect can access the latest editor, content and callbacks
   // without needing them as effect dependencies (they're stable after mount).
   const editorRef = useRef<Editor | null>(null);
+  const isMouseDown = useRef(false);
   const initialContentRef = useRef(initialContent);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -224,12 +225,56 @@ export function ContractEditor({
       },
       onSelectionUpdate: ({ editor }) => {
         if (!onSelectionChange) return;
+
+        // If the mouse/touch is down, we wait for the release to trigger the selection change
+        if (isMouseDown.current) return;
+
         const { from, to } = editor.state.selection;
         if (from === to) {
           onSelectionChange('');
         } else {
+          // If the selection happened via keyboard (Shift+Arrows), trigger immediately
           onSelectionChange(editor.state.doc.textBetween(from, to, ' '));
         }
+      },
+      editorProps: {
+        handleDOMEvents: {
+          mousedown: () => {
+            isMouseDown.current = true;
+            return false;
+          },
+          mouseup: (view) => {
+            isMouseDown.current = false;
+            if (!onSelectionChange) return false;
+
+            // When the mouse is released, trigger the selection change if there's a selection
+            const { from, to } = view.state.selection;
+            if (from !== to) {
+              const selectedText = view.state.doc.textBetween(from, to, ' ');
+              onSelectionChange(selectedText);
+            }
+            return false;
+          },
+          touchstart: () => {
+            isMouseDown.current = true;
+            return false;
+          },
+          touchend: (view) => {
+            isMouseDown.current = false;
+            if (!onSelectionChange) return false;
+
+            // When touch ends, trigger selection change after a tiny delay 
+            // to allow the native selection to settle
+            setTimeout(() => {
+              const { from, to } = view.state.selection;
+              if (from !== to) {
+                const selectedText = view.state.doc.textBetween(from, to, ' ');
+                onSelectionChange(selectedText);
+              }
+            }, 150); // Increased delay for mobile to ensure selection settles
+            return false;
+          },
+        },
       },
       immediatelyRender: false,
     },

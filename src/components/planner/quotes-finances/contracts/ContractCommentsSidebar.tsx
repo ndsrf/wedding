@@ -80,7 +80,10 @@ export function ContractCommentsSidebar({
   useEffect(() => {
     if (pendingSelectedText.trim().length > 0 && !isPlanner) {
       setAddingComment(true);
-      setTimeout(() => textareaRef.current?.focus(), 50);
+      setTimeout(() => {
+        textareaRef.current?.focus();
+        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
     }
   }, [pendingSelectedText, isPlanner]);
 
