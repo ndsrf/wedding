@@ -420,19 +420,21 @@ export function QuotesList() {
                       onChange={(e) => setContractFillWithAI(e.target.checked)}
                     />
                     <span className="text-xs font-medium text-purple-700">Fill with AI</span>
-                    <span className="text-xs text-gray-400">(auto-detect &amp; fill placeholders using client and quote data)</span>
-                  </label>
-                  <div className="flex gap-2">
+                    <span className="text-xs text-gray-400">(auto-detect &amp; fill placeholders using client, quote data, and today's date)</span>
+                    </label>                  <div className="flex gap-2">
                     <button
                       type="submit"
                       disabled={creatingContract}
-                      className="px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition-colors"
+                      className={`px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors ${
+                        creatingContract && contractFillWithAI
+                          ? 'ai-magic-button-loading'
+                          : 'bg-purple-600 hover:bg-purple-700'
+                      } disabled:opacity-50`}
                     >
                       {creatingContract
                         ? contractFillWithAI ? 'Filling with AI…' : 'Creating…'
                         : 'Create & Open Editor'}
-                    </button>
-                    <button
+                    </button>                    <button
                       type="button"
                       onClick={() => setContractQuoteId(null)}
                       className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"

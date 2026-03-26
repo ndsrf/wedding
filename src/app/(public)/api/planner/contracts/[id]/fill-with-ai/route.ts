@@ -30,8 +30,47 @@ interface TipTapNode {
 
 function extractText(node: TipTapNode): string {
   if (node.type === 'text') return node.text ?? '';
-  if (node.content) return node.content.map(extractText).join(' ');
+  if (node.content) {
+    const text = node.content.map(extractText).join('');
+    // Add newlines for block elements to help AI understand structure
+    if (['paragraph', 'heading', 'listItem', 'blockquote'].includes(node.type)) {
+      return text + '\n';
+    }
+    return text;
+  }
   return '';
+}
+
+/**
+ * Merges adjacent text nodes with identical marks to prevent placeholders
+ * from being split across nodes (which breaks simple replaceAll).
+ */
+function normalizeContent(node: TipTapNode): TipTapNode {
+  if (!node.content) return node;
+
+  const newContent: TipTapNode[] = [];
+  let lastNode: TipTapNode | null = null;
+
+  for (let child of node.content) {
+    child = normalizeContent(child);
+
+    if (
+      lastNode &&
+      lastNode.type === 'text' &&
+      child.type === 'text' &&
+      JSON.stringify(lastNode.marks) === JSON.stringify(child.marks)
+    ) {
+      // Create a new object for lastNode to avoid in-place mutation of the original array items if they are reused
+      const mergedNode = { ...lastNode, text: (lastNode.text ?? '') + (child.text ?? '') };
+      newContent[newContent.length - 1] = mergedNode;
+      lastNode = mergedNode;
+    } else {
+      newContent.push(child);
+      lastNode = child;
+    }
+  }
+
+  return { ...node, content: newContent };
 }
 
 function replacePlaceholder(node: TipTapNode, placeholder: string, value: string): TipTapNode {
@@ -81,6 +120,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const quote = contract.quote;
     const customer = contract.customer;
+    const todayDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
     const plannerInfo = [
       `Wedding Planner / Company:`,
@@ -117,12 +157,15 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const prompt = `You are an assistant that helps fill in contract placeholder values for a wedding planning business.
 
 The planner has a contract template with placeholders (typically written as [PLACEHOLDER], {{PLACEHOLDER}}, or similar bracketed formats). Your job is to:
-1. Identify ALL placeholders in the contract text
-2. For each placeholder, determine if it can be filled using the provided data
-3. For placeholders that CAN be filled automatically, provide the fill value AND the sourceField key
-4. For placeholders that CANNOT be filled (missing data), explain what needs to be provided
+1. Detect the language of the contract text (e.g. English, Spanish, German, French, Italian)
+2. Identify ALL text enclosed in brackets [] or {{}} as placeholders
+3. For each placeholder, determine if it can be filled using the provided data
+4. For placeholders that CAN be filled automatically, provide the fill value AND the sourceField key
+5. For placeholders that CANNOT be filled (missing data), explain what needs to be provided
 
 ## Available Data
+
+Today's Date: ${todayDate}
 
 ${plannerInfo}
 
@@ -138,36 +181,41 @@ ${contractText}
 
 Return a JSON object with this exact structure:
 {
+  "detectedLanguage": "the language of the contract (e.g. Spanish)",
+  "locale": "the BCP 47 language tag (e.g. es-ES, en-GB, de-DE, fr-FR, it-IT)",
   "placeholders": [
     {
       "placeholder": "exact placeholder text as it appears in the contract, e.g. [CLIENT_NAME]",
       "filled": true,
-      "value": "the actual value to insert",
-      "description": "brief explanation of what was used to fill this",
+      "value": "the actual value to insert, translated/formatted to the contract's language",
+      "description": "brief explanation of what was used to fill this, in the contract's language",
       "sourceField": "couple_names"
     },
     {
       "placeholder": "[VENUE_ADDRESS]",
       "filled": false,
       "value": null,
-      "description": "Venue full address — not available in the data, needs to be filled manually",
+      "description": "Venue full address — not available in the data, in the contract's language",
       "sourceField": null
     }
   ]
 }
 
 Rules:
-- Include EVERY placeholder you find in the contract, even if you cannot fill it
-- Use the exact placeholder text as it appears in the contract (including brackets)
-- For dates, use the format "Day Month Year" (e.g. "15 June 2025")
-- For amounts, include the currency symbol
-- Only return the JSON object, no other text
+- Include EVERY bracketed placeholder you find in the contract, even if you cannot fill it. Be thorough.
+- Use the exact placeholder text as it appears in the contract (including brackets).
+- ALL returned text (values, descriptions) MUST be in the same language as the contract.
+- For dates, use the appropriate format and month names for the detected language (e.g. "15 de junio de 2025" for Spanish, "15. Juni 2025" for German).
+- For amounts, include the currency symbol.
+- Only return the JSON object, no other text.
 - client_name is the legal/physical person who signs the contract (the one whose ID number and address appear on the contract). Use client_name for placeholders like [CLIENT NAME], [NOMBRE DEL CLIENTE], [CONTRATANTE], etc.
 - couple_names is the combined name of both partners (e.g. "Ana & Carlos"). Only use couple_names when the placeholder clearly refers to the couple together, such as [COUPLE], [NOVIOS], [BRIDE AND GROOM], etc. Do NOT use couple_names for generic "client" or "name" placeholders.
+- For placeholders referring to the "Wedding", "Event", "Enlace", "Boda", etc., use the provided Event / Quote data. For example, [WEDDING_DATE], [FECHA DE LA BODA], or [FECHA DEL ENLACE] MUST use the event_date.
+- For placeholders referring to the "Location", "Venue", "Lugar", "Ciudad", etc., use the event_location from the Event / Quote data if available.
 - For sourceField, use ONLY one of these exact keys (or null if not mappable):
   planner_name, planner_email, planner_phone, planner_address, planner_vat, planner_website,
   couple_names, client_name, client_email, client_phone, client_id_number, client_address, client_notes,
-  event_date, event_location, total_amount`;
+  event_date, event_location, total_amount, today_date`;
 
     const { text } = await generateText({
       model: getChatModel(),
@@ -183,26 +231,28 @@ Rules:
       description: string;
       sourceField: string | null;
     }> = [];
+    let detectedLocale = 'en-GB';
 
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         placeholders = parsed.placeholders ?? [];
+        if (parsed.locale) detectedLocale = parsed.locale;
       }
     } catch (error) {
       console.error('Failed to parse AI response JSON:', { error, text });
     }
 
     // Apply AI fills to contract content
-    let updatedContent = contract.content as TipTapNode;
+    let updatedContent = normalizeContent(contract.content as TipTapNode);
     for (const p of placeholders) {
       if (p.filled && p.value) {
         updatedContent = replacePlaceholder(updatedContent, p.placeholder, p.value);
       }
     }
 
-    // Save updated content to DB
+    // Save updated content to DB (and maybe save the detected language for future use)
     if (placeholders.some((p) => p.filled)) {
       await prisma.contract.update({
         where: { id },
@@ -215,8 +265,8 @@ Rules:
       id: Math.random().toString(36).slice(2),
       selectedText: p.placeholder,
       text: p.filled
-        ? `✅ Auto-filled: "${p.value}"\n${p.description}`
-        : `⚠️ Needs manual fill\n${p.description}`,
+        ? (detectedLocale.startsWith('es') ? `✅ Auto-completado: "${p.value}"\n${p.description}` : `✅ Auto-filled: "${p.value}"\n${p.description}`)
+        : (detectedLocale.startsWith('es') ? `⚠️ Requiere completado manual\n${p.description}` : `⚠️ Needs manual fill\n${p.description}`),
       authorName: 'AI Assistant',
       authorColor: '#7c3aed',
       timestamp: Date.now(),

@@ -94,3 +94,30 @@ body {
 [contenteditable] strike {
   text-decoration: line-through;
 }
+
+/* AI Magic Button Animation */
+@keyframes ai-magic-border {
+  0% { border-color: #7c3aed; box-shadow: 0 0 5px rgba(124, 58, 237, 0.4); }
+  33% { border-color: #ec4899; box-shadow: 0 0 10px rgba(236, 72, 153, 0.4); }
+  66% { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+  100% { border-color: #7c3aed; box-shadow: 0 0 5px rgba(124, 58, 237, 0.4); }
+}
+
+@keyframes ai-magic-move {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.ai-magic-button-loading {
+  position: relative !important;
+  border: 2px solid #7c3aed !important;
+  background-image: linear-gradient(
+    90deg, 
+    #7c3aed, #ec4899, #3b82f6, #10b981, #7c3aed
+  ) !important;
+  background-size: 200% auto !important;
+  animation: ai-magic-border 2s linear infinite, ai-magic-move 1.5s linear infinite !important;
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}

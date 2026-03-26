@@ -92,6 +92,8 @@ function resolveSourceField(sourceField: string, ctx: ResolveContext): string | 
       return quote
         ? new Intl.NumberFormat('en', { style: 'currency', currency: quote.currency }).format(Number(quote.total))
         : null;
+    case 'today_date':
+      return new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     default: return null;
   }
 }
