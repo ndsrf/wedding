@@ -34,6 +34,134 @@ interface Props {
   isLoading?: boolean;
 }
 
+// ─── GenerateMenuPanel ────────────────────────────────────────────────────────
+
+interface GenerateMenuPanelProps {
+  apiBase: string;
+  onGenerated: (dishIds: string[]) => void;
+}
+
+function GenerateMenuPanel({ apiBase, onGenerated }: GenerateMenuPanelProps) {
+  const t = useTranslations('admin.menu');
+  const [open, setOpen] = useState(false);
+  const [quantities, setQuantities] = useState({
+    appetizers: 3,
+    first_course: 1,
+    second_course: 1,
+    dessert: 1,
+  });
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [reasoning, setReasoning] = useState<string | null>(null);
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    setError(null);
+    setReasoning(null);
+    try {
+      const res = await fetch(`${apiBase}/menu/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quantities),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message ?? t('generateError'));
+      setReasoning(data.data.reasoning ?? null);
+      onGenerated(data.data.selectedDishIds as string[]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('generateError'));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const fields: { key: keyof typeof quantities; label: string }[] = [
+    { key: 'appetizers', label: t('appetizers') },
+    { key: 'first_course', label: t('firstCourse') },
+    { key: 'second_course', label: t('secondCourse') },
+    { key: 'dessert', label: t('dessert') },
+  ];
+
+  return (
+    <div className="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-rose-100/50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-xl">✨</span>
+          <div>
+            <span className="font-semibold text-rose-800">{t('generateMenu')}</span>
+            <p className="text-xs text-rose-600 mt-0.5">{t('generateMenuTitle')}</p>
+          </div>
+        </div>
+        <svg
+          className={`w-5 h-5 text-rose-500 transition-transform ${open ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5 space-y-4 border-t border-rose-200">
+          <p className="text-sm text-rose-700 pt-4">{t('generateMenuDescription')}</p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {fields.map(({ key, label }) => (
+              <div key={key}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={quantities[key]}
+                  onChange={e => setQuantities(q => ({ ...q, [key]: Math.max(0, parseInt(e.target.value) || 0) }))}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent bg-white"
+                />
+              </div>
+            ))}
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </p>
+          )}
+
+          {reasoning && (
+            <div className="bg-white rounded-lg border border-rose-100 p-3">
+              <p className="text-xs font-semibold text-rose-700 mb-1">{t('aiReasoning')}</p>
+              <p className="text-xs text-gray-600 leading-relaxed">{reasoning}</p>
+            </div>
+          )}
+
+          <button
+            onClick={handleGenerate}
+            disabled={generating}
+            className="flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            {generating ? (
+              <>
+                <WeddingSpinner size="sm" />
+                {t('generating')}
+              </>
+            ) : (
+              <>
+                <span>✨</span>
+                {t('generateMenu')}
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = false }: Props) {
   const t = useTranslations('admin.menu');
   const tCommon = useTranslations('common');
@@ -191,8 +319,18 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
     );
   }
 
+  const handleGeneratedMenu = (dishIds: string[]) => {
+    const nextIds = new Set(dishIds);
+    setSelectedIds(nextIds);
+    setAvailableChecked(new Set());
+    setSelectedChecked(new Set());
+    handleSave(dishIds);
+  };
+
   return (
     <div className="space-y-6">
+      <GenerateMenuPanel apiBase={apiBase} onGenerated={handleGeneratedMenu} />
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">{t('title')}</h2>

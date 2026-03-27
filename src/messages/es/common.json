@@ -1907,7 +1907,18 @@
       "moveToAvailable": "Mover a Disponibles",
       "noDishes": "No se encontraron platos. Configura primero tu Menú de Degustación.",
       "saveSuccess": "Selección de menú de boda guardada correctamente",
-      "saveError": "Error al guardar la selección de menú de boda"
+      "saveError": "Error al guardar la selección de menú de boda",
+      "generateMenu": "Generar mejor menú",
+      "generateMenuTitle": "Generar menú con IA",
+      "generateMenuDescription": "La IA seleccionará la mejor combinación de platos según la fecha y localización de la boda.",
+      "appetizers": "Aperitivos",
+      "firstCourse": "Primer plato",
+      "secondCourse": "Segundo plato",
+      "dessert": "Postre",
+      "generating": "Generando...",
+      "generateSuccess": "Menú generado correctamente",
+      "generateError": "Error al generar el menú",
+      "aiReasoning": "Razonamiento de la IA"
     }
   },
   "guest": {

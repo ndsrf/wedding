@@ -6,10 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
-Last updated: 2026-03-18
-Last updated: 2026-03-11
-Last updated: 2026-02-19
-Last updated: 2026-02-18
+Last updated: 2026-03-27
 
 ### Current Vulnerabilities
 
@@ -91,6 +88,32 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Not included in production builds
   - Low risk
 - **Mitigation**: Development-only dependency, not included in production bundles
+
+##### brace-expansion - Process Hang & Memory Exhaustion
+- **Package**: brace-expansion 1.1.12 (needs ≥1.1.13) and 2.0.2 (needs ≥2.0.3)
+- **CVE**: [GHSA-f886-m6hf-6m8v](https://github.com/advisories/GHSA-f886-m6hf-6m8v)
+- **Status**: Fix exists (1.1.13 / 2.0.3) but npm overrides cannot apply both semver branches simultaneously without running `npm install` — 1.x and 2.x have incompatible APIs so a single override value would break one of the two consumers
+- **Usage**: Dev toolchain only — transitive dependency of `jest` (reporters, config, runtime) and `readdir-glob`
+- **Risk Assessment**:
+  - DoS via zero-step sequence (`{0..0}`), causing an infinite loop in the parser
+  - Only reachable if untrusted input is passed to a brace-expansion call in the build process
+  - Jest and readdir-glob never receive untrusted input at runtime or in CI
+  - No production bundles include brace-expansion
+- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
+- **Future Plan**: Will be resolved automatically when jest or readdir-glob update their minimatch dependency
+
+##### handlebars - Prototype Pollution via Partial Template Injection
+- **Package**: handlebars 4.7.8 (last released 4.x version; no patched version available)
+- **CVE**: [GHSA-2qvq-rjwj-gvw9](https://github.com/advisories/GHSA-2qvq-rjwj-gvw9)
+- **Status**: No patched handlebars@4.x version released by the maintainer
+- **Usage**: Dev toolchain only — transitive dependency of `conventional-changelog-cli` (changelog generation) via `conventional-changelog-writer`
+- **Risk Assessment**:
+  - Attack requires a malicious partial template to be injected during changelog rendering
+  - `conventional-changelog-cli` is invoked only in controlled CI/CD pipelines with trusted commit messages and templates
+  - handlebars is never loaded in the Next.js application or any production bundle
+  - XSS impact would be limited to the CI log output, not the running application
+- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
+- **Future Plan**: Will be resolved when conventional-changelog-writer migrates away from handlebars or a patched handlebars@4.x is released
 
 ##### ajv - ReDoS via $data Option
 - **Package**: ajv < 8.18.0 (via eslint@9.x → @eslint/eslintrc)
