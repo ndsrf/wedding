@@ -1922,7 +1922,18 @@
       "moveToAvailable": "Move to Available",
       "noDishes": "No dishes found. Configure your Tasting Menu first.",
       "saveSuccess": "Wedding menu selection saved successfully",
-      "saveError": "Failed to save wedding menu selection"
+      "saveError": "Failed to save wedding menu selection",
+      "generateMenu": "Generate best menu",
+      "generateMenuTitle": "Generate menu with AI",
+      "generateMenuDescription": "AI will select the best dish combination based on the wedding date and location.",
+      "appetizers": "Appetizers",
+      "firstCourse": "First course",
+      "secondCourse": "Second course",
+      "dessert": "Dessert",
+      "generating": "Generating...",
+      "generateSuccess": "Menu generated successfully",
+      "generateError": "Error generating the menu",
+      "aiReasoning": "AI reasoning"
     }
   },
   "guest": {

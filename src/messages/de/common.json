@@ -1855,6 +1855,19 @@
         "applying": "Importieren...",
         "cancel": "Abbrechen"
       }
+    },
+    "menu": {
+      "generateMenu": "Bestes Menü generieren",
+      "generateMenuTitle": "Menü mit KI generieren",
+      "generateMenuDescription": "Die KI wählt die beste Gerichtekombination basierend auf Datum und Ort der Hochzeit.",
+      "appetizers": "Vorspeisen",
+      "firstCourse": "Erster Gang",
+      "secondCourse": "Zweiter Gang",
+      "dessert": "Dessert",
+      "generating": "Generierung...",
+      "generateSuccess": "Menü erfolgreich generiert",
+      "generateError": "Fehler beim Generieren des Menüs",
+      "aiReasoning": "KI-Begründung"
     }
   },
   "guest": {

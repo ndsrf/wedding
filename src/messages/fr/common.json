@@ -1855,6 +1855,19 @@
         "applying": "Importation...",
         "cancel": "Annuler"
       }
+    },
+    "menu": {
+      "generateMenu": "Générer le meilleur menu",
+      "generateMenuTitle": "Générer un menu avec l'IA",
+      "generateMenuDescription": "L'IA sélectionnera la meilleure combinaison de plats selon la date et le lieu du mariage.",
+      "appetizers": "Apéritifs",
+      "firstCourse": "Entrée",
+      "secondCourse": "Plat principal",
+      "dessert": "Dessert",
+      "generating": "Génération...",
+      "generateSuccess": "Menu généré avec succès",
+      "generateError": "Erreur lors de la génération du menu",
+      "aiReasoning": "Raisonnement de l'IA"
     }
   },
   "guest": {
