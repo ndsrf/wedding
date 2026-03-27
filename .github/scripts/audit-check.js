@@ -41,6 +41,21 @@ const ACCEPTED_GHSAS = [
   'GHSA-3ppc-4f35-3m26', // ReDoS via repeated wildcards
   // ajv - MODERATE severity
   'GHSA-2g4f-4pwh-qvx6', // ReDoS when using $data option (via eslint dev dependency)
+
+  // brace-expansion - MODERATE severity (dev toolchain only)
+  // Affected paths: jest reporters/config/runtime and readdir-glob, all dev dependencies.
+  // Fix requires 1.1.13 (1.x branch) and 2.0.3 (2.x branch); npm overrides would require
+  // separate handling of both semver branches and can't be applied without npm install.
+  // Zero production risk: this vulnerability (process hang / memory exhaustion) can only
+  // be triggered in the local build toolchain, never at runtime.
+  'GHSA-f886-m6hf-6m8v', // Zero-step sequence causes process hang and memory exhaustion
+
+  // handlebars - MODERATE severity (dev toolchain only)
+  // Affected path: conventional-changelog-cli → conventional-changelog-writer → handlebars@4.7.8
+  // conventional-changelog-cli is a direct dev dependency used for changelog generation only.
+  // No patched handlebars version is available for the 4.x branch.
+  // Zero production risk: handlebars is never loaded in the Next.js application bundle.
+  'GHSA-2qvq-rjwj-gvw9', // Prototype Pollution Leading to XSS through Partial Template Injection
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];
