@@ -45,9 +45,18 @@ export interface PlannerInfo {
   logoUrl?: string | null;
 }
 
+export interface TastingReportLabels {
+  generatedOn: string;
+  ratings: string;
+  rating: string;
+  ratingsPlural: string;
+  footer: string;
+}
+
 interface TastingReportPDFProps {
   report: TastingReportData;
   planner: PlannerInfo;
+  labels: TastingReportLabels;
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
@@ -319,7 +328,7 @@ function formatDate(dateStr: string) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function TastingReportPDF({ report, planner }: TastingReportPDFProps) {
+export function TastingReportPDF({ report, planner, labels }: TastingReportPDFProps) {
   const generatedAt = new Date().toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'long',
@@ -346,7 +355,7 @@ export function TastingReportPDF({ report, planner }: TastingReportPDFProps) {
             {report.description && (
               <Text style={styles.menuDescription}>{report.description}</Text>
             )}
-            <Text style={styles.menuMeta}>Informe generado el {generatedAt}</Text>
+            <Text style={styles.menuMeta}>{labels.generatedOn} {generatedAt}</Text>
           </View>
         </View>
 
@@ -386,7 +395,7 @@ export function TastingReportPDF({ report, planner }: TastingReportPDFProps) {
                       )}
                       {dish.score_count != null && dish.score_count > 0 && (
                         <Text style={styles.scoreCountText}>
-                          {dish.score_count} {dish.score_count === 1 ? 'valoración' : 'valoraciones'}
+                          {dish.score_count} {dish.score_count === 1 ? labels.rating : labels.ratingsPlural}
                         </Text>
                       )}
                     </View>
@@ -395,7 +404,7 @@ export function TastingReportPDF({ report, planner }: TastingReportPDFProps) {
                   {/* Scores */}
                   {hasScores && (
                     <View style={styles.scoresArea}>
-                      <Text style={styles.scoresTitle}>Valoraciones</Text>
+                      <Text style={styles.scoresTitle}>{labels.ratings}</Text>
                       {dish.scores.map((s, idx) => (
                         <View key={idx} style={styles.scoreRow}>
                           <Text style={styles.scoreParticipantName}>{s.participant.name}</Text>
@@ -420,7 +429,7 @@ export function TastingReportPDF({ report, planner }: TastingReportPDFProps) {
 
         {/* Footer */}
         <Text style={styles.footer}>
-          {planner.name} — Informe de Degustación
+          {planner.name} — {labels.footer}
         </Text>
       </Page>
     </Document>

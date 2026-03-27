@@ -8,25 +8,84 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import { prisma } from '@/lib/db/prisma';
 import { toAbsoluteUrl } from '@/lib/images/processor';
-import { TastingReportPDF } from '@/lib/pdf/tasting-report-pdf';
+import { TastingReportPDF, type TastingReportLabels } from '@/lib/pdf/tasting-report-pdf';
 import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── i18n labels ─────────────────────────────────────────────────────────────
 
-async function getPlannerForWedding(weddingId: string) {
+const LABELS: Record<string, TastingReportLabels> = {
+  ES: {
+    generatedOn: 'Informe generado el',
+    ratings: 'Valoraciones',
+    rating: 'valoración',
+    ratingsPlural: 'valoraciones',
+    footer: 'Informe de Degustación',
+  },
+  EN: {
+    generatedOn: 'Report generated on',
+    ratings: 'Ratings',
+    rating: 'rating',
+    ratingsPlural: 'ratings',
+    footer: 'Tasting Report',
+  },
+  FR: {
+    generatedOn: 'Rapport généré le',
+    ratings: 'Évaluations',
+    rating: 'évaluation',
+    ratingsPlural: 'évaluations',
+    footer: 'Rapport de Dégustation',
+  },
+  IT: {
+    generatedOn: 'Report generato il',
+    ratings: 'Valutazioni',
+    rating: 'valutazione',
+    ratingsPlural: 'valutazioni',
+    footer: 'Report Degustazione',
+  },
+  DE: {
+    generatedOn: 'Bericht erstellt am',
+    ratings: 'Bewertungen',
+    rating: 'Bewertung',
+    ratingsPlural: 'Bewertungen',
+    footer: 'Degustationsbericht',
+  },
+};
+
+function getLabels(language: string): TastingReportLabels {
+  return LABELS[language] ?? LABELS.ES;
+}
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+
+async function getWeddingContext(weddingId: string) {
   const wedding = await prisma.wedding.findUnique({
     where: { id: weddingId },
     select: {
+      default_language: true,
       planner: { select: { name: true, logo_url: true } },
     },
   });
-  return wedding?.planner ?? null;
+  return {
+    planner: wedding?.planner ?? null,
+    language: wedding?.default_language ?? 'ES',
+  };
+}
+
+function buildPdfResponse(buffer: Buffer, filename: string) {
+  return new NextResponse(new Uint8Array(buffer), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store',
+    },
+  });
 }
 
 // ─── Tasting Report ──────────────────────────────────────────────────────────
 
 export async function generateTastingReportHandler(weddingId: string) {
-  const [menuData, planner] = await Promise.all([
+  const [menuData, { planner, language }] = await Promise.all([
     prisma.tastingMenu.findUnique({
       where: { wedding_id: weddingId },
       include: {
@@ -46,7 +105,7 @@ export async function generateTastingReportHandler(weddingId: string) {
         },
       },
     }),
-    getPlannerForWedding(weddingId),
+    getWeddingContext(weddingId),
   ]);
 
   if (!menuData) {
@@ -56,7 +115,6 @@ export async function generateTastingReportHandler(weddingId: string) {
     );
   }
 
-  // Compute average scores per dish
   const sections = menuData.sections.map((section) => ({
     ...section,
     dishes: section.dishes.map((dish) => {
@@ -93,24 +151,20 @@ export async function generateTastingReportHandler(weddingId: string) {
   };
 
   const buffer = await renderToBuffer(
-    React.createElement(TastingReportPDF, { report, planner: plannerInfo }) as never,
+    React.createElement(TastingReportPDF, {
+      report,
+      planner: plannerInfo,
+      labels: getLabels(language),
+    }) as never,
   );
 
-  const filename = `tasting-report-${menuData.id}.pdf`;
-  return new NextResponse(buffer, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-store',
-    },
-  });
+  return buildPdfResponse(buffer, `tasting-report-${menuData.id}.pdf`);
 }
 
 // ─── Menu PDF ────────────────────────────────────────────────────────────────
 
 export async function generateTastingMenuPDFHandler(weddingId: string) {
-  const [menuData, planner] = await Promise.all([
+  const [menuData, { planner }] = await Promise.all([
     prisma.tastingMenu.findUnique({
       where: { wedding_id: weddingId },
       include: {
@@ -132,7 +186,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
         },
       },
     }),
-    getPlannerForWedding(weddingId),
+    getWeddingContext(weddingId),
   ]);
 
   if (!menuData) {
@@ -170,13 +224,5 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     React.createElement(TastingMenuPDF, { menu, planner: plannerInfo }) as never,
   );
 
-  const filename = `wedding-menu-${menuData.id}.pdf`;
-  return new NextResponse(buffer, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-store',
-    },
-  });
+  return buildPdfResponse(buffer, `wedding-menu-${menuData.id}.pdf`);
 }

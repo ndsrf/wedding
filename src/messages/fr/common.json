@@ -1857,7 +1857,8 @@
       },
       "pdf": {
         "tastingReport": "Rapport de Dégustation",
-        "weddingMenu": "Menu de Mariage"
+        "weddingMenu": "Menu de Mariage",
+        "error": "Erreur lors de la génération du PDF"
       }
     },
     "menu": {

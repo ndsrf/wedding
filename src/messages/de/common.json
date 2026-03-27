@@ -1857,7 +1857,8 @@
       },
       "pdf": {
         "tastingReport": "Degustationsbericht",
-        "weddingMenu": "Hochzeitsmenü"
+        "weddingMenu": "Hochzeitsmenü",
+        "error": "PDF-Generierung fehlgeschlagen"
       }
     },
     "menu": {

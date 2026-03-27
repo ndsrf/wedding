@@ -33,10 +33,13 @@ function PdfDownloadButton({
   label: string;
   filename: string;
 }) {
+  const t = useTranslations('admin.tastingMenu');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   async function handleClick() {
     setLoading(true);
+    setError(false);
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error('PDF generation failed');
@@ -48,27 +51,32 @@ function PdfDownloadButton({
       a.click();
       URL.revokeObjectURL(href);
     } catch {
-      // silently ignore – the user will notice nothing downloaded
+      setError(true);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-colors shadow-sm"
-    >
-      {loading ? (
-        <WeddingSpinner size="sm" />
-      ) : (
-        <svg className="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-        </svg>
+    <div className="flex flex-col items-end gap-0.5">
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-colors shadow-sm"
+      >
+        {loading ? (
+          <WeddingSpinner size="sm" />
+        ) : (
+          <svg className="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+          </svg>
+        )}
+        {label}
+      </button>
+      {error && (
+        <p className="text-xs text-red-500">{t('pdf.error')}</p>
       )}
-      {label}
-    </button>
+    </div>
   );
 }
 

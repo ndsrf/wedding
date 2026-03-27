@@ -1911,7 +1911,8 @@
       },
       "pdf": {
         "tastingReport": "Tasting Report",
-        "weddingMenu": "Wedding Menu"
+        "weddingMenu": "Wedding Menu",
+        "error": "Failed to generate PDF"
       }
     },
     "menu": {
