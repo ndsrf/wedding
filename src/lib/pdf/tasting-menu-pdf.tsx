@@ -45,7 +45,6 @@ interface TastingMenuPDFProps {
 
 const ROSE = '#e11d48';
 const GRAY_900 = '#111827';
-const GRAY_700 = '#374151';
 const GRAY_500 = '#6b7280';
 const GRAY_300 = '#d1d5db';
 const GRAY_100 = '#f3f4f6';
