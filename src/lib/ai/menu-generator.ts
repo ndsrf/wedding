@@ -4,9 +4,11 @@
  * Selects the best combination of dishes for a wedding menu based on:
  * - Desired quantities per category (appetizers, first course, second course, dessert)
  * - Wedding date and location (season, regional cuisine)
- * - Available dishes with their ratings and descriptions
+ * - Available dishes with their tasting ratings and score counts
+ * - Guest context: average age, total count, dietary restrictions
  *
  * Uses the same OpenAI / Gemini provider as the rest of the AI layer.
+ * The AI may ONLY select dish IDs from the provided list — it cannot invent new dishes.
  */
 
 import OpenAI from 'openai';
@@ -19,7 +21,14 @@ export interface MenuDish {
   name: string;
   description?: string | null;
   average_score?: number | null;
+  score_count?: number;           // How many tasters rated this dish
   section_name: string;
+}
+
+export interface GuestContext {
+  totalGuests: number;
+  averageAge: number | null;
+  dietaryRestrictions: string[];  // Aggregated, de-duplicated list (no PII)
 }
 
 export interface GenerateMenuInput {
@@ -30,8 +39,10 @@ export interface GenerateMenuInput {
     second_course: number;
     dessert: number;
   };
-  weddingDate?: string | null;  // ISO date string
+  weddingDate?: string | null;    // ISO date string
   location?: string | null;
+  weddingCountry?: string | null; // ISO country code, e.g. "ES"
+  guestContext?: GuestContext | null;
 }
 
 export interface GenerateMenuResult {
@@ -42,32 +53,68 @@ export interface GenerateMenuResult {
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
 function buildPrompt(input: GenerateMenuInput): string {
-  const { dishes, quantities, weddingDate, location } = input;
+  const { dishes, quantities, weddingDate, location, weddingCountry, guestContext } = input;
 
+  // ── Wedding context ──────────────────────────────────────────────────────
   const contextParts: string[] = [];
   if (weddingDate) {
     const date = new Date(weddingDate);
     const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
     const season = getSeason(date.getMonth());
-    contextParts.push(`Wedding date: ${month} (${season})`);
+    contextParts.push(`Wedding date: ${month} ${year} (${season})`);
   }
   if (location) {
-    contextParts.push(`Wedding location: ${location}`);
+    contextParts.push(`Wedding venue/location: ${location}`);
+  }
+  if (weddingCountry) {
+    contextParts.push(`Country: ${weddingCountry}`);
+  }
+
+  // ── Guest context ────────────────────────────────────────────────────────
+  if (guestContext) {
+    if (guestContext.totalGuests > 0) {
+      contextParts.push(`Total guests: ${guestContext.totalGuests}`);
+    }
+    if (guestContext.averageAge !== null && guestContext.averageAge > 0) {
+      const ageDesc = describeAgeGroup(guestContext.averageAge);
+      contextParts.push(
+        `Average guest age: ${Math.round(guestContext.averageAge)} years old (${ageDesc})`,
+      );
+    }
+    if (guestContext.dietaryRestrictions.length > 0) {
+      contextParts.push(
+        `Dietary restrictions among guests: ${guestContext.dietaryRestrictions.join(', ')}`,
+      );
+    }
   }
 
   const context = contextParts.length > 0
     ? contextParts.join('. ') + '.'
-    : 'No specific date or location provided.';
+    : 'No specific context provided.';
 
+  // ── Dish catalogue ───────────────────────────────────────────────────────
+  const allIds = dishes.map(d => d.id);
   const dishList = dishes
-    .map(d =>
-      `- ID: ${d.id} | Section: ${d.section_name} | Name: ${d.name}` +
-      (d.description ? ` | Description: ${d.description}` : '') +
-      (d.average_score != null ? ` | Rating: ${d.average_score.toFixed(1)}/10` : '')
-    )
+    .map(d => {
+      let line = `- ID: ${d.id} | Section: ${d.section_name} | Name: ${d.name}`;
+      if (d.description) line += ` | Description: ${d.description}`;
+      if (d.average_score != null) {
+        const scoreInfo = d.score_count != null && d.score_count > 0
+          ? ` (${d.score_count} taster${d.score_count !== 1 ? 's' : ''})`
+          : '';
+        line += ` | Tasting score: ${d.average_score.toFixed(1)}/10${scoreInfo}`;
+      } else {
+        line += ` | Tasting score: not rated yet`;
+      }
+      return line;
+    })
     .join('\n');
 
-  return `You are a professional wedding menu consultant. Select the best combination of dishes for a wedding menu.
+  return `You are a professional wedding menu consultant. Your task is to select the best dishes for a wedding banquet.
+
+CRITICAL CONSTRAINT: You MUST select dish IDs EXCLUSIVELY from the list below. Do NOT invent, guess, or use any ID that is not in this list. The complete set of valid IDs is:
+${JSON.stringify(allIds)}
 
 Context: ${context}
 
@@ -77,21 +124,29 @@ You must select exactly:
 - ${quantities.second_course} second course(s) / segundo plato(s)
 - ${quantities.dessert} dessert(s) / postre(s)
 
-Consider:
-1. Dish ratings (higher is better)
-2. Seasonal and regional appropriateness based on the wedding date and location
-3. Balance and variety (avoid repetitive flavors or ingredients)
-4. Culinary harmony between courses
+Selection criteria (in order of importance):
+1. Category match — map each dish to its category using the section name:
+   • Aperitivo / Cóctel / Cocktail / Canapés / Starters → appetizers
+   • Primer Plato / Entrante / Starter / First Course → first course
+   • Segundo Plato / Principal / Main Course / Second Course → second course
+   • Postre / Dessert → dessert
+   If a section name is ambiguous, use the dish name and description to infer the category.
+2. Tasting scores — prefer highly-rated dishes; give extra weight to scores based on more tasters (more evidence = more reliable).
+3. Seasonal & regional fit — choose dishes that suit the wedding season and local cuisine.
+4. Guest profile — consider the average age of guests:
+   • Young guests (< 30): bold, trendy, creative dishes.
+   • Mixed / adult (30–55): balanced, crowd-pleasing classics with quality ingredients.
+   • Mature guests (> 55): elegant, familiar, easily digestible options.
+5. Dietary considerations — if dietary restrictions are listed, favour dishes that can accommodate them or note this in your reasoning.
+6. Menu harmony — avoid repetitive proteins, flavours, or cooking methods across courses; ensure the overall menu flows well from starter to dessert.
 
 Available dishes:
 ${dishList}
 
-Map sections to categories using the section name. Sections named like "Aperitivo", "Cóctel", "Cocktail", "Canapés" → appetizers. Sections named like "Primer Plato", "Entrante", "Starter", "First Course" → first course. Sections named like "Segundo Plato", "Principal", "Main Course", "Second Course" → second course. Sections named like "Postre", "Dessert" → dessert. If a section doesn't clearly match a category, use your best judgement based on the dish names and descriptions.
-
-IMPORTANT: Return ONLY a valid JSON object with this exact structure, no markdown, no explanation:
+Return ONLY a valid JSON object — no markdown, no prose outside the JSON:
 {
   "selectedDishIds": ["id1", "id2", "..."],
-  "reasoning": "Brief explanation of your choices"
+  "reasoning": "A concise explanation (2-4 sentences) of why these dishes were chosen."
 }`;
 }
 
@@ -100,6 +155,13 @@ function getSeason(month: number): string {
   if (month >= 5 && month <= 7) return 'Summer';
   if (month >= 8 && month <= 10) return 'Autumn';
   return 'Winter';
+}
+
+function describeAgeGroup(avg: number): string {
+  if (avg < 30) return 'young crowd';
+  if (avg < 45) return 'young adults';
+  if (avg < 60) return 'mixed adult';
+  return 'mature guests';
 }
 
 // ─── OpenAI ───────────────────────────────────────────────────────────────────
@@ -171,7 +233,7 @@ function extractJson(text: string): GenerateMenuResult | null {
 /**
  * Generate the best wedding menu selection using AI.
  *
- * @param input - Dishes, desired quantities, and wedding context
+ * @param input - Dishes (with tasting scores), desired quantities, wedding context, and guest profile
  * @returns Selected dish IDs and reasoning, or null if generation fails
  */
 export async function generateBestMenu(input: GenerateMenuInput): Promise<GenerateMenuResult | null> {
@@ -189,6 +251,9 @@ export async function generateBestMenu(input: GenerateMenuInput): Promise<Genera
     provider,
     totalDishes: input.dishes.length,
     quantities: input.quantities,
+    hasGuestContext: !!input.guestContext,
+    avgAge: input.guestContext?.averageAge,
+    totalGuests: input.guestContext?.totalGuests,
   });
 
   try {

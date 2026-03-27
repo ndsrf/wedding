@@ -1,7 +1,7 @@
 /**
- * Generate Best Menu API (Planner)
+ * Generate Best Menu API (Admin)
  *
- * POST /api/planner/weddings/[id]/tasting/menu/generate
+ * POST /api/admin/tasting/menu/generate
  *
  * Uses AI to select the best combination of dishes from the existing tasting menu
  * based on:
@@ -21,7 +21,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireRole } from '@/lib/auth/middleware';
-import { validatePlannerAccess } from '@/lib/guests/planner-access';
 import { prisma } from '@/lib/db/prisma';
 import { generateBestMenu } from '@/lib/ai/menu-generator';
 
@@ -32,22 +31,17 @@ const generateMenuSchema = z.object({
   dessert: z.number().int().min(0).max(20),
 });
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: NextRequest) {
   try {
-    const user = await requireRole('planner');
-    if (!user.planner_id) {
+    const user = await requireRole('wedding_admin');
+    if (!user.wedding_id) {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'No planner' } },
+        { success: false, error: { code: 'FORBIDDEN', message: 'No wedding associated' } },
         { status: 403 },
       );
     }
 
-    const { id: weddingId } = await params;
-    const denied = await validatePlannerAccess(user.planner_id, weddingId);
-    if (denied) return denied;
+    const weddingId = user.wedding_id;
 
     const body = await request.json();
     const parsed = generateMenuSchema.safeParse(body);
@@ -175,7 +169,7 @@ export async function POST(
       data: { selectedDishIds, reasoning: result.reasoning },
     });
   } catch (error) {
-    console.error('[GENERATE_MENU] Error:', error);
+    console.error('[GENERATE_MENU_ADMIN] Error:', error);
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to generate menu' } },
       { status: 500 },
