@@ -1854,6 +1854,10 @@
         "apply": "Zum Menü hinzufügen",
         "applying": "Importieren...",
         "cancel": "Abbrechen"
+      },
+      "pdf": {
+        "tastingReport": "Degustationsbericht",
+        "weddingMenu": "Hochzeitsmenü"
       }
     },
     "menu": {

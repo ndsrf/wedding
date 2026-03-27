@@ -1893,6 +1893,10 @@
         "apply": "Añadir al menú",
         "applying": "Importando...",
         "cancel": "Cancelar"
+      },
+      "pdf": {
+        "tastingReport": "Informe Degustación",
+        "weddingMenu": "Menú de Boda"
       }
     },
     "menu": {

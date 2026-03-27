@@ -1,0 +1,428 @@
+import React from 'react';
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from '@react-pdf/renderer';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export interface TastingScoreData {
+  score: number;
+  notes?: string | null;
+  image_url?: string | null;
+  participant: { name: string };
+}
+
+export interface TastingDishData {
+  id: string;
+  name: string;
+  description?: string | null;
+  image_url?: string | null;
+  scores: TastingScoreData[];
+  average_score?: number | null;
+  score_count?: number;
+}
+
+export interface TastingSectionData {
+  id: string;
+  name: string;
+  dishes: TastingDishData[];
+}
+
+export interface TastingReportData {
+  title: string;
+  description?: string | null;
+  tasting_date?: string | null;
+  sections: TastingSectionData[];
+}
+
+export interface PlannerInfo {
+  name: string;
+  logoUrl?: string | null;
+}
+
+interface TastingReportPDFProps {
+  report: TastingReportData;
+  planner: PlannerInfo;
+}
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const ROSE = '#e11d48';
+const GRAY_900 = '#111827';
+const GRAY_700 = '#374151';
+const GRAY_500 = '#6b7280';
+const GRAY_300 = '#d1d5db';
+const GRAY_100 = '#f3f4f6';
+const GRAY_50 = '#f9fafb';
+const AMBER = '#f59e0b';
+
+const styles = StyleSheet.create({
+  page: {
+    fontFamily: 'Helvetica',
+    fontSize: 9,
+    paddingTop: 40,
+    paddingBottom: 48,
+    paddingHorizontal: 40,
+    color: GRAY_900,
+    backgroundColor: '#ffffff',
+  },
+
+  // ── Header ──
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  logo: {
+    maxWidth: 100,
+    maxHeight: 40,
+    objectFit: 'contain',
+  },
+  plannerName: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+  },
+  headerRight: {
+    textAlign: 'right',
+  },
+  menuTitle: {
+    fontSize: 16,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_900,
+    textAlign: 'right',
+  },
+  menuMeta: {
+    fontSize: 8,
+    color: GRAY_500,
+    marginTop: 3,
+    textAlign: 'right',
+  },
+  menuDescription: {
+    fontSize: 8,
+    color: GRAY_500,
+    marginTop: 2,
+    textAlign: 'right',
+    fontStyle: 'italic',
+  },
+
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: GRAY_300,
+    marginBottom: 16,
+  },
+
+  // ── Section ──
+  sectionHeader: {
+    backgroundColor: ROSE,
+    borderRadius: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  sectionName: {
+    fontSize: 10,
+    fontFamily: 'Helvetica-Bold',
+    color: '#ffffff',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+
+  // ── Dish ──
+  dishCard: {
+    backgroundColor: GRAY_50,
+    borderRadius: 6,
+    marginBottom: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: GRAY_100,
+  },
+  dishTopRow: {
+    flexDirection: 'row',
+    padding: 8,
+    gap: 8,
+  },
+  dishImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 4,
+    objectFit: 'cover',
+    flexShrink: 0,
+  },
+  dishImagePlaceholder: {
+    width: 52,
+    height: 52,
+    borderRadius: 4,
+    backgroundColor: GRAY_100,
+    flexShrink: 0,
+  },
+  dishInfo: {
+    flex: 1,
+  },
+  dishNameRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  dishName: {
+    fontSize: 10,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_900,
+    flex: 1,
+    marginRight: 8,
+  },
+  scoreBlock: {
+    alignItems: 'flex-end',
+    flexShrink: 0,
+  },
+  scoreAvg: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+    lineHeight: 1,
+  },
+  scoreLabel: {
+    fontSize: 7,
+    color: GRAY_500,
+    textAlign: 'right',
+  },
+  starsRow: {
+    flexDirection: 'row',
+    gap: 1,
+    marginTop: 2,
+  },
+  starFull: {
+    width: 7,
+    height: 7,
+    color: AMBER,
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+  },
+  starEmpty: {
+    width: 7,
+    height: 7,
+    color: GRAY_300,
+    fontSize: 7,
+  },
+  dishDesc: {
+    fontSize: 8,
+    color: GRAY_500,
+    marginTop: 3,
+    lineHeight: 1.4,
+  },
+  scoreCountText: {
+    fontSize: 7,
+    color: GRAY_500,
+    marginTop: 2,
+  },
+
+  // ── Scores table ──
+  scoresArea: {
+    borderTopWidth: 1,
+    borderTopColor: GRAY_100,
+    paddingHorizontal: 8,
+    paddingTop: 6,
+    paddingBottom: 6,
+  },
+  scoresTitle: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_500,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+    gap: 6,
+  },
+  scoreParticipantName: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_700,
+    width: 80,
+    flexShrink: 0,
+  },
+  scoreValue: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+    width: 20,
+    flexShrink: 0,
+  },
+  scoreNotes: {
+    fontSize: 7,
+    color: GRAY_500,
+    flex: 1,
+    lineHeight: 1.3,
+    fontStyle: 'italic',
+  },
+  scorePhoto: {
+    width: 36,
+    height: 36,
+    borderRadius: 3,
+    objectFit: 'cover',
+    flexShrink: 0,
+  },
+
+  // ── Footer ──
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 40,
+    right: 40,
+    textAlign: 'center',
+    fontSize: 7,
+    color: GRAY_300,
+    borderTopWidth: 1,
+    borderTopColor: GRAY_100,
+    paddingTop: 6,
+  },
+});
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function Stars({ score, max = 10 }: { score: number; max?: number }) {
+  // Convert 1-10 to 5 stars (half-star approximation with full chars only)
+  const stars5 = Math.round((score / max) * 5);
+  return (
+    <View style={styles.starsRow}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <Text key={i} style={i < stars5 ? styles.starFull : styles.starEmpty}>
+          {i < stars5 ? '★' : '☆'}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
+function formatDate(dateStr: string) {
+  try {
+    return new Date(dateStr).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export function TastingReportPDF({ report, planner }: TastingReportPDFProps) {
+  const generatedAt = new Date().toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            {planner.logoUrl ? (
+              <Image src={planner.logoUrl} style={styles.logo} />
+            ) : (
+              <Text style={styles.plannerName}>{planner.name}</Text>
+            )}
+          </View>
+          <View style={styles.headerRight}>
+            <Text style={styles.menuTitle}>{report.title}</Text>
+            {report.tasting_date && (
+              <Text style={styles.menuMeta}>{formatDate(report.tasting_date)}</Text>
+            )}
+            {report.description && (
+              <Text style={styles.menuDescription}>{report.description}</Text>
+            )}
+            <Text style={styles.menuMeta}>Informe generado el {generatedAt}</Text>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Sections */}
+        {report.sections.map((section) => (
+          <View key={section.id} wrap={false}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionName}>{section.name}</Text>
+            </View>
+
+            {section.dishes.map((dish) => {
+              const hasScores = dish.scores && dish.scores.length > 0;
+              return (
+                <View key={dish.id} style={styles.dishCard} wrap={false}>
+                  {/* Dish header row */}
+                  <View style={styles.dishTopRow}>
+                    {dish.image_url ? (
+                      <Image src={dish.image_url} style={styles.dishImage} />
+                    ) : (
+                      <View style={styles.dishImagePlaceholder} />
+                    )}
+                    <View style={styles.dishInfo}>
+                      <View style={styles.dishNameRow}>
+                        <Text style={styles.dishName}>{dish.name}</Text>
+                        {dish.average_score != null && (
+                          <View style={styles.scoreBlock}>
+                            <Text style={styles.scoreAvg}>{dish.average_score.toFixed(1)}</Text>
+                            <Text style={styles.scoreLabel}>/10</Text>
+                            <Stars score={dish.average_score} />
+                          </View>
+                        )}
+                      </View>
+                      {dish.description && (
+                        <Text style={styles.dishDesc}>{dish.description}</Text>
+                      )}
+                      {dish.score_count != null && dish.score_count > 0 && (
+                        <Text style={styles.scoreCountText}>
+                          {dish.score_count} {dish.score_count === 1 ? 'valoración' : 'valoraciones'}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Scores */}
+                  {hasScores && (
+                    <View style={styles.scoresArea}>
+                      <Text style={styles.scoresTitle}>Valoraciones</Text>
+                      {dish.scores.map((s, idx) => (
+                        <View key={idx} style={styles.scoreRow}>
+                          <Text style={styles.scoreParticipantName}>{s.participant.name}</Text>
+                          <Text style={styles.scoreValue}>{s.score}/10</Text>
+                          {s.notes ? (
+                            <Text style={styles.scoreNotes}>{s.notes}</Text>
+                          ) : (
+                            <Text style={styles.scoreNotes} />
+                          )}
+                          {s.image_url && (
+                            <Image src={s.image_url} style={styles.scorePhoto} />
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        ))}
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          {planner.name} — Informe de Degustación
+        </Text>
+      </Page>
+    </Document>
+  );
+}

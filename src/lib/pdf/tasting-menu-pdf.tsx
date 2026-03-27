@@ -1,0 +1,259 @@
+import React from 'react';
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from '@react-pdf/renderer';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export interface MenuDishData {
+  id: string;
+  name: string;
+  description?: string | null;
+  image_url?: string | null;
+  is_selected?: boolean;
+}
+
+export interface MenuSectionData {
+  id: string;
+  name: string;
+  dishes: MenuDishData[];
+}
+
+export interface TastingMenuPDFData {
+  title: string;
+  description?: string | null;
+  tasting_date?: string | null;
+  sections: MenuSectionData[];
+}
+
+export interface MenuPlannerInfo {
+  name: string;
+  logoUrl?: string | null;
+}
+
+interface TastingMenuPDFProps {
+  menu: TastingMenuPDFData;
+  planner: MenuPlannerInfo;
+}
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const ROSE = '#e11d48';
+const GRAY_900 = '#111827';
+const GRAY_700 = '#374151';
+const GRAY_500 = '#6b7280';
+const GRAY_300 = '#d1d5db';
+const GRAY_100 = '#f3f4f6';
+const GRAY_50 = '#f9fafb';
+
+const styles = StyleSheet.create({
+  page: {
+    fontFamily: 'Helvetica',
+    fontSize: 9,
+    paddingTop: 40,
+    paddingBottom: 48,
+    paddingHorizontal: 40,
+    color: GRAY_900,
+    backgroundColor: '#ffffff',
+  },
+
+  // ── Header ──
+  header: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  logo: {
+    maxWidth: 110,
+    maxHeight: 50,
+    objectFit: 'contain',
+    marginBottom: 10,
+  },
+  plannerName: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+    marginBottom: 10,
+  },
+  menuTitle: {
+    fontSize: 22,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_900,
+    textAlign: 'center',
+  },
+  menuDate: {
+    fontSize: 9,
+    color: GRAY_500,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  menuDescription: {
+    fontSize: 8,
+    color: GRAY_500,
+    marginTop: 3,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+
+  divider: {
+    borderBottomWidth: 1.5,
+    borderBottomColor: ROSE,
+    marginBottom: 20,
+    marginTop: 8,
+  },
+
+  // ── Section ──
+  sectionContainer: {
+    marginBottom: 14,
+  },
+  sectionHeader: {
+    borderBottomWidth: 1,
+    borderBottomColor: ROSE,
+    marginBottom: 8,
+    paddingBottom: 3,
+  },
+  sectionName: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+
+  // ── Dish grid ── (2 columns)
+  dishesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  dishCard: {
+    width: '48%',
+    backgroundColor: GRAY_50,
+    borderRadius: 5,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: GRAY_100,
+    marginBottom: 0,
+  },
+  dishImage: {
+    width: '100%',
+    height: 60,
+    objectFit: 'cover',
+  },
+  dishBody: {
+    padding: 6,
+  },
+  dishName: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_900,
+    marginBottom: 2,
+  },
+  dishDesc: {
+    fontSize: 7.5,
+    color: GRAY_500,
+    lineHeight: 1.4,
+  },
+  dishNoImage: {
+    height: 4,
+    backgroundColor: ROSE,
+  },
+
+  // ── Footer ──
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 40,
+    right: 40,
+    textAlign: 'center',
+    fontSize: 7,
+    color: GRAY_300,
+    borderTopWidth: 1,
+    borderTopColor: GRAY_100,
+    paddingTop: 6,
+  },
+});
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatDate(dateStr: string) {
+  try {
+    return new Date(dateStr).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export function TastingMenuPDF({ menu, planner }: TastingMenuPDFProps) {
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          {planner.logoUrl ? (
+            <Image src={planner.logoUrl} style={styles.logo} />
+          ) : (
+            <Text style={styles.plannerName}>{planner.name}</Text>
+          )}
+          <Text style={styles.menuTitle}>{menu.title}</Text>
+          {menu.tasting_date && (
+            <Text style={styles.menuDate}>{formatDate(menu.tasting_date)}</Text>
+          )}
+          {menu.description && (
+            <Text style={styles.menuDescription}>{menu.description}</Text>
+          )}
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Sections */}
+        {menu.sections.map((section) => {
+          const selectedDishes = section.dishes.filter((d) => d.is_selected);
+          if (selectedDishes.length === 0) return null;
+
+          return (
+            <View key={section.id} style={styles.sectionContainer} wrap={false}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionName}>{section.name}</Text>
+              </View>
+
+              <View style={styles.dishesGrid}>
+                {selectedDishes.map((dish) => (
+                  <View key={dish.id} style={styles.dishCard}>
+                    {dish.image_url ? (
+                      <Image src={dish.image_url} style={styles.dishImage} />
+                    ) : (
+                      <View style={styles.dishNoImage} />
+                    )}
+                    <View style={styles.dishBody}>
+                      <Text style={styles.dishName}>{dish.name}</Text>
+                      {dish.description && (
+                        <Text style={styles.dishDesc}>{dish.description}</Text>
+                      )}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          );
+        })}
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          {planner.name} — Menú de Boda
+        </Text>
+      </Page>
+    </Document>
+  );
+}

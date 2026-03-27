@@ -1908,6 +1908,10 @@
         "apply": "Add to Menu",
         "applying": "Importing...",
         "cancel": "Cancel"
+      },
+      "pdf": {
+        "tastingReport": "Tasting Report",
+        "weddingMenu": "Wedding Menu"
       }
     },
     "menu": {
