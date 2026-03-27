@@ -18,7 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
-import { generateWeddingReply, type InvitationTemplateContext, type LocationContext } from '@/lib/ai/wedding-assistant';
+import { generateWeddingReply, type InvitationTemplateContext, type LocationContext, type MenuContext } from '@/lib/ai/wedding-assistant';
 import { generateNupciBotReply } from '@/lib/ai/nupcibot';
 import { generateRagReply } from '@/lib/ai/rag-chat';
 import { isVectorEnabled } from '@/lib/db/vector-prisma';
@@ -458,6 +458,32 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // --- Fetch selected wedding menu dishes ------------------------------
+    let menuContext: MenuContext | null = null;
+    try {
+      const tastingMenu = await prisma.tastingMenu.findUnique({
+        where: { wedding_id: family.wedding_id },
+        select: {
+          sections: {
+            orderBy: { order: 'asc' },
+            select: {
+              name: true,
+              dishes: {
+                where: { is_selected: true },
+                orderBy: { order: 'asc' },
+                select: { name: true, description: true },
+              },
+            },
+          },
+        },
+      });
+      if (tastingMenu) {
+        menuContext = { sections: tastingMenu.sections };
+      }
+    } catch (err) {
+      console.warn('[TWILIO_INBOUND] Failed to fetch tasting menu, proceeding without it:', err);
+    }
+
     const aiReply = await generateWeddingReply(
       body,
       family.wedding,
@@ -470,7 +496,8 @@ export async function POST(request: NextRequest) {
       language,
       shortRsvpUrl,
       invitationTemplate,
-      family.wedding.main_event_location as LocationContext | null
+      family.wedding.main_event_location as LocationContext | null,
+      menuContext
     );
 
     if (!aiReply) {
