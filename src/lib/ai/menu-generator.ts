@@ -14,6 +14,16 @@
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
 
+// ─── Language helpers ─────────────────────────────────────────────────────────
+
+const LANGUAGE_NAMES: Record<string, string> = {
+  ES: 'Spanish',
+  EN: 'English',
+  FR: 'French',
+  IT: 'Italian',
+  DE: 'German',
+};
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface MenuDish {
@@ -42,6 +52,7 @@ export interface GenerateMenuInput {
   weddingDate?: string | null;    // ISO date string
   location?: string | null;
   weddingCountry?: string | null; // ISO country code, e.g. "ES"
+  language?: string | null;       // Language enum: ES | EN | FR | IT | DE
   guestContext?: GuestContext | null;
 }
 
@@ -53,7 +64,9 @@ export interface GenerateMenuResult {
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
 function buildPrompt(input: GenerateMenuInput): string {
-  const { dishes, quantities, weddingDate, location, weddingCountry, guestContext } = input;
+  const { dishes, quantities, weddingDate, location, weddingCountry, language, guestContext } = input;
+
+  const responseLang = (language && LANGUAGE_NAMES[language]) || 'Spanish';
 
   // ── Wedding context ──────────────────────────────────────────────────────
   const contextParts: string[] = [];
@@ -113,32 +126,52 @@ function buildPrompt(input: GenerateMenuInput): string {
 
   return `You are a professional wedding menu consultant. Your task is to select the best dishes for a wedding banquet.
 
+LANGUAGE: Write the "reasoning" field in ${responseLang}.
+
 CRITICAL CONSTRAINT: You MUST select dish IDs EXCLUSIVELY from the list below. Do NOT invent, guess, or use any ID that is not in this list. The complete set of valid IDs is:
 ${JSON.stringify(allIds)}
 
 Context: ${context}
 
 You must select exactly:
-- ${quantities.appetizers} appetizer(s) / aperitivo(s)
-- ${quantities.first_course} first course(s) / primer plato(s)
-- ${quantities.second_course} second course(s) / segundo plato(s)
-- ${quantities.dessert} dessert(s) / postre(s)
+- ${quantities.appetizers} appetizer(s)
+- ${quantities.first_course} first course(s)
+- ${quantities.second_course} second course(s)
+- ${quantities.dessert} dessert(s)
 
-Selection criteria (in order of importance):
-1. Category match — map each dish to its category using the section name:
-   • Aperitivo / Cóctel / Cocktail / Canapés / Starters → appetizers
-   • Primer Plato / Entrante / Starter / First Course → first course
-   • Segundo Plato / Principal / Main Course / Second Course → second course
-   • Postre / Dessert → dessert
-   If a section name is ambiguous, use the dish name and description to infer the category.
-2. Tasting scores — prefer highly-rated dishes; give extra weight to scores based on more tasters (more evidence = more reliable).
-3. Seasonal & regional fit — choose dishes that suit the wedding season and local cuisine.
-4. Guest profile — consider the average age of guests:
-   • Young guests (< 30): bold, trendy, creative dishes.
-   • Mixed / adult (30–55): balanced, crowd-pleasing classics with quality ingredients.
-   • Mature guests (> 55): elegant, familiar, easily digestible options.
-5. Dietary considerations — if dietary restrictions are listed, favour dishes that can accommodate them or note this in your reasoning.
-6. Menu harmony — avoid repetitive proteins, flavours, or cooking methods across courses; ensure the overall menu flows well from starter to dessert.
+FILLING ALL CATEGORIES IS MANDATORY. Follow this two-pass process:
+
+PASS 1 — Category mapping. Assign each dish to a category by matching its section name:
+  • APPETIZERS: Aperitivo, Cóctel, Cocktail, Canapés, Canapé, Bocados, Picoteo, Entrantes fríos,
+    Aperitif, Amuse-bouche, Häppchen, Fingerfood, Antipasto, Antipasti, Stuzzichini,
+    Apéritif, Starter, Starters, Appetizer, Appetizers
+  • FIRST COURSE: Primer Plato, Primeros, Entrante, Entrantes, Sopa, Ensalada, Pasta, Arroz,
+    First Course, Soup, Salad, Primo Piatto, Primo, Zuppa, Risotto,
+    Entrée, Premier Plat, Erster Gang, Suppe, Salat
+  • SECOND COURSE: Segundo Plato, Segundos, Plato Principal, Carne, Pescado, Principal,
+    Second Course, Main Course, Main, Entrée (as main), Secondo Piatto, Secondo,
+    Plat Principal, Deuxième Plat, Hauptgang, Zweiter Gang, Hauptgericht
+  • DESSERT: Postre, Postres, Dulce, Tarta, Pastel, Helado,
+    Dessert, Sweet, Pudding, Cake, Dolce, Torta,
+    Gâteau, Entremets, Nachspeise, Nachtisch, Süßspeise
+
+  If a section name does not match any keyword above, infer the category from the dish name and description.
+
+PASS 2 — Gap filling. If after Pass 1 a category still has fewer dishes than requested:
+  • Take the highest-scoring unassigned dishes from any section and assign them to fill the gap.
+  • Prefer dishes whose name/description best fits the missing category (e.g. a sweet dish for dessert).
+  • Never leave a category empty if there are any dishes left in the list.
+  • Only return fewer than the requested count if the entire dish catalogue does not contain enough dishes.
+
+Selection criteria (applied within each category):
+1. Tasting scores — prefer highly-rated dishes; weight scores by number of tasters (more tasters = more reliable).
+2. Seasonal & regional fit — choose dishes that suit the wedding season and local cuisine.
+3. Guest profile — consider the average age:
+   • Under 30: bold, trendy, creative dishes.
+   • 30–55: balanced, crowd-pleasing classics with quality ingredients.
+   • Over 55: elegant, familiar, easily digestible options.
+4. Dietary considerations — if dietary restrictions are listed, favour compatible dishes or note them in reasoning.
+5. Menu harmony — avoid repetitive proteins, flavours or cooking methods across courses.
 
 Available dishes:
 ${dishList}
@@ -146,7 +179,7 @@ ${dishList}
 Return ONLY a valid JSON object — no markdown, no prose outside the JSON:
 {
   "selectedDishIds": ["id1", "id2", "..."],
-  "reasoning": "A concise explanation (2-4 sentences) of why these dishes were chosen."
+  "reasoning": "A concise explanation (2-4 sentences) of why these dishes were chosen. Write this in ${responseLang}."
 }`;
 }
 
@@ -251,6 +284,7 @@ export async function generateBestMenu(input: GenerateMenuInput): Promise<Genera
     provider,
     totalDishes: input.dishes.length,
     quantities: input.quantities,
+    language: input.language,
     hasGuestContext: !!input.guestContext,
     avgAge: input.guestContext?.averageAge,
     totalGuests: input.guestContext?.totalGuests,

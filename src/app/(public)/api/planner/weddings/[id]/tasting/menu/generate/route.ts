@@ -71,7 +71,7 @@ export async function POST(
     const [wedding, tastingMenu, guestMembers] = await Promise.all([
       prisma.wedding.findUnique({
         where: { id: weddingId },
-        select: { wedding_date: true, location: true, wedding_country: true },
+        select: { wedding_date: true, location: true, wedding_country: true, default_language: true },
       }),
       prisma.tastingMenu.findUnique({
         where: { wedding_id: weddingId },
@@ -156,6 +156,7 @@ export async function POST(
       weddingDate: wedding?.wedding_date?.toISOString() ?? null,
       location: wedding?.location ?? null,
       weddingCountry: wedding?.wedding_country ?? null,
+      language: wedding?.default_language ?? null,
       guestContext,
     });
 
