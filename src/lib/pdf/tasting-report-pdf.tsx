@@ -204,21 +204,13 @@ const styles = StyleSheet.create({
   },
   starsRow: {
     flexDirection: 'row',
-    gap: 1,
     marginTop: 2,
   },
-  starFull: {
-    width: 7,
-    height: 7,
-    color: AMBER,
-    fontSize: 7,
-    fontFamily: 'Helvetica-Bold',
-  },
-  starEmpty: {
-    width: 7,
-    height: 7,
-    color: GRAY_300,
-    fontSize: 7,
+  starDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 1,
   },
   dishDesc: {
     fontSize: 8,
@@ -301,14 +293,14 @@ const styles = StyleSheet.create({
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function Stars({ score, max = 10 }: { score: number; max?: number }) {
-  // Convert 1-10 to 5 stars (half-star approximation with full chars only)
   const stars5 = Math.round((score / max) * 5);
   return (
     <View style={styles.starsRow}>
       {Array.from({ length: 5 }, (_, i) => (
-        <Text key={i} style={i < stars5 ? styles.starFull : styles.starEmpty}>
-          {i < stars5 ? '★' : '☆'}
-        </Text>
+        <View
+          key={i}
+          style={[styles.starDot, { backgroundColor: i < stars5 ? AMBER : GRAY_300 }]}
+        />
       ))}
     </View>
   );

@@ -162,11 +162,6 @@ export function TastingPageContent({
                 label={t('pdf.tastingReport')}
                 filename="tasting-report.pdf"
               />
-              <PdfDownloadButton
-                url={`${apiBase}/menu/pdf`}
-                label={t('pdf.weddingMenu')}
-                filename="wedding-menu.pdf"
-              />
             </div>
           )}
         </div>
@@ -209,6 +204,7 @@ export function TastingPageContent({
                 apiBase={apiBase}
                 onMenuChange={setMenu}
                 readOnly={isReadOnly}
+                menuPdfUrl={menu ? `${apiBase}/menu/pdf` : undefined}
               />
             )}
             {activeTab === 'participants' && (
