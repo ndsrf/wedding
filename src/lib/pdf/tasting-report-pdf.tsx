@@ -118,7 +118,6 @@ const styles = StyleSheet.create({
     color: GRAY_500,
     marginTop: 2,
     textAlign: 'right',
-    fontStyle: 'italic',
   },
 
   divider: {
@@ -265,7 +264,6 @@ const styles = StyleSheet.create({
     color: GRAY_500,
     flex: 1,
     lineHeight: 1.3,
-    fontStyle: 'italic',
   },
   scorePhoto: {
     width: 36,

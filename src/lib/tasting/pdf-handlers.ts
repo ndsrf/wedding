@@ -150,13 +150,22 @@ export async function generateTastingReportHandler(weddingId: string) {
     logoUrl: planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null,
   };
 
-  const buffer = await renderToBuffer(
-    React.createElement(TastingReportPDF, {
-      report,
-      planner: plannerInfo,
-      labels: getLabels(language),
-    }) as never,
-  );
+  let buffer: Buffer;
+  try {
+    buffer = await renderToBuffer(
+      React.createElement(TastingReportPDF, {
+        report,
+        planner: plannerInfo,
+        labels: getLabels(language),
+      }) as never,
+    );
+  } catch (err) {
+    console.error('[tasting-report-pdf] renderToBuffer failed:', err);
+    return NextResponse.json(
+      { success: false, error: { code: 'PDF_ERROR', message: 'Failed to generate PDF' } },
+      { status: 500 },
+    );
+  }
 
   return buildPdfResponse(buffer, `tasting-report-${menuData.id}.pdf`);
 }
@@ -220,9 +229,18 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     logoUrl: planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null,
   };
 
-  const buffer = await renderToBuffer(
-    React.createElement(TastingMenuPDF, { menu, planner: plannerInfo }) as never,
-  );
+  let buffer: Buffer;
+  try {
+    buffer = await renderToBuffer(
+      React.createElement(TastingMenuPDF, { menu, planner: plannerInfo }) as never,
+    );
+  } catch (err) {
+    console.error('[tasting-menu-pdf] renderToBuffer failed:', err);
+    return NextResponse.json(
+      { success: false, error: { code: 'PDF_ERROR', message: 'Failed to generate PDF' } },
+      { status: 500 },
+    );
+  }
 
   return buildPdfResponse(buffer, `wedding-menu-${menuData.id}.pdf`);
 }

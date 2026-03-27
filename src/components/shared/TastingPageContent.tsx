@@ -204,7 +204,6 @@ export function TastingPageContent({
                 apiBase={apiBase}
                 onMenuChange={setMenu}
                 readOnly={isReadOnly}
-                menuPdfUrl={menu ? `${apiBase}/menu/pdf` : undefined}
               />
             )}
             {activeTab === 'participants' && (

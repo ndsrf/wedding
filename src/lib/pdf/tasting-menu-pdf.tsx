@@ -96,7 +96,6 @@ const styles = StyleSheet.create({
     color: GRAY_500,
     marginTop: 3,
     textAlign: 'center',
-    fontStyle: 'italic',
   },
 
   divider: {
