@@ -36,6 +36,20 @@ export interface LocationContext {
   notes?: string | null;
 }
 
+export interface MenuDishContext {
+  name: string;
+  description?: string | null;
+}
+
+export interface MenuSectionContext {
+  name: string;
+  dishes: MenuDishContext[];
+}
+
+export interface MenuContext {
+  sections: MenuSectionContext[];
+}
+
 // ============================================================================
 // LANGUAGE SUPPORT
 // ============================================================================
@@ -99,7 +113,8 @@ function buildSystemPrompt(
   appUrl: string,
   rsvpUrl?: string | null,
   invitationTemplate?: InvitationTemplateContext | null,
-  location?: LocationContext | null
+  location?: LocationContext | null,
+  menu?: MenuContext | null
 ): string {
   const lang = language in LANGUAGE_NAMES ? language : 'EN';
   const languageName = LANGUAGE_NAMES[lang];
@@ -193,6 +208,24 @@ function buildSystemPrompt(
     }
   }
 
+  if (menu && menu.sections.length > 0) {
+    const selectedSections = menu.sections.filter(s => s.dishes.length > 0);
+    if (selectedSections.length > 0) {
+      prompt += `\n## Wedding Menu\n`;
+      prompt += `The following dishes have been selected for the wedding banquet:\n`;
+      for (const section of selectedSections) {
+        prompt += `\n### ${section.name}\n`;
+        for (const dish of section.dishes) {
+          prompt += `- ${dish.name}`;
+          if (dish.description) {
+            prompt += `: ${dish.description}`;
+          }
+          prompt += `\n`;
+        }
+      }
+    }
+  }
+
   prompt += `\n## Instructions\n`;
   prompt += `1. Respond ONLY in ${languageName}. Do not use any other language.\n`;
   prompt += `2. Be warm, friendly, and concise (2–3 short paragraphs maximum).\n`;
@@ -268,6 +301,7 @@ async function generateWithGemini(systemPrompt: string, userMessage: string): Pr
  * @param rsvpUrl            - Optional short RSVP URL to use instead of generating a long one
  * @param invitationTemplate - Optional active invitation template whose text blocks are added to the AI context
  * @param location           - Optional main event location details (address, website, Google Maps, notes)
+ * @param menu               - Optional selected wedding menu (sections with dishes) to answer food-related questions
  * @returns AI-generated reply string, or null if no provider is available / call fails
  */
 export async function generateWeddingReply(
@@ -277,10 +311,11 @@ export async function generateWeddingReply(
   language = 'EN',
   rsvpUrl?: string | null,
   invitationTemplate?: InvitationTemplateContext | null,
-  location?: LocationContext | null
+  location?: LocationContext | null,
+  menu?: MenuContext | null
 ): Promise<string | null> {
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location);
+  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location, menu);
 
   // Determine provider: explicit env var → fallback to whichever key is present
   const provider =
