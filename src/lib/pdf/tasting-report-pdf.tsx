@@ -458,11 +458,15 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
 
             {section.dishes.map((dish) => {
               const hasScores = dish.scores && dish.scores.length > 0;
+              // Use dish-level photo if available, otherwise promote the first
+              // score photo into the large dish slot (participant photos ARE the
+              // dish photos — TastingDish.image_url is rarely set)
+              const heroImageUrl = dish.image_url ?? dish.scores.find(s => s.image_url)?.image_url ?? null;
               return (
                 <View key={dish.id} style={styles.dishCard} wrap={false}>
                   <View style={styles.dishTopRow}>
-                    {dish.image_url && (
-                      <Image src={dish.image_url} style={styles.dishImage} />
+                    {heroImageUrl && (
+                      <Image src={heroImageUrl} style={styles.dishImage} />
                     )}
                     <View style={styles.dishInfo}>
                       <View style={styles.dishNameRow}>
@@ -492,7 +496,7 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
                       <Text style={styles.scoresTitle}>{labels.ratings}</Text>
                       {dish.scores.map((s, idx) => (
                         <View key={idx} style={styles.scoreRow}>
-                          {s.image_url && (
+                          {s.image_url && s.image_url !== heroImageUrl && (
                             <Image src={s.image_url} style={styles.scoreThumb} />
                           )}
                           <Text style={styles.scoreParticipantName}>{s.participant.name}</Text>
