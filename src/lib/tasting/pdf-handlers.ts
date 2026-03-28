@@ -183,6 +183,7 @@ export async function generateTastingReportHandler(weddingId: string) {
                   select: {
                     score: true,
                     notes: true,
+                    image_url: true,
                     participant: { select: { name: true } },
                   },
                   orderBy: { created_at: 'asc' },
@@ -208,8 +209,11 @@ export async function generateTastingReportHandler(weddingId: string) {
   // Pre-load all images in parallel using raw DB URLs as cache keys.
   // Local paths are read from disk; remote URLs are fetched over HTTPS.
   const rawDishUrls = menuData.sections.flatMap((s) => s.dishes.map((d) => d.image_url));
+  const rawScoreUrls = menuData.sections.flatMap((s) =>
+    s.dishes.flatMap((d) => d.scores.map((sc) => sc.image_url)),
+  );
   const rawLogoUrl = planner?.logo_url ?? null;
-  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls]);
+  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls, ...rawScoreUrls]);
 
   const sections = menuData.sections.map((section) => ({
     id: section.id,
@@ -230,6 +234,7 @@ export async function generateTastingReportHandler(weddingId: string) {
         scores: scores.map((s) => ({
           score: s.score,
           notes: sanitize(s.notes, 300),
+          image_url: s.image_url ? (imageCache.get(s.image_url) ?? null) : null,
           participant: { name: sanitize(s.participant.name) ?? '' },
         })),
       };

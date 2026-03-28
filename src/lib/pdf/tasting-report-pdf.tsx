@@ -13,6 +13,7 @@ import {
 export interface TastingScoreData {
   score: number;
   notes?: string | null;
+  image_url?: string | null;
   participant: { name: string };
 }
 
@@ -226,13 +227,13 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     marginRight: 8,
   },
-  dishImagePlaceholder: {
-    width: 52,
-    height: 52,
-    borderRadius: 4,
-    backgroundColor: GRAY_100,
+  scoreThumb: {
+    width: 32,
+    height: 32,
+    borderRadius: 3,
+    objectFit: 'cover',
     flexShrink: 0,
-    marginRight: 8,
+    marginRight: 6,
   },
   dishInfo: {
     flex: 1,
@@ -460,10 +461,8 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
               return (
                 <View key={dish.id} style={styles.dishCard} wrap={false}>
                   <View style={styles.dishTopRow}>
-                    {dish.image_url ? (
+                    {dish.image_url && (
                       <Image src={dish.image_url} style={styles.dishImage} />
-                    ) : (
-                      <View style={styles.dishImagePlaceholder} />
                     )}
                     <View style={styles.dishInfo}>
                       <View style={styles.dishNameRow}>
@@ -493,6 +492,9 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
                       <Text style={styles.scoresTitle}>{labels.ratings}</Text>
                       {dish.scores.map((s, idx) => (
                         <View key={idx} style={styles.scoreRow}>
+                          {s.image_url && (
+                            <Image src={s.image_url} style={styles.scoreThumb} />
+                          )}
                           <Text style={styles.scoreParticipantName}>{s.participant.name}</Text>
                           <Text style={styles.scoreValue}>{s.score}/10</Text>
                           <Text style={styles.scoreNotes}>{s.notes ?? ''}</Text>
