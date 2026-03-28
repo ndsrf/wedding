@@ -10,7 +10,7 @@ import path from 'path';
 import { readFile, access } from 'fs/promises';
 import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
-import { TastingReportPDF, type TastingReportLabels, type PdfImageSrc } from '@/lib/pdf/tasting-report-pdf';
+import { TastingReportPDF, type TastingReportLabels } from '@/lib/pdf/tasting-report-pdf';
 import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
 
 // ─── Sanitization ─────────────────────────────────────────────────────────────
@@ -27,11 +27,12 @@ function sanitize(s: string | null | undefined, maxLen = 500): string | null {
 // ─── Image pre-fetching ───────────────────────────────────────────────────────
 
 /**
- * Fetch/read an image, resize to maxPx with sharp, and return a
- * { data: Buffer, format: 'jpg' } object that react-pdf's Image component
- * accepts directly — no base64 encoding, no disk writes.
+ * Fetch/read an image, resize to maxPx with sharp, and return a base64
+ * data-URI string that react-pdf's Image component can render.
+ * Resizing prevents OOM when many full-resolution participant photos are
+ * loaded simultaneously during renderToBuffer.
  */
-async function resolveImageForPdf(url: string, maxPx = 1200): Promise<PdfImageSrc | null> {
+async function resolveImageForPdf(url: string, maxPx = 1200): Promise<string | null> {
   try {
     let rawBuf: Buffer;
 
@@ -54,12 +55,12 @@ async function resolveImageForPdf(url: string, maxPx = 1200): Promise<PdfImageSr
 
     if (!rawBuf.length) return null;
 
-    const data = await sharp(rawBuf)
+    const resized = await sharp(rawBuf)
       .resize(maxPx, maxPx, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 90 })
+      .jpeg({ quality: 95 })
       .toBuffer();
 
-    return { data, format: 'jpg' };
+    return `data:image/jpeg;base64,${resized.toString('base64')}`;
   } catch (err) {
     console.warn(`[pdf-image] Failed to resolve ${url}:`, err);
     return null;
@@ -68,14 +69,14 @@ async function resolveImageForPdf(url: string, maxPx = 1200): Promise<PdfImageSr
 
 /**
  * Pre-load all unique image URLs in parallel and return a lookup map
- * (raw DB URL → PdfImageSrc). Pass raw DB URLs as keys.
+ * (raw DB URL → data URI string). Pass raw DB URLs as keys.
  */
 async function prefetchImages(
   urls: (string | null | undefined)[],
-): Promise<Map<string, PdfImageSrc>> {
+): Promise<Map<string, string>> {
   const unique = [...new Set(urls.filter((u): u is string => Boolean(u)))];
   const results = await Promise.all(unique.map((u) => resolveImageForPdf(u)));
-  const map = new Map<string, PdfImageSrc>();
+  const map = new Map<string, string>();
   unique.forEach((url, i) => { if (results[i]) map.set(url, results[i]!); });
   return map;
 }

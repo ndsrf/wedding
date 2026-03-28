@@ -10,13 +10,10 @@ import {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-/** Image source accepted by react-pdf's Image component. */
-export type PdfImageSrc = string | { data: Buffer; format: 'jpg' };
-
 export interface TastingScoreData {
   score: number;
   notes?: string | null;
-  image_url?: PdfImageSrc | null;
+  image_url?: string | null;
   participant: { name: string };
 }
 
@@ -24,7 +21,7 @@ export interface TastingDishData {
   id: string;
   name: string;
   description?: string | null;
-  image_url?: PdfImageSrc | null;
+  image_url?: string | null;
   scores: TastingScoreData[];
   average_score?: number | null;
   score_count?: number;
@@ -45,7 +42,7 @@ export interface TastingReportData {
 
 export interface PlannerInfo {
   name: string;
-  logoUrl?: PdfImageSrc | null;
+  logoUrl?: string | null;
 }
 
 export interface WeddingInfo {
@@ -396,18 +393,15 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
     <Document>
       <Page size="A4" style={styles.page}>
 
-        {/* ── Running header: visible on pages 2+ only ── */}
+        {/* ── Running header: pages 2+ only ── */}
         <View fixed style={styles.runningHeader}>
-          {/* Logo side */}
-          {planner.logoUrl ? (
-            <Image src={planner.logoUrl} style={styles.runningLogo} />
-          ) : (
-            <Text style={styles.runningPlannerName}>
-              {/* Only show on page 2+ — page 1 already has the full header */}
-              <Text render={({ pageNumber }) => pageNumber > 1 ? planner.name : ''} />
-            </Text>
-          )}
-          {/* Couple + dates — hidden on page 1 */}
+          {/* Left: logo or name — hidden on page 1 via render prop on a wrapping View */}
+          <View render={({ pageNumber }) => pageNumber === 1 ? null :
+            planner.logoUrl
+              ? <Image src={planner.logoUrl} style={styles.runningLogo} />
+              : <Text style={styles.runningPlannerName}>{planner.name}</Text>
+          } />
+          {/* Right: couple + dates (pages 2+) */}
           <View style={styles.runningRight}>
             <Text
               style={styles.runningText}
