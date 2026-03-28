@@ -35,7 +35,7 @@ function sanitize(s: string | null | undefined, maxLen = 500): string | null {
  * Vercel function memory limit. Scaling down to ~200 px is plenty for a
  * 32–52 px thumbnail in the PDF.
  */
-async function resolveImageForPdf(url: string, maxPx = 600): Promise<string | null> {
+async function resolveImageForPdf(url: string, maxPx = 800): Promise<string | null> {
   try {
     let rawBuf: Buffer;
 
@@ -63,7 +63,7 @@ async function resolveImageForPdf(url: string, maxPx = 600): Promise<string | nu
     // Resize to fit within maxPx × maxPx and encode as compact JPEG
     const resized = await sharp(rawBuf)
       .resize(maxPx, maxPx, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 88 })
+      .jpeg({ quality: 92 })
       .toBuffer();
 
     return `data:image/jpeg;base64,${resized.toString('base64')}`;
