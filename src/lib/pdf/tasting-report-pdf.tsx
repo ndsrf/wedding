@@ -235,6 +235,12 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     marginRight: 6,
   },
+  scoreThumbSpacer: {
+    width: 44,
+    height: 44,
+    flexShrink: 0,
+    marginRight: 6,
+  },
   dishInfo: {
     flex: 1,
   },
@@ -494,16 +500,26 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
                   {hasScores && (
                     <View style={styles.scoresArea}>
                       <Text style={styles.scoresTitle}>{labels.ratings}</Text>
-                      {dish.scores.map((s, idx) => (
-                        <View key={idx} style={styles.scoreRow}>
-                          {s.image_url && s.image_url !== heroImageUrl && (
-                            <Image src={s.image_url} style={styles.scoreThumb} />
-                          )}
-                          <Text style={styles.scoreParticipantName}>{s.participant.name}</Text>
-                          <Text style={styles.scoreValue}>{s.score}/10</Text>
-                          <Text style={styles.scoreNotes}>{s.notes ?? ''}</Text>
-                        </View>
-                      ))}
+                      {(() => {
+                        const hasThumbCol = dish.scores.some(
+                          (s) => s.image_url && s.image_url !== heroImageUrl,
+                        );
+                        return dish.scores.map((s, idx) => {
+                          const thumbUrl = s.image_url && s.image_url !== heroImageUrl ? s.image_url : null;
+                          return (
+                            <View key={idx} style={styles.scoreRow}>
+                              {hasThumbCol && (
+                                thumbUrl
+                                  ? <Image src={thumbUrl} style={styles.scoreThumb} />
+                                  : <View style={styles.scoreThumbSpacer} />
+                              )}
+                              <Text style={styles.scoreParticipantName}>{s.participant.name}</Text>
+                              <Text style={styles.scoreValue}>{s.score}/10</Text>
+                              <Text style={styles.scoreNotes}>{s.notes ?? ''}</Text>
+                            </View>
+                          );
+                        });
+                      })()}
                     </View>
                   )}
                 </View>
