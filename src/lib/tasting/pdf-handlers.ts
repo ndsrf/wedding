@@ -7,7 +7,8 @@ import { NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import path from 'path';
-import { access } from 'fs/promises';
+import { readFile, access } from 'fs/promises';
+import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
 import { TastingReportPDF, type TastingReportLabels } from '@/lib/pdf/tasting-report-pdf';
 import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
@@ -26,27 +27,48 @@ function sanitize(s: string | null | undefined, maxLen = 500): string | null {
 // ─── Image pre-fetching ───────────────────────────────────────────────────────
 
 /**
- * Resolve an image URL to something react-pdf's Image component can render.
+ * Load an image, resize it to fit within maxPx × maxPx, and return a
+ * compact JPEG base64 data-URI suitable for react-pdf's Image component.
  *
- * - Remote HTTPS URLs (Vercel Blob / CDN) → returned as-is; react-pdf
- *   fetches them natively during renderToBuffer.
- * - Local paths (/uploads/...) → resolved to an absolute filesystem path
- *   so react-pdf can read the file directly without an HTTP round-trip.
+ * Resizing is critical: participant photos can be several MB each, and
+ * loading many full-resolution images during renderToBuffer exhausts the
+ * Vercel function memory limit. Scaling down to ~200 px is plenty for a
+ * 32–52 px thumbnail in the PDF.
  */
-async function resolveImageForPdf(url: string): Promise<string | null> {
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    // Remote URL — pass directly to react-pdf (it fetches HTTPS URLs natively)
-    return url;
-  }
-
-  // Local path — verify existence and return absolute path
-  const rel = url.startsWith('/') ? url.slice(1) : url;
-  const absPath = path.join(process.cwd(), 'public', rel);
+async function resolveImageForPdf(url: string, maxPx = 200): Promise<string | null> {
   try {
-    await access(absPath);
-    return absPath;
-  } catch {
-    console.warn(`[pdf-image] Local file not found: ${absPath}`);
+    let rawBuf: Buffer;
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+      if (!res.ok) {
+        console.warn(`[pdf-image] HTTP ${res.status} for ${url}`);
+        return null;
+      }
+      rawBuf = Buffer.from(await res.arrayBuffer());
+    } else {
+      const rel = url.startsWith('/') ? url.slice(1) : url;
+      const absPath = path.join(process.cwd(), 'public', rel);
+      try {
+        await access(absPath);
+      } catch {
+        console.warn(`[pdf-image] Local file not found: ${absPath}`);
+        return null;
+      }
+      rawBuf = await readFile(absPath);
+    }
+
+    if (!rawBuf.length) return null;
+
+    // Resize to fit within maxPx × maxPx and encode as compact JPEG
+    const resized = await sharp(rawBuf)
+      .resize(maxPx, maxPx, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 82 })
+      .toBuffer();
+
+    return `data:image/jpeg;base64,${resized.toString('base64')}`;
+  } catch (err) {
+    console.warn(`[pdf-image] Failed to resolve ${url}:`, err);
     return null;
   }
 }
