@@ -10,11 +10,13 @@ import {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+import type { PdfImageSrc } from './tasting-report-pdf';
+
 export interface MenuDishData {
   id: string;
   name: string;
   description?: string | null;
-  image_url?: string | null;
+  image_url?: PdfImageSrc | null;
 }
 
 export interface MenuSectionData {
@@ -30,7 +32,7 @@ export interface WeddingInfo {
 
 export interface MenuPlannerInfo {
   name: string;
-  logoUrl?: string | null;
+  logoUrl?: PdfImageSrc | null;
 }
 
 interface TastingMenuPDFProps {

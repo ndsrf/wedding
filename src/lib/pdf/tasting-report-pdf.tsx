@@ -10,10 +10,13 @@ import {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+/** Image source accepted by react-pdf's Image component. */
+export type PdfImageSrc = string | { data: Buffer; format: 'jpg' };
+
 export interface TastingScoreData {
   score: number;
   notes?: string | null;
-  image_url?: string | null;
+  image_url?: PdfImageSrc | null;
   participant: { name: string };
 }
 
@@ -21,7 +24,7 @@ export interface TastingDishData {
   id: string;
   name: string;
   description?: string | null;
-  image_url?: string | null;
+  image_url?: PdfImageSrc | null;
   scores: TastingScoreData[];
   average_score?: number | null;
   score_count?: number;
@@ -42,7 +45,7 @@ export interface TastingReportData {
 
 export interface PlannerInfo {
   name: string;
-  logoUrl?: string | null;
+  logoUrl?: PdfImageSrc | null;
 }
 
 export interface WeddingInfo {

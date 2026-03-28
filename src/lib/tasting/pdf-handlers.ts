@@ -7,12 +7,10 @@ import { NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import path from 'path';
-import { readFile, access, writeFile, unlink } from 'fs/promises';
-import { tmpdir } from 'os';
-import { randomUUID } from 'crypto';
+import { readFile, access } from 'fs/promises';
 import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
-import { TastingReportPDF, type TastingReportLabels } from '@/lib/pdf/tasting-report-pdf';
+import { TastingReportPDF, type TastingReportLabels, type PdfImageSrc } from '@/lib/pdf/tasting-report-pdf';
 import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
 
 // ─── Sanitization ─────────────────────────────────────────────────────────────
@@ -29,17 +27,11 @@ function sanitize(s: string | null | undefined, maxLen = 500): string | null {
 // ─── Image pre-fetching ───────────────────────────────────────────────────────
 
 /**
- * Fetch/read an image, resize to maxPx using sharp, write to a temp file,
- * and return the absolute temp path. React-pdf reads local file paths
- * directly and reliably — no base64 encoding required.
- *
- * The caller must delete temp files after renderToBuffer completes.
+ * Fetch/read an image, resize to maxPx with sharp, and return a
+ * { data: Buffer, format: 'jpg' } object that react-pdf's Image component
+ * accepts directly — no base64 encoding, no disk writes.
  */
-async function resolveImageForPdf(
-  url: string,
-  tempFiles: string[],
-  maxPx = 1200,
-): Promise<string | null> {
+async function resolveImageForPdf(url: string, maxPx = 1200): Promise<PdfImageSrc | null> {
   try {
     let rawBuf: Buffer;
 
@@ -62,15 +54,12 @@ async function resolveImageForPdf(
 
     if (!rawBuf.length) return null;
 
-    const resized = await sharp(rawBuf)
+    const data = await sharp(rawBuf)
       .resize(maxPx, maxPx, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 90 })
       .toBuffer();
 
-    const tempPath = path.join(tmpdir(), `nupci-pdf-${randomUUID()}.jpg`);
-    await writeFile(tempPath, resized);
-    tempFiles.push(tempPath);
-    return tempPath;
+    return { data, format: 'jpg' };
   } catch (err) {
     console.warn(`[pdf-image] Failed to resolve ${url}:`, err);
     return null;
@@ -78,17 +67,15 @@ async function resolveImageForPdf(
 }
 
 /**
- * Pre-load all unique image URLs in parallel.
- * Returns a lookup map (raw DB URL → temp file path) and a cleanup function
- * that deletes all temp files — call it after renderToBuffer.
+ * Pre-load all unique image URLs in parallel and return a lookup map
+ * (raw DB URL → PdfImageSrc). Pass raw DB URLs as keys.
  */
 async function prefetchImages(
   urls: (string | null | undefined)[],
-  tempFiles: string[],
-): Promise<Map<string, string>> {
+): Promise<Map<string, PdfImageSrc>> {
   const unique = [...new Set(urls.filter((u): u is string => Boolean(u)))];
-  const results = await Promise.all(unique.map((u) => resolveImageForPdf(u, tempFiles)));
-  const map = new Map<string, string>();
+  const results = await Promise.all(unique.map((u) => resolveImageForPdf(u)));
+  const map = new Map<string, PdfImageSrc>();
   unique.forEach((url, i) => { if (results[i]) map.set(url, results[i]!); });
   return map;
 }
@@ -241,8 +228,7 @@ export async function generateTastingReportHandler(weddingId: string) {
     s.dishes.flatMap((d) => d.scores.map((sc) => sc.image_url)),
   );
   const rawLogoUrl = planner?.logo_url ?? null;
-  const tempFiles: string[] = [];
-  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls, ...rawScoreUrls], tempFiles);
+  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls, ...rawScoreUrls]);
 
   const sections = menuData.sections.map((section) => ({
     id: section.id,
@@ -303,8 +289,6 @@ export async function generateTastingReportHandler(weddingId: string) {
       { success: false, error: { code: 'PDF_ERROR', message: 'Failed to generate PDF' } },
       { status: 500 },
     );
-  } finally {
-    await Promise.all(tempFiles.map((f) => unlink(f).catch(() => {})));
   }
 
   return buildPdfResponse(buffer, `tasting-report-${menuData.id}.pdf`);
@@ -350,8 +334,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
   // Pre-fetch all images in parallel using raw DB URLs as cache keys
   const rawDishUrls = menuData.sections.flatMap((s) => s.dishes.map((d) => d.image_url));
   const rawLogoUrl = planner?.logo_url ?? null;
-  const tempFiles: string[] = [];
-  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls], tempFiles);
+  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls]);
 
   const sections = menuData.sections
     .filter((s) => s.dishes.length > 0)
@@ -391,8 +374,6 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
       { success: false, error: { code: 'PDF_ERROR', message: 'Failed to generate PDF' } },
       { status: 500 },
     );
-  } finally {
-    await Promise.all(tempFiles.map((f) => unlink(f).catch(() => {})));
   }
 
   return buildPdfResponse(buffer, `wedding-menu-${menuData.id}.pdf`);
