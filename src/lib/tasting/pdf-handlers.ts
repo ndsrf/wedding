@@ -57,6 +57,7 @@ async function resolveImageForPdf(url: string, maxPx = 1200): Promise<string | n
 
     const resized = await sharp(rawBuf)
       .resize(maxPx, maxPx, { fit: 'inside', withoutEnlargement: true })
+      .flatten({ background: '#ffffff' })
       .jpeg({ quality: 95 })
       .toBuffer();
 
