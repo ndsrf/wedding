@@ -22,6 +22,64 @@ import { TastingMenuEditor, type TastingMenu } from '@/components/admin/TastingM
 import { TastingParticipantManager, type TastingParticipant } from '@/components/admin/TastingParticipantManager';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
+// ─── PDF Download Button ──────────────────────────────────────────────────────
+
+function PdfDownloadButton({
+  url,
+  label,
+  filename,
+}: {
+  url: string;
+  label: string;
+  filename: string;
+}) {
+  const t = useTranslations('admin.tastingMenu');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function handleClick() {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('PDF generation failed');
+      const blob = await res.blob();
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(href);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-colors shadow-sm"
+      >
+        {loading ? (
+          <WeddingSpinner size="sm" />
+        ) : (
+          <svg className="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+          </svg>
+        )}
+        {label}
+      </button>
+      {error && (
+        <p className="text-xs text-red-500">{t('pdf.error')}</p>
+      )}
+    </div>
+  );
+}
+
 type Tab = 'menu' | 'participants';
 
 interface TastingPageContentProps {
@@ -85,16 +143,27 @@ export function TastingPageContent({
       <PrivateHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-center mb-6">
-          <Link href={backHref} className="text-gray-500 hover:text-gray-700 mr-3">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">🍽️ {t('title')}</h1>
-            {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+        <div className="flex items-start justify-between mb-6 gap-4">
+          <div className="flex items-center">
+            <Link href={backHref} className="text-gray-500 hover:text-gray-700 mr-3">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">🍽️ {t('title')}</h1>
+              {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+            </div>
           </div>
+          {!loading && menu && (
+            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+              <PdfDownloadButton
+                url={`${apiBase}/report`}
+                label={t('pdf.tastingReport')}
+                filename="tasting-report.pdf"
+              />
+            </div>
+          )}
         </div>
 
         {/* Tabs */}

@@ -68,6 +68,8 @@ interface Props {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 /**
  * Helper to handle fetch responses and parse JSON safely
  */
@@ -466,6 +468,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
 
   return (
     <div className="space-y-6">
+
       {/* Menu Title & Description */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-3">

@@ -1854,6 +1854,11 @@
         "apply": "Aggiungi al menu",
         "applying": "Importazione...",
         "cancel": "Annulla"
+      },
+      "pdf": {
+        "tastingReport": "Report Degustazione",
+        "weddingMenu": "Menu Matrimonio",
+        "error": "Errore nella generazione del PDF"
       }
     },
     "menu": {
@@ -1867,7 +1872,9 @@
       "generating": "Generazione...",
       "generateSuccess": "Menu generato con successo",
       "generateError": "Errore durante la generazione del menu",
-      "aiReasoning": "Ragionamento AI"
+      "aiReasoning": "Ragionamento AI",
+      "exportXlsx": "Esporta in Excel",
+      "exportPdf": "Esporta in PDF"
     }
   },
   "guest": {

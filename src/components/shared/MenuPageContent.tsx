@@ -4,8 +4,6 @@
  * Used by both the Wedding Admin (/admin/menu) and Wedding Planner
  * (/planner/weddings/[id]/menu) routes. All API paths and role-specific
  * configuration are injected via props — this component is role-agnostic.
- *
- * See CONSOLIDATION_PLAN.md for the full consolidation strategy.
  */
 
 'use client';
@@ -32,7 +30,6 @@ interface MenuPageContentProps {
   isReadOnly: boolean;
   /**
    * Role-specific page header (navigation + title).
-   * Admin: <PrivateHeader> | Planner: breadcrumb back to wedding detail.
    */
   header: React.ReactNode;
 }
@@ -71,6 +68,7 @@ export function MenuPageContent({ apiPaths, isReadOnly: _isReadOnly, header }: M
           apiBase={apiPaths.apiBase}
           onMenuChange={setMenu}
           isLoading={loading}
+          pdfUrl={menu ? `${apiPaths.apiBase}/menu/pdf` : undefined}
         />
       </main>
     </div>

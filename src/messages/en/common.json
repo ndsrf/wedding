@@ -1908,6 +1908,11 @@
         "apply": "Add to Menu",
         "applying": "Importing...",
         "cancel": "Cancel"
+      },
+      "pdf": {
+        "tastingReport": "Tasting Report",
+        "weddingMenu": "Wedding Menu",
+        "error": "Failed to generate PDF"
       }
     },
     "menu": {
@@ -1916,6 +1921,8 @@
       "available": "Available",
       "selected": "Selected",
       "generatePrintable": "Generate Printable Menu",
+      "exportXlsx": "Export to Excel",
+      "exportPdf": "Export to PDF",
       "selectSection": "Select Section",
       "unselectSection": "Unselect Section",
       "moveToSelected": "Move to Selected",
