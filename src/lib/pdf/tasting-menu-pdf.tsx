@@ -15,7 +15,6 @@ export interface MenuDishData {
   name: string;
   description?: string | null;
   image_url?: string | null;
-  is_selected?: boolean;
 }
 
 export interface MenuSectionData {
@@ -24,11 +23,9 @@ export interface MenuSectionData {
   dishes: MenuDishData[];
 }
 
-export interface TastingMenuPDFData {
-  title: string;
-  description?: string | null;
-  tasting_date?: string | null;
-  sections: MenuSectionData[];
+export interface WeddingInfo {
+  coupleNames?: string | null;
+  weddingDate?: string | null;
 }
 
 export interface MenuPlannerInfo {
@@ -37,7 +34,8 @@ export interface MenuPlannerInfo {
 }
 
 interface TastingMenuPDFProps {
-  menu: TastingMenuPDFData;
+  sections: MenuSectionData[];
+  wedding: WeddingInfo;
   planner: MenuPlannerInfo;
 }
 
@@ -79,22 +77,16 @@ const styles = StyleSheet.create({
     color: ROSE,
     marginBottom: 10,
   },
-  menuTitle: {
+  coupleNames: {
     fontSize: 22,
     fontFamily: 'Helvetica-Bold',
     color: GRAY_900,
     textAlign: 'center',
   },
-  menuDate: {
+  weddingDate: {
     fontSize: 9,
     color: GRAY_500,
     marginTop: 4,
-    textAlign: 'center',
-  },
-  menuDescription: {
-    fontSize: 8,
-    color: GRAY_500,
-    marginTop: 3,
     textAlign: 'center',
   },
 
@@ -123,25 +115,25 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
 
-  // ── Dish grid ── (2 columns)
+  // ── Dish grid (2 columns) ──
   dishesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
   },
   dishCard: {
     width: '48%',
     backgroundColor: GRAY_50,
     borderRadius: 5,
-    overflow: 'hidden',
     borderWidth: 1,
     borderColor: GRAY_100,
-    marginBottom: 0,
+    marginBottom: 8,
+    marginRight: '2%',
   },
   dishImage: {
     width: '100%',
     height: 60,
     objectFit: 'cover',
+    borderRadius: 4,
   },
   dishBody: {
     padding: 6,
@@ -160,6 +152,7 @@ const styles = StyleSheet.create({
   dishNoImage: {
     height: 4,
     backgroundColor: ROSE,
+    borderRadius: 2,
   },
 
   // ── Footer ──
@@ -193,7 +186,7 @@ function formatDate(dateStr: string) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function TastingMenuPDF({ menu, planner }: TastingMenuPDFProps) {
+export function TastingMenuPDF({ sections, wedding, planner }: TastingMenuPDFProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -204,52 +197,46 @@ export function TastingMenuPDF({ menu, planner }: TastingMenuPDFProps) {
           ) : (
             <Text style={styles.plannerName}>{planner.name}</Text>
           )}
-          <Text style={styles.menuTitle}>{menu.title}</Text>
-          {menu.tasting_date && (
-            <Text style={styles.menuDate}>{formatDate(menu.tasting_date)}</Text>
+          {wedding.coupleNames && (
+            <Text style={styles.coupleNames}>{wedding.coupleNames}</Text>
           )}
-          {menu.description && (
-            <Text style={styles.menuDescription}>{menu.description}</Text>
+          {wedding.weddingDate && (
+            <Text style={styles.weddingDate}>{formatDate(wedding.weddingDate)}</Text>
           )}
         </View>
 
         <View style={styles.divider} />
 
         {/* Sections */}
-        {menu.sections.map((section) => {
-          const selectedDishes = section.dishes.filter((d) => d.is_selected);
-          if (selectedDishes.length === 0) return null;
-
-          return (
-            <View key={section.id} style={styles.sectionContainer} wrap={false}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionName}>{section.name}</Text>
-              </View>
-
-              <View style={styles.dishesGrid}>
-                {selectedDishes.map((dish) => (
-                  <View key={dish.id} style={styles.dishCard}>
-                    {dish.image_url ? (
-                      <Image src={dish.image_url} style={styles.dishImage} />
-                    ) : (
-                      <View style={styles.dishNoImage} />
-                    )}
-                    <View style={styles.dishBody}>
-                      <Text style={styles.dishName}>{dish.name}</Text>
-                      {dish.description && (
-                        <Text style={styles.dishDesc}>{dish.description}</Text>
-                      )}
-                    </View>
-                  </View>
-                ))}
-              </View>
+        {sections.map((section) => (
+          <View key={section.id} style={styles.sectionContainer} wrap={false}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionName}>{section.name}</Text>
             </View>
-          );
-        })}
+
+            <View style={styles.dishesGrid}>
+              {section.dishes.map((dish) => (
+                <View key={dish.id} style={styles.dishCard}>
+                  {dish.image_url ? (
+                    <Image src={dish.image_url} style={styles.dishImage} />
+                  ) : (
+                    <View style={styles.dishNoImage} />
+                  )}
+                  <View style={styles.dishBody}>
+                    <Text style={styles.dishName}>{dish.name}</Text>
+                    {dish.description && (
+                      <Text style={styles.dishDesc}>{dish.description}</Text>
+                    )}
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        ))}
 
         {/* Footer */}
         <Text style={styles.footer}>
-          {planner.name} — Menú de Boda
+          {planner.name} — {wedding.coupleNames ?? ''}
         </Text>
       </Page>
     </Document>

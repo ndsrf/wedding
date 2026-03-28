@@ -1872,7 +1872,9 @@
       "generating": "Génération...",
       "generateSuccess": "Menu généré avec succès",
       "generateError": "Erreur lors de la génération du menu",
-      "aiReasoning": "Raisonnement de l'IA"
+      "aiReasoning": "Raisonnement de l'IA",
+      "exportXlsx": "Exporter en Excel",
+      "exportPdf": "Exporter en PDF"
     }
   },
   "guest": {

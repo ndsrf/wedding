@@ -1906,6 +1906,8 @@
       "available": "Disponibles",
       "selected": "Seleccionados",
       "generatePrintable": "Generar Menú Imprimible",
+      "exportXlsx": "Exportar a Excel",
+      "exportPdf": "Exportar a PDF",
       "selectSection": "Seleccionar Sección",
       "unselectSection": "Deseleccionar Sección",
       "moveToSelected": "Mover a Seleccionados",

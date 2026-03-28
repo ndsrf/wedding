@@ -32,6 +32,7 @@ interface Props {
   apiBase: string; // e.g. '/api/admin/tasting' or '/api/planner/weddings/[id]/tasting'
   onMenuChange: (menu: TastingMenu) => void;
   isLoading?: boolean;
+  pdfUrl?: string;
 }
 
 // ─── GenerateMenuPanel ────────────────────────────────────────────────────────
@@ -162,14 +163,16 @@ function GenerateMenuPanel({ apiBase, onGenerated }: GenerateMenuPanelProps) {
   );
 }
 
-export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = false }: Props) {
+export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = false, pdfUrl }: Props) {
   const t = useTranslations('admin.menu');
   const tCommon = useTranslations('common');
-  
+
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
 
   // Local state for checkboxes
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -303,6 +306,29 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
     }
   };
 
+  const handleExportPdf = async () => {
+    if (!pdfUrl) return;
+    setExportingPdf(true);
+    setPdfError(false);
+    try {
+      const res = await fetch(pdfUrl);
+      if (!res.ok) throw new Error('PDF generation failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `wedding-menu-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      setPdfError(true);
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -363,14 +389,43 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
             )}
           </div>
 
-          <button
-            onClick={handleExport}
-            disabled={exporting || selectedIds.size === 0}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50"
-          >
-            {exporting ? <WeddingSpinner size="sm" /> : <span>📄</span>}
-            {t('generatePrintable')}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExport}
+              disabled={exporting || selectedIds.size === 0}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-colors shadow-sm"
+            >
+              {exporting ? (
+                <WeddingSpinner size="sm" />
+              ) : (
+                <svg className="w-3.5 h-3.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              )}
+              {t('exportXlsx')}
+            </button>
+            {pdfUrl && (
+              <div className="flex flex-col items-end gap-0.5">
+                <button
+                  onClick={handleExportPdf}
+                  disabled={exportingPdf || selectedIds.size === 0}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  {exportingPdf ? (
+                    <WeddingSpinner size="sm" />
+                  ) : (
+                    <svg className="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    </svg>
+                  )}
+                  {t('exportPdf')}
+                </button>
+                {pdfError && (
+                  <p className="text-xs text-red-500">{tCommon('errors.generic')}</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

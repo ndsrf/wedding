@@ -13,7 +13,6 @@ import {
 export interface TastingScoreData {
   score: number;
   notes?: string | null;
-  image_url?: string | null;
   participant: { name: string };
 }
 
@@ -38,11 +37,17 @@ export interface TastingReportData {
   description?: string | null;
   tasting_date?: string | null;
   sections: TastingSectionData[];
+  participants: string[];
 }
 
 export interface PlannerInfo {
   name: string;
   logoUrl?: string | null;
+}
+
+export interface WeddingInfo {
+  coupleNames?: string | null;
+  weddingDate?: string | null;
 }
 
 export interface TastingReportLabels {
@@ -51,11 +56,15 @@ export interface TastingReportLabels {
   rating: string;
   ratingsPlural: string;
   footer: string;
+  participants: string;
+  weddingDate: string;
+  tastingDate: string;
 }
 
 interface TastingReportPDFProps {
   report: TastingReportData;
   planner: PlannerInfo;
+  wedding: WeddingInfo;
   labels: TastingReportLabels;
 }
 
@@ -86,7 +95,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   logo: {
     maxWidth: 100,
@@ -101,11 +110,18 @@ const styles = StyleSheet.create({
   headerRight: {
     textAlign: 'right',
   },
-  menuTitle: {
-    fontSize: 16,
+  coupleNames: {
+    fontSize: 18,
     fontFamily: 'Helvetica-Bold',
     color: GRAY_900,
     textAlign: 'right',
+  },
+  menuTitle: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+    textAlign: 'right',
+    marginTop: 4,
   },
   menuMeta: {
     fontSize: 8,
@@ -123,7 +139,37 @@ const styles = StyleSheet.create({
   divider: {
     borderBottomWidth: 1,
     borderBottomColor: GRAY_300,
-    marginBottom: 16,
+    marginBottom: 12,
+  },
+
+  // ── Participants strip ──
+  participantsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    backgroundColor: GRAY_50,
+    borderRadius: 4,
+    padding: 6,
+    borderWidth: 1,
+    borderColor: GRAY_100,
+  },
+  participantsLabel: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_500,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginRight: 6,
+    flexShrink: 0,
+  },
+  participantsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  participantChip: {
+    fontSize: 7,
+    color: GRAY_700,
+    marginRight: 8,
   },
 
   // ── Section ──
@@ -148,14 +194,12 @@ const styles = StyleSheet.create({
     backgroundColor: GRAY_50,
     borderRadius: 6,
     marginBottom: 10,
-    overflow: 'hidden',
     borderWidth: 1,
     borderColor: GRAY_100,
   },
   dishTopRow: {
     flexDirection: 'row',
     padding: 8,
-    gap: 8,
   },
   dishImage: {
     width: 52,
@@ -163,6 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     objectFit: 'cover',
     flexShrink: 0,
+    marginRight: 8,
   },
   dishImagePlaceholder: {
     width: 52,
@@ -170,6 +215,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: GRAY_100,
     flexShrink: 0,
+    marginRight: 8,
   },
   dishInfo: {
     flex: 1,
@@ -243,7 +289,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: 4,
-    gap: 6,
   },
   scoreParticipantName: {
     fontSize: 8,
@@ -251,6 +296,7 @@ const styles = StyleSheet.create({
     color: GRAY_700,
     width: 80,
     flexShrink: 0,
+    marginRight: 6,
   },
   scoreValue: {
     fontSize: 8,
@@ -258,19 +304,13 @@ const styles = StyleSheet.create({
     color: ROSE,
     width: 20,
     flexShrink: 0,
+    marginRight: 6,
   },
   scoreNotes: {
     fontSize: 7,
     color: GRAY_500,
     flex: 1,
     lineHeight: 1.3,
-  },
-  scorePhoto: {
-    width: 36,
-    height: 36,
-    borderRadius: 3,
-    objectFit: 'cover',
-    flexShrink: 0,
   },
 
   // ── Footer ──
@@ -318,7 +358,7 @@ function formatDate(dateStr: string) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function TastingReportPDF({ report, planner, labels }: TastingReportPDFProps) {
+export function TastingReportPDF({ report, planner, wedding, labels }: TastingReportPDFProps) {
   const generatedAt = new Date().toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'long',
@@ -338,9 +378,19 @@ export function TastingReportPDF({ report, planner, labels }: TastingReportPDFPr
             )}
           </View>
           <View style={styles.headerRight}>
+            {wedding.coupleNames && (
+              <Text style={styles.coupleNames}>{wedding.coupleNames}</Text>
+            )}
             <Text style={styles.menuTitle}>{report.title}</Text>
+            {wedding.weddingDate && (
+              <Text style={styles.menuMeta}>
+                {labels.weddingDate}: {formatDate(wedding.weddingDate)}
+              </Text>
+            )}
             {report.tasting_date && (
-              <Text style={styles.menuMeta}>{formatDate(report.tasting_date)}</Text>
+              <Text style={styles.menuMeta}>
+                {labels.tastingDate}: {formatDate(report.tasting_date)}
+              </Text>
             )}
             {report.description && (
               <Text style={styles.menuDescription}>{report.description}</Text>
@@ -351,9 +401,23 @@ export function TastingReportPDF({ report, planner, labels }: TastingReportPDFPr
 
         <View style={styles.divider} />
 
+        {/* Participants strip */}
+        {report.participants.length > 0 && (
+          <View style={styles.participantsRow}>
+            <Text style={styles.participantsLabel}>{labels.participants}:</Text>
+            <View style={styles.participantsList}>
+              {report.participants.map((name, i) => (
+                <Text key={i} style={styles.participantChip}>
+                  {name}{i < report.participants.length - 1 ? '  ·' : ''}
+                </Text>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Sections */}
         {report.sections.map((section) => (
-          <View key={section.id} wrap={false}>
+          <View key={section.id}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionName}>{section.name}</Text>
             </View>
@@ -399,14 +463,7 @@ export function TastingReportPDF({ report, planner, labels }: TastingReportPDFPr
                         <View key={idx} style={styles.scoreRow}>
                           <Text style={styles.scoreParticipantName}>{s.participant.name}</Text>
                           <Text style={styles.scoreValue}>{s.score}/10</Text>
-                          {s.notes ? (
-                            <Text style={styles.scoreNotes}>{s.notes}</Text>
-                          ) : (
-                            <Text style={styles.scoreNotes} />
-                          )}
-                          {s.image_url && (
-                            <Image src={s.image_url} style={styles.scorePhoto} />
-                          )}
+                          <Text style={styles.scoreNotes}>{s.notes ?? ''}</Text>
                         </View>
                       ))}
                     </View>
