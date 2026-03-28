@@ -6,8 +6,9 @@
 import { NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
+import path from 'path';
+import { readFile } from 'fs/promises';
 import { prisma } from '@/lib/db/prisma';
-import { toAbsoluteUrl } from '@/lib/images/processor';
 import { TastingReportPDF, type TastingReportLabels } from '@/lib/pdf/tasting-report-pdf';
 import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
 
@@ -24,27 +25,50 @@ function sanitize(s: string | null | undefined, maxLen = 500): string | null {
 
 // ─── Image pre-fetching ───────────────────────────────────────────────────────
 
+const EXT_MIME: Record<string, string> = {
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+  webp: 'image/webp', gif: 'image/gif', avif: 'image/avif',
+};
+
 /**
- * Fetch a single image and return a base64 data-URI, or null on failure.
- * Using data-URIs means react-pdf makes zero HTTP requests during render.
+ * Load an image and return a base64 data-URI, or null on failure.
+ *
+ * - Local paths (starting with `/` but not `//` or a scheme) are read
+ *   directly from the filesystem — no HTTP round-trip needed.
+ * - Absolute HTTPS URLs (blob / CDN storage) are fetched over the network.
  */
 async function fetchAsDataUri(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    if (buf.byteLength === 0) return null;
-    const mime = res.headers.get('content-type')?.split(';')[0] ?? 'image/jpeg';
-    return `data:${mime};base64,${Buffer.from(buf).toString('base64')}`;
+    let buf: Buffer;
+    let mime: string;
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      // Remote URL (Vercel Blob, CDN, etc.) — fetch normally
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) return null;
+      const ab = await res.arrayBuffer();
+      if (ab.byteLength === 0) return null;
+      buf = Buffer.from(ab);
+      mime = res.headers.get('content-type')?.split(';')[0] ?? 'image/jpeg';
+    } else {
+      // Local path — read directly from the public directory on disk
+      const rel = url.startsWith('/') ? url.slice(1) : url;
+      const absPath = path.join(process.cwd(), 'public', rel);
+      buf = await readFile(absPath);
+      if (buf.length === 0) return null;
+      const ext = path.extname(rel).replace('.', '').toLowerCase();
+      mime = EXT_MIME[ext] ?? 'image/jpeg';
+    }
+
+    return `data:${mime};base64,${buf.toString('base64')}`;
   } catch {
     return null;
   }
 }
 
 /**
- * Pre-fetch all unique image URLs in parallel and return a lookup map.
+ * Pre-load all unique image URLs in parallel and return a lookup map.
+ * Pass raw DB URLs (relative or absolute) — toAbsoluteUrl is not needed here.
  */
 async function prefetchImages(urls: (string | null | undefined)[]): Promise<Map<string, string>> {
   const unique = [...new Set(urls.filter((u): u is string => Boolean(u)))];
@@ -196,12 +220,11 @@ export async function generateTastingReportHandler(weddingId: string) {
 
   const { planner, language, coupleNames, weddingDate } = weddingCtx;
 
-  // Collect all image URLs to pre-fetch in parallel
-  const dishImageUrls = menuData.sections.flatMap((s) =>
-    s.dishes.map((d) => (d.image_url ? toAbsoluteUrl(d.image_url) ?? null : null)),
-  );
-  const logoUrl = planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null;
-  const imageCache = await prefetchImages([logoUrl, ...dishImageUrls]);
+  // Pre-load all images in parallel using raw DB URLs as cache keys.
+  // Local paths are read from disk; remote URLs are fetched over HTTPS.
+  const rawDishUrls = menuData.sections.flatMap((s) => s.dishes.map((d) => d.image_url));
+  const rawLogoUrl = planner?.logo_url ?? null;
+  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls]);
 
   const sections = menuData.sections.map((section) => ({
     id: section.id,
@@ -212,12 +235,11 @@ export async function generateTastingReportHandler(weddingId: string) {
         scores.length > 0
           ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / scores.length) * 10) / 10
           : null;
-      const rawUrl = dish.image_url ? toAbsoluteUrl(dish.image_url) ?? null : null;
       return {
         id: dish.id,
         name: sanitize(dish.name) ?? '',
         description: sanitize(dish.description, 300),
-        image_url: rawUrl ? (imageCache.get(rawUrl) ?? null) : null,
+        image_url: dish.image_url ? (imageCache.get(dish.image_url) ?? null) : null,
         average_score: avg,
         score_count: scores.length,
         scores: scores.map((s) => ({
@@ -238,7 +260,7 @@ export async function generateTastingReportHandler(weddingId: string) {
 
   const plannerInfo = {
     name: sanitize(planner?.name) ?? 'Wedding Planner',
-    logoUrl: logoUrl ? (imageCache.get(logoUrl) ?? null) : null,
+    logoUrl: rawLogoUrl ? (imageCache.get(rawLogoUrl) ?? null) : null,
   };
 
   const weddingInfo = {
@@ -304,27 +326,22 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     );
   }
 
-  // Pre-fetch all images in parallel
-  const dishImageUrls = menuData.sections.flatMap((s) =>
-    s.dishes.map((d) => (d.image_url ? toAbsoluteUrl(d.image_url) ?? null : null)),
-  );
-  const logoUrl = planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null;
-  const imageCache = await prefetchImages([logoUrl, ...dishImageUrls]);
+  // Pre-fetch all images in parallel using raw DB URLs as cache keys
+  const rawDishUrls = menuData.sections.flatMap((s) => s.dishes.map((d) => d.image_url));
+  const rawLogoUrl = planner?.logo_url ?? null;
+  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls]);
 
   const sections = menuData.sections
     .filter((s) => s.dishes.length > 0)
     .map((section) => ({
       id: section.id,
       name: sanitize(section.name) ?? '',
-      dishes: section.dishes.map((dish) => {
-        const rawUrl = dish.image_url ? toAbsoluteUrl(dish.image_url) ?? null : null;
-        return {
-          id: dish.id,
-          name: sanitize(dish.name) ?? '',
-          description: sanitize(dish.description, 300),
-          image_url: rawUrl ? (imageCache.get(rawUrl) ?? null) : null,
-        };
-      }),
+      dishes: section.dishes.map((dish) => ({
+        id: dish.id,
+        name: sanitize(dish.name) ?? '',
+        description: sanitize(dish.description, 300),
+        image_url: dish.image_url ? (imageCache.get(dish.image_url) ?? null) : null,
+      })),
     }));
 
   const weddingInfo = {
@@ -334,7 +351,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
 
   const plannerInfo = {
     name: sanitize(planner?.name) ?? 'Wedding Planner',
-    logoUrl: logoUrl ? (imageCache.get(logoUrl) ?? null) : null,
+    logoUrl: rawLogoUrl ? (imageCache.get(rawLogoUrl) ?? null) : null,
   };
 
   let buffer: Buffer;

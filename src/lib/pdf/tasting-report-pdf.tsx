@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
     color: ROSE,
-    width: 20,
+    width: 32,
     flexShrink: 0,
     marginRight: 6,
   },
