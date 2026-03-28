@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import path from 'path';
-import { readFile } from 'fs/promises';
+import { access } from 'fs/promises';
 import { prisma } from '@/lib/db/prisma';
 import { TastingReportPDF, type TastingReportLabels } from '@/lib/pdf/tasting-report-pdf';
 import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
@@ -25,43 +25,28 @@ function sanitize(s: string | null | undefined, maxLen = 500): string | null {
 
 // ─── Image pre-fetching ───────────────────────────────────────────────────────
 
-const EXT_MIME: Record<string, string> = {
-  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
-  webp: 'image/webp', gif: 'image/gif', avif: 'image/avif',
-};
-
 /**
- * Load an image and return a base64 data-URI, or null on failure.
+ * Resolve an image URL to something react-pdf's Image component can render.
  *
- * - Local paths (starting with `/` but not `//` or a scheme) are read
- *   directly from the filesystem — no HTTP round-trip needed.
- * - Absolute HTTPS URLs (blob / CDN storage) are fetched over the network.
+ * - Remote HTTPS URLs (Vercel Blob / CDN) → returned as-is; react-pdf
+ *   fetches them natively during renderToBuffer.
+ * - Local paths (/uploads/...) → resolved to an absolute filesystem path
+ *   so react-pdf can read the file directly without an HTTP round-trip.
  */
-async function fetchAsDataUri(url: string): Promise<string | null> {
+async function resolveImageForPdf(url: string): Promise<string | null> {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    // Remote URL — pass directly to react-pdf (it fetches HTTPS URLs natively)
+    return url;
+  }
+
+  // Local path — verify existence and return absolute path
+  const rel = url.startsWith('/') ? url.slice(1) : url;
+  const absPath = path.join(process.cwd(), 'public', rel);
   try {
-    let buf: Buffer;
-    let mime: string;
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      // Remote URL (Vercel Blob, CDN, etc.) — fetch normally
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) return null;
-      const ab = await res.arrayBuffer();
-      if (ab.byteLength === 0) return null;
-      buf = Buffer.from(ab);
-      mime = res.headers.get('content-type')?.split(';')[0] ?? 'image/jpeg';
-    } else {
-      // Local path — read directly from the public directory on disk
-      const rel = url.startsWith('/') ? url.slice(1) : url;
-      const absPath = path.join(process.cwd(), 'public', rel);
-      buf = await readFile(absPath);
-      if (buf.length === 0) return null;
-      const ext = path.extname(rel).replace('.', '').toLowerCase();
-      mime = EXT_MIME[ext] ?? 'image/jpeg';
-    }
-
-    return `data:${mime};base64,${buf.toString('base64')}`;
+    await access(absPath);
+    return absPath;
   } catch {
+    console.warn(`[pdf-image] Local file not found: ${absPath}`);
     return null;
   }
 }
@@ -72,7 +57,7 @@ async function fetchAsDataUri(url: string): Promise<string | null> {
  */
 async function prefetchImages(urls: (string | null | undefined)[]): Promise<Map<string, string>> {
   const unique = [...new Set(urls.filter((u): u is string => Boolean(u)))];
-  const results = await Promise.all(unique.map(fetchAsDataUri));
+  const results = await Promise.all(unique.map(resolveImageForPdf));
   const map = new Map<string, string>();
   unique.forEach((url, i) => {
     if (results[i]) map.set(url, results[i]!);

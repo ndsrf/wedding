@@ -322,6 +322,7 @@ const styles = StyleSheet.create({
     width: 32,
     flexShrink: 0,
     marginRight: 6,
+    textAlign: 'right',
   },
   scoreNotes: {
     fontSize: 7,
