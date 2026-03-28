@@ -34,7 +34,6 @@ export interface TastingSectionData {
 
 export interface TastingReportData {
   title: string;
-  description?: string | null;
   tasting_date?: string | null;
   sections: TastingSectionData[];
   participants: string[];
@@ -51,7 +50,6 @@ export interface WeddingInfo {
 }
 
 export interface TastingReportLabels {
-  generatedOn: string;
   ratings: string;
   rating: string;
   ratingsPlural: string;
@@ -83,14 +81,46 @@ const styles = StyleSheet.create({
   page: {
     fontFamily: 'Helvetica',
     fontSize: 9,
-    paddingTop: 40,
+    // Extra top padding so the fixed running header never overlaps content
+    paddingTop: 56,
     paddingBottom: 48,
     paddingHorizontal: 40,
     color: GRAY_900,
     backgroundColor: '#ffffff',
   },
 
-  // ── Header ──
+  // ── Fixed running header (pages 2+) ──
+  runningHeader: {
+    position: 'absolute',
+    top: 10,
+    left: 40,
+    right: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 0.5,
+    borderBottomColor: GRAY_100,
+    paddingBottom: 4,
+  },
+  runningLogo: {
+    maxWidth: 50,
+    maxHeight: 18,
+    objectFit: 'contain',
+  },
+  runningPlannerName: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+  },
+  runningRight: {
+    textAlign: 'right',
+  },
+  runningText: {
+    fontSize: 7,
+    color: GRAY_500,
+  },
+
+  // ── First-page header ──
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -116,23 +146,10 @@ const styles = StyleSheet.create({
     color: GRAY_900,
     textAlign: 'right',
   },
-  menuTitle: {
-    fontSize: 11,
-    fontFamily: 'Helvetica-Bold',
-    color: ROSE,
-    textAlign: 'right',
-    marginTop: 4,
-  },
   menuMeta: {
     fontSize: 8,
     color: GRAY_500,
     marginTop: 3,
-    textAlign: 'right',
-  },
-  menuDescription: {
-    fontSize: 8,
-    color: GRAY_500,
-    marginTop: 2,
     textAlign: 'right',
   },
 
@@ -313,18 +330,18 @@ const styles = StyleSheet.create({
     lineHeight: 1.3,
   },
 
-  // ── Footer ──
+  // ── Footer (every page) ──
   footer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 16,
     left: 40,
     right: 40,
     textAlign: 'center',
     fontSize: 7,
     color: GRAY_300,
-    borderTopWidth: 1,
+    borderTopWidth: 0.5,
     borderTopColor: GRAY_100,
-    paddingTop: 6,
+    paddingTop: 5,
   },
 });
 
@@ -335,10 +352,7 @@ function Stars({ score, max = 10 }: { score: number; max?: number }) {
   return (
     <View style={styles.starsRow}>
       {Array.from({ length: 5 }, (_, i) => (
-        <View
-          key={i}
-          style={[styles.starDot, { backgroundColor: i < stars5 ? AMBER : GRAY_300 }]}
-        />
+        <View key={i} style={[styles.starDot, { backgroundColor: i < stars5 ? AMBER : GRAY_300 }]} />
       ))}
     </View>
   );
@@ -359,16 +373,39 @@ function formatDate(dateStr: string) {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function TastingReportPDF({ report, planner, wedding, labels }: TastingReportPDFProps) {
-  const generatedAt = new Date().toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const runningRight = [
+    wedding.coupleNames,
+    wedding.weddingDate ? formatDate(wedding.weddingDate) : null,
+    report.tasting_date ? `${labels.tastingDate}: ${formatDate(report.tasting_date)}` : null,
+  ]
+    .filter(Boolean)
+    .join('  ·  ');
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
+
+        {/* ── Running header: visible on pages 2+ only ── */}
+        <View fixed style={styles.runningHeader}>
+          {/* Logo side */}
+          {planner.logoUrl ? (
+            <Image src={planner.logoUrl} style={styles.runningLogo} />
+          ) : (
+            <Text style={styles.runningPlannerName}>
+              {/* Only show on page 2+ — page 1 already has the full header */}
+              <Text render={({ pageNumber }) => pageNumber > 1 ? planner.name : ''} />
+            </Text>
+          )}
+          {/* Couple + dates — hidden on page 1 */}
+          <View style={styles.runningRight}>
+            <Text
+              style={styles.runningText}
+              render={({ pageNumber }) => pageNumber > 1 ? runningRight : ''}
+            />
+          </View>
+        </View>
+
+        {/* ── First-page header ── */}
         <View style={styles.header}>
           <View>
             {planner.logoUrl ? (
@@ -381,7 +418,6 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
             {wedding.coupleNames && (
               <Text style={styles.coupleNames}>{wedding.coupleNames}</Text>
             )}
-            <Text style={styles.menuTitle}>{report.title}</Text>
             {wedding.weddingDate && (
               <Text style={styles.menuMeta}>
                 {labels.weddingDate}: {formatDate(wedding.weddingDate)}
@@ -392,16 +428,12 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
                 {labels.tastingDate}: {formatDate(report.tasting_date)}
               </Text>
             )}
-            {report.description && (
-              <Text style={styles.menuDescription}>{report.description}</Text>
-            )}
-            <Text style={styles.menuMeta}>{labels.generatedOn} {generatedAt}</Text>
           </View>
         </View>
 
         <View style={styles.divider} />
 
-        {/* Participants strip */}
+        {/* ── Participants strip ── */}
         {report.participants.length > 0 && (
           <View style={styles.participantsRow}>
             <Text style={styles.participantsLabel}>{labels.participants}:</Text>
@@ -415,7 +447,7 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
           </View>
         )}
 
-        {/* Sections */}
+        {/* ── Sections ── */}
         {report.sections.map((section) => (
           <View key={section.id}>
             <View style={styles.sectionHeader}>
@@ -426,7 +458,6 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
               const hasScores = dish.scores && dish.scores.length > 0;
               return (
                 <View key={dish.id} style={styles.dishCard} wrap={false}>
-                  {/* Dish header row */}
                   <View style={styles.dishTopRow}>
                     {dish.image_url ? (
                       <Image src={dish.image_url} style={styles.dishImage} />
@@ -449,13 +480,13 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
                       )}
                       {dish.score_count != null && dish.score_count > 0 && (
                         <Text style={styles.scoreCountText}>
-                          {dish.score_count} {dish.score_count === 1 ? labels.rating : labels.ratingsPlural}
+                          {dish.score_count}{' '}
+                          {dish.score_count === 1 ? labels.rating : labels.ratingsPlural}
                         </Text>
                       )}
                     </View>
                   </View>
 
-                  {/* Scores */}
                   {hasScores && (
                     <View style={styles.scoresArea}>
                       <Text style={styles.scoresTitle}>{labels.ratings}</Text>
@@ -474,10 +505,8 @@ export function TastingReportPDF({ report, planner, wedding, labels }: TastingRe
           </View>
         ))}
 
-        {/* Footer */}
-        <Text style={styles.footer}>
-          {planner.name} — {labels.footer}
-        </Text>
+        {/* ── Footer: every page ── */}
+        <Text fixed style={styles.footer}>Generado por Nupci</Text>
       </Page>
     </Document>
   );

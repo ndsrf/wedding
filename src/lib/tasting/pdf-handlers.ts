@@ -13,24 +13,53 @@ import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
 
 // ─── Sanitization ─────────────────────────────────────────────────────────────
 
-/**
- * Strip control characters (except \n and \t) and null bytes that cause
- * react-pdf / PDF spec violations. Trims and caps length.
- */
 function sanitize(s: string | null | undefined, maxLen = 500): string | null {
   if (!s) return null;
   const cleaned = s
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // control chars
-    .replace(/\uFFFD/g, '')                              // replacement char
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replace(/\uFFFD/g, '')
     .trim();
   return cleaned.slice(0, maxLen) || null;
+}
+
+// ─── Image pre-fetching ───────────────────────────────────────────────────────
+
+/**
+ * Fetch a single image and return a base64 data-URI, or null on failure.
+ * Using data-URIs means react-pdf makes zero HTTP requests during render.
+ */
+async function fetchAsDataUri(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    if (buf.byteLength === 0) return null;
+    const mime = res.headers.get('content-type')?.split(';')[0] ?? 'image/jpeg';
+    return `data:${mime};base64,${Buffer.from(buf).toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Pre-fetch all unique image URLs in parallel and return a lookup map.
+ */
+async function prefetchImages(urls: (string | null | undefined)[]): Promise<Map<string, string>> {
+  const unique = [...new Set(urls.filter((u): u is string => Boolean(u)))];
+  const results = await Promise.all(unique.map(fetchAsDataUri));
+  const map = new Map<string, string>();
+  unique.forEach((url, i) => {
+    if (results[i]) map.set(url, results[i]!);
+  });
+  return map;
 }
 
 // ─── i18n labels ─────────────────────────────────────────────────────────────
 
 const LABELS: Record<string, TastingReportLabels> = {
   ES: {
-    generatedOn: 'Informe generado el',
     ratings: 'Valoraciones',
     rating: 'valoración',
     ratingsPlural: 'valoraciones',
@@ -40,7 +69,6 @@ const LABELS: Record<string, TastingReportLabels> = {
     tastingDate: 'Fecha de degustación',
   },
   EN: {
-    generatedOn: 'Report generated on',
     ratings: 'Ratings',
     rating: 'rating',
     ratingsPlural: 'ratings',
@@ -50,7 +78,6 @@ const LABELS: Record<string, TastingReportLabels> = {
     tastingDate: 'Tasting date',
   },
   FR: {
-    generatedOn: 'Rapport généré le',
     ratings: 'Évaluations',
     rating: 'évaluation',
     ratingsPlural: 'évaluations',
@@ -60,7 +87,6 @@ const LABELS: Record<string, TastingReportLabels> = {
     tastingDate: 'Date de dégustation',
   },
   IT: {
-    generatedOn: 'Report generato il',
     ratings: 'Valutazioni',
     rating: 'valutazione',
     ratingsPlural: 'valutazioni',
@@ -70,7 +96,6 @@ const LABELS: Record<string, TastingReportLabels> = {
     tastingDate: 'Data degustazione',
   },
   DE: {
-    generatedOn: 'Bericht erstellt am',
     ratings: 'Bewertungen',
     rating: 'Bewertung',
     ratingsPlural: 'Bewertungen',
@@ -171,6 +196,13 @@ export async function generateTastingReportHandler(weddingId: string) {
 
   const { planner, language, coupleNames, weddingDate } = weddingCtx;
 
+  // Collect all image URLs to pre-fetch in parallel
+  const dishImageUrls = menuData.sections.flatMap((s) =>
+    s.dishes.map((d) => (d.image_url ? toAbsoluteUrl(d.image_url) ?? null : null)),
+  );
+  const logoUrl = planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null;
+  const imageCache = await prefetchImages([logoUrl, ...dishImageUrls]);
+
   const sections = menuData.sections.map((section) => ({
     id: section.id,
     name: sanitize(section.name) ?? '',
@@ -180,12 +212,12 @@ export async function generateTastingReportHandler(weddingId: string) {
         scores.length > 0
           ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / scores.length) * 10) / 10
           : null;
+      const rawUrl = dish.image_url ? toAbsoluteUrl(dish.image_url) ?? null : null;
       return {
         id: dish.id,
         name: sanitize(dish.name) ?? '',
         description: sanitize(dish.description, 300),
-        // Only dish images — skip score photos to avoid many HTTP fetches
-        image_url: dish.image_url ? toAbsoluteUrl(dish.image_url) ?? null : null,
+        image_url: rawUrl ? (imageCache.get(rawUrl) ?? null) : null,
         average_score: avg,
         score_count: scores.length,
         scores: scores.map((s) => ({
@@ -199,7 +231,6 @@ export async function generateTastingReportHandler(weddingId: string) {
 
   const report = {
     title: sanitize(menuData.title) ?? '',
-    description: sanitize(menuData.description, 300),
     tasting_date: menuData.tasting_date?.toISOString() ?? null,
     sections,
     participants: menuData.participants.map((p) => sanitize(p.name) ?? '').filter(Boolean),
@@ -207,7 +238,7 @@ export async function generateTastingReportHandler(weddingId: string) {
 
   const plannerInfo = {
     name: sanitize(planner?.name) ?? 'Wedding Planner',
-    logoUrl: planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null,
+    logoUrl: logoUrl ? (imageCache.get(logoUrl) ?? null) : null,
   };
 
   const weddingInfo = {
@@ -273,17 +304,27 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     );
   }
 
+  // Pre-fetch all images in parallel
+  const dishImageUrls = menuData.sections.flatMap((s) =>
+    s.dishes.map((d) => (d.image_url ? toAbsoluteUrl(d.image_url) ?? null : null)),
+  );
+  const logoUrl = planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null;
+  const imageCache = await prefetchImages([logoUrl, ...dishImageUrls]);
+
   const sections = menuData.sections
     .filter((s) => s.dishes.length > 0)
     .map((section) => ({
       id: section.id,
       name: sanitize(section.name) ?? '',
-      dishes: section.dishes.map((dish) => ({
-        id: dish.id,
-        name: sanitize(dish.name) ?? '',
-        description: sanitize(dish.description, 300),
-        image_url: dish.image_url ? toAbsoluteUrl(dish.image_url) ?? null : null,
-      })),
+      dishes: section.dishes.map((dish) => {
+        const rawUrl = dish.image_url ? toAbsoluteUrl(dish.image_url) ?? null : null;
+        return {
+          id: dish.id,
+          name: sanitize(dish.name) ?? '',
+          description: sanitize(dish.description, 300),
+          image_url: rawUrl ? (imageCache.get(rawUrl) ?? null) : null,
+        };
+      }),
     }));
 
   const weddingInfo = {
@@ -293,7 +334,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
 
   const plannerInfo = {
     name: sanitize(planner?.name) ?? 'Wedding Planner',
-    logoUrl: planner?.logo_url ? toAbsoluteUrl(planner.logo_url) ?? null : null,
+    logoUrl: logoUrl ? (imageCache.get(logoUrl) ?? null) : null,
   };
 
   let buffer: Buffer;

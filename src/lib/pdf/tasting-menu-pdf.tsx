@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'column',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   logo: {
     maxWidth: 110,
@@ -88,6 +88,15 @@ const styles = StyleSheet.create({
     color: GRAY_500,
     marginTop: 4,
     textAlign: 'center',
+  },
+  menuSelectedTitle: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    color: ROSE,
+    textAlign: 'center',
+    marginTop: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 
   divider: {
@@ -155,18 +164,18 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
 
-  // ── Footer ──
+  // ── Footer (every page) ──
   footer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 16,
     left: 40,
     right: 40,
     textAlign: 'center',
     fontSize: 7,
     color: GRAY_300,
-    borderTopWidth: 1,
+    borderTopWidth: 0.5,
     borderTopColor: GRAY_100,
-    paddingTop: 6,
+    paddingTop: 5,
   },
 });
 
@@ -190,7 +199,7 @@ export function TastingMenuPDF({ sections, wedding, planner }: TastingMenuPDFPro
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
+        {/* ── Header ── */}
         <View style={styles.header}>
           {planner.logoUrl ? (
             <Image src={planner.logoUrl} style={styles.logo} />
@@ -203,11 +212,12 @@ export function TastingMenuPDF({ sections, wedding, planner }: TastingMenuPDFPro
           {wedding.weddingDate && (
             <Text style={styles.weddingDate}>{formatDate(wedding.weddingDate)}</Text>
           )}
+          <Text style={styles.menuSelectedTitle}>Menú Seleccionado</Text>
         </View>
 
         <View style={styles.divider} />
 
-        {/* Sections */}
+        {/* ── Sections ── */}
         {sections.map((section) => (
           <View key={section.id} style={styles.sectionContainer} wrap={false}>
             <View style={styles.sectionHeader}>
@@ -234,10 +244,8 @@ export function TastingMenuPDF({ sections, wedding, planner }: TastingMenuPDFPro
           </View>
         ))}
 
-        {/* Footer */}
-        <Text style={styles.footer}>
-          {planner.name} — {wedding.coupleNames ?? ''}
-        </Text>
+        {/* ── Footer: every page ── */}
+        <Text fixed style={styles.footer}>Generado por Nupci</Text>
       </Page>
     </Document>
   );
