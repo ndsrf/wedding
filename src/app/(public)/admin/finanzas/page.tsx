@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type ChangeEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -109,7 +109,7 @@ export default function FinanzasPage() {
     rows.push([]);
 
     // Ingresos
-    const totalGiftsReal = data.gifts.reduce((s, g) => s + g.amount, 0);
+    const totalGiftsReal = data.gifts.reduce((s: number, g: { amount: number; status: string }) => s + g.amount, 0);
     rows.push([t('sectionIncome')]);
     rows.push([t('gifts'), '-', `${totalGiftsReal.toLocaleString()} €`]);
     rows.push([]);
@@ -117,19 +117,19 @@ export default function FinanzasPage() {
     // Gastos
     rows.push([t('sectionExpenses')]);
     // Group by category
-    const categories = [...new Set(data.providers.map(p => p.category_name))];
-    categories.forEach(cat => {
-      const catProviders = data.providers.filter(p => p.category_name === cat);
-      const projCat = catProviders.reduce((s, p) => s + getProjectedExpense(p, pg), 0);
-      const realCatGuests = catProviders.reduce((s, p) => s + getRealExpense(p, pg), 0);
-      const realCatConfirmed = catProviders.reduce((s, p) => s + getRealExpenseConfirmed(p, ac), 0);
+    const categories: string[] = Array.from(new Set(data.providers.map((p: ProviderSummary) => p.category_name)));
+    categories.forEach((cat: string) => {
+      const catProviders = data.providers.filter((p: ProviderSummary) => p.category_name === cat);
+      const projCat = catProviders.reduce((s: number, p: ProviderSummary) => s + getProjectedExpense(p, pg), 0);
+      const realCatGuests = catProviders.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, pg), 0);
+      const realCatConfirmed = catProviders.reduce((s: number, p: ProviderSummary) => s + getRealExpenseConfirmed(p, ac), 0);
       rows.push([cat, projCat ? `${projCat.toLocaleString()} €` : '-', `${realCatGuests.toLocaleString()}(${realCatConfirmed.toLocaleString()}) €`]);
     });
     rows.push([]);
 
-    const totalProjExpenses = data.providers.reduce((s, p) => s + getProjectedExpense(p, pg), 0);
-    const totalRealExpenses = data.providers.reduce((s, p) => s + getRealExpense(p, pg), 0);
-    const totalRealConfirmedExpenses = data.providers.reduce((s, p) => s + getRealExpenseConfirmed(p, ac), 0);
+    const totalProjExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getProjectedExpense(p, pg), 0);
+    const totalRealExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, pg), 0);
+    const totalRealConfirmedExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpenseConfirmed(p, ac), 0);
 
     rows.push([t('totalExpenses'), `${totalProjExpenses.toLocaleString()} €`, `${totalRealExpenses.toLocaleString()}(${totalRealConfirmedExpenses.toLocaleString()}) €`]);
     rows.push([]);
@@ -139,7 +139,7 @@ export default function FinanzasPage() {
     const realConfirmedBalance = totalGiftsReal - totalRealConfirmedExpenses;
     rows.push([t('balance'), `${projBalance.toLocaleString()} €`, `${realBalance.toLocaleString()}(${realConfirmedBalance.toLocaleString()}) €`]);
 
-    const totalPaid = data.providers.reduce((s, p) => s + p.paid, 0);
+    const totalPaid = data.providers.reduce((s: number, p: ProviderSummary) => s + p.paid, 0);
     const totalPending = totalRealExpenses - totalPaid;
     rows.push([t('totalPaid'), '-', `${totalPaid.toLocaleString()} €`]);
     rows.push([t('totalPending'), '-', `${totalPending.toLocaleString()} €`]);
@@ -207,16 +207,16 @@ export default function FinanzasPage() {
 
   // Group providers by category
   const categoriesMap: Record<string, ProviderSummary[]> = {};
-  data.providers.forEach(p => {
+  data.providers.forEach((p: ProviderSummary) => {
     if (!categoriesMap[p.category_name]) categoriesMap[p.category_name] = [];
     categoriesMap[p.category_name].push(p);
   });
 
-  const totalGiftsReal = data.gifts.reduce((s, g) => s + g.amount, 0);
-  const totalProjExpenses = data.providers.reduce((s, p) => s + getProjectedExpense(p, pg), 0);
-  const totalRealExpensesGuests = data.providers.reduce((s, p) => s + getRealExpense(p, pg), 0);
-  const totalRealExpensesConfirmed = data.providers.reduce((s, p) => s + getRealExpenseConfirmed(p, ac), 0);
-  const totalPaid = data.providers.reduce((s, p) => s + p.paid, 0);
+  const totalGiftsReal = data.gifts.reduce((s: number, g: { amount: number; status: string }) => s + g.amount, 0);
+  const totalProjExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getProjectedExpense(p, pg), 0);
+  const totalRealExpensesGuests = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, pg), 0);
+  const totalRealExpensesConfirmed = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpenseConfirmed(p, ac), 0);
+  const totalPaid = data.providers.reduce((s: number, p: ProviderSummary) => s + p.paid, 0);
   const totalPending = totalRealExpensesGuests - totalPaid;
 
   const projBalance = -totalProjExpenses;
@@ -246,7 +246,7 @@ export default function FinanzasPage() {
               type="number"
               min={1}
               value={plannedGuests}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setPlannedGuests(e.target.value ? Number(e.target.value) : '')
               }
               onBlur={handleSavePlannedGuests}
