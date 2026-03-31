@@ -17,7 +17,7 @@ export async function GET() {
       return NextResponse.json({ error: 'No wedding assigned' }, { status: 403 });
     }
 
-    const [wedding, providers, gifts, attendingCount] = await Promise.all([
+    const [wedding, providers, gifts, attendingCount, totalGuestCount] = await Promise.all([
       prisma.wedding.findUnique({
         where: { id: user.wedding_id },
         select: { planned_guests: true, couple_names: true },
@@ -39,11 +39,15 @@ export async function GET() {
       prisma.familyMember.count({
         where: { family: { wedding_id: user.wedding_id }, attending: true },
       }),
+      prisma.familyMember.count({
+        where: { family: { wedding_id: user.wedding_id } },
+      }),
     ]);
 
     return NextResponse.json({
       data: {
         planned_guests: wedding?.planned_guests ?? null,
+        total_guests: totalGuestCount,
         attending_count: attendingCount,
         providers: providers.map((p: {
           id: string;

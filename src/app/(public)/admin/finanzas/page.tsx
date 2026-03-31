@@ -24,6 +24,7 @@ interface ProviderSummary {
 
 interface FinanzasData {
   planned_guests: number | null;
+  total_guests: number;
   attending_count: number;
   providers: ProviderSummary[];
   gifts: { amount: number; status: string }[];
@@ -97,6 +98,7 @@ export default function FinanzasPage() {
     if (!data) return;
     const rows: string[][] = [];
     const pg = plannedGuests ? Number(plannedGuests) : 0;
+    const tg = data.total_guests;
     const ac = data.attending_count;
 
     rows.push([t('title')]);
@@ -105,7 +107,7 @@ export default function FinanzasPage() {
 
     // Guests
     rows.push([t('sectionGuests')]);
-    rows.push([t('plannedGuests'), pg.toString(), `${pg}(${ac})`]);
+    rows.push([t('plannedGuests'), pg.toString(), `${tg}(${ac})`]);
     rows.push([]);
 
     // Ingresos
@@ -121,14 +123,14 @@ export default function FinanzasPage() {
     categories.forEach((cat: string) => {
       const catProviders = data.providers.filter((p: ProviderSummary) => p.category_name === cat);
       const projCat = catProviders.reduce((s: number, p: ProviderSummary) => s + getProjectedExpense(p, pg), 0);
-      const realCatGuests = catProviders.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, pg), 0);
+      const realCatTotal = catProviders.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, tg), 0);
       const realCatConfirmed = catProviders.reduce((s: number, p: ProviderSummary) => s + getRealExpenseConfirmed(p, ac), 0);
-      rows.push([cat, projCat ? `${projCat.toLocaleString()} €` : '-', `${realCatGuests.toLocaleString()}(${realCatConfirmed.toLocaleString()}) €`]);
+      rows.push([cat, projCat ? `${projCat.toLocaleString()} €` : '-', `${realCatTotal.toLocaleString()}(${realCatConfirmed.toLocaleString()}) €`]);
     });
     rows.push([]);
 
     const totalProjExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getProjectedExpense(p, pg), 0);
-    const totalRealExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, pg), 0);
+    const totalRealExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, tg), 0);
     const totalRealConfirmedExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpenseConfirmed(p, ac), 0);
 
     rows.push([t('totalExpenses'), `${totalProjExpenses.toLocaleString()} €`, `${totalRealExpenses.toLocaleString()}(${totalRealConfirmedExpenses.toLocaleString()}) €`]);
@@ -203,7 +205,8 @@ export default function FinanzasPage() {
   }
 
   const pg = plannedGuests ? Number(plannedGuests) : 0;
-  const ac = data.attending_count;
+  const tg = data.total_guests;   // total guests (all, regardless of RSVP)
+  const ac = data.attending_count; // confirmed attending
 
   // Group providers by category
   const categoriesMap: Record<string, ProviderSummary[]> = {};
@@ -214,13 +217,13 @@ export default function FinanzasPage() {
 
   const totalGiftsReal = data.gifts.reduce((s: number, g: { amount: number; status: string }) => s + g.amount, 0);
   const totalProjExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getProjectedExpense(p, pg), 0);
-  const totalRealExpensesGuests = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, pg), 0);
+  const totalRealExpensesTotal = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, tg), 0);
   const totalRealExpensesConfirmed = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpenseConfirmed(p, ac), 0);
   const totalPaid = data.providers.reduce((s: number, p: ProviderSummary) => s + p.paid, 0);
-  const totalPending = totalRealExpensesGuests - totalPaid;
+  const totalPending = totalRealExpensesTotal - totalPaid;
 
   const projBalance = -totalProjExpenses;
-  const realBalanceGuests = totalGiftsReal - totalRealExpensesGuests;
+  const realBalanceTotal = totalGiftsReal - totalRealExpensesTotal;
   const realBalanceConfirmed = totalGiftsReal - totalRealExpensesConfirmed;
 
   const fmtCurrency = (val: number) => `${val.toLocaleString()} €`;
@@ -308,7 +311,7 @@ export default function FinanzasPage() {
                 <td className="px-4 py-3 border border-gray-200 text-sm text-gray-700">{t('guestCount')}</td>
                 <td className="px-4 py-3 border border-gray-200 text-sm text-right text-violet-700 font-medium">{pg}</td>
                 <td className="px-4 py-3 border border-gray-200 text-sm text-right text-blue-700 font-medium">
-                  {pg}<span className="text-gray-400 text-xs ml-1">({ac})</span>
+                  {tg}<span className="text-gray-400 text-xs ml-1">({ac})</span>
                 </td>
               </tr>
 
@@ -346,7 +349,7 @@ export default function FinanzasPage() {
               </tr>
               {Object.entries(categoriesMap).map(([catName, catProviders]) => {
                 const projCat = catProviders.reduce((s, p) => s + getProjectedExpense(p, pg), 0);
-                const realCatGuests = catProviders.reduce((s, p) => s + getRealExpense(p, pg), 0);
+                const realCatTotal = catProviders.reduce((s, p) => s + getRealExpense(p, tg), 0);
                 const realCatConfirmed = catProviders.reduce((s, p) => s + getRealExpenseConfirmed(p, ac), 0);
                 const priceType = catProviders[0]?.price_type;
                 return (
@@ -363,7 +366,7 @@ export default function FinanzasPage() {
                       {projCat ? fmtCurrency(projCat) : '-'}
                     </td>
                     <td className="px-4 py-3 border border-gray-200 text-sm text-right text-red-600 font-medium">
-                      {realCatGuests || realCatConfirmed ? fmtDualReal(realCatGuests, realCatConfirmed) : '-'}
+                      {realCatTotal || realCatConfirmed ? fmtDualReal(realCatTotal, realCatConfirmed) : '-'}
                     </td>
                   </tr>
                 );
@@ -376,7 +379,7 @@ export default function FinanzasPage() {
               <tr className="bg-red-50">
                 <td className="px-4 py-3 border border-gray-200 text-sm font-semibold text-gray-800">{t('totalExpenses')}</td>
                 <td className="px-4 py-3 border border-gray-200 text-sm text-right font-bold text-violet-700">{fmtCurrency(totalProjExpenses)}</td>
-                <td className="px-4 py-3 border border-gray-200 text-sm text-right font-bold text-red-700">{fmtDualReal(totalRealExpensesGuests, totalRealExpensesConfirmed)}</td>
+                <td className="px-4 py-3 border border-gray-200 text-sm text-right font-bold text-red-700">{fmtDualReal(totalRealExpensesTotal, totalRealExpensesConfirmed)}</td>
               </tr>
 
               {/* BALANCE */}
@@ -386,8 +389,8 @@ export default function FinanzasPage() {
                   {fmtCurrency(projBalance)}
                 </td>
                 <td className={`px-4 py-3 border border-gray-200 text-sm text-right font-bold`}>
-                  <span className={realBalanceGuests >= 0 ? 'text-green-700' : 'text-red-700'}>
-                    {fmtCurrency(realBalanceGuests)}
+                  <span className={realBalanceTotal >= 0 ? 'text-green-700' : 'text-red-700'}>
+                    {fmtCurrency(realBalanceTotal)}
                   </span>
                   <span className={`text-xs ml-1 ${realBalanceConfirmed >= 0 ? 'text-green-500' : 'text-red-400'}`}>
                     ({fmtCurrency(realBalanceConfirmed)})
@@ -423,7 +426,7 @@ export default function FinanzasPage() {
           </Card>
           <Card className="p-4 text-center border-blue-200 bg-blue-50">
             <p className="text-xs text-blue-600 font-medium uppercase mb-1">{t('totalReal')}</p>
-            <p className="text-lg font-bold text-blue-800">{fmtCurrency(totalRealExpensesGuests)}</p>
+            <p className="text-lg font-bold text-blue-800">{fmtCurrency(totalRealExpensesTotal)}</p>
             <p className="text-xs text-blue-500">({fmtCurrency(totalRealExpensesConfirmed)})</p>
           </Card>
           <Card className="p-4 text-center border-green-200 bg-green-50">
