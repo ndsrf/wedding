@@ -259,8 +259,15 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     return wp.category.price_type === 'PER_PERSON' && plannedGuests ? b * Number(plannedGuests) : b;
   };
 
+  // For PER_PERSON, total_price is stored per-person → multiply by planned guests
+  const getRealTotal = (wp: WeddingProvider) => {
+    const r = wp.total_price ? Number(wp.total_price) : 0;
+    if (!r) return 0;
+    return wp.category.price_type === 'PER_PERSON' && plannedGuests ? r * Number(plannedGuests) : r;
+  };
+
   const totalBudgeted = providers.reduce((s: number, wp: WeddingProvider) => s + getProjected(wp), 0);
-  const totalReal = providers.reduce((s: number, wp: WeddingProvider) => s + (wp.total_price ? Number(wp.total_price) : 0), 0);
+  const totalReal = providers.reduce((s: number, wp: WeddingProvider) => s + getRealTotal(wp), 0);
   const totalPaid = providers.reduce((s: number, wp: WeddingProvider) => s + wp.payments.reduce((ps: number, p: Payment) => ps + Number(p.amount), 0), 0);
   const totalPending = totalReal - totalPaid;
 
@@ -337,7 +344,8 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
       <div className="space-y-3">
         {providers.map((wp: WeddingProvider) => {
           const paid = wp.payments.reduce((s: number, p: Payment) => s + Number(p.amount), 0);
-          const total = wp.total_price ? Number(wp.total_price) : 0;
+          const ratePerPerson = wp.category.price_type === 'PER_PERSON' ? (wp.total_price ? Number(wp.total_price) : null) : null;
+          const total = getRealTotal(wp);
           const pending = total - paid;
           const projected = getProjected(wp);
           const isEditing = editingId === wp.id;
@@ -451,8 +459,24 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                       </div>
                     )}
                     <div className="px-3 py-2 text-center">
-                      <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">{t('totalPrice')}</p>
-                      <p className="text-sm font-semibold text-gray-800">{total.toLocaleString()} €</p>
+                      <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">
+                        {t('totalPrice')}
+                        {ratePerPerson !== null && (
+                          <span className="ml-0.5 normal-case text-[9px]">/{t('perPersonShort')}</span>
+                        )}
+                      </p>
+                      <p className="text-sm font-semibold text-gray-800">
+                        {ratePerPerson !== null ? (
+                          <>
+                            {total ? `${total.toLocaleString()} €` : '—'}
+                            <span className="text-[10px] text-gray-400 ml-1">
+                              ({ratePerPerson.toLocaleString()}/p.)
+                            </span>
+                          </>
+                        ) : (
+                          `${total.toLocaleString()} €`
+                        )}
+                      </p>
                     </div>
                     <div className="px-3 py-2 text-center">
                       <p className="text-[10px] text-green-500 uppercase font-medium mb-0.5">{t('paid')}</p>
@@ -559,7 +583,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                           onChange={(e: IE) => setEditForm({ ...editForm, budgeted_price: e.target.value ? Number(e.target.value) : null })} />
                       </Field>
                     )}
-                    <Field label={t('totalPrice')}>
+                    <Field label={`${t('totalPrice')}${wp.category.price_type === 'PER_PERSON' ? ` (/${t('perPersonShort')})` : ''}`}>
                       <Input type="number" value={editForm.total_price ?? ''}
                         onChange={(e: IE) => setEditForm({ ...editForm, total_price: e.target.value ? Number(e.target.value) : null })} />
                     </Field>
