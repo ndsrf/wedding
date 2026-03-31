@@ -35,6 +35,7 @@ const updateWeddingConfigSchema = z.object({
   rsvp_cutoff_date: z.string().datetime().optional(),
   payment_tracking_mode: z.enum(['AUTOMATED', 'MANUAL']).optional(),
   gift_iban: z.string().nullable().optional(),
+  planned_guests: z.number().int().positive().nullable().optional(),
   theme_id: z.string().nullable().optional(),
   wedding_day_theme_id: z.string().nullable().optional(),
   wedding_day_invitation_template_id: z.string().nullable().optional(),
@@ -242,6 +243,7 @@ export async function GET() {
       additional_info: wedding.additional_info,
       payment_tracking_mode: wedding.payment_tracking_mode,
       gift_iban: wedding.gift_iban,
+      planned_guests: wedding.planned_guests,
       allow_guest_additions: wedding.allow_guest_additions,
       default_language: wedding.default_language,
       wedding_country: wedding.wedding_country,
@@ -408,6 +410,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (validatedData.gift_iban !== undefined) {
       updateData.gift_iban = validatedData.gift_iban;
+    }
+    if (validatedData.planned_guests !== undefined) {
+      updateData.planned_guests = validatedData.planned_guests;
     }
     if (validatedData.theme_id !== undefined) {
       updateData.theme_id = validatedData.theme_id;

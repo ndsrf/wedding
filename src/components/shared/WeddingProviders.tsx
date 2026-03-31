@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Plus, Trash2, FileText, DollarSign, Edit2, Check, X } from 'lucide-react';
 
+type PriceType = 'PER_PERSON' | 'GLOBAL';
+
 interface WeddingProvider {
   id: string;
   wedding_id: string;
@@ -19,11 +21,13 @@ interface WeddingProvider {
   website: string | null;
   social_media: string | null;
   total_price: number | null;
+  budgeted_price: number | null;
   contract_url: string | null;
   notes: string | null;
   category: {
     id: string;
     name: string;
+    price_type: PriceType;
   };
   provider: {
     id: string;
@@ -76,14 +80,18 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const t = useTranslations('planner.providers');
   const [providers, setProviders] = useState<WeddingProvider[]>([]);
   const [categories, setCategories] = useState<ProviderCategory[]>([]);
-  const [allProviders, setAllProviders] = useState<Provider[]>([]); // All providers from planner's library
+  const [allProviders, setAllProviders] = useState<Provider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddProvider, setShowAddProvider] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(''); // for dropdown
-  const [selectedProviderId, setSelectedProviderId] = useState(''); // selected provider from dropdown
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [selectedProviderId, setSelectedProviderId] = useState('');
+
+  // Planned guests state
+  const [plannedGuests, setPlannedGuests] = useState<number | ''>('');
+  const [savingPlannedGuests, setSavingPlannedGuests] = useState(false);
 
   // Payment form state
-  const [showPaymentForm, setShowPaymentForm] = useState<string | null>(null); // wedding_provider_id
+  const [showPaymentForm, setShowPaymentForm] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER');
   const [paymentNotes, setPaymentNotes] = useState('');
@@ -97,10 +105,17 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/weddings/${weddingId}/providers`);
-      const data = await res.json();
-      if (data.data) {
-        setProviders(data.data);
+      const [provRes, weddingRes] = await Promise.all([
+        fetch(`/api/weddings/${weddingId}/providers`),
+        fetch('/api/admin/wedding'),
+      ]);
+      const provData = await provRes.json();
+      if (provData.data) setProviders(provData.data);
+      if (weddingRes.ok) {
+        const weddingData = await weddingRes.json();
+        if (weddingData.data?.planned_guests != null) {
+          setPlannedGuests(weddingData.data.planned_guests);
+        }
       }
     } catch (error) {
       console.error('Error fetching providers:', error);
@@ -116,13 +131,10 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const fetchCategories = async () => {
     try {
       const categoriesRes = await fetch(`/api/weddings/${weddingId}/categories`);
-
       if (categoriesRes.ok) {
         const data = await categoriesRes.json();
         setCategories(data.data || []);
       }
-
-      // Only fetch providers from library for planners
       if (isPlanner) {
         const providersRes = await fetch('/api/planner/providers');
         if (providersRes.ok) {
@@ -135,20 +147,30 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     }
   };
 
+  const handleSavePlannedGuests = async () => {
+    if (plannedGuests === '') return;
+    setSavingPlannedGuests(true);
+    try {
+      await fetch('/api/admin/wedding', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planned_guests: Number(plannedGuests) }),
+      });
+    } catch (error) {
+      console.error('Error saving planned guests:', error);
+    } finally {
+      setSavingPlannedGuests(false);
+    }
+  };
+
   const handleAddProvider = async () => {
     if (!selectedCategoryId) return;
-
     try {
-      // Find the selected provider details if one is selected
       const selectedProvider = selectedProviderId
         ? allProviders.find(p => p.id === selectedProviderId)
         : null;
 
-      const body: Record<string, unknown> = {
-        category_id: selectedCategoryId,
-      };
-
-      // If a provider is selected, copy its details
+      const body: Record<string, unknown> = { category_id: selectedCategoryId };
       if (selectedProvider) {
         body.provider_id = selectedProvider.id;
         body.name = selectedProvider.name;
@@ -192,6 +214,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
           website: editForm.website,
           social_media: editForm.social_media,
           total_price: editForm.total_price != null ? Number(editForm.total_price) : null,
+          budgeted_price: editForm.budgeted_price != null ? Number(editForm.budgeted_price) : null,
           notes: editForm.notes,
           contract_url: editForm.contract_url,
         }),
@@ -203,18 +226,13 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
       } else {
         const errorData = await res.json().catch(() => ({}));
         let errorMessage: string;
-
-        // Handle Zod validation errors (array format)
         if (Array.isArray(errorData.error)) {
           errorMessage = errorData.error
-            .map((err: { path: string[]; message: string }) =>
-              `${err.path.join('.')}: ${err.message}`
-            )
+            .map((err: { path: string[]; message: string }) => `${err.path.join('.')}: ${err.message}`)
             .join('\n');
         } else {
           errorMessage = errorData.error || `Failed to update provider (${res.status})`;
         }
-
         console.error('Update failed:', errorMessage);
         alert(errorMessage);
       }
@@ -230,12 +248,8 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
     formData.append('weddingProviderId', providerId);
-
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
       if (res.ok) {
         const data = await res.json();
         setEditForm(prev => ({ ...prev, contract_url: data.url }));
@@ -254,12 +268,8 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
     formData.append('weddingProviderId', providerId);
-
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
       if (res.ok) {
         const data = await res.json();
         setPaymentDocumentUrl(data.url);
@@ -303,9 +313,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const deletePayment = async (paymentId: string) => {
     if (!confirm(t('confirmDeletePayment'))) return;
     try {
-      const res = await fetch(`/api/weddings/${weddingId}/payments/${paymentId}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(`/api/weddings/${weddingId}/payments/${paymentId}`, { method: 'DELETE' });
       if (res.ok) fetchData();
     } catch (error) {
       console.error(error);
@@ -315,19 +323,62 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const deleteProvider = async (providerId: string) => {
     if (!confirm(t('confirmDeleteProviderFromWedding'))) return;
     try {
-        const res = await fetch(`/api/weddings/${weddingId}/providers/${providerId}`, {
-            method: 'DELETE',
-        });
-        if (res.ok) fetchData();
+      const res = await fetch(`/api/weddings/${weddingId}/providers/${providerId}`, { method: 'DELETE' });
+      if (res.ok) fetchData();
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
-  }
+  };
+
+  const getProjectedTotal = (wp: WeddingProvider): number => {
+    const budgeted = wp.budgeted_price ? Number(wp.budgeted_price) : 0;
+    if (!budgeted) return 0;
+    if (wp.category.price_type === 'PER_PERSON' && plannedGuests) {
+      return budgeted * Number(plannedGuests);
+    }
+    return budgeted;
+  };
+
+  // Compute totals
+  const totalBudgeted = providers.reduce((sum, wp) => sum + getProjectedTotal(wp), 0);
+  const totalReal = providers.reduce((sum, wp) => sum + (wp.total_price ? Number(wp.total_price) : 0), 0);
+  const totalPaid = providers.reduce((sum, wp) => sum + wp.payments.reduce((s, p) => s + Number(p.amount), 0), 0);
+  const totalPending = totalReal - totalPaid;
 
   if (isLoading) return <div>{t('loading')}</div>;
 
   return (
     <div className="space-y-8">
+      {/* Planned guests input */}
+      <Card className="p-4 bg-blue-50 border-blue-200">
+        <div className="flex items-center gap-4 flex-wrap">
+          <label className="text-sm font-medium text-blue-800 whitespace-nowrap">
+            {t('plannedGuests')}
+          </label>
+          <Input
+            type="number"
+            min={1}
+            value={plannedGuests}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setPlannedGuests(e.target.value ? Number(e.target.value) : '')
+            }
+            onBlur={handleSavePlannedGuests}
+            className="w-32 bg-white"
+            placeholder="0"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSavePlannedGuests}
+            disabled={savingPlannedGuests || plannedGuests === ''}
+            className="border-blue-300 text-blue-700 hover:bg-blue-100"
+          >
+            {savingPlannedGuests ? t('saving') : t('save')}
+          </Button>
+          <p className="text-xs text-blue-600">{t('plannedGuestsHint')}</p>
+        </div>
+      </Card>
+
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-800">{t('weddingProvidersTitle')}</h2>
         <Button onClick={() => { setShowAddProvider(true); fetchCategories(); }}>
@@ -341,11 +392,11 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
           <div className="space-y-3">
             <div className="flex gap-2">
               <select
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={selectedCategoryId}
                 onChange={(e) => {
                   setSelectedCategoryId(e.target.value);
-                  setSelectedProviderId(''); // Reset provider selection when category changes
+                  setSelectedProviderId('');
                 }}
               >
                 <option value="">{t('selectCategory') || 'Select a category'}</option>
@@ -355,11 +406,10 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
               </select>
             </div>
 
-            {/* Provider dropdown - only show for planners */}
             {isPlanner && selectedCategoryId && (
               <div className="flex gap-2">
                 <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={selectedProviderId}
                   onChange={(e) => setSelectedProviderId(e.target.value)}
                 >
@@ -385,19 +435,21 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('category') || 'Category'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('name') || 'Name'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contactPerson') || 'Contact Person'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('email') || 'Email'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('phone') || 'Phone'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('website') || 'Website'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('socialMedia') || 'Social Media'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('totalPrice') || 'Total Price'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('paid') || 'Paid'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('pending') || 'Pending'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contract') || 'Contract'}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes') || 'Notes'}</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions') || 'Actions'}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('category')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('name')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contactPerson')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('email')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('phone')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('website')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('socialMedia')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('budgetedPrice')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('projectedTotal')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('totalPrice')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('paid')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('pending')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contract')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes')}</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -405,22 +457,23 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
               const paid = wp.payments.reduce((sum, p) => sum + Number(p.amount), 0);
               const total = wp.total_price ? Number(wp.total_price) : 0;
               const pending = total - paid;
+              const projected = getProjectedTotal(wp);
               const isEditing = editingProviderId === wp.id;
 
               return (
                 <tr key={wp.id}>
                   {/* Category */}
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{wp.category.name}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <div>{wp.category.name}</div>
+                    <div className={`text-xs mt-0.5 ${wp.category.price_type === 'PER_PERSON' ? 'text-blue-500' : 'text-gray-400'}`}>
+                      {wp.category.price_type === 'PER_PERSON' ? t('priceTypePerPerson') : t('priceTypeGlobal')}
+                    </div>
+                  </td>
 
                   {/* Name */}
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {isEditing ? (
-                      <Input
-                        value={editForm.name || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, name: e.target.value})}
-                        className="w-32"
-                        placeholder="Name"
-                      />
+                      <Input value={editForm.name || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, name: e.target.value})} className="w-32" placeholder="Name" />
                     ) : (
                       <span>{wp.name || '-'}</span>
                     )}
@@ -429,12 +482,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   {/* Contact Person */}
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {isEditing ? (
-                      <Input
-                        value={editForm.contact_name || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, contact_name: e.target.value})}
-                        className="w-32"
-                        placeholder="Contact"
-                      />
+                      <Input value={editForm.contact_name || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, contact_name: e.target.value})} className="w-32" placeholder="Contact" />
                     ) : (
                       <span>{wp.contact_name || '-'}</span>
                     )}
@@ -443,13 +491,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   {/* Email */}
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {isEditing ? (
-                      <Input
-                        type="email"
-                        value={editForm.email || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, email: e.target.value})}
-                        className="w-40"
-                        placeholder="email@example.com"
-                      />
+                      <Input type="email" value={editForm.email || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, email: e.target.value})} className="w-40" placeholder="email@example.com" />
                     ) : (
                       <span>{wp.email || '-'}</span>
                     )}
@@ -458,12 +500,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   {/* Phone */}
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {isEditing ? (
-                      <Input
-                        value={editForm.phone || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, phone: e.target.value})}
-                        className="w-32"
-                        placeholder="Phone"
-                      />
+                      <Input value={editForm.phone || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, phone: e.target.value})} className="w-32" placeholder="Phone" />
                     ) : (
                       <span>{wp.phone || '-'}</span>
                     )}
@@ -472,31 +509,48 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   {/* Website */}
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {isEditing ? (
-                      <Input
-                        value={editForm.website || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, website: e.target.value})}
-                        className="w-40"
-                        placeholder="https://"
-                      />
+                      <Input value={editForm.website || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, website: e.target.value})} className="w-40" placeholder="https://" />
                     ) : (
-                      wp.website ? (
-                        <a href={wp.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a>
-                      ) : '-'
+                      wp.website ? <a href={wp.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a> : '-'
                     )}
                   </td>
 
                   {/* Social Media */}
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {isEditing ? (
-                      <Input
-                        value={editForm.social_media || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, social_media: e.target.value})}
-                        className="w-32"
-                        placeholder="@handle"
-                      />
+                      <Input value={editForm.social_media || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, social_media: e.target.value})} className="w-32" placeholder="@handle" />
                     ) : (
                       <span>{wp.social_media || '-'}</span>
                     )}
+                  </td>
+
+                  {/* Budgeted Price */}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {isEditing ? (
+                      <div>
+                        <Input
+                          type="number"
+                          value={editForm.budgeted_price ?? ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, budgeted_price: e.target.value ? Number(e.target.value) : null})}
+                          className="w-24"
+                        />
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          {wp.category.price_type === 'PER_PERSON' ? t('perPersonShort') : t('priceTypeGlobal')}
+                        </div>
+                      </div>
+                    ) : (
+                      <span>
+                        {wp.budgeted_price ? `${Number(wp.budgeted_price).toLocaleString()} €` : '-'}
+                        {wp.budgeted_price && wp.category.price_type === 'PER_PERSON' && (
+                          <span className="text-xs text-gray-400 ml-1">/{t('perPersonShort')}</span>
+                        )}
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Projected Total (read-only) */}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                    {projected ? `${projected.toLocaleString()} €` : '-'}
                   </td>
 
                   {/* Total Price */}
@@ -504,7 +558,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                     {isEditing ? (
                       <Input
                         type="number"
-                        value={editForm.total_price || ''}
+                        value={editForm.total_price ?? ''}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, total_price: Number(e.target.value)})}
                         className="w-24"
                       />
@@ -539,12 +593,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   {/* Notes */}
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {isEditing ? (
-                      <Input
-                        value={editForm.notes || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, notes: e.target.value})}
-                        className="w-40"
-                        placeholder="Notes"
-                      />
+                      <Input value={editForm.notes || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({...editForm, notes: e.target.value})} className="w-40" placeholder="Notes" />
                     ) : (
                       <span className="max-w-xs truncate block" title={wp.notes || ''}>{wp.notes || '-'}</span>
                     )}
@@ -575,138 +624,138 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
               );
             })}
           </tbody>
+
+          {/* Totals row */}
+          {providers.length > 0 && (
+            <tfoot className="bg-gray-50 border-t-2 border-gray-300">
+              <tr>
+                <td colSpan={7} className="px-4 py-3 text-sm font-bold text-gray-900 uppercase">{t('totals')}</td>
+                <td className="px-4 py-3 text-sm font-bold text-gray-500">-</td>
+                <td className="px-4 py-3 text-sm font-bold text-indigo-700">{totalBudgeted ? `${totalBudgeted.toLocaleString()} €` : '-'}</td>
+                <td className="px-4 py-3 text-sm font-bold text-gray-900">{totalReal.toLocaleString()} €</td>
+                <td className="px-4 py-3 text-sm font-bold text-green-700">{totalPaid.toLocaleString()} €</td>
+                <td className="px-4 py-3 text-sm font-bold text-red-700">{totalPending.toLocaleString()} €</td>
+                <td colSpan={3} />
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
 
-      {/* Payment Form (Shared for all) */}
-      {showPaymentForm && (
-         <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-            <h4 className="font-semibold text-green-900 mb-2">{t('recordPayment')}</h4>
-            <div className="flex gap-4 items-end flex-wrap">
-                <div className="w-32">
-                    <label className="text-xs font-medium text-gray-700">{t('amount')}</label>
-                    <Input type="number" value={paymentAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentAmount(e.target.value)} placeholder="0.00" />
-                </div>
-                <div className="w-40">
-                     <label className="text-xs font-medium text-gray-700">{t('method')}</label>
-                     <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={paymentMethod}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                     >
-                        <option value="CASH">Cash</option>
-                        <option value="BANK_TRANSFER">Bank Transfer</option>
-                        <option value="PAYPAL">Paypal</option>
-                        <option value="BIZUM">Bizum</option>
-                        <option value="REVOLUT">Revolut</option>
-                        <option value="OTHER">Other</option>
-                     </select>
-                </div>
-                <div className="flex-1 min-w-[200px]">
-                    <label className="text-xs font-medium text-gray-700">{t('notes')}</label>
-                    <Input value={paymentNotes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentNotes(e.target.value)} placeholder={t('paymentNotesPlaceholder')} />
-                </div>
-
-                {/* NEW: Document Upload Field */}
-                <div className="flex-1 min-w-[200px]">
-                    <label className="text-xs font-medium text-gray-700">Document</label>
-                    <div className="flex gap-2 items-center">
-                        <Input
-                            type="file"
-                            onChange={(e) => handlePaymentDocumentUpload(e, showPaymentForm)}
-                            disabled={uploadingPaymentDoc}
-                            className="text-sm"
-                        />
-                        {paymentDocumentUrl && (
-                            <a
-                                href={paymentDocumentUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline text-sm whitespace-nowrap"
-                            >
-                              View
-                            </a>
-                        )}
-                    </div>
-                </div>
-
-                <div className="flex gap-2">
-                     <Button size="sm" onClick={() => handleAddPayment(showPaymentForm)} className="bg-green-600 hover:bg-green-700" disabled={uploadingPaymentDoc}>{t('savePayment')}</Button>
-                     <Button size="sm" variant="ghost" onClick={() => {
-                       setShowPaymentForm(null);
-                       setPaymentDocumentUrl('');
-                     }}>{t('cancel')}</Button>
-                </div>
-            </div>
-         </div>
+      {/* Totals summary cards */}
+      {providers.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Card className="p-4 text-center border-indigo-200 bg-indigo-50">
+            <p className="text-xs text-indigo-600 font-medium uppercase mb-1">{t('totalProjected')}</p>
+            <p className="text-xl font-bold text-indigo-800">{totalBudgeted.toLocaleString()} €</p>
+          </Card>
+          <Card className="p-4 text-center border-gray-200 bg-gray-50">
+            <p className="text-xs text-gray-600 font-medium uppercase mb-1">{t('totalReal')}</p>
+            <p className="text-xl font-bold text-gray-800">{totalReal.toLocaleString()} €</p>
+          </Card>
+          <Card className="p-4 text-center border-green-200 bg-green-50">
+            <p className="text-xs text-green-600 font-medium uppercase mb-1">{t('totalPaid')}</p>
+            <p className="text-xl font-bold text-green-800">{totalPaid.toLocaleString()} €</p>
+          </Card>
+          <Card className="p-4 text-center border-red-200 bg-red-50">
+            <p className="text-xs text-red-600 font-medium uppercase mb-1">{t('totalPending')}</p>
+            <p className="text-xl font-bold text-red-800">{totalPending.toLocaleString()} €</p>
+          </Card>
+        </div>
       )}
-      
-      {/* SEPARATE PAYMENTS GRID as per requirement */}
+
+      {/* Payment Form */}
+      {showPaymentForm && (
+        <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+          <h4 className="font-semibold text-green-900 mb-2">{t('recordPayment')}</h4>
+          <div className="flex gap-4 items-end flex-wrap">
+            <div className="w-32">
+              <label className="text-xs font-medium text-gray-700">{t('amount')}</label>
+              <Input type="number" value={paymentAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentAmount(e.target.value)} placeholder="0.00" />
+            </div>
+            <div className="w-40">
+              <label className="text-xs font-medium text-gray-700">{t('method')}</label>
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                <option value="CASH">Cash</option>
+                <option value="BANK_TRANSFER">Bank Transfer</option>
+                <option value="PAYPAL">Paypal</option>
+                <option value="BIZUM">Bizum</option>
+                <option value="REVOLUT">Revolut</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-xs font-medium text-gray-700">{t('notes')}</label>
+              <Input value={paymentNotes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentNotes(e.target.value)} placeholder={t('paymentNotesPlaceholder')} />
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-xs font-medium text-gray-700">Document</label>
+              <div className="flex gap-2 items-center">
+                <Input type="file" onChange={(e) => handlePaymentDocumentUpload(e, showPaymentForm)} disabled={uploadingPaymentDoc} className="text-sm" />
+                {paymentDocumentUrl && (
+                  <a href={paymentDocumentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm whitespace-nowrap">View</a>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => handleAddPayment(showPaymentForm)} className="bg-green-600 hover:bg-green-700" disabled={uploadingPaymentDoc}>{t('savePayment')}</Button>
+              <Button size="sm" variant="ghost" onClick={() => { setShowPaymentForm(null); setPaymentDocumentUrl(''); }}>{t('cancel')}</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payments History */}
       <div className="mt-12">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">{t('paymentsHistory')}</h2>
         <div className="bg-white rounded-lg shadow overflow-hidden">
-             <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('date')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('provider')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('amount')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('method')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions')}</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                    {providers.flatMap(wp => wp.payments.map(p => ({ ...p, providerName: wp.provider?.name || wp.category.name })))
-                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                        .map(payment => (
-                            <tr key={payment.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {new Date(payment.date).toLocaleDateString()}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {payment.providerName}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">
-                                    {Number(payment.amount).toLocaleString()} €
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {payment.method}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
-                                    {payment.notes}
-                                </td>
-                                {/* NEW: Document cell */}
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    {payment.document_url ? (
-                                        <a
-                                            href={payment.document_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline flex items-center"
-                                        >
-                                            <FileText className="w-4 h-4 mr-1" /> View
-                                        </a>
-                                    ) : (
-                                        '-'
-                                    )}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button type="button" onClick={() => deletePayment(payment.id)} className="text-red-600 hover:text-red-900">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    }
-                    {providers.flatMap(wp => wp.payments).length === 0 && (
-                        <tr>
-                            <td colSpan={7} className="px-6 py-4 text-center text-gray-500 text-sm">{t('noPayments')}</td>
-                        </tr>
-                    )}
-                </tbody>
-             </table>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('date')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('provider')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('amount')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('method')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions')}</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {providers.flatMap(wp => wp.payments.map(p => ({ ...p, providerName: wp.provider?.name || wp.category.name })))
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map(payment => (
+                  <tr key={payment.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(payment.date).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{payment.providerName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">{Number(payment.amount).toLocaleString()} €</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{payment.method}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{payment.notes}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {payment.document_url ? (
+                        <a href={payment.document_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center">
+                          <FileText className="w-4 h-4 mr-1" /> View
+                        </a>
+                      ) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button type="button" onClick={() => deletePayment(payment.id)} className="text-red-600 hover:text-red-900">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              {providers.flatMap(wp => wp.payments).length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500 text-sm">{t('noPayments')}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

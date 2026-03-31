@@ -687,7 +687,20 @@
       "savePayment": "Salva Pagamento",
       "paymentsHistory": "Cronologia Pagamenti",
       "date": "Data",
-      "noPayments": "Nessun pagamento registrato ancora."
+      "noPayments": "Nessun pagamento registrato ancora.",
+      "priceTypePerPerson": "A Persona",
+      "priceTypeGlobal": "Globale",
+      "perPersonShort": "pers.",
+      "plannedGuests": "Ospiti Previsti",
+      "plannedGuestsHint": "Inserisci il numero di ospiti previsti per calcolare i totali proiettati.",
+      "budgetedPrice": "Preventivato",
+      "projectedTotal": "Totale Proiettato",
+      "totalProjected": "Totale Proiettato",
+      "totalReal": "Totale Reale",
+      "totalPaid": "Totale Pagato",
+      "totalPending": "Totale In Attesa",
+      "totals": "TOTALI",
+      "saving": "Salvataggio..."
     }
   },
   "admin": {
@@ -749,7 +762,8 @@
       "tablesAndGiftsSubtitle": "Piano dei posti e tracciamento regali",
       "nupcibot_greeting": "Ciao! Sono NupciBot, il tuo assistente matrimoniale. Come posso aiutarti?",
       "nupcibot_helpConfigure": "Aiutami a configurare il mio matrimonio",
-      "tastingMenu": "Menu di Degustazione"
+      "tastingMenu": "Menu di Degustazione",
+      "finanzas": "Conto Economico"
     },
     "reports": {
       "title": "Report",
@@ -1875,6 +1889,36 @@
       "aiReasoning": "Ragionamento AI",
       "exportXlsx": "Esporta in Excel",
       "exportPdf": "Esporta in PDF"
+    },
+    "finanzas": {
+      "title": "Conto Economico",
+      "loading": "Caricamento...",
+      "noData": "Nessun dato disponibile.",
+      "noExpenses": "Nessuna spesa registrata.",
+      "plannedGuests": "Ospiti Previsti",
+      "confirmedGuests": "Ospiti Confermati",
+      "save": "Salva",
+      "saving": "Salvataggio...",
+      "exportExcel": "Esporta Excel",
+      "exportPDF": "Esporta PDF",
+      "concept": "Voce",
+      "projected": "Previsto",
+      "real": "Reale",
+      "realHint": "(ospiti previsti / confermati)",
+      "sectionGuests": "Ospiti",
+      "guestCount": "Numero Ospiti",
+      "sectionIncome": "Entrate",
+      "gifts": "Regali",
+      "totalIncome": "Totale Entrate",
+      "sectionExpenses": "Spese",
+      "perPerson": "a persona",
+      "totalExpenses": "Totale Spese",
+      "balance": "SALDO (Entrate - Spese)",
+      "sectionPayments": "Pagamenti",
+      "totalPaid": "Totale Pagato",
+      "totalPending": "Totale In Attesa",
+      "totalProjected": "Totale Previsto",
+      "totalReal": "Totale Reale"
     }
   },
   "guest": {

@@ -159,6 +159,7 @@ model Wedding {
   disabled_by                     String?
   is_disabled                     Boolean            @default(false)
   gift_iban                       String?
+  planned_guests                  Int?
   couple_table_id                 String?
   customer_id                     String?
   contract_id                     String?            // Originating contract for traceability / billing
@@ -593,6 +594,7 @@ model ProviderCategory {
   id          String         @id @default(uuid())
   planner_id  String
   name        String
+  price_type  PriceType      @default(GLOBAL)
   created_at  DateTime       @default(now())
   updated_at  DateTime       @updatedAt
   planner     WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
@@ -638,6 +640,7 @@ model WeddingProvider {
   website         String?
   social_media    String?
   total_price     Decimal?  @db.Decimal(10, 2)
+  budgeted_price  Decimal?  @db.Decimal(10, 2)
   contract_url    String?
   notes           String?   @db.Text
   created_at      DateTime  @default(now())
@@ -792,6 +795,11 @@ enum TaskStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
+}
+
+enum PriceType {
+  PER_PERSON
+  GLOBAL
 }
 
 enum PaymentMethod {

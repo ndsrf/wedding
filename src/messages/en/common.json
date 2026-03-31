@@ -695,7 +695,20 @@
       "savePayment": "Save Payment",
       "paymentsHistory": "Payments History",
       "date": "Date",
-      "noPayments": "No payments recorded yet."
+      "noPayments": "No payments recorded yet.",
+      "priceTypePerPerson": "Per Person",
+      "priceTypeGlobal": "Global",
+      "perPersonShort": "pp",
+      "plannedGuests": "Planned Guests",
+      "plannedGuestsHint": "Enter the number of planned guests to calculate projected totals.",
+      "budgetedPrice": "Budgeted",
+      "projectedTotal": "Projected Total",
+      "totalProjected": "Total Projected",
+      "totalReal": "Total Real",
+      "totalPaid": "Total Paid",
+      "totalPending": "Total Pending",
+      "totals": "TOTALS",
+      "saving": "Saving..."
     }
   },
   "admin": {
@@ -759,7 +772,8 @@
       "tablesAndGiftsSubtitle": "Seating plan and gift tracking",
       "nupcibot_greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you?",
       "nupcibot_helpConfigure": "Help me configure my wedding",
-      "foodAndDrinks": "Food & Drinks"
+      "foodAndDrinks": "Food & Drinks",
+      "finanzas": "P&L Statement"
     },
     "wizard": {
       "title": "Wedding Setup Wizard",
@@ -1941,6 +1955,36 @@
       "generateSuccess": "Menu generated successfully",
       "generateError": "Error generating the menu",
       "aiReasoning": "AI reasoning"
+    },
+    "finanzas": {
+      "title": "P&L Statement",
+      "loading": "Loading...",
+      "noData": "No data available.",
+      "noExpenses": "No expenses recorded.",
+      "plannedGuests": "Planned Guests",
+      "confirmedGuests": "Confirmed Guests",
+      "save": "Save",
+      "saving": "Saving...",
+      "exportExcel": "Export Excel",
+      "exportPDF": "Export PDF",
+      "concept": "Concept",
+      "projected": "Projected",
+      "real": "Real",
+      "realHint": "(planned / confirmed guests)",
+      "sectionGuests": "Guests",
+      "guestCount": "Guest Count",
+      "sectionIncome": "Income",
+      "gifts": "Gifts",
+      "totalIncome": "Total Income",
+      "sectionExpenses": "Expenses",
+      "perPerson": "per person",
+      "totalExpenses": "Total Expenses",
+      "balance": "BALANCE (Income - Expenses)",
+      "sectionPayments": "Payments",
+      "totalPaid": "Total Paid",
+      "totalPending": "Total Pending",
+      "totalProjected": "Total Projected",
+      "totalReal": "Total Real"
     }
   },
   "guest": {

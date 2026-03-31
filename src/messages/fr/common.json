@@ -687,7 +687,20 @@
       "savePayment": "Enregistrer le paiement",
       "paymentsHistory": "Historique des paiements",
       "date": "Date",
-      "noPayments": "Aucun paiement enregistré pour le moment."
+      "noPayments": "Aucun paiement enregistré pour le moment.",
+      "priceTypePerPerson": "Par Personne",
+      "priceTypeGlobal": "Global",
+      "perPersonShort": "pers.",
+      "plannedGuests": "Invités Prévus",
+      "plannedGuestsHint": "Entrez le nombre d'invités prévus pour calculer les totaux projetés.",
+      "budgetedPrice": "Budgété",
+      "projectedTotal": "Total Projeté",
+      "totalProjected": "Total Projeté",
+      "totalReal": "Total Réel",
+      "totalPaid": "Total Payé",
+      "totalPending": "Total En Attente",
+      "totals": "TOTAUX",
+      "saving": "Enregistrement..."
     }
   },
   "admin": {
@@ -749,7 +762,8 @@
       "tablesAndGiftsSubtitle": "Plan de table et suivi des cadeaux",
       "nupcibot_greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider ?",
       "nupcibot_helpConfigure": "Aidez-moi à configurer mon mariage",
-      "tastingMenu": "Menu de Dégustation"
+      "tastingMenu": "Menu de Dégustation",
+      "finanzas": "Compte de Résultats"
     },
     "reports": {
       "title": "Rapports",
@@ -1875,6 +1889,36 @@
       "aiReasoning": "Raisonnement de l'IA",
       "exportXlsx": "Exporter en Excel",
       "exportPdf": "Exporter en PDF"
+    },
+    "finanzas": {
+      "title": "Compte de Résultats",
+      "loading": "Chargement...",
+      "noData": "Aucune donnée disponible.",
+      "noExpenses": "Aucune dépense enregistrée.",
+      "plannedGuests": "Invités Prévus",
+      "confirmedGuests": "Invités Confirmés",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "exportExcel": "Exporter Excel",
+      "exportPDF": "Exporter PDF",
+      "concept": "Concept",
+      "projected": "Projeté",
+      "real": "Réel",
+      "realHint": "(invités prévus / confirmés)",
+      "sectionGuests": "Invités",
+      "guestCount": "Nombre d'Invités",
+      "sectionIncome": "Revenus",
+      "gifts": "Cadeaux",
+      "totalIncome": "Total Revenus",
+      "sectionExpenses": "Dépenses",
+      "perPerson": "par personne",
+      "totalExpenses": "Total Dépenses",
+      "balance": "SOLDE (Revenus - Dépenses)",
+      "sectionPayments": "Paiements",
+      "totalPaid": "Total Payé",
+      "totalPending": "Total En Attente",
+      "totalProjected": "Total Projeté",
+      "totalReal": "Total Réel"
     }
   },
   "guest": {

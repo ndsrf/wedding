@@ -687,7 +687,20 @@
       "savePayment": "Zahlung speichern",
       "paymentsHistory": "Zahlungshistorie",
       "date": "Datum",
-      "noPayments": "Noch keine Zahlungen erfasst."
+      "noPayments": "Noch keine Zahlungen erfasst.",
+      "priceTypePerPerson": "Pro Person",
+      "priceTypeGlobal": "Global",
+      "perPersonShort": "Pers.",
+      "plannedGuests": "Geplante Gäste",
+      "plannedGuestsHint": "Geben Sie die Anzahl der geplanten Gäste ein, um projizierte Gesamtbeträge zu berechnen.",
+      "budgetedPrice": "Budgetiert",
+      "projectedTotal": "Projektierter Gesamtbetrag",
+      "totalProjected": "Gesamt Projiziert",
+      "totalReal": "Gesamt Real",
+      "totalPaid": "Gesamt Bezahlt",
+      "totalPending": "Gesamt Ausstehend",
+      "totals": "GESAMT",
+      "saving": "Speichern..."
     }
   },
   "admin": {
@@ -749,7 +762,8 @@
       "tablesAndGiftsSubtitle": "Sitzplan und Geschenkverfolgung",
       "nupcibot_greeting": "Hallo! Ich bin NupciBot, Ihr Hochzeitsassistent. Wie kann ich Ihnen helfen?",
       "nupcibot_helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren",
-      "tastingMenu": "Verkostungsmenü"
+      "tastingMenu": "Verkostungsmenü",
+      "finanzas": "Gewinn- und Verlustrechnung"
     },
     "reports": {
       "title": "Berichte",
@@ -1875,6 +1889,36 @@
       "aiReasoning": "KI-Begründung",
       "exportXlsx": "Als Excel exportieren",
       "exportPdf": "Als PDF exportieren"
+    },
+    "finanzas": {
+      "title": "Gewinn- und Verlustrechnung",
+      "loading": "Laden...",
+      "noData": "Keine Daten verfügbar.",
+      "noExpenses": "Keine Ausgaben erfasst.",
+      "plannedGuests": "Geplante Gäste",
+      "confirmedGuests": "Bestätigte Gäste",
+      "save": "Speichern",
+      "saving": "Speichern...",
+      "exportExcel": "Excel Exportieren",
+      "exportPDF": "PDF Exportieren",
+      "concept": "Konzept",
+      "projected": "Projiziert",
+      "real": "Real",
+      "realHint": "(geplante / bestätigte Gäste)",
+      "sectionGuests": "Gäste",
+      "guestCount": "Gästeanzahl",
+      "sectionIncome": "Einnahmen",
+      "gifts": "Geschenke",
+      "totalIncome": "Gesamteinnahmen",
+      "sectionExpenses": "Ausgaben",
+      "perPerson": "pro Person",
+      "totalExpenses": "Gesamtausgaben",
+      "balance": "SALDO (Einnahmen - Ausgaben)",
+      "sectionPayments": "Zahlungen",
+      "totalPaid": "Gesamt Bezahlt",
+      "totalPending": "Gesamt Ausstehend",
+      "totalProjected": "Gesamt Projiziert",
+      "totalReal": "Gesamt Real"
     }
   },
   "guest": {
