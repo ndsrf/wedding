@@ -95,6 +95,8 @@ const baseWedding = {
   google_photos_token_expiry: null,
   customer_id: null,
   contract_id: null,
+  planned_guests: null,
+  planned_gift_per_person: null,
 };
 
 const baseFamily = {
