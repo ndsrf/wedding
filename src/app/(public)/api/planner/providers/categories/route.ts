@@ -5,11 +5,13 @@ import { requireRole } from '@/lib/auth/middleware';
 
 const createCategorySchema = z.object({
   name: z.string().min(1),
+  price_type: z.enum(['PER_PERSON', 'GLOBAL']).optional(),
 });
 
 const updateCategorySchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
+  price_type: z.enum(['PER_PERSON', 'GLOBAL']).optional(),
 });
 
 export async function GET(_request: NextRequest) {
@@ -41,6 +43,7 @@ export async function POST(request: NextRequest) {
       data: {
         planner_id: user.planner_id,
         name: validated.name,
+        price_type: validated.price_type ?? 'GLOBAL',
       },
     });
 
@@ -72,7 +75,10 @@ export async function PUT(request: NextRequest) {
 
     const category = await prisma.providerCategory.update({
       where: { id: validated.id },
-      data: { name: validated.name },
+      data: {
+        name: validated.name,
+        ...(validated.price_type !== undefined && { price_type: validated.price_type }),
+      },
     });
 
     return NextResponse.json({ data: category });

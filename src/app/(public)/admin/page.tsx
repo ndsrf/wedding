@@ -445,6 +445,11 @@ export default async function AdminDashboardPage() {
                   label: t('admin.dashboard.payments'),
                   icon: <CurrencyIcon className="h-3 w-3" />,
                 },
+                {
+                  href: '/admin/finanzas',
+                  label: t('admin.dashboard.finanzas'),
+                  icon: <CurrencyIcon className="h-3 w-3" />,
+                },
               ]}
             />
 

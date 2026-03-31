@@ -5,11 +5,14 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Plus, Edit2, Trash2, Globe, Mail, Phone } from 'lucide-react';
+import { Plus, Edit2, Trash2, Globe, Mail, Phone, RefreshCw } from 'lucide-react';
+
+type PriceType = 'PER_PERSON' | 'GLOBAL';
 
 interface Category {
   id: string;
   name: string;
+  price_type: PriceType;
 }
 
 interface Provider {
@@ -30,8 +33,10 @@ export function ProviderLibrary() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [isApplying, setIsApplying] = useState(false);
   const [isEditingCategory, setIsEditingCategory] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryPriceType, setNewCategoryPriceType] = useState<PriceType>('GLOBAL');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
   const [isEditingProvider, setIsEditingProvider] = useState<string | null>(null);
@@ -46,7 +51,7 @@ export function ProviderLibrary() {
       ]);
       const catData = await catRes.json();
       const provData = await provRes.json();
-      
+
       if (catData.data) setCategories(catData.data);
       if (provData.data) setProviders(provData.data);
     } catch (error) {
@@ -68,23 +73,25 @@ export function ProviderLibrary() {
         const res = await fetch('/api/planner/providers/categories', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: isEditingCategory, name: newCategoryName }),
+          body: JSON.stringify({ id: isEditingCategory, name: newCategoryName, price_type: newCategoryPriceType }),
         });
         if (res.ok) {
           fetchData();
           setIsEditingCategory(null);
           setNewCategoryName('');
+          setNewCategoryPriceType('GLOBAL');
         }
       } else {
         const res = await fetch('/api/planner/providers/categories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: newCategoryName }),
+          body: JSON.stringify({ name: newCategoryName, price_type: newCategoryPriceType }),
         });
         if (res.ok) {
           fetchData();
           setIsAddingCategory(false);
           setNewCategoryName('');
+          setNewCategoryPriceType('GLOBAL');
         }
       }
     } catch (error) {
@@ -153,29 +160,67 @@ export function ProviderLibrary() {
     }
   };
 
+  const applyToAllWeddings = async () => {
+    if (!confirm(t('confirmApplyToAllWeddings'))) return;
+    setIsApplying(true);
+    try {
+      const res = await fetch('/api/planner/providers/apply-to-weddings', { method: 'POST' });
+      const json = await res.json();
+      if (res.ok) {
+        const created: number = json.data?.created ?? 0;
+        alert(created > 0 ? t('applyToAllWeddingsSuccess', { count: created }) : t('applyToAllWeddingsNothingNew'));
+      } else {
+        alert(json.error || t('applyToAllWeddingsError'));
+      }
+    } catch {
+      alert(t('applyToAllWeddingsError'));
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
   if (isLoading) return <div>{t('loading')}</div>;
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <h2 className="text-xl font-semibold text-gray-800">{t('title')}</h2>
-        <Button onClick={() => setIsAddingCategory(true)} size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          {t('addCategory')}
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={applyToAllWeddings}
+            disabled={isApplying}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isApplying ? 'animate-spin' : ''}`} />
+            {isApplying ? t('applying') : t('applyToAllWeddings')}
+          </Button>
+          <Button onClick={() => { setIsAddingCategory(true); setNewCategoryPriceType('GLOBAL'); }} size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            {t('addCategory')}
+          </Button>
+        </div>
       </div>
 
       {isAddingCategory && (
         <Card className="p-4 bg-gray-50">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap items-center">
             <Input
               value={newCategoryName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCategoryName(e.target.value)}
               placeholder={t('categoryNamePlaceholder')}
-              className="max-w-md"
+              className="max-w-xs"
             />
+            <select
+              value={newCategoryPriceType}
+              onChange={(e) => setNewCategoryPriceType(e.target.value as PriceType)}
+              className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="GLOBAL">{t('priceTypeGlobal')}</option>
+              <option value="PER_PERSON">{t('priceTypePerPerson')}</option>
+            </select>
             <Button onClick={saveCategory}>{t('save')}</Button>
-            <Button variant="ghost" onClick={() => setIsAddingCategory(false)}>{t('cancel')}</Button>
+            <Button variant="ghost" onClick={() => { setIsAddingCategory(false); setNewCategoryName(''); setNewCategoryPriceType('GLOBAL'); }}>{t('cancel')}</Button>
           </div>
         </Card>
       )}
@@ -185,20 +230,42 @@ export function ProviderLibrary() {
           <div key={category.id} className="space-y-4">
             <div className="flex items-center justify-between border-b pb-2">
               {isEditingCategory === category.id ? (
-                <div className="flex gap-2 items-center flex-1">
+                <div className="flex gap-2 items-center flex-1 flex-wrap">
                   <Input
                     value={newCategoryName}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCategoryName(e.target.value)}
-                    className="max-w-md"
+                    className="max-w-xs"
                   />
+                  <select
+                    value={newCategoryPriceType}
+                    onChange={(e) => setNewCategoryPriceType(e.target.value as PriceType)}
+                    className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="GLOBAL">{t('priceTypeGlobal')}</option>
+                    <option value="PER_PERSON">{t('priceTypePerPerson')}</option>
+                  </select>
                   <Button size="sm" onClick={saveCategory}>{t('save')}</Button>
-                  <Button size="sm" variant="ghost" onClick={() => { setIsEditingCategory(null); setNewCategoryName(''); }}>{t('cancel')}</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setIsEditingCategory(null); setNewCategoryName(''); setNewCategoryPriceType('GLOBAL'); }}>{t('cancel')}</Button>
                 </div>
               ) : (
-                <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2 flex-wrap">
                   {category.name}
-                  <div className="flex gap-1 ml-4 opacity-50 hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setIsEditingCategory(category.id); setNewCategoryName(category.name); }} className="p-1 hover:text-blue-600">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-normal ${
+                    category.price_type === 'PER_PERSON'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {category.price_type === 'PER_PERSON' ? t('priceTypePerPerson') : t('priceTypeGlobal')}
+                  </span>
+                  <div className="flex gap-1 ml-2 opacity-50 hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => {
+                        setIsEditingCategory(category.id);
+                        setNewCategoryName(category.name);
+                        setNewCategoryPriceType(category.price_type);
+                      }}
+                      className="p-1 hover:text-blue-600"
+                    >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => deleteCategory(category.id)} className="p-1 hover:text-red-600">
@@ -261,9 +328,9 @@ export function ProviderLibrary() {
                             </button>
                           </div>
                         </div>
-                        
+
                         {provider.contact_name && <p className="text-sm text-gray-600">{provider.contact_name}</p>}
-                        
+
                         <div className="space-y-1 pt-2">
                           {provider.email && (
                             <div className="flex items-center text-sm text-gray-500">
@@ -288,6 +355,9 @@ export function ProviderLibrary() {
                         {provider.approx_price && (
                           <div className="pt-2 mt-2 border-t text-sm font-medium text-gray-900">
                             ~ {provider.approx_price.toLocaleString()} €
+                            {category.price_type === 'PER_PERSON' && (
+                              <span className="text-xs text-gray-500 ml-1">/{t('perPersonShort')}</span>
+                            )}
                           </div>
                         )}
                       </div>

@@ -12,6 +12,7 @@ const updateWeddingProviderSchema = z.object({
   website: z.string().optional().nullable().or(z.literal('')),
   social_media: z.string().optional().nullable().or(z.literal('')),
   total_price: z.number().optional().nullable(),
+  budgeted_price: z.number().optional().nullable(),
   contract_url: z.string().optional().nullable().or(z.literal('')),
   notes: z.string().optional().nullable().or(z.literal('')),
 });
@@ -49,6 +50,7 @@ export async function PUT(
         website: validated.website || null,
         social_media: validated.social_media || null,
         total_price: validated.total_price,
+        budgeted_price: validated.budgeted_price,
         contract_url: validated.contract_url,
         notes: validated.notes,
       },
