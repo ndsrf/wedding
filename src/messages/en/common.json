@@ -708,7 +708,13 @@
       "totalPaid": "Total Paid",
       "totalPending": "Total Pending",
       "totals": "TOTALS",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "applyToAllWeddings": "Apply to all my weddings",
+      "confirmApplyToAllWeddings": "Do you want to add missing categories to all your weddings? This will create empty slots for new categories in each wedding.",
+      "applyToAllWeddingsSuccess": "{count} new entries created across your weddings.",
+      "applyToAllWeddingsNothingNew": "All weddings already have all categories up to date.",
+      "applyToAllWeddingsError": "Error applying categories to weddings.",
+      "applying": "Applying..."
     }
   },
   "admin": {
@@ -1961,7 +1967,7 @@
       "loading": "Loading...",
       "noData": "No data available.",
       "noExpenses": "No expenses recorded.",
-      "plannedGuests": "Planned Guests",
+      "plannedGuests": "Total Guests",
       "confirmedGuests": "Confirmed Guests",
       "save": "Save",
       "saving": "Saving...",
@@ -1970,7 +1976,7 @@
       "concept": "Concept",
       "projected": "Projected",
       "real": "Real",
-      "realHint": "(planned / confirmed guests)",
+      "realHint": "(total / confirmed)",
       "sectionGuests": "Guests",
       "guestCount": "Guest Count",
       "sectionIncome": "Income",

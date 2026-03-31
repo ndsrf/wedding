@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Plus, Edit2, Trash2, Globe, Mail, Phone } from 'lucide-react';
+import { Plus, Edit2, Trash2, Globe, Mail, Phone, RefreshCw } from 'lucide-react';
 
 type PriceType = 'PER_PERSON' | 'GLOBAL';
 
@@ -33,6 +33,7 @@ export function ProviderLibrary() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [isApplying, setIsApplying] = useState(false);
   const [isEditingCategory, setIsEditingCategory] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryPriceType, setNewCategoryPriceType] = useState<PriceType>('GLOBAL');
@@ -159,16 +160,46 @@ export function ProviderLibrary() {
     }
   };
 
+  const applyToAllWeddings = async () => {
+    if (!confirm(t('confirmApplyToAllWeddings'))) return;
+    setIsApplying(true);
+    try {
+      const res = await fetch('/api/planner/providers/apply-to-weddings', { method: 'POST' });
+      const json = await res.json();
+      if (res.ok) {
+        const created: number = json.data?.created ?? 0;
+        alert(created > 0 ? t('applyToAllWeddingsSuccess', { count: created }) : t('applyToAllWeddingsNothingNew'));
+      } else {
+        alert(json.error || t('applyToAllWeddingsError'));
+      }
+    } catch {
+      alert(t('applyToAllWeddingsError'));
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
   if (isLoading) return <div>{t('loading')}</div>;
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <h2 className="text-xl font-semibold text-gray-800">{t('title')}</h2>
-        <Button onClick={() => { setIsAddingCategory(true); setNewCategoryPriceType('GLOBAL'); }} size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          {t('addCategory')}
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={applyToAllWeddings}
+            disabled={isApplying}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isApplying ? 'animate-spin' : ''}`} />
+            {isApplying ? t('applying') : t('applyToAllWeddings')}
+          </Button>
+          <Button onClick={() => { setIsAddingCategory(true); setNewCategoryPriceType('GLOBAL'); }} size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            {t('addCategory')}
+          </Button>
+        </div>
       </div>
 
       {isAddingCategory && (

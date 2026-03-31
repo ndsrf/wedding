@@ -700,7 +700,13 @@
       "totalPaid": "Total Payé",
       "totalPending": "Total En Attente",
       "totals": "TOTAUX",
-      "saving": "Enregistrement..."
+      "saving": "Enregistrement...",
+      "applyToAllWeddings": "Appliquer à tous mes mariages",
+      "confirmApplyToAllWeddings": "Voulez-vous ajouter les catégories manquantes à tous vos mariages ? Cela créera des emplacements vides pour les nouvelles catégories dans chaque mariage.",
+      "applyToAllWeddingsSuccess": "{count} nouvelles entrées créées dans vos mariages.",
+      "applyToAllWeddingsNothingNew": "Tous les mariages ont déjà toutes les catégories à jour.",
+      "applyToAllWeddingsError": "Erreur lors de l'application des catégories aux mariages.",
+      "applying": "Application..."
     }
   },
   "admin": {
@@ -1895,7 +1901,7 @@
       "loading": "Chargement...",
       "noData": "Aucune donnée disponible.",
       "noExpenses": "Aucune dépense enregistrée.",
-      "plannedGuests": "Invités Prévus",
+      "plannedGuests": "Total Invités",
       "confirmedGuests": "Invités Confirmés",
       "save": "Enregistrer",
       "saving": "Enregistrement...",
@@ -1904,7 +1910,7 @@
       "concept": "Concept",
       "projected": "Projeté",
       "real": "Réel",
-      "realHint": "(invités prévus / confirmés)",
+      "realHint": "(total / confirmés)",
       "sectionGuests": "Invités",
       "guestCount": "Nombre d'Invités",
       "sectionIncome": "Revenus",
