@@ -105,13 +105,14 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
 
   const fetchData = useCallback(async () => {
     try {
-      const [provRes, weddingRes] = await Promise.all([
+      const promises: [Promise<Response>, Promise<Response>?] = [
         fetch(`/api/weddings/${weddingId}/providers`),
-        fetch('/api/admin/wedding'),
-      ]);
+        ...(!isPlanner ? [fetch('/api/admin/wedding')] : []),
+      ];
+      const [provRes, weddingRes] = await Promise.all(promises);
       const provData = await provRes.json();
       if (provData.data) setProviders(provData.data);
-      if (weddingRes.ok) {
+      if (weddingRes?.ok) {
         const weddingData = await weddingRes.json();
         if (weddingData.data?.planned_guests != null) {
           setPlannedGuests(weddingData.data.planned_guests);
@@ -122,7 +123,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
     } finally {
       setIsLoading(false);
     }
-  }, [weddingId]);
+  }, [weddingId, isPlanner]);
 
   useEffect(() => {
     fetchData();
@@ -349,8 +350,8 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
 
   return (
     <div className="space-y-8">
-      {/* Planned guests input */}
-      <Card className="p-4 bg-blue-50 border-blue-200">
+      {/* Planned guests input — only for admin, not for planners */}
+      {!isPlanner && <Card className="p-4 bg-blue-50 border-blue-200">
         <div className="flex items-center gap-4 flex-wrap">
           <label className="text-sm font-medium text-blue-800 whitespace-nowrap">
             {t('plannedGuests')}
@@ -377,7 +378,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
           </Button>
           <p className="text-xs text-blue-600">{t('plannedGuestsHint')}</p>
         </div>
-      </Card>
+      </Card>}
 
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-800">{t('weddingProvidersTitle')}</h2>
