@@ -20,7 +20,7 @@ export async function GET() {
     const [wedding, providers, gifts, attendingCount, totalGuestCount] = await Promise.all([
       prisma.wedding.findUnique({
         where: { id: user.wedding_id },
-        select: { planned_guests: true, couple_names: true },
+        select: { planned_guests: true, planned_gift_per_person: true, couple_names: true },
       }),
       prisma.weddingProvider.findMany({
         where: { wedding_id: user.wedding_id },
@@ -47,6 +47,7 @@ export async function GET() {
     return NextResponse.json({
       data: {
         planned_guests: wedding?.planned_guests ?? null,
+        planned_gift_per_person: wedding?.planned_gift_per_person ? Number(wedding.planned_gift_per_person) : null,
         total_guests: totalGuestCount,
         attending_count: attendingCount,
         providers: providers.map((p: {

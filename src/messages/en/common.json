@@ -1506,7 +1506,15 @@
         "confirmed": "Confirmed"
       },
       "recordSuccess": "Gift recorded successfully",
-      "updateSuccess": "Gift status updated"
+      "updateSuccess": "Gift status updated",
+      "planning": {
+        "title": "Income Planning",
+        "plannedGuests": "Planned Guests",
+        "giftPerPerson": "Planned Gift per Person (€)",
+        "plannedIncome": "Planned Income",
+        "difference": "Difference (Planned - Real)",
+        "saving": "Saving..."
+      }
     },
     "deleteDialog": {
       "title": "Delete Guest Family",

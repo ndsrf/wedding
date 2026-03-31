@@ -160,6 +160,7 @@ model Wedding {
   is_disabled                     Boolean            @default(false)
   gift_iban                       String?
   planned_guests                  Int?
+  planned_gift_per_person         Decimal?           @db.Decimal(10, 2)
   couple_table_id                 String?
   customer_id                     String?
   contract_id                     String?            // Originating contract for traceability / billing

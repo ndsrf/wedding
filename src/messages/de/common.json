@@ -1172,7 +1172,15 @@
         "confirmed": "Bestätigt"
       },
       "recordSuccess": "Geschenk erfolgreich erfasst",
-      "updateSuccess": "Geschenkstatus aktualisiert"
+      "updateSuccess": "Geschenkstatus aktualisiert",
+      "planning": {
+        "title": "Einnahmenplanung",
+        "plannedGuests": "Geplante Gäste",
+        "giftPerPerson": "Geplantes Geschenk pro Person (€)",
+        "plannedIncome": "Geplante Einnahmen",
+        "difference": "Differenz (Geplant - Ist)",
+        "saving": "Speichern..."
+      }
     },
     "deleteDialog": {
       "title": "Gastfamilie löschen",

@@ -1172,7 +1172,15 @@
         "confirmed": "Confirmé"
       },
       "recordSuccess": "Cadeau enregistré avec succès",
-      "updateSuccess": "Statut du cadeau mis à jour"
+      "updateSuccess": "Statut du cadeau mis à jour",
+      "planning": {
+        "title": "Planification des Revenus",
+        "plannedGuests": "Invités Prévus",
+        "giftPerPerson": "Cadeau Prévu par Personne (€)",
+        "plannedIncome": "Revenus Prévus",
+        "difference": "Différence (Prévu - Réel)",
+        "saving": "Enregistrement..."
+      }
     },
     "deleteDialog": {
       "title": "Supprimer Famille d'Invités",

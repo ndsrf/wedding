@@ -24,6 +24,7 @@ interface ProviderSummary {
 
 interface FinanzasData {
   planned_guests: number | null;
+  planned_gift_per_person: number | null;
   total_guests: number;
   attending_count: number;
   providers: ProviderSummary[];
@@ -112,8 +113,9 @@ export default function FinanzasPage() {
 
     // Ingresos
     const totalGiftsReal = data.gifts.reduce((s: number, g: { amount: number; status: string }) => s + g.amount, 0);
+    const totalProjIncomeCsv = data.planned_gift_per_person && pg ? data.planned_gift_per_person * pg : 0;
     rows.push([t('sectionIncome')]);
-    rows.push([t('gifts'), '-', `${totalGiftsReal.toLocaleString()} €`]);
+    rows.push([t('gifts'), totalProjIncomeCsv ? `${totalProjIncomeCsv.toLocaleString()} €` : '-', `${totalGiftsReal.toLocaleString()} €`]);
     rows.push([]);
 
     // Gastos
@@ -136,7 +138,7 @@ export default function FinanzasPage() {
     rows.push([t('totalExpenses'), `${totalProjExpenses.toLocaleString()} €`, `${totalRealExpenses.toLocaleString()}(${totalRealConfirmedExpenses.toLocaleString()}) €`]);
     rows.push([]);
 
-    const projBalance = 0 - totalProjExpenses;
+    const projBalance = totalProjIncomeCsv - totalProjExpenses;
     const realBalance = totalGiftsReal - totalRealExpenses;
     const realConfirmedBalance = totalGiftsReal - totalRealConfirmedExpenses;
     rows.push([t('balance'), `${projBalance.toLocaleString()} €`, `${realBalance.toLocaleString()}(${realConfirmedBalance.toLocaleString()}) €`]);
@@ -216,13 +218,14 @@ export default function FinanzasPage() {
   });
 
   const totalGiftsReal = data.gifts.reduce((s: number, g: { amount: number; status: string }) => s + g.amount, 0);
+  const totalProjIncome = data.planned_gift_per_person && pg ? data.planned_gift_per_person * pg : 0;
   const totalProjExpenses = data.providers.reduce((s: number, p: ProviderSummary) => s + getProjectedExpense(p, pg), 0);
   const totalRealExpensesTotal = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpense(p, tg), 0);
   const totalRealExpensesConfirmed = data.providers.reduce((s: number, p: ProviderSummary) => s + getRealExpenseConfirmed(p, ac), 0);
   const totalPaid = data.providers.reduce((s: number, p: ProviderSummary) => s + p.paid, 0);
   const totalPending = totalRealExpensesTotal - totalPaid;
 
-  const projBalance = -totalProjExpenses;
+  const projBalance = totalProjIncome - totalProjExpenses;
   const realBalanceTotal = totalGiftsReal - totalRealExpensesTotal;
   const realBalanceConfirmed = totalGiftsReal - totalRealExpensesConfirmed;
 
@@ -325,16 +328,26 @@ export default function FinanzasPage() {
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 border border-gray-200 text-sm text-gray-700 pl-8">{t('gifts')}</td>
-                <td className="px-4 py-3 border border-gray-200 text-sm text-right text-gray-400">-</td>
+                <td className="px-4 py-3 border border-gray-200 text-sm text-gray-700 pl-8">
+                  {t('gifts')}
+                  {data.planned_gift_per_person && (
+                    <span className="ml-2 text-xs text-gray-400">
+                      ({fmtCurrency(data.planned_gift_per_person)}/{t('perPerson')})
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 border border-gray-200 text-sm text-right text-violet-600 font-medium">
+                  {totalProjIncome ? fmtCurrency(totalProjIncome) : '-'}
+                </td>
                 <td className="px-4 py-3 border border-gray-200 text-sm text-right text-green-600 font-medium">
-                  {fmtCurrency(totalGiftsReal)}
-                  <span className="text-gray-400 text-xs ml-1">({fmtCurrency(totalGiftsReal)})</span>
+                  {fmtDualReal(totalGiftsReal, totalGiftsReal)}
                 </td>
               </tr>
               <tr className="bg-green-50">
                 <td className="px-4 py-3 border border-gray-200 text-sm font-semibold text-gray-800">{t('totalIncome')}</td>
-                <td className="px-4 py-3 border border-gray-200 text-sm text-right font-bold text-gray-400">-</td>
+                <td className="px-4 py-3 border border-gray-200 text-sm text-right font-bold text-violet-600">
+                  {totalProjIncome ? fmtCurrency(totalProjIncome) : '-'}
+                </td>
                 <td className="px-4 py-3 border border-gray-200 text-sm text-right font-bold text-green-700">{fmtDualReal(totalGiftsReal, totalGiftsReal)}</td>
               </tr>
 

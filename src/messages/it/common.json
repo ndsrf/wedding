@@ -1172,7 +1172,15 @@
         "confirmed": "Confermato"
       },
       "recordSuccess": "Regalo registrato con successo",
-      "updateSuccess": "Stato regalo aggiornato"
+      "updateSuccess": "Stato regalo aggiornato",
+      "planning": {
+        "title": "Pianificazione Entrate",
+        "plannedGuests": "Invitati Previsti",
+        "giftPerPerson": "Regalo Previsto per Persona (€)",
+        "plannedIncome": "Entrate Previste",
+        "difference": "Differenza (Previsto - Reale)",
+        "saving": "Salvataggio..."
+      }
     },
     "deleteDialog": {
       "title": "Elimina Famiglia Ospiti",

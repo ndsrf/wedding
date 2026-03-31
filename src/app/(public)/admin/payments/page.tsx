@@ -56,6 +56,11 @@ export default function PaymentsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Planning fields
+  const [plannedGuests, setPlannedGuests] = useState<number | ''>('');
+  const [plannedGiftPerPerson, setPlannedGiftPerPerson] = useState<number | ''>('');
+  const [savingPlanning, setSavingPlanning] = useState(false);
+
   // Stats
   const [stats, setStats] = useState({
     total: 0,
@@ -136,6 +141,39 @@ export default function PaymentsPage() {
     }
   }, [guestStatusFilter]);
 
+  const fetchWeddingPlanning = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/wedding');
+      const data = await res.json();
+      if (data.success && data.data) {
+        if (data.data.planned_guests != null) setPlannedGuests(data.data.planned_guests);
+        if (data.data.planned_gift_per_person != null) setPlannedGiftPerPerson(data.data.planned_gift_per_person);
+      }
+    } catch (error) {
+      console.error('Error fetching wedding planning data:', error);
+    }
+  }, []);
+
+  const handleSavePlanning = async () => {
+    setSavingPlanning(true);
+    try {
+      const body: Record<string, unknown> = {};
+      if (plannedGuests !== '') body.planned_guests = Number(plannedGuests);
+      if (plannedGiftPerPerson !== '') body.planned_gift_per_person = Number(plannedGiftPerPerson);
+      if (Object.keys(body).length > 0) {
+        await fetch('/api/admin/wedding', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      }
+    } catch (error) {
+      console.error('Error saving planning data:', error);
+    } finally {
+      setSavingPlanning(false);
+    }
+  };
+
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
@@ -143,6 +181,10 @@ export default function PaymentsPage() {
   useEffect(() => {
     fetchFamilies();
   }, [fetchFamilies]);
+
+  useEffect(() => {
+    fetchWeddingPlanning();
+  }, [fetchWeddingPlanning]);
 
   const handleUpdateStatus = async (paymentId: string, status: GiftStatus) => {
     try {
@@ -241,6 +283,67 @@ export default function PaymentsPage() {
             <p className="text-2xl font-bold text-green-900">{stats.confirmed}</p>
           </div>
         </div>
+
+        {/* Planning card */}
+        {(() => {
+          const pg = plannedGuests !== '' ? Number(plannedGuests) : 0;
+          const pgpp = plannedGiftPerPerson !== '' ? Number(plannedGiftPerPerson) : 0;
+          const plannedIncome = pg * pgpp;
+          const diff = plannedIncome - stats.totalAmount;
+          const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white text-gray-900';
+          return (
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('admin.payments.planning.title')}</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {t('admin.payments.planning.plannedGuests')}
+                  </label>
+                  <input
+                    type="number" min={1}
+                    value={plannedGuests}
+                    onChange={(e) => setPlannedGuests(e.target.value ? Number(e.target.value) : '')}
+                    onBlur={handleSavePlanning}
+                    className={inputCls}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {t('admin.payments.planning.giftPerPerson')}
+                  </label>
+                  <input
+                    type="number" min={0} step="0.01"
+                    value={plannedGiftPerPerson}
+                    onChange={(e) => setPlannedGiftPerPerson(e.target.value ? Number(e.target.value) : '')}
+                    onBlur={handleSavePlanning}
+                    className={inputCls}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {t('admin.payments.planning.plannedIncome')}
+                  </label>
+                  <div className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm font-semibold text-violet-700">
+                    {formatCurrency(plannedIncome)}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {t('admin.payments.planning.difference')}
+                  </label>
+                  <div className={`px-3 py-2 border rounded-md bg-gray-50 text-sm font-semibold ${diff >= 0 ? 'text-green-700 border-green-200' : 'text-red-700 border-red-200'}`}>
+                    {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
+                  </div>
+                </div>
+              </div>
+              {savingPlanning && (
+                <p className="mt-2 text-xs text-gray-400">{t('admin.payments.planning.saving')}</p>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Payment Form */}
         {showForm && (
