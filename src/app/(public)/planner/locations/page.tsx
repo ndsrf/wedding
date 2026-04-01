@@ -189,6 +189,7 @@ export default function LocationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
+  const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
 
   const fetchLocations = useCallback(async () => {
     try {
@@ -209,11 +210,31 @@ export default function LocationsPage() {
     fetchLocations();
   }, [fetchLocations]);
 
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    locations.forEach((l) => l.tags?.forEach((t) => set.add(t)));
+    return Array.from(set).sort();
+  }, [locations]);
+
   const filteredLocations = useMemo(() => {
-    if (!nameFilter.trim()) return locations;
-    const q = nameFilter.trim().toLowerCase();
-    return locations.filter((l) => l.name.toLowerCase().includes(q));
-  }, [locations, nameFilter]);
+    let result = locations;
+    if (nameFilter.trim()) {
+      const q = nameFilter.trim().toLowerCase();
+      result = result.filter((l) => l.name.toLowerCase().includes(q));
+    }
+    if (tagFilter.size > 0) {
+      result = result.filter((l) => l.tags?.some((t) => tagFilter.has(t)));
+    }
+    return result;
+  }, [locations, nameFilter, tagFilter]);
+
+  const toggleTagFilter = (tag: string) => {
+    setTagFilter((prev) => {
+      const next = new Set(prev);
+      next.has(tag) ? next.delete(tag) : next.add(tag);
+      return next;
+    });
+  };
 
   const handleCreateOrUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -340,9 +361,9 @@ export default function LocationsPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Name filter */}
+        {/* Filters */}
         {!loading && locations.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 space-y-3">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               <input
@@ -361,6 +382,35 @@ export default function LocationsPage() {
                 </button>
               )}
             </div>
+            {allTags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <Tag className="h-3 w-3" /> Tags:
+                </span>
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTagFilter(tag)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      tagFilter.has(tag)
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'
+                    }`}
+                  >
+                    {tag}
+                    {tagFilter.has(tag) && <X className="h-3 w-3" />}
+                  </button>
+                ))}
+                {tagFilter.size > 0 && (
+                  <button
+                    onClick={() => setTagFilter(new Set())}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline"
+                  >
+                    Limpiar
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
