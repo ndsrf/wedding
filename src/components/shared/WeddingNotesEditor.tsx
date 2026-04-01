@@ -11,6 +11,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Collaboration from '@tiptap/extension-collaboration';
 import Mention from '@tiptap/extension-mention';
 import { ySyncPluginKey } from '@tiptap/y-tiptap';
+import { createPortal } from 'react-dom';
 import {
   useEffect,
   useRef,
@@ -18,7 +19,6 @@ import {
   useCallback,
   forwardRef,
   useImperativeHandle,
-  createPortal,
 } from 'react';
 import * as Y from 'yjs';
 import type { NotesUser } from '@/app/(public)/api/planner/weddings/[id]/notes-users/route';
