@@ -10,6 +10,7 @@ const createLocationSchema = z.object({
   notes: z.string().optional(),
   google_maps_url: z.string().url().optional().or(z.literal('')),
   address: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export async function GET(_request: NextRequest) {
@@ -18,7 +19,7 @@ export async function GET(_request: NextRequest) {
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const cacheKey = CACHE_KEYS.plannerLocations(user.planner_id);
-    const cached = await getCached<import('@prisma/client').Location[]>(cacheKey);
+    const cached = await getCached<unknown[]>(cacheKey);
     if (cached) {
       return NextResponse.json({ data: cached }, {
         headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
@@ -30,6 +31,24 @@ export async function GET(_request: NextRequest) {
       orderBy: [
         { name: 'asc' },
       ],
+      include: {
+        _count: {
+          select: {
+            weddings: true,
+            itinerary_items: true,
+          },
+        },
+        weddings: {
+          where: { deleted_at: null },
+          select: {
+            id: true,
+            couple_names: true,
+            wedding_date: true,
+            status: true,
+          },
+          orderBy: { wedding_date: 'asc' },
+        },
+      },
     });
 
     await setCached(cacheKey, locations, CACHE_TTL.WEDDING_DETAILS);
@@ -58,6 +77,7 @@ export async function POST(request: NextRequest) {
         notes: validated.notes,
         google_maps_url: validated.google_maps_url || null,
         address: validated.address,
+        tags: validated.tags ?? [],
       },
     });
 
