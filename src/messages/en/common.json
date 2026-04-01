@@ -2439,5 +2439,12 @@
     "message": "We use cookies to improve your experience. By continuing to browse, you agree to our use of cookies.",
     "accept": "Accept",
     "privacy": "Privacy Policy"
+  },
+  "notes": {
+    "title": "Notes",
+    "subtitle": "Shared notepad between the wedding planner and the couple. Use @ to mention someone and automatically create a task.",
+    "mentionHint": "Use @ to mention someone",
+    "taskCreated": "Task created for {name}",
+    "placeholder": "Write your notes here… Use @ to mention someone."
   }
 }

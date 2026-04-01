@@ -2415,5 +2415,12 @@
     "message": "Utilizamos cookies para mejorar tu experiencia. Al continuar navegando, aceptas nuestro uso de cookies.",
     "accept": "Aceptar",
     "privacy": "Política de Privacidad"
+  },
+  "notes": {
+    "title": "Notas",
+    "subtitle": "Bloc de notas compartido entre el wedding planner y la pareja. Usa @ para mencionar a alguien y crear una tarea automáticamente.",
+    "mentionHint": "Usa @ para mencionar a alguien",
+    "taskCreated": "Tarea creada para {name}",
+    "placeholder": "Escribe tus notas aquí… Usa @ para mencionar a alguien."
   }
 }

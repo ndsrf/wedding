@@ -2364,5 +2364,12 @@
     "message": "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Durch das Fortsetzen des Surfens stimmen Sie der Verwendung von Cookies zu.",
     "accept": "Akzeptieren",
     "privacy": "Datenschutzrichtlinie"
+  },
+  "notes": {
+    "title": "Notizen",
+    "subtitle": "Gemeinsames Notizbuch zwischen dem Hochzeitsplaner und dem Brautpaar. Verwende @, um jemanden zu erwähnen und automatisch eine Aufgabe zu erstellen.",
+    "mentionHint": "Verwende @ um jemanden zu erwähnen",
+    "taskCreated": "Aufgabe erstellt für {name}",
+    "placeholder": "Schreibe deine Notizen hier… Verwende @ um jemanden zu erwähnen."
   }
 }
