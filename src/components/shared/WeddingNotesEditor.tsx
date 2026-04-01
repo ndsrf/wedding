@@ -215,18 +215,15 @@ export function WeddingNotesEditor({
           ? `${contextLabel}\n\n"${contextText.trim()}"`
           : null;
 
-        await fetch('/api/admin/checklist', {
+        await fetch('/api/notes-mention-task', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             wedding_id: weddingId,
-            section_id: null,
             title,
             description,
             assigned_to: mentionedUser.role === 'planner' ? 'WEDDING_PLANNER' : 'COUPLE',
             due_date: today.toISOString(),
-            status: 'PENDING',
-            order: 0,
           }),
         });
 
