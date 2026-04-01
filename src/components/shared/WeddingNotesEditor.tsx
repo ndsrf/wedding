@@ -20,6 +20,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from 'react';
+import { useTranslations } from 'next-intl';
 import * as Y from 'yjs';
 import type { NotesUser } from '@/app/(public)/api/planner/weddings/[id]/notes-users/route';
 
@@ -180,6 +181,7 @@ export function WeddingNotesEditor({
   usersEndpoint,
   currentUser,
 }: WeddingNotesEditorProps) {
+  const t = useTranslations('notes');
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
   const editorRef = useRef<Editor | null>(null);
   const [users, setUsers] = useState<NotesUser[]>([]);
@@ -195,6 +197,11 @@ export function WeddingNotesEditor({
       .catch(() => {/* non-critical */});
   }, [usersEndpoint]);
 
+  // Keep t in a ref so the useCallback below doesn't need it as a dep
+  // (t is stable per render but adding it would cause unnecessary rebuilds)
+  const tRef = useRef(t);
+  tRef.current = t;
+
   // Create a checklist task when someone is mentioned
   const handleMention = useCallback(
     async (mentionedUser: NotesUser, contextText: string) => {
@@ -202,16 +209,20 @@ export function WeddingNotesEditor({
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        const title = tRef.current('mentionTaskTitle', { name: mentionedUser.name });
+        const contextLabel = tRef.current('mentionTaskContextLabel');
+        const description = contextText.trim()
+          ? `${contextLabel}\n\n"${contextText.trim()}"`
+          : null;
+
         await fetch('/api/admin/checklist', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             wedding_id: weddingId,
             section_id: null,
-            title: `Mención en el bloque de notas: @${mentionedUser.name}`,
-            description: contextText.trim()
-              ? `Contexto del bloque de notas:\n\n"${contextText.trim()}"`
-              : null,
+            title,
+            description,
             assigned_to: mentionedUser.role === 'planner' ? 'WEDDING_PLANNER' : 'COUPLE',
             due_date: today.toISOString(),
             status: 'PENDING',
@@ -219,7 +230,7 @@ export function WeddingNotesEditor({
           }),
         });
 
-        setMentionToast(`Tarea creada para @${mentionedUser.name}`);
+        setMentionToast(tRef.current('taskCreated', { name: mentionedUser.name }));
         setTimeout(() => setMentionToast(null), 3000);
       } catch {
         // non-critical — don't interrupt the user's writing

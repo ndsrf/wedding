@@ -2421,6 +2421,8 @@
     "subtitle": "Bloc de notas compartido entre el wedding planner y la pareja. Usa @ para mencionar a alguien y crear una tarea automáticamente.",
     "mentionHint": "Usa @ para mencionar a alguien",
     "taskCreated": "Tarea creada para {name}",
-    "placeholder": "Escribe tus notas aquí… Usa @ para mencionar a alguien."
+    "placeholder": "Escribe tus notas aquí… Usa @ para mencionar a alguien.",
+    "mentionTaskTitle": "Mención en el bloque de notas: @{name}",
+    "mentionTaskContextLabel": "Contexto del bloque de notas:"
   }
 }

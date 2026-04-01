@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSession } from 'next-auth/react';
 import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
 import { WeddingNotesEditor } from '@/components/shared/WeddingNotesEditor';
 import PrivateHeader from '@/components/PrivateHeader';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import type { AuthenticatedUser } from '@/types/api';
 
 interface NotasPageProps {
   params: Promise<{ id: string }>;
@@ -14,6 +16,7 @@ interface NotasPageProps {
 
 export default function PlannerNotasPage({ params }: NotasPageProps) {
   const t = useTranslations();
+  const { data: session } = useSession();
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const weddingName = useCoupleNames(weddingId);
   useDocumentTitle(buildNupciTitle(t('notes.title'), weddingName));
@@ -21,6 +24,8 @@ export default function PlannerNotasPage({ params }: NotasPageProps) {
   useEffect(() => {
     params.then(({ id }) => setWeddingId(id));
   }, [params]);
+
+  const user = session?.user as AuthenticatedUser | undefined;
 
   if (!weddingId) {
     return (
@@ -39,7 +44,6 @@ export default function PlannerNotasPage({ params }: NotasPageProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center">
@@ -57,6 +61,7 @@ export default function PlannerNotasPage({ params }: NotasPageProps) {
           weddingId={weddingId}
           authEndpoint={`/api/planner/weddings/${weddingId}/notes-liveblocks-auth`}
           usersEndpoint={`/api/planner/weddings/${weddingId}/notes-users`}
+          currentUser={user ? { id: user.id, name: user.name ?? 'Planner', color: '#e11d48' } : undefined}
         />
       </main>
     </div>

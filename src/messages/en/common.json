@@ -2445,6 +2445,8 @@
     "subtitle": "Shared notepad between the wedding planner and the couple. Use @ to mention someone and automatically create a task.",
     "mentionHint": "Use @ to mention someone",
     "taskCreated": "Task created for {name}",
-    "placeholder": "Write your notes here… Use @ to mention someone."
+    "placeholder": "Write your notes here… Use @ to mention someone.",
+    "mentionTaskTitle": "Mention in the notes block: @{name}",
+    "mentionTaskContextLabel": "Notes block context:"
   }
 }
