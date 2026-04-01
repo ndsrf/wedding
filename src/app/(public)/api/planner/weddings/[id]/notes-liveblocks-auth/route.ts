@@ -18,7 +18,9 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     }
 
     const roomId = notesRoomId(id);
-    const userId = `planner-${user.planner_id}`;
+    // Use user.id (not planner_id) so each sub-account gets its own presence entry.
+    // For the main planner account user.id === user.planner_id; for sub-accounts they differ.
+    const userId = `planner-${user.id}`;
     const { body, status } = await createRoomToken({
       roomId,
       userId,

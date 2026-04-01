@@ -14,7 +14,15 @@ export async function GET() {
     const wedding = await prisma.wedding.findUnique({
       where: { id: user.wedding_id },
       include: {
-        planner: { select: { id: true, name: true, email: true } },
+        planner: {
+          select: { id: true, name: true, email: true },
+          include: {
+            sub_accounts: {
+              where: { enabled: true },
+              select: { id: true, name: true, email: true },
+            },
+          },
+        },
         wedding_admins: { select: { id: true, name: true, email: true } },
       },
     });
@@ -24,12 +32,21 @@ export async function GET() {
     }
 
     const users: NotesUser[] = [
+      // Main planner account
       {
         id: `planner-${wedding.planner.id}`,
         name: wedding.planner.name,
         email: wedding.planner.email,
         role: 'planner',
       },
+      // Sub-accounts of the planner company
+      ...wedding.planner.sub_accounts.map((sa) => ({
+        id: `planner-${sa.id}`,
+        name: sa.name,
+        email: sa.email,
+        role: 'planner' as const,
+      })),
+      // Wedding admins (the couple's side)
       ...wedding.wedding_admins.map((a) => ({
         id: `admin-${a.id}`,
         name: a.name,
