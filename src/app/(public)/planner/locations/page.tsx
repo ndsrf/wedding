@@ -92,11 +92,15 @@ function WeddingPanel({
   weddings: LocationWedding[];
 }) {
   const [openPanel, setOpenPanel] = useState<'active' | 'past' | null>(null);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
-  const activeWeddings = weddings.filter((w) => new Date(w.wedding_date) >= today);
-  const pastWeddings = weddings.filter((w) => new Date(w.wedding_date) < today);
+  const { activeWeddings, pastWeddings } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return {
+      activeWeddings: weddings.filter((w) => new Date(w.wedding_date) >= today),
+      pastWeddings: weddings.filter((w) => new Date(w.wedding_date) < today),
+    };
+  }, [weddings]);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
