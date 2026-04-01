@@ -11,10 +11,38 @@ const SECTION_NAMES: Record<string, string> = {
   IT: 'Promemoria',
 };
 
+// Task title and context label in each supported language
+const TASK_TITLE: Record<string, string> = {
+  EN: 'Mention in the notes block: @{name}',
+  ES: 'Mención en el bloque de notas: @{name}',
+  DE: 'Erwähnung im Notizblock: @{name}',
+  FR: 'Mention dans le bloc de notes : @{name}',
+  IT: 'Menzione nel blocco note: @{name}',
+};
+
+const CONTEXT_LABEL: Record<string, string> = {
+  EN: 'Notes block context:',
+  ES: 'Contexto del bloque de notas:',
+  DE: 'Notizblock-Kontext:',
+  FR: 'Contexte du bloc de notes :',
+  IT: 'Contesto del blocco note:',
+};
+
+function localizedTitle(lang: string, name: string): string {
+  const template = TASK_TITLE[lang] ?? TASK_TITLE.EN;
+  return template.replace('{name}', name);
+}
+
+function localizedDescription(lang: string, contextText: string): string | null {
+  if (!contextText.trim()) return null;
+  const label = CONTEXT_LABEL[lang] ?? CONTEXT_LABEL.EN;
+  return `${label}\n\n"${contextText.trim()}"`;
+}
+
 const bodySchema = z.object({
   wedding_id: z.string().min(1),
-  title: z.string().max(200),
-  description: z.string().max(2000).nullable().optional(),
+  mentioned_name: z.string().max(200),
+  context_text: z.string().max(2000).default(''),
   assigned_to: z.enum(['WEDDING_PLANNER', 'COUPLE', 'OTHER']),
   due_date: z.string().datetime().nullable().optional(),
 });
@@ -28,9 +56,12 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
-    const { wedding_id, title, description, assigned_to, due_date } = parsed.data;
+    const { wedding_id, mentioned_name, context_text, assigned_to, due_date } = parsed.data;
 
-    // Verify access and fetch the wedding's default language
+    // Determine the user's preferred language (uppercased to match Prisma enum keys)
+    const userLang = (user.preferred_language ?? 'EN').toUpperCase();
+
+    // Verify access and fetch the wedding's default language (for the section name)
     const wedding = await (async () => {
       if (user.role === 'wedding_admin') {
         return prisma.wedding.findFirst({
@@ -49,9 +80,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    // Find or create the localized Reminders section
-    const sectionName =
-      SECTION_NAMES[wedding.default_language ?? ''] ?? SECTION_NAMES.EN;
+    // Build task title and description in the user's language
+    const title = localizedTitle(userLang, mentioned_name);
+    const description = localizedDescription(userLang, context_text);
+
+    // Find or create the localized Reminders section (uses wedding language to stay
+    // consistent with the section NupciBot creates)
+    const sectionLang = (wedding.default_language ?? 'EN').toString().toUpperCase();
+    const sectionName = SECTION_NAMES[sectionLang] ?? SECTION_NAMES.EN;
 
     let section = await prisma.checklistSection.findFirst({
       where: { wedding_id, name: sectionName, template_id: null },
@@ -82,7 +118,7 @@ export async function POST(request: NextRequest) {
         wedding_id,
         section_id: section.id,
         title,
-        description: description ?? null,
+        description,
         assigned_to,
         due_date: due_date ? new Date(due_date) : null,
         status: 'PENDING',

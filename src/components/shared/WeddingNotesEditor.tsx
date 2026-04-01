@@ -202,26 +202,22 @@ export function WeddingNotesEditor({
   const tRef = useRef(t);
   tRef.current = t;
 
-  // Create a checklist task when someone is mentioned
+  // Create a checklist task when someone is mentioned.
+  // Title and description are generated server-side in the user's preferred_language
+  // so the task is always in the correct language regardless of the UI locale cookie.
   const handleMention = useCallback(
     async (mentionedUser: NotesUser, contextText: string) => {
       try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const title = tRef.current('mentionTaskTitle', { name: mentionedUser.name });
-        const contextLabel = tRef.current('mentionTaskContextLabel');
-        const description = contextText.trim()
-          ? `${contextLabel}\n\n"${contextText.trim()}"`
-          : null;
-
         await fetch('/api/notes-mention-task', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             wedding_id: weddingId,
-            title,
-            description,
+            mentioned_name: mentionedUser.name,
+            context_text: contextText,
             assigned_to: mentionedUser.role === 'planner' ? 'WEDDING_PLANNER' : 'COUPLE',
             due_date: today.toISOString(),
           }),
