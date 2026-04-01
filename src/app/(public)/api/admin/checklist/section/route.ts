@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createSectionSchema.parse(body);
 
-    const hasAccess = await verifyWeddingAccess(user.id, validatedData.wedding_id, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, validatedData.wedding_id, user.role);
     if (!hasAccess) {
       return NextResponse.json({
         success: false,
@@ -125,7 +125,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const validatedData = updateSectionSchema.parse(body);
 
-    const hasAccess = await verifyWeddingAccess(user.id, validatedData.wedding_id, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, validatedData.wedding_id, user.role);
     if (!hasAccess) {
       return NextResponse.json({
         success: false,
@@ -165,7 +165,7 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const hasAccess = await verifyWeddingAccess(user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
     if (!hasAccess) {
       return NextResponse.json({
         success: false,
