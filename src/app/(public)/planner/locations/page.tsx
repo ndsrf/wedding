@@ -441,7 +441,7 @@ export default function LocationsPage() {
         {!loading && locations.length > 0 && filteredLocations.length === 0 && (
           <div className="bg-white shadow rounded-lg p-8 text-center">
             <Search className="mx-auto h-8 w-8 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600">No se encontraron localizaciones con ese nombre.</p>
+            <p className="mt-2 text-sm text-gray-600">No se encontraron localizaciones con los filtros aplicados.</p>
           </div>
         )}
 
