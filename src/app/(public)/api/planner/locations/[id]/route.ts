@@ -10,6 +10,7 @@ const updateLocationSchema = z.object({
   notes: z.string().optional(),
   google_maps_url: z.string().url().optional().or(z.literal('')),
   address: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export async function GET(
@@ -73,6 +74,7 @@ export async function PATCH(
         notes: validated.notes,
         google_maps_url: validated.google_maps_url || null,
         address: validated.address,
+        tags: validated.tags ?? [],
       },
     });
 

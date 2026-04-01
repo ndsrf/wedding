@@ -242,6 +242,7 @@ model Location {
   notes               String?         @db.Text
   google_maps_url     String?
   address             String?
+  tags                String[]        @default([])
   created_at          DateTime        @default(now())
   updated_at          DateTime        @updatedAt
   planner             WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)

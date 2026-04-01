@@ -10,6 +10,7 @@ const createLocationSchema = z.object({
   notes: z.string().optional(),
   google_maps_url: z.string().url().optional().or(z.literal('')),
   address: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export async function GET(_request: NextRequest) {
@@ -18,18 +19,51 @@ export async function GET(_request: NextRequest) {
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const cacheKey = CACHE_KEYS.plannerLocations(user.planner_id);
-    const cached = await getCached<import('@prisma/client').Location[]>(cacheKey);
+    const cached = await getCached<unknown[]>(cacheKey);
     if (cached) {
       return NextResponse.json({ data: cached }, {
         headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
       });
     }
 
-    const locations = await prisma.location.findMany({
+    const rawLocations = await prisma.location.findMany({
       where: { planner_id: user.planner_id },
-      orderBy: [
-        { name: 'asc' },
-      ],
+      orderBy: [{ name: 'asc' }],
+      include: {
+        _count: {
+          select: {
+            weddings: true,
+            itinerary_items: true,
+          },
+        },
+        weddings: {
+          where: { deleted_at: null },
+          select: { id: true, couple_names: true, wedding_date: true, status: true },
+          orderBy: { wedding_date: 'asc' },
+        },
+        itinerary_items: {
+          where: { wedding: { deleted_at: null } },
+          select: {
+            wedding: {
+              select: { id: true, couple_names: true, wedding_date: true, status: true },
+            },
+          },
+        },
+      },
+    });
+
+    // Merge main-event weddings + itinerary weddings, deduplicated by id
+    const locations = rawLocations.map(({ itinerary_items, weddings, ...rest }) => {
+      const map = new Map(weddings.map((w) => [w.id, w]));
+      for (const item of itinerary_items) {
+        if (item.wedding && !map.has(item.wedding.id)) {
+          map.set(item.wedding.id, item.wedding);
+        }
+      }
+      const allWeddings = Array.from(map.values()).sort(
+        (a, b) => new Date(a.wedding_date).getTime() - new Date(b.wedding_date).getTime()
+      );
+      return { ...rest, weddings: allWeddings };
     });
 
     await setCached(cacheKey, locations, CACHE_TTL.WEDDING_DETAILS);
@@ -58,6 +92,7 @@ export async function POST(request: NextRequest) {
         notes: validated.notes,
         google_maps_url: validated.google_maps_url || null,
         address: validated.address,
+        tags: validated.tags ?? [],
       },
     });
 
