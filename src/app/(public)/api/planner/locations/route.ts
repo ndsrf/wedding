@@ -26,11 +26,9 @@ export async function GET(_request: NextRequest) {
       });
     }
 
-    const locations = await prisma.location.findMany({
+    const rawLocations = await prisma.location.findMany({
       where: { planner_id: user.planner_id },
-      orderBy: [
-        { name: 'asc' },
-      ],
+      orderBy: [{ name: 'asc' }],
       include: {
         _count: {
           select: {
@@ -40,15 +38,32 @@ export async function GET(_request: NextRequest) {
         },
         weddings: {
           where: { deleted_at: null },
-          select: {
-            id: true,
-            couple_names: true,
-            wedding_date: true,
-            status: true,
-          },
+          select: { id: true, couple_names: true, wedding_date: true, status: true },
           orderBy: { wedding_date: 'asc' },
         },
+        itinerary_items: {
+          where: { wedding: { deleted_at: null } },
+          select: {
+            wedding: {
+              select: { id: true, couple_names: true, wedding_date: true, status: true },
+            },
+          },
+        },
       },
+    });
+
+    // Merge main-event weddings + itinerary weddings, deduplicated by id
+    const locations = rawLocations.map(({ itinerary_items, weddings, ...rest }) => {
+      const map = new Map(weddings.map((w) => [w.id, w]));
+      for (const item of itinerary_items) {
+        if (item.wedding && !map.has(item.wedding.id)) {
+          map.set(item.wedding.id, item.wedding);
+        }
+      }
+      const allWeddings = Array.from(map.values()).sort(
+        (a, b) => new Date(a.wedding_date).getTime() - new Date(b.wedding_date).getTime()
+      );
+      return { ...rest, weddings: allWeddings };
     });
 
     await setCached(cacheKey, locations, CACHE_TTL.WEDDING_DETAILS);
