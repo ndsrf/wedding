@@ -85,10 +85,8 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
 }
 
 function WeddingPanel({
-  locationId,
   weddings,
 }: {
-  locationId: string;
   weddings: LocationWedding[];
 }) {
   const [openPanel, setOpenPanel] = useState<'active' | 'past' | null>(null);
@@ -235,7 +233,7 @@ export default function LocationsPage() {
   const toggleTagFilter = (tag: string) => {
     setTagFilter((prev) => {
       const next = new Set(prev);
-      next.has(tag) ? next.delete(tag) : next.add(tag);
+      if (next.has(tag)) { next.delete(tag); } else { next.add(tag); }
       return next;
     });
   };
@@ -524,7 +522,7 @@ export default function LocationsPage() {
 
                 {/* Wedding panels */}
                 {location.weddings !== undefined && (
-                  <WeddingPanel locationId={location.id} weddings={location.weddings} />
+                  <WeddingPanel weddings={location.weddings} />
                 )}
               </div>
             ))}
