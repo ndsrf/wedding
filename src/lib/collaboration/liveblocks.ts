@@ -41,3 +41,10 @@ export async function createRoomToken(params: {
 export function contractRoomId(contractId: string): string {
   return `contract-${contractId}`;
 }
+
+/**
+ * Generate a stable Liveblocks room ID for a wedding notes block.
+ */
+export function notesRoomId(weddingId: string): string {
+  return `notes-${weddingId}`;
+}

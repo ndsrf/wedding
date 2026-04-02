@@ -450,6 +450,11 @@ export default async function AdminDashboardPage() {
                   label: t('admin.dashboard.finanzas'),
                   icon: <CurrencyIcon className="h-3 w-3" />,
                 },
+                {
+                  href: '/admin/notas',
+                  label: t('notes.title'),
+                  icon: <PencilEditIcon className="h-3 w-3" />,
+                },
               ]}
             />
 

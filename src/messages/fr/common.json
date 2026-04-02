@@ -2364,5 +2364,16 @@
     "message": "Nous utilisons des cookies pour améliorer votre expérience. En continuant à naviguer, vous acceptez notre utilisation des cookies.",
     "accept": "Accepter",
     "privacy": "Politique de confidentialité"
+  },
+  "notes": {
+    "title": "Notes",
+    "subtitle": "Bloc-notes partagé entre le wedding planner et le couple. Utilisez @ pour mentionner quelqu'un et créer automatiquement une tâche.",
+    "mentionHint": "Utilisez @ pour mentionner quelqu'un",
+    "taskCreated": "Tâche créée pour {name}",
+    "placeholder": "Écrivez vos notes ici… Utilisez @ pour mentionner quelqu'un.",
+    "mentionTaskTitle": "Mention dans le bloc de notes : @{name}",
+    "mentionTaskContextLabel": "Contexte du bloc de notes :",
+    "bulletList": "• Liste",
+    "orderedList": "1. Liste"
   }
 }
