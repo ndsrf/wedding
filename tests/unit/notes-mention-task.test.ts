@@ -47,7 +47,6 @@ const BASE_BODY = {
   mentioned_name: 'Ana',
   context_text: 'met at the venue',
   assigned_to: 'COUPLE',
-  due_date: new Date('2026-04-02T00:00:00.000Z').toISOString(),
 };
 
 const PLANNER_USER = {
@@ -173,6 +172,30 @@ describe('POST /api/notes-mention-task', () => {
     expect(createCall.data.description).toBeNull();
   });
 
+  // ── Due date ──────────────────────────────────────────────────────────────
+
+  it('sets due_date to UTC midnight today (server-side, not client-supplied)', async () => {
+    (requireAnyRole as jest.Mock).mockResolvedValue(PLANNER_USER);
+    (prisma.wedding.findFirst as jest.Mock).mockResolvedValue({
+      id: 'wedding-1',
+      default_language: 'EN',
+    });
+
+    const before = new Date();
+    before.setUTCHours(0, 0, 0, 0);
+
+    await POST(makeRequest(BASE_BODY));
+
+    const createCall = (prisma.checklistTask.create as jest.Mock).mock.calls[0][0];
+    const dueDate: Date = createCall.data.due_date;
+
+    expect(dueDate).toBeInstanceOf(Date);
+    // Must be UTC midnight of today
+    expect(dueDate.getUTCHours()).toBe(0);
+    expect(dueDate.getUTCMinutes()).toBe(0);
+    expect(dueDate.getTime()).toBe(before.getTime());
+  });
+
   // ── Section find-or-create ────────────────────────────────────────────────
 
   it('reuses an existing Reminders section', async () => {
@@ -293,7 +316,6 @@ describe('POST /api/notes-mention-task', () => {
       mentioned_name: BASE_BODY.mentioned_name,
       context_text: BASE_BODY.context_text,
       assigned_to: BASE_BODY.assigned_to,
-      due_date: BASE_BODY.due_date,
     };
     const res = await POST(makeRequest(noId));
 

@@ -41,7 +41,6 @@ const bodySchema = z.object({
   mentioned_name: z.string().max(200),
   context_text: z.string().max(2000).default(''),
   assigned_to: z.enum(['WEDDING_PLANNER', 'COUPLE', 'OTHER']),
-  due_date: z.string().datetime().nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -53,7 +52,12 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
-    const { wedding_id, mentioned_name, context_text, assigned_to, due_date } = parsed.data;
+    const { wedding_id, mentioned_name, context_text, assigned_to } = parsed.data;
+
+    // Use server-side UTC midnight so the due date is always "today" regardless
+    // of the client's timezone
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
 
     // Verify access and fetch the wedding's default language
     const wedding = await (async () => {
@@ -118,7 +122,7 @@ export async function POST(request: NextRequest) {
         title,
         description,
         assigned_to,
-        due_date: due_date ? new Date(due_date) : null,
+        due_date: today,
         status: 'PENDING',
         order: (lastTask?.order ?? 0) + 1,
       },

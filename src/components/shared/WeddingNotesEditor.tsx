@@ -206,9 +206,6 @@ export function WeddingNotesEditor({
   const handleMention = useCallback(
     async (mentionedUser: NotesUser, contextText: string) => {
       try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
         await fetch('/api/notes-mention-task', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -217,7 +214,6 @@ export function WeddingNotesEditor({
             mentioned_name: mentionedUser.name,
             context_text: contextText,
             assigned_to: mentionedUser.role === 'planner' ? 'WEDDING_PLANNER' : 'COUPLE',
-            due_date: today.toISOString(),
           }),
         });
 
