@@ -11,52 +11,13 @@ import {
   validateImportData,
   importChecklist,
 } from '@/lib/checklist/excel-import';
+import { verifyWeddingAccess } from '@/lib/checklist/access';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import { invalidateChecklistCaches } from '@/lib/checklist/cache';
 import { prisma } from '@/lib/db/prisma';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-/**
- * Verify user has access to the specified wedding
- */
-async function verifyWeddingAccess(
-  userId: string,
-  weddingId: string,
-  userRole: string
-): Promise<boolean> {
-  // Wedding admins must match the wedding_id
-  if (userRole === 'wedding_admin') {
-    const admin = await prisma.weddingAdmin.findFirst({
-      where: {
-        id: userId,
-        wedding_id: weddingId,
-      },
-    });
-    return !!admin;
-  }
-
-  // Planners must be the planner for this wedding
-  if (userRole === 'planner') {
-    const planner = await prisma.weddingPlanner.findFirst({
-      where: { id: userId },
-    });
-
-    if (!planner) return false;
-
-    const wedding = await prisma.wedding.findFirst({
-      where: {
-        id: weddingId,
-        planner_id: planner.id,
-      },
-    });
-
-    return !!wedding;
-  }
-
-  return false;
-}
 
 /**
  * POST /api/admin/checklist/import

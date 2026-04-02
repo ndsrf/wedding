@@ -16,7 +16,7 @@ import {
   deleteSection,
 } from '@/lib/checklist/crud';
 import { invalidateChecklistCaches } from '@/lib/checklist/cache';
-import { prisma } from '@/lib/db/prisma';
+import { verifyWeddingAccess } from '@/lib/checklist/access';
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -34,50 +34,6 @@ const updateSectionSchema = z.object({
   name: z.string().max(100).optional(),
   order: z.number().int().min(0).optional(),
 });
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Verify user has access to the specified wedding
- */
-async function verifyWeddingAccess(
-  userId: string,
-  weddingId: string,
-  userRole: string
-): Promise<boolean> {
-  // Wedding admins must match the wedding_id
-  if (userRole === 'wedding_admin') {
-    const admin = await prisma.weddingAdmin.findFirst({
-      where: {
-        id: userId,
-        wedding_id: weddingId,
-      },
-    });
-    return !!admin;
-  }
-
-  // Planners must be the planner for this wedding
-  if (userRole === 'planner') {
-    const planner = await prisma.weddingPlanner.findFirst({
-      where: { id: userId },
-    });
-
-    if (!planner) return false;
-
-    const wedding = await prisma.wedding.findFirst({
-      where: {
-        id: weddingId,
-        planner_id: planner.id,
-      },
-    });
-
-    return !!wedding;
-  }
-
-  return false;
-}
 
 // ============================================================================
 // API ROUTE HANDLERS
