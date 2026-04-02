@@ -289,7 +289,12 @@ describe('POST /api/notes-mention-task', () => {
   it('returns 400 when wedding_id is missing', async () => {
     (requireAnyRole as jest.Mock).mockResolvedValue(PLANNER_USER);
 
-    const { wedding_id: _omit, ...noId } = BASE_BODY;
+    const noId = {
+      mentioned_name: BASE_BODY.mentioned_name,
+      context_text: BASE_BODY.context_text,
+      assigned_to: BASE_BODY.assigned_to,
+      due_date: BASE_BODY.due_date,
+    };
     const res = await POST(makeRequest(noId));
 
     expect(res.status).toBe(400);
