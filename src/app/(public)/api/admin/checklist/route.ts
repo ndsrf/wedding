@@ -13,6 +13,7 @@ import { requireAnyRole } from '@/lib/auth/middleware';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import { invalidateChecklistCaches } from '@/lib/checklist/cache';
+import { verifyWeddingAccess } from '@/lib/checklist/access';
 import {
   getChecklist,
   createTask,
@@ -109,46 +110,6 @@ async function sanitizeDescription(description: string | null | undefined): Prom
   return clean;
 }
 
-/**
- * Verify user has access to the specified wedding
- */
-async function verifyWeddingAccess(
-  userId: string,
-  weddingId: string,
-  userRole: string
-): Promise<boolean> {
-  // Wedding admins must match the wedding_id
-  if (userRole === 'wedding_admin') {
-    const admin = await prisma.weddingAdmin.findFirst({
-      where: {
-        id: userId,
-        wedding_id: weddingId,
-      },
-    });
-    return !!admin;
-  }
-
-  // Planners must be the planner for this wedding
-  if (userRole === 'planner') {
-    const planner = await prisma.weddingPlanner.findFirst({
-      where: { id: userId },
-    });
-
-    if (!planner) return false;
-
-    const wedding = await prisma.wedding.findFirst({
-      where: {
-        id: weddingId,
-        planner_id: planner.id,
-      },
-    });
-
-    return !!wedding;
-  }
-
-  return false;
-}
-
 // ============================================================================
 // API ROUTE HANDLERS
 // ============================================================================
@@ -178,7 +139,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,
@@ -263,7 +224,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,
@@ -399,7 +360,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,
@@ -602,7 +563,7 @@ export async function DELETE(request: NextRequest) {
     const validatedData = deleteTaskSchema.parse({ task_id: taskId });
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,

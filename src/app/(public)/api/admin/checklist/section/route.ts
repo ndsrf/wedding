@@ -16,7 +16,7 @@ import {
   deleteSection,
 } from '@/lib/checklist/crud';
 import { invalidateChecklistCaches } from '@/lib/checklist/cache';
-import { prisma } from '@/lib/db/prisma';
+import { verifyWeddingAccess } from '@/lib/checklist/access';
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -36,50 +36,6 @@ const updateSectionSchema = z.object({
 });
 
 // ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Verify user has access to the specified wedding
- */
-async function verifyWeddingAccess(
-  userId: string,
-  weddingId: string,
-  userRole: string
-): Promise<boolean> {
-  // Wedding admins must match the wedding_id
-  if (userRole === 'wedding_admin') {
-    const admin = await prisma.weddingAdmin.findFirst({
-      where: {
-        id: userId,
-        wedding_id: weddingId,
-      },
-    });
-    return !!admin;
-  }
-
-  // Planners must be the planner for this wedding
-  if (userRole === 'planner') {
-    const planner = await prisma.weddingPlanner.findFirst({
-      where: { id: userId },
-    });
-
-    if (!planner) return false;
-
-    const wedding = await prisma.wedding.findFirst({
-      where: {
-        id: weddingId,
-        planner_id: planner.id,
-      },
-    });
-
-    return !!wedding;
-  }
-
-  return false;
-}
-
-// ============================================================================
 // API ROUTE HANDLERS
 // ============================================================================
 
@@ -93,7 +49,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createSectionSchema.parse(body);
 
-    const hasAccess = await verifyWeddingAccess(user.id, validatedData.wedding_id, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, validatedData.wedding_id, user.role);
     if (!hasAccess) {
       return NextResponse.json({
         success: false,
@@ -125,7 +81,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const validatedData = updateSectionSchema.parse(body);
 
-    const hasAccess = await verifyWeddingAccess(user.id, validatedData.wedding_id, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, validatedData.wedding_id, user.role);
     if (!hasAccess) {
       return NextResponse.json({
         success: false,
@@ -165,7 +121,7 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const hasAccess = await verifyWeddingAccess(user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
     if (!hasAccess) {
       return NextResponse.json({
         success: false,
