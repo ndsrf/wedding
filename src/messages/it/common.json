@@ -2372,6 +2372,8 @@
     "taskCreated": "Attività creata per {name}",
     "placeholder": "Scrivi le tue note qui… Usa @ per menzionare qualcuno.",
     "mentionTaskTitle": "Menzione nel blocco note: @{name}",
-    "mentionTaskContextLabel": "Contesto del blocco note:"
+    "mentionTaskContextLabel": "Contesto del blocco note:",
+    "bulletList": "• Elenco",
+    "orderedList": "1. Elenco"
   }
 }

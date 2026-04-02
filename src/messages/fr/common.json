@@ -2372,6 +2372,8 @@
     "taskCreated": "Tâche créée pour {name}",
     "placeholder": "Écrivez vos notes ici… Utilisez @ pour mentionner quelqu'un.",
     "mentionTaskTitle": "Mention dans le bloc de notes : @{name}",
-    "mentionTaskContextLabel": "Contexte du bloc de notes :"
+    "mentionTaskContextLabel": "Contexte du bloc de notes :",
+    "bulletList": "• Liste",
+    "orderedList": "1. Liste"
   }
 }

@@ -173,8 +173,6 @@ function ToolbarButton({
 // Main component
 // ---------------------------------------------------------------------------
 
-const YJS_FRAGMENT = 'default';
-
 export function WeddingNotesEditor({
   weddingId,
   authEndpoint,
@@ -331,23 +329,6 @@ export function WeddingNotesEditor({
             });
           }
 
-          // Wait for full Yjs sync before checking if doc is empty
-          const typedProvider = provider as unknown as {
-            synced: boolean;
-            on: (event: string, fn: (isSynced: boolean) => void) => void;
-          };
-          const onSync = (isSynced: boolean) => {
-            if (!isSynced || destroyed) return;
-            // Notes pad starts empty — no seed needed
-            const fragment = ydocRef.current.getXmlFragment(YJS_FRAGMENT);
-            void fragment; // referenced to satisfy linter
-          };
-          if (typedProvider.synced) {
-            onSync(true);
-          } else {
-            typedProvider.on('sync', onSync);
-          }
-
           cleanup = () => {
             provider.destroy();
             room.disconnect();
@@ -370,7 +351,7 @@ export function WeddingNotesEditor({
       extensions: [
         StarterKit.configure({ undoRedo: false }),
         Placeholder.configure({
-          placeholder: 'Escribe tus notas aquí… Usa @ para mencionar a alguien.',
+          placeholder: t('placeholder'),
         }),
         Collaboration.configure({ document: ydocRef.current }),
         Mention.configure({
@@ -469,19 +450,19 @@ export function WeddingNotesEditor({
           <div className="flex items-center gap-1">
             <ToolbarButton
               action={() => editor.chain().focus().toggleBulletList().run()}
-              label="• Lista"
+              label={t('bulletList')}
               isActive={editor.isActive('bulletList')}
             />
             <ToolbarButton
               action={() => editor.chain().focus().toggleOrderedList().run()}
-              label="1. Lista"
+              label={t('orderedList')}
               isActive={editor.isActive('orderedList')}
             />
           </div>
           <div className="ml-auto flex items-center gap-1.5 text-xs text-gray-400">
             <span className="inline-flex items-center gap-1">
               <span className="font-mono bg-gray-100 text-gray-500 px-1 rounded">@</span>
-              para mencionar
+              {t('mentionHint')}
             </span>
           </div>
         </div>

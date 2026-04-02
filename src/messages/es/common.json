@@ -2423,6 +2423,8 @@
     "taskCreated": "Tarea creada para {name}",
     "placeholder": "Escribe tus notas aquí… Usa @ para mencionar a alguien.",
     "mentionTaskTitle": "Mención en el bloque de notas: @{name}",
-    "mentionTaskContextLabel": "Contexto del bloque de notas:"
+    "mentionTaskContextLabel": "Contexto del bloque de notas:",
+    "bulletList": "• Lista",
+    "orderedList": "1. Lista"
   }
 }

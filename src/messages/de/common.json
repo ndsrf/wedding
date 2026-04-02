@@ -2372,6 +2372,8 @@
     "taskCreated": "Aufgabe erstellt für {name}",
     "placeholder": "Schreibe deine Notizen hier… Verwende @ um jemanden zu erwähnen.",
     "mentionTaskTitle": "Erwähnung im Notizblock: @{name}",
-    "mentionTaskContextLabel": "Kontext des Notizblocks:"
+    "mentionTaskContextLabel": "Kontext des Notizblocks:",
+    "bulletList": "• Liste",
+    "orderedList": "1. Liste"
   }
 }

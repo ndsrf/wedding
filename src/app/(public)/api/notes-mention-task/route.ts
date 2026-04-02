@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAnyRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
+import enMessages from '@/messages/en/common.json';
+import esMessages from '@/messages/es/common.json';
+import frMessages from '@/messages/fr/common.json';
+import itMessages from '@/messages/it/common.json';
+import deMessages from '@/messages/de/common.json';
 
+// Section names that NupciBot uses — must match exactly so tasks land in the same section
 const SECTION_NAMES: Record<string, string> = {
   EN: 'Reminders',
   ES: 'Recordatorios',
@@ -11,32 +17,23 @@ const SECTION_NAMES: Record<string, string> = {
   IT: 'Promemoria',
 };
 
-// Task title and context label in each supported language
-const TASK_TITLE: Record<string, string> = {
-  EN: 'Mention in the notes block: @{name}',
-  ES: 'Mención en el bloque de notas: @{name}',
-  DE: 'Erwähnung im Notizblock: @{name}',
-  FR: 'Mention dans le bloc de notes : @{name}',
-  IT: 'Menzione nel blocco note: @{name}',
-};
-
-const CONTEXT_LABEL: Record<string, string> = {
-  EN: 'Notes block context:',
-  ES: 'Contexto del bloque de notas:',
-  DE: 'Notizblock-Kontext:',
-  FR: 'Contexte du bloc de notes :',
-  IT: 'Contesto del blocco note:',
-};
-
-function localizedTitle(lang: string, name: string): string {
-  const template = TASK_TITLE[lang] ?? TASK_TITLE.EN;
-  return template.replace('{name}', name);
+interface NoteMessages {
+  mentionTaskTitle: string;
+  mentionTaskContextLabel: string;
 }
 
-function localizedDescription(lang: string, contextText: string): string | null {
-  if (!contextText.trim()) return null;
-  const label = CONTEXT_LABEL[lang] ?? CONTEXT_LABEL.EN;
-  return `${label}\n\n"${contextText.trim()}"`;
+// Each import may have minor structural differences across languages, so we
+// cast to the narrow interface we actually need
+const MESSAGES: Record<string, NoteMessages> = {
+  en: enMessages.notes as NoteMessages,
+  es: esMessages.notes as NoteMessages,
+  fr: frMessages.notes as NoteMessages,
+  it: itMessages.notes as NoteMessages,
+  de: deMessages.notes as NoteMessages,
+};
+
+function getMessages(lang: string): NoteMessages {
+  return MESSAGES[lang.toLowerCase()] ?? MESSAGES.en;
 }
 
 const bodySchema = z.object({
@@ -58,10 +55,7 @@ export async function POST(request: NextRequest) {
     }
     const { wedding_id, mentioned_name, context_text, assigned_to, due_date } = parsed.data;
 
-    // Determine the user's preferred language (uppercased to match Prisma enum keys)
-    const userLang = (user.preferred_language ?? 'EN').toUpperCase();
-
-    // Verify access and fetch the wedding's default language (for the section name)
+    // Verify access and fetch the wedding's default language
     const wedding = await (async () => {
       if (user.role === 'wedding_admin') {
         return prisma.wedding.findFirst({
@@ -80,9 +74,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    // Build task title and description in the user's language
-    const title = localizedTitle(userLang, mentioned_name);
-    const description = localizedDescription(userLang, context_text);
+    // Build title and description in the user's preferred language using the same
+    // strings as the UI translation files — single source of truth
+    const m = getMessages(user.preferred_language ?? 'EN');
+    const title = m.mentionTaskTitle.replace('{name}', mentioned_name);
+    const description = context_text.trim()
+      ? `${m.mentionTaskContextLabel}\n\n"${context_text.trim()}"`
+      : null;
 
     // Find or create the localized Reminders section (uses wedding language to stay
     // consistent with the section NupciBot creates)
