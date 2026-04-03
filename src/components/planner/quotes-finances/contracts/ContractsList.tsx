@@ -51,6 +51,7 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
 export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const t = useTranslations('planner.quotesFinances');
   const locale = useLocale();
+  const format = useFormatter();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTemplates, setShowTemplates] = useState(false);
