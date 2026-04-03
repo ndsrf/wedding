@@ -275,7 +275,7 @@ export default async function PlannerDashboardPage() {
 
         {/* Quotes & Finances */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quotes &amp; Finances</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('planner.quotesFinances.dashboard.sectionTitle')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
               href="/planner/quotes-finances?tab=contracts"
@@ -288,8 +288,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Contracts</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Send & manage client contracts</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('planner.quotesFinances.dashboard.contracts')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{t('planner.quotesFinances.dashboard.contractsSubtitle')}</p>
               </div>
             </Link>
 
@@ -304,8 +304,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Quotes</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Create and send quotes to clients</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('planner.quotesFinances.tabs.quotes')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{t('planner.quotesFinances.dashboard.quotesSubtitle')}</p>
               </div>
             </Link>
 
@@ -320,8 +320,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Invoices &amp; Payments</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Track invoices and record payments</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('planner.quotesFinances.dashboard.invoicesAndPayments')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{t('planner.quotesFinances.dashboard.invoicesAndPaymentsSubtitle')}</p>
               </div>
             </Link>
           </div>

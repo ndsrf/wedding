@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import PrivateHeader from '@/components/PrivateHeader';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
+import { getTranslations } from '@/lib/i18n/server';
 import { QuotesFinancesPage } from '@/components/planner/quotes-finances/QuotesFinancesPage';
 
 async function getFinancialSummary(plannerId: string) {
@@ -30,7 +31,8 @@ async function getFinancialSummary(plannerId: string) {
 }
 
 export async function generateMetadata() {
-  return { title: 'Nupci – Quotes & Finances' };
+  const { t } = await getTranslations();
+  return { title: `Nupci \u2013 ${t('planner.quotesFinances.page.title')}` };
 }
 
 export default async function QuotesFinancesServerPage({
@@ -45,6 +47,7 @@ export default async function QuotesFinancesServerPage({
     redirect('/api/auth/signin');
   }
 
+  const { t } = await getTranslations();
   const { tab } = await searchParams;
   const summary = user.planner_id ? await getFinancialSummary(user.planner_id) : null;
 
@@ -54,8 +57,8 @@ export default async function QuotesFinancesServerPage({
 
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <h1 className="text-2xl font-bold text-gray-900 font-playfair">Quotes &amp; Finances</h1>
-          <p className="mt-0.5 text-sm text-gray-500">Manage your quotes, contracts, invoices and track payments</p>
+          <h1 className="text-2xl font-bold text-gray-900 font-playfair">{t('planner.quotesFinances.page.title')}</h1>
+          <p className="mt-0.5 text-sm text-gray-500">{t('planner.quotesFinances.page.subtitle')}</p>
         </div>
       </div>
 

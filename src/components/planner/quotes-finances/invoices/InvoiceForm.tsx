@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface LineItem {
   name: string;
@@ -48,6 +49,8 @@ function emptyItem(): LineItem {
 }
 
 export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps) {
+  const t = useTranslations('planner.quotesFinances');
+  const locale = useLocale();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<InvoiceFormData>({
     customer_id: initialData?.customer_id ?? null,
@@ -139,6 +142,10 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
   const taxAmount = (subtotal - discountAmt) * (taxRate / 100);
   const total = subtotal - discountAmt + taxAmount;
 
+  function fmt(amount: number) {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: form.currency }).format(amount);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -168,11 +175,11 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Client */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Client Details</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">{t('invoiceForm.clientDetails')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Customer name autocomplete */}
           <div className="sm:col-span-2" ref={wrapperRef}>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Client Name *</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.clientName')}</label>
             <div className="relative">
               <input
                 required
@@ -181,11 +188,11 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
                 onChange={(e) => handleNameChange(e.target.value)}
                 onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
                 autoComplete="off"
-                placeholder="Search existing customers…"
+                placeholder={t('invoiceForm.searchCustomers')}
               />
               {selectedCustomer && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                  <span className="text-xs bg-rose-100 text-rose-700 rounded-full px-2 py-0.5 font-medium">Existing customer</span>
+                  <span className="text-xs bg-rose-100 text-rose-700 rounded-full px-2 py-0.5 font-medium">{t('invoiceForm.existingCustomer')}</span>
                   <button type="button" onClick={clearCustomer} className="text-gray-400 hover:text-gray-600">
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -217,7 +224,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Client Email</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.clientEmail')}</label>
             <input
               type="email"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
@@ -226,26 +233,26 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">ID / Passport Number</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.idPassport')}</label>
             <input
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
               value={form.client_id_number}
               onChange={(e) => setForm((p) => ({ ...p, client_id_number: e.target.value }))}
-              placeholder="DNI, NIE, Passport…"
+              placeholder={t('invoiceForm.idPlaceholder')}
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Client Address</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.clientAddress')}</label>
             <textarea
               rows={2}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
               value={form.client_address}
               onChange={(e) => setForm((p) => ({ ...p, client_address: e.target.value }))}
-              placeholder="Street, City, Country…"
+              placeholder={t('invoiceForm.addressPlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Issue Date</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.issueDate')}</label>
             <input
               type="date"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
@@ -254,7 +261,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Due Date</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.dueDate')}</label>
             <input
               type="date"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
@@ -263,7 +270,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Description / Notes</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.descriptionNotes')}</label>
             <textarea
               rows={2}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
@@ -277,9 +284,9 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
       {/* Line Items */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Services</h3>
+          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{t('invoiceForm.services')}</h3>
           <div className="flex items-center gap-3">
-            <label className="text-xs font-medium text-gray-700">Currency</label>
+            <label className="text-xs font-medium text-gray-700">{t('invoiceForm.currency')}</label>
             <select
               className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
               value={form.currency}
@@ -297,7 +304,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
                 <input
                   required
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                  placeholder="Service name"
+                  placeholder={t('invoiceForm.serviceName')}
                   value={item.name}
                   onChange={(e) => updateItem(index, 'name', e.target.value)}
                 />
@@ -319,9 +326,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
                 />
               </div>
               <div className="col-span-3 sm:col-span-2 flex items-center justify-end">
-                <span className="text-sm font-medium text-gray-900">
-                  {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(item.total)}
-                </span>
+                <span className="text-sm font-medium text-gray-900">{fmt(item.total)}</span>
               </div>
               <div className="col-span-1 flex items-center justify-center">
                 {form.line_items.length > 1 && (
@@ -348,16 +353,14 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Add line item
+          {t('invoiceForm.addLineItem')}
         </button>
 
         <div className="mt-6 pt-4 border-t border-gray-100">
           <div className="grid grid-cols-2 gap-4 sm:w-72 ml-auto">
-            <div className="text-sm text-gray-500">Subtotal</div>
-            <div className="text-sm font-medium text-gray-900 text-right">
-              {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(subtotal)}
-            </div>
-            <div className="text-sm text-gray-500">Discount ({form.currency})</div>
+            <div className="text-sm text-gray-500">{t('invoiceForm.subtotal')}</div>
+            <div className="text-sm font-medium text-gray-900 text-right">{fmt(subtotal)}</div>
+            <div className="text-sm text-gray-500">{t('invoiceForm.discount', { currency: form.currency })}</div>
             <input
               type="number" min="0" step="0.01"
               className="border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
@@ -365,7 +368,7 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
               placeholder="0"
               onChange={(e) => setForm((p) => ({ ...p, discount: e.target.value === '' ? '' : Number(e.target.value) }))}
             />
-            <div className="text-sm text-gray-500">Tax rate (%)</div>
+            <div className="text-sm text-gray-500">{t('invoiceForm.taxRate')}</div>
             <input
               type="number" min="0" max="100" step="0.1"
               className="border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300"
@@ -375,30 +378,26 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
             />
             {taxRate > 0 && (
               <>
-                <div className="text-sm text-gray-500">Tax</div>
-                <div className="text-sm text-gray-900 text-right">
-                  {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(taxAmount)}
-                </div>
+                <div className="text-sm text-gray-500">{t('invoiceForm.tax')}</div>
+                <div className="text-sm text-gray-900 text-right">{fmt(taxAmount)}</div>
               </>
             )}
-            <div className="text-base font-bold text-gray-900 border-t border-rose-200 pt-2">Total</div>
-            <div className="text-base font-bold text-rose-600 text-right border-t border-rose-200 pt-2">
-              {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(total)}
-            </div>
+            <div className="text-base font-bold text-gray-900 border-t border-rose-200 pt-2">{t('invoiceForm.total')}</div>
+            <div className="text-base font-bold text-rose-600 text-right border-t border-rose-200 pt-2">{fmt(total)}</div>
           </div>
         </div>
       </div>
 
       <div className="flex items-center justify-end gap-3">
         <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-          Cancel
+          {t('invoiceForm.cancel')}
         </button>
         <button
           type="submit"
           disabled={saving}
           className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all shadow-sm"
         >
-          {saving ? 'Saving…' : 'Save Invoice'}
+          {saving ? t('invoiceForm.saving') : t('invoiceForm.saveInvoice')}
         </button>
       </div>
     </form>
