@@ -14,8 +14,8 @@ interface FilterBarProps {
   statusOptions: StatusOption[];
   selectedStatuses: string[];
   onStatusChange: (statuses: string[]) => void;
-  statusLabel?: string;
-  clearFiltersLabel?: string;
+  statusLabel: string;
+  clearFiltersLabel: string;
 }
 
 export function FilterBar({
