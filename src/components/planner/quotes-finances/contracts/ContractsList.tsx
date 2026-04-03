@@ -375,7 +375,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                   {contract.quote && (
                     <div className="text-right">
                       <span className="text-sm font-bold text-gray-900">
-                        {new Intl.NumberFormat(locale, { style: 'currency', currency: contract.quote.currency }).format(Number(contract.quote.total))}
+                        {format.number(Number(contract.quote.total), { style: 'currency', currency: contract.quote.currency })}
                       </span>
                     </div>
                   )}
