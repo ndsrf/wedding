@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations, useLocale, useFormatter } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import { ContractsList, type InvoicePrefillData } from './contracts/ContractsList';
 import { QuotesList } from './quotes/QuotesList';
 import { InvoicesList } from './invoices/InvoicesList';
@@ -45,7 +45,6 @@ const TAB_ICONS: Record<Tab, React.ReactNode> = {
 
 export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPageProps) {
   const t = useTranslations('planner.quotesFinances');
-  const locale = useLocale();
   const format = useFormatter();
   const resolvedInitial = VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'quotes';
   const [activeTab, setActiveTab] = useState<Tab>(resolvedInitial);

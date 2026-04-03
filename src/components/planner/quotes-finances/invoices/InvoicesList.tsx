@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useTranslations, useLocale, useFormatter } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
 import type { InvoicePrefillData } from '../contracts/ContractsList';
@@ -73,7 +73,6 @@ interface InvoicesListProps {
 
 export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: InvoicesListProps) {
   const t = useTranslations('planner.quotesFinances');
-  const locale = useLocale();
   const format = useFormatter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [readyQuotes, setReadyQuotes] = useState<ReadyQuote[]>([]);
@@ -328,7 +327,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                 <div>
                   <span className="text-sm font-semibold text-gray-900">{q.couple_names}</span>
                   <span className="ml-3 text-sm text-gray-500">
-                    {new Intl.NumberFormat(locale, { style: 'currency', currency: q.currency }).format(Number(q.total))}
+                    {format.number(Number(q.total), { style: 'currency', currency: q.currency })}
                   </span>
                   <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">{t('invoices.contractSigned')}</span>
                 </div>
@@ -432,13 +431,13 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                     </div>
                     {invoice.due_date && (
                       <p className="text-xs text-gray-500 mt-1">
-                        {t('invoices.due', { date: new Date(invoice.due_date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }) })}
+                        {t('invoices.due', { date: format.dateTime(new Date(invoice.due_date), { day: 'numeric', month: 'short', year: 'numeric' }) })}
                       </p>
                     )}
                     {invoice.status !== 'PAID' && invoice.status !== 'DRAFT' && (
                       <div className="mt-2">
                         <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                          <span>{t('invoices.paid', { amount: new Intl.NumberFormat(locale, { style: 'currency', currency: invoice.currency }).format(paid) })}</span>
+                          <span>{t('invoices.paid', { amount: format.number(paid, { style: 'currency', currency: invoice.currency }) })}</span>
                           <span>{paidPct}%</span>
                         </div>
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -452,11 +451,11 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-lg font-bold text-gray-900">
-                      {new Intl.NumberFormat(locale, { style: 'currency', currency: invoice.currency }).format(total)}
+                      {format.number(total, { style: 'currency', currency: invoice.currency })}
                     </span>
                     {paid > 0 && paid < total && (
                       <span className="text-xs text-orange-600 font-medium">
-                        {t('invoices.remaining', { amount: new Intl.NumberFormat(locale, { style: 'currency', currency: invoice.currency }).format(total - paid) })}
+                        {t('invoices.remaining', { amount: format.number(total - paid, { style: 'currency', currency: invoice.currency }) })}
                       </span>
                     )}
                   </div>

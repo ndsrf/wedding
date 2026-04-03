@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations, useLocale, useFormatter } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import { QuoteForm } from './QuoteForm';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
@@ -61,7 +61,6 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
 
 export function QuotesList() {
   const t = useTranslations('planner.quotesFinances');
-  const locale = useLocale();
   const format = useFormatter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -345,7 +344,7 @@ export function QuotesList() {
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
-                    {quote.event_date && <span>{new Date(quote.event_date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+                    {quote.event_date && <span>{format.dateTime(new Date(quote.event_date), { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
                     {quote.location && <span>📍 {quote.location}</span>}
                     {quote.customer?.email && <span>✉ {quote.customer.email}</span>}
                   </div>

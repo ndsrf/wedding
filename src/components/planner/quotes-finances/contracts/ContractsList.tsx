@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useTranslations, useLocale, useFormatter } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
@@ -50,7 +50,6 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
 
 export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const t = useTranslations('planner.quotesFinances');
-  const locale = useLocale();
   const format = useFormatter();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
@@ -368,7 +367,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                     </div>
                     {contract.signed_at && (
                       <p className="text-xs text-green-600 mt-1 font-medium">
-                        {t('contracts.signed', { date: new Date(contract.signed_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }) })}
+                        {t('contracts.signed', { date: format.dateTime(new Date(contract.signed_at), { day: 'numeric', month: 'short', year: 'numeric' }) })}
                       </p>
                     )}
                   </div>
