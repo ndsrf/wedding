@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
