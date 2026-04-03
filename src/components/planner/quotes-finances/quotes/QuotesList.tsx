@@ -62,6 +62,7 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
 export function QuotesList() {
   const t = useTranslations('planner.quotesFinances');
   const locale = useLocale();
+  const format = useFormatter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
