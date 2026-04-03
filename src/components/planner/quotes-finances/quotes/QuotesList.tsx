@@ -376,7 +376,7 @@ export function QuotesList() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className="text-lg font-bold text-gray-900">
-                    {new Intl.NumberFormat(locale, { style: 'currency', currency: quote.currency }).format(Number(quote.total))}
+                    {format.number(Number(quote.total), { style: 'currency', currency: quote.currency })}
                   </span>
                   {quote.expires_at && new Date(quote.expires_at) < new Date() && quote.status !== 'EXPIRED' && (
                     <span className="text-xs text-orange-500">{t('quotes.expiredLabel')}</span>
