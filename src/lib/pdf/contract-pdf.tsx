@@ -270,15 +270,27 @@ export interface CompanyInfo {
   signatureUrl?: string;
 }
 
+export interface ContractPDFLabels {
+  dateLabel: string;
+  footer: string;
+  sigPageTitle: string;
+  sigPageSubtitle: string;
+  weddingPlanner: string;
+  clientSigner: string;
+  signatureDate: string;
+}
+
 interface ContractPDFProps {
   title: string;
   content: { type: string; content?: DocNode[] };
   company: CompanyInfo;
   signerName?: string;
   createdAt?: Date;
+  labels: ContractPDFLabels;
+  locale: string;
 }
 
-export function ContractPDF({ title, content, company, signerName, createdAt }: ContractPDFProps) {
+export function ContractPDF({ title, content, company, signerName, createdAt, labels, locale }: ContractPDFProps) {
   const nodes = content?.content ?? [];
 
   return (
@@ -298,9 +310,9 @@ export function ContractPDF({ title, content, company, signerName, createdAt }: 
           {createdAt && (
             <View style={styles.contractMeta}>
               <Text style={styles.metaItem}>
-                Date:{' '}
+                {labels.dateLabel}{' '}
                 <Text style={styles.metaBold}>
-                  {new Date(createdAt).toLocaleDateString('en', {
+                  {new Date(createdAt).toLocaleDateString(locale, {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric',
@@ -316,7 +328,7 @@ export function ContractPDF({ title, content, company, signerName, createdAt }: 
         </View>
 
         <Text style={styles.footer} fixed>
-          This document is confidential and constitutes a binding agreement upon signature by both parties.
+          {labels.footer}
         </Text>
       </Page>
 
@@ -339,27 +351,25 @@ export function ContractPDF({ title, content, company, signerName, createdAt }: 
           </View>
         </View>
 
-        <Text style={styles.sigPageTitle}>Contract Signatures</Text>
-        <Text style={styles.sigPageSubtitle}>
-          By signing below, both parties confirm their agreement to all terms and conditions set out in this contract.
-        </Text>
+        <Text style={styles.sigPageTitle}>{labels.sigPageTitle}</Text>
+        <Text style={styles.sigPageSubtitle}>{labels.sigPageSubtitle}</Text>
 
         <View style={styles.sigRow}>
           {/* Left: Planner signature (static — pre-signed or stamped) */}
           <View style={styles.sigBlock}>
-            <Text style={styles.sigRole}>Wedding Planner</Text>
+            <Text style={styles.sigRole}>{labels.weddingPlanner}</Text>
             <Text style={styles.sigName}>{company.legalName ?? company.name}</Text>
             {company.signatureUrl ? (
               <Image src={company.signatureUrl} style={styles.sigImage} />
             ) : (
               <View style={styles.sigLine} />
             )}
-            <Text style={styles.sigDateLabel}>Signature &amp; Date</Text>
+            <Text style={styles.sigDateLabel}>{labels.signatureDate}</Text>
           </View>
 
           {/* Right: Client signature — DocuSeal overlays its widget here */}
           <View style={styles.sigBlock}>
-            <Text style={styles.sigRole}>Client / Signer</Text>
+            <Text style={styles.sigRole}>{labels.clientSigner}</Text>
             <Text style={styles.sigName}>{signerName ?? 'Client'}</Text>
             {/*
              * DocuSeal signature field target area.
@@ -368,13 +378,11 @@ export function ContractPDF({ title, content, company, signerName, createdAt }: 
              *   areas: [{ x: 0.52, y: 0.25, w: 0.38, h: 0.10, page: <lastPage> }]
              */}
             <View style={styles.sigLine} />
-            <Text style={styles.sigDateLabel}>Signature &amp; Date</Text>
+            <Text style={styles.sigDateLabel}>{labels.signatureDate}</Text>
           </View>
         </View>
 
-        <Text style={styles.sigPageFooter}>
-          This document is confidential and constitutes a binding agreement upon signature by both parties.
-        </Text>
+        <Text style={styles.sigPageFooter}>{labels.footer}</Text>
       </Page>
     </Document>
   );

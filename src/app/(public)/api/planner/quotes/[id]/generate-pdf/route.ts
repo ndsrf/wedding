@@ -5,6 +5,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { QuotePDF } from '@/lib/pdf/quote-pdf';
 import { put, del } from '@vercel/blob';
 import { toAbsoluteUrl } from '@/lib/images/processor';
+import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -39,6 +40,29 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       },
     });
 
+    const locale = await getLanguageFromRequest();
+    const { t } = await getTranslations(locale);
+    const labels = {
+      docTitle: t('planner.quotesFinances.quotePdf.docTitle'),
+      quoteReference: t('planner.quotesFinances.quotePdf.quoteReference'),
+      issueDate: t('planner.quotesFinances.quotePdf.issueDate'),
+      validUntil: t('planner.quotesFinances.quotePdf.validUntil'),
+      quoteFor: t('planner.quotesFinances.quotePdf.quoteFor'),
+      from: t('planner.quotesFinances.quotePdf.from'),
+      services: t('planner.quotesFinances.quotePdf.services'),
+      description: t('planner.quotesFinances.quotePdf.description'),
+      qty: t('planner.quotesFinances.quotePdf.qty'),
+      unitPrice: t('planner.quotesFinances.quotePdf.unitPrice'),
+      total: t('planner.quotesFinances.quotePdf.total'),
+      subtotal: t('planner.quotesFinances.quotePdf.subtotal'),
+      discount: t('planner.quotesFinances.quotePdf.discount'),
+      tax: t('planner.quotesFinances.quotePdf.tax'),
+      notes: t('planner.quotesFinances.quotePdf.notes'),
+      footer: t('planner.quotesFinances.quotePdf.footer'),
+      event: t('planner.quotesFinances.quotePdf.event'),
+      vat: t('planner.quotesFinances.quotePdf.vat'),
+    };
+
     const buffer = await renderToBuffer(
       React.createElement(QuotePDF, {
         quote,
@@ -52,6 +76,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
           phone: planner?.phone ?? undefined,
           website: planner?.website ?? undefined,
         },
+        labels,
+        locale,
       }) as never
     );
 

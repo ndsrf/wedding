@@ -157,9 +157,13 @@ const styles = StyleSheet.create({
   bankText: { fontSize: 9, color: '#6b7280', marginBottom: 2 },
 });
 
-function formatCurrency(amount: number | string | { toNumber: () => number }, currency: string) {
+function formatCurrency(
+  amount: number | string | { toNumber: () => number },
+  currency: string,
+  locale: string,
+) {
   const num = typeof amount === 'object' && 'toNumber' in amount ? amount.toNumber() : Number(amount);
-  return new Intl.NumberFormat('en', { style: 'currency', currency }).format(num);
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(num);
 }
 
 export interface CompanyInfo {
@@ -173,15 +177,51 @@ export interface CompanyInfo {
   website?: string;
 }
 
+export interface InvoicePDFLabels {
+  docTitle: string;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  billTo: string;
+  from: string;
+  services: string;
+  description: string;
+  qty: string;
+  unitPrice: string;
+  total: string;
+  subtotal: string;
+  discount: string;
+  tax: string;
+  amountPaid: string;
+  balanceDue: string;
+  paymentsReceived: string;
+  date: string;
+  method: string;
+  reference: string;
+  amount: string;
+  notes: string;
+  footer: string;
+  idPrefix: string;
+  vat: string;
+}
+
 interface InvoicePDFProps {
   invoice: InvoiceWithDetails;
   company: CompanyInfo;
+  labels: InvoicePDFLabels;
+  locale: string;
 }
 
-export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
+export function InvoicePDF({ invoice, company, labels, locale }: InvoicePDFProps) {
   const total = Number(invoice.total);
   const amountPaid = Number(invoice.amount_paid);
   const balanceDue = total - amountPaid;
+
+  const fmt = (amount: number | string | { toNumber: () => number }) =>
+    formatCurrency(amount, invoice.currency, locale);
+
+  const fmtDate = (d: Date | string) =>
+    new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <Document>
@@ -194,21 +234,21 @@ export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
             ) : (
               <Text style={styles.brandName}>{company.name}</Text>
             )}
-            <Text style={styles.docTitle}>Invoice</Text>
+            <Text style={styles.docTitle}>{labels.docTitle}</Text>
           </View>
           <View style={styles.metaRight}>
-            <Text style={styles.metaLabel}>Invoice Number</Text>
+            <Text style={styles.metaLabel}>{labels.invoiceNumber}</Text>
             <Text style={styles.metaValue}>{invoice.invoice_number}</Text>
             {invoice.issued_at && (
               <>
-                <Text style={[styles.metaLabel, { marginTop: 8 }]}>Issue Date</Text>
-                <Text style={styles.metaValue}>{new Date(invoice.issued_at).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+                <Text style={[styles.metaLabel, { marginTop: 8 }]}>{labels.issueDate}</Text>
+                <Text style={styles.metaValue}>{fmtDate(invoice.issued_at)}</Text>
               </>
             )}
             {invoice.due_date && (
               <>
-                <Text style={[styles.metaLabel, { marginTop: 8 }]}>Due Date</Text>
-                <Text style={styles.metaValue}>{new Date(invoice.due_date).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+                <Text style={[styles.metaLabel, { marginTop: 8 }]}>{labels.dueDate}</Text>
+                <Text style={styles.metaValue}>{fmtDate(invoice.due_date)}</Text>
               </>
             )}
           </View>
@@ -219,17 +259,17 @@ export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
         {/* Client & From */}
         <View style={styles.clientRow}>
           <View style={styles.clientBlock}>
-            <Text style={styles.sectionTitle}>Bill To</Text>
+            <Text style={styles.sectionTitle}>{labels.billTo}</Text>
             <Text style={styles.clientName}>{invoice.customer?.name ?? ''}</Text>
-            {invoice.customer?.id_number && <Text style={styles.clientDetail}>ID: {invoice.customer.id_number}</Text>}
+            {invoice.customer?.id_number && <Text style={styles.clientDetail}>{labels.idPrefix} {invoice.customer.id_number}</Text>}
             {invoice.customer?.email && <Text style={styles.clientDetail}>{invoice.customer.email}</Text>}
             {invoice.customer?.phone && <Text style={styles.clientDetail}>{invoice.customer.phone}</Text>}
             {invoice.customer?.address && <Text style={styles.clientDetail}>{invoice.customer.address}</Text>}
           </View>
           <View style={styles.clientBlock}>
-            <Text style={styles.sectionTitle}>From</Text>
+            <Text style={styles.sectionTitle}>{labels.from}</Text>
             <Text style={styles.clientName}>{company.legalName ?? company.name}</Text>
-            {company.vatNumber && <Text style={styles.clientDetail}>VAT: {company.vatNumber}</Text>}
+            {company.vatNumber && <Text style={styles.clientDetail}>{labels.vat} {company.vatNumber}</Text>}
             {company.address && <Text style={styles.clientDetail}>{company.address}</Text>}
             {company.phone && <Text style={styles.clientDetail}>{company.phone}</Text>}
             {company.email && <Text style={styles.clientDetail}>{company.email}</Text>}
@@ -238,12 +278,12 @@ export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
         </View>
 
         {/* Line Items */}
-        <Text style={styles.sectionTitle}>Services</Text>
+        <Text style={styles.sectionTitle}>{labels.services}</Text>
         <View style={styles.tableHeader}>
-          <Text style={[styles.headerText, styles.colDescription]}>Description</Text>
-          <Text style={[styles.headerText, styles.colQty]}>Qty</Text>
-          <Text style={[styles.headerText, styles.colUnitPrice]}>Unit Price</Text>
-          <Text style={[styles.headerText, styles.colTotal]}>Total</Text>
+          <Text style={[styles.headerText, styles.colDescription]}>{labels.description}</Text>
+          <Text style={[styles.headerText, styles.colQty]}>{labels.qty}</Text>
+          <Text style={[styles.headerText, styles.colUnitPrice]}>{labels.unitPrice}</Text>
+          <Text style={[styles.headerText, styles.colTotal]}>{labels.total}</Text>
         </View>
         {invoice.line_items.map((item) => (
           <View key={item.id} style={styles.tableRow}>
@@ -252,64 +292,64 @@ export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
               {item.description && <Text style={styles.cellSubText}>{item.description}</Text>}
             </View>
             <Text style={[styles.cellText, styles.colQty]}>{Number(item.quantity)}</Text>
-            <Text style={[styles.cellText, styles.colUnitPrice]}>{formatCurrency(item.unit_price, invoice.currency)}</Text>
-            <Text style={[styles.cellText, styles.colTotal]}>{formatCurrency(item.total, invoice.currency)}</Text>
+            <Text style={[styles.cellText, styles.colUnitPrice]}>{fmt(item.unit_price)}</Text>
+            <Text style={[styles.cellText, styles.colTotal]}>{fmt(item.total)}</Text>
           </View>
         ))}
 
         {/* Totals */}
         <View style={styles.totalsBlock}>
           <View style={styles.totalsRow}>
-            <Text style={styles.totalsLabel}>Subtotal</Text>
-            <Text style={styles.totalsValue}>{formatCurrency(invoice.subtotal, invoice.currency)}</Text>
+            <Text style={styles.totalsLabel}>{labels.subtotal}</Text>
+            <Text style={styles.totalsValue}>{fmt(invoice.subtotal)}</Text>
           </View>
           {invoice.discount && Number(invoice.discount) > 0 && (
             <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>Discount</Text>
-              <Text style={styles.totalsValue}>- {formatCurrency(invoice.discount, invoice.currency)}</Text>
+              <Text style={styles.totalsLabel}>{labels.discount}</Text>
+              <Text style={styles.totalsValue}>- {fmt(invoice.discount)}</Text>
             </View>
           )}
           {invoice.tax_rate && Number(invoice.tax_rate) > 0 && (
             <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>Tax ({Number(invoice.tax_rate)}%)</Text>
-              <Text style={styles.totalsValue}>{formatCurrency(invoice.tax_amount ?? 0, invoice.currency)}</Text>
+              <Text style={styles.totalsLabel}>{labels.tax.replace('{rate}', String(Number(invoice.tax_rate)))}</Text>
+              <Text style={styles.totalsValue}>{fmt(invoice.tax_amount ?? 0)}</Text>
             </View>
           )}
           <View style={styles.totalFinalRow}>
-            <Text style={styles.totalFinalLabel}>Total</Text>
-            <Text style={styles.totalFinalValue}>{formatCurrency(total, invoice.currency)}</Text>
+            <Text style={styles.totalFinalLabel}>{labels.total}</Text>
+            <Text style={styles.totalFinalValue}>{fmt(total)}</Text>
           </View>
           {amountPaid > 0 && (
             <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>Amount Paid</Text>
-              <Text style={[styles.totalsValue, { color: '#16a34a' }]}>- {formatCurrency(amountPaid, invoice.currency)}</Text>
+              <Text style={styles.totalsLabel}>{labels.amountPaid}</Text>
+              <Text style={[styles.totalsValue, { color: '#16a34a' }]}>- {fmt(amountPaid)}</Text>
             </View>
           )}
         </View>
 
         {balanceDue > 0 && (
           <View style={styles.balanceDue}>
-            <Text style={styles.balanceLabel}>Balance Due</Text>
-            <Text style={styles.balanceValue}>{formatCurrency(balanceDue, invoice.currency)}</Text>
+            <Text style={styles.balanceLabel}>{labels.balanceDue}</Text>
+            <Text style={styles.balanceValue}>{fmt(balanceDue)}</Text>
           </View>
         )}
 
         {/* Payment history */}
         {invoice.payments.length > 0 && (
           <View style={styles.paymentsSection}>
-            <Text style={styles.sectionTitle}>Payments Received</Text>
+            <Text style={styles.sectionTitle}>{labels.paymentsReceived}</Text>
             <View style={styles.tableHeader}>
-              <Text style={[styles.headerText, { width: 100 }]}>Date</Text>
-              <Text style={[styles.headerText, { flex: 1 }]}>Method</Text>
-              <Text style={[styles.headerText, { flex: 1 }]}>Reference</Text>
-              <Text style={[styles.headerText, { width: 80, textAlign: 'right' }]}>Amount</Text>
+              <Text style={[styles.headerText, { width: 100 }]}>{labels.date}</Text>
+              <Text style={[styles.headerText, { flex: 1 }]}>{labels.method}</Text>
+              <Text style={[styles.headerText, { flex: 1 }]}>{labels.reference}</Text>
+              <Text style={[styles.headerText, { width: 80, textAlign: 'right' }]}>{labels.amount}</Text>
             </View>
             {invoice.payments.map((p) => (
               <View key={p.id} style={styles.paymentRow}>
-                <Text style={styles.paymentDate}>{new Date(p.payment_date).toLocaleDateString('en')}</Text>
+                <Text style={styles.paymentDate}>{new Date(p.payment_date).toLocaleDateString(locale)}</Text>
                 <Text style={styles.paymentMethod}>{p.method.replace('_', ' ')}</Text>
                 <Text style={styles.paymentRef}>{p.reference ?? '—'}</Text>
-                <Text style={styles.paymentAmount}>{formatCurrency(p.amount, p.currency)}</Text>
+                <Text style={styles.paymentAmount}>{formatCurrency(p.amount, p.currency, locale)}</Text>
               </View>
             ))}
           </View>
@@ -317,14 +357,12 @@ export function InvoicePDF({ invoice, company }: InvoicePDFProps) {
 
         {invoice.description && (
           <View style={[styles.bankDetails, { marginTop: 24 }]}>
-            <Text style={styles.sectionTitle}>Notes</Text>
+            <Text style={styles.sectionTitle}>{labels.notes}</Text>
             <Text style={styles.bankText}>{invoice.description}</Text>
           </View>
         )}
 
-        <Text style={styles.footer}>
-          Thank you for your business. Please contact us if you have any questions about this invoice.
-        </Text>
+        <Text style={styles.footer}>{labels.footer}</Text>
       </Page>
     </Document>
   );
