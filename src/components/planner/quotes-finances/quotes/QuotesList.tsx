@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { QuoteForm } from './QuoteForm';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
