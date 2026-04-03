@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { ContractsList, type InvoicePrefillData } from './contracts/ContractsList';
 import { QuotesList } from './quotes/QuotesList';
 import { InvoicesList } from './invoices/InvoicesList';
