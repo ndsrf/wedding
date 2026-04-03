@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent, type ChangeEvent } from 'react';
 import * as Y from 'yjs';
+import { useTranslations } from 'next-intl';
 import { ContractEditor } from '@/components/planner/quotes-finances/contracts/ContractEditor';
 import { ContractCommentsSidebar } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
 
@@ -28,6 +29,7 @@ interface CreateWeddingDialogProps {
 }
 
 function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: CreateWeddingDialogProps) {
+  const t = useTranslations('planner.quotesFinances.contractPage');
   type Fields = { couple_names: string; wedding_date: string; wedding_time: string; rsvp_cutoff_date: string };
   const [fields, setFields] = useState<Fields>({
     couple_names: coupleNames,
@@ -66,7 +68,7 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
       });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
-        setError(json.error ?? 'Failed to create wedding');
+        setError(json.error ?? t('failedToCreate'));
         return;
       }
       const json = await res.json();
@@ -74,7 +76,7 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
       onClose();
       if (weddingId) window.open(`/planner/weddings/${weddingId}`, '_blank');
     } catch {
-      setError('Failed to create wedding');
+      setError(t('failedToCreate'));
     } finally {
       setSaving(false);
     }
@@ -84,7 +86,7 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 className="text-base font-bold text-gray-900">Create Wedding from Contract</h2>
+          <h2 className="text-base font-bold text-gray-900">{t('createWeddingTitle')}</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
@@ -96,7 +98,7 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Couple names</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('coupleNames')}</label>
             <input
               required
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
@@ -106,7 +108,7 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Wedding date</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('weddingDate')}</label>
               <input
                 required
                 type="date"
@@ -116,7 +118,7 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Time</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('time')}</label>
               <input
                 required
                 type="time"
@@ -127,7 +129,7 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">RSVP cutoff date</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('rsvpCutoff')}</label>
             <input
               required
               type="date"
@@ -143,14 +145,14 @@ function CreateWeddingDialog({ coupleNames, contractId, customerId, onClose }: C
               onClick={onClose}
               className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white hover:bg-rose-600 disabled:opacity-60"
             >
-              {saving ? 'Creating…' : 'Create Wedding'}
+              {saving ? t('creating') : t('createWedding')}
             </button>
           </div>
         </form>
@@ -167,15 +169,17 @@ const STATUS_STYLES: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-600',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Draft',
-  SHARED: 'Shared with client',
-  SIGNING: 'Awaiting Signature',
-  SIGNED: 'Signed',
-  CANCELLED: 'Cancelled',
+
+const STATUS_KEY: Record<string, string> = {
+  DRAFT: 'statusDraft',
+  SHARED: 'statusShared',
+  SIGNING: 'statusSigning',
+  SIGNED: 'statusSigned',
+  CANCELLED: 'statusCancelled',
 };
 
 export default function PlannerContractPage({ params }: { params: Promise<{ shareToken: string }> }) {
+  const t = useTranslations('planner.quotesFinances.contractPage');
   const [shareToken, setShareToken] = useState('');
   const [contract, setContract] = useState<ContractData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -250,7 +254,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
 
         setContract(contractData);
       } catch {
-        setError('Failed to load contract');
+        setError(t('failedToLoad'));
       } finally {
         setLoading(false);
       }
@@ -301,8 +305,8 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Contract not found</h1>
-          <p className="text-gray-500">{error ?? 'This link may have expired or been revoked.'}</p>
+          <h1 className="text-xl font-semibold text-gray-900 mb-2">{t('contractNotFound')}</h1>
+          <p className="text-gray-500">{error ?? t('linkExpired')}</p>
         </div>
       </div>
     );
@@ -327,14 +331,14 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-sm sm:text-base font-bold text-gray-900 font-playfair truncate">{contract.title}</h1>
                 <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[contract.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                  {STATUS_LABELS[contract.status] ?? contract.status}
+                  {STATUS_KEY[contract.status] ? t(STATUS_KEY[contract.status] as Parameters<typeof t>[0]) : contract.status}
                 </span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 text-xs">
-            {saving && <span className="text-gray-400">Saving…</span>}
-            {saved && <span className="text-green-600 font-medium">Saved ✓</span>}
+            {saving && <span className="text-gray-400">{t('saving')}</span>}
+            {saved && <span className="text-green-600 font-medium">{t('saved')}</span>}
             <button
               onClick={() => setShowCreateWedding(true)}
               className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-600 transition-colors"
@@ -343,7 +347,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Create Wedding
+              {t('createWedding')}
             </button>
           </div>
         </div>
