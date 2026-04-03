@@ -6,6 +6,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { createDocuSealSubmission } from '@/lib/signing/docuseal';
 import { toAbsoluteUrl } from '@/lib/images/processor';
+import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
 /** Count pages in a PDF buffer by scanning for /Type /Page entries (no external deps). */
@@ -84,6 +85,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // 4. Generate PDF — content on page(s) 0..n-2, dedicated signature page always last
   let buffer: Buffer;
   try {
+    const locale = await getLanguageFromRequest();
+    const { t } = await getTranslations(locale);
+    const labels = {
+      dateLabel: t('planner.quotesFinances.contractPdf.dateLabel'),
+      footer: t('planner.quotesFinances.contractPdf.footer'),
+      sigPageTitle: t('planner.quotesFinances.contractPdf.sigPageTitle'),
+      sigPageSubtitle: t('planner.quotesFinances.contractPdf.sigPageSubtitle'),
+      weddingPlanner: t('planner.quotesFinances.contractPdf.weddingPlanner'),
+      clientSigner: t('planner.quotesFinances.contractPdf.clientSigner'),
+      signatureDate: t('planner.quotesFinances.contractPdf.signatureDate'),
+    };
     buffer = await renderToBuffer(
       React.createElement(ContractPDF, {
         title: contract.title,
@@ -101,6 +113,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
         signerName: data.signer_name,
         createdAt: contract.created_at,
+        labels,
+        locale,
       }) as never
     );
   } catch (error) {
