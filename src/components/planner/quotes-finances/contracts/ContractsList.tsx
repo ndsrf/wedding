@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
@@ -47,15 +48,9 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-700',
 };
 
-const CONTRACT_STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Draft',
-  SHARED: 'Shared',
-  SIGNING: 'Awaiting Signature',
-  SIGNED: 'Signed',
-  CANCELLED: 'Cancelled',
-};
-
 export function ContractsList({ onCreateInvoice }: ContractsListProps) {
+  const t = useTranslations('planner.quotesFinances');
+  const locale = useLocale();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -289,11 +284,11 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const pagedContracts = filteredContracts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const CONTRACT_STATUS_OPTIONS = [
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'SHARED', label: 'Shared' },
-    { value: 'SIGNING', label: 'Awaiting Signature' },
-    { value: 'SIGNED', label: 'Signed' },
-    { value: 'CANCELLED', label: 'Cancelled' },
+    { value: 'DRAFT', label: t('contracts.status.DRAFT') },
+    { value: 'SHARED', label: t('contracts.status.SHARED') },
+    { value: 'SIGNING', label: t('contracts.status.SIGNING') },
+    { value: 'SIGNED', label: t('contracts.status.SIGNED') },
+    { value: 'CANCELLED', label: t('contracts.status.CANCELLED') },
   ];
 
   return (
@@ -310,17 +305,19 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       {/* Contracts list */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900">Contracts</h3>
-          <p className="text-xs text-gray-400">Contracts are created from accepted quotes</p>
+          <h3 className="text-base font-semibold text-gray-900">{t('contracts.title')}</h3>
+          <p className="text-xs text-gray-400">{t('contracts.subtitle')}</p>
         </div>
 
         <FilterBar
           nameValue={nameFilter}
           onNameChange={(v) => { setNameFilter(v); setPage(1); }}
-          namePlaceholder="Search by title or client…"
+          namePlaceholder={t('contracts.searchPlaceholder')}
           statusOptions={CONTRACT_STATUS_OPTIONS}
           selectedStatuses={statusFilter}
           onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
+          statusLabel={t('filterBar.status')}
+          clearFiltersLabel={t('filterBar.clearFilters')}
         />
 
         {filteredContracts.length === 0 ? (
@@ -332,13 +329,13 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
             </div>
             {nameFilter || statusFilter.length > 0 ? (
               <>
-                <h3 className="text-sm font-semibold text-gray-900">No contracts match your filters</h3>
-                <p className="text-xs text-gray-500 mt-1">Try adjusting your search or status filters.</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('contracts.noMatch')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('contracts.noMatchHint')}</p>
               </>
             ) : (
               <>
-                <h3 className="text-sm font-semibold text-gray-900">No contracts yet</h3>
-                <p className="text-xs text-gray-500 mt-1">Accept a quote and create a contract from it to get started.</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('contracts.empty')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('contracts.emptyHint')}</p>
               </>
             )}
           </div>
@@ -353,7 +350,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="text-sm font-semibold text-gray-900">{contract.title}</h4>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${CONTRACT_STATUS_STYLES[contract.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                        {CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}
+                        {t(`contracts.status.${contract.status}` as Parameters<typeof t>[0])}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
@@ -361,23 +358,23 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <span className="font-medium text-gray-700">{contract.customer.name}</span>
                       )}
                       {contract.quote && (
-                        <span>Quote: {contract.quote.couple_names}</span>
+                        <span>{t('contracts.quotePrefix')} {contract.quote.couple_names}</span>
                       )}
                       {contract.signer_email && (
                         <span>✉ {contract.signer_email}</span>
                       )}
-                      <span>{new Date(contract.created_at).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      <span>{new Date(contract.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
                     {contract.signed_at && (
                       <p className="text-xs text-green-600 mt-1 font-medium">
-                        Signed {new Date(contract.signed_at).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {t('contracts.signed', { date: new Date(contract.signed_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }) })}
                       </p>
                     )}
                   </div>
                   {contract.quote && (
                     <div className="text-right">
                       <span className="text-sm font-bold text-gray-900">
-                        {new Intl.NumberFormat('en', { style: 'currency', currency: contract.quote.currency }).format(Number(contract.quote.total))}
+                        {new Intl.NumberFormat(locale, { style: 'currency', currency: contract.quote.currency }).format(Number(contract.quote.total))}
                       </span>
                     </div>
                   )}
@@ -389,10 +386,10 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                     onSubmit={(e) => handleSendForSigning(contract.id, e)}
                     className="mt-3 p-4 bg-amber-50 rounded-xl border border-amber-100 space-y-3"
                   >
-                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Send for Online Signing via DocuSeal</h5>
+                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('contracts.sendForm.heading')}</h5>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Signer Email *</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">{t('contracts.sendForm.signerEmail')}</label>
                         <input
                           required type="email"
                           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -402,7 +399,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Signer Name *</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">{t('contracts.sendForm.signerName')}</label>
                         <input
                           required
                           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -412,7 +409,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Message (optional)</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">{t('contracts.sendForm.message')}</label>
                         <textarea
                           rows={2}
                           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
@@ -438,7 +435,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         {sending && (
                           <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         )}
-                        {sending ? 'Sending…' : 'Send'}
+                        {sending ? t('contracts.sendForm.sending') : t('contracts.sendForm.send')}
                       </button>
                       <button
                         type="button"
@@ -446,7 +443,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         onClick={() => { setSendingId(null); setSendError(null); }}
                         className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-60 transition-colors"
                       >
-                        Cancel
+                        {t('contracts.sendForm.cancel')}
                       </button>
                     </div>
                   </form>
@@ -463,7 +460,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
-                      Edit
+                      {t('contracts.edit')}
                     </button>
                   ) : (
                     <button
@@ -474,7 +471,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      View
+                      {t('contracts.view')}
                     </button>
                   )}
 
@@ -496,7 +493,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     )}
-                    {contract.status === 'SIGNED' ? 'Download Signed PDF' : (contract.pdf_url ? 'Download PDF' : 'Generate PDF')}
+                    {contract.status === 'SIGNED' ? t('contracts.downloadSignedPdf') : (contract.pdf_url ? t('contracts.downloadPdf') : t('contracts.generatePdf'))}
                   </button>
 
                   {/* Audit PDF — only for SIGNED contracts with DocuSeal */}
@@ -509,7 +506,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                       </svg>
-                      Audit
+                      {t('contracts.audit')}
                     </button>
                   )}
 
@@ -522,14 +519,14 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <svg className="h-3.5 w-3.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        <span className="text-green-700">Copied!</span>
+                        <span className="text-green-700">{t('contracts.copied')}</span>
                       </>
                     ) : (
                       <>
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                         </svg>
-                        Share Link
+                        {t('contracts.shareLink')}
                       </>
                     )}
                   </button>
@@ -552,7 +549,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
-                        Send for Signing
+                        {t('contracts.sendForSigning')}
                       </button>
                       <button
                         disabled={manualSigningId === contract.id}
@@ -570,7 +567,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                           </svg>
                         )}
-                        Manual Sign
+                        {t('contracts.manualSign')}
                       </button>
 
                       {/* Delete only in DRAFT mode */}
@@ -581,7 +578,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Delete
+                        {t('contracts.delete')}
                       </button>
                     </>
                   )}
@@ -593,7 +590,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
-                        Awaiting DocuSeal signature
+                        {t('contracts.awaitingDocuSeal')}
                       </span>
                       <button
                         onClick={() => handleMoveToDraft(contract.id)}
@@ -607,7 +604,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                           </svg>
                         )}
-                        Move to Draft
+                        {t('contracts.moveToDraft')}
                       </button>
                     </>
                   )}
@@ -626,7 +623,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                         </svg>
                       )}
-                      Create Invoice
+                      {t('contracts.createInvoice')}
                     </button>
                   )}
                   {contract.status === 'SIGNED' && (
@@ -642,7 +639,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                       )}
-                      Create Wedding
+                      {t('contracts.createWedding')}
                     </button>
                   )}
                 </div>
@@ -666,7 +663,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          Contract Templates
+          {t('contracts.contractTemplates')}
         </button>
         {showTemplates && (
           <div className="mt-4">
