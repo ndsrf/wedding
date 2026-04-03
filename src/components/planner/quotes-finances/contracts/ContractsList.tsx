@@ -364,7 +364,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                       {contract.signer_email && (
                         <span>✉ {contract.signer_email}</span>
                       )}
-                      <span>{new Date(contract.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      <span>{format.dateTime(new Date(contract.created_at), { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
                     {contract.signed_at && (
                       <p className="text-xs text-green-600 mt-1 font-medium">
