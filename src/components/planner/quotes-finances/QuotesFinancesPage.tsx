@@ -59,7 +59,7 @@ export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPagePr
   const defaultCurrency = summary?.currency ?? 'EUR';
 
   function fmt(amount: number) {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: defaultCurrency, maximumFractionDigits: 0 }).format(amount);
+    return format.number(amount, { style: 'currency', currency: defaultCurrency, maximumFractionDigits: 0 });
   }
 
   return (
