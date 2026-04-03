@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
 import type { InvoicePrefillData } from '../contracts/ContractsList';
