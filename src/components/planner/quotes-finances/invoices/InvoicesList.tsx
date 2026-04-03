@@ -74,6 +74,7 @@ interface InvoicesListProps {
 export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: InvoicesListProps) {
   const t = useTranslations('planner.quotesFinances');
   const locale = useLocale();
+  const format = useFormatter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [readyQuotes, setReadyQuotes] = useState<ReadyQuote[]>([]);
   const [loading, setLoading] = useState(true);
