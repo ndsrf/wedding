@@ -42,7 +42,7 @@
     "@google/genai": "^1.44.0",
     "@hyperdx/browser": "^0.22.0",
     "@liveblocks/client": "^3.15.3",
-    "diff": "^5.2.0",
+    "diff": "^8.0.0",
     "@liveblocks/node": "^3.15.3",
     "@liveblocks/react": "^3.15.3",
     "@liveblocks/react-tiptap": "^3.15.3",
@@ -99,7 +99,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^20.0.0",
-    "@types/diff": "^5.2.3",
+    "@types/diff": "^8.0.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.49.1",
