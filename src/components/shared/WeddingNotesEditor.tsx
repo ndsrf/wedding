@@ -296,6 +296,24 @@ export function WeddingNotesEditor({
     let destroyed = false;
     let cleanup: (() => void) | undefined;
 
+    // Track any elements Liveblocks injects into document.body (e.g. the
+    // "Powered by Liveblocks" banner on the free plan) so we can remove them
+    // when this component unmounts and the user navigates away.
+    const liveblocksBodyNodes: Element[] = [];
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof Element) {
+            const cls = typeof node.className === 'string' ? node.className : '';
+            if (cls.includes('lb-') || node.querySelector?.('[class*="lb-"]')) {
+              liveblocksBodyNodes.push(node);
+            }
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true });
+
     async function initLiveblocks() {
       try {
         const { createClient } = await import('@liveblocks/client');
@@ -328,6 +346,10 @@ export function WeddingNotesEditor({
           cleanup = () => {
             provider.destroy();
             room.disconnect();
+            // Remove the Liveblocks banner (and any other lb-* elements) that
+            // were injected into document.body while this component was mounted.
+            observer.disconnect();
+            liveblocksBodyNodes.forEach((el) => el.remove());
           };
         }
       } catch (err) {
@@ -338,6 +360,7 @@ export function WeddingNotesEditor({
     initLiveblocks();
     return () => {
       destroyed = true;
+      observer.disconnect();
       cleanup?.();
     };
   }, [authEndpoint, weddingId, currentUser]);
