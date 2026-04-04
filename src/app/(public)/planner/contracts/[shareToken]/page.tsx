@@ -193,7 +193,14 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   const [contractTemplateId, setContractTemplateId] = useState<string | null>(null);
   const [showCreateWedding, setShowCreateWedding] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const lastEditLogRef = useRef<number>(0);
+
+  // Latest unsaved snapshot — updated on every edit, flushed on hide/unload/hourly
+  const pendingSnapshotRef = useRef<object | null>(null);
+  // Refs so event listeners always read fresh values without stale closures
+  const contractIdRef = useRef<string | null>(null);
+  const plannerNameRef = useRef('Planner');
+  contractIdRef.current = contract?.id ?? null;
+  plannerNameRef.current = plannerName;
 
   // Shared Y.Doc: editor + comments sidebar share the same Liveblocks connection
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
@@ -277,23 +284,59 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       .catch(() => {});
   }, [contract?.id]);
 
-  async function logHistoryEvent(payload: {
-    event_type: 'edit' | 'comment_added' | 'comment_resolved';
+  // Sends the pending snapshot to the history API.
+  // Uses sendBeacon so it survives page unload; falls back to fetch otherwise.
+  function flushSnapshot() {
+    const snapshot = pendingSnapshotRef.current;
+    const contractId = contractIdRef.current;
+    const name = plannerNameRef.current;
+    if (!snapshot || !contractId) return;
+    pendingSnapshotRef.current = null; // clear before sending to avoid double-flush
+
+    const url = `/api/planner/contracts/${contractId}/history`;
+    const body = JSON.stringify({
+      actor_name: name,
+      actor_color: '#e11d48',
+      event_type: 'edit',
+      content_snapshot: snapshot,
+    });
+    const blob = new Blob([body], { type: 'application/json' });
+    if (!navigator.sendBeacon?.(url, blob)) {
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }).catch(() => {});
+    }
+  }
+
+  // Register flush triggers once on mount: page hide, tab close, and hourly fallback.
+  useEffect(() => {
+    const onVisibilityChange = () => { if (document.visibilityState === 'hidden') flushSnapshot(); };
+    const onBeforeUnload = () => flushSnapshot();
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    const hourly = setInterval(flushSnapshot, 60 * 60 * 1000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      clearInterval(hourly);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- uses refs, no stale closure
+
+  function logCommentEvent(payload: {
+    event_type: 'comment_added' | 'comment_resolved';
     description?: string;
-    actor_name?: string;
-    actor_color?: string;
-    content_snapshot?: object;
   }) {
-    if (!contract) return;
-    fetch(`/api/planner/contracts/${contract.id}/history`, {
+    const contractId = contractIdRef.current;
+    const name = plannerNameRef.current;
+    if (!contractId) return;
+    fetch(`/api/planner/contracts/${contractId}/history`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        actor_name: payload.actor_name ?? plannerName,
-        actor_color: payload.actor_color ?? '#e11d48',
+        actor_name: name,
+        actor_color: '#e11d48',
         event_type: payload.event_type,
         description: payload.description,
-        content_snapshot: payload.content_snapshot,
       }),
     }).catch(() => {});
   }
@@ -310,13 +353,8 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-
-      // Log edit event at most once per 60 seconds, with the current content snapshot
-      const now = Date.now();
-      if (now - lastEditLogRef.current > 60_000) {
-        lastEditLogRef.current = now;
-        logHistoryEvent({ event_type: 'edit', content_snapshot: content });
-      }
+      // Just mark as dirty — snapshot is flushed on hide/unload/hourly
+      pendingSnapshotRef.current = content;
     } catch {
       // silent
     } finally {
@@ -325,7 +363,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   }
 
   function handleCommentAdded(comment: CommentData) {
-    logHistoryEvent({
+    logCommentEvent({
       event_type: 'comment_added',
       description: comment.text.length > 120 ? comment.text.slice(0, 120) + '…' : comment.text,
     });
@@ -333,7 +371,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
 
   function handleCommentResolved(resolvedComments: CommentData[]) {
     const names = resolvedComments.map((c) => `"${c.text.slice(0, 60)}${c.text.length > 60 ? '…' : ''}"`).join(', ');
-    logHistoryEvent({
+    logCommentEvent({
       event_type: 'comment_resolved',
       description: resolvedComments.length === 1 ? names : `${resolvedComments.length} comments resolved`,
     });
