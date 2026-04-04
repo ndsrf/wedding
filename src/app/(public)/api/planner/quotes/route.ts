@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       where: {
         planner_id: user.planner_id,
         // Only return the latest version in each chain (quotes not superseded by a newer version)
-        next_version: null,
+        next_version: { is: null },
         ...(status ? { status: status as never } : {}),
       },
       include: {
