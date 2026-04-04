@@ -769,7 +769,8 @@
           "ACCEPTED": "Accepté",
           "REJECTED": "Refusé",
           "EXPIRED": "Expiré"
-        }
+        },
+        "newVersion": "Nouvelle Version"
       },
       "contracts": {
         "title": "Contrats",

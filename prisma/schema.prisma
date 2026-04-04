@@ -922,10 +922,14 @@ model Quote {
   pdf_url                 String?
   expires_at              DateTime?
   converted_to_wedding_id String?
+  version                 Int            @default(1)
+  previous_version_id     String?        @unique
   created_at              DateTime       @default(now())
   updated_at              DateTime       @updatedAt
   planner                 WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   customer                Customer?      @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  previous_version        Quote?         @relation("QuoteVersionChain", fields: [previous_version_id], references: [id], onDelete: SetNull)
+  next_version            Quote?         @relation("QuoteVersionChain")
   line_items              QuoteLineItem[]
   contracts               Contract[]
   invoices                Invoice[]

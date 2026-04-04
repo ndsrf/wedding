@@ -777,7 +777,8 @@
           "ACCEPTED": "Accepted",
           "REJECTED": "Rejected",
           "EXPIRED": "Expired"
-        }
+        },
+        "newVersion": "New Version"
       },
       "contracts": {
         "title": "Contracts",
