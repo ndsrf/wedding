@@ -980,14 +980,15 @@ model Contract {
 }
 
 model ContractHistoryEvent {
-  id          String   @id @default(uuid())
-  contract_id String
-  actor_name  String
-  actor_color String
-  event_type  String   // "edit" | "comment_added" | "comment_resolved"
-  description String?  @db.Text
-  created_at  DateTime @default(now())
-  contract    Contract @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid())
+  contract_id      String
+  actor_name       String
+  actor_color      String
+  event_type       String   // "edit" | "comment_added" | "comment_resolved"
+  description      String?  @db.Text
+  content_snapshot Json?    // ProseMirror JSON snapshot, only for event_type = "edit"
+  created_at       DateTime @default(now())
+  contract         Contract @relation(fields: [contract_id], references: [id], onDelete: Cascade)
 
   @@index([contract_id])
   @@map("contract_history_events")

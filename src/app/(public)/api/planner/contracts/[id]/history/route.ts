@@ -8,6 +8,7 @@ const createSchema = z.object({
   actor_color: z.string().min(1).max(20),
   event_type: z.enum(['edit', 'comment_added', 'comment_resolved']),
   description: z.string().max(500).optional(),
+  content_snapshot: z.record(z.string(), z.unknown()).optional(), // ProseMirror JSON, only for "edit"
   share_token: z.string().optional(), // clients pass this for auth
 });
 
@@ -66,10 +67,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
 
-    const { actor_name, actor_color, event_type, description } = parsed.data;
+    const { actor_name, actor_color, event_type, description, content_snapshot } = parsed.data;
 
     const event = await prisma.contractHistoryEvent.create({
-      data: { contract_id: id, actor_name, actor_color, event_type, description },
+      data: {
+        contract_id: id,
+        actor_name,
+        actor_color,
+        event_type,
+        description,
+        ...(content_snapshot ? { content_snapshot } : {}),
+      },
     });
 
     return NextResponse.json({ data: event }, { status: 201 });

@@ -282,6 +282,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
     description?: string;
     actor_name?: string;
     actor_color?: string;
+    content_snapshot?: object;
   }) {
     if (!contract) return;
     fetch(`/api/planner/contracts/${contract.id}/history`, {
@@ -292,6 +293,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
         actor_color: payload.actor_color ?? '#e11d48',
         event_type: payload.event_type,
         description: payload.description,
+        content_snapshot: payload.content_snapshot,
       }),
     }).catch(() => {});
   }
@@ -309,11 +311,11 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
 
-      // Log edit event at most once per 60 seconds to avoid flooding the log
+      // Log edit event at most once per 60 seconds, with the current content snapshot
       const now = Date.now();
       if (now - lastEditLogRef.current > 60_000) {
         lastEditLogRef.current = now;
-        logHistoryEvent({ event_type: 'edit' });
+        logHistoryEvent({ event_type: 'edit', content_snapshot: content });
       }
     } catch {
       // silent
