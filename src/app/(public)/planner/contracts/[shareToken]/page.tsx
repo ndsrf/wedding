@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type FormEvent, type ChangeEvent } from 'r
 import * as Y from 'yjs';
 import { useTranslations } from 'next-intl';
 import { ContractEditor } from '@/components/planner/quotes-finances/contracts/ContractEditor';
-import { ContractCommentsSidebar } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
+import { ContractCommentsSidebar, type CommentData } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
+import { ContractHistoryPanel } from '@/components/planner/quotes-finances/contracts/ContractHistoryPanel';
 
 interface ContractData {
   id: string;
@@ -191,6 +192,8 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   const [contractCustomerId, setContractCustomerId] = useState<string | null>(null);
   const [contractTemplateId, setContractTemplateId] = useState<string | null>(null);
   const [showCreateWedding, setShowCreateWedding] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const lastEditLogRef = useRef<number>(0);
 
   // Shared Y.Doc: editor + comments sidebar share the same Liveblocks connection
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
@@ -274,6 +277,25 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       .catch(() => {});
   }, [contract?.id]);
 
+  async function logHistoryEvent(payload: {
+    event_type: 'edit' | 'comment_added' | 'comment_resolved';
+    description?: string;
+    actor_name?: string;
+    actor_color?: string;
+  }) {
+    if (!contract) return;
+    fetch(`/api/planner/contracts/${contract.id}/history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        actor_name: payload.actor_name ?? plannerName,
+        actor_color: payload.actor_color ?? '#e11d48',
+        event_type: payload.event_type,
+        description: payload.description,
+      }),
+    }).catch(() => {});
+  }
+
   async function handleSaveContent(content: object) {
     if (!contract) return;
     setSaving(true);
@@ -286,11 +308,33 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+
+      // Log edit event at most once per 60 seconds to avoid flooding the log
+      const now = Date.now();
+      if (now - lastEditLogRef.current > 60_000) {
+        lastEditLogRef.current = now;
+        logHistoryEvent({ event_type: 'edit' });
+      }
     } catch {
       // silent
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleCommentAdded(comment: CommentData) {
+    logHistoryEvent({
+      event_type: 'comment_added',
+      description: comment.text.length > 120 ? comment.text.slice(0, 120) + '…' : comment.text,
+    });
+  }
+
+  function handleCommentResolved(resolvedComments: CommentData[]) {
+    const names = resolvedComments.map((c) => `"${c.text.slice(0, 60)}${c.text.length > 60 ? '…' : ''}"`).join(', ');
+    logHistoryEvent({
+      event_type: 'comment_resolved',
+      description: resolvedComments.length === 1 ? names : `${resolvedComments.length} comments resolved`,
+    });
   }
 
   if (loading) {
@@ -340,6 +384,20 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
             {saving && <span className="text-gray-400">{t('saving')}</span>}
             {saved && <span className="text-green-600 font-medium">{t('saved')}</span>}
             <button
+              onClick={() => setShowHistory((v) => !v)}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                showHistory
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              title="View change history"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              History
+            </button>
+            <button
               onClick={() => setShowCreateWedding(true)}
               className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-600 transition-colors"
               title="Create a wedding from this contract"
@@ -369,13 +427,22 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
 
         <div className="w-full lg:w-72 lg:flex-shrink-0">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden lg:flex lg:flex-col">
-            <ContractCommentsSidebar
-              ydocRef={ydocRef}
-              authorName={plannerName}
-              authorColor="#e11d48"
-              isPlanner
-              contractTemplateId={contractTemplateId}
-            />
+            {showHistory ? (
+              <ContractHistoryPanel
+                contractId={contract.id}
+                onClose={() => setShowHistory(false)}
+              />
+            ) : (
+              <ContractCommentsSidebar
+                ydocRef={ydocRef}
+                authorName={plannerName}
+                authorColor="#e11d48"
+                isPlanner
+                contractTemplateId={contractTemplateId}
+                onCommentAdded={handleCommentAdded}
+                onCommentResolved={handleCommentResolved}
+              />
+            )}
           </div>
         </div>
       </div>

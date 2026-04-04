@@ -970,12 +970,27 @@ model Contract {
   quote                Quote?            @relation(fields: [quote_id], references: [id], onDelete: SetNull)
   template             ContractTemplate? @relation(fields: [contract_template_id], references: [id], onDelete: SetNull)
   weddings             Wedding[]         @relation("WeddingContract")
+  history_events       ContractHistoryEvent[]
 
   @@index([planner_id])
   @@index([customer_id])
   @@index([quote_id])
   @@index([status])
   @@map("contracts")
+}
+
+model ContractHistoryEvent {
+  id          String   @id @default(uuid())
+  contract_id String
+  actor_name  String
+  actor_color String
+  event_type  String   // "edit" | "comment_added" | "comment_resolved"
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  contract    Contract @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+
+  @@index([contract_id])
+  @@map("contract_history_events")
 }
 
 model Invoice {
