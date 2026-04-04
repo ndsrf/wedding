@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations, useFormatter } from 'next-intl';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
 import type { InvoicePrefillData } from '../contracts/ContractsList';
@@ -71,6 +72,8 @@ interface InvoicesListProps {
 }
 
 export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: InvoicesListProps) {
+  const t = useTranslations('planner.quotesFinances');
+  const format = useFormatter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [readyQuotes, setReadyQuotes] = useState<ReadyQuote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,16 +213,16 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         : {};
 
     const formTitle = externalFormData?.client_name
-      ? `New Invoice – ${externalFormData.client_name}`
+      ? t('invoices.newInvoiceFor', { name: externalFormData.client_name })
       : prefillQuote
-        ? `New Invoice – ${prefillQuote.couple_names}`
-        : 'New Invoice';
+        ? t('invoices.newInvoiceFor', { name: prefillQuote.couple_names })
+        : t('invoices.newInvoice');
 
     return (
       <div>
         <div className="flex items-center gap-3 mb-6">
           <button onClick={handleCancelForm} className="text-sm text-gray-500 hover:text-gray-700">
-            ← Back
+            {t('invoices.back')}
           </button>
           <h3 className="text-base font-semibold text-gray-900">{formTitle}</h3>
         </div>
@@ -259,9 +262,9 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       <div>
         <div className="flex items-center gap-3 mb-6">
           <button onClick={handleCancelForm} className="text-sm text-gray-500 hover:text-gray-700">
-            ← Back
+            {t('invoices.back')}
           </button>
-          <h3 className="text-base font-semibold text-gray-900">Edit Invoice – {editingInvoice.customer?.name ?? ''}</h3>
+          <h3 className="text-base font-semibold text-gray-900">{t('invoices.editInvoiceFor', { name: editingInvoice.customer?.name ?? '' })}</h3>
         </div>
         <InvoiceForm
           initialData={prefill}
@@ -299,12 +302,12 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   const pagedInvoices = filteredInvoices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const INVOICE_STATUS_OPTIONS = [
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'ISSUED', label: 'Issued' },
-    { value: 'PARTIAL', label: 'Partial' },
-    { value: 'PAID', label: 'Paid' },
-    { value: 'OVERDUE', label: 'Overdue' },
-    { value: 'CANCELLED', label: 'Cancelled' },
+    { value: 'DRAFT', label: t('invoices.status.DRAFT') },
+    { value: 'ISSUED', label: t('invoices.status.ISSUED') },
+    { value: 'PARTIAL', label: t('invoices.status.PARTIAL') },
+    { value: 'PAID', label: t('invoices.status.PAID') },
+    { value: 'OVERDUE', label: t('invoices.status.OVERDUE') },
+    { value: 'CANCELLED', label: t('invoices.status.CANCELLED') },
   ];
 
   return (
@@ -316,7 +319,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
             <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Ready to Invoice ({readyQuotes.length})
+            {t('invoices.readyToInvoice', { count: readyQuotes.length })}
           </h4>
           <div className="space-y-2">
             {readyQuotes.map((q) => (
@@ -324,15 +327,15 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                 <div>
                   <span className="text-sm font-semibold text-gray-900">{q.couple_names}</span>
                   <span className="ml-3 text-sm text-gray-500">
-                    {new Intl.NumberFormat('en', { style: 'currency', currency: q.currency }).format(Number(q.total))}
+                    {format.number(Number(q.total), { style: 'currency', currency: q.currency })}
                   </span>
-                  <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Contract signed</span>
+                  <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">{t('invoices.contractSigned')}</span>
                 </div>
                 <button
                   onClick={() => handleCreateFromQuote(q)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-lg hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
                 >
-                  Create Invoice
+                  {t('invoices.createInvoice')}
                 </button>
               </div>
             ))}
@@ -343,14 +346,16 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       <FilterBar
         nameValue={nameFilter}
         onNameChange={(v) => { setNameFilter(v); setPage(1); }}
-        namePlaceholder="Search by client name…"
+        namePlaceholder={t('invoices.searchPlaceholder')}
         statusOptions={INVOICE_STATUS_OPTIONS}
         selectedStatuses={statusFilter}
         onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
+        statusLabel={t('filterBar.status')}
+        clearFiltersLabel={t('filterBar.clearFilters')}
       />
 
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-semibold text-gray-900">Invoices</h3>
+        <h3 className="text-base font-semibold text-gray-900">{t('invoices.title')}</h3>
         <button
           onClick={() => { setPrefillQuote(null); setView('new'); }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
@@ -358,7 +363,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Invoice
+          {t('invoices.newInvoice')}
         </button>
       </div>
 
@@ -371,18 +376,18 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
           </div>
           {nameFilter || statusFilter.length > 0 ? (
             <>
-              <h3 className="text-sm font-semibold text-gray-900">No invoices match your filters</h3>
-              <p className="text-xs text-gray-500 mt-1">Try adjusting your search or status filters.</p>
+              <h3 className="text-sm font-semibold text-gray-900">{t('invoices.noMatch')}</h3>
+              <p className="text-xs text-gray-500 mt-1">{t('invoices.noMatchHint')}</p>
             </>
           ) : (
             <>
-              <h3 className="text-sm font-semibold text-gray-900">No invoices yet</h3>
-              <p className="text-xs text-gray-500 mt-1">Create an invoice to track your payments.</p>
+              <h3 className="text-sm font-semibold text-gray-900">{t('invoices.empty')}</h3>
+              <p className="text-xs text-gray-500 mt-1">{t('invoices.emptyHint')}</p>
               <button
                 onClick={() => setView('new')}
                 className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
               >
-                Create Invoice
+                {t('invoices.createInvoice')}
               </button>
             </>
           )}
@@ -403,7 +408,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                       <span className="text-xs font-mono text-gray-400">{invoice.invoice_number}</span>
                       <h4 className="text-sm font-semibold text-gray-900">{invoice.customer?.name ?? ''}</h4>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                        {invoice.status}
+                        {t(`invoices.status.${invoice.status}` as Parameters<typeof t>[0])}
                       </span>
                       {invoice.quote && (
                         <Link
@@ -411,7 +416,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                           className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
                           title={`Go to quote: ${invoice.quote.couple_names}`}
                         >
-                          Quote
+                          {t('invoices.quoteBadge')}
                         </Link>
                       )}
                       {invoice.quote?.contracts[0] && (
@@ -420,19 +425,19 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                           className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
                           title={`Go to contract: ${invoice.quote.contracts[0].title}`}
                         >
-                          Contract
+                          {t('invoices.contractBadge')}
                         </Link>
                       )}
                     </div>
                     {invoice.due_date && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Due {new Date(invoice.due_date).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {t('invoices.due', { date: format.dateTime(new Date(invoice.due_date), { day: 'numeric', month: 'short', year: 'numeric' }) })}
                       </p>
                     )}
                     {invoice.status !== 'PAID' && invoice.status !== 'DRAFT' && (
                       <div className="mt-2">
                         <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                          <span>{new Intl.NumberFormat('en', { style: 'currency', currency: invoice.currency }).format(paid)} paid</span>
+                          <span>{t('invoices.paid', { amount: format.number(paid, { style: 'currency', currency: invoice.currency }) })}</span>
                           <span>{paidPct}%</span>
                         </div>
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -446,11 +451,11 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-lg font-bold text-gray-900">
-                      {new Intl.NumberFormat('en', { style: 'currency', currency: invoice.currency }).format(total)}
+                      {format.number(total, { style: 'currency', currency: invoice.currency })}
                     </span>
                     {paid > 0 && paid < total && (
                       <span className="text-xs text-orange-600 font-medium">
-                        {new Intl.NumberFormat('en', { style: 'currency', currency: invoice.currency }).format(total - paid)} due
+                        {t('invoices.remaining', { amount: format.number(total - paid, { style: 'currency', currency: invoice.currency }) })}
                       </span>
                     )}
                   </div>
@@ -465,14 +470,14 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
-                      Edit
+                      {t('invoices.edit')}
                     </button>
                   )}
                   <button
                     onClick={() => { setSelectedId(invoice.id); setView('detail'); }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    View &amp; Payments
+                    {t('invoices.viewAndPayments')}
                   </button>
                   <button
                     onClick={() => handleGeneratePdf(invoice)}
@@ -491,7 +496,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        {invoice.pdf_url ? 'Download PDF' : 'Generate PDF'}
+                        {invoice.pdf_url ? t('invoices.downloadPdf') : t('invoices.generatePdf')}
                       </>
                     )}
                   </button>
@@ -502,7 +507,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                       onClick={() => handleDelete(invoice.id)}
                       className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
                     >
-                      Delete
+                      {t('invoices.delete')}
                     </button>
                   )}
                 </div>

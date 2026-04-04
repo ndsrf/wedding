@@ -14,6 +14,8 @@ interface FilterBarProps {
   statusOptions: StatusOption[];
   selectedStatuses: string[];
   onStatusChange: (statuses: string[]) => void;
+  statusLabel: string;
+  clearFiltersLabel: string;
 }
 
 export function FilterBar({
@@ -23,6 +25,8 @@ export function FilterBar({
   statusOptions,
   selectedStatuses,
   onStatusChange,
+  statusLabel = 'Status',
+  clearFiltersLabel = 'Clear filters',
 }: FilterBarProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -80,7 +84,7 @@ export function FilterBar({
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
           </svg>
-          Status
+          {statusLabel}
           {selectedStatuses.length > 0 && (
             <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-bold bg-rose-500 text-white rounded-full">
               {selectedStatuses.length}
@@ -118,7 +122,7 @@ export function FilterBar({
           onClick={() => { onNameChange(''); onStatusChange([]); }}
           className="text-xs text-gray-400 hover:text-gray-600 transition-colors whitespace-nowrap"
         >
-          Clear filters
+          {clearFiltersLabel}
         </button>
       )}
     </div>

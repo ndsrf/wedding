@@ -5,6 +5,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { put, del } from '@vercel/blob';
 import { toAbsoluteUrl } from '@/lib/images/processor';
+import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -38,6 +39,18 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       },
     });
 
+    const locale = await getLanguageFromRequest();
+    const { t } = await getTranslations(locale);
+    const labels = {
+      dateLabel: t('planner.quotesFinances.contractPdf.dateLabel'),
+      footer: t('planner.quotesFinances.contractPdf.footer'),
+      sigPageTitle: t('planner.quotesFinances.contractPdf.sigPageTitle'),
+      sigPageSubtitle: t('planner.quotesFinances.contractPdf.sigPageSubtitle'),
+      weddingPlanner: t('planner.quotesFinances.contractPdf.weddingPlanner'),
+      clientSigner: t('planner.quotesFinances.contractPdf.clientSigner'),
+      signatureDate: t('planner.quotesFinances.contractPdf.signatureDate'),
+    };
+
     const buffer = await renderToBuffer(
       React.createElement(ContractPDF, {
         title: contract.title,
@@ -55,6 +68,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         },
         signerName: contract.signer_name ?? contract.signer_email ?? undefined,
         createdAt: contract.created_at,
+        labels,
+        locale,
       }) as never
     );
 

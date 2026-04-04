@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { QuoteForm } from './QuoteForm';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
@@ -59,6 +60,8 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
 };
 
 export function QuotesList() {
+  const t = useTranslations('planner.quotesFinances');
+  const format = useFormatter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -216,11 +219,11 @@ export function QuotesList() {
   const pagedQuotes = filteredQuotes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const QUOTE_STATUS_OPTIONS = [
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'SENT', label: 'Sent' },
-    { value: 'ACCEPTED', label: 'Accepted' },
-    { value: 'REJECTED', label: 'Rejected' },
-    { value: 'EXPIRED', label: 'Expired' },
+    { value: 'DRAFT', label: t('quotes.status.DRAFT') },
+    { value: 'SENT', label: t('quotes.status.SENT') },
+    { value: 'ACCEPTED', label: t('quotes.status.ACCEPTED') },
+    { value: 'REJECTED', label: t('quotes.status.REJECTED') },
+    { value: 'EXPIRED', label: t('quotes.status.EXPIRED') },
   ];
 
   if (showForm) {
@@ -230,10 +233,10 @@ export function QuotesList() {
       <div>
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => { setShowForm(false); setEditingId(null); setViewingId(null); }} className="text-sm text-gray-500 hover:text-gray-700">
-            ← Back
+            {t('quotes.back')}
           </button>
           <h3 className="text-base font-semibold text-gray-900">
-            {isView ? 'View Quote' : editingId ? 'Edit Quote' : 'New Quote'}
+            {isView ? t('quotes.viewQuote') : editingId ? t('quotes.editQuote') : t('quotes.newQuote')}
           </h3>
         </div>
         <QuoteForm
@@ -271,7 +274,7 @@ export function QuotesList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-semibold text-gray-900">Quotes</h3>
+        <h3 className="text-base font-semibold text-gray-900">{t('quotes.title')}</h3>
         <button
           onClick={() => { setShowForm(true); setEditingId(null); setViewingId(null); }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
@@ -279,17 +282,19 @@ export function QuotesList() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Quote
+          {t('quotes.newQuote')}
         </button>
       </div>
 
       <FilterBar
         nameValue={nameFilter}
         onNameChange={(v) => { setNameFilter(v); setPage(1); }}
-        namePlaceholder="Search by couple name…"
+        namePlaceholder={t('quotes.searchPlaceholder')}
         statusOptions={QUOTE_STATUS_OPTIONS}
         selectedStatuses={statusFilter}
         onStatusChange={(s) => { setStatusFilter(s); setPage(1); }}
+        statusLabel={t('filterBar.status')}
+        clearFiltersLabel={t('filterBar.clearFilters')}
       />
 
       {filteredQuotes.length === 0 ? (
@@ -301,18 +306,18 @@ export function QuotesList() {
           </div>
           {nameFilter || statusFilter.length > 0 ? (
             <>
-              <h3 className="text-sm font-semibold text-gray-900">No quotes match your filters</h3>
-              <p className="text-xs text-gray-500 mt-1">Try adjusting your search or status filters.</p>
+              <h3 className="text-sm font-semibold text-gray-900">{t('quotes.noMatch')}</h3>
+              <p className="text-xs text-gray-500 mt-1">{t('quotes.noMatchHint')}</p>
             </>
           ) : (
             <>
-              <h3 className="text-sm font-semibold text-gray-900">No quotes yet</h3>
-              <p className="text-xs text-gray-500 mt-1">Create your first quote to send to a potential client.</p>
+              <h3 className="text-sm font-semibold text-gray-900">{t('quotes.empty')}</h3>
+              <p className="text-xs text-gray-500 mt-1">{t('quotes.emptyHint')}</p>
               <button
                 onClick={() => setShowForm(true)}
                 className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
               >
-                Create Quote
+                {t('quotes.createQuote')}
               </button>
             </>
           )}
@@ -327,19 +332,19 @@ export function QuotesList() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-sm font-semibold text-gray-900">{quote.couple_names}</h4>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[quote.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                      {quote.status}
+                      {t(`quotes.status.${quote.status}` as Parameters<typeof t>[0])}
                     </span>
                     {quote.contracts.length > 0 && (
                       <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                        {quote.contracts.length === 1 ? 'Contract' : `${quote.contracts.length} Contracts`}
+                        {quote.contracts.length === 1 ? t('quotes.contractBadge') : t('quotes.contractsBadge', { count: quote.contracts.length })}
                       </span>
                     )}
                     {quote.invoices.length > 0 && (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Invoiced</span>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">{t('quotes.invoicedBadge')}</span>
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
-                    {quote.event_date && <span>{new Date(quote.event_date).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+                    {quote.event_date && <span>{format.dateTime(new Date(quote.event_date), { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
                     {quote.location && <span>📍 {quote.location}</span>}
                     {quote.customer?.email && <span>✉ {quote.customer.email}</span>}
                   </div>
@@ -362,7 +367,7 @@ export function QuotesList() {
                             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>
-                            {c.status} contract
+                            {t('quotes.contractStatusLabel', { status: t(`contracts.status.${c.status}` as Parameters<typeof t>[0]) })}
                           </a>
                         );
                       })}
@@ -371,10 +376,10 @@ export function QuotesList() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className="text-lg font-bold text-gray-900">
-                    {new Intl.NumberFormat('en', { style: 'currency', currency: quote.currency }).format(Number(quote.total))}
+                    {format.number(Number(quote.total), { style: 'currency', currency: quote.currency })}
                   </span>
                   {quote.expires_at && new Date(quote.expires_at) < new Date() && quote.status !== 'EXPIRED' && (
-                    <span className="text-xs text-orange-500">Expired</span>
+                    <span className="text-xs text-orange-500">{t('quotes.expiredLabel')}</span>
                   )}
                 </div>
               </div>
@@ -385,10 +390,10 @@ export function QuotesList() {
                   onSubmit={handleCreateContract}
                   className="mt-3 p-4 bg-purple-50 rounded-xl border border-purple-100 space-y-3"
                 >
-                  <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">New Contract</h5>
+                  <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('quotes.contractForm.heading')}</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Title *</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">{t('quotes.contractForm.titleField')}</label>
                       <input
                         required
                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
@@ -398,15 +403,15 @@ export function QuotesList() {
                     </div>
                     {templates.length > 0 && (
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Template (optional)</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">{t('quotes.contractForm.template')}</label>
                         <select
                           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                           value={contractTemplateId}
                           onChange={(e) => setContractTemplateId(e.target.value)}
                         >
-                          <option value="">— Blank contract —</option>
-                          {templates.map((t) => (
-                            <option key={t.id} value={t.id}>{t.name}{t.is_default ? ' (default)' : ''}</option>
+                          <option value="">{t('quotes.contractForm.blankContract')}</option>
+                          {templates.map((tmpl) => (
+                            <option key={tmpl.id} value={tmpl.id}>{tmpl.name}{tmpl.is_default ? ` ${t('quotes.contractForm.defaultSuffix')}` : ''}</option>
                           ))}
                         </select>
                       </div>
@@ -419,8 +424,8 @@ export function QuotesList() {
                       checked={contractFillWithAI}
                       onChange={(e) => setContractFillWithAI(e.target.checked)}
                     />
-                    <span className="text-xs font-medium text-purple-700">Fill with AI</span>
-                    <span className="text-xs text-gray-400">(auto-detect &amp; fill placeholders using client, quote data, and today's date)</span>
+                    <span className="text-xs font-medium text-purple-700">{t('quotes.contractForm.fillWithAI')}</span>
+                    <span className="text-xs text-gray-400">{t('quotes.contractForm.fillWithAIHint')}</span>
                     </label>                  <div className="flex gap-2">
                     <button
                       type="submit"
@@ -432,14 +437,14 @@ export function QuotesList() {
                       } disabled:opacity-50`}
                     >
                       {creatingContract
-                        ? contractFillWithAI ? 'Filling with AI…' : 'Creating…'
-                        : 'Create & Open Editor'}
+                        ? contractFillWithAI ? t('quotes.contractForm.fillingWithAI') : t('quotes.contractForm.creating')
+                        : t('quotes.contractForm.createAndOpen')}
                     </button>                    <button
                       type="button"
                       onClick={() => setContractQuoteId(null)}
                       className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      Cancel
+                      {t('quotes.contractForm.cancel')}
                     </button>
                   </div>
                 </form>
@@ -464,7 +469,7 @@ export function QuotesList() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   )}
-                  {quote.pdf_url ? 'Download PDF' : 'Generate PDF'}
+                  {quote.pdf_url ? t('quotes.downloadPdf') : t('quotes.generatePdf')}
                 </button>
 
                 {/* Edit only in DRAFT mode; otherwise View */}
@@ -476,7 +481,7 @@ export function QuotesList() {
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    Edit
+                    {t('quotes.edit')}
                   </button>
                 ) : (
                   <button
@@ -487,7 +492,7 @@ export function QuotesList() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    View
+                    {t('quotes.view')}
                   </button>
                 )}
 
@@ -496,7 +501,7 @@ export function QuotesList() {
                     onClick={() => handleStatusChange(quote.id, 'SENT')}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                   >
-                    Mark Sent
+                    {t('quotes.markSent')}
                   </button>
                 )}
                 {quote.status === 'SENT' && (
@@ -505,13 +510,13 @@ export function QuotesList() {
                       onClick={() => handleStatusChange(quote.id, 'ACCEPTED')}
                       className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
                     >
-                      Accept
+                      {t('quotes.accept')}
                     </button>
                     <button
                       onClick={() => handleStatusChange(quote.id, 'REJECTED')}
                       className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                     >
-                      Reject
+                      {t('quotes.reject')}
                     </button>
                   </>
                 )}
@@ -523,7 +528,7 @@ export function QuotesList() {
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                     </svg>
-                    New Contract
+                    {t('quotes.newContract')}
                   </button>
                 )}
 
@@ -533,7 +538,7 @@ export function QuotesList() {
                     onClick={() => handleDelete(quote.id)}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
                   >
-                    Delete
+                    {t('quotes.delete')}
                   </button>
                 )}
               </div>

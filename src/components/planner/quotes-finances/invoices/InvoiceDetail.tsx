@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import type { Invoice } from './InvoicesList';
 
 interface PaymentFormData {
@@ -30,6 +31,9 @@ interface InvoiceDetailProps {
 }
 
 export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps) {
+  const t = useTranslations('planner.quotesFinances');
+  const format = useFormatter();
+
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -48,7 +52,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
   const paidPct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
 
   function fmt(amount: number | string) {
-    return new Intl.NumberFormat('en', { style: 'currency', currency: invoice.currency }).format(Number(amount));
+    return format.number(Number(amount), { style: 'currency', currency: invoice.currency });
   }
 
   async function handleRecordPayment(e: React.FormEvent) {
@@ -75,7 +79,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
   }
 
   async function handleDeletePayment(paymentId: string) {
-    if (!confirm('Remove this payment record?')) return;
+    if (!confirm(t('invoiceDetail.removePaymentConfirm'))) return;
     await fetch(`/api/planner/invoices/${invoice.id}/payments/${paymentId}`, { method: 'DELETE' });
     onRefresh();
   }
@@ -95,11 +99,11 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
     <div>
       <div className="flex items-center gap-3 mb-6">
         <button onClick={onBack} className="text-sm text-gray-500 hover:text-gray-700">
-          ← Back
+          {t('invoiceDetail.back')}
         </button>
         <h3 className="text-base font-semibold text-gray-900">{invoice.invoice_number}</h3>
         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
-          {invoice.status}
+          {t(`invoices.status.${invoice.status}` as Parameters<typeof t>[0])}
         </span>
       </div>
 
@@ -109,17 +113,19 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">Client</p>
+                <p className="text-xs text-gray-500 mb-0.5">{t('invoiceDetail.client')}</p>
                 <p className="text-sm font-semibold text-gray-900">{invoice.customer?.name ?? ''}</p>
                 {invoice.customer?.email && <p className="text-xs text-gray-500">{invoice.customer.email}</p>}
                 {invoice.customer?.phone && <p className="text-xs text-gray-500">{invoice.customer.phone}</p>}
                 {invoice.customer?.address && <p className="text-xs text-gray-500">{invoice.customer.address}</p>}
               </div>
               <div className="text-right">
-                <p className="text-xs text-gray-500 mb-0.5">Invoice #</p>
+                <p className="text-xs text-gray-500 mb-0.5">{t('invoiceDetail.invoiceHash')}</p>
                 <p className="text-sm font-mono font-semibold text-gray-900">{invoice.invoice_number}</p>
                 {invoice.due_date && (
-                  <p className="text-xs text-gray-500 mt-1">Due {new Date(invoice.due_date).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t('invoiceDetail.due', { date: format.dateTime(new Date(invoice.due_date), { day: 'numeric', month: 'short', year: 'numeric' }) })}
+                  </p>
                 )}
               </div>
             </div>
@@ -128,10 +134,10 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left text-xs font-medium text-gray-500 pb-2">Service</th>
-                  <th className="text-right text-xs font-medium text-gray-500 pb-2 w-16">Qty</th>
-                  <th className="text-right text-xs font-medium text-gray-500 pb-2 w-24">Unit</th>
-                  <th className="text-right text-xs font-medium text-gray-500 pb-2 w-24">Total</th>
+                  <th className="text-left text-xs font-medium text-gray-500 pb-2">{t('invoiceDetail.colService')}</th>
+                  <th className="text-right text-xs font-medium text-gray-500 pb-2 w-16">{t('invoiceDetail.colQty')}</th>
+                  <th className="text-right text-xs font-medium text-gray-500 pb-2 w-24">{t('invoiceDetail.colUnit')}</th>
+                  <th className="text-right text-xs font-medium text-gray-500 pb-2 w-24">{t('invoiceDetail.colTotal')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,23 +157,23 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
 
             <div className="mt-4 pt-4 border-t border-gray-100 space-y-1">
               <div className="flex justify-end gap-8 text-sm">
-                <span className="text-gray-500">Subtotal</span>
+                <span className="text-gray-500">{t('invoiceDetail.subtotal')}</span>
                 <span className="font-medium w-24 text-right">{fmt(invoice.subtotal)}</span>
               </div>
               {invoice.discount !== null && Number(invoice.discount) > 0 && (
                 <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-gray-500">Discount</span>
+                  <span className="text-gray-500">{t('invoiceDetail.discount')}</span>
                   <span className="font-medium w-24 text-right text-green-600">- {fmt(invoice.discount)}</span>
                 </div>
               )}
               {invoice.tax_rate !== null && Number(invoice.tax_rate) > 0 && (
                 <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-gray-500">Tax ({Number(invoice.tax_rate)}%)</span>
+                  <span className="text-gray-500">{t('invoiceDetail.tax', { rate: String(Number(invoice.tax_rate)) })}</span>
                   <span className="font-medium w-24 text-right">{fmt(invoice.tax_amount ?? 0)}</span>
                 </div>
               )}
               <div className="flex justify-end gap-8 text-base font-bold pt-1 border-t border-gray-100">
-                <span>Total</span>
+                <span>{t('invoiceDetail.total')}</span>
                 <span className="text-rose-600 w-24 text-right">{fmt(invoice.total)}</span>
               </div>
             </div>
@@ -177,17 +183,17 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
         {/* Right: Payment tracker */}
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <h4 className="text-sm font-semibold text-gray-900 mb-4">Payment Status</h4>
+            <h4 className="text-sm font-semibold text-gray-900 mb-4">{t('invoiceDetail.paymentStatus')}</h4>
             <div className="text-center mb-4">
               <p className="text-3xl font-bold text-gray-900">{paidPct}%</p>
-              <p className="text-xs text-gray-500">paid</p>
+              <p className="text-xs text-gray-500">{t('invoiceDetail.paidLabel')}</p>
             </div>
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
               <div className="h-full bg-green-400 rounded-full transition-all" style={{ width: `${paidPct}%` }} />
             </div>
             <div className="flex justify-between text-xs text-gray-500 mb-4">
-              <span>{fmt(paid)} paid</span>
-              <span>{fmt(balanceDue)} due</span>
+              <span>{t('invoiceDetail.paidAmount', { amount: fmt(paid) })}</span>
+              <span>{t('invoiceDetail.dueAmount', { amount: fmt(balanceDue) })}</span>
             </div>
 
             {invoice.status === 'DRAFT' && (
@@ -196,7 +202,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                 disabled={updatingStatus}
                 className="w-full px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50"
               >
-                {updatingStatus ? 'Updating…' : 'Mark as Issued'}
+                {updatingStatus ? t('invoiceDetail.updating') : t('invoiceDetail.markAsIssued')}
               </button>
             )}
 
@@ -205,7 +211,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                 onClick={() => setShowPaymentForm(true)}
                 className="w-full mt-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 rounded-xl transition-all"
               >
-                Record Payment
+                {t('invoiceDetail.recordPayment')}
               </button>
             )}
 
@@ -215,7 +221,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Fully Paid
+                  {t('invoiceDetail.fullyPaid')}
                 </div>
               </div>
             )}
@@ -224,10 +230,10 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
           {/* Record payment form */}
           {showPaymentForm && (
             <div className="bg-white rounded-xl border border-rose-100 shadow-sm p-5">
-              <h4 className="text-sm font-semibold text-gray-900 mb-4">Record Payment</h4>
+              <h4 className="text-sm font-semibold text-gray-900 mb-4">{t('invoiceDetail.recordPayment')}</h4>
               <form onSubmit={handleRecordPayment} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceDetail.amount')}</label>
                   <input
                     type="number"
                     min="0.01"
@@ -239,7 +245,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceDetail.date')}</label>
                   <input
                     type="date"
                     required
@@ -249,7 +255,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Method</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceDetail.method')}</label>
                   <select
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
                     value={paymentForm.method}
@@ -259,24 +265,24 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Reference</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceDetail.reference')}</label>
                   <input
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                    placeholder="Transaction ID, bank ref…"
+                    placeholder={t('invoiceDetail.referencePlaceholder')}
                     value={paymentForm.reference}
                     onChange={(e) => setPaymentForm((p) => ({ ...p, reference: e.target.value }))}
                   />
                 </div>
                 <div className="flex items-center gap-2 pt-1">
                   <button type="button" onClick={() => setShowPaymentForm(false)} className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50">
-                    Cancel
+                    {t('invoiceDetail.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={savingPayment}
                     className="flex-1 px-3 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl disabled:opacity-50"
                   >
-                    {savingPayment ? 'Saving…' : 'Save'}
+                    {savingPayment ? t('invoiceDetail.saving') : t('invoiceDetail.save')}
                   </button>
                 </div>
               </form>
@@ -286,14 +292,14 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
           {/* Payment history */}
           {invoice.payments.length > 0 && (
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <h4 className="text-sm font-semibold text-gray-900 mb-3">Payment History</h4>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('invoiceDetail.paymentHistory')}</h4>
               <div className="space-y-2">
                 {invoice.payments.map((p) => (
                   <div key={p.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
                     <div>
                       <p className="text-xs font-medium text-gray-900">{fmt(p.amount)}</p>
                       <p className="text-xs text-gray-400">
-                        {new Date(p.payment_date).toLocaleDateString('en', { day: 'numeric', month: 'short' })} · {p.method.replace('_', ' ')}
+                        {format.dateTime(new Date(p.payment_date), { day: 'numeric', month: 'short' })} · {p.method.replace('_', ' ')}
                         {p.reference && ` · ${p.reference}`}
                       </p>
                     </div>

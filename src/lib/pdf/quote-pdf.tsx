@@ -172,9 +172,13 @@ const styles = StyleSheet.create({
   },
 });
 
-function formatCurrency(amount: number | string | { toNumber: () => number }, currency: string) {
+function formatCurrency(
+  amount: number | string | { toNumber: () => number },
+  currency: string,
+  locale: string,
+) {
   const num = typeof amount === 'object' && 'toNumber' in amount ? amount.toNumber() : Number(amount);
-  return new Intl.NumberFormat('en', { style: 'currency', currency }).format(num);
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(num);
 }
 
 export interface CompanyInfo {
@@ -188,17 +192,46 @@ export interface CompanyInfo {
   website?: string;
 }
 
+export interface QuotePDFLabels {
+  docTitle: string;
+  quoteReference: string;
+  issueDate: string;
+  validUntil: string;
+  quoteFor: string;
+  from: string;
+  services: string;
+  description: string;
+  qty: string;
+  unitPrice: string;
+  total: string;
+  subtotal: string;
+  discount: string;
+  tax: string;
+  notes: string;
+  footer: string;
+  event: string;
+  vat: string;
+}
+
 interface QuotePDFProps {
   quote: QuoteWithLineItems;
   company: CompanyInfo;
+  labels: QuotePDFLabels;
+  locale: string;
 }
 
-export function QuotePDF({ quote, company }: QuotePDFProps) {
+export function QuotePDF({ quote, company, labels, locale }: QuotePDFProps) {
   const subtotal = Number(quote.subtotal);
   const discount = quote.discount ? Number(quote.discount) : 0;
   const taxRate = quote.tax_rate ? Number(quote.tax_rate) : 0;
   const taxAmount = (subtotal - discount) * (taxRate / 100);
   const total = Number(quote.total);
+
+  const fmt = (amount: number | string | { toNumber: () => number }) =>
+    formatCurrency(amount, quote.currency, locale);
+
+  const fmtDate = (d: Date | string) =>
+    new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <Document>
@@ -211,17 +244,17 @@ export function QuotePDF({ quote, company }: QuotePDFProps) {
             ) : (
               <Text style={styles.brandName}>{company.name}</Text>
             )}
-            <Text style={styles.docTitle}>Service Quote</Text>
+            <Text style={styles.docTitle}>{labels.docTitle}</Text>
           </View>
           <View style={styles.metaRight}>
-            <Text style={styles.metaLabel}>Quote Reference</Text>
+            <Text style={styles.metaLabel}>{labels.quoteReference}</Text>
             <Text style={styles.metaValue}>#{quote.id.slice(-8).toUpperCase()}</Text>
-            <Text style={[styles.metaLabel, { marginTop: 8 }]}>Issue Date</Text>
-            <Text style={styles.metaValue}>{new Date(quote.created_at).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+            <Text style={[styles.metaLabel, { marginTop: 8 }]}>{labels.issueDate}</Text>
+            <Text style={styles.metaValue}>{fmtDate(quote.created_at)}</Text>
             {quote.expires_at && (
               <>
-                <Text style={[styles.metaLabel, { marginTop: 8 }]}>Valid Until</Text>
-                <Text style={styles.metaValue}>{new Date(quote.expires_at).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+                <Text style={[styles.metaLabel, { marginTop: 8 }]}>{labels.validUntil}</Text>
+                <Text style={styles.metaValue}>{fmtDate(quote.expires_at)}</Text>
               </>
             )}
           </View>
@@ -232,20 +265,20 @@ export function QuotePDF({ quote, company }: QuotePDFProps) {
         {/* Client Info */}
         <View style={styles.clientRow}>
           <View style={styles.clientBlock}>
-            <Text style={styles.sectionTitle}>Quote For</Text>
+            <Text style={styles.sectionTitle}>{labels.quoteFor}</Text>
             <Text style={styles.clientName}>{quote.couple_names}</Text>
             {quote.customer?.email && <Text style={styles.clientDetail}>{quote.customer.email}</Text>}
             {quote.customer?.phone && <Text style={styles.clientDetail}>{quote.customer.phone}</Text>}
             {quote.customer?.address && <Text style={styles.clientDetail}>{quote.customer.address}</Text>}
             {quote.location && <Text style={styles.clientDetail}>{quote.location}</Text>}
             {quote.event_date && (
-              <Text style={styles.clientDetail}>Event: {new Date(quote.event_date).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+              <Text style={styles.clientDetail}>{labels.event} {fmtDate(quote.event_date)}</Text>
             )}
           </View>
           <View style={styles.clientBlock}>
-            <Text style={styles.sectionTitle}>From</Text>
+            <Text style={styles.sectionTitle}>{labels.from}</Text>
             <Text style={styles.clientName}>{company.legalName ?? company.name}</Text>
-            {company.vatNumber && <Text style={styles.clientDetail}>VAT: {company.vatNumber}</Text>}
+            {company.vatNumber && <Text style={styles.clientDetail}>{labels.vat} {company.vatNumber}</Text>}
             {company.address && <Text style={styles.clientDetail}>{company.address}</Text>}
             {company.phone && <Text style={styles.clientDetail}>{company.phone}</Text>}
             {company.email && <Text style={styles.clientDetail}>{company.email}</Text>}
@@ -254,12 +287,12 @@ export function QuotePDF({ quote, company }: QuotePDFProps) {
         </View>
 
         {/* Line Items Table */}
-        <Text style={styles.sectionTitle}>Services</Text>
+        <Text style={styles.sectionTitle}>{labels.services}</Text>
         <View style={styles.tableHeader}>
-          <Text style={[styles.headerText, styles.colDescription]}>Description</Text>
-          <Text style={[styles.headerText, styles.colQty]}>Qty</Text>
-          <Text style={[styles.headerText, styles.colUnitPrice]}>Unit Price</Text>
-          <Text style={[styles.headerText, styles.colTotal]}>Total</Text>
+          <Text style={[styles.headerText, styles.colDescription]}>{labels.description}</Text>
+          <Text style={[styles.headerText, styles.colQty]}>{labels.qty}</Text>
+          <Text style={[styles.headerText, styles.colUnitPrice]}>{labels.unitPrice}</Text>
+          <Text style={[styles.headerText, styles.colTotal]}>{labels.total}</Text>
         </View>
         {quote.line_items.map((item) => (
           <View key={item.id} style={styles.tableRow}>
@@ -268,47 +301,45 @@ export function QuotePDF({ quote, company }: QuotePDFProps) {
               {item.description && <Text style={styles.cellSubText}>{item.description}</Text>}
             </View>
             <Text style={[styles.cellText, styles.colQty]}>{Number(item.quantity)}</Text>
-            <Text style={[styles.cellText, styles.colUnitPrice]}>{formatCurrency(item.unit_price, quote.currency)}</Text>
-            <Text style={[styles.cellText, styles.colTotal]}>{formatCurrency(item.total, quote.currency)}</Text>
+            <Text style={[styles.cellText, styles.colUnitPrice]}>{fmt(item.unit_price)}</Text>
+            <Text style={[styles.cellText, styles.colTotal]}>{fmt(item.total)}</Text>
           </View>
         ))}
 
         {/* Totals */}
         <View style={styles.totalsBlock}>
           <View style={styles.totalsRow}>
-            <Text style={styles.totalsLabel}>Subtotal</Text>
-            <Text style={styles.totalsValue}>{formatCurrency(subtotal, quote.currency)}</Text>
+            <Text style={styles.totalsLabel}>{labels.subtotal}</Text>
+            <Text style={styles.totalsValue}>{fmt(subtotal)}</Text>
           </View>
           {discount > 0 && (
             <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>Discount</Text>
-              <Text style={styles.totalsValue}>- {formatCurrency(discount, quote.currency)}</Text>
+              <Text style={styles.totalsLabel}>{labels.discount}</Text>
+              <Text style={styles.totalsValue}>- {fmt(discount)}</Text>
             </View>
           )}
           {taxRate > 0 && (
             <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>Tax ({taxRate}%)</Text>
-              <Text style={styles.totalsValue}>{formatCurrency(taxAmount, quote.currency)}</Text>
+              <Text style={styles.totalsLabel}>{labels.tax.replace('{rate}', String(taxRate))}</Text>
+              <Text style={styles.totalsValue}>{fmt(taxAmount)}</Text>
             </View>
           )}
           <View style={styles.totalFinalRow}>
-            <Text style={styles.totalFinalLabel}>Total</Text>
-            <Text style={styles.totalFinalValue}>{formatCurrency(total, quote.currency)}</Text>
+            <Text style={styles.totalFinalLabel}>{labels.total}</Text>
+            <Text style={styles.totalFinalValue}>{fmt(total)}</Text>
           </View>
         </View>
 
         {/* Notes */}
         {quote.notes && (
           <View style={styles.notesSection}>
-            <Text style={styles.sectionTitle}>Notes</Text>
+            <Text style={styles.sectionTitle}>{labels.notes}</Text>
             <Text style={styles.notesText}>{quote.notes}</Text>
           </View>
         )}
 
         {/* Footer */}
-        <Text style={styles.footer}>
-          This quote is valid for 30 days from the issue date unless otherwise stated. Thank you for considering our services.
-        </Text>
+        <Text style={styles.footer}>{labels.footer}</Text>
       </Page>
     </Document>
   );

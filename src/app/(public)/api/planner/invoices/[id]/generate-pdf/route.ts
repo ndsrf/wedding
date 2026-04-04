@@ -5,6 +5,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/lib/pdf/invoice-pdf';
 import { put, del } from '@vercel/blob';
 import { toAbsoluteUrl } from '@/lib/images/processor';
+import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -40,6 +41,36 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
     });
 
+    const locale = await getLanguageFromRequest();
+    const { t } = await getTranslations(locale);
+    const labels = {
+      docTitle: t('planner.quotesFinances.invoicePdf.docTitle'),
+      invoiceNumber: t('planner.quotesFinances.invoicePdf.invoiceNumber'),
+      issueDate: t('planner.quotesFinances.invoicePdf.issueDate'),
+      dueDate: t('planner.quotesFinances.invoicePdf.dueDate'),
+      billTo: t('planner.quotesFinances.invoicePdf.billTo'),
+      from: t('planner.quotesFinances.invoicePdf.from'),
+      services: t('planner.quotesFinances.invoicePdf.services'),
+      description: t('planner.quotesFinances.invoicePdf.description'),
+      qty: t('planner.quotesFinances.invoicePdf.qty'),
+      unitPrice: t('planner.quotesFinances.invoicePdf.unitPrice'),
+      total: t('planner.quotesFinances.invoicePdf.total'),
+      subtotal: t('planner.quotesFinances.invoicePdf.subtotal'),
+      discount: t('planner.quotesFinances.invoicePdf.discount'),
+      tax: t('planner.quotesFinances.invoicePdf.tax'),
+      amountPaid: t('planner.quotesFinances.invoicePdf.amountPaid'),
+      balanceDue: t('planner.quotesFinances.invoicePdf.balanceDue'),
+      paymentsReceived: t('planner.quotesFinances.invoicePdf.paymentsReceived'),
+      date: t('planner.quotesFinances.invoicePdf.date'),
+      method: t('planner.quotesFinances.invoicePdf.method'),
+      reference: t('planner.quotesFinances.invoicePdf.reference'),
+      amount: t('planner.quotesFinances.invoicePdf.amount'),
+      notes: t('planner.quotesFinances.invoicePdf.notes'),
+      footer: t('planner.quotesFinances.invoicePdf.footer'),
+      idPrefix: t('planner.quotesFinances.invoicePdf.idPrefix'),
+      vat: t('planner.quotesFinances.invoicePdf.vat'),
+    };
+
     const buffer = await renderToBuffer(
       React.createElement(InvoicePDF, {
         invoice,
@@ -53,6 +84,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           phone: planner?.phone ?? undefined,
           website: planner?.website ?? undefined,
         },
+        labels,
+        locale,
       }) as never
     );
 

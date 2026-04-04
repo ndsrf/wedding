@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface LineItem {
   id?: string;
@@ -52,6 +53,8 @@ function emptyItem(): LineItem {
 }
 
 export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: QuoteFormProps) {
+  const t = useTranslations('planner.quotesFinances');
+  const locale = useLocale();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<QuoteFormData>({
     customer_id: initialData?.customer_id ?? null,
@@ -157,6 +160,10 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
   const taxAmount = (subtotal - discountAmt) * (taxRate / 100);
   const total = subtotal - discountAmt + taxAmount;
 
+  function fmt(amount: number) {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: form.currency }).format(amount);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -187,11 +194,11 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Client Info */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Client Information</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">{t('quoteForm.clientInfo')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Customer name with autocomplete */}
           <div className="sm:col-span-2" ref={wrapperRef}>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Couple / Client Name *</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.coupleClientName')}</label>
             <div className="relative">
               <input
                 required
@@ -205,7 +212,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
               />
               {selectedCustomer && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                  <span className="text-xs bg-rose-100 text-rose-700 rounded-full px-2 py-0.5 font-medium">Existing customer</span>
+                  <span className="text-xs bg-rose-100 text-rose-700 rounded-full px-2 py-0.5 font-medium">{t('quoteForm.existingCustomer')}</span>
                   {!readOnly && (
                     <button type="button" onClick={clearCustomer} className="text-gray-400 hover:text-gray-600">
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -234,18 +241,18 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
                     </li>
                   ))}
                   <li className="border-t border-gray-100 px-4 py-2 text-xs text-gray-400 italic">
-                    Not listed? Keep typing to create a new customer.
+                    {t('quoteForm.notListed')}
                   </li>
                 </ul>
               )}
             </div>
             {!selectedCustomer && form.couple_names.length >= 2 && suggestions.length === 0 && (
-              <p className="text-xs text-gray-400 mt-1">No existing customers found — a new one will be created on save.</p>
+              <p className="text-xs text-gray-400 mt-1">{t('quoteForm.noCustomerFound')}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Event Date</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.eventDate')}</label>
             <input
               type="date"
               readOnly={readOnly}
@@ -255,7 +262,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Location</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.location')}</label>
             <input
               readOnly={readOnly}
               className={inputClass}
@@ -265,7 +272,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Client Email</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.clientEmail')}</label>
             <input
               type="email"
               readOnly={readOnly}
@@ -275,7 +282,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Client Phone</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.clientPhone')}</label>
             <input
               readOnly={readOnly}
               className={inputClass}
@@ -284,24 +291,24 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">ID / Passport Number</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.idPassport')}</label>
             <input
               readOnly={readOnly}
               className={inputClass}
               value={form.client_id_number}
               onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_id_number: e.target.value }))}
-              placeholder="DNI, NIE, Passport…"
+              placeholder={t('quoteForm.idPlaceholder')}
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Client Address</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.clientAddress')}</label>
             <textarea
               readOnly={readOnly}
               rows={2}
               className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
               value={form.client_address}
               onChange={(e) => !readOnly && setForm((p) => ({ ...p, client_address: e.target.value }))}
-              placeholder="Street, City, Country…"
+              placeholder={t('quoteForm.addressPlaceholder')}
             />
           </div>
         </div>
@@ -310,9 +317,9 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
       {/* Line Items */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Services</h3>
+          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{t('quoteForm.services')}</h3>
           <div className="flex items-center gap-3">
-            <label className="text-xs font-medium text-gray-700">Currency</label>
+            <label className="text-xs font-medium text-gray-700">{t('quoteForm.currency')}</label>
             <select
               disabled={readOnly}
               className={`border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
@@ -325,13 +332,13 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
         </div>
 
         {readOnly && (
-          <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-3">This quote is read-only. Only draft quotes can be edited.</p>
+          <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-3">{t('quoteForm.readOnlyWarning')}</p>
         )}
         <div className="hidden sm:grid sm:grid-cols-12 gap-2 mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
-          <div className="sm:col-span-5">Description</div>
-          <div className="sm:col-span-2 text-right">Qty</div>
-          <div className="sm:col-span-2 text-right">Unit Price</div>
-          <div className="sm:col-span-2 text-right">Total</div>
+          <div className="sm:col-span-5">{t('quoteForm.colDescription')}</div>
+          <div className="sm:col-span-2 text-right">{t('quoteForm.colQty')}</div>
+          <div className="sm:col-span-2 text-right">{t('quoteForm.colUnitPrice')}</div>
+          <div className="sm:col-span-2 text-right">{t('quoteForm.colTotal')}</div>
           <div className="sm:col-span-1" />
         </div>
 
@@ -343,14 +350,14 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
                   required
                   readOnly={readOnly}
                   className={inputClass}
-                  placeholder="Service name"
+                  placeholder={t('quoteForm.serviceName')}
                   value={item.name}
                   onChange={(e) => !readOnly && updateItem(index, 'name', e.target.value)}
                 />
                 <input
                   readOnly={readOnly}
                   className={`w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rose-300 text-gray-500 ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
-                  placeholder="Optional description"
+                  placeholder={t('quoteForm.optionalDescription')}
                   value={item.description}
                   onChange={(e) => !readOnly && updateItem(index, 'description', e.target.value)}
                 />
@@ -374,9 +381,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
                 />
               </div>
               <div className="col-span-3 sm:col-span-2 flex items-center justify-end">
-                <span className="text-sm font-medium text-gray-900">
-                  {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(item.total)}
-                </span>
+                <span className="text-sm font-medium text-gray-900">{fmt(item.total)}</span>
               </div>
               <div className="col-span-1 flex items-center justify-center">
                 {!readOnly && form.line_items.length > 1 && (
@@ -404,18 +409,16 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Add line item
+            {t('quoteForm.addLineItem')}
           </button>
         )}
 
         {/* Totals */}
         <div className="mt-6 pt-4 border-t border-gray-100">
           <div className="grid grid-cols-2 gap-4 sm:w-72 ml-auto">
-            <div className="text-sm text-gray-500">Subtotal</div>
-            <div className="text-sm font-medium text-gray-900 text-right">
-              {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(subtotal)}
-            </div>
-            <div className="text-sm text-gray-500">Discount ({form.currency})</div>
+            <div className="text-sm text-gray-500">{t('quoteForm.subtotal')}</div>
+            <div className="text-sm font-medium text-gray-900 text-right">{fmt(subtotal)}</div>
+            <div className="text-sm text-gray-500">{t('quoteForm.discount', { currency: form.currency })}</div>
             <div>
               <input
                 type="number" min="0" step="0.01"
@@ -426,7 +429,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
                 onChange={(e) => !readOnly && setForm((p) => ({ ...p, discount: e.target.value === '' ? '' : Number(e.target.value) }))}
               />
             </div>
-            <div className="text-sm text-gray-500">Tax rate (%)</div>
+            <div className="text-sm text-gray-500">{t('quoteForm.taxRate')}</div>
             <div>
               <input
                 type="number" min="0" max="100" step="0.1"
@@ -437,20 +440,18 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
                 onChange={(e) => !readOnly && setForm((p) => ({ ...p, tax_rate: e.target.value === '' ? '' : Number(e.target.value) }))}
               />
             </div>
-            <div className="text-base font-bold text-gray-900 border-t border-rose-200 pt-2">Total</div>
-            <div className="text-base font-bold text-rose-600 text-right border-t border-rose-200 pt-2">
-              {new Intl.NumberFormat('en', { style: 'currency', currency: form.currency }).format(total)}
-            </div>
+            <div className="text-base font-bold text-gray-900 border-t border-rose-200 pt-2">{t('quoteForm.colTotal')}</div>
+            <div className="text-base font-bold text-rose-600 text-right border-t border-rose-200 pt-2">{fmt(total)}</div>
           </div>
         </div>
       </div>
 
       {/* Additional */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Additional Details</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">{t('quoteForm.additionalDetails')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Valid Until</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.validUntil')}</label>
             <input
               type="date"
               readOnly={readOnly}
@@ -460,14 +461,14 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.notes')}</label>
             <textarea
               rows={3}
               readOnly={readOnly}
               className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none ${readOnly ? 'bg-gray-50 cursor-default' : ''}`}
               value={form.notes}
               onChange={(e) => !readOnly && setForm((p) => ({ ...p, notes: e.target.value }))}
-              placeholder="Additional notes or terms..."
+              placeholder={t('quoteForm.notesPlaceholder')}
             />
           </div>
         </div>
@@ -479,7 +480,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
           onClick={onCancel}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
         >
-          {readOnly ? 'Close' : 'Cancel'}
+          {readOnly ? t('quoteForm.close') : t('quoteForm.cancel')}
         </button>
         {!readOnly && (
           <button
@@ -487,7 +488,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
             disabled={saving}
             className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all shadow-sm"
           >
-            {saving ? 'Saving…' : 'Save Quote'}
+            {saving ? t('quoteForm.saving') : t('quoteForm.saveQuote')}
           </button>
         )}
       </div>
