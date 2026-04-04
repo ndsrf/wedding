@@ -1202,6 +1202,7 @@ model AlertDelivery {
   recipient_name  String?
   recipient_email String?
   recipient_phone String?
+  recipient_language Language        @default(EN)
 
   channel         Channel
 

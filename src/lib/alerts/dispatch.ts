@@ -44,7 +44,7 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
           delivery.recipient_email,
           delivery.subject ?? '(No subject)',
           delivery.body,
-          'en', // alerts are sent in platform default (admins are EN-capable)
+          delivery.recipient_language.toLowerCase() as import('@/lib/i18n/config').Language,
         );
         success = result.success;
         externalId = result.messageId;

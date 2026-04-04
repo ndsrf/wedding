@@ -15,12 +15,20 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import type { AlertRule, Prisma } from '@prisma/client';
+import type { AlertRule, Language, Prisma } from '@prisma/client';
 import { resolveRecipients } from './recipients';
 import { renderAlertTemplate, buildTemplateVars } from './render';
 import { resolveChannel } from './types';
 import { processPendingDeliveries } from './processor';
 import type { AlertContext } from './types';
+
+const LANGUAGE_LOCALE: Record<Language, string> = {
+  ES: 'es-ES',
+  EN: 'en-GB',
+  FR: 'fr-FR',
+  IT: 'it-IT',
+  DE: 'de-DE',
+};
 
 export { type AlertContext };
 
@@ -128,9 +136,9 @@ async function processRule(
     });
   }
 
+  // Base vars without weddingDate — formatted per-recipient locale below
   const baseVars = buildTemplateVars(metadata, {
     coupleNames: weddingDetails?.couple_names,
-    weddingDate: weddingDetails?.wedding_date?.toLocaleDateString('es-ES') ?? undefined,
     eventType: context.event_type,
   });
 
@@ -146,7 +154,9 @@ async function processRule(
     },
   });
 
-  // Create one AlertDelivery per (recipient × resolved-channel)
+  // De-duplicate recipients by (id, channel) — a person can appear multiple
+  // times if they match several notification criteria (e.g. planner + couple).
+  const seen = new Set<string>();
   const deliveryData: Prisma.AlertDeliveryCreateManyInput[] = [];
 
   for (const recipient of recipients) {
@@ -158,11 +168,15 @@ async function processRule(
       continue;
     }
 
-    const vars = { 
-      ...baseVars, 
-      recipientName: recipient.name,
-      weddingDate: weddingDetails?.wedding_date?.toLocaleDateString(recipient.language.toLowerCase())
-    };
+    const dedupKey = `${recipient.id}:${channel}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
+
+    // Format weddingDate using the recipient's preferred locale
+    const locale = LANGUAGE_LOCALE[recipient.language] ?? 'en-GB';
+    const weddingDate = weddingDetails?.wedding_date?.toLocaleDateString(locale);
+
+    const vars = { ...baseVars, weddingDate, recipientName: recipient.name };
     const subject = renderAlertTemplate(rule.subject, vars);
     const body = renderAlertTemplate(rule.body, vars);
 

@@ -39,9 +39,6 @@ export async function processPendingDeliveries(limit = 50): Promise<ProcessResul
     orderBy: { created_at: 'asc' },
     take: limit,
   });
-    orderBy: { created_at: 'asc' },
-    take: limit,
-  });
 
   const eligibleIds = deliveries
     .filter((d) => d.attempts < d.max_attempts)

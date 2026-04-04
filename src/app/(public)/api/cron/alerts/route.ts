@@ -11,8 +11,22 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { processPendingDeliveries } from '@/lib/alerts/processor';
 import { getPlatformOptimization } from '@/lib/platform/config';
+
+/** Constant-time string comparison to prevent timing attacks on the cron secret. */
+function safeCompare(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a);
+    const bufB = Buffer.from(b);
+    // timingSafeEqual requires equal-length buffers
+    if (bufA.length !== bufB.length) return false;
+    return timingSafeEqual(bufA, bufB);
+  } catch {
+    return false;
+  }
+}
 
 export const maxDuration = 60; // seconds — Vercel Hobby allows up to 60s on cron routes
 
@@ -25,7 +39,7 @@ export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (cronSecret && !safeCompare(authHeader ?? '', `Bearer ${cronSecret}`)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
