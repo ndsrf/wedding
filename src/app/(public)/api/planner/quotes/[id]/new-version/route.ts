@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { del } from '@vercel/blob';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -19,6 +20,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     }
     if (existing.next_version) {
       return NextResponse.json({ error: 'A newer version already exists for this quote' }, { status: 422 });
+    }
+
+    // Delete the previous version's cached PDF so it can't be downloaded as if it were current
+    if (existing.pdf_url) {
+      try { await del(existing.pdf_url); } catch { /* non-fatal */ }
+      await prisma.quote.update({ where: { id: existing.id }, data: { pdf_url: null } });
     }
 
     const newQuote = await prisma.quote.create({
