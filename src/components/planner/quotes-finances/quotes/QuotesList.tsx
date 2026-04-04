@@ -82,6 +82,8 @@ export function QuotesList() {
   const [contractFillWithAI, setContractFillWithAI] = useState(false);
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [creatingContract, setCreatingContract] = useState(false);
+  const [creatingVersion, setCreatingVersion] = useState<string | null>(null);
+  const [newVersionError, setNewVersionError] = useState<string | null>(null);
 
   async function fetchQuotes() {
     const res = await fetch('/api/planner/quotes');
@@ -205,10 +207,16 @@ export function QuotesList() {
   }
 
   async function handleNewVersion(id: string) {
+    setCreatingVersion(id);
+    setNewVersionError(null);
     const res = await fetch(`/api/planner/quotes/${id}/new-version`, { method: 'POST' });
     if (res.ok) {
       fetchQuotes();
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setNewVersionError(json.error ?? t('quotes.newVersionError'));
     }
+    setCreatingVersion(null);
   }
 
   if (loading) return (
@@ -535,15 +543,25 @@ export function QuotesList() {
                   </>
                 )}
                 {quote.status === 'REJECTED' && (
-                  <button
-                    onClick={() => handleNewVersion(quote.id)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                    </svg>
-                    {t('quotes.newVersion')}
-                  </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => handleNewVersion(quote.id)}
+                      disabled={creatingVersion === quote.id}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {creatingVersion === quote.id ? (
+                        <span className="animate-spin w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full" />
+                      ) : (
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                        </svg>
+                      )}
+                      {creatingVersion === quote.id ? t('quotes.newVersionCreating') : t('quotes.newVersion')}
+                    </button>
+                    {newVersionError && creatingVersion === null && (
+                      <p className="text-xs text-red-600">{newVersionError}</p>
+                    )}
+                  </div>
                 )}
                 {quote.status === 'ACCEPTED' && (
                   <button

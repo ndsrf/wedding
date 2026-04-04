@@ -774,7 +774,9 @@
           "REJECTED": "Rechazado",
           "EXPIRED": "Vencido"
         },
-        "newVersion": "Nueva Versión"
+        "newVersion": "Nueva Versión",
+        "newVersionCreating": "Creando versión…",
+        "newVersionError": "No se pudo crear la nueva versión"
       },
       "contracts": {
         "title": "Contratos",

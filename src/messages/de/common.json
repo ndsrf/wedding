@@ -770,7 +770,9 @@
           "REJECTED": "Abgelehnt",
           "EXPIRED": "Abgelaufen"
         },
-        "newVersion": "Neue Version"
+        "newVersion": "Neue Version",
+        "newVersionCreating": "Version wird erstellt…",
+        "newVersionError": "Neue Version konnte nicht erstellt werden"
       },
       "contracts": {
         "title": "Verträge",
