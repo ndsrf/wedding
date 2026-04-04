@@ -320,7 +320,7 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       window.removeEventListener('beforeunload', onBeforeUnload);
       clearInterval(hourly);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- uses refs, no stale closure
+  }, []); // mount once — event handlers access fresh values via refs
 
   function logCommentEvent(payload: {
     event_type: 'comment_added' | 'comment_resolved';
