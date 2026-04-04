@@ -32,10 +32,13 @@ export async function processPendingDeliveries(limit = 50): Promise<ProcessResul
     where: {
       status: { in: ['PENDING', 'FAILED'] },
       OR: [
-        { next_retry_at: null },
+        { status: 'PENDING', next_retry_at: null },
         { next_retry_at: { lte: now } },
       ],
     },
+    orderBy: { created_at: 'asc' },
+    take: limit,
+  });
     orderBy: { created_at: 'asc' },
     take: limit,
   });
