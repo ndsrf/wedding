@@ -52,7 +52,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         contracts: { select: { id: true, status: true, share_token: true, signed_pdf_url: true } },
-        invoices: { select: { id: true, status: true } },
+        invoices: { select: { id: true, status: true, total: true, amount_paid: true } },
       },
     });
 
