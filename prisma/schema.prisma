@@ -847,6 +847,12 @@ enum ContractStatus {
   CANCELLED
 }
 
+enum ContractHistoryEventType {
+  edit
+  comment_added
+  comment_resolved
+}
+
 enum InvoiceStatus {
   DRAFT
   ISSUED
@@ -984,7 +990,7 @@ model ContractHistoryEvent {
   contract_id      String
   actor_name       String
   actor_color      String
-  event_type       String   // "edit" | "comment_added" | "comment_resolved"
+  event_type       ContractHistoryEventType
   description      String?  @db.Text
   content_snapshot Json?    // ProseMirror JSON snapshot, only for event_type = "edit"
   created_at       DateTime @default(now())

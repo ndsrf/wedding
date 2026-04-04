@@ -8,7 +8,7 @@ export interface HistoryEvent {
   contract_id: string;
   actor_name: string;
   actor_color: string;
-  event_type: 'edit' | 'comment_added' | 'comment_resolved';
+  event_type: string; // ContractHistoryEventType enum values
   description: string | null;
   content_snapshot: Record<string, unknown> | null;
   created_at: string;

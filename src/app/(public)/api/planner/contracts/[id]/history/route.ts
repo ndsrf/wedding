@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
@@ -8,8 +9,9 @@ const createSchema = z.object({
   actor_color: z.string().min(1).max(20),
   event_type: z.enum(['edit', 'comment_added', 'comment_resolved']),
   description: z.string().max(500).optional(),
-  content_snapshot: z.record(z.string(), z.unknown()).optional(), // ProseMirror JSON, only for "edit"
-  share_token: z.string().optional(), // clients pass this for auth
+  // Only accepted for edit events; stripped otherwise
+  content_snapshot: z.record(z.string(), z.unknown()).optional(),
+  share_token: z.string().optional(), // clients authenticate with this
 });
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -37,8 +39,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const { id } = await params;
 
-    // Try planner auth first; fall back to share_token for clients
-    let authorized = false;
     let body: Record<string, unknown>;
     try {
       body = await request.json();
@@ -46,28 +46,38 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
     }
 
+    // Determine who is calling
     let plannerUser: { planner_id?: string | null } | null = null;
     try {
       plannerUser = await requireRole('planner');
     } catch {
-      // not a planner session
+      // not a planner session — may be a client with share_token
     }
 
     const contract = await prisma.contract.findUnique({ where: { id } });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    if (plannerUser?.planner_id && contract.planner_id === plannerUser.planner_id) {
-      authorized = true;
-    } else if (body?.share_token && body.share_token === contract.share_token) {
-      authorized = true;
-    }
+    const isPlanner = !!(plannerUser?.planner_id && contract.planner_id === plannerUser.planner_id);
+    const isClient = !isPlanner && body?.share_token === contract.share_token;
 
-    if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!isPlanner && !isClient) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
 
     const { actor_name, actor_color, event_type, description, content_snapshot } = parsed.data;
+
+    // Clients may only log comment events — edit events require planner auth
+    if (!isPlanner && event_type === 'edit') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // content_snapshot is only meaningful for edit events; discard it otherwise
+    const snapshot = event_type === 'edit' && content_snapshot
+      ? content_snapshot as Prisma.InputJsonValue
+      : undefined;
 
     const event = await prisma.contractHistoryEvent.create({
       data: {
@@ -76,7 +86,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         actor_color,
         event_type,
         description,
-        ...(content_snapshot ? { content_snapshot } : {}),
+        ...(snapshot !== undefined ? { content_snapshot: snapshot } : {}),
       },
     });
 
