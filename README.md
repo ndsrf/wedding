@@ -1540,7 +1540,8 @@ GET /api/admin/alert-history?page=1&limit=20&event_type=RSVP_SUBMITTED
 #### Background processing
 
 **On Vercel** (`PLATFORM_OPTIMIZATION=vercel`):
-- `vercel.json` configures a cron job that calls `GET /api/cron/alerts` every minute
+- `vercel.json` configures a daily cron job (`0 8 * * *`, 08:00 UTC) that calls `GET /api/cron/alerts` as a retry sweep — compatible with Vercel Hobby plan
+- Immediate delivery is handled by the fire-and-forget processor called inside `triggerAlert()`, so most alerts are sent within seconds of the event
 - Add `CRON_SECRET` to your Vercel environment variables (any random string)
 
 **On Docker / self-hosted** (`PLATFORM_OPTIMIZATION=docker` or `standard`):
