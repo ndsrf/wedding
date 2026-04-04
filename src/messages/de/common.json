@@ -832,7 +832,7 @@
           "rememberFillRule": "Diese Ausfüllregel für zukünftige Verträge aus dieser Vorlage merken",
           "deselectAll": "Alle abwählen",
           "selectAll": "Alle auswählen",
-          "selectedCountSuffix": "({count} ausgewählt)"
+          "selectedCountSuffix": "({count, plural, one {# ausgewählt} other {# ausgewählt}})"
         }
       },
       "invoices": {

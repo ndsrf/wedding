@@ -836,7 +836,7 @@
           "rememberFillRule": "Recordar esta regla de relleno para contratos futuros de esta plantilla",
           "deselectAll": "Deseleccionar todo",
           "selectAll": "Seleccionar todo",
-          "selectedCountSuffix": "({count} seleccionados)"
+          "selectedCountSuffix": "({count, plural, one {# seleccionado} other {# seleccionados}})"
         }
       },
       "invoices": {

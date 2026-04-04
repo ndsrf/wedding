@@ -832,7 +832,7 @@
           "rememberFillRule": "Mémoriser cette règle de remplissage pour les futurs contrats de ce modèle",
           "deselectAll": "Tout désélectionner",
           "selectAll": "Tout sélectionner",
-          "selectedCountSuffix": "({count} sélectionné(s))"
+          "selectedCountSuffix": "({count, plural, one {# sélectionné} other {# sélectionnés}})"
         }
       },
       "invoices": {

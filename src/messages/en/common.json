@@ -840,7 +840,7 @@
           "rememberFillRule": "Remember this fill rule for future contracts from this template",
           "deselectAll": "Deselect all",
           "selectAll": "Select all",
-          "selectedCountSuffix": "({count} selected)"
+          "selectedCountSuffix": "({count, plural, one {# selected} other {# selected}})"
         }
       },
       "invoices": {
