@@ -158,7 +158,11 @@ async function processRule(
       continue;
     }
 
-    const vars = { ...baseVars, recipientName: recipient.name };
+    const vars = { 
+      ...baseVars, 
+      recipientName: recipient.name,
+      weddingDate: weddingDetails?.wedding_date?.toLocaleDateString(recipient.language.toLowerCase())
+    };
     const subject = renderAlertTemplate(rule.subject, vars);
     const body = renderAlertTemplate(rule.body, vars);
 
