@@ -339,6 +339,9 @@ export function WeddingNotesEditor({
     return () => {
       destroyed = true;
       cleanup?.();
+      // The Liveblocks free-plan badge is injected into document.body with a
+      // fixed id by @liveblocks/core. Remove it when navigating away.
+      document.getElementById('liveblocks-badge')?.remove();
     };
   }, [authEndpoint, weddingId, currentUser]);
 
