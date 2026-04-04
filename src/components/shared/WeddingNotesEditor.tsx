@@ -296,23 +296,6 @@ export function WeddingNotesEditor({
     let destroyed = false;
     let cleanup: (() => void) | undefined;
 
-    // Track any elements Liveblocks injects into document.body (e.g. the
-    // "Powered by Liveblocks" banner on the free plan) so we can remove them
-    // when this component unmounts and the user navigates away.
-    const liveblocksBodyNodes: Element[] = [];
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        for (const node of mutation.addedNodes) {
-          if (node instanceof Element) {
-            if (node.matches('[class*="lb-"]') || node.querySelector('[class*="lb-"]')) {
-              liveblocksBodyNodes.push(node);
-            }
-          }
-        }
-      }
-    });
-    observer.observe(document.body, { childList: true });
-
     async function initLiveblocks() {
       try {
         const { createClient } = await import('@liveblocks/client');
@@ -355,9 +338,10 @@ export function WeddingNotesEditor({
     initLiveblocks();
     return () => {
       destroyed = true;
-      observer.disconnect();
-      liveblocksBodyNodes.forEach((el) => el.remove());
       cleanup?.();
+      // The Liveblocks free-plan badge is injected into document.body with a
+      // fixed id by @liveblocks/core. Remove it when navigating away.
+      document.getElementById('liveblocks-badge')?.remove();
     };
   }, [authEndpoint, weddingId, currentUser]);
 
