@@ -61,6 +61,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       footer: t('planner.quotesFinances.quotePdf.footer'),
       event: t('planner.quotesFinances.quotePdf.event'),
       vat: t('planner.quotesFinances.quotePdf.vat'),
+      version: t('planner.quotesFinances.quotePdf.version'),
     };
 
     const buffer = await renderToBuffer(

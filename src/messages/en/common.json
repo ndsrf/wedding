@@ -780,7 +780,10 @@
         },
         "newVersion": "New Version",
         "newVersionCreating": "Creating version…",
-        "newVersionError": "Could not create new version"
+        "newVersionError": "Could not create new version",
+        "versionLabel": "Version",
+        "versionOption": "Version {version}",
+        "versionLatest": "current"
       },
       "contracts": {
         "title": "Contracts",
@@ -971,7 +974,8 @@
         "notes": "Notes",
         "footer": "This quote is valid for 30 days from the issue date unless otherwise stated. Thank you for considering our services.",
         "event": "Event:",
-        "vat": "VAT:"
+        "vat": "VAT:",
+        "version": "Version"
       },
       "invoicePdf": {
         "docTitle": "Invoice",

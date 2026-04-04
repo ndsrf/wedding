@@ -772,7 +772,10 @@
         },
         "newVersion": "Nuova Versione",
         "newVersionCreating": "Creazione versione…",
-        "newVersionError": "Impossibile creare la nuova versione"
+        "newVersionError": "Impossibile creare la nuova versione",
+        "versionLabel": "Versione",
+        "versionOption": "Versione {version}",
+        "versionLatest": "attuale"
       },
       "contracts": {
         "title": "Contratti",
@@ -963,7 +966,8 @@
         "notes": "Note",
         "footer": "Questo preventivo è valido per 30 giorni dalla data di emissione, salvo diversa indicazione. Grazie per aver considerato i nostri servizi.",
         "event": "Evento:",
-        "vat": "P.IVA:"
+        "vat": "P.IVA:",
+        "version": "Versione"
       },
       "invoicePdf": {
         "docTitle": "Fattura",

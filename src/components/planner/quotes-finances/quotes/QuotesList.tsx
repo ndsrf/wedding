@@ -39,6 +39,13 @@ interface Quote {
   invoices: { id: string; status: string }[];
 }
 
+interface VersionSummary {
+  id: string;
+  version: number;
+  status: string;
+  created_at: string;
+}
+
 interface ContractTemplate {
   id: string;
   name: string;
@@ -84,6 +91,40 @@ export function QuotesList() {
   const [creatingContract, setCreatingContract] = useState(false);
   const [creatingVersion, setCreatingVersion] = useState<string | null>(null);
   const [newVersionError, setNewVersionError] = useState<string | null>(null);
+
+  // Version history state (used when viewing a quote)
+  const [versionChain, setVersionChain] = useState<VersionSummary[]>([]);
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
+  const [selectedVersionData, setSelectedVersionData] = useState<Quote | null>(null);
+  const [loadingVersion, setLoadingVersion] = useState(false);
+
+  // Fetch version chain when a quote is opened for viewing
+  useEffect(() => {
+    if (!viewingId) {
+      setVersionChain([]);
+      setSelectedVersionId(null);
+      setSelectedVersionData(null);
+      return;
+    }
+    setSelectedVersionId(viewingId);
+    setSelectedVersionData(null);
+    fetch(`/api/planner/quotes/${viewingId}/versions`)
+      .then((r) => r.ok ? r.json() : { data: [] })
+      .then((json) => setVersionChain(json.data ?? []));
+  }, [viewingId]);
+
+  // Fetch full quote data when a different version is selected
+  useEffect(() => {
+    if (!selectedVersionId || selectedVersionId === viewingId) {
+      setSelectedVersionData(null);
+      return;
+    }
+    setLoadingVersion(true);
+    fetch(`/api/planner/quotes/${selectedVersionId}`)
+      .then((r) => r.ok ? r.json() : { data: null })
+      .then((json) => setSelectedVersionData(json.data ?? null))
+      .finally(() => setLoadingVersion(false));
+  }, [selectedVersionId, viewingId]);
 
   async function fetchQuotes() {
     const res = await fetch('/api/planner/quotes');
@@ -245,45 +286,79 @@ export function QuotesList() {
 
   if (showForm) {
     const isView = viewingId !== null && editingId === null;
-    const quoteData = editingQuote ?? viewingQuote;
+    // For view mode: show the selected version's data (fetched) or fall back to the list entry
+    const activeQuote = isView
+      ? (selectedVersionData ?? viewingQuote)
+      : editingQuote;
+    const showVersionDropdown = isView && versionChain.length > 1;
+
     return (
       <div>
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => { setShowForm(false); setEditingId(null); setViewingId(null); }} className="text-sm text-gray-500 hover:text-gray-700">
-            {t('quotes.back')}
-          </button>
-          <h3 className="text-base font-semibold text-gray-900">
-            {isView ? t('quotes.viewQuote') : editingId ? t('quotes.editQuote') : t('quotes.newQuote')}
-          </h3>
+        <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+          <div className="flex items-center gap-3">
+            <button onClick={() => { setShowForm(false); setEditingId(null); setViewingId(null); }} className="text-sm text-gray-500 hover:text-gray-700">
+              {t('quotes.back')}
+            </button>
+            <h3 className="text-base font-semibold text-gray-900">
+              {isView ? t('quotes.viewQuote') : editingId ? t('quotes.editQuote') : t('quotes.newQuote')}
+            </h3>
+          </div>
+          {showVersionDropdown && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 font-medium">{t('quotes.versionLabel')}</span>
+              <select
+                value={selectedVersionId ?? ''}
+                onChange={(e) => setSelectedVersionId(e.target.value)}
+                className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white"
+              >
+                {versionChain.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {t('quotes.versionOption', { version: v.version })}
+                    {v.id === viewingId ? ` (${t('quotes.versionLatest')})` : ''}
+                    {` — ${t(`quotes.status.${v.status}` as Parameters<typeof t>[0])}`}
+                  </option>
+                ))}
+              </select>
+              {loadingVersion && (
+                <span className="animate-spin w-3.5 h-3.5 border-2 border-violet-400 border-t-transparent rounded-full" />
+              )}
+            </div>
+          )}
         </div>
-        <QuoteForm
-          readOnly={isView}
-          initialData={quoteData ? {
-            customer_id: quoteData.customer_id ?? null,
-            couple_names: quoteData.couple_names,
-            event_date: quoteData.event_date ?? '',
-            location: quoteData.location ?? '',
-            client_email: quoteData.customer?.email ?? '',
-            client_phone: quoteData.customer?.phone ?? '',
-            client_id_number: quoteData.customer?.id_number ?? '',
-            client_address: quoteData.customer?.address ?? '',
-            notes: quoteData.notes ?? '',
-            currency: quoteData.currency,
-            discount: quoteData.discount != null ? Number(quoteData.discount) : '',
-            tax_rate: quoteData.tax_rate != null ? Number(quoteData.tax_rate) : '',
-            expires_at: quoteData.expires_at ?? '',
-            line_items: quoteData.line_items.map((li) => ({
-              id: li.id,
-              name: li.name,
-              description: li.description ?? '',
-              quantity: Number(li.quantity),
-              unit_price: Number(li.unit_price),
-              total: Number(li.total),
-            })),
-          } : undefined}
-          onSave={isView ? async () => {} : handleSave}
-          onCancel={() => { setShowForm(false); setEditingId(null); setViewingId(null); }}
-        />
+        {loadingVersion ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin w-6 h-6 border-4 border-violet-400 border-t-transparent rounded-full" />
+          </div>
+        ) : (
+          <QuoteForm
+            readOnly={isView}
+            initialData={activeQuote ? {
+              customer_id: activeQuote.customer_id ?? null,
+              couple_names: activeQuote.couple_names,
+              event_date: activeQuote.event_date ?? '',
+              location: activeQuote.location ?? '',
+              client_email: activeQuote.customer?.email ?? '',
+              client_phone: activeQuote.customer?.phone ?? '',
+              client_id_number: activeQuote.customer?.id_number ?? '',
+              client_address: activeQuote.customer?.address ?? '',
+              notes: activeQuote.notes ?? '',
+              currency: activeQuote.currency,
+              discount: activeQuote.discount != null ? Number(activeQuote.discount) : '',
+              tax_rate: activeQuote.tax_rate != null ? Number(activeQuote.tax_rate) : '',
+              expires_at: activeQuote.expires_at ?? '',
+              line_items: activeQuote.line_items.map((li) => ({
+                id: li.id,
+                name: li.name,
+                description: li.description ?? '',
+                quantity: Number(li.quantity),
+                unit_price: Number(li.unit_price),
+                total: Number(li.total),
+              })),
+            } : undefined}
+            onSave={isView ? async () => {} : handleSave}
+            onCancel={() => { setShowForm(false); setEditingId(null); setViewingId(null); }}
+          />
+        )}
       </div>
     );
   }

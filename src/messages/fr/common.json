@@ -772,7 +772,10 @@
         },
         "newVersion": "Nouvelle Version",
         "newVersionCreating": "Création en cours…",
-        "newVersionError": "Impossible de créer une nouvelle version"
+        "newVersionError": "Impossible de créer une nouvelle version",
+        "versionLabel": "Version",
+        "versionOption": "Version {version}",
+        "versionLatest": "actuelle"
       },
       "contracts": {
         "title": "Contrats",
@@ -963,7 +966,8 @@
         "notes": "Notes",
         "footer": "Ce devis est valable 30 jours à compter de la date d'émission, sauf indication contraire. Merci de considérer nos services.",
         "event": "Événement :",
-        "vat": "TVA :"
+        "vat": "TVA :",
+        "version": "Version"
       },
       "invoicePdf": {
         "docTitle": "Facture",
