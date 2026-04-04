@@ -179,6 +179,7 @@ async function processRule(
       recipient_name: recipient.name,
       recipient_email: recipient.email ?? null,
       recipient_phone: phone ?? null,
+      recipient_language: recipient.language,
       channel,
       subject,
       body,
