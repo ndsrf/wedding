@@ -820,6 +820,27 @@
           "SIGNING": "Awaiting Signature",
           "SIGNED": "Signed",
           "CANCELLED": "Cancelled"
+        },
+        "commentsSidebar": {
+          "title": "Comments",
+          "complete": "Complete ({count})",
+          "add": "Add",
+          "allAuthors": "All authors",
+          "aiFilled": "AI filled",
+          "commentOnSelectedText": "Comment on the selected text…",
+          "writeCommentOrSuggestion": "Write a comment or suggestion…",
+          "submit": "Submit",
+          "cancel": "Cancel",
+          "ctrlEnterHint": "Ctrl+Enter to submit · Esc to cancel",
+          "resolveAllSelected": "Resolve all selected comments",
+          "resolveComment": "Resolve comment",
+          "noCommentsMatchFilters": "No comments match the current filters.",
+          "noCommentsFromClient": "No comments from the client yet.",
+          "selectTextToComment": "Select text in the contract to comment on it, or click Add to leave a general note.",
+          "rememberFillRule": "Remember this fill rule for future contracts from this template",
+          "deselectAll": "Deselect all",
+          "selectAll": "Select all",
+          "selectedCountSuffix": "({count, plural, one {# selected} other {# selected}})"
         }
       },
       "invoices": {
@@ -1036,7 +1057,23 @@
         "statusShared": "Shared with client",
         "statusSigning": "Awaiting Signature",
         "statusSigned": "Signed",
-        "statusCancelled": "Cancelled"
+        "statusCancelled": "Cancelled",
+        "sharedBy": "Shared by {name}",
+        "enterName": "Please enter your name to continue reviewing this contract.",
+        "yourName": "Your name",
+        "viewContract": "View Contract",
+        "signTheContractBelow": "Sign the contract below",
+        "backToContract": "Back to contract",
+        "signed": "Signed",
+        "signNow": "Sign Now",
+        "reviewMode": "Review Mode",
+        "readyToSign": "Ready to sign",
+        "readyToSignBannerMessage": "review the contract below, then click Sign Now to add your digital signature.",
+        "signedSuccessfully": "Signed successfully!",
+        "signedSuccessfullyMessage": "Your planner will receive a copy of the signed contract.",
+        "textSelected": "Text selected",
+        "textSelectedMessage": "add a comment below to flag this section for your planner.",
+        "selectTextInstruction": "Select any text and add a comment below to flag it for your wedding planner."
       }
     }
   },

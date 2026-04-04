@@ -812,6 +812,27 @@
           "SIGNING": "En attente de signature",
           "SIGNED": "Signé",
           "CANCELLED": "Annulé"
+        },
+        "commentsSidebar": {
+          "title": "Commentaires",
+          "complete": "Terminer ({count})",
+          "add": "Ajouter",
+          "allAuthors": "Tous les auteurs",
+          "aiFilled": "Rempli par IA",
+          "commentOnSelectedText": "Commentez le texte sélectionné…",
+          "writeCommentOrSuggestion": "Écrivez un commentaire ou une suggestion…",
+          "submit": "Envoyer",
+          "cancel": "Annuler",
+          "ctrlEnterHint": "Ctrl+Entrée pour envoyer · Échap pour annuler",
+          "resolveAllSelected": "Résoudre tous les commentaires sélectionnés",
+          "resolveComment": "Résoudre le commentaire",
+          "noCommentsMatchFilters": "Aucun commentaire ne correspond aux filtres actuels.",
+          "noCommentsFromClient": "Aucun commentaire du client pour l'instant.",
+          "selectTextToComment": "Sélectionnez du texte dans le contrat pour le commenter, ou cliquez sur Ajouter pour laisser une note générale.",
+          "rememberFillRule": "Mémoriser cette règle de remplissage pour les futurs contrats de ce modèle",
+          "deselectAll": "Tout désélectionner",
+          "selectAll": "Tout sélectionner",
+          "selectedCountSuffix": "({count, plural, one {# sélectionné} other {# sélectionnés}})"
         }
       },
       "invoices": {
@@ -1028,7 +1049,23 @@
         "statusShared": "Partagé avec le client",
         "statusSigning": "En attente de signature",
         "statusSigned": "Signé",
-        "statusCancelled": "Annulé"
+        "statusCancelled": "Annulé",
+        "sharedBy": "Partagé par {name}",
+        "enterName": "Veuillez entrer votre nom pour continuer à réviser ce contrat.",
+        "yourName": "Votre nom",
+        "viewContract": "Voir le contrat",
+        "signTheContractBelow": "Signez le contrat ci-dessous",
+        "backToContract": "Retour au contrat",
+        "signed": "Signé",
+        "signNow": "Signer maintenant",
+        "reviewMode": "Mode révision",
+        "readyToSign": "Prêt à signer",
+        "readyToSignBannerMessage": "révisez le contrat ci-dessous, puis cliquez sur Signer maintenant pour ajouter votre signature numérique.",
+        "signedSuccessfully": "Signé avec succès !",
+        "signedSuccessfullyMessage": "Votre planificateur recevra une copie du contrat signé.",
+        "textSelected": "Texte sélectionné",
+        "textSelectedMessage": "ajoutez un commentaire ci-dessous pour signaler cette section à votre planificateur.",
+        "selectTextInstruction": "Sélectionnez n'importe quel texte et ajoutez un commentaire pour le signaler à votre wedding planner."
       }
     }
   },
