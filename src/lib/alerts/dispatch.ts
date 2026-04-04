@@ -22,10 +22,12 @@ const RETRY_DELAYS_MINUTES = [5, 15, 60]; // backoff per attempt
  */
 export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
   // Mark as SENDING to prevent double-processing by concurrent cron runs
-  await prisma.alertDelivery.update({
-    where: { id: delivery.id },
+  const result = await prisma.alertDelivery.updateMany({
+    where: { id: delivery.id, status: { in: ['PENDING', 'FAILED'] } },
     data: { status: 'SENDING', attempts: { increment: 1 }, updated_at: new Date() },
   });
+
+  if (result.count === 0) return;
 
   let success = false;
   let externalId: string | undefined;
