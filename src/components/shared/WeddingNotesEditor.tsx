@@ -304,8 +304,7 @@ export function WeddingNotesEditor({
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
           if (node instanceof Element) {
-            const cls = typeof node.className === 'string' ? node.className : '';
-            if (cls.includes('lb-') || node.querySelector?.('[class*="lb-"]')) {
+            if (node.matches('[class*="lb-"]') || node.querySelector('[class*="lb-"]')) {
               liveblocksBodyNodes.push(node);
             }
           }
@@ -346,10 +345,6 @@ export function WeddingNotesEditor({
           cleanup = () => {
             provider.destroy();
             room.disconnect();
-            // Remove the Liveblocks banner (and any other lb-* elements) that
-            // were injected into document.body while this component was mounted.
-            observer.disconnect();
-            liveblocksBodyNodes.forEach((el) => el.remove());
           };
         }
       } catch (err) {
@@ -361,6 +356,7 @@ export function WeddingNotesEditor({
     return () => {
       destroyed = true;
       observer.disconnect();
+      liveblocksBodyNodes.forEach((el) => el.remove());
       cleanup?.();
     };
   }, [authEndpoint, weddingId, currentUser]);
