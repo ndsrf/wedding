@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import * as Y from 'yjs';
 
 export interface CommentData {
@@ -46,6 +47,7 @@ export function ContractCommentsSidebar({
   onCommentAdded,
   onCommentResolved,
 }: ContractCommentsSidebarProps) {
+  const t = useTranslations('planner.quotesFinances.contracts.commentsSidebar');
   const [comments, setComments] = useState<CommentData[]>([]);
   const [newComment, setNewComment] = useState('');
   const [addingComment, setAddingComment] = useState(false);
@@ -216,7 +218,7 @@ export function ContractCommentsSidebar({
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-          Comments
+          {t('title')}
           {comments.length > 0 && (
             <span className="px-1.5 py-0.5 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
               {filtered.length !== comments.length ? `${filtered.length}/${comments.length}` : comments.length}
@@ -228,12 +230,12 @@ export function ContractCommentsSidebar({
             <button
               onClick={handleCompleteSelected}
               className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-              title="Resolve all selected comments"
+              title={t('resolveAllSelected')}
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
-              Complete ({selectedIds.size})
+              {t('complete', { count: selectedIds.size })}
             </button>
           )}
           {!isPlanner && !addingComment && (
@@ -244,7 +246,7 @@ export function ContractCommentsSidebar({
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Add
+              {t('add')}
             </button>
           )}
         </div>
@@ -260,7 +262,7 @@ export function ContractCommentsSidebar({
               onChange={(e) => setFilterAuthor(e.target.value)}
               className="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white text-gray-700"
             >
-              <option value="">All authors</option>
+              <option value="">{t('allAuthors')}</option>
               {authors.map((a) => (
                 <option key={a} value={a}>{a}</option>
               ))}
@@ -274,7 +276,7 @@ export function ContractCommentsSidebar({
                 onChange={(e) => setFilterAiFilled(e.target.checked)}
                 className="w-3.5 h-3.5 rounded border-gray-300 text-violet-600 focus:ring-violet-300"
               />
-              <span className="text-xs text-gray-600 whitespace-nowrap">AI filled</span>
+              <span className="text-xs text-gray-600 whitespace-nowrap">{t('aiFilled')}</span>
             </label>
           </div>
 
@@ -289,8 +291,8 @@ export function ContractCommentsSidebar({
                 className="w-3.5 h-3.5 rounded border-gray-300 text-violet-600 focus:ring-violet-300 cursor-pointer"
               />
               <span className="text-xs text-gray-500">
-                {allChecked ? 'Deselect all' : 'Select all'}
-                {someChecked && !allChecked && ` (${selectedVisibleCount} selected)`}
+                {allChecked ? t('deselectAll') : t('selectAll')}
+                {someChecked && !allChecked && ` ${t('selectedCountSuffix', { count: selectedVisibleCount })}`}
               </span>
             </div>
           )}
@@ -309,7 +311,7 @@ export function ContractCommentsSidebar({
             ref={textareaRef}
             rows={3}
             className="w-full text-xs border border-violet-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-300 resize-none bg-white"
-            placeholder={pendingSelectedText ? 'Comment on the selected text…' : 'Write a comment or suggestion…'}
+            placeholder={pendingSelectedText ? t('commentOnSelectedText') : t('writeCommentOrSuggestion')}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             onKeyDown={(e) => {
@@ -323,16 +325,16 @@ export function ContractCommentsSidebar({
               disabled={!newComment.trim()}
               className="px-3 py-1 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50 rounded-lg transition-colors"
             >
-              Submit
+              {t('submit')}
             </button>
             <button
               onClick={() => { setAddingComment(false); setNewComment(''); }}
               className="px-3 py-1 text-xs font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors"
             >
-              Cancel
+              {t('cancel')}
             </button>
           </div>
-          <p className="text-[10px] text-gray-400 mt-1.5">Ctrl+Enter to submit · Esc to cancel</p>
+          <p className="text-[10px] text-gray-400 mt-1.5">{t('ctrlEnterHint')}</p>
         </div>
       )}
 
@@ -347,10 +349,10 @@ export function ContractCommentsSidebar({
             </div>
             <p className="text-xs text-gray-400">
               {comments.length > 0
-                ? 'No comments match the current filters.'
+                ? t('noCommentsMatchFilters')
                 : isPlanner
-                  ? 'No comments from the client yet.'
-                  : 'Select text in the contract to comment on it, or click Add to leave a general note.'}
+                  ? t('noCommentsFromClient')
+                  : t('selectTextToComment')}
             </p>
           </div>
         )}
@@ -397,7 +399,7 @@ export function ContractCommentsSidebar({
                     <button
                       onClick={() => handleRemember(comment)}
                       disabled={rememberingId === comment.id || rememberedIds.has(comment.id)}
-                      title="Remember this fill rule for future contracts from this template"
+                      title={t('rememberFillRule')}
                       className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-violet-600 disabled:opacity-40 transition-colors rounded"
                     >
                       {rememberingId === comment.id ? (
@@ -419,7 +421,7 @@ export function ContractCommentsSidebar({
                   {isPlanner && (
                     <button
                       onClick={() => handleResolve(comment.id)}
-                      title="Resolve comment"
+                      title={t('resolveComment')}
                       className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-green-600 transition-colors rounded"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

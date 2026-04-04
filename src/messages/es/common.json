@@ -816,6 +816,27 @@
           "SIGNING": "Esperando firma",
           "SIGNED": "Firmado",
           "CANCELLED": "Cancelado"
+        },
+        "commentsSidebar": {
+          "title": "Comentarios",
+          "complete": "Completar ({count})",
+          "add": "Añadir",
+          "allAuthors": "Todos los autores",
+          "aiFilled": "Completado por IA",
+          "commentOnSelectedText": "Comenta el texto seleccionado…",
+          "writeCommentOrSuggestion": "Escribe un comentario o sugerencia…",
+          "submit": "Enviar",
+          "cancel": "Cancelar",
+          "ctrlEnterHint": "Ctrl+Enter para enviar · Esc para cancelar",
+          "resolveAllSelected": "Resolver todos los comentarios seleccionados",
+          "resolveComment": "Resolver comentario",
+          "noCommentsMatchFilters": "Ningún comentario coincide con los filtros actuales.",
+          "noCommentsFromClient": "Todavía no hay comentarios del cliente.",
+          "selectTextToComment": "Selecciona texto en el contrato para comentarlo, o haz clic en Añadir para dejar una nota general.",
+          "rememberFillRule": "Recordar esta regla de relleno para contratos futuros de esta plantilla",
+          "deselectAll": "Deseleccionar todo",
+          "selectAll": "Seleccionar todo",
+          "selectedCountSuffix": "({count} seleccionados)"
         }
       },
       "invoices": {
@@ -1032,7 +1053,23 @@
         "statusShared": "Compartido con el cliente",
         "statusSigning": "Pendiente de firma",
         "statusSigned": "Firmado",
-        "statusCancelled": "Cancelado"
+        "statusCancelled": "Cancelado",
+        "sharedBy": "Compartido por {name}",
+        "enterName": "Por favor, introduce tu nombre para continuar revisando este contrato.",
+        "yourName": "Tu nombre",
+        "viewContract": "Ver contrato",
+        "signTheContractBelow": "Firma el contrato a continuación",
+        "backToContract": "Volver al contrato",
+        "signed": "Firmado",
+        "signNow": "Firmar ahora",
+        "reviewMode": "Modo revisión",
+        "readyToSign": "Listo para firmar",
+        "readyToSignBannerMessage": "revisa el contrato a continuación y haz clic en Firmar ahora para añadir tu firma digital.",
+        "signedSuccessfully": "¡Firmado con éxito!",
+        "signedSuccessfullyMessage": "Tu planificador recibirá una copia del contrato firmado.",
+        "textSelected": "Texto seleccionado",
+        "textSelectedMessage": "añade un comentario a continuación para marcar esta sección para tu planificador.",
+        "selectTextInstruction": "Selecciona cualquier texto y añade un comentario para marcarlo para tu organizador de bodas."
       }
     }
   },

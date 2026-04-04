@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as Y from 'yjs';
+import { useTranslations } from 'next-intl';
 import { ContractEditor } from '@/components/planner/quotes-finances/contracts/ContractEditor';
 import { ContractCommentsSidebar, type CommentData } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
 
@@ -16,6 +17,7 @@ interface ContractData {
 }
 
 export default function ClientContractPage({ params }: { params: Promise<{ shareToken: string }> }) {
+  const t = useTranslations('planner.quotesFinances.contractPage');
   const [shareToken, setShareToken] = useState('');
   const [contract, setContract] = useState<ContractData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,8 +92,8 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Contract not found</h1>
-          <p className="text-gray-500">{error ?? 'This link may have expired or been revoked.'}</p>
+          <h1 className="text-xl font-semibold text-gray-900 mb-2">{t('contractNotFound')}</h1>
+          <p className="text-gray-500">{error ?? t('linkExpired')}</p>
         </div>
       </div>
     );
@@ -109,15 +111,15 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
               </svg>
             </div>
             <h1 className="text-xl font-bold text-gray-900 font-playfair">{contract.title}</h1>
-            <p className="text-sm text-gray-500 mt-1">Shared by {contract.planner.name}</p>
+            <p className="text-sm text-gray-500 mt-1">{t('sharedBy', { name: contract.planner.name })}</p>
           </div>
           <p className="text-sm text-gray-600 mb-4">
-            Please enter your name to continue reviewing this contract.
+            {t('enterName')}
           </p>
           <input
             type="text"
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-            placeholder="Your name"
+            placeholder={t('yourName')}
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && clientName.trim()) setNameSubmitted(true); }}
@@ -127,7 +129,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
             onClick={() => { if (clientName.trim()) setNameSubmitted(true); }}
             className="mt-3 w-full px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl text-sm font-semibold hover:from-rose-600 hover:to-pink-700 transition-all"
           >
-            View Contract
+            {t('viewContract')}
           </button>
         </div>
       </div>
@@ -142,13 +144,13 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div>
               <h1 className="text-sm font-bold text-gray-900 font-playfair">{contract.title}</h1>
-              <p className="text-xs text-gray-500">Sign the contract below</p>
+              <p className="text-xs text-gray-500">{t('signTheContractBelow')}</p>
             </div>
             <button
               onClick={() => setShowSigningWidget(false)}
               className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              Back to contract
+              {t('backToContract')}
             </button>
           </div>
         </div>
@@ -218,7 +220,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
             </button>
             <div className="min-w-0">
               <h1 className="text-sm sm:text-base font-bold text-gray-900 font-playfair truncate">{contract.title}</h1>
-              <p className="text-xs text-gray-500 mt-0.5">Shared by {contract.planner.name}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('sharedBy', { name: contract.planner.name })}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
@@ -227,7 +229,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Signed
+                {t('signed')}
               </span>
             ) : canSign ? (
               <button
@@ -237,11 +239,11 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
-                Sign Now
+                {t('signNow')}
               </button>
             ) : (
               <span className="inline-flex items-center px-3 py-1.5 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold">
-                Review Mode
+                {t('reviewMode')}
               </span>
             )}
           </div>
@@ -257,14 +259,14 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
               <span>
-                <strong>Ready to sign</strong> — review the contract below, then click Sign Now to add your digital signature.
+                <strong>{t('readyToSign')}</strong> — {t('readyToSignBannerMessage')}
               </span>
             </div>
             <button
               onClick={() => setShowSigningWidget(true)}
               className="flex-shrink-0 px-4 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-semibold hover:bg-rose-700 transition-colors"
             >
-              Sign Now
+              {t('signNow')}
             </button>
           </div>
         </div>
@@ -278,7 +280,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
             <span>
-              <strong>Signed successfully!</strong> Your planner will receive a copy of the signed contract.
+              <strong>{t('signedSuccessfully')}</strong> {t('signedSuccessfullyMessage')}
             </span>
           </div>
         </div>
@@ -292,7 +294,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
             <span>
-              <strong>Text selected</strong> — add a comment below to flag this section for your planner.
+              <strong>{t('textSelected')}</strong> — {t('textSelectedMessage')}
             </span>
           </div>
         </div>
@@ -319,7 +321,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
             onSelectionChange={setSelectedText}
           />
           <p className="text-center text-xs text-gray-400 mt-4">
-            Select any text and add a comment below to flag it for your wedding planner.
+            {t('selectTextInstruction')}
           </p>
         </div>
 

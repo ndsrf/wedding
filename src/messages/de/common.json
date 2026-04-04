@@ -812,6 +812,27 @@
           "SIGNING": "Warten auf Unterschrift",
           "SIGNED": "Unterzeichnet",
           "CANCELLED": "Abgebrochen"
+        },
+        "commentsSidebar": {
+          "title": "Kommentare",
+          "complete": "Erledigen ({count})",
+          "add": "Hinzufügen",
+          "allAuthors": "Alle Autoren",
+          "aiFilled": "KI-ausgefüllt",
+          "commentOnSelectedText": "Ausgewählten Text kommentieren…",
+          "writeCommentOrSuggestion": "Kommentar oder Vorschlag schreiben…",
+          "submit": "Absenden",
+          "cancel": "Abbrechen",
+          "ctrlEnterHint": "Strg+Enter zum Absenden · Esc zum Abbrechen",
+          "resolveAllSelected": "Alle ausgewählten Kommentare lösen",
+          "resolveComment": "Kommentar lösen",
+          "noCommentsMatchFilters": "Keine Kommentare entsprechen den aktuellen Filtern.",
+          "noCommentsFromClient": "Noch keine Kommentare vom Kunden.",
+          "selectTextToComment": "Wählen Sie Text im Vertrag aus, um ihn zu kommentieren, oder klicken Sie auf Hinzufügen, um eine allgemeine Notiz zu hinterlassen.",
+          "rememberFillRule": "Diese Ausfüllregel für zukünftige Verträge aus dieser Vorlage merken",
+          "deselectAll": "Alle abwählen",
+          "selectAll": "Alle auswählen",
+          "selectedCountSuffix": "({count} ausgewählt)"
         }
       },
       "invoices": {
@@ -1028,7 +1049,23 @@
         "statusShared": "Mit Kunden geteilt",
         "statusSigning": "Unterschrift ausstehend",
         "statusSigned": "Unterzeichnet",
-        "statusCancelled": "Storniert"
+        "statusCancelled": "Storniert",
+        "sharedBy": "Geteilt von {name}",
+        "enterName": "Bitte geben Sie Ihren Namen ein, um diesen Vertrag weiter zu überprüfen.",
+        "yourName": "Ihr Name",
+        "viewContract": "Vertrag anzeigen",
+        "signTheContractBelow": "Vertrag unten unterschreiben",
+        "backToContract": "Zurück zum Vertrag",
+        "signed": "Unterzeichnet",
+        "signNow": "Jetzt unterschreiben",
+        "reviewMode": "Überprüfungsmodus",
+        "readyToSign": "Bereit zum Unterschreiben",
+        "readyToSignBannerMessage": "überprüfen Sie den Vertrag unten und klicken Sie auf Jetzt unterschreiben, um Ihre digitale Unterschrift hinzuzufügen.",
+        "signedSuccessfully": "Erfolgreich unterzeichnet!",
+        "signedSuccessfullyMessage": "Ihr Planer erhält eine Kopie des unterzeichneten Vertrags.",
+        "textSelected": "Text ausgewählt",
+        "textSelectedMessage": "fügen Sie unten einen Kommentar hinzu, um diesen Abschnitt für Ihren Planer zu markieren.",
+        "selectTextInstruction": "Wählen Sie einen beliebigen Text aus und fügen Sie einen Kommentar hinzu, um ihn für Ihren Hochzeitsplaner zu markieren."
       }
     }
   },
