@@ -37,6 +37,50 @@ export async function register() {
       console.error('[Server] ✗ Application initialization failed:', error);
     }
 
+    // Alert processor — non-Vercel environments
+    // On Vercel the cron job at /api/cron/alerts fires every minute.
+    // On docker/standard/cloudflare we spin up an in-process scheduler instead.
+    try {
+      const { getPlatformOptimization } = await import('@/lib/platform/config');
+      const platform = getPlatformOptimization();
+
+      if (platform !== 'vercel') {
+        const { processPendingDeliveries } = await import('@/lib/alerts/processor');
+
+        // Run once on startup to catch any pending deliveries left from a restart
+        processPendingDeliveries(50).catch((err) =>
+          console.error('[Alerts] Startup processing error:', err),
+        );
+
+        // Then run every 60 seconds
+        const INTERVAL_MS = 60_000;
+        let running = false;
+
+        setInterval(async () => {
+          if (running) return; // skip if previous run still in progress
+          running = true;
+          try {
+            const result = await processPendingDeliveries(50);
+            if (result.processed > 0) {
+              console.log(
+                `[Alerts] Processed ${result.processed} deliveries — succeeded=${result.succeeded} failed=${result.failed}`,
+              );
+            }
+          } catch (err) {
+            console.error('[Alerts] Scheduler error:', err);
+          } finally {
+            running = false;
+          }
+        }, INTERVAL_MS);
+
+        console.log(`[Alerts] ✓ In-process scheduler started (platform=${platform}, interval=60s)`);
+      } else {
+        console.log('[Alerts] ✓ Vercel cron mode — scheduler not started');
+      }
+    } catch (error) {
+      console.error('[Alerts] Failed to start scheduler:', error);
+    }
+
     // Vector DB seeding
     try {
       const { isVectorEnabled, vectorPrisma } = await import('@/lib/db/vector-prisma');
