@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
     const quotes = await prisma.quote.findMany({
       where: {
         planner_id: user.planner_id,
+        // Only return the latest version in each chain (quotes not superseded by a newer version)
+        next_version: { is: null },
         ...(status ? { status: status as never } : {}),
       },
       include: {

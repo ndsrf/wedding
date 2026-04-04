@@ -773,7 +773,13 @@
           "ACCEPTED": "Aceptado",
           "REJECTED": "Rechazado",
           "EXPIRED": "Vencido"
-        }
+        },
+        "newVersion": "Nueva Versión",
+        "newVersionCreating": "Creando versión…",
+        "newVersionError": "No se pudo crear la nueva versión",
+        "versionLabel": "Versión",
+        "versionOption": "Versión {version}",
+        "versionLatest": "actual"
       },
       "contracts": {
         "title": "Contratos",
@@ -964,7 +970,8 @@
         "notes": "Notas",
         "footer": "Este presupuesto es válido durante 30 días desde la fecha de emisión, salvo indicación contraria. Gracias por considerar nuestros servicios.",
         "event": "Evento:",
-        "vat": "NIF/CIF:"
+        "vat": "NIF/CIF:",
+        "version": "Versión"
       },
       "invoicePdf": {
         "docTitle": "Factura",

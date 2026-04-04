@@ -769,7 +769,13 @@
           "ACCEPTED": "Akzeptiert",
           "REJECTED": "Abgelehnt",
           "EXPIRED": "Abgelaufen"
-        }
+        },
+        "newVersion": "Neue Version",
+        "newVersionCreating": "Version wird erstellt…",
+        "newVersionError": "Neue Version konnte nicht erstellt werden",
+        "versionLabel": "Version",
+        "versionOption": "Version {version}",
+        "versionLatest": "aktuell"
       },
       "contracts": {
         "title": "Verträge",
@@ -960,7 +966,8 @@
         "notes": "Hinweise",
         "footer": "Dieses Angebot ist 30 Tage ab Ausstellungsdatum gültig, sofern nichts anderes angegeben. Vielen Dank für Ihr Interesse an unseren Dienstleistungen.",
         "event": "Veranstaltung:",
-        "vat": "USt-IdNr.:"
+        "vat": "USt-IdNr.:",
+        "version": "Version"
       },
       "invoicePdf": {
         "docTitle": "Rechnung",

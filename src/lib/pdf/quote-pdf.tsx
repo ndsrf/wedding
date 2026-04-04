@@ -211,6 +211,7 @@ export interface QuotePDFLabels {
   footer: string;
   event: string;
   vat: string;
+  version: string;
 }
 
 interface QuotePDFProps {
@@ -255,6 +256,12 @@ export function QuotePDF({ quote, company, labels, locale }: QuotePDFProps) {
               <>
                 <Text style={[styles.metaLabel, { marginTop: 8 }]}>{labels.validUntil}</Text>
                 <Text style={styles.metaValue}>{fmtDate(quote.expires_at)}</Text>
+              </>
+            )}
+            {quote.version > 1 && (
+              <>
+                <Text style={[styles.metaLabel, { marginTop: 8 }]}>{labels.version}</Text>
+                <Text style={styles.metaValue}>v{quote.version}</Text>
               </>
             )}
           </View>

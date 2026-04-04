@@ -31,10 +31,19 @@ interface Quote {
   expires_at: string | null;
   pdf_url: string | null;
   status: string;
+  version: number;
+  previous_version_id: string | null;
   created_at: string;
   line_items: LineItem[];
   contracts: { id: string; status: string; share_token?: string; signed_pdf_url?: string | null }[];
   invoices: { id: string; status: string }[];
+}
+
+interface VersionSummary {
+  id: string;
+  version: number;
+  status: string;
+  created_at: string;
 }
 
 interface ContractTemplate {
@@ -80,6 +89,42 @@ export function QuotesList() {
   const [contractFillWithAI, setContractFillWithAI] = useState(false);
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [creatingContract, setCreatingContract] = useState(false);
+  const [creatingVersion, setCreatingVersion] = useState<string | null>(null);
+  const [newVersionError, setNewVersionError] = useState<string | null>(null);
+
+  // Version history state (used when viewing a quote)
+  const [versionChain, setVersionChain] = useState<VersionSummary[]>([]);
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
+  const [selectedVersionData, setSelectedVersionData] = useState<Quote | null>(null);
+  const [loadingVersion, setLoadingVersion] = useState(false);
+
+  // Fetch version chain when a quote is opened for viewing
+  useEffect(() => {
+    if (!viewingId) {
+      setVersionChain([]);
+      setSelectedVersionId(null);
+      setSelectedVersionData(null);
+      return;
+    }
+    setSelectedVersionId(viewingId);
+    setSelectedVersionData(null);
+    fetch(`/api/planner/quotes/${viewingId}/versions`)
+      .then((r) => r.ok ? r.json() : { data: [] })
+      .then((json) => setVersionChain(json.data ?? []));
+  }, [viewingId]);
+
+  // Fetch full quote data when a different version is selected
+  useEffect(() => {
+    if (!selectedVersionId || selectedVersionId === viewingId) {
+      setSelectedVersionData(null);
+      return;
+    }
+    setLoadingVersion(true);
+    fetch(`/api/planner/quotes/${selectedVersionId}`)
+      .then((r) => r.ok ? r.json() : { data: null })
+      .then((json) => setSelectedVersionData(json.data ?? null))
+      .finally(() => setLoadingVersion(false));
+  }, [selectedVersionId, viewingId]);
 
   async function fetchQuotes() {
     const res = await fetch('/api/planner/quotes');
@@ -202,6 +247,19 @@ export function QuotesList() {
     fetchQuotes();
   }
 
+  async function handleNewVersion(id: string) {
+    setCreatingVersion(id);
+    setNewVersionError(null);
+    const res = await fetch(`/api/planner/quotes/${id}/new-version`, { method: 'POST' });
+    if (res.ok) {
+      fetchQuotes();
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setNewVersionError(json.error ?? t('quotes.newVersionError'));
+    }
+    setCreatingVersion(null);
+  }
+
   if (loading) return (
     <div className="flex items-center justify-center h-32">
       <div className="animate-spin w-6 h-6 border-4 border-rose-500 border-t-transparent rounded-full" />
@@ -228,45 +286,79 @@ export function QuotesList() {
 
   if (showForm) {
     const isView = viewingId !== null && editingId === null;
-    const quoteData = editingQuote ?? viewingQuote;
+    // For view mode: show the selected version's data (fetched) or fall back to the list entry
+    const activeQuote = isView
+      ? (selectedVersionData ?? viewingQuote)
+      : editingQuote;
+    const showVersionDropdown = isView && versionChain.length > 1;
+
     return (
       <div>
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => { setShowForm(false); setEditingId(null); setViewingId(null); }} className="text-sm text-gray-500 hover:text-gray-700">
-            {t('quotes.back')}
-          </button>
-          <h3 className="text-base font-semibold text-gray-900">
-            {isView ? t('quotes.viewQuote') : editingId ? t('quotes.editQuote') : t('quotes.newQuote')}
-          </h3>
+        <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+          <div className="flex items-center gap-3">
+            <button onClick={() => { setShowForm(false); setEditingId(null); setViewingId(null); }} className="text-sm text-gray-500 hover:text-gray-700">
+              {t('quotes.back')}
+            </button>
+            <h3 className="text-base font-semibold text-gray-900">
+              {isView ? t('quotes.viewQuote') : editingId ? t('quotes.editQuote') : t('quotes.newQuote')}
+            </h3>
+          </div>
+          {showVersionDropdown && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 font-medium">{t('quotes.versionLabel')}</span>
+              <select
+                value={selectedVersionId ?? ''}
+                onChange={(e) => setSelectedVersionId(e.target.value)}
+                className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white"
+              >
+                {versionChain.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {t('quotes.versionOption', { version: v.version })}
+                    {v.id === viewingId ? ` (${t('quotes.versionLatest')})` : ''}
+                    {` — ${t(`quotes.status.${v.status}` as Parameters<typeof t>[0])}`}
+                  </option>
+                ))}
+              </select>
+              {loadingVersion && (
+                <span className="animate-spin w-3.5 h-3.5 border-2 border-violet-400 border-t-transparent rounded-full" />
+              )}
+            </div>
+          )}
         </div>
-        <QuoteForm
-          readOnly={isView}
-          initialData={quoteData ? {
-            customer_id: quoteData.customer_id ?? null,
-            couple_names: quoteData.couple_names,
-            event_date: quoteData.event_date ?? '',
-            location: quoteData.location ?? '',
-            client_email: quoteData.customer?.email ?? '',
-            client_phone: quoteData.customer?.phone ?? '',
-            client_id_number: quoteData.customer?.id_number ?? '',
-            client_address: quoteData.customer?.address ?? '',
-            notes: quoteData.notes ?? '',
-            currency: quoteData.currency,
-            discount: quoteData.discount != null ? Number(quoteData.discount) : '',
-            tax_rate: quoteData.tax_rate != null ? Number(quoteData.tax_rate) : '',
-            expires_at: quoteData.expires_at ?? '',
-            line_items: quoteData.line_items.map((li) => ({
-              id: li.id,
-              name: li.name,
-              description: li.description ?? '',
-              quantity: Number(li.quantity),
-              unit_price: Number(li.unit_price),
-              total: Number(li.total),
-            })),
-          } : undefined}
-          onSave={isView ? async () => {} : handleSave}
-          onCancel={() => { setShowForm(false); setEditingId(null); setViewingId(null); }}
-        />
+        {loadingVersion ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin w-6 h-6 border-4 border-violet-400 border-t-transparent rounded-full" />
+          </div>
+        ) : (
+          <QuoteForm
+            readOnly={isView}
+            initialData={activeQuote ? {
+              customer_id: activeQuote.customer_id ?? null,
+              couple_names: activeQuote.couple_names,
+              event_date: activeQuote.event_date ?? '',
+              location: activeQuote.location ?? '',
+              client_email: activeQuote.customer?.email ?? '',
+              client_phone: activeQuote.customer?.phone ?? '',
+              client_id_number: activeQuote.customer?.id_number ?? '',
+              client_address: activeQuote.customer?.address ?? '',
+              notes: activeQuote.notes ?? '',
+              currency: activeQuote.currency,
+              discount: activeQuote.discount != null ? Number(activeQuote.discount) : '',
+              tax_rate: activeQuote.tax_rate != null ? Number(activeQuote.tax_rate) : '',
+              expires_at: activeQuote.expires_at ?? '',
+              line_items: activeQuote.line_items.map((li) => ({
+                id: li.id,
+                name: li.name,
+                description: li.description ?? '',
+                quantity: Number(li.quantity),
+                unit_price: Number(li.unit_price),
+                total: Number(li.total),
+              })),
+            } : undefined}
+            onSave={isView ? async () => {} : handleSave}
+            onCancel={() => { setShowForm(false); setEditingId(null); setViewingId(null); }}
+          />
+        )}
       </div>
     );
   }
@@ -334,6 +426,11 @@ export function QuotesList() {
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[quote.status] ?? 'bg-gray-100 text-gray-600'}`}>
                       {t(`quotes.status.${quote.status}` as Parameters<typeof t>[0])}
                     </span>
+                    {quote.version > 1 && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-700">
+                        v{quote.version}
+                      </span>
+                    )}
                     {quote.contracts.length > 0 && (
                       <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                         {quote.contracts.length === 1 ? t('quotes.contractBadge') : t('quotes.contractsBadge', { count: quote.contracts.length })}
@@ -519,6 +616,27 @@ export function QuotesList() {
                       {t('quotes.reject')}
                     </button>
                   </>
+                )}
+                {quote.status === 'REJECTED' && (
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => handleNewVersion(quote.id)}
+                      disabled={creatingVersion === quote.id}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {creatingVersion === quote.id ? (
+                        <span className="animate-spin w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full" />
+                      ) : (
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                        </svg>
+                      )}
+                      {creatingVersion === quote.id ? t('quotes.newVersionCreating') : t('quotes.newVersion')}
+                    </button>
+                    {newVersionError && creatingVersion === null && (
+                      <p className="text-xs text-red-600">{newVersionError}</p>
+                    )}
+                  </div>
                 )}
                 {quote.status === 'ACCEPTED' && (
                   <button
