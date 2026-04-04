@@ -28,15 +28,15 @@ interface PmNode {
   attrs?: Record<string, unknown>;
 }
 
+const PM_BLOCK_NODES = ['paragraph', 'heading', 'blockquote', 'listItem', 'bulletList', 'orderedList', 'horizontalRule', 'hardBreak'];
+
 function pmToText(node: PmNode, depth = 0): string {
   if (node.type === 'text') return node.text ?? '';
 
   const children = node.content ?? [];
   const childText = children.map((c) => pmToText(c, depth + 1)).join('');
 
-  const block = ['paragraph', 'heading', 'blockquote', 'listItem',
-                 'bulletList', 'orderedList', 'horizontalRule', 'hardBreak'];
-  return block.includes(node.type) ? childText + '\n' : childText;
+  return PM_BLOCK_NODES.includes(node.type) ? childText + '\n' : childText;
 }
 
 function snapshotToText(snapshot: Record<string, unknown>): string {
