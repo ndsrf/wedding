@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type FormEvent, type ChangeEvent } from 'r
 import * as Y from 'yjs';
 import { useTranslations } from 'next-intl';
 import { ContractEditor } from '@/components/planner/quotes-finances/contracts/ContractEditor';
-import { ContractCommentsSidebar } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
+import { ContractCommentsSidebar, type CommentData } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
+import { ContractHistoryPanel } from '@/components/planner/quotes-finances/contracts/ContractHistoryPanel';
 
 interface ContractData {
   id: string;
@@ -191,6 +192,15 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
   const [contractCustomerId, setContractCustomerId] = useState<string | null>(null);
   const [contractTemplateId, setContractTemplateId] = useState<string | null>(null);
   const [showCreateWedding, setShowCreateWedding] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Latest unsaved snapshot — updated on every edit, flushed on hide/unload/hourly
+  const pendingSnapshotRef = useRef<object | null>(null);
+  // Refs so event listeners always read fresh values without stale closures
+  const contractIdRef = useRef<string | null>(null);
+  const plannerNameRef = useRef('Planner');
+  contractIdRef.current = contract?.id ?? null;
+  plannerNameRef.current = plannerName;
 
   // Shared Y.Doc: editor + comments sidebar share the same Liveblocks connection
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
@@ -274,6 +284,63 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       .catch(() => {});
   }, [contract?.id]);
 
+  // Sends the pending snapshot to the history API.
+  // Uses sendBeacon so it survives page unload; falls back to fetch otherwise.
+  function flushSnapshot() {
+    const snapshot = pendingSnapshotRef.current;
+    const contractId = contractIdRef.current;
+    const name = plannerNameRef.current;
+    if (!snapshot || !contractId) return;
+    pendingSnapshotRef.current = null; // clear before sending to avoid double-flush
+
+    const url = `/api/planner/contracts/${contractId}/history`;
+    const body = JSON.stringify({
+      actor_name: name,
+      actor_color: '#e11d48',
+      event_type: 'edit',
+      content_snapshot: snapshot,
+    });
+    const blob = new Blob([body], { type: 'application/json' });
+    if (!navigator.sendBeacon?.(url, blob)) {
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }).catch(() => {});
+    }
+  }
+
+  // Register flush triggers once on mount: page hide, tab close, and hourly fallback.
+  useEffect(() => {
+    const onVisibilityChange = () => { if (document.visibilityState === 'hidden') flushSnapshot(); };
+    const onBeforeUnload = () => flushSnapshot();
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    const hourly = setInterval(flushSnapshot, 60 * 60 * 1000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      clearInterval(hourly);
+    };
+  }, []); // mount once — event handlers access fresh values via refs
+
+  function logCommentEvent(payload: {
+    event_type: 'comment_added' | 'comment_resolved';
+    description?: string;
+  }) {
+    const contractId = contractIdRef.current;
+    const name = plannerNameRef.current;
+    if (!contractId) return;
+    fetch(`/api/planner/contracts/${contractId}/history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        actor_name: name,
+        actor_color: '#e11d48',
+        event_type: payload.event_type,
+        description: payload.description,
+      }),
+    }).catch(() => {});
+  }
+
   async function handleSaveContent(content: object) {
     if (!contract) return;
     setSaving(true);
@@ -286,11 +353,28 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      // Just mark as dirty — snapshot is flushed on hide/unload/hourly
+      pendingSnapshotRef.current = content;
     } catch {
       // silent
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleCommentAdded(comment: CommentData) {
+    logCommentEvent({
+      event_type: 'comment_added',
+      description: comment.text.length > 120 ? comment.text.slice(0, 120) + '…' : comment.text,
+    });
+  }
+
+  function handleCommentResolved(resolvedComments: CommentData[]) {
+    const names = resolvedComments.map((c) => `"${c.text.slice(0, 60)}${c.text.length > 60 ? '…' : ''}"`).join(', ');
+    logCommentEvent({
+      event_type: 'comment_resolved',
+      description: resolvedComments.length === 1 ? names : `${resolvedComments.length} comments resolved`,
+    });
   }
 
   if (loading) {
@@ -340,6 +424,20 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
             {saving && <span className="text-gray-400">{t('saving')}</span>}
             {saved && <span className="text-green-600 font-medium">{t('saved')}</span>}
             <button
+              onClick={() => setShowHistory((v) => !v)}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                showHistory
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              title="View change history"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              History
+            </button>
+            <button
               onClick={() => setShowCreateWedding(true)}
               className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-600 transition-colors"
               title="Create a wedding from this contract"
@@ -369,13 +467,22 @@ export default function PlannerContractPage({ params }: { params: Promise<{ shar
 
         <div className="w-full lg:w-72 lg:flex-shrink-0">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden lg:flex lg:flex-col">
-            <ContractCommentsSidebar
-              ydocRef={ydocRef}
-              authorName={plannerName}
-              authorColor="#e11d48"
-              isPlanner
-              contractTemplateId={contractTemplateId}
-            />
+            {showHistory ? (
+              <ContractHistoryPanel
+                contractId={contract.id}
+                onClose={() => setShowHistory(false)}
+              />
+            ) : (
+              <ContractCommentsSidebar
+                ydocRef={ydocRef}
+                authorName={plannerName}
+                authorColor="#e11d48"
+                isPlanner
+                contractTemplateId={contractTemplateId}
+                onCommentAdded={handleCommentAdded}
+                onCommentResolved={handleCommentResolved}
+              />
+            )}
           </div>
         </div>
       </div>

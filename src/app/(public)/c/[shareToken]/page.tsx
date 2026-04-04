@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as Y from 'yjs';
 import { ContractEditor } from '@/components/planner/quotes-finances/contracts/ContractEditor';
-import { ContractCommentsSidebar } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
+import { ContractCommentsSidebar, type CommentData } from '@/components/planner/quotes-finances/contracts/ContractCommentsSidebar';
 
 interface ContractData {
   id: string;
@@ -170,6 +170,32 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
     );
   }
 
+  // ── History logging helpers ────────────────────────────────────────────────
+  function logClientHistoryEvent(payload: {
+    event_type: 'comment_added' | 'comment_resolved';
+    description?: string;
+  }) {
+    if (!contract) return;
+    fetch(`/api/planner/contracts/${contract.id}/history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        actor_name: clientName,
+        actor_color: '#7c3aed',
+        event_type: payload.event_type,
+        description: payload.description,
+        share_token: shareToken,
+      }),
+    }).catch(() => {});
+  }
+
+  function handleClientCommentAdded(comment: CommentData) {
+    logClientHistoryEvent({
+      event_type: 'comment_added',
+      description: comment.text.length > 120 ? comment.text.slice(0, 120) + '…' : comment.text,
+    });
+  }
+
   // ── Contract review ────────────────────────────────────────────────────────
   const clientColor = '#7c3aed';
   const isSigned = contract.status === 'SIGNED' || signingComplete;
@@ -306,6 +332,7 @@ export default function ClientContractPage({ params }: { params: Promise<{ share
               authorColor={clientColor}
               isPlanner={false}
               pendingSelectedText={selectedText}
+              onCommentAdded={handleClientCommentAdded}
             />
           </div>
         </div>

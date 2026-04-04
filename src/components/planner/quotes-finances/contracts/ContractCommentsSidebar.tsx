@@ -30,6 +30,10 @@ interface ContractCommentsSidebarProps {
   pendingSelectedText?: string;
   /** Contract template ID — enables the "remember" feature */
   contractTemplateId?: string | null;
+  /** Called after a comment is successfully added */
+  onCommentAdded?: (comment: CommentData) => void;
+  /** Called after a comment is resolved/deleted (single or bulk) */
+  onCommentResolved?: (comments: CommentData[]) => void;
 }
 
 export function ContractCommentsSidebar({
@@ -39,6 +43,8 @@ export function ContractCommentsSidebar({
   isPlanner = false,
   pendingSelectedText = '',
   contractTemplateId,
+  onCommentAdded,
+  onCommentResolved,
 }: ContractCommentsSidebarProps) {
   const [comments, setComments] = useState<CommentData[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -125,6 +131,7 @@ export function ContractCommentsSidebar({
     commentsArray.push([comment]);
     setNewComment('');
     setAddingComment(false);
+    onCommentAdded?.(comment);
   }
 
   function resolveById(id: string) {
@@ -135,15 +142,19 @@ export function ContractCommentsSidebar({
   }
 
   function handleResolve(id: string) {
+    const commentsArray = ydocRef.current.getArray<CommentData>('comments');
+    const resolved = commentsArray.toArray().find((c) => c.id === id);
     resolveById(id);
     setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+    if (resolved) onCommentResolved?.([resolved]);
   }
 
   function handleCompleteSelected() {
     const toRemove = [...selectedIds];
-    // Delete in reverse index order to avoid shifting issues
     const commentsArray = ydocRef.current.getArray<CommentData>('comments');
     const all = commentsArray.toArray();
+    const resolved = all.filter((c) => toRemove.includes(c.id));
+    // Delete in reverse index order to avoid shifting issues
     const indices = toRemove
       .map((id) => all.findIndex((c) => c.id === id))
       .filter((i) => i !== -1)
@@ -152,6 +163,7 @@ export function ContractCommentsSidebar({
       commentsArray.delete(idx, 1);
     }
     setSelectedIds(new Set());
+    if (resolved.length > 0) onCommentResolved?.(resolved);
   }
 
   async function handleRemember(comment: CommentData) {
