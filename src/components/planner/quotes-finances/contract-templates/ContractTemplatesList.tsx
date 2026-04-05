@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ContractTemplateEditor } from './ContractTemplateEditor';
+import { PaymentScheduleEditor, type ScheduleItem } from '../payment-schedule/PaymentScheduleEditor';
 
 interface ContractTemplate {
   id: string;
@@ -23,6 +24,57 @@ export function ContractTemplatesList() {
   const [isDefault, setIsDefault] = useState(false);
   const [content, setContent] = useState<object>({ type: 'doc', content: [{ type: 'paragraph' }] });
   const [saving, setSaving] = useState(false);
+  // Payment schedule per template: templateId -> { expanded, items, saving }
+  const [scheduleState, setScheduleState] = useState<Record<string, { expanded: boolean; items: ScheduleItem[]; loading: boolean; saving: boolean }>>({});
+
+  async function toggleSchedule(templateId: string) {
+    const current = scheduleState[templateId];
+    if (current?.expanded) {
+      setScheduleState((p) => ({ ...p, [templateId]: { ...p[templateId], expanded: false } }));
+      return;
+    }
+    // Load items
+    setScheduleState((p) => ({ ...p, [templateId]: { expanded: true, items: p[templateId]?.items ?? [], loading: true, saving: false } }));
+    const res = await fetch(`/api/planner/contract-templates/${templateId}/payment-schedule`);
+    if (res.ok) {
+      const { data } = await res.json();
+      setScheduleState((p) => ({
+        ...p,
+        [templateId]: {
+          ...p[templateId],
+          items: (data ?? []).map((it: ScheduleItem & { amount_value: unknown }) => ({ ...it, amount_value: Number(it.amount_value) })),
+          loading: false,
+        },
+      }));
+    } else {
+      setScheduleState((p) => ({ ...p, [templateId]: { ...p[templateId], loading: false } }));
+    }
+  }
+
+  async function saveSchedule(templateId: string) {
+    const state = scheduleState[templateId];
+    if (!state) return;
+    setScheduleState((p) => ({ ...p, [templateId]: { ...p[templateId], saving: true } }));
+    try {
+      await fetch(`/api/planner/contract-templates/${templateId}/payment-schedule`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: state.items.map((it, i) => ({
+            order: i,
+            days_offset: it.days_offset,
+            reference_date: it.reference_date,
+            fixed_date: it.fixed_date ?? null,
+            description: it.description,
+            amount_type: it.amount_type,
+            amount_value: it.amount_value,
+          })),
+        }),
+      });
+    } finally {
+      setScheduleState((p) => ({ ...p, [templateId]: { ...p[templateId], saving: false } }));
+    }
+  }
 
   async function fetchTemplates() {
     const res = await fetch('/api/planner/contract-templates');
@@ -196,12 +248,54 @@ export function ContractTemplatesList() {
                   Edit
                 </button>
                 <button
+                  onClick={() => toggleSchedule(t.id)}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
+                  title="Calendario de pagos"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Calendario
+                </button>
+                <button
                   onClick={() => handleDelete(t.id)}
                   className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                 >
                   Delete
                 </button>
               </div>
+
+              {/* Payment schedule editor (expandable) */}
+              {scheduleState[t.id]?.expanded && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Hitos de pago del template</h5>
+                    <button
+                      onClick={() => saveSchedule(t.id)}
+                      disabled={scheduleState[t.id]?.saving}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-rose-500 hover:bg-rose-600 disabled:opacity-60 rounded-lg transition-colors"
+                    >
+                      {scheduleState[t.id]?.saving && (
+                        <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      )}
+                      {scheduleState[t.id]?.saving ? 'Guardando…' : 'Guardar'}
+                    </button>
+                  </div>
+                  {scheduleState[t.id]?.loading ? (
+                    <div className="flex items-center justify-center h-12">
+                      <div className="animate-spin w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full" />
+                    </div>
+                  ) : (
+                    <PaymentScheduleEditor
+                      items={scheduleState[t.id]?.items ?? []}
+                      onChange={(items) =>
+                        setScheduleState((p) => ({ ...p, [t.id]: { ...p[t.id], items } }))
+                      }
+                      compact
+                    />
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

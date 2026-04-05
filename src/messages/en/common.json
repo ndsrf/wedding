@@ -858,6 +858,8 @@
         "moveToDraft": "Move to Draft",
         "awaitingDocuSeal": "Awaiting DocuSeal signature",
         "createInvoice": "Create Invoice",
+        "createScheduleInvoices": "Create Schedule Invoices",
+        "paymentSchedule": "Payment Schedule",
         "createWedding": "Create Wedding",
         "delete": "Delete",
         "contractTemplates": "Contract Templates",

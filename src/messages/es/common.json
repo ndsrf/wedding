@@ -854,6 +854,8 @@
         "moveToDraft": "Mover a borrador",
         "awaitingDocuSeal": "Esperando firma DocuSeal",
         "createInvoice": "Crear Factura",
+        "createScheduleInvoices": "Crear Facturas Calendario",
+        "paymentSchedule": "Calendario de Pagos",
         "createWedding": "Crear Boda",
         "delete": "Eliminar",
         "contractTemplates": "Plantillas de Contrato",

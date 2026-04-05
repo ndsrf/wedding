@@ -842,6 +842,17 @@ enum QuoteStatus {
   EXPIRED
 }
 
+enum ScheduleReferenceDate {
+  WEDDING_DATE
+  SIGNING_DATE
+  FIXED_DATE
+}
+
+enum ScheduleAmountType {
+  FIXED
+  PERCENTAGE
+}
+
 enum ContractStatus {
   DRAFT
   SHARED
@@ -909,6 +920,7 @@ model ContractTemplate {
   updated_at        DateTime       @updatedAt
   planner           WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   contracts         Contract[]
+  payment_schedule_items PaymentScheduleTemplateItem[]
 
   @@index([planner_id])
   @@map("contract_templates")
@@ -982,6 +994,8 @@ model Contract {
   signed_at            DateTime?
   signer_email         String?
   signer_name          String?
+  payment_schedule_wedding_date DateTime?
+  payment_schedule_signing_date DateTime?
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
   planner              WeddingPlanner    @relation(fields: [planner_id], references: [id], onDelete: Cascade)
@@ -991,6 +1005,7 @@ model Contract {
   weddings             Wedding[]         @relation("WeddingContract")
   history_events       ContractHistoryEvent[]
   invoices             Invoice[]
+  payment_schedule_items ContractPaymentScheduleItem[]
 
   @@index([planner_id])
   @@index([customer_id])
@@ -1087,6 +1102,40 @@ model InvoicePayment {
 
   @@index([invoice_id])
   @@map("invoice_payments")
+}
+
+model PaymentScheduleTemplateItem {
+  id             String                @id @default(uuid())
+  template_id    String
+  order          Int
+  days_offset    Int                   @default(0)
+  reference_date ScheduleReferenceDate @default(WEDDING_DATE)
+  fixed_date     DateTime?             // Used when reference_date = FIXED_DATE
+  description    String
+  amount_type    ScheduleAmountType    @default(FIXED)
+  amount_value   Decimal               @db.Decimal(10, 2)
+  created_at     DateTime              @default(now())
+  template       ContractTemplate      @relation(fields: [template_id], references: [id], onDelete: Cascade)
+
+  @@index([template_id])
+  @@map("payment_schedule_template_items")
+}
+
+model ContractPaymentScheduleItem {
+  id             String                @id @default(uuid())
+  contract_id    String
+  order          Int
+  days_offset    Int                   @default(0)
+  reference_date ScheduleReferenceDate @default(WEDDING_DATE)
+  fixed_date     DateTime?             // Used when reference_date = FIXED_DATE
+  description    String
+  amount_type    ScheduleAmountType    @default(FIXED)
+  amount_value   Decimal               @db.Decimal(10, 2)
+  created_at     DateTime              @default(now())
+  contract       Contract              @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+
+  @@index([contract_id])
+  @@map("contract_payment_schedule_items")
 }
 
 // -----------------------------------------------------------------------------
