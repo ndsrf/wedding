@@ -511,10 +511,15 @@ quantity DECIMAL, unit_price DECIMAL, total DECIMAL
 
 ### invoices
 id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), quote_id TEXT FK→quotes,
-invoice_number TEXT, currency TEXT, subtotal DECIMAL, discount DECIMAL,
+customer_id TEXT FK→customers, contract_id TEXT FK→contracts,
+type TEXT (PROFORMA/INVOICE/RECTIFICATIVA), invoice_number TEXT,
+currency TEXT, subtotal DECIMAL, discount DECIMAL,
 tax_rate DECIMAL, total DECIMAL, amount_paid DECIMAL,
-status TEXT (DRAFT/SENT/PAID/PARTIALLY_PAID/OVERDUE/CANCELLED),
-issued_at TIMESTAMP, due_date TIMESTAMP, created_at TIMESTAMP
+status TEXT (DRAFT/ISSUED/PAID/PARTIAL/OVERDUE/CANCELLED),
+issued_at TIMESTAMP, due_date TIMESTAMP, created_at TIMESTAMP,
+proforma_id TEXT (set on INVOICE type: references its source proforma)
+**IMPORTANT: To avoid double-counting, always filter out converted proformas:
+  WHERE (type = 'INVOICE') OR (type = 'PROFORMA' AND proforma_id IS NULL AND NOT EXISTS (SELECT 1 FROM invoices di WHERE di.proforma_id = invoices.id))**
 
 ### invoice_line_items
 id TEXT PK, invoice_id TEXT FK→invoices, name TEXT, description TEXT,

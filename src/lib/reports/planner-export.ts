@@ -220,7 +220,14 @@ export async function fetchRevenueSummary(planner_id: string): Promise<RevenueSu
       },
     }),
     prisma.invoice.findMany({
-      where: { planner_id },
+      where: {
+        planner_id,
+        // Exclude converted proformas to avoid double-counting revenue
+        OR: [
+          { type: 'INVOICE' },
+          { type: 'PROFORMA', derived_invoice: null },
+        ],
+      },
       select: {
         type: true,
         invoice_number: true,

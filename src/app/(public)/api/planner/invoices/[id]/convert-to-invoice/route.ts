@@ -130,6 +130,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
           where: { invoice_id: proformaId },
           data: { invoice_id: newInvoice.id },
         });
+        // Reset amount_paid on the proforma so it no longer counts toward revenue stats.
+        await tx.invoice.update({
+          where: { id: proformaId },
+          data: { amount_paid: 0 },
+        });
       }
 
       return tx.invoice.findUniqueOrThrow({
