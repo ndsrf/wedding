@@ -446,6 +446,45 @@
       "subtitle": "Aufgaben verwalten und Fortschritt verfolgen",
       "description": "Aufgaben verwalten und Fortschritt für diese Hochzeit verfolgen"
     },
+    "reports": {
+      "title": "Planer-Berichte",
+      "subtitle": "Analysen und Exporte für alle Ihre Hochzeiten und Finanzen",
+      "dashboardSubtitle": "Hochzeitsübergreifende Analysen und Finanzen",
+      "scopeNote": "Diese Berichte umfassen alle Hochzeiten, die Sie verwalten.",
+      "perWeddingNote": "Für hochzeitsspezifische Berichte öffnen Sie eine Hochzeit und gehen Sie zu Berichte.",
+      "goToWeddings": "Hochzeiten anzeigen",
+      "noData": "Keine Daten verfügbar.",
+      "infoTitle": "Über die Berichte",
+      "info1": "Alle Berichte werden in Echtzeit aus Ihren aktuellen Daten generiert",
+      "info2": "Exportieren Sie nach Excel oder CSV für weitere Analysen",
+      "info3": "KI-Abfragen können alle Ihre Hochzeiten und Finanzdaten abdecken",
+      "weddingsSummary": {
+        "title": "Hochzeitsübersicht",
+        "description": "Alle verwalteten Hochzeiten mit Gästezahlen, RSVP-Abschluss, Daten und Status"
+      },
+      "guestsSummary": {
+        "title": "Gäste nach Hochzeit",
+        "description": "Gesamte und bestätigte Gästezahlen nach Hochzeit mit Antwortraten"
+      },
+      "providerPayments": {
+        "title": "Dienstleisterzahlungen",
+        "description": "Dienstleisterzahlungen für alle Hochzeiten — Gesamtpreis, bezahlter Betrag und offener Saldo"
+      },
+      "revenue": {
+        "title": "Umsatzübersicht",
+        "description": "Überblick über Angebote und Rechnungen — Gesamtbeträge, eingegangene Zahlungen und offene Salden"
+      },
+      "nlQuery": {
+        "title": "Geschäftsdaten abfragen",
+        "subtitle": "Alle Hochzeiten, Finanzen und Gäste in natürlicher Sprache abfragen",
+        "placeholder": "z.B. Was ist mein Gesamtumsatz dieses Jahr?",
+        "securityNote": "Nur schreibgeschützte Abfragen sind erlaubt. Ergebnisse sind automatisch auf Ihr Konto beschränkt.",
+        "example1": "Wie viele Gäste habe ich insgesamt über alle Hochzeiten?",
+        "example2": "Was ist mein gesamter Rechnungsbetrag?",
+        "example3": "Alle ausstehenden Dienstleisterzahlungen auflisten",
+        "example4": "Hochzeiten mit der niedrigsten RSVP-Rate anzeigen"
+      }
+    },
     "stats": {
       "totalWeddings": "Gesamtzahl Hochzeiten",
       "totalGuests": "Gesamtzahl Gäste",

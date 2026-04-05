@@ -454,6 +454,45 @@
       "subtitle": "Manage tasks and track progress",
       "description": "Manage tasks and track progress for this wedding"
     },
+    "reports": {
+      "title": "Planner Reports",
+      "subtitle": "Analytics and exports across all your weddings and financials",
+      "dashboardSubtitle": "Cross-wedding analytics and financials",
+      "scopeNote": "These reports cover all weddings you manage.",
+      "perWeddingNote": "For per-wedding reports, open a wedding and go to Reports.",
+      "goToWeddings": "View weddings",
+      "noData": "No data available.",
+      "infoTitle": "About Planner Reports",
+      "info1": "All reports are generated in real-time from your live data",
+      "info2": "Export to Excel or CSV for further analysis",
+      "info3": "AI queries can span all your weddings and financial data",
+      "weddingsSummary": {
+        "title": "Weddings Overview",
+        "description": "All weddings you manage with guest counts, RSVP completion, dates and status"
+      },
+      "guestsSummary": {
+        "title": "Guests by Wedding",
+        "description": "Total and attending guest counts grouped by wedding, with RSVP completion rates"
+      },
+      "providerPayments": {
+        "title": "Provider Payments",
+        "description": "Vendor payments across all your weddings — total price, amount paid, and outstanding balance"
+      },
+      "revenue": {
+        "title": "Revenue Summary",
+        "description": "Overview of your quotes and invoices — totals, payments received, and outstanding balances"
+      },
+      "nlQuery": {
+        "title": "Ask About Your Business Data",
+        "subtitle": "Query across all your weddings, financials, and guests in plain language",
+        "placeholder": "e.g. What is my total revenue this year?",
+        "securityNote": "Only read-only queries are allowed. Results are automatically scoped to your planner account.",
+        "example1": "How many total guests do I have across all weddings?",
+        "example2": "What is my total invoiced amount?",
+        "example3": "List all pending provider payments",
+        "example4": "Show me weddings with the lowest RSVP completion"
+      }
+    },
     "stats": {
       "totalWeddings": "Total Weddings",
       "totalGuests": "Total Guests",

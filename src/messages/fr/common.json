@@ -446,6 +446,45 @@
       "subtitle": "Gérer les tâches et suivre les progrès",
       "description": "Gérer les tâches et suivre les progrès pour ce mariage"
     },
+    "reports": {
+      "title": "Rapports Organisateur",
+      "subtitle": "Analyses et exports pour tous vos mariages et finances",
+      "dashboardSubtitle": "Analyses multi-mariages et finances",
+      "scopeNote": "Ces rapports couvrent tous les mariages que vous gérez.",
+      "perWeddingNote": "Pour les rapports par mariage, ouvrez un mariage et allez dans Rapports.",
+      "goToWeddings": "Voir les mariages",
+      "noData": "Aucune donnée disponible.",
+      "infoTitle": "À propos des Rapports",
+      "info1": "Tous les rapports sont générés en temps réel",
+      "info2": "Exportez en Excel ou CSV pour une analyse approfondie",
+      "info3": "Les requêtes IA couvrent tous vos mariages et données financières",
+      "weddingsSummary": {
+        "title": "Vue d'ensemble des Mariages",
+        "description": "Tous les mariages gérés avec nombre d'invités, taux RSVP, dates et statut"
+      },
+      "guestsSummary": {
+        "title": "Invités par Mariage",
+        "description": "Nombre total et confirmés d'invités par mariage, avec taux de réponse"
+      },
+      "providerPayments": {
+        "title": "Paiements Prestataires",
+        "description": "Paiements aux prestataires pour tous vos mariages — prix total, montant payé et solde restant"
+      },
+      "revenue": {
+        "title": "Récapitulatif des Revenus",
+        "description": "Aperçu de vos devis et factures — totaux, paiements reçus et soldes restants"
+      },
+      "nlQuery": {
+        "title": "Interrogez vos Données Professionnelles",
+        "subtitle": "Interrogez tous vos mariages, finances et invités en langage naturel",
+        "placeholder": "ex. Quel est mon chiffre d'affaires total cette année ?",
+        "securityNote": "Seules les requêtes en lecture seule sont autorisées. Les résultats sont limités à votre compte.",
+        "example1": "Combien d'invités au total parmi tous mes mariages ?",
+        "example2": "Quel est mon montant total facturé ?",
+        "example3": "Listez tous les paiements prestataires en attente",
+        "example4": "Montrez les mariages avec le taux RSVP le plus faible"
+      }
+    },
     "stats": {
       "totalWeddings": "Total Mariages",
       "totalGuests": "Total Invités",

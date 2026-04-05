@@ -450,6 +450,45 @@
       "subtitle": "Gestiona tareas y rastrea el progreso",
       "description": "Gestiona tareas y rastrea el progreso para esta boda"
     },
+    "reports": {
+      "title": "Informes del Organizador",
+      "subtitle": "Análisis y exportaciones de todas tus bodas y finanzas",
+      "dashboardSubtitle": "Análisis multi-boda y finanzas",
+      "scopeNote": "Estos informes cubren todas las bodas que gestionas.",
+      "perWeddingNote": "Para informes por boda, abre una boda y ve a Informes.",
+      "goToWeddings": "Ver bodas",
+      "noData": "No hay datos disponibles.",
+      "infoTitle": "Acerca de los Informes",
+      "info1": "Todos los informes se generan en tiempo real",
+      "info2": "Exporta a Excel o CSV para análisis adicional",
+      "info3": "Las consultas de IA pueden abarcar todas tus bodas y datos financieros",
+      "weddingsSummary": {
+        "title": "Resumen de Bodas",
+        "description": "Todas las bodas que gestionas con recuentos de invitados, confirmación de asistencia, fechas y estado"
+      },
+      "guestsSummary": {
+        "title": "Invitados por Boda",
+        "description": "Recuentos de invitados totales y confirmados agrupados por boda, con tasas de respuesta"
+      },
+      "providerPayments": {
+        "title": "Pagos a Proveedores",
+        "description": "Pagos a proveedores en todas tus bodas — precio total, importe pagado y saldo pendiente"
+      },
+      "revenue": {
+        "title": "Resumen de Ingresos",
+        "description": "Resumen de tus presupuestos y facturas — totales, pagos recibidos y saldos pendientes"
+      },
+      "nlQuery": {
+        "title": "Consulta tus Datos de Negocio",
+        "subtitle": "Consulta todas tus bodas, finanzas e invitados en lenguaje natural",
+        "placeholder": "p.ej. ¿Cuál es mi facturación total este año?",
+        "securityNote": "Solo se permiten consultas de solo lectura. Los resultados se limitan automáticamente a tu cuenta.",
+        "example1": "¿Cuántos invitados tengo en total entre todas las bodas?",
+        "example2": "¿Cuál es mi importe total facturado?",
+        "example3": "Lista todos los pagos pendientes a proveedores",
+        "example4": "Muestra las bodas con menor tasa de respuesta"
+      }
+    },
     "stats": {
       "totalWeddings": "Total de Bodas",
       "totalGuests": "Total de Invitados",
