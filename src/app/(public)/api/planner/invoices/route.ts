@@ -185,30 +185,31 @@ export async function POST(request: NextRequest) {
 
     const issuedAt = data.issued_at ? new Date(data.issued_at) : new Date();
 
-    // Fetch planner billing series configuration
-    const plannerConfig = await prisma.weddingPlanner.findUnique({
-      where: { id: user.planner_id! },
-      select: {
-        invoice_series: true,
-        rectification_series: true,
-        proforma_series: true,
-        invoice_start_number: true,
-        rectification_start_number: true,
-        proforma_start_number: true,
-        last_external_hash: true,
-      },
-    });
-    const billingConfig: PlannerBillingConfig = plannerConfig ?? {
-      invoice_series: 'FAC',
-      rectification_series: 'REC',
-      proforma_series: 'PRO',
-      invoice_start_number: 1,
-      rectification_start_number: 1,
-      proforma_start_number: 1,
-      last_external_hash: null,
-    };
-
     const invoice = await prisma.$transaction(async (tx) => {
+      // Fetch planner billing config inside the transaction so the series names
+      // and start numbers are consistent with all other reads in this unit of work.
+      const plannerConfig = await tx.weddingPlanner.findUnique({
+        where: { id: user.planner_id! },
+        select: {
+          invoice_series: true,
+          rectification_series: true,
+          proforma_series: true,
+          invoice_start_number: true,
+          rectification_start_number: true,
+          proforma_start_number: true,
+          last_external_hash: true,
+        },
+      });
+      const billingConfig: PlannerBillingConfig = plannerConfig ?? {
+        invoice_series: 'FAC',
+        rectification_series: 'REC',
+        proforma_series: 'PRO',
+        invoice_start_number: 1,
+        rectification_start_number: 1,
+        proforma_start_number: 1,
+        last_external_hash: null,
+      };
+
       // Resolve or create the customer record
       let customerId = data.customer_id ?? null;
       if (!customerId) {

@@ -28,7 +28,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const [planner, prevInvoice] = await Promise.all([
       prisma.weddingPlanner.findUnique({
-
         where: { id: user.planner_id },
         select: {
           name: true,
@@ -40,20 +39,28 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           phone: true,
           website: true,
           logo_url: true,
+          last_external_hash: true,
         },
       }),
-      // Fetch previous invoice in the same series to show its chain hash in the footer
-      invoice.serie && invoice.numero && invoice.numero > 1
+      // Fetch the preceding invoice in the same series (highest numero strictly
+      // less than the current one) to show its chain hash in the footer.
+      // Using lt rather than numero-1 handles gaps and non-1 start numbers.
+      invoice.serie && invoice.numero != null
         ? prisma.invoice.findFirst({
             where: {
               planner_id: user.planner_id,
               serie: invoice.serie,
-              numero: invoice.numero - 1,
+              numero: { lt: invoice.numero },
             },
+            orderBy: { numero: 'desc' },
             select: { chain_hash: true },
           })
         : Promise.resolve(null),
     ]);
+
+    // If no preceding invoice exists in the series, fall back to the planner's
+    // configured external hash (Verifactu continuity from a previous system).
+    const previousHash = prevInvoice?.chain_hash ?? planner?.last_external_hash ?? null;
 
     const locale = await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
@@ -108,7 +115,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
         labels,
         locale,
-        previousHash: prevInvoice?.chain_hash ?? planner?.last_external_hash ?? null,
+        previousHash,
       }) as never
     );
 
