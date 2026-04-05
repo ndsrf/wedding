@@ -420,13 +420,18 @@ const ALLOWED_TABLES_PLANNER = new Set([
   'wedding_admins',
   'gifts',
   'checklist_tasks',
+  'checklist_sections',
   'wedding_providers',
   'provider_categories',
   'payments',
   'tasting_menus',
-  // planner's own financial tables (direct planner_id = $1)
+  // planner-level tables (direct planner_id = $1)
+  'customers',
+  'locations',
+  'providers',
   'quotes',
   'quote_line_items',
+  'contracts',
   'invoices',
   'invoice_line_items',
   'invoice_payments',
@@ -498,11 +503,51 @@ date TIMESTAMP, method TEXT, notes TEXT
 id TEXT PK, wedding_id TEXT FK→weddings, title TEXT, description TEXT
 **NOTE: Scope via JOIN weddings w ON tm.wedding_id = w.id WHERE w.planner_id = $1**
 
+### customers
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), name TEXT, couple_names TEXT,
+email TEXT, phone TEXT, id_number TEXT, address TEXT, notes TEXT, created_at TIMESTAMP
+
+### locations
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), name TEXT, address TEXT,
+url TEXT, google_maps_url TEXT, tags TEXT[], notes TEXT, created_at TIMESTAMP
+
+### providers
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), category_id TEXT FK→provider_categories,
+name TEXT, contact_name TEXT, email TEXT, phone TEXT, website TEXT,
+social_media TEXT, approx_price DECIMAL, created_at TIMESTAMP
+
+### provider_categories
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), name TEXT, price_type TEXT (GLOBAL/PER_PERSON)
+
+### contracts
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), customer_id TEXT FK→customers,
+quote_id TEXT FK→quotes, title TEXT,
+status TEXT (DRAFT/SHARED/SIGNING/SIGNED/CANCELLED),
+signer_name TEXT, signer_email TEXT, signed_at TIMESTAMP, created_at TIMESTAMP
+
+### checklist_tasks
+id TEXT PK, wedding_id TEXT FK→weddings, section_id TEXT FK→checklist_sections,
+title TEXT, description TEXT, assigned_to TEXT (WEDDING_PLANNER/COUPLE/OTHER),
+due_date TIMESTAMP, status TEXT (PENDING/IN_PROGRESS/COMPLETED),
+completed BOOLEAN, completed_at TIMESTAMP, order INT, created_at TIMESTAMP
+**NOTE: Scope via JOIN weddings w ON ct.wedding_id = w.id WHERE w.planner_id = $1**
+
+### checklist_sections
+id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, order INT
+**NOTE: Scope via JOIN weddings w ON cs.wedding_id = w.id WHERE w.planner_id = $1**
+
+### gifts
+id TEXT PK, wedding_id TEXT FK→weddings, family_id TEXT FK→families,
+amount DECIMAL, status TEXT (PENDING/RECEIVED/CONFIRMED),
+transaction_date TIMESTAMP, auto_matched BOOLEAN, created_at TIMESTAMP
+**NOTE: Scope via JOIN weddings w ON g.wedding_id = w.id WHERE w.planner_id = $1**
+
 ### quotes
-id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), couple_names TEXT,
-event_date TIMESTAMP, location TEXT, status TEXT (DRAFT/SENT/ACCEPTED/REJECTED/EXPIRED),
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), customer_id TEXT FK→customers,
+couple_names TEXT, event_date TIMESTAMP, location TEXT,
+status TEXT (DRAFT/SENT/ACCEPTED/REJECTED/EXPIRED),
 currency TEXT, subtotal DECIMAL, discount DECIMAL, tax_rate DECIMAL, total DECIMAL,
-expires_at TIMESTAMP, created_at TIMESTAMP
+expires_at TIMESTAMP, version INT, created_at TIMESTAMP
 
 ### quote_line_items
 id TEXT PK, quote_id TEXT FK→quotes, name TEXT, description TEXT,
