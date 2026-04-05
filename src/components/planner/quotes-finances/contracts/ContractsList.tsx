@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
 import { ContractTemplatesList } from '../contract-templates/ContractTemplatesList';
+import { PaymentSchedulePanel } from '../payment-schedule/PaymentSchedulePanel';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
 
 export interface InvoicePrefillData {
   customer_id?: string | null;
   quote_id?: string;
+  contract_id?: string;
   client_name?: string;
   client_email?: string;
   client_id_number?: string;
@@ -35,9 +37,12 @@ interface Contract {
   pdf_url: string | null;
   signed_pdf_url: string | null;
   created_at: string;
+  payment_schedule_wedding_date: string | null;
+  payment_schedule_signing_date: string | null;
   customer: { id: string; name: string; couple_names: string | null; email: string | null } | null;
   quote: { id: string; couple_names: string; event_date: string | null; currency: string; total: string | number } | null;
   template: { id: string; name: string } | null;
+  _count: { invoices: number };
 }
 
 const CONTRACT_STATUS_STYLES: Record<string, string> = {
@@ -74,6 +79,12 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
+  // Payment schedule panel
+  const [scheduleContractId, setScheduleContractId] = useState<string | null>(null);
+  // Dropdown state for "create invoice" menu
+  const [invoiceDropdownId, setInvoiceDropdownId] = useState<string | null>(null);
+  const [creatingScheduleInvoicesId, setCreatingScheduleInvoicesId] = useState<string | null>(null);
+  const [scheduleInvoiceError, setScheduleInvoiceError] = useState<string | null>(null);
 
   async function fetchContracts() {
     const res = await fetch('/api/planner/contracts');
@@ -222,32 +233,66 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
   }
 
   async function handleCreateInvoice(contract: Contract) {
-    if (!contract.quote || !onCreateInvoice) return;
+    if (!onCreateInvoice) return;
     setCreatingInvoiceId(contract.id);
     try {
-      const res = await fetch(`/api/planner/quotes/${contract.quote.id}`);
-      if (!res.ok) return;
-      const { data: quote } = await res.json();
-      onCreateInvoice({
-        customer_id: quote.customer_id ?? null,
-        quote_id: quote.id,
-        client_name: quote.customer?.name ?? quote.couple_names,
-        client_email: quote.customer?.email ?? '',
-        client_id_number: quote.customer?.id_number ?? '',
-        client_address: quote.customer?.address ?? '',
-        currency: quote.currency,
-        discount: quote.discount != null ? Number(quote.discount) : '',
-        tax_rate: quote.tax_rate != null ? Number(quote.tax_rate) : '',
-        line_items: (quote.line_items ?? []).map((li: { name: string; description: string | null; quantity: unknown; unit_price: unknown; total: unknown }) => ({
-          name: li.name,
-          description: li.description ?? '',
-          quantity: Number(li.quantity),
-          unit_price: Number(li.unit_price),
-          total: Number(li.total),
-        })),
-      });
+      if (contract.quote) {
+        const res = await fetch(`/api/planner/quotes/${contract.quote.id}`);
+        if (!res.ok) return;
+        const { data: quote } = await res.json();
+        onCreateInvoice({
+          customer_id: quote.customer_id ?? null,
+          quote_id: quote.id,
+          contract_id: contract.id,
+          client_name: quote.customer?.name ?? quote.couple_names,
+          client_email: quote.customer?.email ?? '',
+          client_id_number: quote.customer?.id_number ?? '',
+          client_address: quote.customer?.address ?? '',
+          currency: quote.currency,
+          discount: quote.discount != null ? Number(quote.discount) : '',
+          tax_rate: quote.tax_rate != null ? Number(quote.tax_rate) : '',
+          line_items: (quote.line_items ?? []).map((li: { name: string; description: string | null; quantity: unknown; unit_price: unknown; total: unknown }) => ({
+            name: li.name,
+            description: li.description ?? '',
+            quantity: Number(li.quantity),
+            unit_price: Number(li.unit_price),
+            total: Number(li.total),
+          })),
+        });
+      } else {
+        // Contract without quote — prefill with customer only
+        onCreateInvoice({
+          customer_id: contract.customer?.id ?? null,
+          contract_id: contract.id,
+          client_name: contract.customer?.name ?? '',
+          client_email: contract.customer?.email ?? '',
+        });
+      }
     } finally {
       setCreatingInvoiceId(null);
+    }
+  }
+
+  async function handleCreateScheduleInvoices(contract: Contract) {
+    setCreatingScheduleInvoicesId(contract.id);
+    setScheduleInvoiceError(null);
+    setInvoiceDropdownId(null);
+    try {
+      const res = await fetch(`/api/planner/contracts/${contract.id}/create-schedule-invoices`, { method: 'POST' });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        fetchContracts();
+      } else {
+        const keys: string[] = json.errors ?? [];
+        const msg = keys.length > 0
+          ? keys.map((k) => t(k as Parameters<typeof t>[0])).join('\n')
+          : t('contracts.scheduleErrors.generic');
+        setScheduleInvoiceError(msg);
+      }
+    } catch {
+      setScheduleInvoiceError(t('contracts.scheduleErrors.networkError'));
+    } finally {
+      setCreatingScheduleInvoicesId(null);
     }
   }
 
@@ -609,28 +654,116 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
                     </>
                   )}
 
-                  {/* SIGNED: Create Invoice + Create Wedding */}
-                  {contract.status === 'SIGNED' && contract.quote && onCreateInvoice && (
-                    <button
-                      onClick={() => handleCreateInvoice(contract)}
-                      disabled={creatingInvoiceId === contract.id}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-60 rounded-lg transition-colors ml-auto"
-                    >
-                      {creatingInvoiceId === contract.id ? (
-                        <span className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                  {/* Payment schedule button — all contracts */}
+                  <button
+                    onClick={() => setScheduleContractId(contract.id)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
+                    title="Calendario de pagos"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {t('contracts.paymentSchedule')}
+                  </button>
+
+                  {/* SIGNED: Invoice dropdown or plain button */}
+                  {contract.status === 'SIGNED' && onCreateInvoice && (
+                    <div className="relative ml-auto">
+                      {/* If no invoices yet AND we have a quote, show dropdown; otherwise plain button */}
+                      {contract._count.invoices === 0 ? (
+                        <>
+                          <div className="inline-flex rounded-lg overflow-hidden border border-emerald-200 shadow-sm">
+                            <button
+                              onClick={() => handleCreateInvoice(contract)}
+                              disabled={creatingInvoiceId === contract.id}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-60 transition-colors"
+                            >
+                              {creatingInvoiceId === contract.id ? (
+                                <span className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                              )}
+                              {t('contracts.createInvoice')}
+                            </button>
+                            <button
+                              onClick={() => setInvoiceDropdownId(invoiceDropdownId === contract.id ? null : contract.id)}
+                              className="px-2 py-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-l border-emerald-200 transition-colors"
+                              title="Más opciones"
+                            >
+                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                          </div>
+                          {invoiceDropdownId === contract.id && (
+                            <div className="absolute right-0 top-full mt-1 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden" style={{ zIndex: 20 }}>
+                              <button
+                                onClick={() => { setInvoiceDropdownId(null); handleCreateInvoice(contract); }}
+                                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                              >
+                                <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                <div>
+                                  <div className="font-medium">{t('contracts.createInvoice')}</div>
+                                  <div className="text-gray-400">Factura proforma manual</div>
+                                </div>
+                              </button>
+                              <div className="border-t border-gray-100" />
+                              <button
+                                onClick={() => handleCreateScheduleInvoices(contract)}
+                                disabled={creatingScheduleInvoicesId === contract.id}
+                                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-violet-700 hover:bg-violet-50 transition-colors text-left disabled:opacity-60"
+                              >
+                                {creatingScheduleInvoicesId === contract.id ? (
+                                  <span className="w-3.5 h-3.5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                                ) : (
+                                  <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                )}
+                                <div>
+                                  <div className="font-medium">{t('contracts.createScheduleInvoices')}</div>
+                                  <div className="text-gray-400">Genera todas las proformas del calendario</div>
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </>
                       ) : (
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
+                        <button
+                          onClick={() => handleCreateInvoice(contract)}
+                          disabled={creatingInvoiceId === contract.id}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-60 rounded-lg transition-colors"
+                        >
+                          {creatingInvoiceId === contract.id ? (
+                            <span className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                          )}
+                          {t('contracts.createInvoice')}
+                        </button>
                       )}
-                      {t('contracts.createInvoice')}
-                    </button>
+                    </div>
                   )}
+
+                  {/* Error from schedule invoice creation */}
+                  {scheduleInvoiceError && creatingScheduleInvoicesId === null && (
+                    <div className="w-full mt-1 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 whitespace-pre-line">
+                      {scheduleInvoiceError}
+                    </div>
+                  )}
+
+                  {/* SIGNED: Create Wedding */}
                   {contract.status === 'SIGNED' && (
                     <button
                       onClick={() => handleCreateWedding(contract)}
                       disabled={creatingWeddingId === contract.id}
-                      className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 disabled:opacity-60 rounded-lg transition-colors ${!(contract.status === 'SIGNED' && contract.quote && onCreateInvoice) ? 'ml-auto' : ''}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 disabled:opacity-60 rounded-lg transition-colors"
                     >
                       {creatingWeddingId === contract.id ? (
                         <span className="w-3 h-3 border-2 border-rose-600 border-t-transparent rounded-full animate-spin" />
@@ -671,6 +804,27 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
           </div>
         )}
       </div>
+
+      {/* Click-outside overlay for invoice dropdown */}
+      {invoiceDropdownId && (
+        <div className="fixed inset-0 z-[5]" onClick={() => setInvoiceDropdownId(null)} />
+      )}
+
+      {/* Payment schedule panel (modal) */}
+      {scheduleContractId && (() => {
+        const contract = contracts.find((c) => c.id === scheduleContractId);
+        if (!contract) return null;
+        return (
+          <PaymentSchedulePanel
+            contractId={contract.id}
+            contractTitle={contract.title}
+            defaultWeddingDate={contract.payment_schedule_wedding_date ?? contract.quote?.event_date ?? null}
+            defaultSigningDate={contract.payment_schedule_signing_date ?? contract.signed_at ?? null}
+            currency={contract.quote?.currency ?? 'EUR'}
+            onClose={() => { setScheduleContractId(null); fetchContracts(); }}
+          />
+        );
+      })()}
     </div>
   );
 }
