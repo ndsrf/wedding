@@ -5,31 +5,32 @@ import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { getTranslations } from '@/lib/i18n/server';
 import { QuotesFinancesPage } from '@/components/planner/quotes-finances/QuotesFinancesPage';
-import { parseCookieFilter, computeDateRange, STATS_FILTER_COOKIE } from '@/lib/stats-filter';
+import { parseCookieFilter, computeDateRange, buildPrismaDateFilter, STATS_FILTER_COOKIE } from '@/lib/stats-filter';
 
 async function getFinancialSummary(plannerId: string, startDate?: Date, endDate?: Date) {
   try {
-    const createdAtFilter =
-      startDate || endDate
-        ? { created_at: { ...(startDate ? { gte: startDate } : {}), ...(endDate ? { lte: endDate } : {}) } }
-        : {};
+    const dateFilter = buildPrismaDateFilter(startDate, endDate);
 
     const [quotes, invoices] = await Promise.all([
       prisma.quote.findMany({
-        where: { planner_id: plannerId, ...createdAtFilter },
+        where: { planner_id: plannerId, ...dateFilter },
         select: { status: true, currency: true },
       }),
       prisma.invoice.findMany({
-        where: { planner_id: plannerId, ...createdAtFilter },
+        where: { planner_id: plannerId, ...dateFilter },
         select: { total: true, amount_paid: true, currency: true },
       }),
     ]);
 
     const currency = quotes[0]?.currency ?? invoices[0]?.currency ?? 'EUR';
+    const sameCurrencyInvoices = invoices.filter((i) => i.currency === currency);
+
     const total_quotes = quotes.length;
     const accepted_quotes = quotes.filter((q) => q.status === 'ACCEPTED').length;
-    const invoiced_total = invoices.reduce((sum, i) => sum + Number(i.total), 0);
-    const amount_received = invoices.reduce((sum, i) => sum + Number(i.amount_paid), 0);
+    const invoiced_total =
+      sameCurrencyInvoices.reduce((sum, i) => sum + Math.round(Number(i.total) * 100), 0) / 100;
+    const amount_received =
+      sameCurrencyInvoices.reduce((sum, i) => sum + Math.round(Number(i.amount_paid) * 100), 0) / 100;
 
     return { total_quotes, accepted_quotes, invoiced_total, amount_received, currency };
   } catch {

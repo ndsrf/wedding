@@ -34,6 +34,12 @@ export function serializeFilterForCookie(filter: StatsFilterValue): string {
   return filter.type;
 }
 
+/** Parse a YYYY-MM-DD string as a local date (avoids UTC midnight ambiguity). */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export function computeDateRange(filter: StatsFilterValue): { start?: Date; end?: Date } {
   const now = new Date();
 
@@ -55,13 +61,26 @@ export function computeDateRange(filter: StatsFilterValue): { start?: Date; end?
 
     case 'custom': {
       const result: { start?: Date; end?: Date } = {};
-      if (filter.startDate) result.start = new Date(filter.startDate);
+      if (filter.startDate) {
+        result.start = parseLocalDate(filter.startDate);
+      }
       if (filter.endDate) {
-        const end = new Date(filter.endDate);
+        const end = parseLocalDate(filter.endDate);
         end.setHours(23, 59, 59, 999);
         result.end = end;
       }
       return result;
     }
   }
+}
+
+/** Build a Prisma `created_at` where-clause fragment from an optional date range. */
+export function buildPrismaDateFilter(start?: Date, end?: Date) {
+  if (!start && !end) return {};
+  return {
+    created_at: {
+      ...(start ? { gte: start } : {}),
+      ...(end ? { lte: end } : {}),
+    },
+  };
 }
