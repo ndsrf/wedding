@@ -632,7 +632,7 @@ export function QuotesList({ initialRef }: { initialRef?: string }) {
                     </button>
                   </>
                 )}
-                {quote.status === 'REJECTED' && (
+                {(quote.status === 'REJECTED' || quote.status === 'EXPIRED') && (
                   <div className="flex flex-col gap-1">
                     <button
                       onClick={() => handleNewVersion(quote.id)}

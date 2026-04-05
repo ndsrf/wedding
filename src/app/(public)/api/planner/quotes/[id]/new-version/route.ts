@@ -15,8 +15,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     });
 
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    if (existing.status !== 'REJECTED') {
-      return NextResponse.json({ error: 'Only rejected quotes can have a new version created' }, { status: 422 });
+    if (existing.status !== 'REJECTED' && existing.status !== 'EXPIRED') {
+      return NextResponse.json({ error: 'Only rejected or expired quotes can have a new version created' }, { status: 422 });
     }
     if (existing.next_version) {
       return NextResponse.json({ error: 'A newer version already exists for this quote' }, { status: 422 });
