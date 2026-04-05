@@ -30,7 +30,7 @@ export const DynamicMessageEmail = ({
   language: _language = 'en',
   subject = 'Important Message',
   body = 'This is an important message from the couple.',
-  coupleNames = 'The Couple',
+  coupleNames = 'Nupci',
   imageUrl = null,
 }: DynamicMessageEmailProps) => {
   console.log('[EMAIL TEMPLATE] Rendering with imageUrl:', imageUrl);

@@ -18,6 +18,7 @@ const VALID_TABS = ['quotes', 'contracts', 'invoices'] as const;
 interface QuotesFinancesPageProps {
   summary?: FinancialSummary;
   initialTab?: string;
+  initialRef?: string;
   initialFilter?: StatsFilterValue;
 }
 
@@ -52,7 +53,7 @@ function saveFilterCookie(filter: StatsFilterValue) {
   document.cookie = `${STATS_FILTER_COOKIE}=${value}; path=/; max-age=31536000; SameSite=Lax`;
 }
 
-export function QuotesFinancesPage({ summary: initialSummary, initialTab, initialFilter }: QuotesFinancesPageProps) {
+export function QuotesFinancesPage({ summary: initialSummary, initialTab, initialRef, initialFilter }: QuotesFinancesPageProps) {
   const t = useTranslations('planner.quotesFinances');
   const format = useFormatter();
   const resolvedInitial = VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'quotes';
@@ -155,7 +156,7 @@ export function QuotesFinancesPage({ summary: initialSummary, initialTab, initia
           ))}
         </div>
         <div className="p-6">
-          {activeTab === 'quotes' && <QuotesList />}
+          {activeTab === 'quotes' && <QuotesList initialRef={initialRef} />}
           {activeTab === 'contracts' && <ContractsList onCreateInvoice={handleCreateInvoice} />}
           {activeTab === 'invoices' && (
             <InvoicesList

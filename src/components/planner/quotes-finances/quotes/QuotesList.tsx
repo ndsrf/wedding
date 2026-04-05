@@ -68,7 +68,7 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
   CANCELLED: 'text-red-500',
 };
 
-export function QuotesList() {
+export function QuotesList({ initialRef }: { initialRef?: string }) {
   const t = useTranslations('planner.quotesFinances');
   const format = useFormatter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -136,6 +136,17 @@ export function QuotesList() {
   }
 
   useEffect(() => { fetchQuotes(); }, []);
+
+  // Auto-open a specific quote when arriving via deep link
+  useEffect(() => {
+    if (!initialRef || loading || quotes.length === 0) return;
+    const target = quotes.find((q) => q.id === initialRef);
+    if (target) {
+      setViewingId(target.id);
+      setEditingId(null);
+      setShowForm(true);
+    }
+  }, [initialRef, loading, quotes]);
 
   async function fetchTemplates() {
     if (templates.length > 0) return;
