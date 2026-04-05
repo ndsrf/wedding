@@ -505,7 +505,6 @@ function InvoiceCard({ invoice, generating, onView, onEdit, onGeneratePdf, onDel
   const paid = Number(invoice.amount_paid);
   const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
   const isProforma = invoice.type === 'PROFORMA';
-  const isDraftOrProforma = invoice.status === 'DRAFT' || isProforma;
   const isRegularInvoice = invoice.type === 'INVOICE';
 
   const now = new Date();
