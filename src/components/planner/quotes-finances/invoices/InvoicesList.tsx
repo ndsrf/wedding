@@ -51,7 +51,14 @@ export interface Invoice {
 interface SignedContract {
   id: string;
   title: string;
-  customer: { name: string } | null;
+  customer: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    id_number: string | null;
+    address: string | null;
+  } | null;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -191,17 +198,29 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   const editingInvoice = editingId ? invoices.find((i) => i.id === editingId) ?? null : null;
 
   if (view === 'new') {
+    // Look for the contract in signedContracts (no invoices yet) or fall back to
+    // the customer already stored on any existing invoice for that contract.
     const contractForPrefill = prefillContractId
       ? signedContracts.find((c) => c.id === prefillContractId) ?? null
       : null;
 
+    const fallbackCustomer = prefillContractId && !contractForPrefill
+      ? invoices.find((i) => i.contract?.id === prefillContractId)?.customer ?? null
+      : null;
+
+    const customer = contractForPrefill?.customer ?? fallbackCustomer;
+
     const prefill = externalFormData
       ? { ...externalFormData, type: 'PROFORMA' as const }
-      : contractForPrefill
+      : prefillContractId
         ? {
             type: 'PROFORMA' as const,
-            contract_id: contractForPrefill.id,
-            client_name: contractForPrefill.customer?.name ?? '',
+            contract_id: prefillContractId,
+            customer_id: customer?.id ?? null,
+            client_name: customer?.name ?? '',
+            client_email: customer?.email ?? '',
+            client_id_number: customer?.id_number ?? '',
+            client_address: customer?.address ?? '',
           }
         : { type: 'PROFORMA' as const };
 
@@ -437,16 +456,10 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                     {hasContract && (
                       <button
                         onClick={() => {
-                          const contract = signedContracts.find((c) => c.id === contractKey);
-                          if (contract) {
-                            handleCreateForContract(contract);
-                          } else {
-                            // Contract exists but may not be in signedContracts (already has invoices)
-                            setPrefillContractId(contractKey);
-                            setExternalFormData(null);
-                            setEditingId(null);
-                            setView('new');
-                          }
+                          setPrefillContractId(contractKey!);
+                          setExternalFormData(null);
+                          setEditingId(null);
+                          setView('new');
                         }}
                         className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"
                       >
@@ -506,6 +519,8 @@ function InvoiceCard({ invoice, generating, onView, onEdit, onGeneratePdf, onDel
   const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
   const isProforma = invoice.type === 'PROFORMA';
   const isRegularInvoice = invoice.type === 'INVOICE';
+  // Proforma becomes read-only once the first payment is recorded
+  const isProformaEditable = isProforma && invoice.payments.length === 0;
 
   const now = new Date();
   const isEffectivelyOverdue =
@@ -585,8 +600,8 @@ function InvoiceCard({ invoice, generating, onView, onEdit, onGeneratePdf, onDel
       </div>
 
       <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
-        {/* Edit: only for proformas */}
-        {isProforma && (
+        {/* Edit: only for proformas with no payments yet */}
+        {isProformaEditable && (
           <button
             onClick={onEdit}
             className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
@@ -625,8 +640,8 @@ function InvoiceCard({ invoice, generating, onView, onEdit, onGeneratePdf, onDel
           )}
         </button>
 
-        {/* Delete: only for proformas, not regular invoices */}
-        {isProforma && !invoice.derived_invoice && (
+        {/* Delete: only for proformas with no payments and no linked invoice */}
+        {isProformaEditable && !invoice.derived_invoice && (
           <button
             onClick={onDelete}
             className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"

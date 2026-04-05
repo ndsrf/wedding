@@ -49,6 +49,8 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
 
   const isProforma = invoice.type === 'PROFORMA';
   const isRegularInvoice = invoice.type === 'INVOICE';
+  // Proforma is read-only once any payment has been recorded
+  const isProformaEditable = isProforma && invoice.payments.length === 0;
   const total = Number(invoice.total);
   const paid = Number(invoice.amount_paid);
   const balanceDue = total - paid;
@@ -130,8 +132,8 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
         </span>
       </div>
 
-      {/* Read-only notice for regular invoices */}
-      {isRegularInvoice && (
+      {/* Read-only notice for regular invoices or proformas with payments */}
+      {(isRegularInvoice || (isProforma && !isProformaEditable)) && (
         <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
           {t('invoiceDetail.readOnly')}
         </div>
@@ -243,8 +245,8 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
               <span>{t('invoiceDetail.dueAmount', { amount: fmt(balanceDue) })}</span>
             </div>
 
-            {/* Mark as issued: only for proformas in DRAFT */}
-            {isProforma && invoice.status === 'DRAFT' && (
+            {/* Mark as issued: only for editable proformas in DRAFT */}
+            {isProformaEditable && invoice.status === 'DRAFT' && (
               <button
                 onClick={handleMarkIssued}
                 disabled={updatingStatus}
@@ -368,7 +370,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                         {p.reference && ` · ${p.reference}`}
                       </p>
                     </div>
-                    {isProforma && (
+                    {isProformaEditable && (
                       <button
                         onClick={() => handleDeletePayment(p.id)}
                         className="text-gray-300 hover:text-red-500 transition-colors p-1"

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         ...(status ? { status: status as never } : {}),
       },
       include: {
-        customer: { select: { id: true, name: true, couple_names: true, email: true } },
+        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true } },
         quote: { select: { id: true, couple_names: true, event_date: true, currency: true, total: true } },
         template: { select: { id: true, name: true } },
       },

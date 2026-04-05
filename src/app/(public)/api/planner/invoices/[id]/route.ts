@@ -63,21 +63,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
 
-    const existing = await prisma.invoice.findFirst({ where: { id, planner_id: user.planner_id } });
+    const existing = await prisma.invoice.findFirst({
+      where: { id, planner_id: user.planner_id },
+      include: { _count: { select: { payments: true } } },
+    });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Regular invoices (non-proforma) cannot be edited once created
-    if (existing.type === 'INVOICE') {
+    const isReadOnly = existing.type === 'INVOICE' || (existing.type === 'PROFORMA' && existing._count.payments > 0);
+
+    // Read-only documents: only status changes are permitted
+    if (isReadOnly) {
       const body = await request.json();
-      // Only allow status updates on regular invoices (not content changes)
       const allowed = updateSchema.pick({ status: true }).safeParse(body);
       if (!allowed.success || Object.keys(body).some((k) => k !== 'status')) {
         return NextResponse.json(
-          { error: 'Regular invoices cannot be edited. Only proforma invoices are editable.' },
+          { error: 'This document is read-only and cannot be edited. Only status changes are allowed.' },
           { status: 403 },
         );
       }
-      // Allow only status update
       if (allowed.data.status) {
         const updated = await prisma.invoice.update({
           where: { id },
@@ -181,13 +184,16 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
 
-    const existing = await prisma.invoice.findFirst({ where: { id, planner_id: user.planner_id } });
+    const existing = await prisma.invoice.findFirst({
+      where: { id, planner_id: user.planner_id },
+      include: { _count: { select: { payments: true } } },
+    });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Regular invoices (non-proforma) cannot be deleted once created
-    if (existing.type === 'INVOICE') {
+    // Only editable proformas (no payments yet) can be deleted
+    if (existing.type === 'INVOICE' || (existing.type === 'PROFORMA' && existing._count.payments > 0)) {
       return NextResponse.json(
-        { error: 'Regular invoices cannot be deleted. Only proforma invoices can be removed.' },
+        { error: 'This document cannot be deleted. Only proforma invoices without recorded payments can be removed.' },
         { status: 403 },
       );
     }
