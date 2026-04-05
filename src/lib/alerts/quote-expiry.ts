@@ -40,6 +40,7 @@ export async function processExpiredQuotes(): Promise<ExpiredQuotesResult> {
 
   if (expiredQuotes.length === 0) return { expired: 0, errors: 0 };
 
+  const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
   let expired = 0;
   let errors = 0;
 
@@ -64,6 +65,7 @@ export async function processExpiredQuotes(): Promise<ExpiredQuotesResult> {
           total: quote.total?.toString() ?? '',
           currency: quote.currency,
           expiredAt: quote.expires_at?.toISOString() ?? '',
+          quoteLink: `${appUrl}/planner/quotes-finances?tab=quotes&ref=${quote.id}`,
         },
       });
 

@@ -33,5 +33,10 @@ export function buildTemplateVars(
       fromMeta[k] = String(v);
     }
   }
-  return { ...fromMeta, ...extras };
+  // Only let extras override metadata when the extra value is actually defined
+  const definedExtras: AlertTemplateVars = {};
+  for (const [k, v] of Object.entries(extras)) {
+    if (v !== undefined) definedExtras[k] = v;
+  }
+  return { ...fromMeta, ...definedExtras };
 }

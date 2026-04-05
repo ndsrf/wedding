@@ -40,11 +40,13 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
           errorMessage = 'No email address for recipient';
           break;
         }
+        const platformName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME ?? 'Nupci';
         const result = await sendDynamicEmail(
           delivery.recipient_email,
           delivery.subject ?? '(No subject)',
           delivery.body,
           delivery.recipient_language.toLowerCase() as import('@/lib/i18n/config').Language,
+          platformName,
         );
         success = result.success;
         externalId = result.messageId;

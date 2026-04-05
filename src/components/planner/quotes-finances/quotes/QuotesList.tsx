@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
 import { QuoteForm } from './QuoteForm';
 import { FilterBar } from '../FilterBar';
@@ -68,7 +68,7 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
   CANCELLED: 'text-red-500',
 };
 
-export function QuotesList() {
+export function QuotesList({ initialRef }: { initialRef?: string }) {
   const t = useTranslations('planner.quotesFinances');
   const format = useFormatter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -136,6 +136,21 @@ export function QuotesList() {
   }
 
   useEffect(() => { fetchQuotes(); }, []);
+
+  // Auto-open a specific quote when arriving via deep link.
+  // processedRef prevents re-triggering when the list refreshes after user actions.
+  const processedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!initialRef || loading || quotes.length === 0) return;
+    if (processedRef.current === initialRef) return;
+    const target = quotes.find((q) => q.id === initialRef);
+    if (target) {
+      processedRef.current = initialRef;
+      setViewingId(target.id);
+      setEditingId(null);
+      setShowForm(true);
+    }
+  }, [initialRef, loading, quotes]);
 
   async function fetchTemplates() {
     if (templates.length > 0) return;

@@ -46,7 +46,7 @@ export async function generateMetadata() {
 export default async function QuotesFinancesServerPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; ref?: string }>;
 }) {
   let user;
   try {
@@ -56,7 +56,7 @@ export default async function QuotesFinancesServerPage({
   }
 
   const { t } = await getTranslations();
-  const { tab } = await searchParams;
+  const { tab, ref } = await searchParams;
 
   const cookieStore = await cookies();
   const filterCookie = cookieStore.get(STATS_FILTER_COOKIE)?.value;
@@ -82,6 +82,7 @@ export default async function QuotesFinancesServerPage({
         <QuotesFinancesPage
           summary={summary ?? undefined}
           initialTab={tab}
+          initialRef={ref}
           initialFilter={initialFilter}
         />
       </main>

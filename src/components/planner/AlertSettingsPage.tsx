@@ -98,6 +98,8 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
       const lang = plannerLanguage.toUpperCase();
       const mergedChannels = patch.channels ?? current.channels;
       const mergedEnabled = patch.enabled ?? current.enabled;
+      const subject = def.subject[lang] ?? def.subject['EN'];
+      const body = def.body[lang] ?? def.body['EN'];
 
       let ruleId = current.ruleId;
 
@@ -108,8 +110,8 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
           body: JSON.stringify({
             name: builtinRuleName(builtinId),
             event_type: def.event_type,
-            subject: def.subject[lang] ?? def.subject['EN'],
-            body: def.body[lang] ?? def.body['EN'],
+            subject,
+            body,
             notify_planner: true,
             notify_master_admin: false,
             notify_couple: false,
@@ -126,6 +128,8 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            subject,
+            body,
             channels: mergedChannels,
             enabled: mergedEnabled,
           }),
