@@ -50,23 +50,24 @@ function buildSerie(type: 'PROFORMA' | 'INVOICE' | 'RECTIFICATIVA', year: number
 }
 
 /**
- * Returns (serie, numero, invoice_number) using MAX(numero)+1 in a transaction-safe way.
- * For INVOICE type, also enforces date ordering (no invoice before the last one in the series).
+ * Returns (serie, numero, invoice_number, previous_chain_hash) using MAX(numero)+1 in a
+ * transaction-safe way. Combines the number allocation and chain-hash lookup into one query
+ * to avoid a redundant DB round-trip.
+ * For INVOICE/RECTIFICATIVA types, also enforces date ordering.
  */
 async function allocateInvoiceNumber(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
   plannerId: string,
   type: 'PROFORMA' | 'INVOICE' | 'RECTIFICATIVA',
   issuedAt?: Date,
-): Promise<{ serie: string; numero: number; invoice_number: string }> {
+): Promise<{ serie: string; numero: number; invoice_number: string; previous_chain_hash: string | null }> {
   const year = (issuedAt ?? new Date()).getFullYear();
   const serie = buildSerie(type, year);
 
-  // Find the maximum number in this series (SELECT FOR UPDATE equivalent via Prisma transaction)
   const last = await tx.invoice.findFirst({
     where: { planner_id: plannerId, serie },
     orderBy: { numero: 'desc' },
-    select: { numero: true, issued_at: true },
+    select: { numero: true, issued_at: true, chain_hash: true },
   });
 
   const numero = (last?.numero ?? 0) + 1;
@@ -79,7 +80,7 @@ async function allocateInvoiceNumber(
   }
 
   const invoice_number = `${serie}-${String(numero).padStart(4, '0')}`;
-  return { serie, numero, invoice_number };
+  return { serie, numero, invoice_number, previous_chain_hash: last?.chain_hash ?? null };
 }
 
 /**
@@ -110,13 +111,23 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
-    const type = searchParams.get('type');
+    const typeParam = searchParams.get('type');
+
+    const VALID_STATUSES = ['DRAFT', 'ISSUED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'] as const;
+    const VALID_TYPES = ['PROFORMA', 'INVOICE', 'RECTIFICATIVA'] as const;
+    type ValidStatus = typeof VALID_STATUSES[number];
+    type ValidType = typeof VALID_TYPES[number];
+
+    const validStatus = status && (VALID_STATUSES as readonly string[]).includes(status)
+      ? (status as ValidStatus) : undefined;
+    const validType = typeParam && (VALID_TYPES as readonly string[]).includes(typeParam)
+      ? (typeParam as ValidType) : undefined;
 
     const invoices = await prisma.invoice.findMany({
       where: {
         planner_id: user.planner_id,
-        ...(status ? { status: status as never } : {}),
-        ...(type ? { type: type as never } : {}),
+        ...(validStatus ? { status: validStatus } : {}),
+        ...(validType ? { type: validType } : {}),
       },
       include: {
         customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
@@ -172,27 +183,22 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Allocate sequential number (validates date order for legal invoices)
-      const { serie, numero, invoice_number } = await allocateInvoiceNumber(
+      // Allocate sequential number (validates date order for legal invoices).
+      // Also returns the previous chain_hash, avoiding a redundant DB query.
+      const { serie, numero, invoice_number, previous_chain_hash } = await allocateInvoiceNumber(
         tx,
         user.planner_id!,
         data.type,
         issuedAt,
       );
 
-      // Compute chain hash (Verifactu preparation)
-      const lastInSerie = await tx.invoice.findFirst({
-        where: { planner_id: user.planner_id!, serie },
-        orderBy: { numero: 'desc' },
-        select: { chain_hash: true },
-      });
       const chain_hash = (data.type === 'INVOICE' || data.type === 'RECTIFICATIVA')
         ? computeChainHash({
             invoice_number,
             issued_at: issuedAt,
             total: data.total,
             planner_id: user.planner_id!,
-            previous_hash: lastInSerie?.chain_hash ?? null,
+            previous_hash: previous_chain_hash,
           })
         : null;
 

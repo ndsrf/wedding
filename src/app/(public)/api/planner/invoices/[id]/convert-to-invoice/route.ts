@@ -3,9 +3,8 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import crypto from 'crypto';
 
-function buildSerie(type: 'INVOICE' | 'RECTIFICATIVA', year: number): string {
-  const yearShort = String(year).slice(2);
-  return type === 'INVOICE' ? `FAC-${yearShort}` : `REC-${yearShort}`;
+function buildSerie(year: number): string {
+  return `FAC-${String(year).slice(2)}`;
 }
 
 function computeChainHash(data: {
@@ -29,13 +28,14 @@ function computeChainHash(data: {
  * POST /api/planner/invoices/[id]/convert-to-invoice
  *
  * Converts a fully-paid PROFORMA into a definitive INVOICE (Factura Ordinaria).
- * The proforma must be PAID and must not already have a derived invoice.
  *
- * Implements:
- * - MAX-based sequential numbering (no gaps)
- * - Date ordering validation
- * - Chain hash for Verifactu preparation
- * - Read-only locking (type=INVOICE prevents further edits)
+ * All validation (including the derived_invoice conflict check) runs inside the
+ * $transaction block so that concurrent requests cannot produce duplicate invoices.
+ * The proforma_id @unique constraint in the DB provides an additional safety net
+ * against race conditions.
+ *
+ * Payment records are moved from the proforma to the new invoice within the same
+ * transaction so the definitive invoice carries the full audit trail.
  */
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -43,40 +43,28 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id: proformaId } = await params;
 
-    // Validate the proforma
-    const proforma = await prisma.invoice.findFirst({
-      where: { id: proformaId, planner_id: user.planner_id },
-      include: {
-        line_items: true,
-        customer: true,
-        derived_invoice: true,
-      },
-    });
-
-    if (!proforma) return NextResponse.json({ error: 'Proforma not found' }, { status: 404 });
-    if (proforma.type !== 'PROFORMA') {
-      return NextResponse.json({ error: 'Only proforma invoices can be converted' }, { status: 400 });
-    }
-    if (proforma.status !== 'PAID') {
-      return NextResponse.json(
-        { error: 'Proforma must be fully paid before converting to an invoice' },
-        { status: 400 },
-      );
-    }
-    if (proforma.derived_invoice) {
-      return NextResponse.json(
-        { error: 'This proforma already has a linked invoice', data: { invoice_id: proforma.derived_invoice.id } },
-        { status: 409 },
-      );
-    }
-
     const issuedAt = new Date();
 
     const invoice = await prisma.$transaction(async (tx) => {
-      const year = issuedAt.getFullYear();
-      const serie = buildSerie('INVOICE', year);
+      // --- Validation inside the transaction to prevent race conditions ---
+      const proforma = await tx.invoice.findFirst({
+        where: { id: proformaId, planner_id: user.planner_id! },
+        include: {
+          line_items: true,
+          payments: true,
+          derived_invoice: { select: { id: true } },
+        },
+      });
 
-      // MAX-based sequential numbering
+      if (!proforma) throw new Error('NOT_FOUND');
+      if (proforma.type !== 'PROFORMA') throw new Error('NOT_PROFORMA');
+      if (proforma.status !== 'PAID') throw new Error('NOT_PAID');
+      if (proforma.derived_invoice) throw new Error('ALREADY_CONVERTED');
+
+      // --- Allocate sequential number ---
+      const year = issuedAt.getFullYear();
+      const serie = buildSerie(year);
+
       const last = await tx.invoice.findFirst({
         where: { planner_id: user.planner_id!, serie },
         orderBy: { numero: 'desc' },
@@ -85,14 +73,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
       const numero = (last?.numero ?? 0) + 1;
 
-      // Date ordering validation
       if (last?.issued_at && issuedAt < last.issued_at) {
         throw new Error('DATE_ORDER_VIOLATION');
       }
 
       const invoice_number = `${serie}-${String(numero).padStart(4, '0')}`;
 
-      // Compute chain hash
       const chain_hash = computeChainHash({
         invoice_number,
         issued_at: issuedAt,
@@ -101,7 +87,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         previous_hash: last?.chain_hash ?? null,
       });
 
-      return tx.invoice.create({
+      // --- Create the definitive invoice ---
+      const newInvoice = await tx.invoice.create({
         data: {
           type: 'INVOICE',
           planner_id: user.planner_id!,
@@ -134,6 +121,19 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
             })),
           },
         },
+      });
+
+      // --- Move payment records from the proforma to the definitive invoice ---
+      // The definitive invoice is the legal document; it must carry the full audit trail.
+      if (proforma.payments.length > 0) {
+        await tx.invoicePayment.updateMany({
+          where: { invoice_id: proformaId },
+          data: { invoice_id: newInvoice.id },
+        });
+      }
+
+      return tx.invoice.findUniqueOrThrow({
+        where: { id: newInvoice.id },
         include: {
           customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
           line_items: true,
@@ -146,11 +146,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ data: invoice }, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && error.message === 'DATE_ORDER_VIOLATION') {
-      return NextResponse.json(
-        { error: 'La fecha de emisión no puede ser anterior a la última factura de la misma serie.' },
-        { status: 422 },
-      );
+    if (error instanceof Error) {
+      if (error.message === 'NOT_FOUND') return NextResponse.json({ error: 'Proforma not found' }, { status: 404 });
+      if (error.message === 'NOT_PROFORMA') return NextResponse.json({ error: 'Only proforma invoices can be converted' }, { status: 400 });
+      if (error.message === 'NOT_PAID') return NextResponse.json({ error: 'Proforma must be fully paid before converting to an invoice' }, { status: 400 });
+      if (error.message === 'ALREADY_CONVERTED') return NextResponse.json({ error: 'This proforma already has a linked invoice' }, { status: 409 });
+      if (error.message === 'DATE_ORDER_VIOLATION') return NextResponse.json({ error: 'La fecha de emisión no puede ser anterior a la última factura de la misma serie.' }, { status: 422 });
     }
     console.error('Convert proforma to invoice error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
