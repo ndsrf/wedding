@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
 import { QuoteForm } from './QuoteForm';
 import { FilterBar } from '../FilterBar';
@@ -137,11 +137,15 @@ export function QuotesList({ initialRef }: { initialRef?: string }) {
 
   useEffect(() => { fetchQuotes(); }, []);
 
-  // Auto-open a specific quote when arriving via deep link
+  // Auto-open a specific quote when arriving via deep link.
+  // processedRef prevents re-triggering when the list refreshes after user actions.
+  const processedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!initialRef || loading || quotes.length === 0) return;
+    if (processedRef.current === initialRef) return;
     const target = quotes.find((q) => q.id === initialRef);
     if (target) {
+      processedRef.current = initialRef;
       setViewingId(target.id);
       setEditingId(null);
       setShowForm(true);

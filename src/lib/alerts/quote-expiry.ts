@@ -40,6 +40,7 @@ export async function processExpiredQuotes(): Promise<ExpiredQuotesResult> {
 
   if (expiredQuotes.length === 0) return { expired: 0, errors: 0 };
 
+  const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
   let expired = 0;
   let errors = 0;
 
@@ -54,7 +55,6 @@ export async function processExpiredQuotes(): Promise<ExpiredQuotesResult> {
       // Queue alert deliveries sequentially.
       // skipDispatch=true prevents N concurrent processPendingDeliveries calls —
       // the cron's alertDeliveriesJob dispatches everything in one pass after this loop.
-      const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
       await triggerAlert({
         event_type: 'QUOTE_EXPIRED',
         planner_id: quote.planner_id,
