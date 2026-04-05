@@ -1,26 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
 import { ContractsList, type InvoicePrefillData } from './contracts/ContractsList';
 import { QuotesList } from './quotes/QuotesList';
 import { InvoicesList } from './invoices/InvoicesList';
+import { StatsDateFilter } from '@/components/ui/StatsDateFilter';
+import type { StatsFilterValue } from '@/lib/stats-filter';
+import { parseCookieFilter, serializeFilterForCookie, computeDateRange, STATS_FILTER_COOKIE } from '@/lib/stats-filter';
+import { getFilteredSummary } from '@/app/(public)/planner/quotes-finances/actions';
+import type { FinancialSummary } from '@/app/(public)/planner/quotes-finances/actions';
 
 type Tab = 'quotes' | 'contracts' | 'invoices';
-
-interface FinancialSummary {
-  total_quotes: number;
-  accepted_quotes: number;
-  invoiced_total: number;
-  amount_received: number;
-  currency: string;
-}
 
 const VALID_TABS = ['quotes', 'contracts', 'invoices'] as const;
 
 interface QuotesFinancesPageProps {
   summary?: FinancialSummary;
   initialTab?: string;
+  initialFilter?: StatsFilterValue;
 }
 
 const TAB_IDS: Tab[] = ['quotes', 'contracts', 'invoices'];
@@ -43,12 +41,43 @@ const TAB_ICONS: Record<Tab, React.ReactNode> = {
   ),
 };
 
-export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPageProps) {
+function readFilterCookie(): StatsFilterValue {
+  if (typeof document === 'undefined') return { type: 'this_year' };
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${STATS_FILTER_COOKIE}=([^;]*)`));
+  return parseCookieFilter(match ? decodeURIComponent(match[1]) : null);
+}
+
+function saveFilterCookie(filter: StatsFilterValue) {
+  const value = encodeURIComponent(serializeFilterForCookie(filter));
+  document.cookie = `${STATS_FILTER_COOKIE}=${value}; path=/; max-age=31536000; SameSite=Lax`;
+}
+
+export function QuotesFinancesPage({ summary: initialSummary, initialTab, initialFilter }: QuotesFinancesPageProps) {
   const t = useTranslations('planner.quotesFinances');
   const format = useFormatter();
   const resolvedInitial = VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'quotes';
   const [activeTab, setActiveTab] = useState<Tab>(resolvedInitial);
   const [invoicePrefill, setInvoicePrefill] = useState<InvoicePrefillData | null>(null);
+
+  const [filter, setFilterState] = useState<StatsFilterValue>(
+    () => initialFilter ?? readFilterCookie()
+  );
+  const [summary, setSummary] = useState<FinancialSummary | undefined>(initialSummary);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+
+  const handleFilterChange = useCallback(async (newFilter: StatsFilterValue) => {
+    setFilterState(newFilter);
+    saveFilterCookie(newFilter);
+
+    setLoadingSummary(true);
+    try {
+      const { start, end } = computeDateRange(newFilter);
+      const result = await getFilteredSummary(start, end);
+      if (result) setSummary(result);
+    } finally {
+      setLoadingSummary(false);
+    }
+  }, []);
 
   function handleCreateInvoice(prefill: InvoicePrefillData) {
     setInvoicePrefill(prefill);
@@ -61,34 +90,48 @@ export function QuotesFinancesPage({ summary, initialTab }: QuotesFinancesPagePr
     return format.number(amount, { style: 'currency', currency: defaultCurrency, maximumFractionDigits: 0 });
   }
 
+  const filterLabels = {
+    all: t('statsFilter.all'),
+    thisYear: t('statsFilter.thisYear'),
+    thisMonth: t('statsFilter.thisMonth'),
+    custom: t('statsFilter.custom'),
+    from: t('statsFilter.from'),
+    to: t('statsFilter.to'),
+    apply: t('statsFilter.apply'),
+  };
+
   return (
     <div className="space-y-6">
-      {/* KPI cards */}
-      {summary && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <p className="text-2xl font-bold text-gray-900">{summary.total_quotes}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{t('kpi.totalQuotes')}</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <p className="text-2xl font-bold text-green-600">{summary.accepted_quotes}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{t('kpi.accepted')}</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <p className="text-2xl font-bold text-gray-900">{fmt(summary.invoiced_total)}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{t('kpi.invoiced')}</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <p className="text-2xl font-bold text-rose-600">{fmt(summary.amount_received)}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{t('kpi.received')}</p>
-            {summary.invoiced_total > 0 && (
-              <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-rose-400 rounded-full"
-                  style={{ width: `${Math.min(100, Math.round((summary.amount_received / summary.invoiced_total) * 100))}%` }}
-                />
-              </div>
-            )}
+      {/* Stats filter + KPI cards */}
+      {summary !== undefined && (
+        <div className="space-y-3">
+          <StatsDateFilter value={filter} onChange={handleFilterChange} labels={filterLabels} />
+
+          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 transition-opacity duration-200 ${loadingSummary ? 'opacity-50' : 'opacity-100'}`}>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-2xl font-bold text-gray-900">{summary.total_quotes}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('kpi.totalQuotes')}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-2xl font-bold text-green-600">{summary.accepted_quotes}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('kpi.accepted')}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-2xl font-bold text-gray-900">{fmt(summary.invoiced_total)}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('kpi.invoiced')}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-2xl font-bold text-rose-600">{fmt(summary.amount_received)}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('kpi.received')}</p>
+              {summary.invoiced_total > 0 && (
+                <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-rose-400 rounded-full"
+                    style={{ width: `${Math.min(100, Math.round((summary.amount_received / summary.invoiced_total) * 100))}%` }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

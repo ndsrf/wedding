@@ -720,6 +720,15 @@
         "invoiced": "Fatturato",
         "received": "Ricevuto"
       },
+      "statsFilter": {
+        "all": "Dall'inizio",
+        "thisYear": "Quest'anno",
+        "thisMonth": "Questo mese",
+        "custom": "Personalizzato",
+        "from": "Dal",
+        "to": "Al",
+        "apply": "Applica"
+      },
       "filterBar": {
         "status": "Stato",
         "clearFilters": "Cancella filtri"

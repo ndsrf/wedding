@@ -724,6 +724,15 @@
         "invoiced": "Facturado",
         "received": "Recibido"
       },
+      "statsFilter": {
+        "all": "Desde el principio",
+        "thisYear": "Este año",
+        "thisMonth": "Este mes",
+        "custom": "Personalizado",
+        "from": "Desde",
+        "to": "Hasta",
+        "apply": "Aplicar"
+      },
       "filterBar": {
         "status": "Estado",
         "clearFilters": "Borrar filtros"

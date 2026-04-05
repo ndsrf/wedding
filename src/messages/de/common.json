@@ -720,6 +720,15 @@
         "invoiced": "Fakturiert",
         "received": "Erhalten"
       },
+      "statsFilter": {
+        "all": "Seit Beginn",
+        "thisYear": "Dieses Jahr",
+        "thisMonth": "Diesen Monat",
+        "custom": "Benutzerdefiniert",
+        "from": "Von",
+        "to": "Bis",
+        "apply": "Anwenden"
+      },
       "filterBar": {
         "status": "Status",
         "clearFilters": "Filter zurücksetzen"

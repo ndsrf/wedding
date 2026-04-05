@@ -728,6 +728,15 @@
         "invoiced": "Invoiced",
         "received": "Received"
       },
+      "statsFilter": {
+        "all": "All time",
+        "thisYear": "This year",
+        "thisMonth": "This month",
+        "custom": "Custom",
+        "from": "From",
+        "to": "To",
+        "apply": "Apply"
+      },
       "filterBar": {
         "status": "Status",
         "clearFilters": "Clear filters"
