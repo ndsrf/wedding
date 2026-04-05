@@ -97,6 +97,15 @@ export interface CreatePlannerRequest {
   name: string;
   email: string;
   logo_url?: string;
+  billing?: {
+    invoice_series: string;
+    rectification_series: string;
+    proforma_series: string;
+    invoice_start_number: number;
+    rectification_start_number: number;
+    proforma_start_number: number;
+    last_external_hash?: string | null;
+  };
 }
 
 export type CreatePlannerResponse = APIResponse<WeddingPlanner>;

@@ -4,7 +4,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/lib/pdf/invoice-pdf';
 import { put, del } from '@vercel/blob';
-import { toAbsoluteUrl } from '@/lib/images/processor';
+import { resolveLogoDataUri } from '@/lib/pdf/resolve-logo';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
@@ -26,20 +26,41 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ data: { pdf_url: invoice.pdf_url, invoice } });
     }
 
-    const planner = await prisma.weddingPlanner.findUnique({
-      where: { id: user.planner_id },
-      select: {
-        name: true,
-        email: true,
-        company_email: true,
-        legal_name: true,
-        vat_number: true,
-        address: true,
-        phone: true,
-        website: true,
-        logo_url: true,
-      },
-    });
+    const [planner, prevInvoice] = await Promise.all([
+      prisma.weddingPlanner.findUnique({
+        where: { id: user.planner_id },
+        select: {
+          name: true,
+          email: true,
+          company_email: true,
+          legal_name: true,
+          vat_number: true,
+          address: true,
+          phone: true,
+          website: true,
+          logo_url: true,
+          last_external_hash: true,
+        },
+      }),
+      // Fetch the preceding invoice in the same series (highest numero strictly
+      // less than the current one) to show its chain hash in the footer.
+      // Using lt rather than numero-1 handles gaps and non-1 start numbers.
+      invoice.serie && invoice.numero != null
+        ? prisma.invoice.findFirst({
+            where: {
+              planner_id: user.planner_id,
+              serie: invoice.serie,
+              numero: { lt: invoice.numero },
+            },
+            orderBy: { numero: 'desc' },
+            select: { chain_hash: true },
+          })
+        : Promise.resolve(null),
+    ]);
+
+    // If no preceding invoice exists in the series, fall back to the planner's
+    // configured external hash (Verifactu continuity from a previous system).
+    const previousHash = prevInvoice?.chain_hash ?? planner?.last_external_hash ?? null;
 
     const locale = await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
@@ -74,7 +95,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       footer: t('planner.quotesFinances.invoicePdf.footer'),
       idPrefix: t('planner.quotesFinances.invoicePdf.idPrefix'),
       vat: t('planner.quotesFinances.invoicePdf.vat'),
+      previousHash: t('planner.quotesFinances.invoicePdf.previousHash'),
     };
+
+    const logoDataUri = await resolveLogoDataUri(planner?.logo_url);
 
     const buffer = await renderToBuffer(
       React.createElement(InvoicePDF, {
@@ -82,7 +106,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         company: {
           name: planner?.name ?? 'Wedding Planner',
           email: planner?.company_email || planner?.email,
-          logoUrl: toAbsoluteUrl(planner?.logo_url),
+          logoUrl: logoDataUri,
           legalName: planner?.legal_name ?? undefined,
           vatNumber: planner?.vat_number ?? undefined,
           address: planner?.address ?? undefined,
@@ -91,6 +115,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
         labels,
         locale,
+        previousHash,
       }) as never
     );
 

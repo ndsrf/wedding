@@ -35,6 +35,14 @@ model WeddingPlanner {
   instagram           String?
   website             String?
   signature_url       String?
+  // Billing series configuration
+  invoice_series              String  @default("FAC")
+  rectification_series        String  @default("REC")
+  proforma_series             String  @default("PRO")
+  invoice_start_number        Int     @default(1)
+  rectification_start_number  Int     @default(1)
+  proforma_start_number       Int     @default(1)
+  last_external_hash          String? // Verifactu chain continuity from previous software
   enabled             Boolean                    @default(true)
   subscription_status SubscriptionStatus         @default(ACTIVE)
   created_at          DateTime                   @default(now())

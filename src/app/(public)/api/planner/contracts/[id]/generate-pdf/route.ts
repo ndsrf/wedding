@@ -4,7 +4,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { put, del } from '@vercel/blob';
-import { toAbsoluteUrl } from '@/lib/images/processor';
+import { resolveLogoDataUri } from '@/lib/pdf/resolve-logo';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
@@ -51,6 +51,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       signatureDate: t('planner.quotesFinances.contractPdf.signatureDate'),
     };
 
+    const [logoDataUri, signatureDataUri] = await Promise.all([
+      resolveLogoDataUri(planner?.logo_url),
+      resolveLogoDataUri(planner?.signature_url),
+    ]);
+
     const buffer = await renderToBuffer(
       React.createElement(ContractPDF, {
         title: contract.title,
@@ -58,13 +63,13 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         company: {
           name: planner?.name ?? 'Wedding Planner',
           email: planner?.email,
-          logoUrl: toAbsoluteUrl(planner?.logo_url),
+          logoUrl: logoDataUri,
           legalName: planner?.legal_name ?? undefined,
           vatNumber: planner?.vat_number ?? undefined,
           address: planner?.address ?? undefined,
           phone: planner?.phone ?? undefined,
           website: planner?.website ?? undefined,
-          signatureUrl: toAbsoluteUrl(planner?.signature_url),
+          signatureUrl: signatureDataUri,
         },
         signerName: contract.signer_name ?? contract.signer_email ?? undefined,
         createdAt: contract.created_at,

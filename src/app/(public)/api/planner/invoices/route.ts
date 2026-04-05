@@ -34,35 +34,48 @@ const createInvoiceSchema = z.object({
   line_items: z.array(lineItemSchema).min(1),
 });
 
+type PlannerBillingConfig = {
+  invoice_series: string;
+  rectification_series: string;
+  proforma_series: string;
+  invoice_start_number: number;
+  rectification_start_number: number;
+  proforma_start_number: number;
+  last_external_hash: string | null;
+};
+
 /**
- * Builds the series prefix for a given invoice type and year.
- * Proforma: PRO-YYYY
- * Invoice (Ordinaria): FAC-YYYY
- * Rectificativa: REC-YYYY
+ * Builds the series prefix for a given invoice type and year,
+ * using the planner's configured series names.
  */
-function buildSerie(type: 'PROFORMA' | 'INVOICE' | 'RECTIFICATIVA', year: number): string {
+function buildSerie(
+  type: 'PROFORMA' | 'INVOICE' | 'RECTIFICATIVA',
+  year: number,
+  config: PlannerBillingConfig,
+): string {
   const yearShort = String(year).slice(2); // "26" for 2026
   switch (type) {
-    case 'PROFORMA': return `PRO-${yearShort}`;
-    case 'INVOICE': return `FAC-${yearShort}`;
-    case 'RECTIFICATIVA': return `REC-${yearShort}`;
+    case 'PROFORMA': return `${config.proforma_series}-${yearShort}`;
+    case 'INVOICE': return `${config.invoice_series}-${yearShort}`;
+    case 'RECTIFICATIVA': return `${config.rectification_series}-${yearShort}`;
   }
 }
 
 /**
  * Returns (serie, numero, invoice_number, previous_chain_hash) using MAX(numero)+1 in a
- * transaction-safe way. Combines the number allocation and chain-hash lookup into one query
- * to avoid a redundant DB round-trip.
+ * transaction-safe way. When no records exist yet, uses the planner's configured start
+ * number and last_external_hash for Verifactu chain continuity.
  * For INVOICE/RECTIFICATIVA types, also enforces date ordering.
  */
 async function allocateInvoiceNumber(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
   plannerId: string,
   type: 'PROFORMA' | 'INVOICE' | 'RECTIFICATIVA',
+  config: PlannerBillingConfig,
   issuedAt?: Date,
 ): Promise<{ serie: string; numero: number; invoice_number: string; previous_chain_hash: string | null }> {
   const year = (issuedAt ?? new Date()).getFullYear();
-  const serie = buildSerie(type, year);
+  const serie = buildSerie(type, year, config);
 
   const last = await tx.invoice.findFirst({
     where: { planner_id: plannerId, serie },
@@ -70,7 +83,22 @@ async function allocateInvoiceNumber(
     select: { numero: true, issued_at: true, chain_hash: true },
   });
 
-  const numero = (last?.numero ?? 0) + 1;
+  let numero: number;
+  let previous_chain_hash: string | null;
+
+  if (last === null) {
+    // First invoice in this series: use the configured start number and external hash
+    const startNumber = type === 'INVOICE'
+      ? config.invoice_start_number
+      : type === 'RECTIFICATIVA'
+        ? config.rectification_start_number
+        : config.proforma_start_number;
+    numero = startNumber;
+    previous_chain_hash = config.last_external_hash;
+  } else {
+    numero = (last.numero ?? 0) + 1;
+    previous_chain_hash = last.chain_hash;
+  }
 
   // Date ordering validation for legal invoices only (not proformas)
   if (type === 'INVOICE' || type === 'RECTIFICATIVA') {
@@ -80,7 +108,7 @@ async function allocateInvoiceNumber(
   }
 
   const invoice_number = `${serie}-${String(numero).padStart(4, '0')}`;
-  return { serie, numero, invoice_number, previous_chain_hash: last?.chain_hash ?? null };
+  return { serie, numero, invoice_number, previous_chain_hash };
 }
 
 /**
@@ -158,6 +186,30 @@ export async function POST(request: NextRequest) {
     const issuedAt = data.issued_at ? new Date(data.issued_at) : new Date();
 
     const invoice = await prisma.$transaction(async (tx) => {
+      // Fetch planner billing config inside the transaction so the series names
+      // and start numbers are consistent with all other reads in this unit of work.
+      const plannerConfig = await tx.weddingPlanner.findUnique({
+        where: { id: user.planner_id! },
+        select: {
+          invoice_series: true,
+          rectification_series: true,
+          proforma_series: true,
+          invoice_start_number: true,
+          rectification_start_number: true,
+          proforma_start_number: true,
+          last_external_hash: true,
+        },
+      });
+      const billingConfig: PlannerBillingConfig = plannerConfig ?? {
+        invoice_series: 'FAC',
+        rectification_series: 'REC',
+        proforma_series: 'PRO',
+        invoice_start_number: 1,
+        rectification_start_number: 1,
+        proforma_start_number: 1,
+        last_external_hash: null,
+      };
+
       // Resolve or create the customer record
       let customerId = data.customer_id ?? null;
       if (!customerId) {
@@ -189,6 +241,7 @@ export async function POST(request: NextRequest) {
         tx,
         user.planner_id!,
         data.type,
+        billingConfig,
         issuedAt,
       );
 

@@ -4,7 +4,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { QuotePDF } from '@/lib/pdf/quote-pdf';
 import { put, del } from '@vercel/blob';
-import { toAbsoluteUrl } from '@/lib/images/processor';
+import { resolveLogoDataUri } from '@/lib/pdf/resolve-logo';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
@@ -64,13 +64,15 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       version: t('planner.quotesFinances.quotePdf.version'),
     };
 
+    const logoDataUri = await resolveLogoDataUri(planner?.logo_url);
+
     const buffer = await renderToBuffer(
       React.createElement(QuotePDF, {
         quote,
         company: {
           name: planner?.name ?? 'Wedding Planner',
           email: planner?.company_email || planner?.email,
-          logoUrl: toAbsoluteUrl(planner?.logo_url),
+          logoUrl: logoDataUri,
           legalName: planner?.legal_name ?? undefined,
           vatNumber: planner?.vat_number ?? undefined,
           address: planner?.address ?? undefined,

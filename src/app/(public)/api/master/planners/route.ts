@@ -23,6 +23,15 @@ const createPlannerSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
   logo_url: z.string().url('Invalid logo URL').optional(),
+  billing: z.object({
+    invoice_series: z.string().min(1).max(10).default('FAC'),
+    rectification_series: z.string().min(1).max(10).default('REC'),
+    proforma_series: z.string().min(1).max(10).default('PRO'),
+    invoice_start_number: z.coerce.number().int().min(1).default(1),
+    rectification_start_number: z.coerce.number().int().min(1).default(1),
+    proforma_start_number: z.coerce.number().int().min(1).default(1),
+    last_external_hash: z.string().optional().nullable(),
+  }).optional(),
 });
 
 // Validation schema for query parameters
@@ -183,6 +192,7 @@ export async function POST(request: NextRequest) {
 
     // Create the new planner
     // Note: auth_provider will be set on first login via OAuth
+    const billing = validatedData.billing;
     const planner = await prisma.weddingPlanner.create({
       data: {
         name: validatedData.name,
@@ -191,6 +201,15 @@ export async function POST(request: NextRequest) {
         enabled: true,
         auth_provider: 'GOOGLE', // Default, will be updated on first login
         created_by: user.id,
+        ...(billing && {
+          invoice_series: billing.invoice_series,
+          rectification_series: billing.rectification_series,
+          proforma_series: billing.proforma_series,
+          invoice_start_number: billing.invoice_start_number,
+          rectification_start_number: billing.rectification_start_number,
+          proforma_start_number: billing.proforma_start_number,
+          last_external_hash: billing.last_external_hash ?? null,
+        }),
       },
     });
 

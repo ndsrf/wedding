@@ -1080,7 +1080,8 @@
         "notes": "Note",
         "footer": "Grazie per il vostro business. Contattateci se avete domande su questa fattura.",
         "idPrefix": "ID:",
-        "vat": "P.IVA:"
+        "vat": "P.IVA:",
+        "previousHash": "Hash Fattura Precedente:"
       },
       "contractPdf": {
         "dateLabel": "Data:",

@@ -148,6 +148,13 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: '#d1d5db',
   },
+  footerHash: {
+    fontSize: 7,
+    color: '#e5e7eb',
+    marginTop: 3,
+    fontFamily: 'Helvetica',
+    letterSpacing: 0.2,
+  },
   bankDetails: {
     marginTop: 24,
     padding: 12,
@@ -203,6 +210,7 @@ export interface InvoicePDFLabels {
   footer: string;
   idPrefix: string;
   vat: string;
+  previousHash: string;
 }
 
 interface InvoicePDFProps {
@@ -210,9 +218,10 @@ interface InvoicePDFProps {
   company: CompanyInfo;
   labels: InvoicePDFLabels;
   locale: string;
+  previousHash?: string | null;
 }
 
-export function InvoicePDF({ invoice, company, labels, locale }: InvoicePDFProps) {
+export function InvoicePDF({ invoice, company, labels, locale, previousHash }: InvoicePDFProps) {
   const total = Number(invoice.total);
   const amountPaid = Number(invoice.amount_paid);
   const balanceDue = total - amountPaid;
@@ -362,7 +371,12 @@ export function InvoicePDF({ invoice, company, labels, locale }: InvoicePDFProps
           </View>
         )}
 
-        <Text style={styles.footer}>{labels.footer}</Text>
+        <View style={styles.footer}>
+          <Text>{labels.footer}</Text>
+          {previousHash && (
+            <Text style={styles.footerHash}>{labels.previousHash} {previousHash}</Text>
+          )}
+        </View>
       </Page>
     </Document>
   );
