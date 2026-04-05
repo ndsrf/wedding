@@ -47,6 +47,7 @@ interface InvoiceFormData {
 
 interface InvoiceFormProps {
   initialData?: Partial<InvoiceFormData & { discount?: number | '' }>;
+  initialContracts?: ContractOption[];
   onSave: (data: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
 }
@@ -57,7 +58,7 @@ function emptyItem(): LineItem {
   return { name: '', description: '', quantity: 1, unit_price: 0, total: 0 };
 }
 
-export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps) {
+export function InvoiceForm({ initialData, initialContracts, onSave, onCancel }: InvoiceFormProps) {
   const t = useTranslations('planner.quotesFinances');
   const locale = useLocale();
   const [saving, setSaving] = useState(false);
@@ -79,15 +80,16 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
     line_items: initialData?.line_items?.length ? initialData.line_items : [emptyItem()],
   });
 
-  const [contracts, setContracts] = useState<ContractOption[]>([]);
+  const [contracts, setContracts] = useState<ContractOption[]>(initialContracts ?? []);
 
-  // Load signed contracts for the selector
+  // Load signed contracts for the selector only if not provided by the parent
   useEffect(() => {
+    if (initialContracts) return;
     fetch('/api/planner/contracts?status=SIGNED')
       .then((r) => r.json())
       .then((json) => setContracts(json.data ?? []))
       .catch(() => {/* ignore */});
-  }, []);
+  }, [initialContracts]);
 
   // Customer autocomplete
   const [suggestions, setSuggestions] = useState<CustomerSuggestion[]>([]);

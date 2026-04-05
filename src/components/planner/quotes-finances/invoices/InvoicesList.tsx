@@ -234,6 +234,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         </div>
         <InvoiceForm
           initialData={prefill}
+          initialContracts={signedContracts.map((c) => ({ id: c.id, title: c.title, status: 'SIGNED', customer: c.customer ? { name: c.customer.name } : null }))}
           onSave={handleCreate}
           onCancel={handleCancelForm}
         />
@@ -276,6 +277,15 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
         </div>
         <InvoiceForm
           initialData={prefill}
+          initialContracts={(() => {
+            const mapped = signedContracts.map((c) => ({ id: c.id, title: c.title, status: 'SIGNED', customer: c.customer ? { name: c.customer.name } : null }));
+            // Ensure the currently linked contract is always included (it may no longer be SIGNED)
+            const linkedContract = editingInvoice.contract;
+            if (linkedContract && !mapped.some((c) => c.id === linkedContract.id)) {
+              mapped.push({ id: linkedContract.id, title: linkedContract.title, status: linkedContract.status, customer: null });
+            }
+            return mapped;
+          })()}
           onSave={handleEdit}
           onCancel={handleCancelForm}
         />
