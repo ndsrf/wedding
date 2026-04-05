@@ -3,8 +3,8 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import crypto from 'crypto';
 
-function buildSerie(year: number): string {
-  return `FAC-${String(year).slice(2)}`;
+function buildSerie(seriesName: string, year: number): string {
+  return `${seriesName}-${String(year).slice(2)}`;
 }
 
 function computeChainHash(data: {
@@ -45,6 +45,19 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const issuedAt = new Date();
 
+    // Fetch planner billing config for series name and start number
+    const plannerConfig = await prisma.weddingPlanner.findUnique({
+      where: { id: user.planner_id! },
+      select: {
+        invoice_series: true,
+        invoice_start_number: true,
+        last_external_hash: true,
+      },
+    });
+    const invoiceSeriesName = plannerConfig?.invoice_series ?? 'FAC';
+    const invoiceStartNumber = plannerConfig?.invoice_start_number ?? 1;
+    const externalHash = plannerConfig?.last_external_hash ?? null;
+
     const invoice = await prisma.$transaction(async (tx) => {
       // --- Validation inside the transaction to prevent race conditions ---
       const proforma = await tx.invoice.findFirst({
@@ -63,7 +76,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
       // --- Allocate sequential number ---
       const year = issuedAt.getFullYear();
-      const serie = buildSerie(year);
+      const serie = buildSerie(invoiceSeriesName, year);
 
       const last = await tx.invoice.findFirst({
         where: { planner_id: user.planner_id!, serie },
@@ -71,7 +84,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         select: { numero: true, issued_at: true, chain_hash: true },
       });
 
-      const numero = (last?.numero ?? 0) + 1;
+      const numero = last === null ? invoiceStartNumber : last.numero + 1;
+      const previousHash = last === null ? externalHash : last.chain_hash;
 
       if (last?.issued_at && issuedAt < last.issued_at) {
         throw new Error('DATE_ORDER_VIOLATION');
@@ -84,7 +98,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         issued_at: issuedAt,
         total: Number(proforma.total),
         planner_id: user.planner_id!,
-        previous_hash: last?.chain_hash ?? null,
+        previous_hash: previousHash,
       });
 
       // --- Create the definitive invoice ---

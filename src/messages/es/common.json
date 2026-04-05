@@ -1084,7 +1084,8 @@
         "notes": "Notas",
         "footer": "Gracias por su confianza. Póngase en contacto con nosotros si tiene alguna pregunta sobre esta factura.",
         "idPrefix": "ID:",
-        "vat": "NIF/CIF:"
+        "vat": "NIF/CIF:",
+        "previousHash": "Hash Factura Anterior:"
       },
       "contractPdf": {
         "dateLabel": "Fecha:",

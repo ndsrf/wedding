@@ -26,20 +26,33 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ data: { pdf_url: invoice.pdf_url, invoice } });
     }
 
-    const planner = await prisma.weddingPlanner.findUnique({
-      where: { id: user.planner_id },
-      select: {
-        name: true,
-        email: true,
-        company_email: true,
-        legal_name: true,
-        vat_number: true,
-        address: true,
-        phone: true,
-        website: true,
-        logo_url: true,
-      },
-    });
+    const [planner, prevInvoice] = await Promise.all([
+      prisma.weddingPlanner.findUnique({
+        where: { id: user.planner_id },
+        select: {
+          name: true,
+          email: true,
+          company_email: true,
+          legal_name: true,
+          vat_number: true,
+          address: true,
+          phone: true,
+          website: true,
+          logo_url: true,
+        },
+      }),
+      // Fetch previous invoice in the same series to show its chain hash in the footer
+      invoice.serie && invoice.numero && invoice.numero > 1
+        ? prisma.invoice.findFirst({
+            where: {
+              planner_id: user.planner_id,
+              serie: invoice.serie,
+              numero: invoice.numero - 1,
+            },
+            select: { chain_hash: true },
+          })
+        : Promise.resolve(null),
+    ]);
 
     const locale = await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
@@ -74,6 +87,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       footer: t('planner.quotesFinances.invoicePdf.footer'),
       idPrefix: t('planner.quotesFinances.invoicePdf.idPrefix'),
       vat: t('planner.quotesFinances.invoicePdf.vat'),
+      previousHash: t('planner.quotesFinances.invoicePdf.previousHash'),
     };
 
     const buffer = await renderToBuffer(
@@ -91,6 +105,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
         labels,
         locale,
+        previousHash: prevInvoice?.chain_hash ?? null,
       }) as never
     );
 

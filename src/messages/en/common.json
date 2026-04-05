@@ -1088,7 +1088,8 @@
         "notes": "Notes",
         "footer": "Thank you for your business. Please contact us if you have any questions about this invoice.",
         "idPrefix": "ID:",
-        "vat": "VAT:"
+        "vat": "VAT:",
+        "previousHash": "Previous Invoice Hash:"
       },
       "contractPdf": {
         "dateLabel": "Date:",

@@ -1080,7 +1080,8 @@
         "notes": "Hinweise",
         "footer": "Vielen Dank für Ihren Auftrag. Bei Fragen zu dieser Rechnung kontaktieren Sie uns bitte.",
         "idPrefix": "Ausweis-Nr.:",
-        "vat": "USt-IdNr.:"
+        "vat": "USt-IdNr.:",
+        "previousHash": "Hash Vorherige Rechnung:"
       },
       "contractPdf": {
         "dateLabel": "Datum:",
