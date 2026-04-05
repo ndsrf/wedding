@@ -84,7 +84,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         select: { numero: true, issued_at: true, chain_hash: true },
       });
 
-      const numero = last === null ? invoiceStartNumber : last.numero + 1;
+      const numero = last === null || last.numero === null ? invoiceStartNumber : last.numero + 1;
       const previousHash = last === null ? externalHash : last.chain_hash;
 
       if (last?.issued_at && issuedAt < last.issued_at) {
