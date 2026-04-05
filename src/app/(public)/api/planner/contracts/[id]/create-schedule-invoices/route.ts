@@ -73,11 +73,20 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
 
-    // Load contract with quote (including tax_rate), customer, schedule items, and existing invoices
+    // Load contract with quote (including tax_rate and line items), customer, schedule items, and existing invoices
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
-        quote: { select: { id: true, total: true, currency: true, customer_id: true, tax_rate: true } },
+        quote: {
+          select: {
+            id: true,
+            total: true,
+            currency: true,
+            customer_id: true,
+            tax_rate: true,
+            line_items: { select: { name: true, description: true }, orderBy: { id: 'asc' } },
+          },
+        },
         customer: { select: { id: true, name: true, email: true, id_number: true, address: true } },
         payment_schedule_items: { orderBy: { order: 'asc' } },
         invoices: { select: { id: true }, take: 1 },
@@ -141,9 +150,22 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const currency = contract.quote!.currency ?? 'EUR';
     const customerId = contract.customer?.id ?? contract.quote?.customer_id ?? null;
 
+    // Build a summary of the quote's line items to append to each invoice description.
+    // This lets the client see what services they are paying for on every proforma.
+    const quoteLineItems = contract.quote!.line_items ?? [];
+    const quoteConceptsText = quoteLineItems.length > 0
+      ? '\n\nConceptos del presupuesto:\n' +
+        quoteLineItems
+          .map(li => `• ${li.name}${li.description ? `: ${li.description}` : ''}`)
+          .join('\n')
+      : '';
+
     // Compute invoice amounts (each PERCENTAGE is a % of the remaining balance)
     let remaining = quoteTotal;
     const invoiceData: Array<{
+      /** Short milestone label — used as the invoice line item name. */
+      lineItemName: string;
+      /** Full invoice description: milestone label + quote concepts summary. */
       description: string;
       total: number;
       subtotal: number;
@@ -179,7 +201,15 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         tax_amount = null;
       }
 
-      invoiceData.push({ description: item.description, total, subtotal, tax_rate: quoteTaxRate, tax_amount, issuedAt });
+      invoiceData.push({
+        lineItemName: item.description,
+        description: item.description + quoteConceptsText,
+        total,
+        subtotal,
+        tax_rate: quoteTaxRate,
+        tax_amount,
+        issuedAt,
+      });
     }
 
     // Create all proforma invoices sequentially within one transaction.
@@ -214,7 +244,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
             due_date: dueDate,
             line_items: {
               create: [{
-                name: inv.description,
+                name: inv.lineItemName,
                 description: null,
                 quantity: 1,
                 unit_price: inv.subtotal,
