@@ -20,6 +20,7 @@ import { resolveRecipients } from './recipients';
 import { renderAlertTemplate, buildTemplateVars } from './render';
 import { resolveChannel } from './types';
 import { processPendingDeliveries } from './processor';
+import { defer } from '@/lib/cron/defer';
 import type { AlertContext } from './types';
 
 const LANGUAGE_LOCALE: Record<Language, string> = {
@@ -82,10 +83,10 @@ export async function triggerAlert(context: AlertContext): Promise<void> {
       await processRule(rule, context, metadata, wedding_id, planner_id);
     }
 
-    // Fire-and-forget: start dispatching immediately
-    processPendingDeliveries(20).catch((err) => {
-      console.error('[ALERT] Background processor error:', err);
-    });
+    // Dispatch immediately in background.
+    // On Vercel: defer() uses waitUntil() to keep the function alive.
+    // Elsewhere: fire-and-forget — the in-process scheduler is the safety net.
+    defer(processPendingDeliveries(20));
   } catch (err) {
     // Never let alert failures propagate to the caller
     console.error('[ALERT] triggerAlert error:', err);
