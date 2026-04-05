@@ -4,7 +4,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/lib/pdf/invoice-pdf';
 import { put, del } from '@vercel/blob';
-import { toAbsoluteUrl } from '@/lib/images/processor';
+import { resolveLogoDataUri } from '@/lib/pdf/resolve-logo';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
@@ -28,6 +28,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const [planner, prevInvoice] = await Promise.all([
       prisma.weddingPlanner.findUnique({
+
         where: { id: user.planner_id },
         select: {
           name: true,
@@ -90,13 +91,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       previousHash: t('planner.quotesFinances.invoicePdf.previousHash'),
     };
 
+    const logoDataUri = await resolveLogoDataUri(planner?.logo_url);
+
     const buffer = await renderToBuffer(
       React.createElement(InvoicePDF, {
         invoice,
         company: {
           name: planner?.name ?? 'Wedding Planner',
           email: planner?.company_email || planner?.email,
-          logoUrl: toAbsoluteUrl(planner?.logo_url),
+          logoUrl: logoDataUri,
           legalName: planner?.legal_name ?? undefined,
           vatNumber: planner?.vat_number ?? undefined,
           address: planner?.address ?? undefined,
