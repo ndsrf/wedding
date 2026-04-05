@@ -97,7 +97,7 @@ export async function fetchWeddingsSummary(planner_id: string): Promise<Weddings
 
     return {
       coupleNames: w.couple_names,
-      weddingDate: new Date(w.wedding_date).toLocaleDateString('en-GB'),
+      weddingDate: new Date(w.wedding_date).toISOString().split('T')[0],
       location: w.location || '',
       status: effectiveStatus,
       totalGuests,
@@ -135,7 +135,7 @@ export async function fetchGuestsSummary(planner_id: string): Promise<GuestsSumm
 
     return {
       coupleNames: w.couple_names,
-      weddingDate: new Date(w.wedding_date).toLocaleDateString('en-GB'),
+      weddingDate: new Date(w.wedding_date).toISOString().split('T')[0],
       totalFamilies: w.families.length,
       totalGuests,
       attendingGuests,
@@ -186,13 +186,13 @@ export async function fetchRevenueSummary(planner_id: string): Promise<RevenueSu
     prisma.quote.findMany({
       where: { planner_id },
       select: {
+        id: true,
         couple_names: true,
         status: true,
         currency: true,
         total: true,
         created_at: true,
       },
-      orderBy: { created_at: 'desc' },
     }),
     prisma.invoice.findMany({
       where: { planner_id },
@@ -206,45 +206,47 @@ export async function fetchRevenueSummary(planner_id: string): Promise<RevenueSu
         created_at: true,
         quote: { select: { couple_names: true } },
       },
-      orderBy: { created_at: 'desc' },
     }),
   ]);
 
-  const rows: RevenueSummaryData[] = [];
+  type RowWithDate = RevenueSummaryData & { _sortDate: Date };
 
-  quotes.forEach((q, idx) => {
-    rows.push({
+  const rows: RowWithDate[] = [
+    ...quotes.map((q): RowWithDate => ({
       type: 'Quote',
-      reference: `Q-${String(idx + 1).padStart(4, '0')}`,
+      // Stable prefix of the UUID — not affected by query order
+      reference: `Q-${q.id.slice(0, 8).toUpperCase()}`,
       coupleNames: q.couple_names,
       status: q.status,
       currency: q.currency,
       total: Number(q.total).toFixed(2),
       amountPaid: '—',
       balance: '—',
-      date: new Date(q.created_at).toLocaleDateString('en-GB'),
-    });
-  });
+      date: q.created_at.toISOString().split('T')[0],
+      _sortDate: q.created_at,
+    })),
+    ...invoices.map((inv): RowWithDate => {
+      const total = Number(inv.total);
+      const paid = Number(inv.amount_paid);
+      return {
+        type: 'Invoice',
+        reference: inv.invoice_number,
+        coupleNames: inv.quote?.couple_names || '',
+        status: inv.status,
+        currency: inv.currency,
+        total: total.toFixed(2),
+        amountPaid: paid.toFixed(2),
+        balance: (total - paid).toFixed(2),
+        date: (inv.issued_at ?? inv.created_at).toISOString().split('T')[0],
+        _sortDate: inv.issued_at ?? inv.created_at,
+      };
+    }),
+  ];
 
-  invoices.forEach((inv) => {
-    const total = Number(inv.total);
-    const paid = Number(inv.amount_paid);
-    rows.push({
-      type: 'Invoice',
-      reference: inv.invoice_number,
-      coupleNames: inv.quote?.couple_names || '',
-      status: inv.status,
-      currency: inv.currency,
-      total: total.toFixed(2),
-      amountPaid: paid.toFixed(2),
-      balance: (total - paid).toFixed(2),
-      date: inv.issued_at
-        ? new Date(inv.issued_at).toLocaleDateString('en-GB')
-        : new Date(inv.created_at).toLocaleDateString('en-GB'),
-    });
-  });
-
-  return rows;
+  // Sort newest first, then strip the internal sort key before returning
+  rows.sort((a, b) => b._sortDate.getTime() - a._sortDate.getTime());
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return rows.map(({ _sortDate, ...rest }) => rest);
 }
 
 // ============================================================================
