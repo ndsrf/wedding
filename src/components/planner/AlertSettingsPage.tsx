@@ -32,8 +32,21 @@ interface Props {
 export function AlertSettingsPage({ plannerLanguage }: Props) {
   const t = useTranslations('planner.alertSettings');
 
-  const [states, setStates] = useState<AlertStates>({});
-  const [loading, setLoading] = useState(true);
+  // Pre-populate all rows with disabled defaults — rows are visible immediately.
+  // The useEffect below merges in real DB values once the fetch completes.
+  const [states, setStates] = useState<AlertStates>(() => {
+    const initial: AlertStates = {};
+    for (const def of BUILTIN_ALERTS) {
+      initial[def.builtinId] = {
+        ruleId: null,
+        enabled: false,
+        channels: [...def.defaultChannels],
+        saving: false,
+        error: false,
+      };
+    }
+    return initial;
+  });
 
   // ── Load existing rules ────────────────────────────────────────────────────
 
@@ -44,22 +57,22 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
         if (!res.ok) throw new Error('Failed to load');
         const { rules } = await res.json() as { rules: Array<{ id: string; name: string; enabled: boolean; channels: Channel[] }> };
 
-        const next: AlertStates = {};
-        for (const def of BUILTIN_ALERTS) {
-          const existing = rules.find((r) => r.name === builtinRuleName(def.builtinId));
-          next[def.builtinId] = {
-            ruleId: existing?.id ?? null,
-            enabled: existing?.enabled ?? false,
-            channels: existing?.channels?.length ? existing.channels : [...def.defaultChannels],
-            saving: false,
-            error: false,
-          };
-        }
-        setStates(next);
+        setStates((prev) => {
+          const next = { ...prev };
+          for (const def of BUILTIN_ALERTS) {
+            const existing = rules.find((r) => r.name === builtinRuleName(def.builtinId));
+            next[def.builtinId] = {
+              ruleId: existing?.id ?? null,
+              enabled: existing?.enabled ?? false,
+              channels: existing?.channels?.length ? existing.channels : [...def.defaultChannels],
+              saving: false,
+              error: false,
+            };
+          }
+          return next;
+        });
       } catch (err) {
         console.error('[AlertSettings] Failed to load rules', err);
-      } finally {
-        setLoading(false);
       }
     }
     load();
@@ -198,7 +211,6 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
     descKey: string;
   }) {
     const state = states[def.builtinId];
-    if (!state) return null;
     const { enabled, channels, saving, error } = state;
 
     return (
@@ -271,17 +283,6 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <svg className="h-6 w-6 text-gray-300 animate-spin" viewBox="0 0 24 24" fill="none">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
