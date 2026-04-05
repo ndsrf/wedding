@@ -179,7 +179,7 @@ grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageConte
 | Tasting | `/admin/tasting` | `/planner/weddings/[id]/tasting` | ✅ Done |
 | Seating | `/admin/seating` | `/planner/weddings/[id]/seating` | ✅ Done |
 | Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ⬜ Pending |
-| Reports | `/admin/reports` | `/planner/weddings/[id]/reports` | ⬜ Pending |
+| Reports | `/admin/reports` | `/planner/weddings/[id]/reports` | ✅ Done |
 | Providers | `/admin/providers` | `/planner/weddings/[id]/providers` | ✅ Done |
 | Invitation Builder | `/admin/invitation-builder` | `/planner/weddings/[id]/invitation-builder` | ✅ Done |
 | Templates | `/admin/templates` | `/planner/weddings/[id]/templates` | ⬜ Pending |
@@ -395,3 +395,52 @@ Business logic for 6 operations extracted into shared functions:
 **New planner route:** `src/app/(public)/api/planner/weddings/[id]/seating/layout/route.ts` — previously missing; planners can now save and use the visual seating layout editor.
 
 **All 10 API route files** (5 admin + 5 planner) reduced to ~20-line auth-and-dispatch wrappers. Three inline copies of `validatePlannerAccess` removed from planner routes. Security fix: planner routes now consistently verify planner ownership via `validatePlannerAccess` upfront.
+
+---
+
+## Completed: Reports Page
+
+### UI Consolidation
+
+**Shared component:** `src/components/shared/ReportsPageContent.tsx`
+
+**Differences resolved:**
+| Difference | Resolution |
+|-----------|-----------|
+| Page shell duplication | Extracted into `ReportsPageContent` with `apiBasePath` + `header` slot |
+| Planner wedding name subtitle | Planner thin page fetches couple names and injects into its `header` slot |
+| Per-wedding vs planner-level reports | Two distinct experiences: shared `ReportsView` for per-wedding, new `PlannerReportsView` for cross-wedding |
+
+### API Consolidation
+
+**Shared handlers:** `src/lib/reports/api-handlers.ts`
+
+Business logic for 5 operations extracted into shared functions:
+`attendeesReportHandler`, `guestsPerAdminReportHandler`, `seatingPlanReportHandler`, `ageAverageReportHandler`, `nlQueryReportHandler`.
+
+**Shared access guard:** reuses `src/lib/guests/planner-access.ts`
+
+**New planner per-wedding routes:** all 5 routes under `src/app/(public)/api/planner/weddings/[id]/reports/` were previously missing — planners could not run any per-wedding reports.
+
+**All 10 API route files** (5 admin + 5 planner) reduced to ~15-line auth-and-dispatch wrappers.
+
+### Planner-Level Reports (New — not a consolidation of admin screen)
+
+A new, planner-exclusive reports page at `/planner/reports` provides:
+- **4 predefined cross-wedding reports:** Weddings Overview, Guests by Wedding, Provider Payments, Revenue Summary (quotes + invoices)
+- **AI natural-language query** scoped by `planner_id`, spanning all managed weddings + financials
+- **New API routes:** `src/app/(public)/api/planner/reports/{weddings-summary,guests-summary,provider-payments,revenue,query}/route.ts`
+- **New export lib:** `src/lib/reports/planner-export.ts`
+- **Planner-scoped NL query:** `executeNaturalLanguagePlannerQuery` + `validatePlannerSQL` added to `src/lib/reports/nl-query.ts`
+
+**Sub-account access:** Sub-accounts receive `planner_id = company_planner_id` in their session token (set in `src/lib/auth/oauth.ts:156`), so they automatically see all company data in both the per-wedding routes (via `validatePlannerAccess`) and the planner-level reports.
+
+**Tables available for planner NL query:**
+
+| Category | Tables |
+|----------|--------|
+| Wedding data | `weddings`, `families`, `family_members`, `tables`, `wedding_admins`, `gifts` |
+| Tasks | `checklist_tasks` |
+| Vendors | `wedding_providers`, `provider_categories`, `payments` |
+| Tasting | `tasting_menus` |
+| Financials | `quotes`, `quote_line_items`, `invoices`, `invoice_line_items`, `invoice_payments` |
