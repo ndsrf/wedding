@@ -1,14 +1,20 @@
 /**
  * Natural Language Query Service
  *
- * Converts natural language questions into safe, parameterized SQL queries
- * restricted to the current wedding's data only.
+ * Converts natural language questions into safe, parameterized SQL queries.
+ *
+ * Two query modes:
+ *  - Per-wedding (wedding_id scope): queries restricted to one wedding's data.
+ *    $1 = wedding_id, $2 = admin_id (optional "my side" context).
+ *  - Planner-level (planner_id scope): queries across all weddings the planner
+ *    manages, plus the planner's own financials (quotes, invoices).
+ *    $1 = planner_id.
  *
  * Security measures:
  * - Only SELECT statements are allowed (validated by node-sql-parser + keyword blocklist)
- * - All queries MUST include wedding_id = $1 as a parameterized value
+ * - All queries MUST include $1 as a parameterized value
  * - Results are capped at MAX_ROWS rows
- * - Only approved tables can be queried
+ * - Only approved tables can be queried (separate sets per mode)
  * - The AI-generated SQL is re-validated before every execution
  */
 
@@ -152,7 +158,7 @@ score INTEGER (1–10), notes TEXT, created_at TIMESTAMP
 // SQL GENERATION (LLM)
 // ============================================================================
 
-async function generateSQLWithOpenAI(question: string): Promise<string | null> {
+async function generateSQLWithOpenAI(question: string, systemPrompt: string): Promise<string | null> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
 
@@ -162,7 +168,7 @@ async function generateSQLWithOpenAI(question: string): Promise<string | null> {
   const response = await openai.chat.completions.create({
     model,
     messages: [
-      { role: 'system', content: SCHEMA_DESCRIPTION },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: question },
     ],
     max_tokens: 600,
@@ -172,7 +178,7 @@ async function generateSQLWithOpenAI(question: string): Promise<string | null> {
   return response.choices[0]?.message?.content?.trim() ?? null;
 }
 
-async function generateSQLWithGemini(question: string): Promise<string | null> {
+async function generateSQLWithGemini(question: string, systemPrompt: string): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
@@ -182,21 +188,21 @@ async function generateSQLWithGemini(question: string): Promise<string | null> {
   const result = await ai.models.generateContent({
     model: modelName,
     contents: question,
-    config: { systemInstruction: SCHEMA_DESCRIPTION },
+    config: { systemInstruction: systemPrompt },
   });
   return result.text?.trim() || null;
 }
 
-async function generateSQL(question: string): Promise<string | null> {
+async function generateSQL(question: string, systemPrompt: string = SCHEMA_DESCRIPTION): Promise<string | null> {
   const provider =
     process.env.AI_PROVIDER || (process.env.OPENAI_API_KEY ? 'openai' : 'gemini');
 
   console.log('[NL-QUERY] Generating SQL', { provider, questionLength: question.length });
 
   if (provider === 'gemini') {
-    return generateSQLWithGemini(question);
+    return generateSQLWithGemini(question, systemPrompt);
   }
-  return generateSQLWithOpenAI(question);
+  return generateSQLWithOpenAI(question, systemPrompt);
 }
 
 // ============================================================================
@@ -390,6 +396,250 @@ export async function executeValidatedSQL(
     string,
     unknown
   >[];
+  const data = raw.map(serializeRow);
+  const columns = data.length > 0 ? Object.keys(data[0]) : [];
+
+  return { data, sql: cleanedSql, columns };
+}
+
+// ============================================================================
+// PLANNER-LEVEL NL QUERY
+// ============================================================================
+//
+// Scoped by planner_id ($1) instead of wedding_id.
+// Queries may span all weddings the planner manages.
+// ============================================================================
+
+/** Tables accessible in planner-scoped queries */
+const ALLOWED_TABLES_PLANNER = new Set([
+  // wedding-level tables (filtered via weddings.planner_id = $1)
+  'weddings',
+  'families',
+  'family_members',
+  'tables',
+  'wedding_admins',
+  'gifts',
+  'checklist_tasks',
+  'wedding_providers',
+  'provider_categories',
+  'payments',
+  'tasting_menus',
+  // planner's own financial tables (direct planner_id = $1)
+  'quotes',
+  'quote_line_items',
+  'invoices',
+  'invoice_line_items',
+  'invoice_payments',
+]);
+
+const SCHEMA_DESCRIPTION_PLANNER = `You are a PostgreSQL SQL query generator for a wedding planner management system.
+Your ONLY job is to produce safe SELECT queries based on the user's natural-language question.
+
+## Parameters (always provided — never hardcode these values)
+- $1 = planner_id  — scope EVERY query to this planner's data
+
+## Data Scope
+The planner manages multiple weddings. Their data falls into two categories:
+1. **Per-wedding data** — always reached via JOIN with weddings WHERE planner_id = $1
+2. **Planner financials** — tables that have planner_id directly (quotes, invoices)
+
+## Available Tables
+
+### weddings
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1 when used as starting table**),
+couple_names TEXT, wedding_date TIMESTAMP, location TEXT, status TEXT (ACTIVE/ARCHIVED/COMPLETED/DELETED),
+guest_count INTEGER, created_at TIMESTAMP
+
+### families
+id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, email TEXT, phone TEXT,
+whatsapp_number TEXT, preferred_language TEXT, channel_preference TEXT,
+created_at TIMESTAMP
+**NOTE: Scope via JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1**
+
+### family_members
+id TEXT PK, family_id TEXT FK→families, name TEXT, type TEXT (ADULT/CHILD/INFANT),
+attending BOOLEAN (true=yes, false=no, null=pending), age INTEGER,
+dietary_restrictions TEXT, accessibility_needs TEXT, table_id TEXT FK→tables
+**NOTE: Scope via JOIN families f ON fm.family_id = f.id JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1**
+
+### tables
+id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, number INTEGER, capacity INTEGER
+**NOTE: Scope via JOIN weddings w ON t.wedding_id = w.id WHERE w.planner_id = $1**
+
+### wedding_admins
+id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, email TEXT, preferred_language TEXT
+**NOTE: Scope via JOIN weddings w ON wa.wedding_id = w.id WHERE w.planner_id = $1**
+
+### gifts
+id TEXT PK, family_id TEXT FK→families, wedding_id TEXT FK→weddings,
+amount DECIMAL, status TEXT (PENDING/RECEIVED/CONFIRMED)
+**NOTE: Scope via JOIN weddings w ON g.wedding_id = w.id WHERE w.planner_id = $1**
+
+### checklist_tasks
+id TEXT PK, wedding_id TEXT FK→weddings, title TEXT, assigned_to TEXT,
+due_date TIMESTAMP, status TEXT (PENDING/IN_PROGRESS/COMPLETED), completed BOOLEAN
+**NOTE: Scope via JOIN weddings w ON ct.wedding_id = w.id WHERE w.planner_id = $1**
+
+### wedding_providers
+id TEXT PK, wedding_id TEXT FK→weddings, category_id TEXT FK→provider_categories,
+name TEXT, contact_name TEXT, total_price DECIMAL, notes TEXT
+**NOTE: Scope via JOIN weddings w ON wp.wedding_id = w.id WHERE w.planner_id = $1**
+
+### provider_categories
+id TEXT PK, planner_id TEXT (**direct filter: WHERE planner_id = $1**), name TEXT
+**NOTE: Has direct planner_id — can be filtered directly or joined via wedding_providers**
+
+### payments
+id TEXT PK, wedding_provider_id TEXT FK→wedding_providers, amount DECIMAL,
+date TIMESTAMP, method TEXT, notes TEXT
+**NOTE: Scope via JOIN wedding_providers wp ON p.wedding_provider_id = wp.id JOIN weddings w ON wp.wedding_id = w.id WHERE w.planner_id = $1**
+
+### tasting_menus
+id TEXT PK, wedding_id TEXT FK→weddings, title TEXT, description TEXT
+**NOTE: Scope via JOIN weddings w ON tm.wedding_id = w.id WHERE w.planner_id = $1**
+
+### quotes
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), couple_names TEXT,
+event_date TIMESTAMP, location TEXT, status TEXT (DRAFT/SENT/ACCEPTED/REJECTED/EXPIRED),
+currency TEXT, subtotal DECIMAL, discount DECIMAL, tax_rate DECIMAL, total DECIMAL,
+expires_at TIMESTAMP, created_at TIMESTAMP
+
+### quote_line_items
+id TEXT PK, quote_id TEXT FK→quotes, name TEXT, description TEXT,
+quantity DECIMAL, unit_price DECIMAL, total DECIMAL
+**NOTE: Scope via JOIN quotes q ON qli.quote_id = q.id WHERE q.planner_id = $1**
+
+### invoices
+id TEXT PK, planner_id TEXT (**ALWAYS filter with $1**), quote_id TEXT FK→quotes,
+invoice_number TEXT, currency TEXT, subtotal DECIMAL, discount DECIMAL,
+tax_rate DECIMAL, total DECIMAL, amount_paid DECIMAL,
+status TEXT (DRAFT/SENT/PAID/PARTIALLY_PAID/OVERDUE/CANCELLED),
+issued_at TIMESTAMP, due_date TIMESTAMP, created_at TIMESTAMP
+
+### invoice_line_items
+id TEXT PK, invoice_id TEXT FK→invoices, name TEXT, description TEXT,
+quantity DECIMAL, unit_price DECIMAL, total DECIMAL
+**NOTE: Scope via JOIN invoices i ON ili.invoice_id = i.id WHERE i.planner_id = $1**
+
+### invoice_payments
+id TEXT PK, invoice_id TEXT FK→invoices, amount DECIMAL,
+currency TEXT, payment_date TIMESTAMP, method TEXT, reference TEXT
+**NOTE: Scope via JOIN invoices i ON ip.invoice_id = i.id WHERE i.planner_id = $1**
+
+## Strict Rules
+1. ONLY write SELECT statements. NEVER write INSERT, UPDATE, DELETE, DROP, CREATE, ALTER or any other statement.
+2. ALWAYS scope to the planner's data using $1 (planner_id).
+3. For tables without direct planner_id, ALWAYS JOIN via weddings: JOIN weddings w ON <table>.wedding_id = w.id WHERE w.planner_id = $1.
+4. For quotes and invoices, filter directly: WHERE planner_id = $1.
+5. You may ONLY use $1. No other parameters.
+6. Add LIMIT ${MAX_ROWS} at the end of every query.
+7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
+8. Use clear English column aliases (e.g. couple_names, total_guests, invoice_total).
+9. Only reference tables listed above.`;
+
+/**
+ * Validate a planner-scoped SQL query.
+ * Requires $1 and planner_id (or weddings table) to be present.
+ */
+export function validatePlannerSQL(rawSql: string): ValidationResult {
+  const sql = cleanSQL(rawSql);
+
+  if (!/^SELECT\b/i.test(sql)) {
+    return { valid: false, error: 'Only SELECT queries are allowed' };
+  }
+
+  if (DANGEROUS_KEYWORDS.test(sql)) {
+    return { valid: false, error: 'Query contains disallowed SQL operations' };
+  }
+
+  if (!sql.includes('$1')) {
+    return { valid: false, error: 'Query must use $1 to scope to planner data' };
+  }
+
+  // Must reference planner_id or weddings table for scoping
+  const hasPlannerId = sql.toLowerCase().includes('planner_id');
+  const hasWeddingsJoin = /\bweddings\b/i.test(sql);
+  if (!hasPlannerId && !hasWeddingsJoin) {
+    return { valid: false, error: 'Query must filter by planner_id or join through weddings' };
+  }
+
+  const sqlForParsing = sql.replace(/\$\d+/g, "'__PARAM__'");
+  const parser = new Parser();
+
+  try {
+    const ast = parser.astify(sqlForParsing, { database: 'PostgresQL' });
+    const statements = Array.isArray(ast) ? ast : [ast];
+    for (const stmt of statements) {
+      if ((stmt as { type: string }).type !== 'select') {
+        return { valid: false, error: 'Only SELECT statements are allowed' };
+      }
+    }
+    const tableList = parser.tableList(sqlForParsing, { database: 'PostgresQL' });
+    for (const ref of tableList) {
+      const tableName = ref.split('::').pop()?.toLowerCase();
+      if (tableName && !ALLOWED_TABLES_PLANNER.has(tableName)) {
+        return { valid: false, error: `Table "${tableName}" is not allowed` };
+      }
+    }
+  } catch {
+    console.warn('[NL-QUERY-PLANNER] node-sql-parser failed; falling back to regex table check');
+    const tableMatches = sql.matchAll(/\b(?:FROM|JOIN)\s+([a-zA-Z_][a-zA-Z0-9_]*)/gi);
+    for (const match of tableMatches) {
+      const tableName = match[1].toLowerCase();
+      if (!ALLOWED_TABLES_PLANNER.has(tableName)) {
+        return { valid: false, error: `Table "${tableName}" is not allowed` };
+      }
+    }
+  }
+
+  return { valid: true, cleanedSql: sql };
+}
+
+/**
+ * Convert a natural-language question into a planner-scoped SQL query,
+ * validate it, then execute it.
+ *
+ * @param question    Natural-language question
+ * @param planner_id  Bound to $1 — scopes every query to this planner's data
+ */
+export async function executeNaturalLanguagePlannerQuery(
+  question: string,
+  planner_id: string,
+): Promise<NLQueryResult> {
+  const rawSql = await generateSQL(question, SCHEMA_DESCRIPTION_PLANNER);
+  if (!rawSql) {
+    throw new Error('AI service is unavailable or did not return a query');
+  }
+
+  const validation = validatePlannerSQL(rawSql);
+  if (!validation.valid || !validation.cleanedSql) {
+    throw new Error(validation.error ?? 'Generated query failed validation');
+  }
+
+  const sql = validation.cleanedSql;
+  console.log('[NL-QUERY-PLANNER] Executing validated query:', sql);
+
+  const raw = (await prisma.$queryRawUnsafe(sql, planner_id)) as Record<string, unknown>[];
+  const data = raw.map(serializeRow);
+  const columns = data.length > 0 ? Object.keys(data[0]) : [];
+
+  return { data, sql, columns };
+}
+
+/**
+ * Execute a previously-generated planner-scoped SQL string directly (for exports).
+ */
+export async function executeValidatedPlannerSQL(
+  sql: string,
+  planner_id: string,
+): Promise<NLQueryResult> {
+  const validation = validatePlannerSQL(sql);
+  if (!validation.valid || !validation.cleanedSql) {
+    throw new Error(validation.error ?? 'SQL failed validation');
+  }
+
+  const cleanedSql = validation.cleanedSql;
+  const raw = (await prisma.$queryRawUnsafe(cleanedSql, planner_id)) as Record<string, unknown>[];
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 

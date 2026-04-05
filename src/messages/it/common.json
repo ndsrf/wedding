@@ -446,6 +446,45 @@
       "subtitle": "Gestisci le attività e monitora i progressi",
       "description": "Gestisci le attività e monitora i progressi per questo matrimonio"
     },
+    "reports": {
+      "title": "Report Organizzatore",
+      "subtitle": "Analisi ed esportazioni per tutti i tuoi matrimoni e finanze",
+      "dashboardSubtitle": "Analisi multi-matrimonio e finanze",
+      "scopeNote": "Questi report coprono tutti i matrimoni che gestisci.",
+      "perWeddingNote": "Per report per singolo matrimonio, apri un matrimonio e vai su Report.",
+      "goToWeddings": "Vedi matrimoni",
+      "noData": "Nessun dato disponibile.",
+      "infoTitle": "Informazioni sui Report",
+      "info1": "Tutti i report vengono generati in tempo reale",
+      "info2": "Esporta in Excel o CSV per ulteriori analisi",
+      "info3": "Le query AI coprono tutti i tuoi matrimoni e dati finanziari",
+      "weddingsSummary": {
+        "title": "Panoramica Matrimoni",
+        "description": "Tutti i matrimoni gestiti con conteggi ospiti, completamento RSVP, date e stato"
+      },
+      "guestsSummary": {
+        "title": "Ospiti per Matrimonio",
+        "description": "Conteggi totali e confermati degli ospiti per matrimonio, con tassi di risposta"
+      },
+      "providerPayments": {
+        "title": "Pagamenti Fornitori",
+        "description": "Pagamenti ai fornitori per tutti i tuoi matrimoni — prezzo totale, importo pagato e saldo"
+      },
+      "revenue": {
+        "title": "Riepilogo Ricavi",
+        "description": "Panoramica di preventivi e fatture — totali, pagamenti ricevuti e saldi in sospeso"
+      },
+      "nlQuery": {
+        "title": "Interroga i Dati della tua Attività",
+        "subtitle": "Esplora tutti i tuoi matrimoni, finanze e ospiti in linguaggio naturale",
+        "placeholder": "es. Qual è il mio fatturato totale quest'anno?",
+        "securityNote": "Sono consentite solo query in sola lettura. I risultati sono automaticamente limitati al tuo account.",
+        "example1": "Quanti ospiti totali ho in tutti i matrimoni?",
+        "example2": "Qual è il mio importo totale fatturato?",
+        "example3": "Elenca tutti i pagamenti fornitore in sospeso",
+        "example4": "Mostra i matrimoni con il tasso RSVP più basso"
+      }
+    },
     "stats": {
       "totalWeddings": "Totale Matrimoni",
       "totalGuests": "Totale Ospiti",
