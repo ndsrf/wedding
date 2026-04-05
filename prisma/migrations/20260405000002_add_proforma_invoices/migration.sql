@@ -12,7 +12,11 @@ ALTER TABLE "invoices" ADD COLUMN "chain_hash" TEXT;
 -- Add unique constraint on proforma_id (each proforma can only generate one invoice)
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_proforma_id_key" UNIQUE ("proforma_id");
 
--- Add unique constraint on (planner_id, serie, numero) to ensure no duplicate numbering
+-- Drop the existing global unique constraint on invoice_number and replace with per-planner constraint
+ALTER TABLE "invoices" DROP CONSTRAINT IF EXISTS "invoices_invoice_number_key";
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_planner_id_invoice_number_key" UNIQUE ("planner_id", "invoice_number");
+
+-- Add unique constraint on (planner_id, serie, numero) to ensure no duplicate numbering within a planner's series
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_planner_id_serie_numero_key" UNIQUE ("planner_id", "serie", "numero");
 
 -- Add foreign key to contracts

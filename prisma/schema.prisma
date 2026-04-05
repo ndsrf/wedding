@@ -1022,8 +1022,8 @@ model Invoice {
   contract_id     String?
   proforma_id     String?         @unique
   type            InvoiceType     @default(INVOICE)
-  invoice_number  String          @unique
-  serie           String?         // Series prefix, e.g. "FAC-2026" or "PRO-2026"
+  invoice_number  String          // Unique per planner — see @@unique below
+  serie           String?         // Series prefix, e.g. "FAC-26" or "PRO-26"
   numero          Int?            // Sequential number within the series (for gap-free audit trail)
   chain_hash      String?         // SHA-256 hash of previous invoice in series (Verifactu prep)
   description     String?         @db.Text
@@ -1049,6 +1049,7 @@ model Invoice {
   line_items      InvoiceLineItem[]
   payments        InvoicePayment[]
 
+  @@unique([planner_id, invoice_number])
   @@unique([planner_id, serie, numero])
   @@index([planner_id])
   @@index([customer_id])
