@@ -894,6 +894,7 @@
       "invoices": {
         "title": "Factures",
         "newInvoice": "Nouvelle facture",
+        "newProforma": "Nouveau proforma",
         "createInvoice": "Créer une facture",
         "back": "← Retour",
         "newInvoiceFor": "Nouvelle facture – {name}",
@@ -902,11 +903,12 @@
         "noMatch": "Aucune facture ne correspond aux filtres",
         "noMatchHint": "Essayez d’ajuster la recherche ou les filtres d’état.",
         "empty": "Aucune facture pour l’instant",
-        "emptyHint": "Créez une facture pour suivre vos paiements.",
-        "readyToInvoice": "Prêts à facturer ({count})",
+        "emptyHint": "Créez un proforma pour démarrer le calendrier de paiements.",
+        "readyToInvoice": "Contrats signés sans proforma ({count})",
         "contractSigned": "Contrat signé",
         "quoteBadge": "Devis",
         "contractBadge": "Contrat",
+        "proformaBadge": "Proforma",
         "due": "Échéance le {date}",
         "paid": "{amount} payé",
         "remaining": "{amount} restant",
@@ -915,6 +917,13 @@
         "downloadPdf": "Télécharger PDF",
         "generatePdf": "Générer PDF",
         "delete": "Supprimer",
+        "convertToInvoice": "Générer la facture",
+        "linkedInvoice": "Facture: {number}",
+        "linkedProforma": "Proforma: {number}",
+        "noContract": "Sans contrat",
+        "addProforma": "+ Ajouter proforma",
+        "contractGroup": "Contrat: {title}",
+        "noContractGroup": "Factures sans contrat",
         "status": {
           "DRAFT": "Brouillon",
           "ISSUED": "Émise",
@@ -922,6 +931,10 @@
           "PAID": "Payée",
           "OVERDUE": "En retard",
           "CANCELLED": "Annulée"
+        },
+        "type": {
+          "PROFORMA": "Proforma",
+          "INVOICE": "Facture"
         }
       },
       "page": {
@@ -996,7 +1009,13 @@
         "total": "Total",
         "cancel": "Annuler",
         "saving": "Enregistrement…",
-        "saveInvoice": "Enregistrer la facture"
+        "saveInvoice": "Enregistrer la facture",
+        "type": "Type de document",
+        "typeProforma": "Facture proforma",
+        "typeInvoice": "Facture",
+        "contract": "Contrat lié",
+        "noContract": "Sans contrat",
+        "selectContract": "Sélectionner un contrat…"
       },
       "quotePdf": {
         "docTitle": "Devis de Services",
@@ -1021,7 +1040,9 @@
       },
       "invoicePdf": {
         "docTitle": "Facture",
+        "proformaDocTitle": "Facture Proforma",
         "invoiceNumber": "Numéro de Facture",
+        "proformaNumber": "Numéro de Proforma",
         "issueDate": "Date d'Émission",
         "dueDate": "Date d'Échéance",
         "billTo": "Facturer À",
@@ -1085,7 +1106,14 @@
         "saving": "Enregistrement…",
         "save": "Enregistrer",
         "removePaymentConfirm": "Supprimer cet enregistrement de paiement ?",
-        "paymentHistory": "Historique des paiements"
+        "paymentHistory": "Historique des paiements",
+        "proformaHash": "Proforma n°",
+        "convertToInvoice": "Générer la facture définitive",
+        "converting": "Génération…",
+        "convertToInvoiceHint": "Ce proforma est entièrement payé. Vous pouvez générer la facture définitive.",
+        "linkedInvoice": "Facture générée : {number}",
+        "linkedProforma": "Généré depuis proforma : {number}",
+        "readOnly": "Cette facture ne peut plus être modifiée une fois émise."
       },
       "contractPage": {
         "createWeddingTitle": "Créer un mariage depuis le contrat",

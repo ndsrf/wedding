@@ -894,6 +894,7 @@
       "invoices": {
         "title": "Fatture",
         "newInvoice": "Nuova fattura",
+        "newProforma": "Nuovo proforma",
         "createInvoice": "Crea fattura",
         "back": "← Indietro",
         "newInvoiceFor": "Nuova fattura – {name}",
@@ -902,11 +903,12 @@
         "noMatch": "Nessuna fattura corrisponde ai filtri",
         "noMatchHint": "Prova a modificare la ricerca o i filtri di stato.",
         "empty": "Nessuna fattura ancora",
-        "emptyHint": "Crea una fattura per monitorare i tuoi pagamenti.",
-        "readyToInvoice": "Pronti per la fatturazione ({count})",
+        "emptyHint": "Crea una fattura proforma per iniziare il piano di pagamenti.",
+        "readyToInvoice": "Contratti firmati senza proforma ({count})",
         "contractSigned": "Contratto firmato",
         "quoteBadge": "Preventivo",
         "contractBadge": "Contratto",
+        "proformaBadge": "Proforma",
         "due": "Scadenza {date}",
         "paid": "{amount} pagato",
         "remaining": "{amount} rimanente",
@@ -915,6 +917,13 @@
         "downloadPdf": "Scarica PDF",
         "generatePdf": "Genera PDF",
         "delete": "Elimina",
+        "convertToInvoice": "Genera fattura",
+        "linkedInvoice": "Fattura: {number}",
+        "linkedProforma": "Proforma: {number}",
+        "noContract": "Senza contratto",
+        "addProforma": "+ Aggiungi proforma",
+        "contractGroup": "Contratto: {title}",
+        "noContractGroup": "Fatture senza contratto",
         "status": {
           "DRAFT": "Bozza",
           "ISSUED": "Emessa",
@@ -922,6 +931,10 @@
           "PAID": "Pagata",
           "OVERDUE": "Scaduta",
           "CANCELLED": "Annullata"
+        },
+        "type": {
+          "PROFORMA": "Proforma",
+          "INVOICE": "Fattura"
         }
       },
       "page": {
@@ -996,7 +1009,13 @@
         "total": "Totale",
         "cancel": "Annulla",
         "saving": "Salvataggio…",
-        "saveInvoice": "Salva fattura"
+        "saveInvoice": "Salva fattura",
+        "type": "Tipo documento",
+        "typeProforma": "Fattura proforma",
+        "typeInvoice": "Fattura",
+        "contract": "Contratto collegato",
+        "noContract": "Senza contratto",
+        "selectContract": "Seleziona contratto…"
       },
       "quotePdf": {
         "docTitle": "Preventivo di Servizi",
@@ -1021,7 +1040,9 @@
       },
       "invoicePdf": {
         "docTitle": "Fattura",
+        "proformaDocTitle": "Fattura Proforma",
         "invoiceNumber": "Numero Fattura",
+        "proformaNumber": "Numero Proforma",
         "issueDate": "Data di Emissione",
         "dueDate": "Data di Scadenza",
         "billTo": "Intestata A",
@@ -1085,7 +1106,14 @@
         "saving": "Salvataggio…",
         "save": "Salva",
         "removePaymentConfirm": "Rimuovere questo registro di pagamento?",
-        "paymentHistory": "Cronologia pagamenti"
+        "paymentHistory": "Cronologia pagamenti",
+        "proformaHash": "Proforma #",
+        "convertToInvoice": "Genera fattura definitiva",
+        "converting": "Generazione…",
+        "convertToInvoiceHint": "Questo proforma è completamente pagato. Puoi generare la fattura definitiva.",
+        "linkedInvoice": "Fattura generata: {number}",
+        "linkedProforma": "Generato da proforma: {number}",
+        "readOnly": "Questa fattura non può essere modificata una volta emessa."
       },
       "contractPage": {
         "createWeddingTitle": "Crea matrimonio dal contratto",

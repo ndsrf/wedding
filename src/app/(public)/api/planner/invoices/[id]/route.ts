@@ -44,6 +44,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
         quote: { select: { id: true, couple_names: true } },
+        contract: { select: { id: true, title: true, status: true } },
+        derived_invoice: { select: { id: true, invoice_number: true, status: true } },
+        proforma: { select: { id: true, invoice_number: true } },
       },
     });
     if (!invoice) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -60,8 +63,42 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
 
-    const existing = await prisma.invoice.findFirst({ where: { id, planner_id: user.planner_id } });
+    const existing = await prisma.invoice.findFirst({
+      where: { id, planner_id: user.planner_id },
+      include: { _count: { select: { payments: true } } },
+    });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    const isReadOnly = existing.type === 'INVOICE' || (existing.type === 'PROFORMA' && existing._count.payments > 0);
+
+    // Read-only documents: only status changes are permitted
+    if (isReadOnly) {
+      const body = await request.json();
+      const allowed = updateSchema.pick({ status: true }).safeParse(body);
+      if (!allowed.success || Object.keys(body).some((k) => k !== 'status')) {
+        return NextResponse.json(
+          { error: 'This document is read-only and cannot be edited. Only status changes are allowed.' },
+          { status: 403 },
+        );
+      }
+      if (allowed.data.status) {
+        const updated = await prisma.invoice.update({
+          where: { id },
+          data: { status: allowed.data.status },
+          include: {
+            customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+            line_items: true,
+            payments: { orderBy: { payment_date: 'desc' } },
+            quote: { select: { id: true, couple_names: true } },
+            contract: { select: { id: true, title: true, status: true } },
+            derived_invoice: { select: { id: true, invoice_number: true, status: true } },
+            proforma: { select: { id: true, invoice_number: true } },
+          },
+        });
+        return NextResponse.json({ data: updated });
+      }
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
+    }
 
     const body = await request.json();
     const data = updateSchema.parse(body);
@@ -125,6 +162,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           line_items: true,
           payments: { orderBy: { payment_date: 'desc' } },
           quote: { select: { id: true, couple_names: true } },
+          contract: { select: { id: true, title: true, status: true } },
+          derived_invoice: { select: { id: true, invoice_number: true, status: true } },
+          proforma: { select: { id: true, invoice_number: true } },
         },
       });
     });
@@ -144,8 +184,19 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
 
-    const existing = await prisma.invoice.findFirst({ where: { id, planner_id: user.planner_id } });
+    const existing = await prisma.invoice.findFirst({
+      where: { id, planner_id: user.planner_id },
+      include: { _count: { select: { payments: true } } },
+    });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    // Only editable proformas (no payments yet) can be deleted
+    if (existing.type === 'INVOICE' || (existing.type === 'PROFORMA' && existing._count.payments > 0)) {
+      return NextResponse.json(
+        { error: 'This document cannot be deleted. Only proforma invoices without recorded payments can be removed.' },
+        { status: 403 },
+      );
+    }
 
     // Delete the PDF blob if it exists
     if (existing.pdf_url) {

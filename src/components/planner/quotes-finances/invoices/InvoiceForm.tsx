@@ -20,9 +20,18 @@ interface CustomerSuggestion {
   address: string | null;
 }
 
+interface ContractOption {
+  id: string;
+  title: string;
+  status: string;
+  customer: { name: string } | null;
+}
+
 interface InvoiceFormData {
+  type: 'PROFORMA' | 'INVOICE';
   customer_id: string | null;
   quote_id: string;
+  contract_id: string;
   client_name: string;
   client_email: string;
   client_id_number: string;
@@ -38,6 +47,7 @@ interface InvoiceFormData {
 
 interface InvoiceFormProps {
   initialData?: Partial<InvoiceFormData & { discount?: number | '' }>;
+  initialContracts?: ContractOption[];
   onSave: (data: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
 }
@@ -48,13 +58,15 @@ function emptyItem(): LineItem {
   return { name: '', description: '', quantity: 1, unit_price: 0, total: 0 };
 }
 
-export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps) {
+export function InvoiceForm({ initialData, initialContracts, onSave, onCancel }: InvoiceFormProps) {
   const t = useTranslations('planner.quotesFinances');
   const locale = useLocale();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<InvoiceFormData>({
+    type: initialData?.type ?? 'PROFORMA',
     customer_id: initialData?.customer_id ?? null,
     quote_id: initialData?.quote_id ?? '',
+    contract_id: initialData?.contract_id ?? '',
     client_name: initialData?.client_name ?? '',
     client_email: initialData?.client_email ?? '',
     client_id_number: initialData?.client_id_number ?? '',
@@ -67,6 +79,17 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
     issued_at: initialData?.issued_at ?? new Date().toISOString(),
     line_items: initialData?.line_items?.length ? initialData.line_items : [emptyItem()],
   });
+
+  const [contracts, setContracts] = useState<ContractOption[]>(initialContracts ?? []);
+
+  // Load signed contracts for the selector only if not provided by the parent
+  useEffect(() => {
+    if (initialContracts) return;
+    fetch('/api/planner/contracts?status=SIGNED')
+      .then((r) => r.json())
+      .then((json) => setContracts(json.data ?? []))
+      .catch(() => {/* ignore */});
+  }, [initialContracts]);
 
   // Customer autocomplete
   const [suggestions, setSuggestions] = useState<CustomerSuggestion[]>([]);
@@ -152,8 +175,10 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
     try {
       await onSave({
         ...form,
+        type: form.type,
         customer_id: form.customer_id || null,
         quote_id: form.quote_id || null,
+        contract_id: form.contract_id || null,
         client_email: form.client_email || null,
         client_id_number: form.client_id_number || null,
         client_address: form.client_address || null,
@@ -173,6 +198,57 @@ export function InvoiceForm({ initialData, onSave, onCancel }: InvoiceFormProps)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Document type */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">{t('invoiceForm.type')}</h3>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setForm((p) => ({ ...p, type: 'PROFORMA' }))}
+            className={`flex-1 py-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+              form.type === 'PROFORMA'
+                ? 'border-rose-500 bg-rose-50 text-rose-700'
+                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+            }`}
+          >
+            {t('invoiceForm.typeProforma')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setForm((p) => ({ ...p, type: 'INVOICE' }))}
+            className={`flex-1 py-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+              form.type === 'INVOICE'
+                ? 'border-rose-500 bg-rose-50 text-rose-700'
+                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+            }`}
+          >
+            {t('invoiceForm.typeInvoice')}
+          </button>
+        </div>
+        {form.type === 'INVOICE' && (
+          <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            {t('invoiceDetail.readOnly')}
+          </p>
+        )}
+
+        {/* Contract link */}
+        <div className="mt-4">
+          <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.contract')}</label>
+          <select
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+            value={form.contract_id}
+            onChange={(e) => setForm((p) => ({ ...p, contract_id: e.target.value }))}
+          >
+            <option value="">{t('invoiceForm.noContract')}</option>
+            {contracts.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title}{c.customer ? ` – ${c.customer.name}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Client */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">{t('invoiceForm.clientDetails')}</h3>

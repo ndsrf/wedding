@@ -43,9 +43,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const locale = await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
+    const isProforma = (invoice as { type?: string }).type === 'PROFORMA';
     const labels = {
-      docTitle: t('planner.quotesFinances.invoicePdf.docTitle'),
-      invoiceNumber: t('planner.quotesFinances.invoicePdf.invoiceNumber'),
+      docTitle: isProforma
+        ? t('planner.quotesFinances.invoicePdf.proformaDocTitle')
+        : t('planner.quotesFinances.invoicePdf.docTitle'),
+      invoiceNumber: isProforma
+        ? t('planner.quotesFinances.invoicePdf.proformaNumber')
+        : t('planner.quotesFinances.invoicePdf.invoiceNumber'),
       issueDate: t('planner.quotesFinances.invoicePdf.issueDate'),
       dueDate: t('planner.quotesFinances.invoicePdf.dueDate'),
       billTo: t('planner.quotesFinances.invoicePdf.billTo'),

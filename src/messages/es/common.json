@@ -898,6 +898,7 @@
       "invoices": {
         "title": "Facturas",
         "newInvoice": "Nueva Factura",
+        "newProforma": "Nueva Proforma",
         "createInvoice": "Crear Factura",
         "back": "← Volver",
         "newInvoiceFor": "Nueva Factura – {name}",
@@ -906,11 +907,12 @@
         "noMatch": "Ninguna factura coincide con los filtros",
         "noMatchHint": "Prueba ajustando la búsqueda o los filtros de estado.",
         "empty": "Sin facturas todavía",
-        "emptyHint": "Crea una factura para hacer seguimiento de tus pagos.",
-        "readyToInvoice": "Listos para facturar ({count})",
+        "emptyHint": "Crea una factura proforma para comenzar el calendario de pagos.",
+        "readyToInvoice": "Contratos firmados sin proformas ({count})",
         "contractSigned": "Contrato firmado",
         "quoteBadge": "Presupuesto",
         "contractBadge": "Contrato",
+        "proformaBadge": "Proforma",
         "due": "Vence el {date}",
         "paid": "{amount} pagado",
         "remaining": "{amount} pendiente",
@@ -919,6 +921,13 @@
         "downloadPdf": "Descargar PDF",
         "generatePdf": "Generar PDF",
         "delete": "Eliminar",
+        "convertToInvoice": "Generar Factura",
+        "linkedInvoice": "Factura: {number}",
+        "linkedProforma": "Proforma: {number}",
+        "noContract": "Sin contrato",
+        "addProforma": "+ Añadir Proforma",
+        "contractGroup": "Contrato: {title}",
+        "noContractGroup": "Facturas sin contrato",
         "status": {
           "DRAFT": "Borrador",
           "ISSUED": "Emitida",
@@ -926,6 +935,10 @@
           "PAID": "Pagada",
           "OVERDUE": "Vencida",
           "CANCELLED": "Cancelada"
+        },
+        "type": {
+          "PROFORMA": "Proforma",
+          "INVOICE": "Factura"
         }
       },
       "page": {
@@ -1000,7 +1013,13 @@
         "total": "Total",
         "cancel": "Cancelar",
         "saving": "Guardando…",
-        "saveInvoice": "Guardar factura"
+        "saveInvoice": "Guardar factura",
+        "type": "Tipo de documento",
+        "typeProforma": "Factura Proforma",
+        "typeInvoice": "Factura",
+        "contract": "Contrato vinculado",
+        "noContract": "Sin contrato",
+        "selectContract": "Seleccionar contrato…"
       },
       "quotePdf": {
         "docTitle": "Presupuesto de Servicios",
@@ -1025,7 +1044,9 @@
       },
       "invoicePdf": {
         "docTitle": "Factura",
+        "proformaDocTitle": "Factura Proforma",
         "invoiceNumber": "Número de Factura",
+        "proformaNumber": "Número de Proforma",
         "issueDate": "Fecha de Emisión",
         "dueDate": "Fecha de Vencimiento",
         "billTo": "Facturar A",
@@ -1063,6 +1084,7 @@
         "back": "← Atrás",
         "client": "Cliente",
         "invoiceHash": "Factura #",
+        "proformaHash": "Proforma #",
         "due": "Vence el {date}",
         "colService": "Servicio",
         "colQty": "Cant.",
@@ -1089,7 +1111,13 @@
         "saving": "Guardando…",
         "save": "Guardar",
         "removePaymentConfirm": "¿Eliminar este registro de pago?",
-        "paymentHistory": "Historial de pagos"
+        "paymentHistory": "Historial de pagos",
+        "convertToInvoice": "Generar Factura Real",
+        "converting": "Generando…",
+        "convertToInvoiceHint": "La proforma está completamente pagada. Puedes generar la factura definitiva.",
+        "linkedInvoice": "Factura generada: {number}",
+        "linkedProforma": "Generada desde proforma: {number}",
+        "readOnly": "Esta factura no se puede modificar una vez emitida."
       },
       "contractPage": {
         "createWeddingTitle": "Crear boda desde el contrato",

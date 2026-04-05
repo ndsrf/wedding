@@ -37,6 +37,7 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [converting, setConverting] = useState(false);
   const [paymentForm, setPaymentForm] = useState<PaymentFormData>({
     amount: Number(invoice.total) - Number(invoice.amount_paid),
     currency: invoice.currency,
@@ -46,6 +47,10 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
     notes: '',
   });
 
+  const isProforma = invoice.type === 'PROFORMA';
+  const isRegularInvoice = invoice.type === 'INVOICE';
+  // Proforma is read-only once any payment has been recorded
+  const isProformaEditable = isProforma && invoice.payments.length === 0;
   const total = Number(invoice.total);
   const paid = Number(invoice.amount_paid);
   const balanceDue = total - paid;
@@ -95,6 +100,20 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
     onRefresh();
   }
 
+  async function handleConvertToInvoice() {
+    if (!confirm(t('invoiceDetail.convertToInvoice') + '?')) return;
+    setConverting(true);
+    try {
+      const res = await fetch(`/api/planner/invoices/${invoice.id}/convert-to-invoice`, { method: 'POST' });
+      if (res.ok) {
+        onRefresh();
+        onBack();
+      }
+    } finally {
+      setConverting(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
@@ -102,10 +121,35 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
           {t('invoiceDetail.back')}
         </button>
         <h3 className="text-base font-semibold text-gray-900">{invoice.invoice_number}</h3>
+        {/* Type badge */}
+        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+          isProforma ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+        }`}>
+          {t(`invoices.type.${invoice.type}` as Parameters<typeof t>[0])}
+        </span>
         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
           {t(`invoices.status.${invoice.status}` as Parameters<typeof t>[0])}
         </span>
       </div>
+
+      {/* Read-only notice for regular invoices or proformas with payments */}
+      {(isRegularInvoice || (isProforma && !isProformaEditable)) && (
+        <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+          {t('invoiceDetail.readOnly')}
+        </div>
+      )}
+
+      {/* Links between proforma and invoice */}
+      {isProforma && invoice.derived_invoice && (
+        <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-800 font-medium">
+          {t('invoiceDetail.linkedInvoice', { number: invoice.derived_invoice.invoice_number })}
+        </div>
+      )}
+      {isRegularInvoice && invoice.proforma && (
+        <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800 font-medium">
+          {t('invoiceDetail.linkedProforma', { number: invoice.proforma.invoice_number })}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Invoice details */}
@@ -120,12 +164,17 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                 {invoice.customer?.address && <p className="text-xs text-gray-500">{invoice.customer.address}</p>}
               </div>
               <div className="text-right">
-                <p className="text-xs text-gray-500 mb-0.5">{t('invoiceDetail.invoiceHash')}</p>
+                <p className="text-xs text-gray-500 mb-0.5">
+                  {isProforma ? t('invoiceDetail.proformaHash') : t('invoiceDetail.invoiceHash')}
+                </p>
                 <p className="text-sm font-mono font-semibold text-gray-900">{invoice.invoice_number}</p>
                 {invoice.due_date && (
                   <p className="text-xs text-gray-500 mt-1">
                     {t('invoiceDetail.due', { date: format.dateTime(new Date(invoice.due_date), { day: 'numeric', month: 'short', year: 'numeric' }) })}
                   </p>
+                )}
+                {invoice.contract && (
+                  <p className="text-xs text-purple-600 mt-1 font-medium">{invoice.contract.title}</p>
                 )}
               </div>
             </div>
@@ -196,7 +245,8 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
               <span>{t('invoiceDetail.dueAmount', { amount: fmt(balanceDue) })}</span>
             </div>
 
-            {invoice.status === 'DRAFT' && (
+            {/* Mark as issued: only for editable proformas in DRAFT */}
+            {isProformaEditable && invoice.status === 'DRAFT' && (
               <button
                 onClick={handleMarkIssued}
                 disabled={updatingStatus}
@@ -206,13 +256,30 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
               </button>
             )}
 
-            {invoice.status !== 'PAID' && invoice.status !== 'CANCELLED' && (
+            {/* Record payment: for proformas not fully paid */}
+            {isProforma && invoice.status !== 'PAID' && invoice.status !== 'CANCELLED' && (
               <button
                 onClick={() => setShowPaymentForm(true)}
                 className="w-full mt-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 rounded-xl transition-all"
               >
                 {t('invoiceDetail.recordPayment')}
               </button>
+            )}
+
+            {/* Convert to invoice: proforma that is PAID and has no derived invoice yet */}
+            {isProforma && invoice.status === 'PAID' && !invoice.derived_invoice && (
+              <div className="mt-3 space-y-2">
+                <p className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                  {t('invoiceDetail.convertToInvoiceHint')}
+                </p>
+                <button
+                  onClick={handleConvertToInvoice}
+                  disabled={converting}
+                  className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl transition-all disabled:opacity-50"
+                >
+                  {converting ? t('invoiceDetail.converting') : t('invoiceDetail.convertToInvoice')}
+                </button>
+              </div>
             )}
 
             {invoice.status === 'PAID' && (
@@ -303,14 +370,16 @@ export function InvoiceDetail({ invoice, onBack, onRefresh }: InvoiceDetailProps
                         {p.reference && ` · ${p.reference}`}
                       </p>
                     </div>
-                    <button
-                      onClick={() => handleDeletePayment(p.id)}
-                      className="text-gray-300 hover:text-red-500 transition-colors p-1"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    {isProformaEditable && (
+                      <button
+                        onClick={() => handleDeletePayment(p.id)}
+                        className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

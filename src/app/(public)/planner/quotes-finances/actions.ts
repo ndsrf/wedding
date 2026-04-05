@@ -28,7 +28,16 @@ export async function getFilteredSummary(
         select: { status: true, currency: true },
       }),
       prisma.invoice.findMany({
-        where: { planner_id: user.planner_id, ...dateFilter },
+        where: {
+          planner_id: user.planner_id,
+          ...dateFilter,
+          // Exclude proformas that have already been converted to a definitive invoice
+          // to prevent double-counting the same transaction.
+          OR: [
+            { type: 'INVOICE' },
+            { type: 'PROFORMA', derived_invoice: null },
+          ],
+        },
         select: { total: true, amount_paid: true, currency: true },
       }),
     ]);

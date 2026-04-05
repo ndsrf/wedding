@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import crypto from 'crypto';
 
 const lineItemSchema = z.object({
   name: z.string().min(1),
@@ -12,8 +13,10 @@ const lineItemSchema = z.object({
 });
 
 const createInvoiceSchema = z.object({
+  type: z.enum(['PROFORMA', 'INVOICE', 'RECTIFICATIVA']).default('PROFORMA'),
   customer_id: z.string().optional().nullable(),
   quote_id: z.string().uuid().optional().nullable(),
+  contract_id: z.string().uuid().optional().nullable(),
   // Client contact fields — stored on the Customer record, not on the Invoice
   client_name: z.string().min(1),
   client_email: z.string().email().optional().nullable(),
@@ -31,13 +34,74 @@ const createInvoiceSchema = z.object({
   line_items: z.array(lineItemSchema).min(1),
 });
 
-async function generateInvoiceNumber(plannerEmail: string): Promise<string> {
-  const year = new Date().getFullYear();
-  const prefix = plannerEmail.slice(0, 2).toUpperCase();
-  const count = await prisma.invoice.count({
-    where: { planner: { email: plannerEmail } },
+/**
+ * Builds the series prefix for a given invoice type and year.
+ * Proforma: PRO-YYYY
+ * Invoice (Ordinaria): FAC-YYYY
+ * Rectificativa: REC-YYYY
+ */
+function buildSerie(type: 'PROFORMA' | 'INVOICE' | 'RECTIFICATIVA', year: number): string {
+  const yearShort = String(year).slice(2); // "26" for 2026
+  switch (type) {
+    case 'PROFORMA': return `PRO-${yearShort}`;
+    case 'INVOICE': return `FAC-${yearShort}`;
+    case 'RECTIFICATIVA': return `REC-${yearShort}`;
+  }
+}
+
+/**
+ * Returns (serie, numero, invoice_number, previous_chain_hash) using MAX(numero)+1 in a
+ * transaction-safe way. Combines the number allocation and chain-hash lookup into one query
+ * to avoid a redundant DB round-trip.
+ * For INVOICE/RECTIFICATIVA types, also enforces date ordering.
+ */
+async function allocateInvoiceNumber(
+  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
+  plannerId: string,
+  type: 'PROFORMA' | 'INVOICE' | 'RECTIFICATIVA',
+  issuedAt?: Date,
+): Promise<{ serie: string; numero: number; invoice_number: string; previous_chain_hash: string | null }> {
+  const year = (issuedAt ?? new Date()).getFullYear();
+  const serie = buildSerie(type, year);
+
+  const last = await tx.invoice.findFirst({
+    where: { planner_id: plannerId, serie },
+    orderBy: { numero: 'desc' },
+    select: { numero: true, issued_at: true, chain_hash: true },
   });
-  return `${prefix}-${year}-${String(count + 1).padStart(4, '0')}`;
+
+  const numero = (last?.numero ?? 0) + 1;
+
+  // Date ordering validation for legal invoices only (not proformas)
+  if (type === 'INVOICE' || type === 'RECTIFICATIVA') {
+    if (last?.issued_at && issuedAt && issuedAt < last.issued_at) {
+      throw new Error(`DATE_ORDER_VIOLATION: Cannot create a ${type} with a date (${issuedAt.toISOString()}) before the last issued invoice in series ${serie} (${last.issued_at.toISOString()})`);
+    }
+  }
+
+  const invoice_number = `${serie}-${String(numero).padStart(4, '0')}`;
+  return { serie, numero, invoice_number, previous_chain_hash: last?.chain_hash ?? null };
+}
+
+/**
+ * Computes a SHA-256 chain hash over the key invoice fields.
+ * Intended as a building block for Verifactu compliance.
+ */
+function computeChainHash(data: {
+  invoice_number: string;
+  issued_at: Date | null;
+  total: number;
+  planner_id: string;
+  previous_hash: string | null;
+}): string {
+  const payload = [
+    data.invoice_number,
+    data.issued_at?.toISOString() ?? '',
+    data.total.toFixed(2),
+    data.planner_id,
+    data.previous_hash ?? '',
+  ].join('|');
+  return crypto.createHash('sha256').update(payload).digest('hex');
 }
 
 export async function GET(request: NextRequest) {
@@ -47,17 +111,32 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
+    const typeParam = searchParams.get('type');
+
+    const VALID_STATUSES = ['DRAFT', 'ISSUED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'] as const;
+    const VALID_TYPES = ['PROFORMA', 'INVOICE', 'RECTIFICATIVA'] as const;
+    type ValidStatus = typeof VALID_STATUSES[number];
+    type ValidType = typeof VALID_TYPES[number];
+
+    const validStatus = status && (VALID_STATUSES as readonly string[]).includes(status)
+      ? (status as ValidStatus) : undefined;
+    const validType = typeParam && (VALID_TYPES as readonly string[]).includes(typeParam)
+      ? (typeParam as ValidType) : undefined;
 
     const invoices = await prisma.invoice.findMany({
       where: {
         planner_id: user.planner_id,
-        ...(status ? { status: status as never } : {}),
+        ...(validStatus ? { status: validStatus } : {}),
+        ...(validType ? { type: validType } : {}),
       },
       include: {
         customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
         line_items: true,
         payments: { orderBy: { payment_date: 'desc' } },
         quote: { select: { id: true, couple_names: true, contracts: { select: { id: true, title: true }, take: 1 } } },
+        contract: { select: { id: true, title: true, status: true } },
+        derived_invoice: { select: { id: true, invoice_number: true, status: true } },
+        proforma: { select: { id: true, invoice_number: true } },
       },
       orderBy: { created_at: 'desc' },
     });
@@ -76,76 +155,104 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createInvoiceSchema.parse(body);
 
-    const planner = await prisma.weddingPlanner.findUnique({
-      where: { id: user.planner_id },
-      select: { email: true },
-    });
-    if (!planner) return NextResponse.json({ error: 'Planner not found' }, { status: 404 });
+    const issuedAt = data.issued_at ? new Date(data.issued_at) : new Date();
 
-    const invoiceNumber = await generateInvoiceNumber(planner.email);
+    const invoice = await prisma.$transaction(async (tx) => {
+      // Resolve or create the customer record
+      let customerId = data.customer_id ?? null;
+      if (!customerId) {
+        const newCustomer = await tx.customer.create({
+          data: {
+            planner_id: user.planner_id!,
+            name: data.client_name,
+            email: data.client_email || null,
+            id_number: data.client_id_number || null,
+            address: data.client_address || null,
+          },
+        });
+        customerId = newCustomer.id;
+      } else {
+        await tx.customer.update({
+          where: { id: customerId, planner_id: user.planner_id! },
+          data: {
+            ...(data.client_name && { name: data.client_name }),
+            ...(data.client_email !== undefined && { email: data.client_email || null }),
+            ...(data.client_id_number !== undefined && { id_number: data.client_id_number || null }),
+            ...(data.client_address !== undefined && { address: data.client_address || null }),
+          },
+        });
+      }
 
-    // Resolve or create the customer record
-    let customerId = data.customer_id ?? null;
-    if (!customerId) {
-      const newCustomer = await prisma.customer.create({
+      // Allocate sequential number (validates date order for legal invoices).
+      // Also returns the previous chain_hash, avoiding a redundant DB query.
+      const { serie, numero, invoice_number, previous_chain_hash } = await allocateInvoiceNumber(
+        tx,
+        user.planner_id!,
+        data.type,
+        issuedAt,
+      );
+
+      const chain_hash = (data.type === 'INVOICE' || data.type === 'RECTIFICATIVA')
+        ? computeChainHash({
+            invoice_number,
+            issued_at: issuedAt,
+            total: data.total,
+            planner_id: user.planner_id!,
+            previous_hash: previous_chain_hash,
+          })
+        : null;
+
+      return tx.invoice.create({
         data: {
-          planner_id: user.planner_id,
-          name: data.client_name,
-          email: data.client_email || null,
-          id_number: data.client_id_number || null,
-          address: data.client_address || null,
+          type: data.type,
+          planner_id: user.planner_id!,
+          customer_id: customerId,
+          quote_id: data.quote_id ?? null,
+          contract_id: data.contract_id ?? null,
+          invoice_number,
+          serie,
+          numero,
+          chain_hash,
+          description: data.description ?? null,
+          currency: data.currency,
+          subtotal: data.subtotal,
+          discount: data.discount ?? null,
+          tax_rate: data.tax_rate ?? null,
+          tax_amount: data.tax_amount ?? null,
+          total: data.total,
+          due_date: data.due_date ? new Date(data.due_date) : null,
+          issued_at: issuedAt,
+          line_items: {
+            create: data.line_items.map((item) => ({
+              name: item.name,
+              description: item.description ?? null,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              total: item.total,
+            })),
+          },
+        },
+        include: {
+          customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+          line_items: true,
+          payments: true,
+          contract: { select: { id: true, title: true, status: true } },
+          derived_invoice: { select: { id: true, invoice_number: true, status: true } },
+          proforma: { select: { id: true, invoice_number: true } },
         },
       });
-      customerId = newCustomer.id;
-    } else {
-      // Update existing customer with any provided contact data
-      await prisma.customer.update({
-        where: { id: customerId, planner_id: user.planner_id },
-        data: {
-          ...(data.client_name && { name: data.client_name }),
-          ...(data.client_email !== undefined && { email: data.client_email || null }),
-          ...(data.client_id_number !== undefined && { id_number: data.client_id_number || null }),
-          ...(data.client_address !== undefined && { address: data.client_address || null }),
-        },
-      });
-    }
-
-    const invoice = await prisma.invoice.create({
-      data: {
-        planner_id: user.planner_id,
-        customer_id: customerId,
-        quote_id: data.quote_id ?? null,
-        invoice_number: invoiceNumber,
-        description: data.description ?? null,
-        currency: data.currency,
-        subtotal: data.subtotal,
-        discount: data.discount ?? null,
-        tax_rate: data.tax_rate ?? null,
-        tax_amount: data.tax_amount ?? null,
-        total: data.total,
-        due_date: data.due_date ? new Date(data.due_date) : null,
-        issued_at: data.issued_at ? new Date(data.issued_at) : null,
-        line_items: {
-          create: data.line_items.map((item) => ({
-            name: item.name,
-            description: item.description ?? null,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            total: item.total,
-          })),
-        },
-      },
-      include: {
-        customer: { select: { id: true, name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
-        line_items: true,
-        payments: true,
-      },
     });
 
     return NextResponse.json({ data: invoice }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 422 });
+    }
+    if (error instanceof Error && error.message.startsWith('DATE_ORDER_VIOLATION')) {
+      return NextResponse.json(
+        { error: 'La fecha de emisión no puede ser anterior a la última factura de la misma serie.' },
+        { status: 422 },
+      );
     }
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
