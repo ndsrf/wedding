@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import { resolvePaymentScheduleDate } from '@/lib/wedding-utils';
 
 export async function GET() {
   try {
@@ -81,29 +82,15 @@ export async function GET() {
 
     const contract = wedding.contract;
 
-    // Resolve due dates for each payment schedule item
-    const resolveScheduleDate = (item: {
-      reference_date: string;
-      days_offset: number;
-      fixed_date: Date | null;
-    }): Date | null => {
-      if (item.reference_date === 'FIXED_DATE') {
-        return item.fixed_date;
-      }
-      const base =
-        item.reference_date === 'WEDDING_DATE'
-          ? contract?.payment_schedule_wedding_date ?? wedding.wedding_date
-          : contract?.payment_schedule_signing_date ?? null;
-      if (!base) return null;
-      const d = new Date(base);
-      d.setDate(d.getDate() + item.days_offset);
-      return d;
-    };
-
     const paymentSchedule = contract?.payment_schedule_items.map((item) => ({
       ...item,
       amount_value: Number(item.amount_value),
-      due_date: resolveScheduleDate(item as { reference_date: string; days_offset: number; fixed_date: Date | null }),
+      due_date: resolvePaymentScheduleDate(
+        item,
+        wedding.wedding_date,
+        contract.payment_schedule_wedding_date,
+        contract.payment_schedule_signing_date,
+      ),
     })) ?? [];
 
     const invoices = contract?.invoices.map((inv) => ({
@@ -134,7 +121,15 @@ export async function GET() {
         payment_schedule: paymentSchedule,
       },
     });
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (message.startsWith('FORBIDDEN')) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    console.error('Error fetching admin account data:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

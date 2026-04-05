@@ -1,4 +1,4 @@
-import type { Location, Wedding } from '@prisma/client';
+import type { Location, Wedding, ScheduleReferenceDate } from '@prisma/client';
 
 type WeddingWithMainEventLocation = Pick<Wedding, 'location'> & {
   main_event_location: Pick<Location, 'name'> | null;
@@ -6,6 +6,37 @@ type WeddingWithMainEventLocation = Pick<Wedding, 'location'> & {
 
 export function getWeddingDisplayLocation(wedding: WeddingWithMainEventLocation): string | null {
   return wedding.main_event_location?.name ?? wedding.location;
+}
+
+/**
+ * Resolve the concrete due date for a contract payment schedule item.
+ *
+ * @param item - Schedule item with reference type, offset, and optional fixed date
+ * @param weddingDate - Fallback base date when payment_schedule_wedding_date is absent
+ * @param scheduleWeddingDate - Planner-set wedding date override for the schedule
+ * @param scheduleSigningDate - Planner-set signing date for the schedule
+ */
+export function resolvePaymentScheduleDate(
+  item: {
+    reference_date: ScheduleReferenceDate;
+    days_offset: number;
+    fixed_date: Date | null;
+  },
+  weddingDate: Date,
+  scheduleWeddingDate: Date | null,
+  scheduleSigningDate: Date | null,
+): Date | null {
+  if (item.reference_date === 'FIXED_DATE') {
+    return item.fixed_date;
+  }
+  const base =
+    item.reference_date === 'WEDDING_DATE'
+      ? (scheduleWeddingDate ?? weddingDate)
+      : (scheduleSigningDate ?? null);
+  if (!base) return null;
+  const d = new Date(base);
+  d.setDate(d.getDate() + item.days_offset);
+  return d;
 }
 
 /**

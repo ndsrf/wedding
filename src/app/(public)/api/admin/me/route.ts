@@ -29,8 +29,16 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, data: admin });
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (message.startsWith('FORBIDDEN')) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    console.error('Error fetching admin profile:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -55,6 +63,14 @@ export async function PATCH(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (message.startsWith('FORBIDDEN')) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    console.error('Error updating admin profile:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

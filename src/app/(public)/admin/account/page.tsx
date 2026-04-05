@@ -10,6 +10,7 @@
 import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
+import { resolvePaymentScheduleDate } from '@/lib/wedding-utils';
 import PrivateHeader from '@/components/PrivateHeader';
 import AdminAccountClient from '@/components/admin/AdminAccountClient';
 
@@ -98,25 +99,6 @@ export default async function AdminAccountPage() {
 
   const contract = wedding.contract;
 
-  // Resolve due date for each payment schedule item
-  const resolveDate = (item: {
-    reference_date: string;
-    days_offset: number;
-    fixed_date: Date | null;
-  }): string | null => {
-    if (item.reference_date === 'FIXED_DATE') {
-      return item.fixed_date?.toISOString() ?? null;
-    }
-    const base =
-      item.reference_date === 'WEDDING_DATE'
-        ? contract?.payment_schedule_wedding_date ?? wedding.wedding_date
-        : contract?.payment_schedule_signing_date ?? null;
-    if (!base) return null;
-    const d = new Date(base);
-    d.setDate(d.getDate() + item.days_offset);
-    return d.toISOString();
-  };
-
   const paymentSchedule =
     contract?.payment_schedule_items.map((item) => ({
       id: item.id,
@@ -124,7 +106,12 @@ export default async function AdminAccountPage() {
       description: item.description,
       amount_type: item.amount_type,
       amount_value: Number(item.amount_value),
-      due_date: resolveDate(item as { reference_date: string; days_offset: number; fixed_date: Date | null }),
+      due_date: resolvePaymentScheduleDate(
+        item,
+        wedding.wedding_date,
+        contract.payment_schedule_wedding_date,
+        contract.payment_schedule_signing_date,
+      )?.toISOString() ?? null,
     })) ?? [];
 
   const invoices =

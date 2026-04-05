@@ -68,7 +68,15 @@ export async function GET() {
         },
       },
     });
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('UNAUTHORIZED')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (message.startsWith('FORBIDDEN')) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    console.error('Error fetching planner account data:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
