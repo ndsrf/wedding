@@ -902,6 +902,7 @@
       "invoices": {
         "title": "Invoices",
         "newInvoice": "New Invoice",
+        "newProforma": "New Proforma",
         "createInvoice": "Create Invoice",
         "back": "← Back",
         "newInvoiceFor": "New Invoice – {name}",
@@ -910,11 +911,12 @@
         "noMatch": "No invoices match your filters",
         "noMatchHint": "Try adjusting your search or status filters.",
         "empty": "No invoices yet",
-        "emptyHint": "Create an invoice to track your payments.",
-        "readyToInvoice": "Ready to Invoice ({count})",
+        "emptyHint": "Create a proforma invoice to start the payment schedule.",
+        "readyToInvoice": "Signed contracts without proformas ({count})",
         "contractSigned": "Contract signed",
         "quoteBadge": "Quote",
         "contractBadge": "Contract",
+        "proformaBadge": "Proforma",
         "due": "Due {date}",
         "paid": "{amount} paid",
         "remaining": "{amount} due",
@@ -923,6 +925,13 @@
         "downloadPdf": "Download PDF",
         "generatePdf": "Generate PDF",
         "delete": "Delete",
+        "convertToInvoice": "Generate Invoice",
+        "linkedInvoice": "Invoice: {number}",
+        "linkedProforma": "Proforma: {number}",
+        "noContract": "No contract",
+        "addProforma": "+ Add Proforma",
+        "contractGroup": "Contract: {title}",
+        "noContractGroup": "Invoices without contract",
         "status": {
           "DRAFT": "Draft",
           "ISSUED": "Issued",
@@ -930,6 +939,10 @@
           "PAID": "Paid",
           "OVERDUE": "Overdue",
           "CANCELLED": "Cancelled"
+        },
+        "type": {
+          "PROFORMA": "Proforma",
+          "INVOICE": "Invoice"
         }
       },
       "page": {
@@ -1004,7 +1017,13 @@
         "total": "Total",
         "cancel": "Cancel",
         "saving": "Saving…",
-        "saveInvoice": "Save Invoice"
+        "saveInvoice": "Save Invoice",
+        "type": "Document type",
+        "typeProforma": "Proforma Invoice",
+        "typeInvoice": "Invoice",
+        "contract": "Linked contract",
+        "noContract": "No contract",
+        "selectContract": "Select contract…"
       },
       "quotePdf": {
         "docTitle": "Service Quote",
@@ -1029,7 +1048,9 @@
       },
       "invoicePdf": {
         "docTitle": "Invoice",
+        "proformaDocTitle": "Proforma Invoice",
         "invoiceNumber": "Invoice Number",
+        "proformaNumber": "Proforma Number",
         "issueDate": "Issue Date",
         "dueDate": "Due Date",
         "billTo": "Bill To",
@@ -1093,7 +1114,14 @@
         "saving": "Saving…",
         "save": "Save",
         "removePaymentConfirm": "Remove this payment record?",
-        "paymentHistory": "Payment History"
+        "paymentHistory": "Payment History",
+        "proformaHash": "Proforma #",
+        "convertToInvoice": "Generate Final Invoice",
+        "converting": "Generating…",
+        "convertToInvoiceHint": "This proforma is fully paid. You can now generate the definitive invoice.",
+        "linkedInvoice": "Generated invoice: {number}",
+        "linkedProforma": "Generated from proforma: {number}",
+        "readOnly": "This invoice cannot be modified once issued."
       },
       "contractPage": {
         "createWeddingTitle": "Create Wedding from Contract",

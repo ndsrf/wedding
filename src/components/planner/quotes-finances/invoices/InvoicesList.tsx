@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceDetail } from './InvoiceDetail';
@@ -11,6 +10,7 @@ import { Pagination } from '../Pagination';
 
 export interface Invoice {
   id: string;
+  type: 'PROFORMA' | 'INVOICE';
   invoice_number: string;
   customer: { id: string; name: string; email: string | null; phone: string | null; id_number: string | null; address: string | null; notes: string | null } | null;
   description: string | null;
@@ -27,6 +27,9 @@ export interface Invoice {
   pdf_url: string | null;
   created_at: string;
   quote: { id: string; couple_names: string; contracts: { id: string; title: string }[] } | null;
+  contract: { id: string; title: string; status: string } | null;
+  derived_invoice: { id: string; invoice_number: string; status: string } | null;
+  proforma: { id: string; invoice_number: string } | null;
   line_items: {
     id: string;
     name: string;
@@ -45,14 +48,10 @@ export interface Invoice {
   }[];
 }
 
-interface ReadyQuote {
+interface SignedContract {
   id: string;
-  couple_names: string;
-  customer: { email: string | null; id_number: string | null; address: string | null } | null;
-  currency: string;
-  total: string | number;
-  contract: { id: string; status: string } | null;
-  invoices: { id: string }[];
+  title: string;
+  customer: { name: string } | null;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -75,32 +74,31 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   const t = useTranslations('planner.quotesFinances');
   const format = useFormatter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [readyQuotes, setReadyQuotes] = useState<ReadyQuote[]>([]);
+  const [signedContracts, setSignedContracts] = useState<SignedContract[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
-  const [prefillQuote, setPrefillQuote] = useState<ReadyQuote | null>(null);
   const [externalFormData, setExternalFormData] = useState<InvoicePrefillData | null>(null);
+  const [prefillContractId, setPrefillContractId] = useState<string | null>(null);
   const [nameFilter, setNameFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 50;
 
   useEffect(() => {
     if (externalPrefill) {
       setExternalFormData(externalPrefill);
-      setPrefillQuote(null);
       setView('new');
       onExternalPrefillConsumed?.();
     }
   }, [externalPrefill]); // onExternalPrefillConsumed is intentionally excluded — it's a stable callback
 
   async function fetchData() {
-    const [invoiceRes, quoteRes] = await Promise.all([
+    const [invoiceRes, contractRes] = await Promise.all([
       fetch('/api/planner/invoices'),
-      fetch('/api/planner/quotes?status=ACCEPTED'),
+      fetch('/api/planner/contracts?status=SIGNED'),
     ]);
 
     if (invoiceRes.ok) {
@@ -108,12 +106,9 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       setInvoices(json.data ?? []);
     }
 
-    if (quoteRes.ok) {
-      const json = await quoteRes.json();
-      const accepted: ReadyQuote[] = (json.data ?? []).filter(
-        (q: ReadyQuote) => q.contract && q.invoices.length === 0,
-      );
-      setReadyQuotes(accepted);
+    if (contractRes.ok) {
+      const json = await contractRes.json();
+      setSignedContracts(json.data ?? []);
     }
 
     setLoading(false);
@@ -127,8 +122,8 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    setPrefillQuote(null);
     setExternalFormData(null);
+    setPrefillContractId(null);
     setView('list');
     fetchData();
   }
@@ -140,7 +135,6 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    // Immediately clear pdf_url in local state so the UI reflects that it needs regeneration
     setInvoices((prev) => prev.map((i) => i.id === editingId ? { ...i, pdf_url: null } : i));
     setEditingId(null);
     setView('list');
@@ -149,14 +143,14 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
   function handleCancelForm() {
     setView('list');
-    setPrefillQuote(null);
     setExternalFormData(null);
+    setPrefillContractId(null);
     setEditingId(null);
   }
 
-  function handleCreateFromQuote(q: ReadyQuote) {
+  function handleCreateForContract(contract: SignedContract) {
+    setPrefillContractId(contract.id);
     setExternalFormData(null);
-    setPrefillQuote(q);
     setEditingId(null);
     setView('new');
   }
@@ -167,12 +161,10 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   }
 
   async function handleGeneratePdf(invoice: Invoice) {
-    // If PDF exists and hasn't been cleared, just open it
     if (invoice.pdf_url) {
       window.open(invoice.pdf_url, '_blank');
       return;
     }
-    // Otherwise generate fresh PDF (fetches latest data from DB)
     setGenerating(invoice.id);
     const res = await fetch(`/api/planner/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
     if (res.ok) {
@@ -199,24 +191,19 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   const editingInvoice = editingId ? invoices.find((i) => i.id === editingId) ?? null : null;
 
   if (view === 'new') {
-    const prefill = externalFormData
-      ? externalFormData
-      : prefillQuote
-        ? {
-            client_name: prefillQuote.couple_names,
-            client_email: prefillQuote.customer?.email ?? '',
-            client_id_number: prefillQuote.customer?.id_number ?? '',
-            client_address: prefillQuote.customer?.address ?? '',
-            currency: prefillQuote.currency,
-            quote_id: prefillQuote.id,
-          }
-        : {};
+    const contractForPrefill = prefillContractId
+      ? signedContracts.find((c) => c.id === prefillContractId) ?? null
+      : null;
 
-    const formTitle = externalFormData?.client_name
-      ? t('invoices.newInvoiceFor', { name: externalFormData.client_name })
-      : prefillQuote
-        ? t('invoices.newInvoiceFor', { name: prefillQuote.couple_names })
-        : t('invoices.newInvoice');
+    const prefill = externalFormData
+      ? { ...externalFormData, type: 'PROFORMA' as const }
+      : contractForPrefill
+        ? {
+            type: 'PROFORMA' as const,
+            contract_id: contractForPrefill.id,
+            client_name: contractForPrefill.customer?.name ?? '',
+          }
+        : { type: 'PROFORMA' as const };
 
     return (
       <div>
@@ -224,7 +211,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
           <button onClick={handleCancelForm} className="text-sm text-gray-500 hover:text-gray-700">
             {t('invoices.back')}
           </button>
-          <h3 className="text-base font-semibold text-gray-900">{formTitle}</h3>
+          <h3 className="text-base font-semibold text-gray-900">{t('invoices.newProforma')}</h3>
         </div>
         <InvoiceForm
           initialData={prefill}
@@ -237,7 +224,9 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
   if (view === 'edit' && editingInvoice) {
     const prefill = {
+      type: editingInvoice.type,
       customer_id: editingInvoice.customer?.id ?? null,
+      contract_id: editingInvoice.contract?.id ?? '',
       client_name: editingInvoice.customer?.name ?? '',
       client_email: editingInvoice.customer?.email ?? '',
       client_id_number: editingInvoice.customer?.id_number ?? '',
@@ -286,6 +275,8 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   }
 
   const now = new Date();
+
+  // Filter invoices
   const filteredInvoices = invoices.filter((inv) => {
     const clientName = inv.customer?.name ?? '';
     const nameMatch = nameFilter.trim() === '' || clientName.toLowerCase().includes(nameFilter.toLowerCase());
@@ -299,7 +290,32 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
     const statusMatch = statusFilter.length === 0 || statusFilter.includes(effectiveStatus) || statusFilter.includes(inv.status);
     return nameMatch && statusMatch;
   });
-  const pagedInvoices = filteredInvoices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Group by contract: { contractId | null -> invoices[] }
+  const groups: Map<string | null, { contract: Invoice['contract'] | null; items: Invoice[] }> = new Map();
+
+  for (const inv of filteredInvoices) {
+    const key = inv.contract?.id ?? null;
+    if (!groups.has(key)) {
+      groups.set(key, { contract: inv.contract ?? null, items: [] });
+    }
+    groups.get(key)!.items.push(inv);
+  }
+
+  // Signed contracts with no proformas yet (for the "ready" banner)
+  const contractIdsWithInvoices = new Set(invoices.filter((i) => i.contract_id).map((i) => i.contract?.id));
+  const readyContracts = signedContracts.filter((c) => !contractIdsWithInvoices.has(c.id));
+
+  // Sort groups: contracts first (alphabetically by title), then null group last
+  const sortedGroupKeys = [...groups.keys()].sort((a, b) => {
+    if (a === null) return 1;
+    if (b === null) return -1;
+    const titleA = groups.get(a)?.contract?.title ?? '';
+    const titleB = groups.get(b)?.contract?.title ?? '';
+    return titleA.localeCompare(titleB);
+  });
+
+  const pagedGroupKeys = sortedGroupKeys.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const INVOICE_STATUS_OPTIONS = [
     { value: 'DRAFT', label: t('invoices.status.DRAFT') },
@@ -312,30 +328,28 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
 
   return (
     <div>
-      {/* Ready to invoice — accepted quotes with contract but no invoice yet */}
-      {readyQuotes.length > 0 && (
+      {/* Ready to invoice — signed contracts with no proformas yet */}
+      {readyContracts.length > 0 && (
         <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
           <h4 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
             <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {t('invoices.readyToInvoice', { count: readyQuotes.length })}
+            {t('invoices.readyToInvoice', { count: readyContracts.length })}
           </h4>
           <div className="space-y-2">
-            {readyQuotes.map((q) => (
-              <div key={q.id} className="flex items-center justify-between bg-white rounded-lg border border-amber-100 px-4 py-3">
+            {readyContracts.map((c) => (
+              <div key={c.id} className="flex items-center justify-between bg-white rounded-lg border border-amber-100 px-4 py-3">
                 <div>
-                  <span className="text-sm font-semibold text-gray-900">{q.couple_names}</span>
-                  <span className="ml-3 text-sm text-gray-500">
-                    {format.number(Number(q.total), { style: 'currency', currency: q.currency })}
-                  </span>
+                  <span className="text-sm font-semibold text-gray-900">{c.title}</span>
+                  {c.customer && <span className="ml-2 text-sm text-gray-500">{c.customer.name}</span>}
                   <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">{t('invoices.contractSigned')}</span>
                 </div>
                 <button
-                  onClick={() => handleCreateFromQuote(q)}
+                  onClick={() => handleCreateForContract(c)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-lg hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
                 >
-                  {t('invoices.createInvoice')}
+                  {t('invoices.addProforma')}
                 </button>
               </div>
             ))}
@@ -357,13 +371,13 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-gray-900">{t('invoices.title')}</h3>
         <button
-          onClick={() => { setPrefillQuote(null); setView('new'); }}
+          onClick={() => { setPrefillContractId(null); setExternalFormData(null); setView('new'); }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          {t('invoices.newInvoice')}
+          {t('invoices.newProforma')}
         </button>
       </div>
 
@@ -387,137 +401,241 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
                 onClick={() => setView('new')}
                 className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all"
               >
-                {t('invoices.createInvoice')}
+                {t('invoices.newProforma')}
               </button>
             </>
           )}
         </div>
       ) : (
         <>
-        <div className="space-y-3">
-          {pagedInvoices.map((invoice) => {
-            const total = Number(invoice.total);
-            const paid = Number(invoice.amount_paid);
-            const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
-            const isDraft = invoice.status === 'DRAFT';
-            return (
-              <div key={invoice.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-mono text-gray-400">{invoice.invoice_number}</span>
-                      <h4 className="text-sm font-semibold text-gray-900">{invoice.customer?.name ?? ''}</h4>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                        {t(`invoices.status.${invoice.status}` as Parameters<typeof t>[0])}
-                      </span>
-                      {invoice.quote && (
-                        <Link
-                          href="/planner/quotes-finances?tab=quotes"
-                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
-                          title={`Go to quote: ${invoice.quote.couple_names}`}
-                        >
-                          {t('invoices.quoteBadge')}
-                        </Link>
-                      )}
-                      {invoice.quote?.contracts[0] && (
-                        <Link
-                          href="/planner/quotes-finances?tab=contracts"
-                          className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
-                          title={`Go to contract: ${invoice.quote.contracts[0].title}`}
-                        >
-                          {t('invoices.contractBadge')}
-                        </Link>
+          <div className="space-y-6">
+            {pagedGroupKeys.map((contractKey) => {
+              const group = groups.get(contractKey)!;
+              const hasContract = contractKey !== null;
+
+              return (
+                <div key={contractKey ?? 'no-contract'} className="space-y-2">
+                  {/* Contract group header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {hasContract ? (
+                        <>
+                          <svg className="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <span className="text-sm font-semibold text-gray-700">
+                            {group.contract!.title}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                            {t('invoices.contractBadge')}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-sm font-semibold text-gray-400">{t('invoices.noContractGroup')}</span>
                       )}
                     </div>
-                    {invoice.due_date && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {t('invoices.due', { date: format.dateTime(new Date(invoice.due_date), { day: 'numeric', month: 'short', year: 'numeric' }) })}
-                      </p>
-                    )}
-                    {invoice.status !== 'PAID' && invoice.status !== 'DRAFT' && (
-                      <div className="mt-2">
-                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                          <span>{t('invoices.paid', { amount: format.number(paid, { style: 'currency', currency: invoice.currency }) })}</span>
-                          <span>{paidPct}%</span>
-                        </div>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-green-400 rounded-full transition-all"
-                            style={{ width: `${paidPct}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-lg font-bold text-gray-900">
-                      {format.number(total, { style: 'currency', currency: invoice.currency })}
-                    </span>
-                    {paid > 0 && paid < total && (
-                      <span className="text-xs text-orange-600 font-medium">
-                        {t('invoices.remaining', { amount: format.number(total - paid, { style: 'currency', currency: invoice.currency }) })}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
-                  {isDraft && (
-                    <button
-                      onClick={() => handleOpenEdit(invoice)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      {t('invoices.edit')}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => { setSelectedId(invoice.id); setView('detail'); }}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    {t('invoices.viewAndPayments')}
-                  </button>
-                  <button
-                    onClick={() => handleGeneratePdf(invoice)}
-                    disabled={generating === invoice.id}
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                      invoice.pdf_url
-                        ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
-                        : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
-                    }`}
-                    title={invoice.pdf_url ? 'Download existing PDF' : 'PDF needs to be generated'}
-                  >
-                    {generating === invoice.id ? (
-                      <span className="animate-spin w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full inline-block" />
-                    ) : (
-                      <>
+                    {hasContract && (
+                      <button
+                        onClick={() => {
+                          const contract = signedContracts.find((c) => c.id === contractKey);
+                          if (contract) {
+                            handleCreateForContract(contract);
+                          } else {
+                            // Contract exists but may not be in signedContracts (already has invoices)
+                            setPrefillContractId(contractKey);
+                            setExternalFormData(null);
+                            setEditingId(null);
+                            setView('new');
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"
+                      >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        {invoice.pdf_url ? t('invoices.downloadPdf') : t('invoices.generatePdf')}
-                      </>
+                        {t('invoices.addProforma')}
+                      </button>
                     )}
-                  </button>
+                  </div>
 
-                  {/* Delete only available in DRAFT mode */}
-                  {isDraft && (
-                    <button
-                      onClick={() => handleDelete(invoice.id)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
-                    >
-                      {t('invoices.delete')}
-                    </button>
-                  )}
+                  {/* Invoices in this group */}
+                  <div className="space-y-2 pl-2 border-l-2 border-gray-100">
+                    {group.items.map((invoice) => (
+                      <InvoiceCard
+                        key={invoice.id}
+                        invoice={invoice}
+                        generating={generating}
+                        onView={() => { setSelectedId(invoice.id); setView('detail'); }}
+                        onEdit={() => handleOpenEdit(invoice)}
+                        onGeneratePdf={() => handleGeneratePdf(invoice)}
+                        onDelete={() => handleDelete(invoice.id)}
+                        t={t}
+                        format={format}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-        <Pagination total={filteredInvoices.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+              );
+            })}
+          </div>
+          <Pagination total={sortedGroupKeys.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
         </>
       )}
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// InvoiceCard sub-component
+// -----------------------------------------------------------------------------
+
+interface InvoiceCardProps {
+  invoice: Invoice;
+  generating: string | null;
+  onView: () => void;
+  onEdit: () => void;
+  onGeneratePdf: () => void;
+  onDelete: () => void;
+  t: ReturnType<typeof useTranslations<'planner.quotesFinances'>>;
+  format: ReturnType<typeof useFormatter>;
+}
+
+function InvoiceCard({ invoice, generating, onView, onEdit, onGeneratePdf, onDelete, t, format }: InvoiceCardProps) {
+  const total = Number(invoice.total);
+  const paid = Number(invoice.amount_paid);
+  const paidPct = total > 0 ? Math.round((paid / total) * 100) : 0;
+  const isProforma = invoice.type === 'PROFORMA';
+  const isDraftOrProforma = invoice.status === 'DRAFT' || isProforma;
+  const isRegularInvoice = invoice.type === 'INVOICE';
+
+  const now = new Date();
+  const isEffectivelyOverdue =
+    invoice.status !== 'PAID' &&
+    invoice.status !== 'CANCELLED' &&
+    invoice.status !== 'DRAFT' &&
+    !!invoice.due_date &&
+    new Date(invoice.due_date) < now;
+
+  return (
+    <div className={`bg-white rounded-xl border shadow-sm p-4 ${isProforma ? 'border-blue-100' : 'border-green-100'}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Type badge */}
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+              isProforma ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+            }`}>
+              {t(`invoices.type.${invoice.type}` as Parameters<typeof t>[0])}
+            </span>
+            <span className="text-xs font-mono text-gray-400">{invoice.invoice_number}</span>
+            <h4 className="text-sm font-semibold text-gray-900">{invoice.customer?.name ?? ''}</h4>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
+              {t(`invoices.status.${invoice.status}` as Parameters<typeof t>[0])}
+            </span>
+            {isEffectivelyOverdue && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                {t('invoices.status.OVERDUE')}
+              </span>
+            )}
+          </div>
+
+          {/* Linked invoice/proforma badges */}
+          <div className="flex flex-wrap gap-1 mt-1">
+            {isProforma && invoice.derived_invoice && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                {t('invoices.linkedInvoice', { number: invoice.derived_invoice.invoice_number })}
+              </span>
+            )}
+            {isRegularInvoice && invoice.proforma && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                {t('invoices.linkedProforma', { number: invoice.proforma.invoice_number })}
+              </span>
+            )}
+          </div>
+
+          {invoice.due_date && (
+            <p className="text-xs text-gray-500 mt-1">
+              {t('invoices.due', { date: format.dateTime(new Date(invoice.due_date), { day: 'numeric', month: 'short', year: 'numeric' }) })}
+            </p>
+          )}
+          {invoice.status !== 'PAID' && invoice.status !== 'DRAFT' && (
+            <div className="mt-2">
+              <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                <span>{t('invoices.paid', { amount: format.number(paid, { style: 'currency', currency: invoice.currency }) })}</span>
+                <span>{paidPct}%</span>
+              </div>
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-400 rounded-full transition-all"
+                  style={{ width: `${paidPct}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-lg font-bold text-gray-900">
+            {format.number(total, { style: 'currency', currency: invoice.currency })}
+          </span>
+          {paid > 0 && paid < total && (
+            <span className="text-xs text-orange-600 font-medium">
+              {t('invoices.remaining', { amount: format.number(total - paid, { style: 'currency', currency: invoice.currency }) })}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
+        {/* Edit: only for proformas */}
+        {isProforma && (
+          <button
+            onClick={onEdit}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            {t('invoices.edit')}
+          </button>
+        )}
+        <button
+          onClick={onView}
+          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          {t('invoices.viewAndPayments')}
+        </button>
+        <button
+          onClick={onGeneratePdf}
+          disabled={generating === invoice.id}
+          className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+            invoice.pdf_url
+              ? 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+              : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+          }`}
+          title={invoice.pdf_url ? 'Download existing PDF' : 'PDF needs to be generated'}
+        >
+          {generating === invoice.id ? (
+            <span className="animate-spin w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full inline-block" />
+          ) : (
+            <>
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {invoice.pdf_url ? t('invoices.downloadPdf') : t('invoices.generatePdf')}
+            </>
+          )}
+        </button>
+
+        {/* Delete: only for proformas, not regular invoices */}
+        {isProforma && !invoice.derived_invoice && (
+          <button
+            onClick={onDelete}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors ml-auto"
+          >
+            {t('invoices.delete')}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

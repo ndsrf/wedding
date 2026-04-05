@@ -894,6 +894,7 @@
       "invoices": {
         "title": "Rechnungen",
         "newInvoice": "Neue Rechnung",
+        "newProforma": "Neue Proforma",
         "createInvoice": "Rechnung erstellen",
         "back": "← Zurück",
         "newInvoiceFor": "Neue Rechnung – {name}",
@@ -902,11 +903,12 @@
         "noMatch": "Keine Rechnungen entsprechen den Filtern",
         "noMatchHint": "Versuchen Sie, die Suche oder die Statusfilter anzupassen.",
         "empty": "Noch keine Rechnungen",
-        "emptyHint": "Erstellen Sie eine Rechnung, um Ihre Zahlungen zu verfolgen.",
-        "readyToInvoice": "Bereit zur Abrechnung ({count})",
+        "emptyHint": "Erstellen Sie eine Proforma-Rechnung, um den Zahlungsplan zu beginnen.",
+        "readyToInvoice": "Unterzeichnete Verträge ohne Proforma ({count})",
         "contractSigned": "Vertrag unterzeichnet",
         "quoteBadge": "Angebot",
         "contractBadge": "Vertrag",
+        "proformaBadge": "Proforma",
         "due": "Fällig am {date}",
         "paid": "{amount} bezahlt",
         "remaining": "{amount} offen",
@@ -915,6 +917,13 @@
         "downloadPdf": "PDF herunterladen",
         "generatePdf": "PDF generieren",
         "delete": "Löschen",
+        "convertToInvoice": "Rechnung erstellen",
+        "linkedInvoice": "Rechnung: {number}",
+        "linkedProforma": "Proforma: {number}",
+        "noContract": "Kein Vertrag",
+        "addProforma": "+ Proforma hinzufügen",
+        "contractGroup": "Vertrag: {title}",
+        "noContractGroup": "Rechnungen ohne Vertrag",
         "status": {
           "DRAFT": "Entwurf",
           "ISSUED": "Ausgestellt",
@@ -922,6 +931,10 @@
           "PAID": "Bezahlt",
           "OVERDUE": "Überfällig",
           "CANCELLED": "Storniert"
+        },
+        "type": {
+          "PROFORMA": "Proforma",
+          "INVOICE": "Rechnung"
         }
       },
       "page": {
@@ -996,7 +1009,13 @@
         "total": "Gesamt",
         "cancel": "Abbrechen",
         "saving": "Wird gespeichert…",
-        "saveInvoice": "Rechnung speichern"
+        "saveInvoice": "Rechnung speichern",
+        "type": "Dokumenttyp",
+        "typeProforma": "Proforma-Rechnung",
+        "typeInvoice": "Rechnung",
+        "contract": "Verknüpfter Vertrag",
+        "noContract": "Kein Vertrag",
+        "selectContract": "Vertrag auswählen…"
       },
       "quotePdf": {
         "docTitle": "Dienstleistungsangebot",
@@ -1021,7 +1040,9 @@
       },
       "invoicePdf": {
         "docTitle": "Rechnung",
+        "proformaDocTitle": "Proforma-Rechnung",
         "invoiceNumber": "Rechnungsnummer",
+        "proformaNumber": "Proforma-Nummer",
         "issueDate": "Ausstellungsdatum",
         "dueDate": "Fälligkeitsdatum",
         "billTo": "Rechnungsempfänger",
@@ -1085,7 +1106,14 @@
         "saving": "Wird gespeichert…",
         "save": "Speichern",
         "removePaymentConfirm": "Diesen Zahlungseintrag entfernen?",
-        "paymentHistory": "Zahlungshistorie"
+        "paymentHistory": "Zahlungshistorie",
+        "proformaHash": "Proforma #",
+        "convertToInvoice": "Endgültige Rechnung erstellen",
+        "converting": "Wird erstellt…",
+        "convertToInvoiceHint": "Diese Proforma ist vollständig bezahlt. Sie können jetzt die endgültige Rechnung erstellen.",
+        "linkedInvoice": "Erstellte Rechnung: {number}",
+        "linkedProforma": "Aus Proforma erstellt: {number}",
+        "readOnly": "Diese Rechnung kann nach Ausstellung nicht mehr geändert werden."
       },
       "contractPage": {
         "createWeddingTitle": "Hochzeit aus Vertrag erstellen",

@@ -865,6 +865,12 @@ enum InvoiceStatus {
   CANCELLED
 }
 
+enum InvoiceType {
+  PROFORMA
+  INVOICE
+  RECTIFICATIVA
+}
+
 // -----------------------------------------------------------------------------
 // QUOTES & FINANCES — Planner income management
 // -----------------------------------------------------------------------------
@@ -984,6 +990,7 @@ model Contract {
   template             ContractTemplate? @relation(fields: [contract_template_id], references: [id], onDelete: SetNull)
   weddings             Wedding[]         @relation("WeddingContract")
   history_events       ContractHistoryEvent[]
+  invoices             Invoice[]
 
   @@index([planner_id])
   @@index([customer_id])
@@ -1008,35 +1015,46 @@ model ContractHistoryEvent {
 }
 
 model Invoice {
-  id             String          @id @default(uuid())
-  planner_id     String
-  customer_id    String?
-  quote_id       String?
-  invoice_number String          @unique
-  description      String?         @db.Text
-  currency       String          @default("EUR")
-  subtotal       Decimal         @db.Decimal(10, 2)
-  discount       Decimal?        @db.Decimal(10, 2)
-  tax_rate       Decimal?        @db.Decimal(5, 2)
-  tax_amount     Decimal?        @db.Decimal(10, 2)
-  total          Decimal         @db.Decimal(10, 2)
-  amount_paid    Decimal         @default(0) @db.Decimal(10, 2)
-  status         InvoiceStatus   @default(DRAFT)
-  issued_at      DateTime?
-  due_date       DateTime?
-  pdf_url        String?
-  created_at     DateTime        @default(now())
-  updated_at     DateTime        @updatedAt
-  planner        WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
-  customer       Customer?       @relation(fields: [customer_id], references: [id], onDelete: SetNull)
-  quote          Quote?          @relation(fields: [quote_id], references: [id], onDelete: SetNull)
-  line_items     InvoiceLineItem[]
-  payments       InvoicePayment[]
+  id              String          @id @default(uuid())
+  planner_id      String
+  customer_id     String?
+  quote_id        String?
+  contract_id     String?
+  proforma_id     String?         @unique
+  type            InvoiceType     @default(INVOICE)
+  invoice_number  String          @unique
+  serie           String?         // Series prefix, e.g. "FAC-2026" or "PRO-2026"
+  numero          Int?            // Sequential number within the series (for gap-free audit trail)
+  chain_hash      String?         // SHA-256 hash of previous invoice in series (Verifactu prep)
+  description     String?         @db.Text
+  currency        String          @default("EUR")
+  subtotal        Decimal         @db.Decimal(10, 2)
+  discount        Decimal?        @db.Decimal(10, 2)
+  tax_rate        Decimal?        @db.Decimal(5, 2)
+  tax_amount      Decimal?        @db.Decimal(10, 2)
+  total           Decimal         @db.Decimal(10, 2)
+  amount_paid     Decimal         @default(0) @db.Decimal(10, 2)
+  status          InvoiceStatus   @default(DRAFT)
+  issued_at       DateTime?
+  due_date        DateTime?
+  pdf_url         String?
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  planner         WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  customer        Customer?       @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  quote           Quote?          @relation(fields: [quote_id], references: [id], onDelete: SetNull)
+  contract        Contract?       @relation(fields: [contract_id], references: [id], onDelete: SetNull)
+  proforma        Invoice?        @relation("ProformaToInvoice", fields: [proforma_id], references: [id])
+  derived_invoice Invoice?        @relation("ProformaToInvoice")
+  line_items      InvoiceLineItem[]
+  payments        InvoicePayment[]
 
+  @@unique([planner_id, serie, numero])
   @@index([planner_id])
   @@index([customer_id])
   @@index([status])
   @@index([quote_id])
+  @@index([contract_id])
   @@map("invoices")
 }
 
