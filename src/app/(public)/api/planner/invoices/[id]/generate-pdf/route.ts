@@ -108,7 +108,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
         labels,
         locale,
-        previousHash: prevInvoice?.chain_hash ?? null,
+        previousHash: prevInvoice?.chain_hash ?? planner?.last_external_hash ?? null,
       }) as never
     );
 
