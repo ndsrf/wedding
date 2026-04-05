@@ -303,7 +303,7 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   }
 
   // Signed contracts with no proformas yet (for the "ready" banner)
-  const contractIdsWithInvoices = new Set(invoices.filter((i) => i.contract_id).map((i) => i.contract?.id));
+  const contractIdsWithInvoices = new Set(invoices.filter((i) => i.contract).map((i) => i.contract!.id));
   const readyContracts = signedContracts.filter((c) => !contractIdsWithInvoices.has(c.id));
 
   // Sort groups: contracts first (alphabetically by title), then null group last
