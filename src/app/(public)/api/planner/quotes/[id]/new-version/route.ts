@@ -15,8 +15,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     });
 
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    if (existing.status !== 'REJECTED') {
-      return NextResponse.json({ error: 'Only rejected quotes can have a new version created' }, { status: 422 });
+    if (existing.status !== 'REJECTED' && existing.status !== 'EXPIRED') {
+      return NextResponse.json({ error: 'Only rejected or expired quotes can have a new version created' }, { status: 422 });
     }
     if (existing.next_version) {
       return NextResponse.json({ error: 'A newer version already exists for this quote' }, { status: 422 });
@@ -27,6 +27,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       try { await del(existing.pdf_url); } catch { /* non-fatal */ }
       await prisma.quote.update({ where: { id: existing.id }, data: { pdf_url: null } });
     }
+
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const newExpiresAt = existing.status === 'EXPIRED'
+      ? thirtyDaysFromNow
+      : existing.expires_at;
 
     const newQuote = await prisma.quote.create({
       data: {
@@ -41,7 +47,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         discount: existing.discount,
         tax_rate: existing.tax_rate,
         total: existing.total,
-        expires_at: existing.expires_at,
+        expires_at: newExpiresAt,
         status: 'DRAFT',
         version: existing.version + 1,
         previous_version_id: existing.id,
