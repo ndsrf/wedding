@@ -283,10 +283,14 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       if (res.ok) {
         fetchContracts();
       } else {
-        setScheduleInvoiceError(json.error ?? 'Error al crear las facturas del calendario');
+        const keys: string[] = json.errors ?? [];
+        const msg = keys.length > 0
+          ? keys.map((k) => t(k as Parameters<typeof t>[0])).join('\n')
+          : t('contracts.scheduleErrors.generic');
+        setScheduleInvoiceError(msg);
       }
     } catch {
-      setScheduleInvoiceError('Error de red — comprueba tu conexión');
+      setScheduleInvoiceError(t('contracts.scheduleErrors.networkError'));
     } finally {
       setCreatingScheduleInvoicesId(null);
     }

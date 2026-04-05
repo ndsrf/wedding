@@ -84,6 +84,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
             currency: true,
             customer_id: true,
             tax_rate: true,
+            event_date: true,
             line_items: { select: { name: true, description: true }, orderBy: { id: 'asc' } },
           },
         },
@@ -95,35 +96,36 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Collect all validation errors before returning
+    // Resolve dates: prefer the schedule-specific overrides, fall back to contract/quote fields
+    const weddingDate = contract.payment_schedule_wedding_date ?? contract.quote?.event_date ?? null;
+    const signingDate = contract.payment_schedule_signing_date ?? contract.signed_at ?? null;
+
+    // Collect all validation errors as i18n keys — translated by the frontend
     const errors: string[] = [];
 
     if (contract.status !== 'SIGNED') {
-      errors.push('El contrato debe estar firmado para crear facturas de calendario.');
+      errors.push('contracts.scheduleErrors.contractNotSigned');
     }
 
     if (contract.invoices.length > 0) {
-      errors.push('Ya existen facturas para este contrato. No se puede crear un calendario de pagos.');
+      errors.push('contracts.scheduleErrors.invoicesExist');
     }
 
     if (contract.payment_schedule_items.length === 0) {
-      errors.push('El calendario de pagos está vacío. Añade al menos un hito.');
+      errors.push('contracts.scheduleErrors.emptySchedule');
     }
 
     const emptyDescriptions = contract.payment_schedule_items.filter(i => !i.description?.trim());
     if (emptyDescriptions.length > 0) {
-      errors.push('Todos los hitos del calendario deben tener una descripción.');
+      errors.push('contracts.scheduleErrors.emptyDescriptions');
     }
 
-    const weddingDate = contract.payment_schedule_wedding_date;
-    const signingDate = contract.payment_schedule_signing_date;
-
     if (!weddingDate && contract.payment_schedule_items.some(i => i.reference_date === 'WEDDING_DATE')) {
-      errors.push('Falta la fecha de la boda en el calendario de pagos.');
+      errors.push('contracts.scheduleErrors.missingWeddingDate');
     }
 
     if (!signingDate && contract.payment_schedule_items.some(i => i.reference_date === 'SIGNING_DATE')) {
-      errors.push('Falta la fecha de firma en el calendario de pagos.');
+      errors.push('contracts.scheduleErrors.missingSigningDate');
     }
 
     const missingDates = contract.payment_schedule_items.filter(item =>
@@ -134,15 +136,15 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       ) === null,
     );
     if (missingDates.length > 0) {
-      errors.push('Algunos hitos del calendario no tienen fecha calculable. Comprueba las fechas de referencia.');
+      errors.push('contracts.scheduleErrors.missingComputedDates');
     }
 
     if (!contract.quote) {
-      errors.push('El contrato no tiene un presupuesto asociado. Se necesita el total para calcular los importes.');
+      errors.push('contracts.scheduleErrors.noQuote');
     }
 
     if (errors.length > 0) {
-      return NextResponse.json({ error: errors.join('\n') }, { status: 422 });
+      return NextResponse.json({ errors }, { status: 422 });
     }
 
     const quoteTotal = Number(contract.quote!.total);
@@ -263,7 +265,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     // Unique constraint violation means a concurrent request grabbed the same invoice number
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return NextResponse.json(
-        { error: 'Conflicto de numeración: otro proceso generó facturas al mismo tiempo. Vuelve a intentarlo.' },
+        { errors: ['contracts.scheduleErrors.numberingConflict'] },
         { status: 409 },
       );
     }
