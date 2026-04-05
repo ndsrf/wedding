@@ -8,19 +8,20 @@ import { resolveLogoDataUri } from '@/lib/pdf/resolve-logo';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import React from 'react';
 
-export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole('planner');
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
+    const force = new URL(request.url).searchParams.get('force') === 'true';
 
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // If a cached PDF URL exists, return it
-    if (contract.pdf_url) {
+    // If a cached PDF URL exists, return it unless forced to regenerate
+    if (contract.pdf_url && !force) {
       return NextResponse.json({ data: { pdf_url: contract.pdf_url } });
     }
 

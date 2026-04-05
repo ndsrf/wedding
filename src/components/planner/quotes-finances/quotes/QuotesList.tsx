@@ -240,14 +240,8 @@ export function QuotesList({ initialRef }: { initialRef?: string }) {
   }
 
   async function handlePdf(quote: Quote) {
-    // If PDF already exists and quote hasn't changed, just open it
-    if (quote.pdf_url) {
-      window.open(quote.pdf_url, '_blank');
-      return;
-    }
-    // Otherwise generate it
     setGenerating(quote.id);
-    const res = await fetch(`/api/planner/quotes/${quote.id}/generate-pdf`, { method: 'POST' });
+    const res = await fetch(`/api/planner/quotes/${quote.id}/generate-pdf?force=true`, { method: 'POST' });
     if (res.ok) {
       const { data } = await res.json();
       window.open(data.pdf_url, '_blank');

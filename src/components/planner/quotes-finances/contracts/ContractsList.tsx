@@ -178,16 +178,10 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
       return;
     }
 
-    // If we have a cached PDF URL, just open it
-    if (contract.pdf_url) {
-      window.open(contract.pdf_url, '_blank');
-      return;
-    }
-
-    // Generate the PDF
+    // Generate (or regenerate) the PDF
     setGeneratingPdfId(contract.id);
     try {
-      const res = await fetch(`/api/planner/contracts/${contract.id}/generate-pdf`, { method: 'POST' });
+      const res = await fetch(`/api/planner/contracts/${contract.id}/generate-pdf?force=true`, { method: 'POST' });
       if (res.ok) {
         const json = await res.json();
         const url = json.data?.pdf_url;
