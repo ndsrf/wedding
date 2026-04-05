@@ -54,6 +54,7 @@ model WeddingPlanner {
   invoices            Invoice[]
   license             PlannerLicense?
   sub_accounts        PlannerSubAccount[]
+  alert_rules         AlertRule[]
 
   @@index([enabled])
   @@map("wedding_planners")
@@ -177,6 +178,8 @@ model Wedding {
   google_photos_token_expiry      DateTime?          // When the access token expires
   checklist_sections              ChecklistSection[]
   checklist_tasks                 ChecklistTask[]
+  alert_rules                     AlertRule[]        @relation("WeddingAlertRules")
+  alerts                          Alert[]            @relation("WeddingAlerts")
   families                        Family[]
   message_templates               MessageTemplate[]
   invitation_templates            InvitationTemplate[]
@@ -1081,6 +1084,159 @@ model RagIngestionJob {
 
   @@index([triggeredAt])
   @@map("rag_ingestion_jobs")
+}
+
+// ============================================================================
+// ALERT SYSTEM — async, multi-channel, multi-recipient alert infrastructure
+// ============================================================================
+
+enum AlertEventType {
+  RSVP_SUBMITTED
+  RSVP_UPDATED
+  PAYMENT_RECEIVED
+  TASK_COMPLETED
+  TASK_OVERDUE
+  GUEST_ADDED
+  CONTRACT_SIGNED
+  BUDGET_THRESHOLD
+  QUOTE_EXPIRED
+  CUSTOM
+}
+
+enum AlertRecipientType {
+  MASTER_ADMIN
+  WEDDING_PLANNER
+  COUPLE
+  GUEST
+}
+
+enum AlertStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  PARTIAL
+  FAILED
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  SKIPPED
+}
+
+/// Alert rule: defines WHEN to fire an alert, to WHOM, and via which CHANNELS.
+/// Scope hierarchy: wedding_id set → per-wedding; only planner_id → all weddings
+/// of that planner; both null → master/global rule.
+model AlertRule {
+  id                  String           @id @default(uuid())
+  name                String
+  description         String?          @db.Text
+  event_type          AlertEventType
+
+  // Scope
+  planner_id          String?
+  wedding_id          String?
+
+  // Recipient flags
+  notify_master_admin Boolean          @default(false)
+  notify_planner      Boolean          @default(false)
+  notify_couple       Boolean          @default(false)
+  notify_guest_ids    String[]         @default([]) // Family IDs
+
+  // Channel preference (order = priority; first with contact info wins)
+  channels            Channel[]
+
+  // Message template ({{variable}} placeholders supported)
+  subject             String           // Used as email subject
+  body                String           @db.Text
+
+  // Control
+  enabled             Boolean          @default(true)
+  cooldown_minutes    Int?             // Min minutes between same event_type per wedding
+
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+
+  planner             WeddingPlanner?  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  wedding             Wedding?         @relation("WeddingAlertRules", fields: [wedding_id], references: [id], onDelete: Cascade)
+  alerts              Alert[]
+
+  @@index([event_type, enabled])
+  @@index([planner_id])
+  @@index([wedding_id])
+  @@map("alert_rules")
+}
+
+/// One Alert is created every time a rule fires. Its status summarises delivery outcomes.
+model Alert {
+  id           String         @id @default(uuid())
+  rule_id      String?
+  event_type   AlertEventType
+  wedding_id   String?
+  planner_id   String?
+
+  metadata     Json           @default("{}")
+
+  status       AlertStatus    @default(PENDING)
+
+  created_at   DateTime       @default(now())
+  processed_at DateTime?
+
+  rule         AlertRule?     @relation(fields: [rule_id], references: [id], onDelete: SetNull)
+  wedding      Wedding?       @relation("WeddingAlerts", fields: [wedding_id], references: [id], onDelete: Cascade)
+  deliveries   AlertDelivery[]
+
+  @@index([event_type])
+  @@index([wedding_id])
+  @@index([planner_id])
+  @@index([status])
+  @@index([created_at])
+  @@map("alerts")
+}
+
+/// One AlertDelivery per (alert × recipient × channel). Tracks retries individually.
+model AlertDelivery {
+  id              String             @id @default(uuid())
+  alert_id        String
+
+  recipient_type  AlertRecipientType
+  recipient_id    String
+  recipient_name  String?
+  recipient_email String?
+  recipient_phone String?
+  recipient_language Language        @default(EN)
+
+  channel         Channel
+
+  // Rendered content (stored at creation time so retries use identical content)
+  subject         String?
+  body            String             @db.Text
+
+  status          DeliveryStatus     @default(PENDING)
+
+  attempts        Int                @default(0)
+  max_attempts    Int                @default(3)
+  next_retry_at   DateTime?
+  last_error      String?            @db.Text
+
+  external_id     String?            // Resend message ID or Twilio SID
+
+  sent_at         DateTime?
+  delivered_at    DateTime?
+  failed_at       DateTime?
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @updatedAt
+
+  alert           Alert              @relation(fields: [alert_id], references: [id], onDelete: Cascade)
+
+  @@index([alert_id])
+  @@index([status])
+  @@index([status, next_retry_at])
+  @@index([recipient_type, recipient_id])
+  @@map("alert_deliveries")
 }
 
 // -----------------------------------------------------------------------------

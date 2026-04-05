@@ -385,7 +385,9 @@
       "templates": "Standardvorlagen",
       "templatesSubtitle": "Nachrichtenvorlagen für alle Hochzeiten anpassen",
       "noWeddings": "Noch keine Hochzeiten",
-      "noWeddingsSubtitle": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit."
+      "noWeddingsSubtitle": "Beginnen Sie mit der Erstellung Ihrer ersten Hochzeit.",
+      "alertSettings": "Benachrichtigungen",
+      "alertSettingsSubtitle": "Planner-Benachrichtigungen konfigurieren"
     },
     "checklistTemplate": {
       "title": "Checklisten-Vorlage",
@@ -1074,6 +1076,24 @@
         "textSelectedMessage": "fügen Sie unten einen Kommentar hinzu, um diesen Abschnitt für Ihren Planer zu markieren.",
         "selectTextInstruction": "Wählen Sie einen beliebigen Text aus und fügen Sie einen Kommentar hinzu, um ihn für Ihren Hochzeitsplaner zu markieren."
       }
+    },
+    "alertSettings": {
+      "title": "Benachrichtigungen",
+      "subtitle": "Konfigurieren Sie, wann und wie Sie Benachrichtigungen über Ihre Aktivitäten erhalten möchten.",
+      "forYou": "Für Sie",
+      "forYouSubtitle": "Benachrichtigungen, die Sie direkt per E-Mail oder Telefon erhalten",
+      "financialControl": "Finanzkontrolle",
+      "financialControlSubtitle": "Benachrichtigungen zu Angeboten, Verträgen und Zahlungen",
+      "quoteExpiredName": "Abgelaufenes Angebot",
+      "quoteExpiredDescription": "Erhalten Sie eine Benachrichtigung, wenn ein Angebot den Status abgelaufen erhält",
+      "channelEmail": "E-Mail",
+      "channelSms": "SMS",
+      "channelWhatsapp": "WhatsApp",
+      "channelHint": "Mindestens ein Kanal muss aktiv bleiben",
+      "footer": "Stellen Sie sicher, dass Ihre E-Mail und Telefonnummer aktuell sind in",
+      "footerLink": "Ihrem Unternehmensprofil",
+      "alertSettings": "Benachrichtigungen",
+      "alertSettingsSubtitle": "Planner-Benachrichtigungen konfigurieren"
     }
   },
   "admin": {

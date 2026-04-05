@@ -393,7 +393,9 @@
       "templates": "Default Templates",
       "templatesSubtitle": "Customize default message templates for all weddings",
       "noWeddings": "No weddings yet",
-      "noWeddingsSubtitle": "Get started by creating your first wedding."
+      "noWeddingsSubtitle": "Get started by creating your first wedding.",
+      "alertSettings": "Alerts",
+      "alertSettingsSubtitle": "Configure planner notifications"
     },
     "checklistTemplate": {
       "title": "Checklist Template",
@@ -1082,6 +1084,24 @@
         "textSelectedMessage": "add a comment below to flag this section for your planner.",
         "selectTextInstruction": "Select any text and add a comment below to flag it for your wedding planner."
       }
+    },
+    "alertSettings": {
+      "title": "Alerts & Notifications",
+      "subtitle": "Configure when and how you want to receive notifications about your activity.",
+      "forYou": "For you",
+      "forYouSubtitle": "Alerts you will receive directly by email or phone",
+      "financialControl": "Financial control",
+      "financialControlSubtitle": "Alerts about quotes, contracts and payments",
+      "quoteExpiredName": "Expired quote",
+      "quoteExpiredDescription": "Receive an alert when a quote passes to the expired status",
+      "channelEmail": "Email",
+      "channelSms": "SMS",
+      "channelWhatsapp": "WhatsApp",
+      "channelHint": "At least one channel must remain active",
+      "footer": "Make sure your email and phone are up to date in",
+      "footerLink": "your company profile",
+      "alertSettings": "Alerts",
+      "alertSettingsSubtitle": "Configure planner notifications"
     }
   },
   "admin": {

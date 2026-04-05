@@ -385,7 +385,9 @@
       "templates": "Modèles par Défaut",
       "templatesSubtitle": "Personnaliser les modèles de messages pour tous les mariages",
       "noWeddings": "Pas encore de mariages",
-      "noWeddingsSubtitle": "Commencez par créer votre premier mariage."
+      "noWeddingsSubtitle": "Commencez par créer votre premier mariage.",
+      "alertSettings": "Alertes",
+      "alertSettingsSubtitle": "Configurer les notifications du planificateur"
     },
     "checklistTemplate": {
       "title": "Modèle de Liste de Tâches",
@@ -1074,6 +1076,24 @@
         "textSelectedMessage": "ajoutez un commentaire ci-dessous pour signaler cette section à votre planificateur.",
         "selectTextInstruction": "Sélectionnez n'importe quel texte et ajoutez un commentaire pour le signaler à votre wedding planner."
       }
+    },
+    "alertSettings": {
+      "title": "Alertes et notifications",
+      "subtitle": "Configurez quand et comment vous souhaitez recevoir des notifications sur votre activité.",
+      "forYou": "Pour vous",
+      "forYouSubtitle": "Alertes que vous recevrez directement par email ou téléphone",
+      "financialControl": "Contrôle financier",
+      "financialControlSubtitle": "Alertes sur les devis, contrats et paiements",
+      "quoteExpiredName": "Devis expiré",
+      "quoteExpiredDescription": "Recevez une alerte lorsqu'un devis passe au statut expiré",
+      "channelEmail": "Email",
+      "channelSms": "SMS",
+      "channelWhatsapp": "WhatsApp",
+      "channelHint": "Au moins un canal doit rester actif",
+      "footer": "Assurez-vous que votre email et téléphone sont à jour dans",
+      "footerLink": "votre profil d'entreprise",
+      "alertSettings": "Alertes",
+      "alertSettingsSubtitle": "Configurer les notifications du planificateur"
     }
   },
   "admin": {

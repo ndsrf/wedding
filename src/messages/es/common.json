@@ -389,7 +389,9 @@
       "templates": "Plantillas Predeterminadas",
       "templatesSubtitle": "Personalizar plantillas de mensajes para todas las bodas",
       "noWeddings": "Aún no hay bodas",
-      "noWeddingsSubtitle": "Empieza creando tu primera boda."
+      "noWeddingsSubtitle": "Empieza creando tu primera boda.",
+      "alertSettings": "Alertas",
+      "alertSettingsSubtitle": "Configura las notificaciones del planner"
     },
     "checklistTemplate": {
       "title": "Plantilla de Lista de Tareas",
@@ -1078,6 +1080,24 @@
         "textSelectedMessage": "añade un comentario a continuación para marcar esta sección para tu planificador.",
         "selectTextInstruction": "Selecciona cualquier texto y añade un comentario para marcarlo para tu organizador de bodas."
       }
+    },
+    "alertSettings": {
+      "title": "Alertas y notificaciones",
+      "subtitle": "Configura cuándo y cómo quieres recibir notificaciones sobre tu actividad.",
+      "forYou": "Para ti",
+      "forYouSubtitle": "Alertas que recibirás directamente en tu email o teléfono",
+      "financialControl": "Control financiero",
+      "financialControlSubtitle": "Alertas sobre presupuestos, contratos y pagos",
+      "quoteExpiredName": "Presupuesto caducado",
+      "quoteExpiredDescription": "Recibe una alerta cuando un presupuesto pasa al estado caducado",
+      "channelEmail": "Email",
+      "channelSms": "SMS",
+      "channelWhatsapp": "WhatsApp",
+      "channelHint": "Debe haber al menos un canal activo",
+      "footer": "Asegúrate de tener tu email y teléfono actualizados en",
+      "footerLink": "tu perfil de empresa",
+      "alertSettings": "Alertas",
+      "alertSettingsSubtitle": "Configura las notificaciones del planner"
     }
   },
   "admin": {

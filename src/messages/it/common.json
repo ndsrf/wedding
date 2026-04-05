@@ -385,7 +385,9 @@
       "templates": "Modelli Predefiniti",
       "templatesSubtitle": "Personalizza i modelli di messaggio per tutti i matrimoni",
       "noWeddings": "Ancora nessun matrimonio",
-      "noWeddingsSubtitle": "Inizia creando il tuo primo matrimonio."
+      "noWeddingsSubtitle": "Inizia creando il tuo primo matrimonio.",
+      "alertSettings": "Avvisi",
+      "alertSettingsSubtitle": "Configura le notifiche del planner"
     },
     "checklistTemplate": {
       "title": "Modello di Lista di Controllo",
@@ -1074,6 +1076,24 @@
         "textSelectedMessage": "aggiungi un commento di seguito per segnalare questa sezione al tuo pianificatore.",
         "selectTextInstruction": "Seleziona qualsiasi testo e aggiungi un commento per segnalarlo al tuo wedding planner."
       }
+    },
+    "alertSettings": {
+      "title": "Avvisi e notifiche",
+      "subtitle": "Configura quando e come vuoi ricevere notifiche sulla tua attività.",
+      "forYou": "Per te",
+      "forYouSubtitle": "Avvisi che riceverai direttamente via email o telefono",
+      "financialControl": "Controllo finanziario",
+      "financialControlSubtitle": "Avvisi su preventivi, contratti e pagamenti",
+      "quoteExpiredName": "Preventivo scaduto",
+      "quoteExpiredDescription": "Ricevi un avviso quando un preventivo passa allo stato scaduto",
+      "channelEmail": "Email",
+      "channelSms": "SMS",
+      "channelWhatsapp": "WhatsApp",
+      "channelHint": "Almeno un canale deve rimanere attivo",
+      "footer": "Assicurati che email e telefono siano aggiornati nel",
+      "footerLink": "tuo profilo aziendale",
+      "alertSettings": "Avvisi",
+      "alertSettingsSubtitle": "Configura le notifiche del planner"
     }
   },
   "admin": {

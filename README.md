@@ -17,6 +17,7 @@ The Wedding Management App enables wedding planners to manage multiple weddings 
 - **Mobile-first design** optimized for WhatsApp in-app browsers
 - **Custom theme system** for wedding branding
 - **Quotes & Finances** — full income management for wedding planners (quotes, contracts, eSignature, invoices)
+- **Alert system** — async multi-channel alerts (email/SMS/WhatsApp) to admins, planners, the couple, or specific guests; configurable rules with retry logic and full delivery tracking
 
 ## Tech Stack
 
@@ -783,6 +784,7 @@ You can use the same secret for all environments or generate separate ones for b
 - `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
 - `MASTER_ADMIN_EMAILS` - Comma-separated admin emails
 - `ROLE_REVALIDATION_INTERVAL_MINUTES` - How often (in minutes) to re-validate a logged-in user's role against the database; lower values detect permission changes faster, higher values reduce DB load (default: 60)
+- `CRON_SECRET` - Secret used to authenticate calls to `/api/cron/alerts`; required on Vercel (Vercel sets this header automatically), optional on self-hosted (endpoint is only called internally)
 
 ### SSL/HTTPS Configuration
 
@@ -1416,6 +1418,163 @@ GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 # Must match the domain registered in Google Cloud Console redirect URIs
 APP_URL=https://your-domain.com
 ```
+
+### Alert System
+
+The platform includes a robust asynchronous alert infrastructure to notify admins, planners, the couple, and specific guests when events occur (RSVP submissions, payments received, tasks overdue, etc.).
+
+#### How it works
+
+```
+Event occurs in app
+  → triggerAlert({ event_type, wedding_id, metadata })
+    → matching AlertRules resolved (by event_type + scope)
+      → AlertDelivery rows created per (recipient × channel)
+        → immediate fire-and-forget dispatch
+        → Cron/scheduler retries any failures (up to 3 attempts)
+```
+
+Each delivery is tracked individually in the `alert_deliveries` table with full status history (`PENDING → SENDING → SENT / FAILED`).
+
+#### Triggering alerts from code
+
+```typescript
+import { triggerAlert } from '@/lib/alerts';
+
+// Fire-and-forget — does not block the request
+void triggerAlert({
+  event_type: 'RSVP_SUBMITTED',
+  wedding_id: 'uuid',
+  metadata: {
+    familyName: 'García',
+    attending: '4',
+  },
+});
+```
+
+**Supported event types**: `RSVP_SUBMITTED` · `RSVP_UPDATED` · `PAYMENT_RECEIVED` · `TASK_COMPLETED` · `TASK_OVERDUE` · `GUEST_ADDED` · `CONTRACT_SIGNED` · `BUDGET_THRESHOLD` · `CUSTOM`
+
+#### Recipients
+
+A rule can notify any combination of:
+
+| Recipient type | Who |
+|---|---|
+| `MASTER_ADMIN` | All platform super-admins |
+| `WEDDING_PLANNER` | The planner who owns the wedding |
+| `COUPLE` | All `WeddingAdmin` records for that wedding |
+| `GUEST` | Specific `Family` IDs listed in `notify_guest_ids` |
+
+#### Channels
+
+Channels are listed in order of preference per rule. The system picks the first channel for which the recipient has valid contact info:
+
+- `EMAIL` — via Resend (`RESEND_API_KEY` required)
+- `SMS` — via Twilio (`TWILIO_ACCOUNT_SID` + `TWILIO_PHONE_NUMBER` required)
+- `WHATSAPP` — via Twilio (`TWILIO_WHATSAPP_NUMBER` required)
+
+#### Message templates
+
+Rule `subject` and `body` fields support `{{variable}}` placeholders:
+
+| Variable | Value |
+|---|---|
+| `{{coupleNames}}` | Wedding couple names |
+| `{{weddingDate}}` | Wedding date (formatted) |
+| `{{familyName}}` | Guest family name |
+| `{{recipientName}}` | Name of the person receiving the alert |
+| `{{amount}}` | Payment amount (when applicable) |
+| `{{taskTitle}}` | Task title (when applicable) |
+| Any key from `metadata` | Passed through directly |
+
+**Example body:**
+```
+{{recipientName}}, a new RSVP has been received from the {{familyName}} family for {{coupleNames}}'s wedding on {{weddingDate}}.
+```
+
+#### Alert rule scope
+
+Rules have a three-level scope hierarchy:
+
+| `planner_id` | `wedding_id` | Scope |
+|---|---|---|
+| set | null | All weddings of that planner |
+| set | set | A specific wedding only |
+| null | null | Global — fires for every wedding on the platform |
+
+#### Managing rules
+
+Rules are managed via the API:
+
+```bash
+# Planner: list rules
+GET /api/planner/alert-rules?wedding_id=<uuid>
+
+# Planner: create rule
+POST /api/planner/alert-rules
+{
+  "name": "RSVP received",
+  "event_type": "RSVP_SUBMITTED",
+  "notify_planner": true,
+  "notify_couple": true,
+  "channels": ["EMAIL", "WHATSAPP"],
+  "subject": "New RSVP — {{coupleNames}}",
+  "body": "{{familyName}} has confirmed attendance.",
+  "cooldown_minutes": 5
+}
+
+# Planner: update / delete a rule
+PATCH /api/planner/alert-rules/:id
+DELETE /api/planner/alert-rules/:id
+
+# Master admin: global rules
+GET  /api/master/alert-rules
+POST /api/master/alert-rules
+PATCH /api/master/alert-rules/:id
+DELETE /api/master/alert-rules/:id
+
+# Wedding admin: view alert history for their wedding
+GET /api/admin/alert-history?page=1&limit=20&event_type=RSVP_SUBMITTED
+```
+
+#### Background processing
+
+**On Vercel** (`PLATFORM_OPTIMIZATION=vercel`):
+- `vercel.json` configures a daily cron job (`0 8 * * *`, 08:00 UTC) that calls `GET /api/cron/alerts` as a retry sweep — compatible with Vercel Hobby plan
+- Immediate delivery is handled by the fire-and-forget processor called inside `triggerAlert()`, so most alerts are sent within seconds of the event
+- Add `CRON_SECRET` to your Vercel environment variables (any random string)
+
+**On Docker / self-hosted** (`PLATFORM_OPTIMIZATION=docker` or `standard`):
+- An in-process `setInterval` scheduler starts automatically at server boot via `instrumentation.ts`
+- No extra configuration needed
+
+```bash
+# Required on Vercel — prevents unauthorised cron invocations
+CRON_SECRET=your-random-secret   # openssl rand -base64 32
+```
+
+#### Retry logic
+
+Failed deliveries are retried automatically with exponential backoff:
+
+| Attempt | Retry delay |
+|---|---|
+| 1st failure | 5 minutes |
+| 2nd failure | 15 minutes |
+| 3rd failure | 60 minutes |
+| After 3 failures | Marked as permanently `FAILED` |
+
+The parent `Alert` status is computed from all its deliveries: `COMPLETED` (all sent) · `PARTIAL` (some sent, some failed) · `FAILED` (all failed).
+
+#### Database migration
+
+The alert system adds three new tables. Run after deploying:
+
+```bash
+npx prisma migrate deploy
+```
+
+New tables: `alert_rules`, `alerts`, `alert_deliveries`
 
 ### Building and Pushing Images (CI/CD)
 
