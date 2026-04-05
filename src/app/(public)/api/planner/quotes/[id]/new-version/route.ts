@@ -28,6 +28,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       await prisma.quote.update({ where: { id: existing.id }, data: { pdf_url: null } });
     }
 
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const newExpiresAt = existing.status === 'EXPIRED'
+      ? thirtyDaysFromNow
+      : existing.expires_at;
+
     const newQuote = await prisma.quote.create({
       data: {
         planner_id: existing.planner_id,
@@ -41,7 +47,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         discount: existing.discount,
         tax_rate: existing.tax_rate,
         total: existing.total,
-        expires_at: existing.expires_at,
+        expires_at: newExpiresAt,
         status: 'DRAFT',
         version: existing.version + 1,
         previous_version_id: existing.id,

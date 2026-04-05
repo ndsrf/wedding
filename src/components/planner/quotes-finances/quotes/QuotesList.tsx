@@ -90,7 +90,7 @@ export function QuotesList({ initialRef }: { initialRef?: string }) {
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [creatingContract, setCreatingContract] = useState(false);
   const [creatingVersion, setCreatingVersion] = useState<string | null>(null);
-  const [newVersionError, setNewVersionError] = useState<string | null>(null);
+  const [newVersionError, setNewVersionError] = useState<Record<string, string>>({});
 
   // Version history state (used when viewing a quote)
   const [versionChain, setVersionChain] = useState<VersionSummary[]>([]);
@@ -264,13 +264,13 @@ export function QuotesList({ initialRef }: { initialRef?: string }) {
 
   async function handleNewVersion(id: string) {
     setCreatingVersion(id);
-    setNewVersionError(null);
+    setNewVersionError((prev) => { const next = { ...prev }; delete next[id]; return next; });
     const res = await fetch(`/api/planner/quotes/${id}/new-version`, { method: 'POST' });
     if (res.ok) {
       fetchQuotes();
     } else {
       const json = await res.json().catch(() => ({}));
-      setNewVersionError(json.error ?? t('quotes.newVersionError'));
+      setNewVersionError((prev) => ({ ...prev, [id]: json.error ?? t('quotes.newVersionError') }));
     }
     setCreatingVersion(null);
   }
@@ -648,8 +648,8 @@ export function QuotesList({ initialRef }: { initialRef?: string }) {
                       )}
                       {creatingVersion === quote.id ? t('quotes.newVersionCreating') : t('quotes.newVersion')}
                     </button>
-                    {newVersionError && creatingVersion === null && (
-                      <p className="text-xs text-red-600">{newVersionError}</p>
+                    {newVersionError[quote.id] && (
+                      <p className="text-xs text-red-600">{newVersionError[quote.id]}</p>
                     )}
                   </div>
                 )}
