@@ -13,5 +13,7 @@
 
 export { triggerAlert } from './trigger';
 export { processPendingDeliveries } from './processor';
+export { processExpiredQuotes } from './quote-expiry';
+export { BUILTIN_ALERTS, builtinRuleName, findDefinition } from './definitions';
 export type { AlertContext } from './types';
 export type { AlertTemplateVars } from './types';

@@ -45,11 +45,11 @@ export async function register() {
       const platform = getPlatformOptimization();
 
       if (platform !== 'vercel') {
-        const { processPendingDeliveries } = await import('@/lib/alerts/processor');
+        const { runCronJobs } = await import('@/lib/cron/runner');
 
-        // Run once on startup to catch any pending deliveries left from a restart
-        processPendingDeliveries(50).catch((err) =>
-          console.error('[Alerts] Startup processing error:', err),
+        // Run once on startup to flush any pending deliveries from before restart
+        runCronJobs().catch((err) =>
+          console.error('[Alerts] Startup run error:', err),
         );
 
         // Then run every 60 seconds
@@ -57,15 +57,10 @@ export async function register() {
         let running = false;
 
         setInterval(async () => {
-          if (running) return; // skip if previous run still in progress
+          if (running) return;
           running = true;
           try {
-            const result = await processPendingDeliveries(50);
-            if (result.processed > 0) {
-              console.log(
-                `[Alerts] Processed ${result.processed} deliveries — succeeded=${result.succeeded} failed=${result.failed}`,
-              );
-            }
+            await runCronJobs();
           } catch (err) {
             console.error('[Alerts] Scheduler error:', err);
           } finally {
