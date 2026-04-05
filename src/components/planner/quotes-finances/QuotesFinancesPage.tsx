@@ -73,7 +73,7 @@ export function QuotesFinancesPage({ summary: initialSummary, initialTab, initia
     try {
       const { start, end } = computeDateRange(newFilter);
       const result = await getFilteredSummary(start, end);
-      if (result) setSummary(result);
+      setSummary(result ?? undefined);
     } finally {
       setLoadingSummary(false);
     }
