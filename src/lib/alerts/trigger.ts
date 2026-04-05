@@ -83,10 +83,12 @@ export async function triggerAlert(context: AlertContext): Promise<void> {
       await processRule(rule, context, metadata, wedding_id, planner_id);
     }
 
-    // Dispatch immediately in background.
+    // Dispatch immediately in background — unless the caller handles it themselves.
     // On Vercel: defer() uses waitUntil() to keep the function alive.
     // Elsewhere: fire-and-forget — the in-process scheduler is the safety net.
-    defer(processPendingDeliveries(20));
+    if (!context.skipDispatch) {
+      defer(processPendingDeliveries(20));
+    }
   } catch (err) {
     // Never let alert failures propagate to the caller
     console.error('[ALERT] triggerAlert error:', err);
@@ -143,22 +145,12 @@ async function processRule(
     eventType: context.event_type,
   });
 
-  // Create the Alert record
-  const alert = await prisma.alert.create({
-    data: {
-      rule_id: rule.id,
-      event_type: context.event_type,
-      wedding_id: wedding_id ?? null,
-      planner_id: planner_id ?? null,
-      metadata: metadata as Prisma.InputJsonValue,
-      status: 'PENDING',
-    },
-  });
+  // Build delivery specs BEFORE creating the Alert so we can skip the whole
+  // thing if no recipient has a valid channel — avoids orphaned PENDING Alerts.
+  type DeliverySpec = Omit<Prisma.AlertDeliveryCreateManyInput, 'alert_id'>;
 
-  // De-duplicate recipients by (id, channel) — a person can appear multiple
-  // times if they match several notification criteria (e.g. planner + couple).
   const seen = new Set<string>();
-  const deliveryData: Prisma.AlertDeliveryCreateManyInput[] = [];
+  const specs: DeliverySpec[] = [];
 
   for (const recipient of recipients) {
     const channel = resolveChannel(rule.channels, recipient);
@@ -173,40 +165,54 @@ async function processRule(
     if (seen.has(dedupKey)) continue;
     seen.add(dedupKey);
 
-    // Format weddingDate using the recipient's preferred locale
     const locale = LANGUAGE_LOCALE[recipient.language] ?? 'en-GB';
     const weddingDate = weddingDetails?.wedding_date?.toLocaleDateString(locale);
 
     const vars = { ...baseVars, weddingDate, recipientName: recipient.name };
-    const subject = renderAlertTemplate(rule.subject, vars);
-    const body = renderAlertTemplate(rule.body, vars);
 
-    // For WhatsApp we store the WA number in recipient_phone
-    const phone =
-      channel === 'WHATSAPP'
-        ? (recipient.whatsapp ?? recipient.phone)
-        : recipient.phone;
-
-    deliveryData.push({
-      alert_id: alert.id,
+    specs.push({
       recipient_type: recipient.type,
       recipient_id: recipient.id,
       recipient_name: recipient.name,
       recipient_email: recipient.email ?? null,
-      recipient_phone: phone ?? null,
+      recipient_phone:
+        channel === 'WHATSAPP'
+          ? (recipient.whatsapp ?? recipient.phone ?? null)
+          : (recipient.phone ?? null),
       recipient_language: recipient.language,
       channel,
-      subject,
-      body,
-      status: 'PENDING',
+      subject: renderAlertTemplate(rule.subject, vars),
+      body: renderAlertTemplate(rule.body, vars),
+      status: 'PENDING' as const,
       max_attempts: 3,
     });
   }
 
-  if (deliveryData.length > 0) {
-    await prisma.alertDelivery.createMany({ data: deliveryData });
+  // No valid deliveries — skip creating the Alert entirely
+  if (specs.length === 0) {
     console.log(
-      `[ALERT] Created ${deliveryData.length} deliveries for rule "${rule.name}" (alert ${alert.id})`,
+      `[ALERT] No deliverable recipients for rule "${rule.name}" (no valid channels), skipping.`,
     );
+    return;
   }
+
+  // Create Alert only now that we know there is work to do
+  const alert = await prisma.alert.create({
+    data: {
+      rule_id: rule.id,
+      event_type: context.event_type,
+      wedding_id: wedding_id ?? null,
+      planner_id: planner_id ?? null,
+      metadata: metadata as Prisma.InputJsonValue,
+      status: 'PENDING',
+    },
+  });
+
+  await prisma.alertDelivery.createMany({
+    data: specs.map((s) => ({ ...s, alert_id: alert.id })),
+  });
+
+  console.log(
+    `[ALERT] Created ${specs.length} deliveries for rule "${rule.name}" (alert ${alert.id})`,
+  );
 }

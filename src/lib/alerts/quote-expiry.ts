@@ -51,10 +51,13 @@ export async function processExpiredQuotes(): Promise<ExpiredQuotesResult> {
         data: { status: 'EXPIRED' },
       });
 
-      // Fire alert (fire-and-forget — triggerAlert never throws)
-      void triggerAlert({
+      // Queue alert deliveries sequentially.
+      // skipDispatch=true prevents N concurrent processPendingDeliveries calls —
+      // the cron's alertDeliveriesJob dispatches everything in one pass after this loop.
+      await triggerAlert({
         event_type: 'QUOTE_EXPIRED',
         planner_id: quote.planner_id,
+        skipDispatch: true,
         metadata: {
           quoteId: quote.id,
           coupleNames: quote.couple_names,

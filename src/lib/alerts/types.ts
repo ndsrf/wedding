@@ -24,6 +24,12 @@ export interface AlertContext {
   planner_id?: string;
   /** Arbitrary key/value pairs rendered into the alert template */
   metadata?: Record<string, string | number | boolean | null | undefined>;
+  /**
+   * When true, skip the immediate fire-and-forget dispatch after queuing deliveries.
+   * Use this in batch callers (e.g. the cron) where a single processor run will
+   * follow and dispatch everything at once, avoiding N concurrent processor calls.
+   */
+  skipDispatch?: boolean;
 }
 
 // ── Resolved recipient ────────────────────────────────────────────────────────

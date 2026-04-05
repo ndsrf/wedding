@@ -26,13 +26,21 @@ export interface ProcessResult {
 export async function processPendingDeliveries(limit = 50): Promise<ProcessResult> {
   const now = new Date();
 
+  // Deliveries stuck in SENDING for more than 10 minutes indicate a worker that
+  // crashed mid-send. Reset their status to PENDING so they are re-dispatched.
+  const stuckCutoff = new Date(now.getTime() - 10 * 60 * 1000);
+  await prisma.alertDelivery.updateMany({
+    where: { status: 'SENDING', updated_at: { lte: stuckCutoff } },
+    data: { status: 'PENDING', next_retry_at: null },
+  });
+
   // Prisma doesn't support cross-field comparisons (attempts < max_attempts),
   // so we fetch broadly and filter in JS.
   const deliveries = await prisma.alertDelivery.findMany({
     where: {
       status: { in: ['PENDING', 'FAILED'] },
       OR: [
-        { status: 'PENDING', next_retry_at: null },
+        { next_retry_at: null },
         { next_retry_at: { lte: now } },
       ],
     },
