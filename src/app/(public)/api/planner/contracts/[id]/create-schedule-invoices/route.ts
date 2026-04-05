@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
@@ -7,6 +8,14 @@ function buildSerie(year: number): string {
   return `PRO-${yearShort}`;
 }
 
+/**
+ * Allocates the next sequential invoice number within the transaction.
+ * Since we call this in a loop inside a single transaction, each call sees
+ * the previous iteration's insert, so numbers are allocated gap-free.
+ * Concurrent requests from other transactions are protected by the unique
+ * constraint on (planner_id, serie, numero); a P2002 violation is caught
+ * at the call site and surfaced as a 409.
+ */
 async function allocateInvoiceNumber(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
   plannerId: string,
@@ -53,17 +62,22 @@ function computeDate(
   return null;
 }
 
+/** Round to 2 decimal places using integer arithmetic to avoid float drift. */
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole('planner');
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
 
-    // Load contract with quote, customer, schedule items, and existing invoices
+    // Load contract with quote (including tax_rate), customer, schedule items, and existing invoices
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
-        quote: { select: { id: true, total: true, currency: true, customer_id: true } },
+        quote: { select: { id: true, total: true, currency: true, customer_id: true, tax_rate: true } },
         customer: { select: { id: true, name: true, email: true, id_number: true, address: true } },
         payment_schedule_items: { orderBy: { order: 'asc' } },
         invoices: { select: { id: true }, take: 1 },
@@ -72,7 +86,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Validations
+    // Collect all validation errors before returning
     const errors: string[] = [];
 
     if (contract.status !== 'SIGNED') {
@@ -81,14 +95,6 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     if (contract.invoices.length > 0) {
       errors.push('Ya existen facturas para este contrato. No se puede crear un calendario de pagos.');
-    }
-
-    if (!contract.payment_schedule_wedding_date && contract.payment_schedule_items.some(i => i.reference_date === 'WEDDING_DATE')) {
-      errors.push('Falta la fecha de la boda en el calendario de pagos.');
-    }
-
-    if (!contract.payment_schedule_signing_date && contract.payment_schedule_items.some(i => i.reference_date === 'SIGNING_DATE')) {
-      errors.push('Falta la fecha de firma en el calendario de pagos.');
     }
 
     if (contract.payment_schedule_items.length === 0) {
@@ -100,40 +106,49 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       errors.push('Todos los hitos del calendario deben tener una descripción.');
     }
 
-    // Validate computed dates exist for all items
     const weddingDate = contract.payment_schedule_wedding_date;
     const signingDate = contract.payment_schedule_signing_date;
 
-    const missingDates = contract.payment_schedule_items.filter(item => {
-      const d = computeDate(
+    if (!weddingDate && contract.payment_schedule_items.some(i => i.reference_date === 'WEDDING_DATE')) {
+      errors.push('Falta la fecha de la boda en el calendario de pagos.');
+    }
+
+    if (!signingDate && contract.payment_schedule_items.some(i => i.reference_date === 'SIGNING_DATE')) {
+      errors.push('Falta la fecha de firma en el calendario de pagos.');
+    }
+
+    const missingDates = contract.payment_schedule_items.filter(item =>
+      computeDate(
         { reference_date: item.reference_date, days_offset: item.days_offset, fixed_date: item.fixed_date },
         weddingDate,
         signingDate,
-      );
-      return d === null;
-    });
-
+      ) === null,
+    );
     if (missingDates.length > 0) {
       errors.push('Algunos hitos del calendario no tienen fecha calculable. Comprueba las fechas de referencia.');
     }
 
     if (!contract.quote) {
-      errors.push('El contrato no tiene un presupuesto asociado. Se necesita el total del presupuesto para calcular los importes.');
+      errors.push('El contrato no tiene un presupuesto asociado. Se necesita el total para calcular los importes.');
     }
 
     if (errors.length > 0) {
-      return NextResponse.json({ error: errors.join(' ') }, { status: 422 });
+      return NextResponse.json({ error: errors.join('\n') }, { status: 422 });
     }
 
     const quoteTotal = Number(contract.quote!.total);
+    const quoteTaxRate = contract.quote!.tax_rate != null ? Number(contract.quote!.tax_rate) : null;
     const currency = contract.quote!.currency ?? 'EUR';
     const customerId = contract.customer?.id ?? contract.quote?.customer_id ?? null;
 
-    // Compute invoice amounts (percentage of remaining)
+    // Compute invoice amounts (each PERCENTAGE is a % of the remaining balance)
     let remaining = quoteTotal;
     const invoiceData: Array<{
       description: string;
-      amount: number;
+      total: number;
+      subtotal: number;
+      tax_rate: number | null;
+      tax_amount: number | null;
       issuedAt: Date;
     }> = [];
 
@@ -144,24 +159,32 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         signingDate,
       )!;
 
-      let amount: number;
+      let total: number;
       if (item.amount_type === 'FIXED') {
-        amount = Math.min(Number(item.amount_value), remaining);
+        total = round2(Math.min(Number(item.amount_value), remaining));
       } else {
-        // PERCENTAGE: percentage of remaining
-        amount = (remaining * Number(item.amount_value)) / 100;
+        total = round2((remaining * Number(item.amount_value)) / 100);
       }
-      amount = Math.round(amount * 100) / 100; // round to 2 decimals
-      remaining = Math.max(0, Math.round((remaining - amount) * 100) / 100);
+      remaining = round2(Math.max(0, remaining - total));
 
-      invoiceData.push({
-        description: item.description,
-        amount,
-        issuedAt,
-      });
+      // Back-calculate subtotal and tax from the tax-inclusive milestone total.
+      // The quote total already includes tax, so each milestone share inherits the same rate.
+      let subtotal: number;
+      let tax_amount: number | null;
+      if (quoteTaxRate && quoteTaxRate > 0) {
+        subtotal = round2(total / (1 + quoteTaxRate / 100));
+        tax_amount = round2(total - subtotal);
+      } else {
+        subtotal = total;
+        tax_amount = null;
+      }
+
+      invoiceData.push({ description: item.description, total, subtotal, tax_rate: quoteTaxRate, tax_amount, issuedAt });
     }
 
-    // Create all proforma invoices in a transaction
+    // Create all proforma invoices sequentially within one transaction.
+    // Sequential allocation means each call to allocateInvoiceNumber sees the
+    // previous insert (same-transaction visibility), so numbers are gap-free.
     const created = await prisma.$transaction(async (tx) => {
       const invoices = [];
       for (const inv of invoiceData) {
@@ -182,11 +205,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
             chain_hash: null,
             description: inv.description,
             currency,
-            subtotal: inv.amount,
+            subtotal: inv.subtotal,
             discount: null,
-            tax_rate: null,
-            tax_amount: null,
-            total: inv.amount,
+            tax_rate: inv.tax_rate,
+            tax_amount: inv.tax_amount,
+            total: inv.total,
             issued_at: inv.issuedAt,
             due_date: dueDate,
             line_items: {
@@ -194,8 +217,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
                 name: inv.description,
                 description: null,
                 quantity: 1,
-                unit_price: inv.amount,
-                total: inv.amount,
+                unit_price: inv.subtotal,
+                total: inv.subtotal,
               }],
             },
           },
@@ -207,6 +230,13 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ data: created }, { status: 201 });
   } catch (error) {
+    // Unique constraint violation means a concurrent request grabbed the same invoice number
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Conflicto de numeración: otro proceso generó facturas al mismo tiempo. Vuelve a intentarlo.' },
+        { status: 409 },
+      );
+    }
     console.error('[create-schedule-invoices]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

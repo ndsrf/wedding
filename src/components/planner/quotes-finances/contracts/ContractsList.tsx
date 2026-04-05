@@ -749,7 +749,7 @@ export function ContractsList({ onCreateInvoice }: ContractsListProps) {
 
                   {/* Error from schedule invoice creation */}
                   {scheduleInvoiceError && creatingScheduleInvoicesId === null && (
-                    <div className="w-full mt-1 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    <div className="w-full mt-1 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 whitespace-pre-line">
                       {scheduleInvoiceError}
                     </div>
                   )}
