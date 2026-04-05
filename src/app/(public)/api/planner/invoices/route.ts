@@ -96,7 +96,7 @@ async function allocateInvoiceNumber(
     numero = startNumber;
     previous_chain_hash = config.last_external_hash;
   } else {
-    numero = last.numero + 1;
+    numero = (last.numero ?? 0) + 1;
     previous_chain_hash = last.chain_hash;
   }
 
