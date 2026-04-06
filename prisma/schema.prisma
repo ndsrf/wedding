@@ -35,6 +35,9 @@ model WeddingPlanner {
   instagram           String?
   website             String?
   signature_url       String?
+  bank_account        String?
+  accepts_bizum       Boolean                    @default(false)
+  accepts_revolut     Boolean                    @default(false)
   // Billing series configuration
   invoice_series              String  @default("FAC")
   rectification_series        String  @default("REC")
