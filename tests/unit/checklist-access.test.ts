@@ -3,8 +3,9 @@
  *
  * Covers:
  *   - wedding_admin: access granted only to their own wedding
+ *   - wedding_admin: planner_id on the session must NOT affect the lookup (regression)
  *   - planner (main account): access granted to weddings they own
- *   - planner (sub-account): same check works via parent planner_id
+ *   - planner (sub-account): uses planner_id over user.id
  *   - cross-role and negative cases
  */
 
@@ -48,7 +49,10 @@ describe('verifyWeddingAccess — wedding_admin', () => {
   it('grants access when admin is assigned to the wedding', async () => {
     mockWeddingAdmin.mockResolvedValue({ id: ADMIN_ID, wedding_id: WEDDING_ID });
 
-    const result = await verifyWeddingAccess(ADMIN_ID, WEDDING_ID, 'wedding_admin');
+    const result = await verifyWeddingAccess(
+      { id: ADMIN_ID, role: 'wedding_admin' },
+      WEDDING_ID
+    );
 
     expect(result).toBe(true);
     expect(mockWeddingAdmin).toHaveBeenCalledWith({
@@ -59,7 +63,10 @@ describe('verifyWeddingAccess — wedding_admin', () => {
   it('denies access when admin belongs to a different wedding', async () => {
     mockWeddingAdmin.mockResolvedValue(null);
 
-    const result = await verifyWeddingAccess(ADMIN_ID, OTHER_WEDDING_ID, 'wedding_admin');
+    const result = await verifyWeddingAccess(
+      { id: ADMIN_ID, role: 'wedding_admin' },
+      OTHER_WEDDING_ID
+    );
 
     expect(result).toBe(false);
   });
@@ -67,7 +74,10 @@ describe('verifyWeddingAccess — wedding_admin', () => {
   it('denies access when a different admin ID is used for the wedding', async () => {
     mockWeddingAdmin.mockResolvedValue(null);
 
-    const result = await verifyWeddingAccess(OTHER_ADMIN_ID, WEDDING_ID, 'wedding_admin');
+    const result = await verifyWeddingAccess(
+      { id: OTHER_ADMIN_ID, role: 'wedding_admin' },
+      WEDDING_ID
+    );
 
     expect(result).toBe(false);
     expect(mockWedding).not.toHaveBeenCalled();
@@ -76,9 +86,25 @@ describe('verifyWeddingAccess — wedding_admin', () => {
   it('does not query the wedding table for wedding_admin', async () => {
     mockWeddingAdmin.mockResolvedValue({ id: ADMIN_ID, wedding_id: WEDDING_ID });
 
-    await verifyWeddingAccess(ADMIN_ID, WEDDING_ID, 'wedding_admin');
+    await verifyWeddingAccess({ id: ADMIN_ID, role: 'wedding_admin' }, WEDDING_ID);
 
     expect(mockWedding).not.toHaveBeenCalled();
+  });
+
+  it('uses user.id (not planner_id) when both are present on the session (regression)', async () => {
+    // wedding_admin sessions carry planner_id = the wedding's planner ID.
+    // The lookup must still use user.id, not planner_id.
+    mockWeddingAdmin.mockResolvedValue({ id: ADMIN_ID, wedding_id: WEDDING_ID });
+
+    const result = await verifyWeddingAccess(
+      { id: ADMIN_ID, planner_id: PLANNER_ID, role: 'wedding_admin' },
+      WEDDING_ID
+    );
+
+    expect(result).toBe(true);
+    expect(mockWeddingAdmin).toHaveBeenCalledWith({
+      where: { id: ADMIN_ID, wedding_id: WEDDING_ID },
+    });
   });
 });
 
@@ -90,8 +116,10 @@ describe('verifyWeddingAccess — planner (main account)', () => {
   it('grants access when the wedding belongs to the planner', async () => {
     mockWedding.mockResolvedValue({ id: WEDDING_ID, planner_id: PLANNER_ID });
 
-    // Main planners: planner_id ?? id resolves to PLANNER_ID
-    const result = await verifyWeddingAccess(PLANNER_ID, WEDDING_ID, 'planner');
+    const result = await verifyWeddingAccess(
+      { id: PLANNER_ID, planner_id: PLANNER_ID, role: 'planner' },
+      WEDDING_ID
+    );
 
     expect(result).toBe(true);
     expect(mockWedding).toHaveBeenCalledWith({
@@ -102,7 +130,10 @@ describe('verifyWeddingAccess — planner (main account)', () => {
   it('denies access when the wedding belongs to a different planner', async () => {
     mockWedding.mockResolvedValue(null);
 
-    const result = await verifyWeddingAccess(OTHER_PLANNER_ID, WEDDING_ID, 'planner');
+    const result = await verifyWeddingAccess(
+      { id: OTHER_PLANNER_ID, planner_id: OTHER_PLANNER_ID, role: 'planner' },
+      WEDDING_ID
+    );
 
     expect(result).toBe(false);
   });
@@ -110,7 +141,10 @@ describe('verifyWeddingAccess — planner (main account)', () => {
   it('denies access when the wedding_id does not exist', async () => {
     mockWedding.mockResolvedValue(null);
 
-    const result = await verifyWeddingAccess(PLANNER_ID, OTHER_WEDDING_ID, 'planner');
+    const result = await verifyWeddingAccess(
+      { id: PLANNER_ID, planner_id: PLANNER_ID, role: 'planner' },
+      OTHER_WEDDING_ID
+    );
 
     expect(result).toBe(false);
   });
@@ -118,7 +152,10 @@ describe('verifyWeddingAccess — planner (main account)', () => {
   it('does not query the weddingAdmin table for planners', async () => {
     mockWedding.mockResolvedValue({ id: WEDDING_ID, planner_id: PLANNER_ID });
 
-    await verifyWeddingAccess(PLANNER_ID, WEDDING_ID, 'planner');
+    await verifyWeddingAccess(
+      { id: PLANNER_ID, planner_id: PLANNER_ID, role: 'planner' },
+      WEDDING_ID
+    );
 
     expect(mockWeddingAdmin).not.toHaveBeenCalled();
   });
@@ -126,16 +163,16 @@ describe('verifyWeddingAccess — planner (main account)', () => {
 
 // ============================================================================
 // planner — sub-account (user.id = SUB_ACCOUNT_ID, user.planner_id = PLANNER_ID)
-// The caller passes user.planner_id ?? user.id, so the function receives PLANNER_ID.
 // ============================================================================
 
 describe('verifyWeddingAccess — planner (sub-account)', () => {
-  it('grants access using parent planner ID', async () => {
+  it('grants access using parent planner_id, not the sub-account user.id', async () => {
     mockWedding.mockResolvedValue({ id: WEDDING_ID, planner_id: PLANNER_ID });
 
-    // Simulates: verifyWeddingAccess(user.planner_id ?? user.id, ...)
-    // where user.planner_id = PLANNER_ID (parent), user.id = SUB_ACCOUNT_ID
-    const result = await verifyWeddingAccess(PLANNER_ID, WEDDING_ID, 'planner');
+    const result = await verifyWeddingAccess(
+      { id: SUB_ACCOUNT_ID, planner_id: PLANNER_ID, role: 'planner' },
+      WEDDING_ID
+    );
 
     expect(result).toBe(true);
     expect(mockWedding).toHaveBeenCalledWith({
@@ -143,20 +180,29 @@ describe('verifyWeddingAccess — planner (sub-account)', () => {
     });
   });
 
-  it('denies access when sub-account raw ID is used (regression guard)', async () => {
-    // If the sub-account's own ID were passed instead of the parent planner ID,
-    // the wedding lookup would return null — access must be denied.
+  it('denies access when sub-account has no parent planner_id and raw id does not match', async () => {
+    // planner_id absent — falls back to user.id (SUB_ACCOUNT_ID), which is not
+    // the planner_id on the wedding record.
     mockWedding.mockResolvedValue(null);
 
-    const result = await verifyWeddingAccess(SUB_ACCOUNT_ID, WEDDING_ID, 'planner');
+    const result = await verifyWeddingAccess(
+      { id: SUB_ACCOUNT_ID, role: 'planner' },
+      WEDDING_ID
+    );
 
     expect(result).toBe(false);
+    expect(mockWedding).toHaveBeenCalledWith({
+      where: { id: WEDDING_ID, planner_id: SUB_ACCOUNT_ID },
+    });
   });
 
   it('denies access to a wedding owned by a different planner', async () => {
     mockWedding.mockResolvedValue(null);
 
-    const result = await verifyWeddingAccess(PLANNER_ID, OTHER_WEDDING_ID, 'planner');
+    const result = await verifyWeddingAccess(
+      { id: SUB_ACCOUNT_ID, planner_id: PLANNER_ID, role: 'planner' },
+      OTHER_WEDDING_ID
+    );
 
     expect(result).toBe(false);
   });
@@ -168,16 +214,24 @@ describe('verifyWeddingAccess — planner (sub-account)', () => {
 
 describe('verifyWeddingAccess — unknown role', () => {
   it('denies access for master_admin (not a supported role here)', async () => {
-    const result = await verifyWeddingAccess(PLANNER_ID, WEDDING_ID, 'master_admin');
+    const result = await verifyWeddingAccess(
+      { id: PLANNER_ID, role: 'master_admin' },
+      WEDDING_ID
+    );
 
     expect(result).toBe(false);
     expect(mockWeddingAdmin).not.toHaveBeenCalled();
     expect(mockWedding).not.toHaveBeenCalled();
   });
 
-  it('denies access for an empty role string', async () => {
-    const result = await verifyWeddingAccess(PLANNER_ID, WEDDING_ID, '');
+  it('neither queries weddingAdmin nor wedding for unsupported roles', async () => {
+    const result = await verifyWeddingAccess(
+      { id: PLANNER_ID, role: 'master_admin' },
+      OTHER_WEDDING_ID
+    );
 
     expect(result).toBe(false);
+    expect(mockWeddingAdmin).not.toHaveBeenCalled();
+    expect(mockWedding).not.toHaveBeenCalled();
   });
 });

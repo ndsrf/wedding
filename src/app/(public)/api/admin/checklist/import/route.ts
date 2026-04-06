@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user, weddingId);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,

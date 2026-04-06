@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user, weddingId);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user, weddingId);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,
@@ -360,7 +360,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user, weddingId);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,
@@ -563,7 +563,7 @@ export async function DELETE(request: NextRequest) {
     const validatedData = deleteTaskSchema.parse({ task_id: taskId });
 
     // Verify user has access to this wedding
-    const hasAccess = await verifyWeddingAccess(user.planner_id ?? user.id, weddingId, user.role);
+    const hasAccess = await verifyWeddingAccess(user, weddingId);
     if (!hasAccess) {
       const response: APIResponse = {
         success: false,

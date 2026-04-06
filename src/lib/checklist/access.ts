@@ -1,29 +1,31 @@
 import { prisma } from '@/lib/db/prisma';
+import type { AuthenticatedUser } from '@/types/api';
 
 /**
  * Verify that a user has access to a specific wedding.
  *
- * @param userId  - For planners: the WeddingPlanner ID (i.e. user.planner_id ?? user.id).
- *                  For wedding_admins: the WeddingAdmin ID (i.e. user.id).
+ * - For wedding_admins: checks WeddingAdmin.id === user.id
+ * - For planners: checks Wedding.planner_id === (user.planner_id ?? user.id)
+ *   (handles sub-accounts where user.id is the PlannerSubAccount ID)
+ *
+ * @param user      - Authenticated user from the session.
  * @param weddingId - Wedding to check access for.
- * @param userRole  - Role of the authenticated user.
  */
 export async function verifyWeddingAccess(
-  userId: string,
-  weddingId: string,
-  userRole: string
+  user: Pick<AuthenticatedUser, 'id' | 'planner_id' | 'role'>,
+  weddingId: string
 ): Promise<boolean> {
-  if (userRole === 'wedding_admin') {
+  if (user.role === 'wedding_admin') {
     const admin = await prisma.weddingAdmin.findFirst({
-      where: { id: userId, wedding_id: weddingId },
+      where: { id: user.id, wedding_id: weddingId },
     });
     return !!admin;
   }
 
-  if (userRole === 'planner') {
-    // userId is already the WeddingPlanner ID — single query suffices.
+  if (user.role === 'planner') {
+    // For sub-accounts, planner_id holds the parent WeddingPlanner ID.
     const wedding = await prisma.wedding.findFirst({
-      where: { id: weddingId, planner_id: userId },
+      where: { id: weddingId, planner_id: user.planner_id ?? user.id },
     });
     return !!wedding;
   }
