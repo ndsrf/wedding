@@ -14,7 +14,15 @@ const updateProfileSchema = z.object({
 export async function GET() {
   try {
     const user = await requireRole('planner');
-    return NextResponse.json({ name: user.name ?? 'Planner', email: user.email });
+    let preferred_language: string | null = null;
+    if (user.planner_id) {
+      const planner = await prisma.weddingPlanner.findUnique({
+        where: { id: user.planner_id },
+        select: { preferred_language: true },
+      });
+      preferred_language = planner?.preferred_language ?? null;
+    }
+    return NextResponse.json({ name: user.name ?? 'Planner', email: user.email, preferred_language });
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

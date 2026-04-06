@@ -16,6 +16,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
+      include: { template: { select: { language: true } } },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -39,7 +40,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       },
     });
 
-    const locale = await getLanguageFromRequest();
+    // Use the template's language; fall back to planner's preferred_language or request language
+    const templateLang = contract.template?.language;
+    const locale = templateLang
+      ? templateLang.toLowerCase() as string
+      : await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
     const labels = {
       dateLabel: t('planner.quotesFinances.contractPdf.dateLabel'),

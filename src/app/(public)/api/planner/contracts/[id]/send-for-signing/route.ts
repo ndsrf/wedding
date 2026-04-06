@@ -38,6 +38,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
+      include: { template: { select: { language: true } } },
     });
   } catch (error) {
     console.error('send-for-signing: DB lookup error:', error);
@@ -85,7 +86,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // 4. Generate PDF — content on page(s) 0..n-2, dedicated signature page always last
   let buffer: Buffer;
   try {
-    const locale = await getLanguageFromRequest();
+    // Use the template's language; fall back to request language
+    const templateLang = contract.template?.language;
+    const locale = templateLang
+      ? templateLang.toLowerCase() as string
+      : await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
     const labels = {
       dateLabel: t('planner.quotesFinances.contractPdf.dateLabel'),

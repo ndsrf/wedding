@@ -4,10 +4,14 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
+const VALID_LANGUAGES = ['ES', 'EN', 'FR', 'IT', 'DE'] as const;
+type TemplateLanguage = typeof VALID_LANGUAGES[number];
+
 const createSchema = z.object({
   name: z.string().min(1).max(120),
   content: z.record(z.string(), z.unknown()),
   is_default: z.boolean().optional(),
+  language: z.enum(VALID_LANGUAGES).optional(),
 });
 
 export async function GET(_request: NextRequest) {
@@ -34,6 +38,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createSchema.parse(body);
 
+    // If no language provided, default to the planner's preferred_language
+    let language: TemplateLanguage = 'ES';
+    if (data.language) {
+      language = data.language;
+    } else {
+      const planner = await prisma.weddingPlanner.findUnique({
+        where: { id: user.planner_id },
+        select: { preferred_language: true },
+      });
+      if (planner?.preferred_language && VALID_LANGUAGES.includes(planner.preferred_language as TemplateLanguage)) {
+        language = planner.preferred_language as TemplateLanguage;
+      }
+    }
+
     if (data.is_default) {
       // Unset current default
       await prisma.contractTemplate.updateMany({
@@ -46,6 +64,7 @@ export async function POST(request: NextRequest) {
       data: {
         planner_id: user.planner_id,
         name: data.name,
+        language,
         content: data.content as Prisma.InputJsonValue,
         is_default: data.is_default ?? false,
       },
