@@ -7,6 +7,7 @@ import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { createDocuSealSubmission } from '@/lib/signing/docuseal';
 import { toAbsoluteUrl } from '@/lib/images/processor';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
+import { isValidLanguage } from '@/lib/i18n/config';
 import React from 'react';
 
 /** Count pages in a PDF buffer by scanning for /Type /Page entries (no external deps). */
@@ -87,9 +88,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   let buffer: Buffer;
   try {
     // Use the template's language; fall back to request language
-    const templateLang = contract.template?.language;
-    const locale = templateLang
-      ? templateLang.toLowerCase() as string
+    const templateLangRaw = contract.template?.language?.toLowerCase();
+    const locale = (templateLangRaw && isValidLanguage(templateLangRaw))
+      ? templateLangRaw
       : await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
     const labels = {

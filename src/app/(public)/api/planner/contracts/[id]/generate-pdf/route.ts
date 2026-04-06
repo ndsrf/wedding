@@ -6,6 +6,7 @@ import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { put, del } from '@vercel/blob';
 import { resolveLogoDataUri } from '@/lib/pdf/resolve-logo';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
+import { isValidLanguage } from '@/lib/i18n/config';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -40,10 +41,10 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       },
     });
 
-    // Use the template's language; fall back to planner's preferred_language or request language
-    const templateLang = contract.template?.language;
-    const locale = templateLang
-      ? templateLang.toLowerCase() as string
+    // Use the template's language; fall back to request language
+    const templateLangRaw = contract.template?.language?.toLowerCase();
+    const locale = (templateLangRaw && isValidLanguage(templateLangRaw))
+      ? templateLangRaw
       : await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
     const labels = {
