@@ -1000,6 +1000,7 @@
         "discount": "Discount ({currency})",
         "taxRate": "Tax rate (%)",
         "additionalDetails": "Additional Details",
+        "dueDate": "Due Date",
         "validUntil": "Valid Until",
         "notes": "Notes",
         "notesPlaceholder": "Additional notes or terms...",

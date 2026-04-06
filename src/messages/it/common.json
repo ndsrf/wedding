@@ -992,6 +992,7 @@
         "discount": "Sconto ({currency})",
         "taxRate": "Aliquota IVA (%)",
         "additionalDetails": "Dettagli aggiuntivi",
+        "dueDate": "Data di scadenza",
         "validUntil": "Valido fino al",
         "notes": "Note",
         "notesPlaceholder": "Note aggiuntive o condizioni...",

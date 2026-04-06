@@ -29,7 +29,7 @@ const createInvoiceSchema = z.object({
   tax_rate: z.number().min(0).max(100).optional().nullable(),
   tax_amount: z.number().min(0).optional().nullable(),
   total: z.number().min(0),
-  due_date: z.string().datetime().optional().nullable(),
+  due_date: z.string().datetime(),
   issued_at: z.string().datetime().optional().nullable(),
   line_items: z.array(lineItemSchema).min(1),
 });
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
           tax_rate: data.tax_rate ?? null,
           tax_amount: data.tax_amount ?? null,
           total: data.total,
-          due_date: data.due_date ? new Date(data.due_date) : null,
+          due_date: new Date(data.due_date),
           issued_at: issuedAt,
           line_items: {
             create: data.line_items.map((item) => ({

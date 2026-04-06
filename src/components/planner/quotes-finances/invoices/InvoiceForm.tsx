@@ -75,7 +75,7 @@ export function InvoiceForm({ initialData, initialContracts, onSave, onCancel }:
     currency: initialData?.currency ?? 'EUR',
     discount: initialData?.discount ?? '',
     tax_rate: initialData?.tax_rate ?? '',
-    due_date: initialData?.due_date ?? '',
+    due_date: initialData?.due_date ?? (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })(),
     issued_at: initialData?.issued_at ?? new Date().toISOString(),
     line_items: initialData?.line_items?.length ? initialData.line_items : [emptyItem()],
   });
@@ -188,7 +188,7 @@ export function InvoiceForm({ initialData, initialContracts, onSave, onCancel }:
         tax_amount: taxAmount,
         total,
         issued_at: form.issued_at || null,
-        due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
+        due_date: new Date(form.due_date).toISOString(),
         description: form.description || null,
       });
     } finally {
@@ -337,9 +337,10 @@ export function InvoiceForm({ initialData, initialContracts, onSave, onCancel }:
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.dueDate')}</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('invoiceForm.dueDate')} *</label>
             <input
               type="date"
+              required
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
               value={form.due_date ? form.due_date.slice(0, 10) : ''}
               onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
