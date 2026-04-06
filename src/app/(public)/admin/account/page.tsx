@@ -43,6 +43,7 @@ export default async function AdminAccountPage() {
         wedding_date: true,
         contract_id: true,
         customer_id: true,
+        planner_id: true,
         // Specific contract linked to this wedding
         contract: {
           select: {
@@ -70,6 +71,19 @@ export default async function AdminAccountPage() {
   ]);
 
   if (!admin || !wedding) redirect('/admin');
+
+  // Fetch planner's payment info (bank account, Bizum, Revolut)
+  const planner = await prisma.weddingPlanner.findUnique({
+    where: { id: wedding.planner_id },
+    select: { phone: true, bank_account: true, accepts_bizum: true, accepts_revolut: true },
+  });
+
+  const plannerPayment = {
+    bank_account: planner?.bank_account ?? null,
+    accepts_bizum: planner?.accepts_bizum ?? false,
+    accepts_revolut: planner?.accepts_revolut ?? false,
+    phone: planner?.phone ?? null,
+  };
 
   // ─── Document resolution ────────────────────────────────────────────────────
   // Primary path: wedding has a direct contract link
@@ -196,6 +210,7 @@ export default async function AdminAccountPage() {
           quote={quoteData}
           invoices={invoiceList}
           paymentSchedule={scheduleList}
+          plannerPayment={plannerPayment}
         />
       </main>
     </div>

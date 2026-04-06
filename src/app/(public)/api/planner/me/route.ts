@@ -5,6 +5,10 @@ import { requireRole } from '@/lib/auth/middleware';
 
 const updateProfileSchema = z.object({
   name: z.string().min(1).max(200),
+  phone: z.string().max(50).nullable().optional(),
+  bank_account: z.string().max(50).nullable().optional(),
+  accepts_bizum: z.boolean().optional(),
+  accepts_revolut: z.boolean().optional(),
 });
 
 export async function GET() {
@@ -23,11 +27,17 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Planner ID not found' }, { status: 403 });
     }
     const body = await request.json();
-    const { name } = updateProfileSchema.parse(body);
+    const validated = updateProfileSchema.parse(body);
     const updated = await prisma.weddingPlanner.update({
       where: { id: user.planner_id },
-      data: { name },
-      select: { name: true, email: true },
+      data: {
+        name: validated.name,
+        ...(validated.phone !== undefined && { phone: validated.phone }),
+        ...(validated.bank_account !== undefined && { bank_account: validated.bank_account }),
+        ...(validated.accepts_bizum !== undefined && { accepts_bizum: validated.accepts_bizum }),
+        ...(validated.accepts_revolut !== undefined && { accepts_revolut: validated.accepts_revolut }),
+      },
+      select: { name: true, email: true, phone: true, bank_account: true, accepts_bizum: true, accepts_revolut: true },
     });
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {

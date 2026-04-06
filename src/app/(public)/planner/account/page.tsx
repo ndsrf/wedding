@@ -82,6 +82,10 @@ export default async function PlannerAccountPage() {
       select: {
         name: true,
         email: true,
+        phone: true,
+        bank_account: true,
+        accepts_bizum: true,
+        accepts_revolut: true,
         subscription_status: true,
         license: {
           select: { max_weddings: true, max_sub_planners: true },
@@ -120,8 +124,15 @@ export default async function PlannerAccountPage() {
       </div>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Name editor (client component) */}
-        <PlannerNameEditor initialName={planner.name} email={planner.email} />
+        {/* Profile editor (client component) */}
+        <PlannerNameEditor
+          initialName={planner.name}
+          email={planner.email}
+          initialPhone={planner.phone}
+          initialBankAccount={planner.bank_account}
+          initialAcceptsBizum={planner.accepts_bizum}
+          initialAcceptsRevolut={planner.accepts_revolut}
+        />
 
         {/* Subscription Status */}
         <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

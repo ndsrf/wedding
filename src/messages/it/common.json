@@ -1210,7 +1210,12 @@
       "aiPremium": "Chiamate IA premium",
       "whatsapp": "Messaggi WhatsApp",
       "comingSoon": "Prossimamente",
-      "noLimit": "Senza limite"
+      "noLimit": "Senza limite",
+      "phone": "Telefono",
+      "bankAccount": "Conto corrente (IBAN)",
+      "bankAccountPlaceholder": "IT00 X000 0000 0000 0000 0000 000",
+      "acceptsBizum": "Accetta Bizum",
+      "acceptsRevolut": "Accetta Revolut"
     }
   },
   "admin": {
@@ -2487,7 +2492,18 @@
         "INVOICE": "Fattura",
         "PROFORMA": "Proforma",
         "RECTIFICATIVA": "Nota di credito"
-      }
+      },
+      "paymentsMade": "Pagamenti effettuati",
+      "noPaymentsMade": "Nessun pagamento registrato.",
+      "paid": "Pagato",
+      "remaining": "Rimanente",
+      "issuedOn": "Emessa il",
+      "howToPay": "Come pagare",
+      "bankTransfer": "Bonifico bancario",
+      "bizum": "Bizum",
+      "revolut": "Revolut",
+      "reference": "Riferimento",
+      "noPendingDue": "Nessuna scadenza"
     }
   },
   "guest": {

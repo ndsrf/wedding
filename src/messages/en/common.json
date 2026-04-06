@@ -1218,7 +1218,12 @@
       "aiPremium": "Premium AI calls",
       "whatsapp": "WhatsApp messages",
       "comingSoon": "Coming soon",
-      "noLimit": "No limit"
+      "noLimit": "No limit",
+      "phone": "Phone",
+      "bankAccount": "Bank account (IBAN)",
+      "bankAccountPlaceholder": "GB00 XXXX XXXX XXXX XXXX XX",
+      "acceptsBizum": "Accepts Bizum",
+      "acceptsRevolut": "Accepts Revolut"
     }
   },
   "admin": {
@@ -2553,7 +2558,18 @@
         "INVOICE": "Invoice",
         "PROFORMA": "Pro forma",
         "RECTIFICATIVA": "Credit note"
-      }
+      },
+      "paymentsMade": "Payments made",
+      "noPaymentsMade": "No payments have been recorded yet.",
+      "paid": "Paid",
+      "remaining": "Remaining",
+      "issuedOn": "Issued on",
+      "howToPay": "How to pay",
+      "bankTransfer": "Bank transfer",
+      "bizum": "Bizum",
+      "revolut": "Revolut",
+      "reference": "Reference",
+      "noPendingDue": "No due date"
     }
   },
   "guest": {
