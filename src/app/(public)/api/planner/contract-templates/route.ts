@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import { Prisma, Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-
-const VALID_LANGUAGES = ['ES', 'EN', 'FR', 'IT', 'DE'] as const;
-type TemplateLanguage = typeof VALID_LANGUAGES[number];
 
 const createSchema = z.object({
   name: z.string().min(1).max(120),
   content: z.record(z.string(), z.unknown()),
   is_default: z.boolean().optional(),
-  language: z.enum(VALID_LANGUAGES).optional(),
+  language: z.nativeEnum(Language).optional(),
 });
 
 export async function GET(_request: NextRequest) {
@@ -39,7 +36,7 @@ export async function POST(request: NextRequest) {
     const data = createSchema.parse(body);
 
     // If no language provided, default to the planner's preferred_language
-    let language: TemplateLanguage = 'ES';
+    let language: Language = Language.ES;
     if (data.language) {
       language = data.language;
     } else {
@@ -47,8 +44,8 @@ export async function POST(request: NextRequest) {
         where: { id: user.planner_id },
         select: { preferred_language: true },
       });
-      if (planner?.preferred_language && VALID_LANGUAGES.includes(planner.preferred_language as TemplateLanguage)) {
-        language = planner.preferred_language as TemplateLanguage;
+      if (planner?.preferred_language) {
+        language = planner.preferred_language;
       }
     }
 

@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import { Prisma, Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-
-const VALID_LANGUAGES = ['ES', 'EN', 'FR', 'IT', 'DE'] as const;
 
 const updateSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   content: z.record(z.string(), z.unknown()).optional(),
   is_default: z.boolean().optional(),
-  language: z.enum(VALID_LANGUAGES).optional(),
+  language: z.nativeEnum(Language).optional(),
 });
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
