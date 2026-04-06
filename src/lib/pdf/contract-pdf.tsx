@@ -286,11 +286,12 @@ interface ContractPDFProps {
   company: CompanyInfo;
   signerName?: string;
   createdAt?: Date;
+  signedAt?: Date;
   labels: ContractPDFLabels;
   locale: string;
 }
 
-export function ContractPDF({ title, content, company, signerName, createdAt, labels, locale }: ContractPDFProps) {
+export function ContractPDF({ title, content, company, signerName, createdAt, signedAt, labels, locale }: ContractPDFProps) {
   const nodes = content?.content ?? [];
 
   return (
@@ -364,7 +365,9 @@ export function ContractPDF({ title, content, company, signerName, createdAt, la
             ) : (
               <View style={styles.sigLine} />
             )}
-            <Text style={styles.sigDateLabel}>{labels.signatureDate}</Text>
+            <Text style={styles.sigDateLabel}>
+              {labels.signatureDate}{signedAt ? ` ${new Date(signedAt).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}
+            </Text>
           </View>
 
           {/* Right: Client signature — DocuSeal overlays its widget here */}
