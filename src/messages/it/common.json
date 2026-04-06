@@ -1168,6 +1168,33 @@
         "textSelected": "Testo selezionato",
         "textSelectedMessage": "aggiungi un commento di seguito per segnalare questa sezione al tuo pianificatore.",
         "selectTextInstruction": "Seleziona qualsiasi testo e aggiungi un commento per segnalarlo al tuo wedding planner."
+      },
+      "contractTemplates": {
+        "back": "← Indietro",
+        "editHeading": "Modifica modello",
+        "newHeading": "Nuovo modello di contratto",
+        "nameLabel": "Nome del modello *",
+        "namePlaceholder": "Contratto standard di organizzazione matrimonio",
+        "languageLabel": "Lingua del contratto",
+        "setAsDefault": "Imposta come predefinito",
+        "cancel": "Annulla",
+        "saveTemplate": "Salva modello",
+        "saving": "Salvataggio…",
+        "listHeading": "Modelli di contratto",
+        "newTemplate": "Nuovo modello",
+        "emptyTitle": "Nessun modello di contratto",
+        "emptyDescription": "Crea un modello di contratto riutilizzabile da usare per i contratti dei clienti.",
+        "createTemplate": "Crea modello",
+        "defaultBadge": "Predefinito",
+        "updatedAt": "Aggiornato il {date}",
+        "edit": "Modifica",
+        "scheduleTitle": "Calendario pagamenti",
+        "scheduleButton": "Calendario",
+        "delete": "Elimina",
+        "deleteConfirm": "Eliminare questo modello?",
+        "paymentMilestonesHeading": "Scadenze di pagamento del modello",
+        "scheduleSaving": "Salvataggio…",
+        "scheduleSave": "Salva"
       }
     },
     "alertSettings": {

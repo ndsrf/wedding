@@ -1168,6 +1168,33 @@
         "textSelected": "Text ausgewählt",
         "textSelectedMessage": "fügen Sie unten einen Kommentar hinzu, um diesen Abschnitt für Ihren Planer zu markieren.",
         "selectTextInstruction": "Wählen Sie einen beliebigen Text aus und fügen Sie einen Kommentar hinzu, um ihn für Ihren Hochzeitsplaner zu markieren."
+      },
+      "contractTemplates": {
+        "back": "← Zurück",
+        "editHeading": "Vorlage bearbeiten",
+        "newHeading": "Neue Vertragsvorlage",
+        "nameLabel": "Vorlagenname *",
+        "namePlaceholder": "Standard-Hochzeitsplanungsvertrag",
+        "languageLabel": "Vertragssprache",
+        "setAsDefault": "Als Standard festlegen",
+        "cancel": "Abbrechen",
+        "saveTemplate": "Vorlage speichern",
+        "saving": "Wird gespeichert…",
+        "listHeading": "Vertragsvorlagen",
+        "newTemplate": "Neue Vorlage",
+        "emptyTitle": "Noch keine Vertragsvorlagen",
+        "emptyDescription": "Erstellen Sie eine wiederverwendbare Vertragsvorlage für Kundenverträge.",
+        "createTemplate": "Vorlage erstellen",
+        "defaultBadge": "Standard",
+        "updatedAt": "Aktualisiert am {date}",
+        "edit": "Bearbeiten",
+        "scheduleTitle": "Zahlungsplan",
+        "scheduleButton": "Zeitplan",
+        "delete": "Löschen",
+        "deleteConfirm": "Diese Vorlage löschen?",
+        "paymentMilestonesHeading": "Zahlungsmeilensteine der Vorlage",
+        "scheduleSaving": "Wird gespeichert…",
+        "scheduleSave": "Speichern"
       }
     },
     "alertSettings": {
