@@ -168,8 +168,12 @@ export function InvoicesList({ externalPrefill, onExternalPrefillConsumed }: Inv
   }
 
   async function handleGeneratePdf(invoice: Invoice) {
+    if (invoice.pdf_url) {
+      window.open(invoice.pdf_url, '_blank');
+      return;
+    }
     setGenerating(invoice.id);
-    const res = await fetch(`/api/planner/invoices/${invoice.id}/generate-pdf?force=true`, { method: 'POST' });
+    const res = await fetch(`/api/planner/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
     if (res.ok) {
       const { data } = await res.json();
       window.open(data.pdf_url, '_blank');
