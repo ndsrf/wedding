@@ -1186,6 +1186,31 @@
       "footerLink": "Ihrem Unternehmensprofil",
       "alertSettings": "Benachrichtigungen",
       "alertSettingsSubtitle": "Planner-Benachrichtigungen konfigurieren"
+    },
+    "account": {
+      "title": "Mein Konto",
+      "subtitle": "Ihr Abonnementstatus und Plannutzung",
+      "personalData": "Persönliche Daten",
+      "name": "Name",
+      "saveChanges": "Änderungen speichern",
+      "saving": "Speichern...",
+      "changesSaved": "Änderungen gespeichert",
+      "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "subscription": "Abonnement",
+      "subscriptionActive": "Aktiv",
+      "subscriptionInactive": "Inaktiv",
+      "usage": "Aktuelle Nutzung",
+      "limits": "Planlimits",
+      "aiUsage": "KI- und WhatsApp-Nutzung",
+      "activeWeddings": "Aktive Hochzeiten",
+      "activeSubPlanners": "Aktive Sub-Planer",
+      "simultaneousWeddings": "Gleichzeitige Hochzeiten",
+      "subPlanners": "Sub-Planer",
+      "aiBasic": "Basis-KI-Anfragen",
+      "aiPremium": "Premium-KI-Anfragen",
+      "whatsapp": "WhatsApp-Nachrichten",
+      "comingSoon": "Demnächst",
+      "noLimit": "Kein Limit"
     }
   },
   "admin": {
@@ -2412,6 +2437,57 @@
       "totalPending": "Gesamt Ausstehend",
       "totalProjected": "Gesamt Projiziert",
       "totalReal": "Gesamt Real"
+    },
+    "account": {
+      "title": "Mein Konto",
+      "subtitle": "Verwalten Sie Ihr Profil und sehen Sie Ihre Dokumente ein",
+      "personalData": "Persönliche Daten",
+      "email": "E-Mail",
+      "name": "Name",
+      "phone": "Telefon",
+      "phonePlaceholder": "+49 170 000 0000",
+      "saveChanges": "Änderungen speichern",
+      "saving": "Speichern...",
+      "changesSaved": "Änderungen gespeichert",
+      "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "documents": "Dokumente",
+      "noDocuments": "Noch keine Dokumente verfügbar.",
+      "quote": "Angebot",
+      "contract": "Vertrag",
+      "pendingPayments": "Ausstehende Zahlungen",
+      "paymentSchedule": "Zahlungsplan des Vertrags",
+      "paymentScheduleSubtitle": "Mit Ihrem Wedding Planner vereinbarter Zahlungsplan",
+      "pdf": "PDF",
+      "overdueOn": "Überfällig am",
+      "dueOn": "Fällig am",
+      "pendingAmount": "Ausstehend",
+      "quoteStatus": {
+        "DRAFT": "Entwurf",
+        "SENT": "Gesendet",
+        "ACCEPTED": "Akzeptiert",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen"
+      },
+      "contractStatus": {
+        "DRAFT": "Entwurf",
+        "SHARED": "Geteilt",
+        "SIGNING": "Ausstehende Unterschrift",
+        "SIGNED": "Unterzeichnet",
+        "CANCELLED": "Storniert"
+      },
+      "invoiceStatus": {
+        "DRAFT": "Entwurf",
+        "ISSUED": "Ausgestellt",
+        "PARTIAL": "Teilzahlung",
+        "PAID": "Bezahlt",
+        "OVERDUE": "Überfällig",
+        "CANCELLED": "Storniert"
+      },
+      "invoiceType": {
+        "INVOICE": "Rechnung",
+        "PROFORMA": "Proforma",
+        "RECTIFICATIVA": "Gutschrift"
+      }
     }
   },
   "guest": {

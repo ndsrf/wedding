@@ -1186,6 +1186,31 @@
       "footerLink": "tuo profilo aziendale",
       "alertSettings": "Avvisi",
       "alertSettingsSubtitle": "Configura le notifiche del planner"
+    },
+    "account": {
+      "title": "Il mio account",
+      "subtitle": "Stato del tuo abbonamento e utilizzo del piano",
+      "personalData": "Dati personali",
+      "name": "Nome",
+      "saveChanges": "Salva modifiche",
+      "saving": "Salvataggio...",
+      "changesSaved": "Modifiche salvate",
+      "saveError": "Impossibile salvare. Riprova.",
+      "subscription": "Abbonamento",
+      "subscriptionActive": "Attivo",
+      "subscriptionInactive": "Inattivo",
+      "usage": "Utilizzo attuale",
+      "limits": "Limiti del piano",
+      "aiUsage": "Utilizzo IA e WhatsApp",
+      "activeWeddings": "Matrimoni attivi",
+      "activeSubPlanners": "Sub-planner attivi",
+      "simultaneousWeddings": "Matrimoni simultanei",
+      "subPlanners": "Sub-planner",
+      "aiBasic": "Chiamate IA base",
+      "aiPremium": "Chiamate IA premium",
+      "whatsapp": "Messaggi WhatsApp",
+      "comingSoon": "Prossimamente",
+      "noLimit": "Senza limite"
     }
   },
   "admin": {
@@ -2412,6 +2437,57 @@
       "totalPending": "Totale In Attesa",
       "totalProjected": "Totale Previsto",
       "totalReal": "Totale Reale"
+    },
+    "account": {
+      "title": "Il mio account",
+      "subtitle": "Gestisci il tuo profilo e consulta i tuoi documenti",
+      "personalData": "Dati personali",
+      "email": "Email",
+      "name": "Nome",
+      "phone": "Telefono",
+      "phonePlaceholder": "+39 333 000 0000",
+      "saveChanges": "Salva modifiche",
+      "saving": "Salvataggio...",
+      "changesSaved": "Modifiche salvate",
+      "saveError": "Impossibile salvare. Riprova.",
+      "documents": "Documenti",
+      "noDocuments": "Nessun documento disponibile.",
+      "quote": "Preventivo",
+      "contract": "Contratto",
+      "pendingPayments": "Pagamenti in sospeso",
+      "paymentSchedule": "Piano di pagamento del contratto",
+      "paymentScheduleSubtitle": "Calendario dei pagamenti concordato con il tuo wedding planner",
+      "pdf": "PDF",
+      "overdueOn": "Scaduto il",
+      "dueOn": "Scade il",
+      "pendingAmount": "In sospeso",
+      "quoteStatus": {
+        "DRAFT": "Bozza",
+        "SENT": "Inviato",
+        "ACCEPTED": "Accettato",
+        "REJECTED": "Rifiutato",
+        "EXPIRED": "Scaduto"
+      },
+      "contractStatus": {
+        "DRAFT": "Bozza",
+        "SHARED": "Condiviso",
+        "SIGNING": "In attesa di firma",
+        "SIGNED": "Firmato",
+        "CANCELLED": "Annullato"
+      },
+      "invoiceStatus": {
+        "DRAFT": "Bozza",
+        "ISSUED": "Emessa",
+        "PARTIAL": "Pagamento parziale",
+        "PAID": "Pagata",
+        "OVERDUE": "Scaduta",
+        "CANCELLED": "Annullata"
+      },
+      "invoiceType": {
+        "INVOICE": "Fattura",
+        "PROFORMA": "Proforma",
+        "RECTIFICATIVA": "Nota di credito"
+      }
     }
   },
   "guest": {

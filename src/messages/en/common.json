@@ -1194,6 +1194,31 @@
       "footerLink": "your company profile",
       "alertSettings": "Alerts",
       "alertSettingsSubtitle": "Configure planner notifications"
+    },
+    "account": {
+      "title": "My account",
+      "subtitle": "Your subscription status and plan usage",
+      "personalData": "Personal details",
+      "name": "Name",
+      "saveChanges": "Save changes",
+      "saving": "Saving...",
+      "changesSaved": "Changes saved",
+      "saveError": "Could not save. Please try again.",
+      "subscription": "Subscription",
+      "subscriptionActive": "Active",
+      "subscriptionInactive": "Inactive",
+      "usage": "Current usage",
+      "limits": "Plan limits",
+      "aiUsage": "AI & WhatsApp usage",
+      "activeWeddings": "Active weddings",
+      "activeSubPlanners": "Active sub-planners",
+      "simultaneousWeddings": "Simultaneous weddings",
+      "subPlanners": "Sub-planners",
+      "aiBasic": "Basic AI calls",
+      "aiPremium": "Premium AI calls",
+      "whatsapp": "WhatsApp messages",
+      "comingSoon": "Coming soon",
+      "noLimit": "No limit"
     }
   },
   "admin": {
@@ -2478,6 +2503,57 @@
       "totalPending": "Total Pending",
       "totalProjected": "Total Projected",
       "totalReal": "Total Real"
+    },
+    "account": {
+      "title": "My account",
+      "subtitle": "Manage your profile and view your documents",
+      "personalData": "Personal details",
+      "email": "Email",
+      "name": "Name",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 555 000 0000",
+      "saveChanges": "Save changes",
+      "saving": "Saving...",
+      "changesSaved": "Changes saved",
+      "saveError": "Could not save. Please try again.",
+      "documents": "Documents",
+      "noDocuments": "No documents available yet.",
+      "quote": "Quote",
+      "contract": "Contract",
+      "pendingPayments": "Pending payments",
+      "paymentSchedule": "Contract payment schedule",
+      "paymentScheduleSubtitle": "Payment timeline agreed with your wedding planner",
+      "pdf": "PDF",
+      "overdueOn": "Overdue on",
+      "dueOn": "Due on",
+      "pendingAmount": "Pending",
+      "quoteStatus": {
+        "DRAFT": "Draft",
+        "SENT": "Sent",
+        "ACCEPTED": "Accepted",
+        "REJECTED": "Rejected",
+        "EXPIRED": "Expired"
+      },
+      "contractStatus": {
+        "DRAFT": "Draft",
+        "SHARED": "Shared",
+        "SIGNING": "Awaiting signature",
+        "SIGNED": "Signed",
+        "CANCELLED": "Cancelled"
+      },
+      "invoiceStatus": {
+        "DRAFT": "Draft",
+        "ISSUED": "Issued",
+        "PARTIAL": "Partially paid",
+        "PAID": "Paid",
+        "OVERDUE": "Overdue",
+        "CANCELLED": "Cancelled"
+      },
+      "invoiceType": {
+        "INVOICE": "Invoice",
+        "PROFORMA": "Pro forma",
+        "RECTIFICATIVA": "Credit note"
+      }
     }
   },
   "guest": {
