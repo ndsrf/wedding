@@ -924,6 +924,7 @@ model ContractTemplate {
   id                String         @id @default(uuid())
   planner_id        String
   name              String
+  language          Language       @default(ES)
   content           Json           // TipTap ProseMirror JSON
   is_default        Boolean        @default(false)
   placeholder_rules Json?          // Array of {placeholder, description, rememberedAt}

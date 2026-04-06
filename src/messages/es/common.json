@@ -1172,6 +1172,33 @@
         "textSelected": "Texto seleccionado",
         "textSelectedMessage": "añade un comentario a continuación para marcar esta sección para tu planificador.",
         "selectTextInstruction": "Selecciona cualquier texto y añade un comentario para marcarlo para tu organizador de bodas."
+      },
+      "contractTemplates": {
+        "back": "← Volver",
+        "editHeading": "Editar Plantilla",
+        "newHeading": "Nueva Plantilla de Contrato",
+        "nameLabel": "Nombre de la plantilla *",
+        "namePlaceholder": "Contrato estándar de organización de boda",
+        "languageLabel": "Idioma del contrato",
+        "setAsDefault": "Establecer como predeterminada",
+        "cancel": "Cancelar",
+        "saveTemplate": "Guardar Plantilla",
+        "saving": "Guardando…",
+        "listHeading": "Plantillas de Contrato",
+        "newTemplate": "Nueva Plantilla",
+        "emptyTitle": "Aún no hay plantillas de contrato",
+        "emptyDescription": "Crea una plantilla de contrato reutilizable para usar al crear contratos para clientes.",
+        "createTemplate": "Crear Plantilla",
+        "defaultBadge": "Predeterminada",
+        "updatedAt": "Actualizada el {date}",
+        "edit": "Editar",
+        "scheduleTitle": "Calendario de pagos",
+        "scheduleButton": "Calendario",
+        "delete": "Eliminar",
+        "deleteConfirm": "¿Eliminar esta plantilla?",
+        "paymentMilestonesHeading": "Hitos de pago de la plantilla",
+        "scheduleSaving": "Guardando…",
+        "scheduleSave": "Guardar"
       }
     },
     "alertSettings": {

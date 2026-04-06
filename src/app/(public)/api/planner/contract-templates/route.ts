@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import { Prisma, Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
@@ -8,6 +8,7 @@ const createSchema = z.object({
   name: z.string().min(1).max(120),
   content: z.record(z.string(), z.unknown()),
   is_default: z.boolean().optional(),
+  language: z.nativeEnum(Language).optional(),
 });
 
 export async function GET(_request: NextRequest) {
@@ -34,6 +35,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createSchema.parse(body);
 
+    // If no language provided, default to the planner's preferred_language
+    let language: Language = Language.ES;
+    if (data.language) {
+      language = data.language;
+    } else {
+      const planner = await prisma.weddingPlanner.findUnique({
+        where: { id: user.planner_id },
+        select: { preferred_language: true },
+      });
+      if (planner?.preferred_language) {
+        language = planner.preferred_language;
+      }
+    }
+
     if (data.is_default) {
       // Unset current default
       await prisma.contractTemplate.updateMany({
@@ -46,6 +61,7 @@ export async function POST(request: NextRequest) {
       data: {
         planner_id: user.planner_id,
         name: data.name,
+        language,
         content: data.content as Prisma.InputJsonValue,
         is_default: data.is_default ?? false,
       },

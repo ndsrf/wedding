@@ -1176,6 +1176,33 @@
         "textSelected": "Text selected",
         "textSelectedMessage": "add a comment below to flag this section for your planner.",
         "selectTextInstruction": "Select any text and add a comment below to flag it for your wedding planner."
+      },
+      "contractTemplates": {
+        "back": "← Back",
+        "editHeading": "Edit Template",
+        "newHeading": "New Contract Template",
+        "nameLabel": "Template Name *",
+        "namePlaceholder": "Standard Wedding Planning Contract",
+        "languageLabel": "Contract Language",
+        "setAsDefault": "Set as default",
+        "cancel": "Cancel",
+        "saveTemplate": "Save Template",
+        "saving": "Saving…",
+        "listHeading": "Contract Templates",
+        "newTemplate": "New Template",
+        "emptyTitle": "No contract templates yet",
+        "emptyDescription": "Create a reusable contract template to use when creating contracts for clients.",
+        "createTemplate": "Create Template",
+        "defaultBadge": "Default",
+        "updatedAt": "Updated {date}",
+        "edit": "Edit",
+        "scheduleTitle": "Payment schedule",
+        "scheduleButton": "Schedule",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this template?",
+        "paymentMilestonesHeading": "Template Payment Milestones",
+        "scheduleSaving": "Saving…",
+        "scheduleSave": "Save"
       }
     },
     "alertSettings": {

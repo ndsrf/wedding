@@ -6,6 +6,7 @@ import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { put, del } from '@vercel/blob';
 import { resolveLogoDataUri } from '@/lib/pdf/resolve-logo';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
+import { isValidLanguage } from '@/lib/i18n/config';
 import React from 'react';
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -16,6 +17,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
+      include: { template: { select: { language: true } } },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -39,7 +41,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       },
     });
 
-    const locale = await getLanguageFromRequest();
+    // Use the template's language; fall back to request language
+    const templateLangRaw = contract.template?.language?.toLowerCase();
+    const locale = (templateLangRaw && isValidLanguage(templateLangRaw))
+      ? templateLangRaw
+      : await getLanguageFromRequest();
     const { t } = await getTranslations(locale);
     const labels = {
       dateLabel: t('planner.quotesFinances.contractPdf.dateLabel'),

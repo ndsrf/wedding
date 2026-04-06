@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import { Prisma, Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 
@@ -8,6 +8,7 @@ const updateSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   content: z.record(z.string(), z.unknown()).optional(),
   is_default: z.boolean().optional(),
+  language: z.nativeEnum(Language).optional(),
 });
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -50,6 +51,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       where: { id },
       data: {
         ...(data.name !== undefined && { name: data.name }),
+        ...(data.language !== undefined && { language: data.language }),
         ...(data.content !== undefined && { content: data.content as Prisma.InputJsonValue }),
         ...(data.is_default !== undefined && { is_default: data.is_default }),
         // Wipe remembered placeholder rules whenever the template body changes —

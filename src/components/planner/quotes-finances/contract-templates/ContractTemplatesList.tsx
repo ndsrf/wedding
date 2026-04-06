@@ -1,12 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { ContractTemplateEditor } from './ContractTemplateEditor';
 import { PaymentScheduleEditor, type ScheduleItem } from '../payment-schedule/PaymentScheduleEditor';
+
+const LANGUAGE_OPTIONS = [
+  { value: 'ES', label: 'Español', flag: '🇪🇸' },
+  { value: 'EN', label: 'English', flag: '🇬🇧' },
+  { value: 'FR', label: 'Français', flag: '🇫🇷' },
+  { value: 'IT', label: 'Italiano', flag: '🇮🇹' },
+  { value: 'DE', label: 'Deutsch', flag: '🇩🇪' },
+] as const;
+
+type TemplateLanguage = typeof LANGUAGE_OPTIONS[number]['value'];
 
 interface ContractTemplate {
   id: string;
   name: string;
+  language: TemplateLanguage;
   is_default: boolean;
   created_at: string;
   updated_at: string;
@@ -15,6 +27,8 @@ interface ContractTemplate {
 type View = 'list' | 'create' | 'edit';
 
 export function ContractTemplatesList() {
+  const t = useTranslations('planner.quotesFinances.contractTemplates');
+
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>('list');
@@ -22,8 +36,10 @@ export function ContractTemplatesList() {
   const [editingContent, setEditingContent] = useState<object | null>(null);
   const [name, setName] = useState('');
   const [isDefault, setIsDefault] = useState(false);
+  const [language, setLanguage] = useState<TemplateLanguage>('ES');
   const [content, setContent] = useState<object>({ type: 'doc', content: [{ type: 'paragraph' }] });
   const [saving, setSaving] = useState(false);
+  const [plannerLanguage, setPlannerLanguage] = useState<TemplateLanguage>('ES');
   // Payment schedule per template: templateId -> { expanded, items, saving }
   const [scheduleState, setScheduleState] = useState<Record<string, { expanded: boolean; items: ScheduleItem[]; loading: boolean; saving: boolean }>>({});
 
@@ -33,7 +49,6 @@ export function ContractTemplatesList() {
       setScheduleState((p) => ({ ...p, [templateId]: { ...p[templateId], expanded: false } }));
       return;
     }
-    // Load items
     setScheduleState((p) => ({ ...p, [templateId]: { expanded: true, items: p[templateId]?.items ?? [], loading: true, saving: false } }));
     const res = await fetch(`/api/planner/contract-templates/${templateId}/payment-schedule`);
     if (res.ok) {
@@ -85,23 +100,37 @@ export function ContractTemplatesList() {
     setLoading(false);
   }
 
-  useEffect(() => { fetchTemplates(); }, []);
+  useEffect(() => {
+    fetchTemplates();
+    // Fetch planner's preferred language to use as default for new templates
+    fetch('/api/planner/me').then(async (res) => {
+      if (res.ok) {
+        const json = await res.json();
+        const lang = (json.preferred_language as string | null)?.toUpperCase() as TemplateLanguage | undefined;
+        if (lang && LANGUAGE_OPTIONS.some((o) => o.value === lang)) {
+          setPlannerLanguage(lang);
+        }
+      }
+    });
+  }, []);
 
   function startCreate() {
     setEditingId(null);
     setName('');
     setIsDefault(false);
+    setLanguage(plannerLanguage);
     setContent({ type: 'doc', content: [{ type: 'paragraph' }] });
     setView('create');
   }
 
-  async function startEdit(t: ContractTemplate) {
-    const res = await fetch(`/api/planner/contract-templates/${t.id}`);
+  async function startEdit(tmpl: ContractTemplate) {
+    const res = await fetch(`/api/planner/contract-templates/${tmpl.id}`);
     if (res.ok) {
       const json = await res.json();
-      setEditingId(t.id);
-      setName(t.name);
-      setIsDefault(t.is_default);
+      setEditingId(tmpl.id);
+      setName(tmpl.name);
+      setIsDefault(tmpl.is_default);
+      setLanguage((tmpl.language ?? 'ES') as TemplateLanguage);
       setEditingContent(json.data.content);
       setView('edit');
     }
@@ -114,13 +143,13 @@ export function ContractTemplatesList() {
         await fetch(`/api/planner/contract-templates/${editingId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, content: editingContent ?? content, is_default: isDefault }),
+          body: JSON.stringify({ name, content: editingContent ?? content, is_default: isDefault, language }),
         });
       } else {
         await fetch('/api/planner/contract-templates', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, content, is_default: isDefault }),
+          body: JSON.stringify({ name, content, is_default: isDefault, language }),
         });
       }
       setView('list');
@@ -131,7 +160,7 @@ export function ContractTemplatesList() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this template?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     await fetch(`/api/planner/contract-templates/${id}`, { method: 'DELETE' });
     fetchTemplates();
   }
@@ -146,21 +175,37 @@ export function ContractTemplatesList() {
     return (
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => setView('list')} className="text-sm text-gray-500 hover:text-gray-700">← Back</button>
-          <h3 className="text-base font-semibold text-gray-900">{view === 'edit' ? 'Edit Template' : 'New Contract Template'}</h3>
+          <button onClick={() => setView('list')} className="text-sm text-gray-500 hover:text-gray-700">{t('back')}</button>
+          <h3 className="text-base font-semibold text-gray-900">{view === 'edit' ? t('editHeading') : t('newHeading')}</h3>
         </div>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-gray-700 mb-1">Template Name *</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('nameLabel')}</label>
               <input
                 required
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Standard Wedding Planning Contract"
+                placeholder={t('namePlaceholder')}
               />
             </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('languageLabel')}</label>
+              <select
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as TemplateLanguage)}
+              >
+                {LANGUAGE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.flag} {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -168,7 +213,7 @@ export function ContractTemplatesList() {
                 checked={isDefault}
                 onChange={(e) => setIsDefault(e.target.checked)}
               />
-              <span className="text-sm text-gray-700">Set as default</span>
+              <span className="text-sm text-gray-700">{t('setAsDefault')}</span>
             </label>
           </div>
           <ContractTemplateEditor
@@ -180,14 +225,14 @@ export function ContractTemplatesList() {
           />
           <div className="flex items-center justify-end gap-3">
             <button onClick={() => setView('list')} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50">
-              Cancel
+              {t('cancel')}
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !name.trim()}
               className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 disabled:opacity-50 transition-all shadow-sm"
             >
-              {saving ? 'Saving…' : 'Save Template'}
+              {saving ? t('saving') : t('saveTemplate')}
             </button>
           </div>
         </div>
@@ -198,7 +243,7 @@ export function ContractTemplatesList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-semibold text-gray-900">Contract Templates</h3>
+        <h3 className="text-base font-semibold text-gray-900">{t('listHeading')}</h3>
         <button
           onClick={startCreate}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm"
@@ -206,7 +251,7 @@ export function ContractTemplatesList() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Template
+          {t('newTemplate')}
         </button>
       </div>
 
@@ -217,87 +262,95 @@ export function ContractTemplatesList() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900">No contract templates yet</h3>
-          <p className="text-xs text-gray-500 mt-1">Create a reusable contract template to use when creating contracts for clients.</p>
+          <h3 className="text-sm font-semibold text-gray-900">{t('emptyTitle')}</h3>
+          <p className="text-xs text-gray-500 mt-1">{t('emptyDescription')}</p>
           <button onClick={startCreate} className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all">
-            Create Template
+            {t('createTemplate')}
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {templates.map((t) => (
-            <div key={t.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-semibold text-gray-900">{t.name}</h4>
-                    {t.is_default && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-medium">Default</span>
+          {templates.map((tmpl) => {
+            const langOption = LANGUAGE_OPTIONS.find((o) => o.value === tmpl.language);
+            return (
+              <div key={tmpl.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-sm font-semibold text-gray-900">{tmpl.name}</h4>
+                      {tmpl.is_default && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-medium">{t('defaultBadge')}</span>
+                      )}
+                      {langOption && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+                          {langOption.flag} {langOption.label}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {t('updatedAt', { date: new Date(tmpl.updated_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <button
+                    onClick={() => startEdit(tmpl)}
+                    className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    {t('edit')}
+                  </button>
+                  <button
+                    onClick={() => toggleSchedule(tmpl.id)}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
+                    title={t('scheduleTitle')}
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {t('scheduleButton')}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(tmpl.id)}
+                    className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+
+                {/* Payment schedule editor (expandable) */}
+                {scheduleState[tmpl.id]?.expanded && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('paymentMilestonesHeading')}</h5>
+                      <button
+                        onClick={() => saveSchedule(tmpl.id)}
+                        disabled={scheduleState[tmpl.id]?.saving}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-rose-500 hover:bg-rose-600 disabled:opacity-60 rounded-lg transition-colors"
+                      >
+                        {scheduleState[tmpl.id]?.saving && (
+                          <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        )}
+                        {scheduleState[tmpl.id]?.saving ? t('scheduleSaving') : t('scheduleSave')}
+                      </button>
+                    </div>
+                    {scheduleState[tmpl.id]?.loading ? (
+                      <div className="flex items-center justify-center h-12">
+                        <div className="animate-spin w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full" />
+                      </div>
+                    ) : (
+                      <PaymentScheduleEditor
+                        items={scheduleState[tmpl.id]?.items ?? []}
+                        onChange={(items) =>
+                          setScheduleState((p) => ({ ...p, [tmpl.id]: { ...p[tmpl.id], items } }))
+                        }
+                        compact
+                      />
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Updated {new Date(t.updated_at).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                </div>
+                )}
               </div>
-              <div className="flex items-center gap-2 mt-4">
-                <button
-                  onClick={() => startEdit(t)}
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => toggleSchedule(t.id)}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
-                  title="Calendario de pagos"
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Calendario
-                </button>
-                <button
-                  onClick={() => handleDelete(t.id)}
-                  className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-
-              {/* Payment schedule editor (expandable) */}
-              {scheduleState[t.id]?.expanded && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="flex items-center justify-between mb-3">
-                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Hitos de pago del template</h5>
-                    <button
-                      onClick={() => saveSchedule(t.id)}
-                      disabled={scheduleState[t.id]?.saving}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-rose-500 hover:bg-rose-600 disabled:opacity-60 rounded-lg transition-colors"
-                    >
-                      {scheduleState[t.id]?.saving && (
-                        <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      )}
-                      {scheduleState[t.id]?.saving ? 'Guardando…' : 'Guardar'}
-                    </button>
-                  </div>
-                  {scheduleState[t.id]?.loading ? (
-                    <div className="flex items-center justify-center h-12">
-                      <div className="animate-spin w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full" />
-                    </div>
-                  ) : (
-                    <PaymentScheduleEditor
-                      items={scheduleState[t.id]?.items ?? []}
-                      onChange={(items) =>
-                        setScheduleState((p) => ({ ...p, [t.id]: { ...p[t.id], items } }))
-                      }
-                      compact
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
