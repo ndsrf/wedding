@@ -35,7 +35,6 @@ interface QuoteFormData {
   currency: string;
   discount: number | '';
   tax_rate: number | '';
-  due_date: string;
   expires_at: string;
   line_items: LineItem[];
 }
@@ -70,8 +69,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
     currency: initialData?.currency ?? 'EUR',
     discount: initialData?.discount ?? '',
     tax_rate: initialData?.tax_rate ?? '',
-    due_date: initialData?.due_date ?? (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })(),
-    expires_at: initialData?.expires_at ?? '',
+    expires_at: initialData?.expires_at ?? (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })(),
     line_items: initialData?.line_items?.length ? initialData.line_items : [emptyItem()],
   });
 
@@ -177,8 +175,7 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
         discount: form.discount === '' ? null : Number(form.discount),
         tax_rate: form.tax_rate === '' ? null : Number(form.tax_rate),
         event_date: form.event_date || null,
-        due_date: form.due_date,
-        expires_at: form.expires_at || null,
+        expires_at: form.expires_at,
         client_email: form.client_email || null,
         client_phone: form.client_phone || null,
         client_id_number: form.client_id_number || null,
@@ -454,20 +451,10 @@ export function QuoteForm({ initialData, onSave, onCancel, readOnly = false }: Q
         <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">{t('quoteForm.additionalDetails')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.dueDate')} *</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.validUntil')} *</label>
             <input
               type="date"
               required
-              readOnly={readOnly}
-              className={inputClass}
-              value={form.due_date ? form.due_date.slice(0, 10) : ''}
-              onChange={(e) => !readOnly && setForm((p) => ({ ...p, due_date: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quoteForm.validUntil')}</label>
-            <input
-              type="date"
               readOnly={readOnly}
               className={inputClass}
               value={form.expires_at ? form.expires_at.slice(0, 10) : ''}

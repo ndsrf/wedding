@@ -953,7 +953,6 @@ model Quote {
   total                   Decimal        @db.Decimal(10, 2)
   pdf_url                 String?
   expires_at              DateTime?
-  due_date                DateTime?
   converted_to_wedding_id String?
   version                 Int            @default(1)
   previous_version_id     String?        @unique
