@@ -992,6 +992,7 @@
         "discount": "Remise ({currency})",
         "taxRate": "Taux de taxe (%)",
         "additionalDetails": "Détails supplémentaires",
+        "dueDate": "Date d’échéance",
         "validUntil": "Valide jusqu’au",
         "notes": "Notes",
         "notesPlaceholder": "Notes ou conditions supplémentaires...",

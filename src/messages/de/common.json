@@ -992,6 +992,7 @@
         "discount": "Rabatt ({currency})",
         "taxRate": "Steuersatz (%)",
         "additionalDetails": "Weitere Details",
+        "dueDate": "Fälligkeitsdatum",
         "validUntil": "Gültig bis",
         "notes": "Notizen",
         "notesPlaceholder": "Zusätzliche Hinweise oder Bedingungen...",

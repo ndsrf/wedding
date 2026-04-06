@@ -996,6 +996,7 @@
         "discount": "Descuento ({currency})",
         "taxRate": "Tipo impositivo (%)",
         "additionalDetails": "Detalles adicionales",
+        "dueDate": "Fecha de Vencimiento",
         "validUntil": "Válido hasta",
         "notes": "Notas",
         "notesPlaceholder": "Notas adicionales o condiciones...",

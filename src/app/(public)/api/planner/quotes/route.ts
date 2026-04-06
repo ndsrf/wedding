@@ -27,7 +27,7 @@ const createQuoteSchema = z.object({
   discount: z.number().min(0).optional().nullable(),
   tax_rate: z.number().min(0).max(100).optional().nullable(),
   total: z.number().min(0),
-  expires_at: z.string().datetime().optional().nullable(),
+  expires_at: z.string().datetime(),
   line_items: z.array(lineItemSchema).min(1),
 });
 
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         discount: data.discount ?? null,
         tax_rate: data.tax_rate ?? null,
         total: data.total,
-        expires_at: data.expires_at ? new Date(data.expires_at) : null,
+        expires_at: new Date(data.expires_at),
         line_items: {
           create: data.line_items.map((item) => ({
             name: item.name,
