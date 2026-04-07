@@ -2424,6 +2424,11 @@
         "tastingReport": "Rapport de Dégustation",
         "weddingMenu": "Menu de Mariage",
         "error": "Erreur lors de la génération du PDF"
+      },
+      "rounds": {
+        "selectRound": "Tour :",
+        "addRound": "Ajouter un tour",
+        "roundLabel": "Tour {number}"
       }
     },
     "menu": {
@@ -2439,7 +2444,8 @@
       "generateError": "Erreur lors de la génération du menu",
       "aiReasoning": "Raisonnement de l'IA",
       "exportXlsx": "Exporter en Excel",
-      "exportPdf": "Exporter en PDF"
+      "exportPdf": "Exporter en PDF",
+      "rounds": "Tours de dégustation :"
     },
     "finanzas": {
       "title": "Compte de Résultats",

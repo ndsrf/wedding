@@ -62,6 +62,7 @@ interface ImportSelections {
 interface Props {
   menu: TastingMenu | null;
   apiBase: string; // e.g. '/api/admin/tasting' or '/api/planner/weddings/[id]/tasting'
+  menuId?: string; // ID of the active tasting round (menu); undefined → round 1 / default
   onMenuChange: (menu: TastingMenu) => void;
   readOnly?: boolean;
 }
@@ -90,7 +91,7 @@ async function fetchJson(url: string, options?: RequestInit) {
   return { ...data, status: res.status };
 }
 
-export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = false }: Props) {
+export function TastingMenuEditor({ menu, apiBase, menuId, onMenuChange, readOnly = false }: Props) {
   const t = useTranslations('admin.tastingMenu');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -165,7 +166,8 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
           ? new Date(menuTastingDate).toISOString()
           : null,
       };
-      const data = await fetchJson(apiBase, {
+      const saveUrl = menuId ? `${apiBase}?menuId=${menuId}` : apiBase;
+      const data = await fetchJson(saveUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -191,10 +193,12 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     if (!addingSectionName.trim()) return;
     setAddingSection(true);
     try {
+      const sectionBody: Record<string, string> = { name: addingSectionName.trim() };
+      if (menuId) sectionBody.menu_id = menuId;
       const data = await fetchJson(`${apiBase}/sections`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: addingSectionName.trim() }),
+        body: JSON.stringify(sectionBody),
       });
       if (!data.success) throw new Error(data.error?.message ?? 'Failed to add section');
       const current = menu ?? { id: data.data.menu_id, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
@@ -417,10 +421,12 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         const parsedSection = importPreview.sections[si];
 
         // Create section
+        const importSectionBody: Record<string, string> = { name: parsedSection.name };
+        if (menuId) importSectionBody.menu_id = menuId;
         const sectionData = await fetchJson(`${apiBase}/sections`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: parsedSection.name }),
+          body: JSON.stringify(importSectionBody),
         });
         if (!sectionData.success) continue;
 

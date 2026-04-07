@@ -8,12 +8,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { getTastingMenuHandler, upsertTastingMenuHandler } from '@/lib/tasting/api-handlers';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const user = await requireRole('wedding_admin');
   if (!user.wedding_id) {
     return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'No wedding' } }, { status: 403 });
   }
-  return getTastingMenuHandler(user.wedding_id);
+  const menuId = request.nextUrl.searchParams.get('menuId') ?? undefined;
+  return getTastingMenuHandler(user.wedding_id, menuId);
 }
 
 export async function POST(request: NextRequest) {

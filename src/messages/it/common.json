@@ -2424,6 +2424,11 @@
         "tastingReport": "Report Degustazione",
         "weddingMenu": "Menu Matrimonio",
         "error": "Errore nella generazione del PDF"
+      },
+      "rounds": {
+        "selectRound": "Turno:",
+        "addRound": "Aggiungi un altro turno",
+        "roundLabel": "Turno {number}"
       }
     },
     "menu": {
@@ -2439,7 +2444,8 @@
       "generateError": "Errore durante la generazione del menu",
       "aiReasoning": "Ragionamento AI",
       "exportXlsx": "Esporta in Excel",
-      "exportPdf": "Esporta in PDF"
+      "exportPdf": "Esporta in PDF",
+      "rounds": "Turni di degustazione:"
     },
     "finanzas": {
       "title": "Conto Economico",

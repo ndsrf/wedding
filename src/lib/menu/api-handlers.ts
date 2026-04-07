@@ -32,21 +32,24 @@ export async function updateMenuSelectionHandler(
     );
   }
 
-  const tastingMenu = await prisma.tastingMenu.findFirst({
+  const allMenus = await prisma.tastingMenu.findMany({
     where: { wedding_id: weddingId },
     select: { id: true },
   });
 
-  if (!tastingMenu) {
+  if (allMenus.length === 0) {
     return NextResponse.json(
       { success: false, error: { message: 'Tasting menu not found' } },
       { status: 404 },
     );
   }
 
+  const menuIds = allMenus.map(m => m.id);
+
+  // Deselect all dishes across every round, then select the specified ones
   await prisma.$transaction([
     prisma.tastingDish.updateMany({
-      where: { section: { menu_id: tastingMenu.id } },
+      where: { section: { menu_id: { in: menuIds } } },
       data: { is_selected: false },
     }),
     prisma.tastingDish.updateMany({

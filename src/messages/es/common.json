@@ -2463,6 +2463,11 @@
         "tastingReport": "Informe Degustación",
         "weddingMenu": "Menú de Boda",
         "error": "Error al generar el PDF"
+      },
+      "rounds": {
+        "selectRound": "Ronda:",
+        "addRound": "Añadir otra ronda",
+        "roundLabel": "Ronda {number}"
       }
     },
     "menu": {
@@ -2490,7 +2495,8 @@
       "generating": "Generando...",
       "generateSuccess": "Menú generado correctamente",
       "generateError": "Error al generar el menú",
-      "aiReasoning": "Razonamiento de la IA"
+      "aiReasoning": "Razonamiento de la IA",
+      "rounds": "Rondas de cata:"
     },
     "finanzas": {
       "title": "Cuenta de Resultados",

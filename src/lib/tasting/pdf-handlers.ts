@@ -169,48 +169,53 @@ function buildPdfResponse(buffer: Buffer, filename: string) {
 
 // ─── Tasting Report ──────────────────────────────────────────────────────────
 
-export async function generateTastingReportHandler(weddingId: string) {
-  const [menuData, weddingCtx] = await Promise.all([
-    prisma.tastingMenu.findUnique({
-      where: { wedding_id: weddingId },
+export async function generateTastingReportHandler(weddingId: string, menuId?: string) {
+  const menuSelect = {
+    id: true,
+    title: true,
+    description: true,
+    tasting_date: true,
+    participants: {
+      select: { name: true },
+      orderBy: { name: 'asc' as const },
+    },
+    sections: {
+      orderBy: { order: 'asc' as const },
       select: {
         id: true,
-        title: true,
-        description: true,
-        tasting_date: true,
-        participants: {
-          select: { name: true },
-          orderBy: { name: 'asc' },
-        },
-        sections: {
-          orderBy: { order: 'asc' },
+        name: true,
+        order: true,
+        dishes: {
+          orderBy: { order: 'asc' as const },
           select: {
             id: true,
             name: true,
+            description: true,
+            image_url: true,
             order: true,
-            dishes: {
-              orderBy: { order: 'asc' },
+            scores: {
               select: {
-                id: true,
-                name: true,
-                description: true,
+                score: true,
+                notes: true,
                 image_url: true,
-                order: true,
-                scores: {
-                  select: {
-                    score: true,
-                    notes: true,
-                    image_url: true,
-                    participant: { select: { name: true } },
-                  },
-                  orderBy: { created_at: 'asc' },
-                },
+                participant: { select: { name: true } },
               },
+              orderBy: { created_at: 'asc' as const },
             },
           },
         },
       },
-    }),
+    },
+  };
+
+  const [menuData, weddingCtx] = await Promise.all([
+    menuId
+      ? prisma.tastingMenu.findFirst({ where: { id: menuId, wedding_id: weddingId }, select: menuSelect })
+      : prisma.tastingMenu.findFirst({
+          where: { wedding_id: weddingId },
+          orderBy: { round_number: 'asc' },
+          select: menuSelect,
+        }),
     getWeddingContext(weddingId),
   ]);
 
@@ -299,9 +304,11 @@ export async function generateTastingReportHandler(weddingId: string) {
 // ─── Menu PDF ────────────────────────────────────────────────────────────────
 
 export async function generateTastingMenuPDFHandler(weddingId: string) {
-  const [menuData, { planner, coupleNames, weddingDate }] = await Promise.all([
-    prisma.tastingMenu.findUnique({
+  // For the menu PDF we consolidate selected dishes from ALL rounds
+  const [allMenus, { planner, coupleNames, weddingDate }] = await Promise.all([
+    prisma.tastingMenu.findMany({
       where: { wedding_id: weddingId },
+      orderBy: { round_number: 'asc' },
       select: {
         id: true,
         sections: {
@@ -326,19 +333,40 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     getWeddingContext(weddingId),
   ]);
 
-  if (!menuData) {
+  // Consolidate sections from all rounds by section name
+  const sectionMap = new Map<string, { id: string; name: string; dishes: Array<{ id: string; name: string; description: string | null; image_url: string | null }> }>();
+  const sectionOrder: string[] = [];
+  for (const menu of allMenus) {
+    for (const s of menu.sections) {
+      if (!sectionMap.has(s.name)) {
+        sectionMap.set(s.name, { id: s.id, name: s.name, dishes: [] });
+        sectionOrder.push(s.name);
+      }
+      sectionMap.get(s.name)!.dishes.push(...s.dishes);
+    }
+  }
+  const consolidatedSections = sectionOrder.map(n => sectionMap.get(n)!);
+
+  if (consolidatedSections.length === 0 && allMenus.length === 0) {
     return NextResponse.json(
       { success: false, error: { code: 'NOT_FOUND', message: 'No tasting menu found' } },
       { status: 404 },
     );
   }
 
-  // Pre-fetch all images in parallel using raw DB URLs as cache keys
-  const rawDishUrls = menuData.sections.flatMap((s) => s.dishes.map((d) => d.image_url));
-  const rawLogoUrl = planner?.logo_url ?? null;
-  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls]);
+  // Legacy shape expected by the rest of the function
+  const menuDataLegacy = {
+    id: allMenus[0]?.id ?? 'combined',
+    sections: consolidatedSections,
+  };
 
-  const sections = menuData.sections
+  // Pre-fetch all images in parallel using raw DB URLs as cache keys
+  // (reusing the function-scoped variable below)
+  const rawDishUrls2 = consolidatedSections.flatMap((s) => s.dishes.map((d) => d.image_url));
+  const rawLogoUrl2 = planner?.logo_url ?? null;
+  const imageCache2 = await prefetchImages([rawLogoUrl2, ...rawDishUrls2]);
+
+  const sections = menuDataLegacy.sections
     .filter((s) => s.dishes.length > 0)
     .map((section) => ({
       id: section.id,
@@ -347,7 +375,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
         id: dish.id,
         name: sanitize(dish.name) ?? '',
         description: sanitize(dish.description, 300),
-        image_url: dish.image_url ? (imageCache.get(dish.image_url) ?? null) : null,
+        image_url: dish.image_url ? (imageCache2.get(dish.image_url) ?? null) : null,
       })),
     }));
 
@@ -358,7 +386,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
 
   const plannerInfo = {
     name: sanitize(planner?.name) ?? 'Wedding Planner',
-    logoUrl: rawLogoUrl ? (imageCache.get(rawLogoUrl) ?? null) : null,
+    logoUrl: rawLogoUrl2 ? (imageCache2.get(rawLogoUrl2) ?? null) : null,
   };
 
   let buffer: Buffer;
@@ -378,5 +406,5 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     );
   }
 
-  return buildPdfResponse(buffer, `wedding-menu-${menuData.id}.pdf`);
+  return buildPdfResponse(buffer, `wedding-menu-${menuDataLegacy.id}.pdf`);
 }
