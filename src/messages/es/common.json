@@ -228,7 +228,7 @@
         },
         "standard": {
           "name": "Estándar",
-          "price": "€50",
+          "price": "Contáctanos",
           "features": [
             "3 bodas en paralelo",
             "Invitados ilimitados",
@@ -2854,7 +2854,16 @@
   "docs": {
     "title": "Documentación",
     "subtitle": "Todo lo que necesitas saber sobre Nupci",
-    "overview": {
+    "videoTutorials": {
+      "title": "Videotutoriales",
+      "subtitle": "Aprende a usar Nupci con nuestras guías en vídeo paso a paso",
+      "items": [
+        {
+          "title": "Configuración Inicial y Gestión de Negocio",
+          "description": "Este vídeo enseña cómo configurar tu empresa en Nupci (logo, firma) y cómo:\n\n• Crear presupuestos y facturas con plantillas\n• Controlar cambios y versiones\n• Rellenar contratos mediante IA\n• Enviar contratos para firma electrónica\n• Gestionar facturas, calendarios de pagos y recepción de cobros"
+        }
+      ]
+    },    "overview": {
       "title": "¿Qué es Nupci?",
       "content1": "Nupci es una plataforma integral de gestión de bodas diseñada específicamente para wedding planners. Proporciona una solución completa para gestionar múltiples bodas simultáneamente, desde la gestión de listas de invitados hasta invitaciones y seguimiento de regalos.",
       "content2": "Construida con una arquitectura multi-tenant, Nupci permite a los wedding planners gestionar múltiples parejas a la vez, mientras brinda a cada pareja acceso seguro a los datos de su propia boda a través de una interfaz intuitiva."

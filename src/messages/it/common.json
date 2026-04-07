@@ -2802,7 +2802,17 @@
   },
   "docs": {
     "title": "Documentazione",
-    "subtitle": "Tutto quello che devi sapere su {commercialName}",
+    "subtitle": "Tutto quello che c'è da sapere su {commercialName}",
+    "videoTutorials": {
+      "title": "Video Tutorial",
+      "subtitle": "Impara a usare {commercialName} con le nostre guide video passo-passo",
+      "items": [
+        {
+          "title": "Configurazione Iniziale e Gestione Aziendale",
+          "description": "Questo video (in spagnolo) mostra come configurare la tua azienda in {commercialName} (logo, firma) e come:\n\n• Creare preventivi e fatture con modelli\n• Controllare modifiche e versioni\n• Compilare contratti tramite IA\n• Inviare contratti per la firma elettronica\n• Gestire fatture, scadenziari di pagamento e ricezione dei pagamenti"
+        }
+      ]
+    },
     "overview": {
       "title": "Cos'è {commercialName}?",
       "content1": "{commercialName} è una piattaforma completa di gestione matrimoni progettata specificamente per gli organizzatori di matrimoni. Fornisce una soluzione completa per gestire più matrimoni contemporaneamente, dalla gestione delle liste degli invitati agli inviti al monitoraggio dei regali.",

@@ -10,6 +10,7 @@ import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
 import AMPLink from '@/components/AMPLink';
 import LandingFeatureCard from '@/components/LandingFeatureCard';
+import { ArcadeEmbed } from '@/components/ArcadeEmbed';
 
 const LANDING_FEATURES: Array<{
   key: string;
@@ -203,18 +204,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 {t('landing.hero.subtitle', { commercialName })}
               </p>
 
-              {/* Mobile Hero Image */}
+              {/* Mobile Hero Demo */}
               <div className="lg:hidden mb-10 relative px-4">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl mx-auto max-w-md ring-8 ring-white/50">
-                  <Image
-                    src="/images/novios-mobile.webp"
-                    alt="Wedding planning"
-                    width={600}
-                    height={343}
-                    className="w-full h-auto object-cover"
-                    priority
-                    fetchPriority="high"
-                  />
+                  <ArcadeEmbed />
                 </div>
               </div>
 
@@ -237,18 +230,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               </p>
             </div>
 
-            {/* Right side - Hero image */}
+            {/* Right side - Hero demo */}
             <div className="relative hidden lg:block">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-12 ring-white/30 transform hover:scale-[1.02] transition-transform duration-500">
-                <Image
-                  src="/images/novios.webp"
-                  alt="Wedding planning"
-                  width={800}
-                  height={533}
-                  className="w-full h-auto"
-                  priority
-                  fetchPriority="high"
-                />
+                <ArcadeEmbed />
               </div>
             </div>
           </div>
@@ -432,8 +417,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 {t('landing.pricing.plans.standard.name')}
               </h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold">€50</span>
-                <span className="text-white/80">/{t('landing.pricing.perMonth')}</span>
+                <span className="text-4xl font-bold">{t('landing.pricing.contactUs')}</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start">

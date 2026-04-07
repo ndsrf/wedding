@@ -2803,7 +2803,16 @@
   "docs": {
     "title": "Dokumentation",
     "subtitle": "Alles, was Sie über {commercialName} wissen müssen",
-    "overview": {
+    "videoTutorials": {
+      "title": "Videotutorials",
+      "subtitle": "Lernen Sie die Nutzung von {commercialName} mit unseren schrittweisen Video-Anleitungen",
+      "items": [
+        {
+          "title": "Ersteinrichtung und Geschäftsführung",
+          "description": "Dieses Video (auf Spanisch) zeigt, wie Sie Ihr Unternehmen in {commercialName} konfigurieren (Logo, Unterschrift) und wie Sie:\n\n• Angebote und Rechnungen mit Vorlagen erstellen\n• Änderungen und Versionen kontrollieren\n• Verträge mithilfe von KI ausfüllen\n• Verträge zur elektronischen Unterzeichnung versenden\n• Rechnungen, Zahlungspläne und Zahlungseingänge verwalten"
+        }
+      ]
+    },    "overview": {
       "title": "Was ist {commercialName}?",
       "content1": "{commercialName} ist eine umfassende Hochzeitsverwaltungsplattform, die speziell für Hochzeitsplaner entwickelt wurde. Sie bietet eine vollständige Lösung zur gleichzeitigen Verwaltung mehrerer Hochzeiten, von der Gästelistenverwaltung über Einladungen bis zur Geschenkverfolgung.",
       "content2": "Mit einer Multi-Tenant-Architektur ermöglicht {commercialName} Hochzeitsplanern die gleichzeitige Verwaltung mehrerer Paare und gibt jedem Paar über eine intuitive Benutzeroberfläche sicheren Zugriff auf die Daten ihrer eigenen Hochzeit."

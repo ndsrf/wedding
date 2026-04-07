@@ -51,7 +51,29 @@ export async function GET(
     section { margin-top: 32px; }
     .user-type { margin-bottom: 20px; padding: 16px; border-left: 4px solid #e11d48; background: #fff5f7; }
     .user-type h3 { margin-top: 0; }
+    .video-item { margin-top: 20px; }
+    .video-title { margin-top: 12px; margin-bottom: 8px; }
+    .video-description { font-size: 0.95rem; color: #555; white-space: pre-line; }
     .cta { text-align: center; margin-top: 40px; }
+  `;
+
+  const html = renderAMPPage({
+    locale,
+    title,
+    canonical: `${baseUrl}/${locale}/docs`,
+    description,
+    content,
+    styles,
+    scripts: ['amp-vimeo'],
+  });
+
+  return new NextResponse(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+    },
+  });
+}
+n-top: 40px; }
   `;
 
   const html = renderAMPPage({

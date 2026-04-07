@@ -2878,7 +2878,16 @@
   "docs": {
     "title": "Documentation",
     "subtitle": "Everything you need to know about {commercialName}",
-    "overview": {
+    "videoTutorials": {
+      "title": "Video Tutorials",
+      "subtitle": "Learn how to use {commercialName} with our step-by-step video guides",
+      "items": [
+        {
+          "title": "Initial Configuration and Business Management",
+          "description": "This video (in Spanish) shows how to configure your company in {commercialName} (logo, signature) and how to:\n\n• Create quotes and invoices with templates\n• Control changes and versions\n• Fill contracts using AI\n• Send contracts for electronic signature\n• Manage invoices, payment schedules, and payment collection"
+        }
+      ]
+    },    "overview": {
       "title": "What is {commercialName}?",
       "content1": "{commercialName} is a comprehensive wedding management platform designed specifically for wedding planners. It provides a complete solution for managing multiple weddings simultaneously, from guest list management to invitations to gift tracking.",
       "content2": "Built with a multi-tenant architecture, {commercialName} allows wedding planners to manage multiple couples at once, while giving each couple secure access to their own wedding data through an intuitive interface."

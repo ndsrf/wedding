@@ -2803,7 +2803,16 @@
   "docs": {
     "title": "Documentation",
     "subtitle": "Tout ce que vous devez savoir sur {commercialName}",
-    "overview": {
+    "videoTutorials": {
+      "title": "Tutoriels Vidéo",
+      "subtitle": "Apprenez à utiliser {commercialName} avec nos guides vidéo étape par étape",
+      "items": [
+        {
+          "title": "Configuration Initiale et Gestion d'Entreprise",
+          "description": "Cette vidéo (en espagnol) montre comment configurer votre entreprise dans {commercialName} (logo, signature) et comment :\n\n• Créer des devis et des factures avec des modèles\n• Contrôler les modifications et les versions\n• Remplir des contrats via l'IA\n• Envoyer des contrats pour signature électronique\n• Gérer les factures, les échéanciers de paiement et la réception des paiements"
+        }
+      ]
+    },    "overview": {
       "title": "Qu'est-ce que {commercialName} ?",
       "content1": "{commercialName} est une plateforme complète de gestion de mariages conçue spécifiquement pour les organisateurs de mariage. Elle fournit une solution complète pour gérer plusieurs mariages simultanément, de la gestion des listes d'invités aux invitations en passant par le suivi des cadeaux.",
       "content2": "Construite avec une architecture multi-tenant, {commercialName} permet aux organisateurs de mariage de gérer plusieurs couples à la fois, tout en donnant à chaque couple un accès sécurisé aux données de leur propre mariage via une interface intuitive."

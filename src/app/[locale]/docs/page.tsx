@@ -10,6 +10,7 @@ import { generateAMPMetadata } from '@/lib/amp';
 import Footer from '@/components/Footer';
 import AMPLink from '@/components/AMPLink';
 import DocsPersonaTabs from '@/components/docs/DocsPersonaTabs';
+import VideoTutorials from '@/components/docs/VideoTutorials';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -211,6 +212,14 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
     },
   ];
 
+  const videos = [
+    {
+      url: "https://player.vimeo.com/video/1180992295",
+      title: t('docs.videoTutorials.items.0.title'),
+      description: t('docs.videoTutorials.items.0.description'),
+    }
+  ];
+
   return (
     <>
       <AMPLink ampUrl={`${baseUrl}/${locale}/docs/amp`} />
@@ -263,6 +272,13 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
                   </p>
                 </section>
               </div>
+
+              {/* Video Tutorials */}
+              <VideoTutorials 
+                title={t('docs.videoTutorials.title')}
+                subtitle={t('docs.videoTutorials.subtitle')}
+                videos={videos}
+              />
 
               {/* Persona-based Feature Tabs */}
               <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border border-rose-100">
