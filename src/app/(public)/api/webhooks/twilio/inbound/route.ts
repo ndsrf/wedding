@@ -461,7 +461,7 @@ export async function POST(request: NextRequest) {
     // --- Fetch selected wedding menu dishes ------------------------------
     let menuContext: MenuContext | null = null;
     try {
-      const tastingMenu = await prisma.tastingMenu.findUnique({
+      const tastingMenus = await prisma.tastingMenu.findMany({
         where: { wedding_id: family.wedding_id },
         select: {
           sections: {
@@ -477,8 +477,18 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-      if (tastingMenu) {
-        menuContext = { sections: tastingMenu.sections };
+      if (tastingMenus.length > 0) {
+        // Consolidate selected dishes across all rounds
+        const sectionMap = new Map<string, typeof tastingMenus[0]['sections'][0]['dishes']>();
+        for (const menu of tastingMenus) {
+          for (const section of menu.sections) {
+            if (!sectionMap.has(section.name)) sectionMap.set(section.name, []);
+            sectionMap.get(section.name)!.push(...section.dishes);
+          }
+        }
+        menuContext = {
+          sections: Array.from(sectionMap.entries()).map(([name, dishes]) => ({ name, dishes })),
+        };
       }
     } catch (err) {
       console.warn('[TWILIO_INBOUND] Failed to fetch tasting menu, proceeding without it:', err);
