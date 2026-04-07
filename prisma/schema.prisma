@@ -201,7 +201,7 @@ model Wedding {
   providers                       WeddingProvider[]
   itinerary_items                 ItineraryItem[]
   photos                          WeddingPhoto[]
-  tasting_menu                    TastingMenu?
+  tasting_menus                   TastingMenu[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   customer                        Customer?          @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   contract                        Contract?          @relation("WeddingContract", fields: [contract_id], references: [id], onDelete: SetNull)
