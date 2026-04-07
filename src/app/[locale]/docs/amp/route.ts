@@ -30,6 +30,21 @@ export async function GET(
     </section>
 
     <section>
+      <h2>${t('docs.videoTutorials.title')}</h2>
+      <p>${t('docs.videoTutorials.subtitle')}</p>
+      <div class="video-item">
+        <amp-vimeo
+          data-videoid="1180992295"
+          width="16"
+          height="9"
+          layout="responsive"
+        ></amp-vimeo>
+        <h3 class="video-title">${t('docs.videoTutorials.items.0.title')}</h3>
+        <p class="video-description">${t('docs.videoTutorials.items.0.description')}</p>
+      </div>
+    </section>
+
+    <section>
       <h2>${t('docs.targetUsers.title')}</h2>
       <div class="user-type">
         <h3>${t('docs.targetUsers.planner.title')}</h3>
@@ -65,24 +80,6 @@ export async function GET(
     content,
     styles,
     scripts: ['amp-vimeo'],
-  });
-
-  return new NextResponse(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-    },
-  });
-}
-n-top: 40px; }
-  `;
-
-  const html = renderAMPPage({
-    locale,
-    title,
-    canonical: `${baseUrl}/${locale}/docs`,
-    description,
-    content,
-    styles,
   });
 
   return new NextResponse(html, {
