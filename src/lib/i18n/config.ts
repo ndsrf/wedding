@@ -7,7 +7,7 @@ export type Language = 'es' | 'en' | 'fr' | 'it' | 'de';
 
 export const SUPPORTED_LANGUAGES: readonly Language[] = ['es', 'en', 'fr', 'it', 'de'] as const;
 
-export const DEFAULT_LANGUAGE: Language = 'en';
+export const DEFAULT_LANGUAGE: Language = 'es';
 
 export const LANGUAGE_NAMES: Record<Language, string> = {
   es: 'Español',

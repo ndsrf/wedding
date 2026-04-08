@@ -9,6 +9,7 @@ import { Language } from '@/lib/i18n/config'
 import MobileNav from '@/components/MobileNav'
 import Footer from '@/components/Footer'
 import AMPLink from '@/components/AMPLink'
+import ResourcesDropdown from '@/components/ResourcesDropdown'
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -65,12 +66,14 @@ export default async function NewsPage({ params }: { params: Promise<{ locale: s
               <Link href={`/${locale}#pricing`} className="text-gray-700 hover:text-rose-600 transition-colors">
                 {t('landing.nav.pricing')}
               </Link>
-              <Link href={`/${locale}#testimonials`} className="text-gray-700 hover:text-rose-600 transition-colors">
-                {t('landing.nav.testimonials')}
-              </Link>
-              <Link href={`/${locale}/news`} className="text-rose-600 font-semibold transition-colors">
-                {t('news.title')}
-              </Link>
+              <ResourcesDropdown
+                locale={locale}
+                translations={{
+                  resources: t('landing.nav.resources'),
+                  news: t('landing.nav.news'),
+                  helpCenter: t('landing.nav.helpCenter'),
+                }}
+              />
               <LanguageSelector />
               <Link
                 href="/auth/signin"
@@ -84,8 +87,9 @@ export default async function NewsPage({ params }: { params: Promise<{ locale: s
               translations={{
                 features: t('landing.nav.features'),
                 pricing: t('landing.nav.pricing'),
-                testimonials: t('landing.nav.testimonials'),
-                news: t('news.title'),
+                resources: t('landing.nav.resources'),
+                news: t('landing.nav.news'),
+                helpCenter: t('landing.nav.helpCenter'),
                 login: t('landing.nav.login'),
               }}
             />

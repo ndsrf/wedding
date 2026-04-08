@@ -8,8 +8,8 @@ export const routing = {
   // Used when no locale matches
   defaultLocale: DEFAULT_LANGUAGE,
   
-  // This is the default, but being explicit
-  localePrefix: 'as-needed' as const,
+  // Always include the locale in the URL (e.g., /es, /en)
+  localePrefix: 'always' as const,
 
   // Enable locale detection based on browser headers for public pages.
   // This is specifically used in middleware for SEO-friendly public routes.

@@ -119,14 +119,17 @@
       "features": "Caratteristiche",
       "pricing": "Prezzi",
       "testimonials": "Testimonianze",
+      "resources": "Risorse",
+      "news": "Notizie",
+      "helpCenter": "Centro Assistenza",
       "login": "Accedi"
     },
     "hero": {
-      "title": "Potenzia La Tua Attività di Organizzazione Matrimoni",
-      "subtitle": "{commercialName} è la piattaforma tutto-in-uno per organizzatori di matrimoni per collaborare senza problemi con le coppie, gestire gli invitati, progettare inviti straordinari e creare celebrazioni indimenticabili.",
+      "title": "Tu metti la magia, Nupci mette il controllo.",
+      "subtitle": "La piattaforma all-in-one per Wedding Planner che trasforma il caos amministrativo in un'esperienza indimenticabile per le tue coppie.",
       "cta": {
-        "primary": "Prova Gratuita",
-        "secondary": "Scopri Di Più"
+        "primary": "Inizia gratis oggi",
+        "secondary": "Guarda la demo interattiva"
       },
       "trial": "Prova gratuita • 1 matrimonio • Nessuna carta di credito richiesta"
     },
@@ -2810,6 +2813,10 @@
         {
           "title": "Configurazione Iniziale e Gestione Aziendale",
           "description": "Questo video (in spagnolo) mostra come configurare la tua azienda in {commercialName} (logo, firma) e come:\n\n• Creare preventivi e fatture con modelli\n• Controllare modifiche e versioni\n• Compilare contratti tramite IA\n• Inviare contratti per la firma elettronica\n• Gestire fatture, scadenziari di pagamento e ricezione dei pagamenti"
+        },
+        {
+          "title": "Portale per la Coppia e Gestione Integrale del Matrimonio",
+          "description": "Questo video (in spagnolo) mostra le funzionalità del portale per la coppia, da dove possono:\n\n• Creare inviti digitali e modelli di messaggi\n• Gestire la lista degli invitati e le esigenze speciali (allergie, intolleranze)\n• Progettare il piano dei posti\n• Controllare budget, pagamenti e fornitori\n• Gestire la lista dei regali e il menu degustazione"
         }
       ]
     },

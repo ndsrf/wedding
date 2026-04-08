@@ -216,13 +216,18 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
     {
       url: "https://player.vimeo.com/video/1180992295",
       title: t('docs.videoTutorials.items.0.title'),
-      description: t('docs.videoTutorials.items.0.description'),
+      description: t('docs.videoTutorials.items.0.description', { commercialName }),
+    },
+    {
+      url: "https://player.vimeo.com/video/1181252121",
+      title: t('docs.videoTutorials.items.1.title'),
+      description: t('docs.videoTutorials.items.1.description'),
     }
   ];
 
   return (
     <>
-      <AMPLink ampUrl={`${baseUrl}/${locale}/docs/amp`} />
+      <AMPLink ampUrl={`${baseUrl}/${locale}/docs`} />
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
         {/* Header */}
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
@@ -276,7 +281,7 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
               {/* Video Tutorials */}
               <VideoTutorials 
                 title={t('docs.videoTutorials.title')}
-                subtitle={t('docs.videoTutorials.subtitle')}
+                subtitle={t('docs.videoTutorials.subtitle', { commercialName })}
                 videos={videos}
               />
 

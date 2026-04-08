@@ -183,10 +183,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(redirectPath, request.url));
     }
 
-    // For unauthenticated users at the bare root path, explicitly route to
-    // [locale]/page.tsx. We do this instead of delegating to intlMiddleware
-    // because intlMiddleware may return NextResponse.next() for the default
-    // locale, which leaves Next.js with no matching page at "/" and causes 404.
+    // For unauthenticated users at the bare root path, explicitly redirect to
+    // [locale]/page.tsx.
     if (pathname === '/') {
       const acceptLanguage = request.headers.get('accept-language') ?? '';
       const locale = negotiateLocale(
@@ -194,13 +192,8 @@ export async function middleware(request: NextRequest) {
         routing.locales as string[],
         routing.defaultLocale,
       );
-      if (locale !== routing.defaultLocale) {
-        // Non-default locale: visible redirect (e.g. / → /es)
-        return NextResponse.redirect(new URL(`/${locale}`, request.url));
-      }
-      // Default locale: internal rewrite so [locale]/page.tsx can handle it
-      // without changing the URL shown to the user.
-      return NextResponse.rewrite(new URL(`/${routing.defaultLocale}`, request.url));
+      // Visible redirect (e.g. / → /es, / → /en)
+      return NextResponse.redirect(new URL(`/${locale}`, request.url));
     }
 
     // For locale-prefixed roots (/en, /es, …) fall through to intlMiddleware below

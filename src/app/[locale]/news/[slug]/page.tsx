@@ -8,6 +8,8 @@ import { generateAMPMetadata } from '@/lib/amp'
 import LanguageSelector from '@/components/LanguageSelector'
 import { Language } from '@/lib/i18n/config'
 import AMPLink from '@/components/AMPLink'
+import ResourcesDropdown from '@/components/ResourcesDropdown'
+import MobileNav from '@/components/MobileNav'
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
@@ -84,12 +86,14 @@ export default async function ArticlePage({ params }: Props) {
               <Link href={`/${locale}#pricing`} className="text-gray-700 hover:text-rose-600 transition-colors">
                 {t('landing.nav.pricing')}
               </Link>
-              <Link href={`/${locale}#testimonials`} className="text-gray-700 hover:text-rose-600 transition-colors">
-                {t('landing.nav.testimonials')}
-              </Link>
-              <Link href={`/${locale}/news`} className="text-rose-600 font-semibold transition-colors">
-                {t('news.title')}
-              </Link>
+              <ResourcesDropdown
+                locale={locale}
+                translations={{
+                  resources: t('landing.nav.resources'),
+                  news: t('landing.nav.news'),
+                  helpCenter: t('landing.nav.helpCenter'),
+                }}
+              />
               <LanguageSelector />
               <Link
                 href="/auth/signin"
@@ -98,15 +102,17 @@ export default async function ArticlePage({ params }: Props) {
                 {t('landing.nav.login')}
               </Link>
             </nav>
-            <div className="md:hidden flex items-center gap-2">
-              <LanguageSelector />
-              <Link
-                href="/auth/signin"
-                className="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-sm"
-              >
-                {t('landing.nav.login')}
-              </Link>
-            </div>
+            <MobileNav
+              locale={locale}
+              translations={{
+                features: t('landing.nav.features'),
+                pricing: t('landing.nav.pricing'),
+                resources: t('landing.nav.resources'),
+                news: t('landing.nav.news'),
+                helpCenter: t('landing.nav.helpCenter'),
+                login: t('landing.nav.login'),
+              }}
+            />
           </div>
         </div>
       </header>

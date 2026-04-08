@@ -119,14 +119,17 @@
       "features": "Fonctionnalités",
       "pricing": "Tarifs",
       "testimonials": "Témoignages",
-      "login": "Connexion"
+      "resources": "Ressources",
+      "news": "Actualités",
+      "helpCenter": "Base de Connaissances",
+      "login": "Se connecter"
     },
     "hero": {
-      "title": "Développez Votre Entreprise d'Organisation de Mariages",
-      "subtitle": "{commercialName} est la plateforme tout-en-un pour les organisateurs de mariages pour collaborer facilement avec les couples, gérer les invités, concevoir de superbes invitations et créer des célébrations inoubliables.",
+      "title": "Vous apportez la magie, Nupci apporte le contrôle.",
+      "subtitle": "La plateforme tout-en-un pour les organisateurs de mariages qui transforme le chaos administratif en une expérience inoubliable pour vos couples.",
       "cta": {
-        "primary": "Essai Gratuit",
-        "secondary": "En Savoir Plus"
+        "primary": "Commencer gratuitement",
+        "secondary": "Voir la démo interactive"
       },
       "trial": "Essai gratuit • 1 mariage • Aucune carte de crédit requise"
     },
@@ -2810,6 +2813,10 @@
         {
           "title": "Configuration Initiale et Gestion d'Entreprise",
           "description": "Cette vidéo (en espagnol) montre comment configurer votre entreprise dans {commercialName} (logo, signature) et comment :\n\n• Créer des devis et des factures avec des modèles\n• Contrôler les modifications et les versions\n• Remplir des contrats via l'IA\n• Envoyer des contrats pour signature électronique\n• Gérer les factures, les échéanciers de paiement et la réception des paiements"
+        },
+        {
+          "title": "Portail pour le Couple et Gestion Intégrale du Mariage",
+          "description": "Cette vidéo (en espagnol) montre les fonctionnalités du portail pour le couple, d'où ils peuvent :\n\n• Créer des invitations numériques et des modèles de messages\n• Gérer la liste des invités et les besoins spéciaux (allergies, intolérances)\n• Concevoir le plan de salle\n• Contrôler les budgets, les paiements et les fournisseurs\n• Gérer la liste de cadeaux et le menu de dégustation"
         }
       ]
     },    "overview": {

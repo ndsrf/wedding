@@ -124,14 +124,17 @@
       "features": "Features",
       "pricing": "Pricing",
       "testimonials": "Testimonials",
+      "resources": "Resources",
+      "news": "News",
+      "helpCenter": "Knowledge Base",
       "login": "Login"
     },
     "hero": {
-      "title": "Empower Your Wedding Planning Business",
-      "subtitle": "{commercialName} is the all-in-one platform for wedding planners to collaborate seamlessly with couples, manage guests, design stunning invitations, and create unforgettable celebrations.",
+      "title": "You bring the magic, Nupci brings the control.",
+      "subtitle": "The all-in-one platform for Wedding Planners that transforms administrative chaos into an unforgettable experience for your couples.",
       "cta": {
-        "primary": "Start Free Trial",
-        "secondary": "Learn More"
+        "primary": "Start Free today",
+        "secondary": "Watch Interactive Demo"
       },
       "trial": "Free trial • 1 wedding • No credit card",
       "moreVideos": "You can watch more videos in our <link>documentation</link> section"
@@ -139,6 +142,7 @@
     "features": {
       "title": "Everything You Need to Plan Perfect Weddings",
       "subtitle": "Powerful tools designed for professional wedding planners",
+      "seeMore": "See more",
       "items": {
         "guestManagement": {
           "title": "Guest Management",
@@ -2886,6 +2890,10 @@
         {
           "title": "Initial Configuration and Business Management",
           "description": "This video (in Spanish) shows how to configure your company in {commercialName} (logo, signature) and how to:\n\n• Create quotes and invoices with templates\n• Control changes and versions\n• Fill contracts using AI\n• Send contracts for electronic signature\n• Manage invoices, payment schedules, and payment collection"
+        },
+        {
+          "title": "Couple Portal and Integral Wedding Management",
+          "description": "This video (in Spanish) shows the couple portal features, where they can:\n\n• Create digital invitations and message templates\n• Manage guest list and special needs (allergies, intolerances)\n• Design the seating plan\n• Control budgets, payments, and suppliers\n• Manage gift list and tasting menu"
         }
       ]
     },    "overview": {

@@ -118,15 +118,18 @@
     "nav": {
       "features": "Funktionen",
       "pricing": "Preise",
-      "testimonials": "Referenzen",
+      "testimonials": "Testimonials",
+      "resources": "Ressourcen",
+      "news": "Neuigkeiten",
+      "helpCenter": "Wissensdatenbank",
       "login": "Anmelden"
     },
     "hero": {
-      "title": "Stärken Sie Ihr Hochzeitsplanungsgeschäft",
-      "subtitle": "{commercialName} ist die All-in-One-Plattform für Hochzeitsplaner, um nahtlos mit Paaren zusammenzuarbeiten, Gäste zu verwalten, atemberaubende Einladungen zu gestalten und unvergessliche Feiern zu schaffen.",
+      "title": "Sie bringen die Magie, Nupci bringt die Kontrolle.",
+      "subtitle": "Die All-in-One-Plattform für Wedding Planner, die administratives Chaos in ein unvergessliches Erlebnis für Ihre Paare verwandelt.",
       "cta": {
-        "primary": "Kostenlos Testen",
-        "secondary": "Mehr Erfahren"
+        "primary": "Heute kostenlos starten",
+        "secondary": "Interaktive Demo ansehen"
       },
       "trial": "Kostenlose Testversion • 1 Hochzeit • Keine Kreditkarte erforderlich"
     },
@@ -2810,6 +2813,10 @@
         {
           "title": "Ersteinrichtung und Geschäftsführung",
           "description": "Dieses Video (auf Spanisch) zeigt, wie Sie Ihr Unternehmen in {commercialName} konfigurieren (Logo, Unterschrift) und wie Sie:\n\n• Angebote und Rechnungen mit Vorlagen erstellen\n• Änderungen und Versionen kontrollieren\n• Verträge mithilfe von KI ausfüllen\n• Verträge zur elektronischen Unterzeichnung versenden\n• Rechnungen, Zahlungspläne und Zahlungseingänge verwalten"
+        },
+        {
+          "title": "Paar-Portal und Integrale Hochzeitsverwaltung",
+          "description": "Dieses Video (auf Spanisch) zeigt die Funktionen des Paar-Portals, von dem aus sie:\n\n• Digitale Einladungen und Nachrichtenvorlagen erstellen können\n• Die Gästeliste und spezielle Bedürfnisse (Allergien, Intoleranzen) verwalten können\n• Den Sitzplan entwerfen können\n• Budgets, Zahlungen und Lieferanten kontrollieren können\n• Die Geschenkliste und das Verkostungsmenü verwalten können"
         }
       ]
     },    "overview": {

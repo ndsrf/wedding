@@ -10,6 +10,9 @@ import Footer from '@/components/Footer';
 import AMPLink from '@/components/AMPLink';
 import LandingFeatureCard from '@/components/LandingFeatureCard';
 import { ArcadeEmbed } from '@/components/ArcadeEmbed';
+import VideoHero from '@/components/guest/VideoHero';
+import ResourcesDropdown from '@/components/ResourcesDropdown';
+import { ChevronsRight } from 'lucide-react';
 
 const LANDING_FEATURES: Array<{
   key: string;
@@ -150,12 +153,14 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <a href="#pricing" className="text-gray-700 hover:text-rose-600 transition-colors">
                 {t('landing.nav.pricing')}
               </a>
-              <a href="#testimonials" className="text-gray-700 hover:text-rose-600 transition-colors">
-                {t('landing.nav.testimonials')}
-              </a>
-              <Link href={`/${locale}/news`} className="text-gray-700 hover:text-rose-600 transition-colors">
-                {t('news.title')}
-              </Link>
+              <ResourcesDropdown
+                locale={locale}
+                translations={{
+                  resources: t('landing.nav.resources'),
+                  news: t('landing.nav.news'),
+                  helpCenter: t('landing.nav.helpCenter'),
+                }}
+              />
               <LanguageSelector />
               <Link
                 href="/auth/signin"
@@ -169,8 +174,9 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               translations={{
                 features: t('landing.nav.features'),
                 pricing: t('landing.nav.pricing'),
-                testimonials: t('landing.nav.testimonials'),
-                news: t('news.title'),
+                resources: t('landing.nav.resources'),
+                news: t('landing.nav.news'),
+                helpCenter: t('landing.nav.helpCenter'),
                 login: t('landing.nav.login'),
               }}
             />
@@ -178,76 +184,13 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         </div>
       </header>
 
-      {/* Hero Section with decorative elements */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
-
-        <div className="max-w-7xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left side - Text content */}
-            <div className="text-center lg:text-left">
-              {/* Decorative icon */}
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-rose-100 to-pink-100 rounded-full mb-6">
-                <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 font-playfair">
-                {t('landing.hero.title')}
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
-                {t('landing.hero.subtitle', { commercialName })}
-              </p>
-
-              {/* Mobile Hero Demo */}
-              <div className="lg:hidden mb-10 relative px-4 text-center">
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl mx-auto max-w-md ring-8 ring-white/50 mb-4">
-                  <ArcadeEmbed />
-                </div>
-                <p className="text-sm text-gray-500 italic">
-                  {t.rich('landing.hero.moreVideos', {
-                    link: (chunks) => <Link href="/docs" className="text-rose-600 hover:underline font-semibold">{chunks}</Link>
-                  })}
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link
-                  href="/contact"
-                  className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  {t('landing.hero.cta.primary')}
-                </Link>
-                <a
-                  href="#features"
-                  className="px-8 py-4 bg-white text-rose-600 rounded-full text-lg font-semibold border-2 border-rose-300 hover:border-rose-500 transition-all shadow-md hover:shadow-lg"
-                >
-                  {t('landing.hero.cta.secondary')}
-                </a>
-              </div>
-              <p className="mt-8 text-gray-500 text-sm">
-                {t('landing.hero.trial')}
-              </p>
-            </div>
-
-            {/* Right side - Hero demo */}
-            <div className="relative hidden lg:block text-center">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-12 ring-white/30 transform hover:scale-[1.02] transition-transform duration-500 mb-6">
-                <ArcadeEmbed />
-              </div>
-              <p className="text-sm text-gray-500 italic">
-                {t.rich('landing.hero.moreVideos', {
-                  link: (chunks) => <Link href="/docs" className="text-rose-600 hover:underline font-semibold">{chunks}</Link>
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section with Video Background */}
+      <VideoHero
+        title={t('landing.hero.title')}
+        subtitle={t('landing.hero.subtitle', { commercialName })}
+        ctaPrimary={t('landing.hero.cta.primary')}
+        ctaSecondary={t('landing.hero.cta.secondary')}
+      />
 
       {/* Features Section */}
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -259,6 +202,28 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               {t('landing.features.subtitle')}
             </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto mb-20 relative group">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-12 ring-rose-50/30 transform hover:scale-[1.01] transition-transform duration-500">
+              <ArcadeEmbed />
+            </div>
+            <Link
+              href={`/${locale}/docs`}
+              className="absolute -right-4 lg:-right-32 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-2 text-rose-500 hover:text-rose-600 transition-all duration-300 transform hover:translate-x-2 font-medium group/link"
+            >
+              <span className="whitespace-nowrap">{t('landing.features.seeMore')}</span>
+              <ChevronsRight className="w-5 h-5" />
+            </Link>
+            <div className="mt-12 flex justify-center md:hidden">
+              <Link
+                href={`/${locale}/docs`}
+                className="flex items-center gap-2 text-rose-500 hover:text-rose-600 font-medium"
+              >
+                <span>{t('landing.features.seeMore')}</span>
+                <ChevronsRight className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -15,24 +15,26 @@ export async function GET(
 
   const { t } = await getTranslations(locale as Language);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
+  const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
 
   const title = `${t('docs.title')} - AMP`;
-  const description = t('docs.subtitle');
+  const description = t('docs.subtitle', { commercialName });
 
   const content = `
     <h1>${t('docs.title')}</h1>
-    <p class="subtitle">${t('docs.subtitle')}</p>
+    <p class="subtitle">${t('docs.subtitle', { commercialName })}</p>
     
     <section>
-      <h2>${t('docs.overview.title')}</h2>
-      <p>${t('docs.overview.content1')}</p>
-      <p>${t('docs.overview.content2')}</p>
+      <h2>${t('docs.overview.title', { commercialName })}</h2>
+      <p>${t('docs.overview.content1', { commercialName })}</p>
+      <p>${t('docs.overview.content2', { commercialName })}</p>
     </section>
 
     <section>
       <h2>${t('docs.videoTutorials.title')}</h2>
-      <p>${t('docs.videoTutorials.subtitle')}</p>
-      <div class="video-item">
+      <p>${t('docs.videoTutorials.subtitle', { commercialName })}</p>
+      
+      <div class="video-item" style="margin-bottom: 40px;">
         <amp-vimeo
           data-videoid="1180992295"
           width="16"
@@ -40,12 +42,23 @@ export async function GET(
           layout="responsive"
         ></amp-vimeo>
         <h3 class="video-title">${t('docs.videoTutorials.items.0.title')}</h3>
-        <p class="video-description">${t('docs.videoTutorials.items.0.description')}</p>
+        <p class="video-description">${t('docs.videoTutorials.items.0.description', { commercialName })}</p>
+      </div>
+
+      <div class="video-item">
+        <amp-vimeo
+          data-videoid="1181252121"
+          width="16"
+          height="9"
+          layout="responsive"
+        ></amp-vimeo>
+        <h3 class="video-title">${t('docs.videoTutorials.items.1.title')}</h3>
+        <p class="video-description">${t('docs.videoTutorials.items.1.description')}</p>
       </div>
     </section>
 
     <section>
-      <h2>${t('docs.targetUsers.title')}</h2>
+      <h2>${t('docs.targetUsers.title', { commercialName })}</h2>
       <div class="user-type">
         <h3>${t('docs.targetUsers.planner.title')}</h3>
         <p>${t('docs.targetUsers.planner.content')}</p>

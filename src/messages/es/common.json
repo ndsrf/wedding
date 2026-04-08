@@ -123,14 +123,17 @@
       "features": "Características",
       "pricing": "Precios",
       "testimonials": "Testimonios",
+      "resources": "Recursos",
+      "news": "Noticias",
+      "helpCenter": "Videos y Ayuda",
       "login": "Iniciar Sesión"
     },
     "hero": {
-      "title": "Potencia Tu Negocio de Organización de Bodas",
-      "subtitle": "{commercialName} es la plataforma todo-en-uno para wedding planners para colaborar sin problemas con las parejas, gestionar invitados, diseñar invitaciones impresionantes y crear celebraciones inolvidables.",
+      "title": "Tú pones la magia, Nupci pone el control.",
+      "subtitle": "La plataforma integral para Wedding Planners que transforma el caos administrativo en una experiencia inolvidable para tus parejas.",
       "cta": {
-        "primary": "Prueba Gratuita",
-        "secondary": "Saber Más"
+        "primary": "Empieza Gratis hoy",
+        "secondary": "Ver Demo Interactiva"
       },
       "trial": "Prueba gratuita • 1 boda • Sin tarjeta de crédito",
       "moreVideos": "Puedes ver más vídeos en nuestra sección de <link>documentación</link>"
@@ -138,6 +141,7 @@
     "features": {
       "title": "Todo Lo Que Necesitas Para Planear Bodas Perfectas",
       "subtitle": "Herramientas poderosas diseñadas para wedding planners profesionales",
+      "seeMore": "Ver más",
       "items": {
         "guestManagement": {
           "title": "Gestión de Invitados",
@@ -2854,23 +2858,28 @@
   },
   "docs": {
     "title": "Documentación",
-    "subtitle": "Todo lo que necesitas saber sobre Nupci",
+    "subtitle": "Todo lo que necesitas saber sobre {commercialName}",
     "videoTutorials": {
       "title": "Videotutoriales",
-      "subtitle": "Aprende a usar Nupci con nuestras guías en vídeo paso a paso",
+      "subtitle": "Aprende a usar {commercialName} con nuestras guías en vídeo paso a paso",
       "items": [
         {
           "title": "Configuración Inicial y Gestión de Negocio",
-          "description": "Este vídeo enseña cómo configurar tu empresa en Nupci (logo, firma) y cómo:\n\n• Crear presupuestos y facturas con plantillas\n• Controlar cambios y versiones\n• Rellenar contratos mediante IA\n• Enviar contratos para firma electrónica\n• Gestionar facturas, calendarios de pagos y recepción de cobros"
+          "description": "Este vídeo enseña cómo configurar tu empresa en {commercialName} (logo, firma) y cómo:\n\n• Crear presupuestos y facturas con plantillas\n• Controlar cambios y versiones\n• Rellenar contratos mediante IA\n• Enviar contratos para firma electrónica\n• Gestionar facturas, calendarios de pagos y recepción de cobros"
+        },
+        {
+          "title": "Portal para la Pareja y Gestión Integral de Boda",
+          "description": "Este vídeo muestra las funcionalidades del portal para la pareja, desde donde pueden:\n\n• Crear invitaciones digitales y plantillas de mensajes\n• Gestionar la lista de invitados y necesidades especiales (alergias, intolerancias)\n• Diseñar el plan de asientos\n• Controlar presupuestos, pagos y proveedores\n• Gestionar la lista de regalos y el menú degustación"
         }
       ]
-    },    "overview": {
-      "title": "¿Qué es Nupci?",
-      "content1": "Nupci es una plataforma integral de gestión de bodas diseñada específicamente para wedding planners. Proporciona una solución completa para gestionar múltiples bodas simultáneamente, desde la gestión de listas de invitados hasta invitaciones y seguimiento de regalos.",
-      "content2": "Construida con una arquitectura multi-tenant, Nupci permite a los wedding planners gestionar múltiples parejas a la vez, mientras brinda a cada pareja acceso seguro a los datos de su propia boda a través de una interfaz intuitiva."
+    },
+    "overview": {
+      "title": "¿Qué es {commercialName}?",
+      "content1": "{commercialName} es una plataforma integral de gestión de bodas diseñada específicamente para wedding planners. Proporciona una solución completa para gestionar múltiples bodas simultáneamente, desde la gestión de listas de invitados hasta invitaciones y seguimiento de regalos.",
+      "content2": "Construida con una arquitectura multi-tenant, {commercialName} permite a los wedding planners gestionar múltiples parejas a la vez, mientras brinda a cada pareja acceso seguro a los datos de su propia boda a través de una interfaz intuitiva."
     },
     "targetUsers": {
-      "title": "¿Para quién es Nupci?",
+      "title": "¿Para quién es {commercialName}?",
       "planner": {
         "title": "Wedding Planners",
         "content": "Wedding planners profesionales que gestionan múltiples bodas y necesitan una plataforma centralizada para manejar todos los aspectos de la gestión de invitados, comunicación y coordinación."
