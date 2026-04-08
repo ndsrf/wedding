@@ -205,10 +205,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               </p>
 
               {/* Mobile Hero Demo */}
-              <div className="lg:hidden mb-10 relative px-4">
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl mx-auto max-w-md ring-8 ring-white/50">
+              <div className="lg:hidden mb-10 relative px-4 text-center">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl mx-auto max-w-md ring-8 ring-white/50 mb-4">
                   <ArcadeEmbed />
                 </div>
+                <p className="text-sm text-gray-500 italic">
+                  {t.rich('landing.hero.moreVideos', {
+                    link: (chunks) => <Link href="/docs" className="text-rose-600 hover:underline font-semibold">{chunks}</Link>
+                  })}
+                </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -231,10 +236,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             </div>
 
             {/* Right side - Hero demo */}
-            <div className="relative hidden lg:block">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-12 ring-white/30 transform hover:scale-[1.02] transition-transform duration-500">
+            <div className="relative hidden lg:block text-center">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-12 ring-white/30 transform hover:scale-[1.02] transition-transform duration-500 mb-6">
                 <ArcadeEmbed />
               </div>
+              <p className="text-sm text-gray-500 italic">
+                {t.rich('landing.hero.moreVideos', {
+                  link: (chunks) => <Link href="/docs" className="text-rose-600 hover:underline font-semibold">{chunks}</Link>
+                })}
+              </p>
             </div>
           </div>
         </div>

@@ -133,8 +133,9 @@
         "primary": "Start Free Trial",
         "secondary": "Learn More"
       },
-      "trial": "Free trial • 1 wedding • No credit card required"
-    },
+      "trial": "Free trial • 1 wedding • No credit card",
+      "moreVideos": "You can watch more videos in our <link>documentation</link> section"
+      },
     "features": {
       "title": "Everything You Need to Plan Perfect Weddings",
       "subtitle": "Powerful tools designed for professional wedding planners",
