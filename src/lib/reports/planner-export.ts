@@ -289,7 +289,6 @@ export async function fetchRevenueSummary(planner_id: string): Promise<RevenueSu
   ];
 
   rows.sort((a, b) => b._sortDate.getTime() - a._sortDate.getTime());
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return rows.map(({ _sortDate, ...rest }) => rest);
 }
 

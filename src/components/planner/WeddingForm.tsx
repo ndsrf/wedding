@@ -170,7 +170,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
         }
       })
       .catch(() => {});
-  }, [initialData?.customer_id]); // eslint-disable-line
+  }, [initialData?.customer_id]); 
 
   // Sync form data when initialData changes (important for edit mode)
   useEffect(() => {

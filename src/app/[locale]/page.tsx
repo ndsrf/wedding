@@ -1,10 +1,9 @@
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import LanguageSelector from '@/components/LanguageSelector';
 import Image from 'next/image';
 import { Metadata } from 'next';
-import { getTranslations } from '@/lib/i18n/server';
-import { Language, isValidLanguage } from '@/lib/i18n/config';
+import { isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
 import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
@@ -130,7 +129,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   }
 
   setRequestLocale(locale);
-  const { t } = await getTranslations(locale as Language);
+  const t = await getTranslations({ locale, namespace: '' });
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
 
   return (
