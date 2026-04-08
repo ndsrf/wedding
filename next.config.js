@@ -67,6 +67,10 @@ const nextConfig = {
       // Vercel Analytics / Speed Insights
       'https://va.vercel-scripts.com',
       'https://vitals.vercel-insights.com',
+      // Arcade & Vimeo
+      'https://demo.arcade.software',
+      'https://player.vimeo.com',
+      'https://f.vimeocdn.com',
     ];
     if (process.env.NODE_ENV !== 'production') {
       scriptSrcDirectives.push("'unsafe-eval'");
@@ -77,9 +81,9 @@ const nextConfig = {
       `script-src ${scriptSrcDirectives.join(' ')}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https:",
-      "connect-src 'self' https: wss://api.liveblocks.io",
-      "frame-src 'self' https://accounts.google.com https://www.facebook.com https://www.google.com https://demo.arcade.software https://player.vimeo.com",
+      "img-src 'self' data: blob: https: https://demo.arcade.software https://*.vimeo.com https://*.vimeocdn.com",
+      "connect-src 'self' https: wss://api.liveblocks.io https://demo.arcade.software https://*.vimeo.com",
+      "frame-src 'self' https://accounts.google.com https://www.facebook.com https://www.google.com https://demo.arcade.software https://player.vimeo.com https://vimeo.com",
       "frame-ancestors 'self'",
       "form-action 'self' https://accounts.google.com https://www.facebook.com",
       "base-uri 'self'",
@@ -98,10 +102,6 @@ const nextConfig = {
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
           },
           {
             key: 'X-Content-Type-Options',
