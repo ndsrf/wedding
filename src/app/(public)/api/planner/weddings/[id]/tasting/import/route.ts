@@ -19,5 +19,5 @@ export async function POST(request: NextRequest, { params }: Params) {
   const { id: weddingId } = await params;
   const denied = await validatePlannerAccess(user.planner_id, weddingId);
   if (denied) return denied;
-  return importTastingMenuHandler(request);
+  return importTastingMenuHandler(request, weddingId, user.planner_id);
 }

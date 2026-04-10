@@ -5,12 +5,15 @@
 
 import { Resend } from 'resend';
 import { Language } from '../i18n/config';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
+import { ResourceType, Language as PrismaLanguage } from '@prisma/client';
 import { PlannerInvitationEmail } from './templates/planner-invitation';
 import { AdminInvitationEmail } from './templates/admin-invitation';
 import { RSVPReminderEmail } from './templates/rsvp-reminder';
 import { RSVPConfirmationEmail } from './templates/rsvp-confirmation';
 import { PaymentConfirmationEmail } from './templates/payment-confirmation';
 import { DynamicMessageEmail } from './templates/dynamic-message';
+import React from 'react';
 
 // Initialize Resend client lazily to avoid build-time API key requirement
 let resend: Resend | null = null;
@@ -62,9 +65,12 @@ export interface EmailOptions {
   template: EmailTemplate;
   language: Language;
   variables: Record<string, string>;
+  plannerId?: string;
+  weddingId?: string;
+  role?: 'planner' | 'wedding_admin';
 }
 
-interface EmailResult {
+export interface EmailResult {
   success: boolean;
   messageId?: string;
   error?: string;
@@ -156,9 +162,33 @@ export async function sendEmail(
   options: EmailOptions,
   retries = 3
 ): Promise<EmailResult> {
-  const { to, template, language, variables } = options;
+  const { to, template, language, variables, plannerId, weddingId, role } = options;
 
-  console.log('[RESEND DEBUG] sendEmail called with:', { to, template, language, variables });
+  console.log('[RESEND DEBUG] sendEmail called with:', { to, template, language, variables, plannerId, weddingId });
+
+  // Check resource limit if plannerId is provided
+  if (plannerId && template !== EmailTemplate.PLANNER_INVITATION) {
+    const result = await checkResourceLimit({
+      plannerId,
+      weddingId,
+      type: ResourceType.EMAIL,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role: role || 'planner',
+        language: (language.toUpperCase() as PrismaLanguage) || 'ES',
+      });
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
 
   // Validate email address
   if (!isValidEmail(to)) {
@@ -207,6 +237,16 @@ export async function sendEmail(
       }
 
       console.log(`Email sent successfully to ${to} (template: ${template}, language: ${language})`);
+      
+      // Record usage if successful
+      if (plannerId && template !== EmailTemplate.PLANNER_INVITATION) {
+        void recordResourceUsage({
+          plannerId,
+          weddingId,
+          type: ResourceType.EMAIL,
+        });
+      }
+
       return {
         success: true,
         messageId: data?.id,
@@ -316,7 +356,8 @@ export async function sendAdminInvitation(
   adminName: string,
   coupleNames: string,
   weddingDate: string,
-  oauthLink: string
+  oauthLink: string,
+  plannerId?: string
 ): Promise<EmailResult> {
   return sendEmail({
     to,
@@ -328,6 +369,7 @@ export async function sendAdminInvitation(
       weddingDate,
       oauthLink,
     },
+    plannerId,
   });
 }
 
@@ -342,7 +384,9 @@ export async function sendRSVPReminder(
   weddingDate: string,
   magicLink: string,
   weddingTime?: string,
-  location?: string
+  location?: string,
+  plannerId?: string,
+  weddingId?: string
 ): Promise<EmailResult> {
   return sendEmail({
     to,
@@ -356,6 +400,8 @@ export async function sendRSVPReminder(
       ...(weddingTime && { weddingTime }),
       ...(location && { location }),
     },
+    plannerId,
+    weddingId,
   });
 }
 
@@ -369,7 +415,9 @@ export async function sendRSVPConfirmation(
   coupleNames: string,
   weddingDate: string,
   weddingTime?: string,
-  location?: string
+  location?: string,
+  plannerId?: string,
+  weddingId?: string
 ): Promise<EmailResult> {
   return sendEmail({
     to,
@@ -382,6 +430,8 @@ export async function sendRSVPConfirmation(
       ...(weddingTime && { weddingTime }),
       ...(location && { location }),
     },
+    plannerId,
+    weddingId,
   });
 }
 
@@ -393,7 +443,9 @@ export async function sendPaymentConfirmation(
   language: Language,
   familyName: string,
   coupleNames: string,
-  amount: string
+  amount: string,
+  plannerId?: string,
+  weddingId?: string
 ): Promise<EmailResult> {
   return sendEmail({
     to,
@@ -404,6 +456,8 @@ export async function sendPaymentConfirmation(
       coupleNames,
       amount,
     },
+    plannerId,
+    weddingId,
   });
 }
 
@@ -418,9 +472,36 @@ export async function sendDynamicEmail(
   language: Language = 'en',
   coupleNames?: string,
   imageUrl?: string | null,
+  plannerId?: string,
+  weddingId?: string,
+  role?: 'planner' | 'wedding_admin',
   retries = 3
 ): Promise<EmailResult> {
-  console.log('[RESEND DEBUG] sendDynamicEmail called with:', { to, subject, language, imageUrl });
+  console.log('[RESEND DEBUG] sendDynamicEmail called with:', { to, subject, language, imageUrl, plannerId, weddingId });
+
+  // Check resource limit if plannerId is provided
+  if (plannerId) {
+    const result = await checkResourceLimit({
+      plannerId,
+      weddingId,
+      type: ResourceType.EMAIL,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role: role || 'planner',
+        language: (language.toUpperCase() as PrismaLanguage) || 'ES',
+      });
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
 
   // Validate email address
   if (!isValidEmail(to)) {
@@ -473,6 +554,16 @@ export async function sendDynamicEmail(
       }
 
       console.log(`Dynamic email sent successfully to ${to}`);
+
+      // Record usage if successful
+      if (plannerId) {
+        void recordResourceUsage({
+          plannerId,
+          weddingId,
+          type: ResourceType.EMAIL,
+        });
+      }
+
       return {
         success: true,
         messageId: data?.id,

@@ -11,8 +11,8 @@ interface VideoHeroProps {
 }
 
 const VIDEOS = [
-  'https://v4cxderyhhfml6js.public.blob.vercel-storage.com/background2.mp4',
-  'https://v4cxderyhhfml6js.public.blob.vercel-storage.com/background1.mp4',
+  'https://cdn.nupci.com/background2.mp4',
+  'https://cdn.nupci.com/background1.mp4',
 ];
 
 export default function VideoHero({

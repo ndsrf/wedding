@@ -147,6 +147,7 @@ export async function POST(
       where: { id: weddingId },
       select: {
         id: true,
+        planner_id: true,
         couple_names: true,
         wedding_date: true,
         wedding_time: true,
@@ -295,7 +296,9 @@ export async function POST(
               renderedBody,
               language,
               wedding.couple_names,
-              absoluteImageUrl
+              absoluteImageUrl,
+              wedding.planner_id,
+              wedding.id
             );
           } else {
             console.log('[PLANNER REMINDER DEBUG] Using hardcoded template for', familyLanguage);
@@ -307,7 +310,9 @@ export async function POST(
               weddingDate,
               magicLink,
               wedding.wedding_time || undefined,
-              wedding.location || undefined
+              wedding.location || undefined,
+              wedding.planner_id,
+              wedding.id
             );
           }
         }
@@ -503,6 +508,18 @@ export async function POST(
           return true;
         } else {
           console.error('[PLANNER REMINDER DEBUG] Failed to send message to', contactInfo, ':', result.error);
+          // If error is a license limit error, stop the process and throw
+          const isLimitError = 
+            result.error?.includes('cupo') || 
+            result.error?.includes('quota') || 
+            result.error?.includes('limit') || 
+            result.error?.includes('plan') || 
+            result.error?.includes('licencia') ||
+            result.error?.includes('license');
+
+          if (isLimitError) {
+            throw new Error(result.error);
+          }
           return false;
         }
       } catch (error) {
@@ -568,6 +585,19 @@ export async function POST(
     return NextResponse.json(response, { status: 200 });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : '';
+    
+    // Check if it's a license limit error
+    if (errorMessage.includes('cupo') || errorMessage.includes('quota') || errorMessage.includes('limit')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: 'LIMIT_REACHED',
+          message: errorMessage,
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
     if (errorMessage.includes('UNAUTHORIZED')) {
       const response: APIResponse = {
         success: false,

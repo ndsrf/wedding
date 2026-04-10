@@ -506,11 +506,16 @@ export function GuestsPageContent({
             window.open(item.wa_link, '_blank');
           });
         }
-        if (reminderMode === 'save_the_date') {
-          showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
-          fetchGuests();
-        } else {
-          showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
+        
+        if (data.data.sent_count > 0) {
+          if (reminderMode === 'save_the_date') {
+            showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
+            fetchGuests();
+          } else {
+            showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
+          }
+        } else if (data.data.failed_count > 0) {
+          showNotification('error', t('common.errors.generic'));
         }
       } else {
         throw new Error(data.error?.message || t('common.errors.generic'));
@@ -541,8 +546,13 @@ export function GuestsPageContent({
             window.open(item.wa_link, '_blank');
           });
         }
-        showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
-        setSelectedGuestIds([]);
+        
+        if (data.data.sent_count > 0) {
+          showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
+          setSelectedGuestIds([]);
+        } else if (data.data.failed_count > 0) {
+          showNotification('error', t('common.errors.generic'));
+        }
       } else {
         throw new Error(data.error?.message || t('common.errors.generic'));
       }

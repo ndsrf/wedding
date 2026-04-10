@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
       where: { id: user.wedding_id },
       select: {
         id: true,
+        planner_id: true,
         couple_names: true,
         wedding_date: true,
         wedding_time: true,
@@ -262,7 +263,10 @@ export async function POST(request: NextRequest) {
               renderedBody,
               language,
               wedding.couple_names,
-              absoluteImageUrl
+              absoluteImageUrl,
+              wedding.planner_id,
+              wedding.id,
+              'wedding_admin'
             );
           } else {
             // Fallback to hardcoded template
@@ -275,7 +279,9 @@ export async function POST(request: NextRequest) {
               weddingDate,
               magicLink,
               wedding.wedding_time || undefined,
-              wedding.location || undefined
+              wedding.location || undefined,
+              wedding.planner_id,
+              wedding.id
             );
           }
         }
@@ -442,7 +448,7 @@ export async function POST(request: NextRequest) {
           // Only create REMINDER_SENT event if we sent a reminder, not an invitation
           // (invitation service already creates INVITATION_SENT event)
           if (!isInvitation) {
-            // Create tracking event with message_sid
+            // ... (keep tracking logic)
             const rawLanguage = family.preferred_language || wedding.default_language;
             const language = rawLanguage.toLowerCase() as I18nLanguage;
             const messages = REMINDER_MESSAGES[language];
@@ -483,6 +489,18 @@ export async function POST(request: NextRequest) {
           return true;
         } else {
           console.error('[REMINDER DEBUG] Failed to send message to', contactInfo, ':', result.error);
+          // If error is a license limit error, stop the process and throw
+          const isLimitError = 
+            result.error?.includes('cupo') || 
+            result.error?.includes('quota') || 
+            result.error?.includes('limit') || 
+            result.error?.includes('plan') || 
+            result.error?.includes('licencia') ||
+            result.error?.includes('license');
+
+          if (isLimitError) {
+            throw new Error(result.error);
+          }
           return false;
         }
       } catch (error) {
@@ -548,8 +566,21 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 });
   } catch (error: unknown) {
-    // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';
+
+    // Check if it's a license limit error
+    if (errorMessage.includes('cupo') || errorMessage.includes('quota') || errorMessage.includes('limit')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: 'LIMIT_REACHED',
+          message: errorMessage,
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Handle authentication errors
     if (errorMessage.includes('UNAUTHORIZED')) {
       const response: APIResponse = {
         success: false,

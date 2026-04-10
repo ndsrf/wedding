@@ -12,52 +12,47 @@ import { getTranslations } from '@/lib/i18n/server';
 import PrivateHeader from '@/components/PrivateHeader';
 import PlannerNameEditor from '@/components/planner/PlannerNameEditor';
 
-export async function generateMetadata() {
-  const { t } = await getTranslations();
-  return { title: `Nupci - ${t('planner.account.title')}` };
-}
-
-interface UsageBarProps {
-  label: string;
-  used: number | null;
-  max: number | null;
-  comingSoon?: boolean;
-  comingSoonLabel: string;
-  noLimitLabel: string;
-}
-
-function UsageBar({ label, used, max, comingSoon = false, comingSoonLabel, noLimitLabel }: UsageBarProps) {
-  const percentage = used !== null && max !== null && max > 0 ? Math.min((used / max) * 100, 100) : 0;
-  const isNearLimit = percentage >= 80;
-  const isAtLimit = percentage >= 100;
-
-  const barColor = isAtLimit ? 'bg-red-500' : isNearLimit ? 'bg-amber-500' : 'bg-rose-400';
+/**
+ * Local UsageBar component to avoid import issues
+ */
+function UsageBar({ 
+  label, 
+  used, 
+  max, 
+  comingSoonLabel, 
+  noLimitLabel 
+}: { 
+  label: string; 
+  used: number; 
+  max: number | null; 
+  comingSoonLabel: string; 
+  noLimitLabel: string; 
+}) {
+  const isComingSoon = max === -1;
+  const isNoLimit = max === null;
+  const percentage = isNoLimit || isComingSoon ? 0 : Math.min(Math.round((used / max) * 100), 100);
+  
+  const barColor = percentage > 90 ? 'bg-red-500' : percentage > 75 ? 'bg-amber-500' : 'bg-purple-500';
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-end">
         <span className="text-sm font-medium text-gray-700">{label}</span>
-        {comingSoon ? (
-          <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{comingSoonLabel}</span>
-        ) : used !== null && max !== null ? (
-          <span className={`text-xs font-semibold ${isAtLimit ? 'text-red-600' : isNearLimit ? 'text-amber-600' : 'text-gray-500'}`}>
-            {used} / {max}
-          </span>
-        ) : max !== null ? (
-          <span className="text-xs text-gray-500">{max}</span>
-        ) : (
-          <span className="text-xs text-gray-400">{noLimitLabel}</span>
-        )}
+        <span className="text-sm font-semibold text-gray-900">
+          {isComingSoon ? (
+            <span className="text-gray-400 font-normal italic">{comingSoonLabel}</span>
+          ) : isNoLimit ? (
+            <span>{used} <span className="text-gray-400 font-normal">/ {noLimitLabel}</span></span>
+          ) : (
+            <span>{used} <span className="text-gray-400 font-normal">/ {max}</span></span>
+          )}
+        </span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-        {comingSoon ? (
-          <div className="h-full w-full bg-gray-200 rounded-full" />
-        ) : (
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-            style={{ width: `${percentage}%` }}
-          />
-        )}
+      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div 
+          className={`h-full transition-all duration-500 ${barColor}`} 
+          style={{ width: `${isComingSoon || isNoLimit ? 0 : percentage}%` }}
+        />
       </div>
     </div>
   );
@@ -88,7 +83,16 @@ export default async function PlannerAccountPage() {
         accepts_revolut: true,
         subscription_status: true,
         license: {
-          select: { max_weddings: true, max_sub_planners: true },
+          select: {
+            max_weddings: true,
+            max_sub_planners: true,
+            max_whatsapp_per_month: true,
+            max_standard_ai_calls: true,
+            max_premium_ai_calls: true,
+            max_emails_per_month: true,
+            max_contracts_per_month: true,
+            can_delete_weddings: true,
+          },
         },
       },
     }),
@@ -102,13 +106,46 @@ export default async function PlannerAccountPage() {
 
   if (!planner) redirect('/planner');
 
+  // Fetch current month's usage
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const usageData = await prisma.resourceUsage.groupBy({
+    by: ['type'],
+    where: {
+      planner_id: user.planner_id,
+      timestamp: { gte: startOfMonth },
+    },
+    _sum: {
+      quantity: true,
+    },
+  });
+
+  const getUsage = (type: string) => {
+    return usageData.find((u) => u.type === type)?._sum.quantity || 0;
+  };
+
+  const whatsappUsed = getUsage('WHATSAPP');
+  const standardAIUsed = getUsage('AI_STANDARD');
+  const premiumAIUsed = getUsage('AI_PREMIUM');
+  const emailsUsed = getUsage('EMAIL');
+  const contractsUsed = getUsage('CONTRACT');
+
   const isActive = planner.subscription_status === 'ACTIVE';
   const statusLabel = isActive ? t('planner.account.subscriptionActive') : t('planner.account.subscriptionInactive');
   const statusColor = isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600';
   const statusDot = isActive ? 'bg-green-500' : 'bg-gray-400';
 
-  const maxWeddings = planner.license?.max_weddings ?? null;
-  const maxSubPlanners = planner.license?.max_sub_planners ?? null;
+  const maxWeddings = planner.license?.max_weddings ?? 10;
+  const maxSubPlanners = planner.license?.max_sub_planners ?? 2;
+  const maxWhatsApp = planner.license?.max_whatsapp_per_month ?? 100;
+  const maxStandardAI = planner.license?.max_standard_ai_calls ?? 100;
+  const maxPremiumAI = planner.license?.max_premium_ai_calls ?? 50;
+  const maxEmails = planner.license?.max_emails_per_month ?? 1000;
+  const maxContracts = planner.license?.max_contracts_per_month ?? 100;
+  const canDeleteWeddings = planner.license?.can_delete_weddings ?? true;
+
   const comingSoon = t('planner.account.comingSoon');
   const noLimit = t('planner.account.noLimit');
 
@@ -162,35 +199,60 @@ export default async function PlannerAccountPage() {
             {[
               { label: t('planner.account.simultaneousWeddings'), value: maxWeddings !== null ? String(maxWeddings) : '∞' },
               { label: t('planner.account.subPlanners'), value: maxSubPlanners !== null ? String(maxSubPlanners) : '∞' },
+              { label: t('planner.account.aiBasic'), value: maxStandardAI !== null ? String(maxStandardAI) : '∞' },
+              { label: t('planner.account.aiPremium'), value: maxPremiumAI !== null ? String(maxPremiumAI) : '∞' },
+              { label: t('planner.account.whatsapp'), value: maxWhatsApp !== null ? String(maxWhatsApp) : '∞' },
+              { label: t('planner.account.emails'), value: maxEmails !== null ? String(maxEmails) : '∞' },
+              { label: t('planner.account.contracts'), value: maxContracts !== null ? String(maxContracts) : '∞' },
+              { label: t('master.license.canDeleteWeddings'), value: canDeleteWeddings ? t('common.yes') : t('common.no') },
             ].map(({ label, value }, i, arr) => (
               <div key={label} className={`flex items-center justify-between py-3 ${i < arr.length - 1 ? 'border-b border-gray-50' : ''}`}>
                 <span className="text-sm text-gray-700">{label}</span>
                 <span className="text-sm font-semibold text-gray-900">{value}</span>
               </div>
             ))}
-            {[
-              t('planner.account.aiBasic'),
-              t('planner.account.aiPremium'),
-              t('planner.account.whatsapp'),
-            ].map((label, i, arr) => (
-              <div key={label} className={`flex items-center justify-between py-3 ${i < arr.length - 1 ? 'border-b border-gray-50' : ''}`}>
-                <span className="text-sm text-gray-700 flex items-center gap-2">
-                  {label}
-                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{comingSoon}</span>
-                </span>
-                <span className="text-sm font-semibold text-gray-400">—</span>
-              </div>
-            ))}
           </div>
         </section>
 
-        {/* AI & WhatsApp usage */}
+        {/* AI & WhatsApp & Email usage */}
         <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-5">{t('planner.account.aiUsage')}</h2>
           <div className="space-y-5">
-            <UsageBar label={t('planner.account.aiBasic')} used={null} max={null} comingSoon comingSoonLabel={comingSoon} noLimitLabel={noLimit} />
-            <UsageBar label={t('planner.account.aiPremium')} used={null} max={null} comingSoon comingSoonLabel={comingSoon} noLimitLabel={noLimit} />
-            <UsageBar label={t('planner.account.whatsapp')} used={null} max={null} comingSoon comingSoonLabel={comingSoon} noLimitLabel={noLimit} />
+            <UsageBar
+              label={t('planner.account.aiBasic')}
+              used={Number(standardAIUsed)}
+              max={maxStandardAI}
+              comingSoonLabel={comingSoon}
+              noLimitLabel={noLimit}
+            />
+            <UsageBar
+              label={t('planner.account.aiPremium')}
+              used={Number(premiumAIUsed)}
+              max={maxPremiumAI}
+              comingSoonLabel={comingSoon}
+              noLimitLabel={noLimit}
+            />
+            <UsageBar
+              label={t('planner.account.whatsapp')}
+              used={Number(whatsappUsed)}
+              max={maxWhatsApp}
+              comingSoonLabel={comingSoon}
+              noLimitLabel={noLimit}
+            />
+            <UsageBar
+              label={t('planner.account.emails')}
+              used={Number(emailsUsed)}
+              max={maxEmails}
+              comingSoonLabel={comingSoon}
+              noLimitLabel={noLimit}
+            />
+            <UsageBar
+              label={t('planner.account.contracts')}
+              used={Number(contractsUsed)}
+              max={maxContracts}
+              comingSoonLabel={comingSoon}
+              noLimitLabel={noLimit}
+            />
           </div>
         </section>
       </main>

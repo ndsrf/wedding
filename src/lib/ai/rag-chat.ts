@@ -10,10 +10,12 @@
  */
 
 import { streamText, stepCountIs } from 'ai';
+import { ResourceType, Language } from '@prisma/client';
 import { getChatModel } from './provider';
 import { buildTools } from './tools';
 import type { ChatMessage } from './nupcibot';
 import { prisma } from '@/lib/db/prisma';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 
 export interface RagChatParams {
   userMessage: string;
@@ -111,6 +113,33 @@ References
 export async function streamRagChat(params: RagChatParams): Promise<Response> {
   const { userMessage, history, language, userName, weddingId, plannerId, role } = params;
 
+  // Check AI Standard limit if plannerId is known
+  if (plannerId) {
+    const result = await checkResourceLimit({
+      plannerId,
+      type: ResourceType.AI_STANDARD,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role: role || 'planner',
+        language: (language as Language) || 'ES',
+      });
+
+      console.warn(`[RAG-CHAT] Limit reached for planner ${plannerId}: ${errorMessage}`);
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'LIMIT_REACHED', message: errorMessage }
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  }
+
   // Fetch wedding info if available
   let weddingDate: string | undefined;
   let coupleNames: string | undefined;
@@ -171,6 +200,15 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
       if (res.text.length === 0) {
         console.warn(`[RAG-CHAT] WARNING: Response text is empty!`);
       }
+
+      // Record usage if successful
+      if (plannerId && res.text.length > 0) {
+        void recordResourceUsage({
+          plannerId,
+          weddingId: weddingId || null,
+          type: ResourceType.AI_STANDARD,
+        });
+      }
     },
   });
 
@@ -184,6 +222,26 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
  */
 export async function generateRagReply(params: RagChatParams): Promise<string | null> {
   const { userMessage, history, language, userName, weddingId, plannerId, role } = params;
+
+  // Check AI Standard limit if plannerId is known
+  if (plannerId) {
+    const result = await checkResourceLimit({
+      plannerId,
+      type: ResourceType.AI_STANDARD,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role: role || 'planner',
+        language: (language as Language) || 'ES',
+      });
+      console.warn(`[RAG-CHAT] Limit reached for planner ${plannerId}: ${errorMessage}`);
+      return errorMessage;
+    }
+  }
 
   let weddingDate: string | undefined;
   let coupleNames: string | undefined;
@@ -227,5 +285,15 @@ export async function generateRagReply(params: RagChatParams): Promise<string | 
   });
 
   const text = await result.text;
+
+  // Record usage if successful
+  if (text && plannerId) {
+    void recordResourceUsage({
+      plannerId,
+      weddingId: weddingId || null,
+      type: ResourceType.AI_STANDARD,
+    });
+  }
+
   return text || null;
 }

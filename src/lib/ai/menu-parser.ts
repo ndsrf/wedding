@@ -14,6 +14,8 @@
 
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
+import { ResourceType, Language } from '@prisma/client';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -149,9 +151,39 @@ function extractJson(text: string): ParsedMenu | null {
  *
  * @param fileBuffer - Raw file bytes
  * @param mimeType   - MIME type of the file (e.g. "image/jpeg", "application/pdf")
- * @returns Parsed menu structure or null if parsing fails
+ * @param plannerId  - ID of the wedding planner (for usage tracking)
+ * @param weddingId  - ID of the wedding (for usage tracking)
+ * @returns Parsed menu structure, error object, or null if parsing fails
  */
-export async function parseMenuFromFile(fileBuffer: Buffer, mimeType: string): Promise<ParsedMenu | null> {
+export async function parseMenuFromFile(
+  fileBuffer: Buffer,
+  mimeType: string,
+  plannerId?: string,
+  weddingId?: string,
+  role: 'planner' | 'wedding_admin' = 'planner',
+  language: Language = 'ES'
+): Promise<ParsedMenu | { error: string } | null> {
+  // Check resource limit if plannerId is provided
+  if (plannerId) {
+    const result = await checkResourceLimit({
+      plannerId,
+      weddingId,
+      type: ResourceType.AI_PREMIUM,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role,
+        language,
+      });
+      console.warn(`[MENU_PARSER] Limit reached for planner ${plannerId}: ${errorMessage}`);
+      return { error: errorMessage };
+    }
+  }
+
   // Determine provider
   const provider =
     process.env.AI_PROVIDER ||
@@ -165,10 +197,23 @@ export async function parseMenuFromFile(fileBuffer: Buffer, mimeType: string): P
   console.log('[MENU_PARSER] Parsing menu', { provider, mimeType, size: fileBuffer.length });
 
   try {
+    let result: ParsedMenu | null = null;
     if (provider === 'gemini') {
-      return await parseWithGemini(fileBuffer, mimeType);
+      result = await parseWithGemini(fileBuffer, mimeType);
+    } else {
+      result = await parseWithOpenAI(fileBuffer, mimeType);
     }
-    return await parseWithOpenAI(fileBuffer, mimeType);
+
+    if (result && plannerId) {
+      // Record usage if successful
+      void recordResourceUsage({
+        plannerId,
+        weddingId,
+        type: ResourceType.AI_PREMIUM,
+      });
+    }
+
+    return result;
   } catch (error) {
     console.error('[MENU_PARSER] Failed:', error);
     return null;

@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PlannerList } from '@/components/master/PlannerList';
 import { PlannerForm } from '@/components/master/PlannerForm';
+import { useToast } from '@/components/ui/Toast';
 import { useNamespacedTranslations } from '@/lib/i18n/client';
 
 interface Planner {
@@ -31,9 +32,10 @@ interface PlannerFormData {
   logo_url: string;
 }
 
-export default function PlannersPage() {
-  const t = useNamespacedTranslations('master');
+export default function MasterPlannersPage() {
+  const t = useNamespacedTranslations('master.planners');
   const tCommon = useNamespacedTranslations('common');
+  const { success: showToastSuccess, error: showToastError } = useToast();
   const router = useRouter();
 
   const [planners, setPlanners] = useState<Planner[]>([]);
@@ -98,11 +100,11 @@ export default function PlannersPage() {
       }
 
       // Success - refresh planner list and close form
-      alert(tCommon('success.created'));
+      showToastSuccess(tCommon('success.created'));
       setShowForm(false);
       fetchPlanners(currentPage);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
+      showToastError(err instanceof Error ? err.message : tCommon('errors.generic'));
       throw err;
     }
   };
@@ -127,10 +129,10 @@ export default function PlannersPage() {
       }
 
       // Success - refresh planner list
-      alert(tCommon('success.updated'));
+      showToastSuccess(tCommon('success.updated'));
       fetchPlanners(currentPage);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
+      showToastError(err instanceof Error ? err.message : tCommon('errors.generic'));
       throw err;
     }
   };

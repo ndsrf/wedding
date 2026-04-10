@@ -590,6 +590,9 @@ export async function sendParticipantLinkHandler(
       messageBody,
       'en',
       wedding.couple_names,
+      null,
+      wedding.planner_id,
+      weddingId
     );
     if (!result.success) {
       return NextResponse.json(
@@ -620,7 +623,13 @@ export async function sendParticipantLinkHandler(
     const { mapToWhatsAppVariables } = await import('@/lib/templates/whatsapp-mapper');
     const { sendWhatsAppWithContentTemplate } = await import('@/lib/sms/twilio');
     const whatsappVars = mapToWhatsAppVariables(variables);
-    const result = await sendWhatsAppWithContentTemplate(phone, contentTemplateId, whatsappVars);
+    const result = await sendWhatsAppWithContentTemplate({
+      to: phone,
+      contentSid: contentTemplateId,
+      contentVariables: whatsappVars,
+      plannerId: wedding.planner_id,
+      weddingId: weddingId,
+    });
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: { code: 'SEND_FAILED', message: result.error ?? 'Failed to send WhatsApp' } },
@@ -635,7 +644,14 @@ export async function sendParticipantLinkHandler(
         { status: 400 },
       );
     }
-    const result = await sendDynamicMessage(phone, messageBody, MessageType.SMS);
+    const result = await sendDynamicMessage(
+      phone,
+      messageBody,
+      MessageType.SMS,
+      undefined,
+      wedding.planner_id,
+      weddingId
+    );
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: { code: 'SEND_FAILED', message: result.error ?? 'Failed to send SMS' } },
@@ -655,7 +671,11 @@ export async function sendParticipantLinkHandler(
 // IMPORT HANDLER
 // ============================================================================
 
-export async function importTastingMenuHandler(request: NextRequest) {
+export async function importTastingMenuHandler(
+  request: NextRequest,
+  weddingId?: string,
+  plannerId?: string,
+) {
   const formData = await request.formData().catch(() => null);
   if (!formData) {
     return NextResponse.json(
@@ -685,13 +705,20 @@ export async function importTastingMenuHandler(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const parsed = await parseMenuFromFile(buffer, file.type);
-  if (!parsed) {
+  const result = await parseMenuFromFile(buffer, file.type, plannerId, weddingId);
+  if (!result) {
     return NextResponse.json(
       { success: false, error: { code: 'PARSE_FAILED', message: 'Could not extract menu structure from file' } },
       { status: 422 },
     );
   }
 
-  return NextResponse.json({ success: true, data: parsed });
+  if ('error' in result) {
+    return NextResponse.json(
+      { success: false, error: { code: 'LIMIT_REACHED', message: result.error } },
+      { status: 403 },
+    );
+  }
+
+  return NextResponse.json({ success: true, data: result });
 }

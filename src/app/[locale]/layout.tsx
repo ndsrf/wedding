@@ -8,6 +8,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 import CookieConsent from '@/components/CookieConsent'
 import HyperDXProvider from '@/components/observability/HyperDXProvider'
+import { ToastProvider } from '@/components/ui/Toast'
 import '../globals.css'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -76,8 +77,10 @@ export default async function RootLayout({
       <body>
         <HyperDXProvider />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-          <CookieConsent />
+          <ToastProvider>
+            {children}
+            <CookieConsent />
+          </ToastProvider>
         </NextIntlClientProvider>
         <SpeedInsights />
         <Analytics />

@@ -15,7 +15,9 @@
 
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
+import { ResourceType, Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 
 // ============================================================================
 // TYPES
@@ -494,7 +496,42 @@ export async function generateNupciBotReply(
   userName?: string,
   weddingId?: string,
   role: 'admin' | 'planner' = 'admin',
+  plannerId?: string,
 ): Promise<string | null> {
+  // Try to find plannerId if not provided
+  let effectivePlannerId = plannerId;
+  if (!effectivePlannerId && weddingId) {
+    try {
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        select: { planner_id: true },
+      });
+      effectivePlannerId = wedding?.planner_id;
+    } catch (err) {
+      console.warn('[NUPCIBOT] Failed to fetch planner info:', err);
+    }
+  }
+
+  // Check AI Standard limit if plannerId is known
+  if (effectivePlannerId) {
+    const result = await checkResourceLimit({
+      plannerId: effectivePlannerId,
+      type: ResourceType.AI_STANDARD,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role: role === 'admin' ? 'wedding_admin' : 'planner',
+        language: (language as Language) || 'ES',
+      });
+      console.warn(`[NUPCIBOT] Limit reached for planner ${effectivePlannerId}: ${errorMessage}`);
+      return errorMessage;
+    }
+  }
+
   // Fetch wedding info if available
   let weddingDate: string | undefined;
   let coupleNames: string | undefined;
@@ -528,10 +565,23 @@ export async function generateNupciBotReply(
   });
 
   try {
+    let reply: string | null = null;
     if (provider === 'gemini') {
-      return await generateWithGemini(systemPrompt, history, userMessage);
+      reply = await generateWithGemini(systemPrompt, history, userMessage);
+    } else {
+      reply = await generateWithOpenAI(systemPrompt, history, userMessage);
     }
-    return await generateWithOpenAI(systemPrompt, history, userMessage);
+
+    if (reply && effectivePlannerId) {
+      // Record AI Standard usage
+      void recordResourceUsage({
+        plannerId: effectivePlannerId,
+        weddingId: weddingId || null,
+        type: ResourceType.AI_STANDARD,
+      });
+    }
+
+    return reply;
   } catch (error) {
     console.error('[NUPCIBOT] Generation failed:', error);
     return null;

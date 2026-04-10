@@ -34,6 +34,18 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
   let errorMessage: string | undefined;
 
   try {
+    // Fetch parent alert to get planner/wedding context for license checks
+    const deliveryWithAlert = await prisma.alertDelivery.findUnique({
+      where: { id: delivery.id },
+      include: { alert: true },
+    });
+
+    if (!deliveryWithAlert?.alert) {
+      throw new Error('Associated alert not found');
+    }
+
+    const { planner_id: plannerId, wedding_id: weddingId } = deliveryWithAlert.alert;
+
     switch (delivery.channel) {
       case 'EMAIL': {
         if (!delivery.recipient_email) {
@@ -47,6 +59,9 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
           delivery.body,
           delivery.recipient_language.toLowerCase() as import('@/lib/i18n/config').Language,
           platformName,
+          null,
+          plannerId || undefined,
+          weddingId || undefined,
         );
         success = result.success;
         externalId = result.messageId;
@@ -63,6 +78,9 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
           delivery.recipient_phone,
           delivery.body,
           MessageType.SMS,
+          undefined,
+          plannerId || undefined,
+          weddingId || undefined,
         );
         success = result.success;
         externalId = result.messageId;
@@ -80,6 +98,9 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
           phone,
           delivery.body,
           MessageType.WHATSAPP,
+          undefined,
+          plannerId || undefined,
+          weddingId || undefined,
         );
         success = result.success;
         externalId = result.messageId;

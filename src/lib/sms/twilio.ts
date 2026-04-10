@@ -4,6 +4,8 @@
  */
 
 import twilio from 'twilio';
+import { ResourceType, Language } from '@prisma/client';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 
 // Initialize Twilio client lazily to avoid build-time API key requirement
 let twilioClient: ReturnType<typeof twilio> | null = null;
@@ -36,12 +38,20 @@ export interface MessageOptions {
   body: string;
   type: MessageType;
   mediaUrl?: string;
+  plannerId?: string;
+  weddingId?: string;
+  role?: 'planner' | 'wedding_admin';
+  language?: Language;
 }
 
 export interface ContentTemplateOptions {
   to: string;
   contentSid: string;
   contentVariables: Record<string, string>;
+  plannerId?: string;
+  weddingId?: string;
+  role?: 'planner' | 'wedding_admin';
+  language?: Language;
 }
 
 interface MessageResult {
@@ -97,7 +107,31 @@ export async function sendMessage(
   retries = 3
 ): Promise<MessageResult> {
   try {
-    const { to, body, type, mediaUrl } = options;
+    const { to, body, type, mediaUrl, plannerId, weddingId, role, language } = options;
+
+    // Check resource limit if plannerId is provided and type is WHATSAPP
+    if (type === MessageType.WHATSAPP && plannerId) {
+      const result = await checkResourceLimit({
+        plannerId,
+        weddingId,
+        type: ResourceType.WHATSAPP,
+      });
+
+      if (!result.allowed) {
+        const errorMessage = await formatLimitError({
+          resourceType: result.resourceType!,
+          limit: result.limit!,
+          used: result.used!,
+          role: role || 'planner',
+          language: language || 'ES',
+        });
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+    }
 
     // Validate phone number
     if (!isValidPhoneNumber(to)) {
@@ -165,6 +199,15 @@ export async function sendMessage(
       status: message.status,
     });
 
+    // Record usage if successful and type is WHATSAPP
+    if (type === MessageType.WHATSAPP && plannerId) {
+      void recordResourceUsage({
+        plannerId,
+        weddingId,
+        type: ResourceType.WHATSAPP,
+      });
+    }
+
     return {
       success: true,
       messageId: message.sid,
@@ -216,13 +259,17 @@ export async function sendDynamicMessage(
   to: string,
   body: string,
   type: MessageType,
-  mediaUrl?: string
+  mediaUrl?: string,
+  plannerId?: string,
+  weddingId?: string
 ): Promise<MessageResult> {
   return sendMessage({
     to,
     body,
     type,
     mediaUrl,
+    plannerId,
+    weddingId,
   });
 }
 
@@ -246,13 +293,17 @@ export async function sendSMS(
 export async function sendWhatsApp(
   to: string,
   body: string,
-  mediaUrl?: string
+  mediaUrl?: string,
+  plannerId?: string,
+  weddingId?: string
 ): Promise<MessageResult> {
   return sendMessage({
     to,
     body,
     type: MessageType.WHATSAPP,
     mediaUrl,
+    plannerId,
+    weddingId,
   });
 }
 
@@ -261,12 +312,36 @@ export async function sendWhatsApp(
  * Uses approved Meta templates with variable substitution
  */
 export async function sendWhatsAppWithContentTemplate(
-  to: string,
-  contentSid: string,
-  contentVariables: Record<string, string>,
+  options: ContentTemplateOptions,
   retries = 3
 ): Promise<MessageResult> {
   try {
+    const { to, contentSid, contentVariables, plannerId, weddingId, role, language } = options;
+
+    // Check resource limit if plannerId is provided
+    if (plannerId) {
+      const result = await checkResourceLimit({
+        plannerId,
+        weddingId,
+        type: ResourceType.WHATSAPP,
+      });
+
+      if (!result.allowed) {
+        const errorMessage = await formatLimitError({
+          resourceType: result.resourceType!,
+          limit: result.limit!,
+          used: result.used!,
+          role: role || 'planner',
+          language: language || 'ES',
+        });
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+    }
+
     // Validate phone number
     if (!isValidPhoneNumber(to)) {
       return {
@@ -312,6 +387,15 @@ export async function sendWhatsAppWithContentTemplate(
       status: message.status,
     });
 
+    // Record usage if successful
+    if (plannerId) {
+      void recordResourceUsage({
+        plannerId,
+        weddingId,
+        type: ResourceType.WHATSAPP,
+      });
+    }
+
     return {
       success: true,
       messageId: message.sid,
@@ -325,9 +409,7 @@ export async function sendWhatsAppWithContentTemplate(
       console.log(`⏳ Retrying... (${retries} attempts remaining)`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       return sendWhatsAppWithContentTemplate(
-        to,
-        contentSid,
-        contentVariables,
+        options,
         retries - 1
       );
     }

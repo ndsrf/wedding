@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
+import { getTranslations } from '@/lib/i18n/server';
 import type {
   APIResponse,
   UpdateWeddingStatusResponse,
@@ -65,17 +66,15 @@ export async function PATCH(
 
     const { action } = validationResult.data;
 
-    // Fetch wedding to verify ownership
+    // Fetch wedding to verify ownership and planner license
     const wedding = await prisma.wedding.findUnique({
       where: { id: weddingId },
-      select: {
-        id: true,
-        planner_id: true,
-        status: true,
-        is_disabled: true,
-        disabled_at: true,
-        deleted_at: true,
-        license_deleted: true,
+      include: {
+        planner: {
+          include: {
+            license: true,
+          },
+        },
       },
     });
 
@@ -97,6 +96,20 @@ export async function PATCH(
         error: {
           code: API_ERROR_CODES.FORBIDDEN,
           message: 'You do not have access to this wedding',
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Check if planner is allowed to delete/disable weddings
+    const canDelete = wedding.planner.license?.can_delete_weddings ?? true;
+    if (!canDelete && (action === 'delete' || action === 'disable')) {
+      const { t } = await getTranslations((user.preferred_language as string || 'es').toLowerCase());
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: API_ERROR_CODES.FORBIDDEN,
+          message: t('common.errors.license.noDelete'),
         },
       };
       return NextResponse.json(response, { status: 403 });

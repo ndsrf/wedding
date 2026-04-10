@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
       userName,
       weddingId,
       'planner',
+      user.planner_id,
     );
 
     if (!reply) {

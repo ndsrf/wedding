@@ -63,7 +63,20 @@
       "network": "Connection error. Please check your internet connection.",
       "unauthorized": "You are not authorized to perform this action.",
       "notFound": "The requested resource was not found.",
-      "serverError": "Server error. Please try again later."
+      "serverError": "Server error. Please try again later.",
+      "license": {
+        "limitReachedCouple": "The limit for {resource} included in your plan has been reached. Please contact your wedding planner to upgrade the service.",
+        "limitReachedPlanner": "You've reached your monthly quota for {resource} ({used}/{limit}). To continue enjoying all AI benefits and increase your limits, please contact our support team.",
+        "noDelete": "Your current plan doesn't include the option to delete or disable weddings. Contact our customer support team to upgrade your license and access advanced management features.",
+        "resources": {
+          "WHATSAPP": "WhatsApp messages",
+          "WHATSAPP_WEDDING": "WhatsApp messages for this wedding",
+          "AI_STANDARD": "standard AI queries",
+          "AI_PREMIUM": "premium AI processings",
+          "EMAIL": "emails",
+          "CONTRACT": "contracts"
+          }
+      }
     },
     "success": {
       "saved": "Successfully saved",
@@ -361,6 +374,13 @@
       "description": "Configure the maximum number of weddings and additional planner accounts for this company.",
       "maxWeddings": "Maximum Weddings",
       "maxSubPlanners": "Maximum Additional Planners",
+      "canDeleteWeddings": "Can delete or disable weddings",
+      "maxWhatsAppPerMonth": "Max WhatsApp per month (Global)",
+      "maxWhatsAppPerWeddingPerMonth": "Max WhatsApp per wedding per month",
+      "maxStandardAICalls": "Maximum standard AI calls",
+      "maxPremiumAICalls": "Maximum premium AI calls",
+      "maxEmailsPerMonth": "Maximum emails per month",
+      "maxContractsPerMonth": "Maximum contracts per month",
       "currentlyUsing": "currently using {count}",
       "confirmSave": "Save license changes?",
       "warnDeleteWeddings": "Warning: {count} wedding(s) exceed the new limit and will be permanently deleted. This cannot be undone.",
@@ -1249,8 +1269,10 @@
       "subPlanners": "Sub-planners",
       "aiBasic": "Basic AI calls",
       "aiPremium": "Premium AI calls",
-      "whatsapp": "WhatsApp messages",
-      "comingSoon": "Coming soon",
+      "whatsapp": "WhatsApp Messages",
+      "emails": "Monthly Emails",
+      "contracts": "Monthly Contracts",
+      "comingSoon": "Coming Soon",
       "noLimit": "No limit",
       "phone": "Phone",
       "bankAccount": "Bank account (IBAN)",

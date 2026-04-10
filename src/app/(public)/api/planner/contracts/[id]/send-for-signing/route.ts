@@ -8,6 +8,8 @@ import { createDocuSealSubmission } from '@/lib/signing/docuseal';
 import { toAbsoluteUrl } from '@/lib/images/processor';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import { isValidLanguage } from '@/lib/i18n/config';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
+import { ResourceType } from '@prisma/client';
 import React from 'react';
 
 /** Count pages in a PDF buffer by scanning for /Type /Page entries (no external deps). */
@@ -39,7 +41,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
-      include: { template: { select: { language: true } } },
+      include: { 
+        template: { select: { language: true } },
+        weddings: { select: { id: true }, take: 1 }
+      },
     });
   } catch (error) {
     console.error('send-for-signing: DB lookup error:', error);
@@ -77,11 +82,31 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         website: true,
         logo_url: true,
         signature_url: true,
+        preferred_language: true,
       },
     });
   } catch (error) {
     console.error('send-for-signing: planner lookup error:', error);
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  }
+
+  // 3.5 Check License Limit
+  const weddingId = contract.weddings?.[0]?.id;
+  const limitResult = await checkResourceLimit({
+    plannerId: user.planner_id,
+    weddingId,
+    type: ResourceType.CONTRACT,
+  });
+
+  if (!limitResult.allowed) {
+    const errorMessage = await formatLimitError({
+      resourceType: limitResult.resourceType!,
+      limit: limitResult.limit!,
+      used: limitResult.used!,
+      role: 'planner',
+      language: planner?.preferred_language || 'ES',
+    });
+    return NextResponse.json({ error: errorMessage }, { status: 403 });
   }
 
   // 4. Generate PDF — content on page(s) 0..n-2, dedicated signature page always last
@@ -169,6 +194,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     console.error('send-for-signing: DB update error:', error);
     return NextResponse.json({ error: 'Failed to save signing details' }, { status: 500 });
   }
+
+  // Record usage
+  void recordResourceUsage({
+    plannerId: user.planner_id,
+    weddingId: contract.weddings?.[0]?.id,
+    type: ResourceType.CONTRACT,
+  });
 
   return NextResponse.json({
     data: {

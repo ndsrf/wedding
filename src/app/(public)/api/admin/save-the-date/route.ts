@@ -163,8 +163,23 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 });
   } catch (error: unknown) {
-    // Handle authentication errors
     const errorMessage = error instanceof Error ? error.message : '';
+    console.log('[DEBUG] Catching error in save-the-date POST:', errorMessage);
+
+    // Check if it's a license limit error
+    if (errorMessage.includes('cupo') || errorMessage.includes('quota') || errorMessage.includes('limit') || errorMessage.includes('plan') || errorMessage.includes('licencia') || errorMessage.includes('license')) {
+      console.log('[DEBUG] Identified as LIMIT_REACHED error');
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: 'LIMIT_REACHED',
+          message: errorMessage,
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    // Handle authentication errors
     if (errorMessage.includes('UNAUTHORIZED')) {
       const response: APIResponse = {
         success: false,

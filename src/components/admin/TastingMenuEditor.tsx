@@ -7,6 +7,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { useToast } from '@/components/ui/Toast';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -92,6 +93,7 @@ async function fetchJson(url: string, options?: RequestInit) {
 
 export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = false }: Props) {
   const t = useTranslations('admin.tastingMenu');
+  const { error: showToastError } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Menu title/description/date/status form
@@ -202,7 +204,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
       setAddingSectionName('');
     } catch (err) {
       console.error('Error adding section:', err);
-      alert(err instanceof Error ? err.message : 'Error adding section');
+      showToastError(err instanceof Error ? err.message : 'Error adding section');
     } finally {
       setAddingSection(false);
     }
@@ -214,7 +216,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     if (data.success && menu) {
       onMenuChange({ ...menu, sections: menu.sections.filter(s => s.id !== sectionId) });
     } else if (data.error) {
-      alert(data.error.message);
+      showToastError(data.error.message);
     }
   };
 
@@ -230,7 +232,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
       onMenuChange({ ...menu, sections: menu.sections.map(s => s.id === sectionId ? { ...s, name } : s) });
       setEditingSection(prev => { const n = { ...prev }; delete n[sectionId]; return n; });
     } else if (data.error) {
-      alert(data.error.message);
+      showToastError(data.error.message);
     }
   };
 
@@ -334,7 +336,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
       });
     } catch (err) {
       console.error('Error uploading image:', err);
-      alert(err instanceof Error ? err.message : 'Error uploading image');
+      showToastError(err instanceof Error ? err.message : 'Error uploading image');
     } finally {
       setImageUploading(prev => ({ ...prev, [dishId]: false }));
     }
@@ -356,7 +358,7 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
       });
     } catch (err) {
       console.error('Error removing image:', err);
-      alert(err instanceof Error ? err.message : 'Error removing image');
+      showToastError(err instanceof Error ? err.message : 'Error removing image');
     } finally {
       setImageUploading(prev => ({ ...prev, [dishId]: false }));
     }

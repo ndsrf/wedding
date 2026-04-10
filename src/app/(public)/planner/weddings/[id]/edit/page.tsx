@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { cacheCoupleName } from '@/hooks/useCoupleNames';
 import { WeddingForm } from '@/components/planner/WeddingForm';
+import { useToast } from '@/components/ui/Toast';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import type { Wedding, Theme, ItineraryItem } from '@/types/models';
 import type { CreateWeddingRequest, UpdateWeddingStatusRequest } from '@/types/api';
@@ -24,6 +25,7 @@ interface EditWeddingPageProps {
 
 export default function EditWeddingPage({ params }: EditWeddingPageProps) {
   const t = useTranslations();
+  const { error: showToastError } = useToast();
   const { id: weddingId } = use(params);
   const router = useRouter();
   const [wedding, setWedding] = useState<(Wedding & { itinerary_items?: ItineraryItem[] }) | null>(null);
@@ -155,7 +157,8 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update wedding status');
+        const data = await response.json();
+        throw new Error(data.error?.message || 'Failed to update wedding status');
       }
 
       const result = await response.json();
@@ -165,7 +168,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
       setWedding((prev) => prev ? { ...prev, ...result.data } : prev);
     } catch (err) {
       console.error('Error toggling wedding status:', err);
-      alert('Failed to update wedding status. Please try again.');
+      showToastError(err instanceof Error ? err.message : 'Failed to update wedding status. Please try again.');
     }
   };
 
@@ -185,7 +188,8 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete wedding');
+        const data = await response.json();
+        throw new Error(data.error?.message || 'Failed to delete wedding');
       }
 
       // Bust Next.js router cache so /planner and /planner/weddings re-render.
@@ -193,7 +197,7 @@ export default function EditWeddingPage({ params }: EditWeddingPageProps) {
       router.push('/planner/weddings');
     } catch (err) {
       console.error('Error deleting wedding:', err);
-      alert('Failed to delete wedding. Please try again.');
+      showToastError(err instanceof Error ? err.message : 'Failed to delete wedding. Please try again.');
     }
   };
 

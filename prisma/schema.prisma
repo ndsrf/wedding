@@ -66,21 +66,54 @@ model WeddingPlanner {
   license             PlannerLicense?
   sub_accounts        PlannerSubAccount[]
   alert_rules         AlertRule[]
+  resource_usages     ResourceUsage[]
 
   @@index([enabled])
   @@map("wedding_planners")
 }
 
 model PlannerLicense {
-  id               String         @id @default(uuid())
-  planner_id       String         @unique
-  max_weddings     Int            @default(10)
-  max_sub_planners Int            @default(2)
-  created_at       DateTime       @default(now())
-  updated_at       DateTime       @updatedAt
-  planner          WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  id                                 String         @id @default(uuid())
+  planner_id                         String         @unique
+  max_weddings                       Int            @default(10)
+  max_sub_planners                   Int            @default(2)
+  can_delete_weddings                Boolean        @default(true)
+  max_whatsapp_per_month             Int            @default(100)
+  max_whatsapp_per_wedding_per_month Int            @default(100)
+  max_standard_ai_calls              Int            @default(100)
+  max_premium_ai_calls               Int            @default(50)
+  max_emails_per_month               Int            @default(1000)
+  max_contracts_per_month            Int            @default(100)
+  created_at                         DateTime       @default(now())
+  updated_at                         DateTime       @updatedAt
+  planner                            WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
 
   @@map("planner_licenses")
+}
+
+model ResourceUsage {
+  id         String         @id @default(uuid())
+  planner_id String
+  wedding_id String?
+  type       ResourceType
+  quantity   Int            @default(1)
+  timestamp  DateTime       @default(now())
+  planner    WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  wedding    Wedding?       @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@index([planner_id])
+  @@index([wedding_id])
+  @@index([type])
+  @@index([timestamp])
+  @@map("resource_usages")
+}
+
+enum ResourceType {
+  WHATSAPP
+  AI_STANDARD
+  AI_PREMIUM
+  EMAIL
+  CONTRACT
 }
 
 model PlannerSubAccount {
@@ -209,6 +242,7 @@ model Wedding {
   wedding_day_theme               Theme?             @relation("WeddingDayTheme", fields: [wedding_day_theme_id], references: [id])
   wedding_day_invitation_template InvitationTemplate? @relation("WeddingDayInvitationTemplate", fields: [wedding_day_invitation_template_id], references: [id])
   main_event_location             Location?          @relation("MainEventLocation", fields: [main_event_location_id], references: [id], onDelete: SetNull)
+  resource_usages                 ResourceUsage[]
 
   @@index([planner_id])
   @@index([theme_id])

@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/Toast';
 import { useNamespacedTranslations, useFormatDate } from '@/lib/i18n/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -27,6 +28,13 @@ interface License {
   planner_id: string;
   max_weddings: number;
   max_sub_planners: number;
+  can_delete_weddings: boolean;
+  max_whatsapp_per_month: number;
+  max_whatsapp_per_wedding_per_month: number;
+  max_standard_ai_calls: number;
+  max_premium_ai_calls: number;
+  max_emails_per_month: number;
+  max_contracts_per_month: number;
 }
 
 interface SubAccount {
@@ -44,6 +52,7 @@ interface SubAccount {
 export default function PlannerDetailPage() {
   const t = useNamespacedTranslations('master');
   const tCommon = useNamespacedTranslations('common');
+  const { success: showToastSuccess, error: showToastError } = useToast();
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const plannerId = params.id;
@@ -53,7 +62,17 @@ export default function PlannerDetailPage() {
   const [planner, setPlanner] = useState<Planner | null>(null);
   // License
   const [license, setLicense] = useState<License | null>(null);
-  const [licenseForm, setLicenseForm] = useState({ max_weddings: 10, max_sub_planners: 2 });
+  const [licenseForm, setLicenseForm] = useState({
+    max_weddings: 10,
+    max_sub_planners: 2,
+    can_delete_weddings: true,
+    max_whatsapp_per_month: 100,
+    max_whatsapp_per_wedding_per_month: 100,
+    max_standard_ai_calls: 100,
+    max_premium_ai_calls: 50,
+    max_emails_per_month: 1000,
+    max_contracts_per_month: 100,
+  });
   const [savingLicense, setSavingLicense] = useState(false);
   // Sub-accounts
   const [subAccounts, setSubAccounts] = useState<SubAccount[]>([]);
@@ -86,6 +105,13 @@ export default function PlannerDetailPage() {
       setLicenseForm({
         max_weddings: data.data.max_weddings,
         max_sub_planners: data.data.max_sub_planners,
+        can_delete_weddings: data.data.can_delete_weddings ?? true,
+        max_whatsapp_per_month: data.data.max_whatsapp_per_month ?? 100,
+        max_whatsapp_per_wedding_per_month: data.data.max_whatsapp_per_wedding_per_month ?? 100,
+        max_standard_ai_calls: data.data.max_standard_ai_calls ?? 100,
+        max_premium_ai_calls: data.data.max_premium_ai_calls ?? 50,
+        max_emails_per_month: data.data.max_emails_per_month ?? 1000,
+        max_contracts_per_month: data.data.max_contracts_per_month ?? 100,
       });
     }
   }, [plannerId]);
@@ -140,9 +166,9 @@ export default function PlannerDetailPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to save license');
       setLicense(data.data);
       await Promise.all([fetchPlanner(), fetchSubAccounts()]);
-      alert(tCommon('success.updated'));
+      showToastSuccess(tCommon('success.updated'));
     } catch (err) {
-      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
+      showToastError(err instanceof Error ? err.message : tCommon('errors.generic'));
     } finally {
       setSavingLicense(false);
     }
@@ -162,9 +188,9 @@ export default function PlannerDetailPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to add sub-account');
       setNewSubAccount({ name: '', email: '' });
       await fetchSubAccounts();
-      alert(tCommon('success.created'));
+      showToastSuccess(tCommon('success.created'));
     } catch (err) {
-      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
+      showToastError(err instanceof Error ? err.message : tCommon('errors.generic'));
     } finally {
       setAddingSubAccount(false);
     }
@@ -183,7 +209,7 @@ export default function PlannerDetailPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to update sub-account');
       await fetchSubAccounts();
     } catch (err) {
-      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
+      showToastError(err instanceof Error ? err.message : tCommon('errors.generic'));
     } finally {
       setActioningSubId(null);
     }
@@ -201,7 +227,7 @@ export default function PlannerDetailPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to delete sub-account');
       await fetchSubAccounts();
     } catch (err) {
-      alert(err instanceof Error ? err.message : tCommon('errors.generic'));
+      showToastError(err instanceof Error ? err.message : tCommon('errors.generic'));
     } finally {
       setActioningSubId(null);
     }
@@ -286,6 +312,106 @@ export default function PlannerDetailPage() {
                 onChange={(e) => setLicenseForm((f) => ({ ...f, max_sub_planners: parseInt(e.target.value) || 0 }))}
                 className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-base focus:outline-none focus:border-purple-400 transition-colors"
               />
+            </div>
+
+            {/* Can Delete Weddings */}
+            <div className="flex items-center space-x-3 pt-4">
+              <input
+                id="can_delete_weddings"
+                type="checkbox"
+                checked={licenseForm.can_delete_weddings}
+                onChange={(e) => setLicenseForm((f) => ({ ...f, can_delete_weddings: e.target.checked }))}
+                className="h-5 w-5 text-pink-600 border-2 border-pink-200 rounded focus:ring-purple-400"
+              />
+              <label htmlFor="can_delete_weddings" className="text-sm font-medium text-gray-700">
+                {t('license.canDeleteWeddings')}
+              </label>
+            </div>
+
+            <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-pink-100">
+              {/* Max WhatsApp Month */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('license.maxWhatsAppPerMonth')}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={licenseForm.max_whatsapp_per_month}
+                  onChange={(e) => setLicenseForm((f) => ({ ...f, max_whatsapp_per_month: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-base focus:outline-none focus:border-purple-400 transition-colors"
+                />
+              </div>
+
+              {/* Max WhatsApp Wedding Month */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('license.maxWhatsAppPerWeddingPerMonth')}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={licenseForm.max_whatsapp_per_wedding_per_month}
+                  onChange={(e) => setLicenseForm((f) => ({ ...f, max_whatsapp_per_wedding_per_month: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-base focus:outline-none focus:border-purple-400 transition-colors"
+                />
+              </div>
+
+              {/* Max Standard AI Calls */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('license.maxStandardAICalls')}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={licenseForm.max_standard_ai_calls}
+                  onChange={(e) => setLicenseForm((f) => ({ ...f, max_standard_ai_calls: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-base focus:outline-none focus:border-purple-400 transition-colors"
+                />
+              </div>
+
+              {/* Max Premium AI Calls */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('license.maxPremiumAICalls')}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={licenseForm.max_premium_ai_calls}
+                  onChange={(e) => setLicenseForm((f) => ({ ...f, max_premium_ai_calls: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-base focus:outline-none focus:border-purple-400 transition-colors"
+                />
+              </div>
+
+              {/* Max Emails per Month */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('license.maxEmailsPerMonth')}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={licenseForm.max_emails_per_month}
+                  onChange={(e) => setLicenseForm((f) => ({ ...f, max_emails_per_month: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-base focus:outline-none focus:border-purple-400 transition-colors"
+                />
+              </div>
+
+              {/* Max Contracts per Month */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('license.maxContractsPerMonth')}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={licenseForm.max_contracts_per_month}
+                  onChange={(e) => setLicenseForm((f) => ({ ...f, max_contracts_per_month: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-base focus:outline-none focus:border-purple-400 transition-colors"
+                />
+              </div>
             </div>
           </div>
 

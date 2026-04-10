@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/Toast';
 import { useTranslations } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { WeddingCard } from '@/components/planner/WeddingCard';
@@ -18,6 +19,7 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
 export default function DeletedWeddingsPage() {
   const t = useTranslations();
+  const { error: showToastError } = useToast();
   useDocumentTitle(`Nupci - ${t('planner.weddings.deletedWeddings')}`);
   const [weddings, setWeddings] = useState<WeddingWithStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,14 +62,15 @@ export default function DeletedWeddingsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to restore wedding');
+        const data = await response.json();
+        throw new Error(data.error?.message || 'Failed to restore wedding');
       }
 
       // Remove from list (it's now in active weddings)
       setWeddings(weddings.filter(w => w.id !== weddingId));
     } catch (err) {
       console.error('Error restoring wedding:', err);
-      alert('Failed to restore wedding. Please try again.');
+      showToastError(err instanceof Error ? err.message : 'Failed to restore wedding. Please try again.');
     }
   };
 

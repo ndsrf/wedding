@@ -4,6 +4,7 @@ import { getLanguageFromRequest } from '@/lib/i18n/server';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 import HyperDXProvider from '@/components/observability/HyperDXProvider';
+import { ToastProvider } from '@/components/ui/Toast';
 import '../globals.css'
 
 export default async function PublicLayout({
@@ -33,7 +34,9 @@ export default async function PublicLayout({
       <body>
         <HyperDXProvider />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </NextIntlClientProvider>
         <SpeedInsights />
         <Analytics />

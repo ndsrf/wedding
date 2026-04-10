@@ -51,8 +51,8 @@ async function loadTranslations(language: Language): Promise<Record<string, unkn
  * This is the main function to use in Server Components
  * If language is not provided, it will be detected from the request
  */
-export async function getTranslations(language?: Language) {
-  const targetLanguage = language || await getLanguageFromRequest();
+export async function getTranslations(language?: string) {
+  const targetLanguage = (language?.toLowerCase() || await getLanguageFromRequest()) as Language;
   const messages = await loadTranslations(targetLanguage);
 
   return {
@@ -67,7 +67,7 @@ export async function getTranslations(language?: Language) {
 
       // Fallback to key if translation not found
       if (translationValue === undefined || translationValue === null) {
-        console.warn(`Translation not found for key: ${key} in language: ${language}`);
+        console.warn(`Translation not found for key: ${key} in language: ${targetLanguage}`);
         return key;
       }
 

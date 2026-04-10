@@ -202,6 +202,19 @@ export async function POST(
     return NextResponse.json(response, { status: 200 });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : '';
+
+    // Check if it's a license limit error
+    if (errorMessage.includes('cupo') || errorMessage.includes('quota') || errorMessage.includes('limit') || errorMessage.includes('plan') || errorMessage.includes('licencia') || errorMessage.includes('license')) {
+      const response: APIResponse = {
+        success: false,
+        error: {
+          code: 'LIMIT_REACHED',
+          message: errorMessage,
+        },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
     if (errorMessage.includes('UNAUTHORIZED')) {
       const response: APIResponse = {
         success: false,

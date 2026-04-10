@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from 'ai';
+import { ResourceType, Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { getChatModel } from '@/lib/ai/provider';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 
 interface CommentData {
   id: string;
@@ -93,12 +95,37 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     if (!user.planner_id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
 
+    // Check AI Premium limit
+    const result = await checkResourceLimit({
+      plannerId: user.planner_id,
+      type: ResourceType.AI_PREMIUM,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role: 'planner',
+        language: user.preferred_language as Language || 'ES',
+      });
+
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'LIMIT_REACHED',
+          message: errorMessage,
+        },
+      }, { status: 403 });
+    }
+
     // Load contract with related data
     const contract = await prisma.contract.findFirst({
       where: { id, planner_id: user.planner_id },
       include: {
         quote: { include: { line_items: true } },
         customer: { select: { name: true, couple_names: true, email: true, phone: true, id_number: true, address: true, notes: true } },
+        weddings: { select: { id: true }, take: 1 },
       },
     });
     if (!contract) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -221,6 +248,13 @@ Rules:
       model: getChatModel(),
       prompt,
       temperature: 0,
+    });
+
+    // Record AI Premium usage
+    void recordResourceUsage({
+      plannerId: user.planner_id,
+      weddingId: contract.weddings[0]?.id || null,
+      type: ResourceType.AI_PREMIUM,
     });
 
     // Parse AI response

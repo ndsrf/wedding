@@ -16,6 +16,13 @@ import { WeddingStatus } from '@prisma/client';
 const updateLicenseSchema = z.object({
   max_weddings: z.number().int().min(0).optional(),
   max_sub_planners: z.number().int().min(0).optional(),
+  can_delete_weddings: z.boolean().optional(),
+  max_whatsapp_per_month: z.number().int().min(0).optional(),
+  max_whatsapp_per_wedding_per_month: z.number().int().min(0).optional(),
+  max_standard_ai_calls: z.number().int().min(0).optional(),
+  max_premium_ai_calls: z.number().int().min(0).optional(),
+  max_emails_per_month: z.number().int().min(0).optional(),
+  max_contracts_per_month: z.number().int().min(0).optional(),
 });
 
 interface RouteContext {
@@ -26,7 +33,18 @@ async function getOrCreateLicense(plannerId: string) {
   return prisma.plannerLicense.upsert({
     where: { planner_id: plannerId },
     update: {},
-    create: { planner_id: plannerId },
+    create: {
+      planner_id: plannerId,
+      max_weddings: 10,
+      max_sub_planners: 2,
+      can_delete_weddings: true,
+      max_whatsapp_per_month: 100,
+      max_whatsapp_per_wedding_per_month: 100,
+      max_standard_ai_calls: 100,
+      max_premium_ai_calls: 50,
+      max_emails_per_month: 1000,
+      max_contracts_per_month: 100,
+    },
   });
 }
 
@@ -130,7 +148,17 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
       return tx.plannerLicense.update({
         where: { planner_id: id },
-        data: { max_weddings: newMaxWeddings, max_sub_planners: newMaxSubPlanners },
+        data: {
+          max_weddings: newMaxWeddings,
+          max_sub_planners: newMaxSubPlanners,
+          can_delete_weddings: validated.can_delete_weddings ?? license.can_delete_weddings,
+          max_whatsapp_per_month: validated.max_whatsapp_per_month ?? license.max_whatsapp_per_month,
+          max_whatsapp_per_wedding_per_month: validated.max_whatsapp_per_wedding_per_month ?? license.max_whatsapp_per_wedding_per_month,
+          max_standard_ai_calls: validated.max_standard_ai_calls ?? license.max_standard_ai_calls,
+          max_premium_ai_calls: validated.max_premium_ai_calls ?? license.max_premium_ai_calls,
+          max_emails_per_month: validated.max_emails_per_month ?? license.max_emails_per_month,
+          max_contracts_per_month: validated.max_contracts_per_month ?? license.max_contracts_per_month,
+        },
       });
     });
 

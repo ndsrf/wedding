@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
+import { useToast } from '@/components/ui/Toast';
 import { QuoteForm } from './QuoteForm';
 import { FilterBar } from '../FilterBar';
 import { Pagination } from '../Pagination';
@@ -71,6 +72,7 @@ const CONTRACT_STATUS_STYLES: Record<string, string> = {
 export function QuotesList({ initialRef }: { initialRef?: string }) {
   const t = useTranslations('planner.quotesFinances');
   const format = useFormatter();
+  const { error: showToastError } = useToast();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -197,9 +199,16 @@ export function QuotesList({ initialRef }: { initialRef?: string }) {
               JSON.stringify(fillJson.data.comments),
             );
           }
+        } else {
+          const fillError = await fillRes.json();
+          showToastError(fillError.error?.message || 'AI processing limit reached. Please check your license plan.');
+          setCreatingContract(false);
+          setContractQuoteId(null);
+          fetchQuotes();
+          return;
         }
-      } catch {
-        // Non-fatal: open editor without AI comments
+      } catch (err) {
+        console.error('Error filling contract with AI:', err);
       }
     }
 

@@ -9,11 +9,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/middleware';
 import { importTastingMenuHandler } from '@/lib/tasting/api-handlers';
+import { prisma } from '@/lib/db/prisma';
 
 export async function POST(request: NextRequest) {
   const user = await requireRole('wedding_admin');
   if (!user.wedding_id) {
     return NextResponse.json({ success: false, error: { code: 'FORBIDDEN' } }, { status: 403 });
   }
-  return importTastingMenuHandler(request);
+
+  const wedding = await prisma.wedding.findUnique({
+    where: { id: user.wedding_id },
+    select: { planner_id: true },
+  });
+
+  return importTastingMenuHandler(request, user.wedding_id, wedding?.planner_id || undefined);
 }

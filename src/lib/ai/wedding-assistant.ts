@@ -14,8 +14,10 @@
 
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
+import { ResourceType, Language } from '@prisma/client';
 import type { Wedding, Family, FamilyMember } from '@prisma/client';
 import type { TemplateDesign, SupportedLanguage } from '@/types/invitation-template';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 
 // ============================================================================
 // TYPES
@@ -314,6 +316,24 @@ export async function generateWeddingReply(
   location?: LocationContext | null,
   menu?: MenuContext | null
 ): Promise<string | null> {
+  // Check AI Standard limit
+  const result = await checkResourceLimit({
+    plannerId: wedding.planner_id,
+    type: ResourceType.AI_STANDARD,
+  });
+
+  if (!result.allowed) {
+    const errorMessage = await formatLimitError({
+      resourceType: result.resourceType!,
+      limit: result.limit!,
+      used: result.used!,
+      role: 'wedding_admin', // Guests are part of the couple's wedding context
+      language: (language as Language) || 'ES',
+    });
+    console.warn(`[AI_ASSISTANT] Limit reached for planner ${wedding.planner_id}: ${errorMessage}`);
+    return errorMessage;
+  }
+
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
   const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location, menu);
 
@@ -330,10 +350,22 @@ export async function generateWeddingReply(
   });
 
   try {
+    let reply: string | null = null;
     if (provider === 'gemini') {
-      return await generateWithGemini(systemPrompt, guestMessage);
+      reply = await generateWithGemini(systemPrompt, guestMessage);
+    } else {
+      reply = await generateWithOpenAI(systemPrompt, guestMessage);
     }
-    return await generateWithOpenAI(systemPrompt, guestMessage);
+
+    if (reply) {
+      // Record AI Standard usage
+      void recordResourceUsage({
+        plannerId: wedding.planner_id,
+        type: ResourceType.AI_STANDARD,
+      });
+    }
+
+    return reply;
   } catch (error) {
     console.error('[AI_ASSISTANT] Generation failed:', error);
     return null;

@@ -63,7 +63,20 @@
       "network": "Error de conexión. Por favor, comprueba tu conexión a internet.",
       "unauthorized": "No tienes autorización para realizar esta acción.",
       "notFound": "El recurso solicitado no fue encontrado.",
-      "serverError": "Error del servidor. Por favor, inténtalo más tarde."
+      "serverError": "Error del servidor. Por favor, inténtalo más tarde.",
+      "license": {
+        "limitReachedCouple": "Se ha alcanzado el límite de {resource} incluido en vuestro plan. Por favor, contactad con vuestro wedding planner para ampliar el servicio.",
+        "limitReachedPlanner": "Has alcanzado tu cupo mensual de {resource} ({used}/{limit}). Para seguir disfrutando de todas las ventajas de la IA y ampliar tus límites, contacta con nuestro equipo de soporte.",
+        "noDelete": "Tu plan actual no incluye la opción de borrar o deshabilitar bodas. Contacta con nuestro servicio de atención al cliente para ampliar tu licencia y acceder a funciones avanzadas de gestión.",
+        "resources": {
+          "WHATSAPP": "mensajes de WhatsApp",
+          "WHATSAPP_WEDDING": "mensajes de WhatsApp para esta boda",
+          "AI_STANDARD": "consultas de IA estándar",
+          "AI_PREMIUM": "procesamientos de IA premium",
+          "EMAIL": "emails",
+          "CONTRACT": "contratos"
+        }
+      }
     },
     "success": {
       "saved": "Guardado exitosamente",
@@ -357,6 +370,13 @@
       "description": "Configura el número máximo de bodas y cuentas adicionales de wedding planner para esta empresa.",
       "maxWeddings": "Máximo de Bodas",
       "maxSubPlanners": "Máximo de Wedding Planners Adicionales",
+      "canDeleteWeddings": "Puede borrar o deshabilitar bodas",
+      "maxWhatsAppPerMonth": "Máximo de WhatsApp por mes (Global)",
+      "maxWhatsAppPerWeddingPerMonth": "Máximo de WhatsApp por boda por mes",
+      "maxStandardAICalls": "Máximo de llamadas IA estándar",
+      "maxPremiumAICalls": "Máximo de llamadas IA premium",
+      "maxEmailsPerMonth": "Máximo de emails por mes",
+      "maxContractsPerMonth": "Máximo de contratos por mes",
       "currentlyUsing": "usando actualmente {count}",
       "confirmSave": "¿Guardar los cambios de licencia?",
       "warnDeleteWeddings": "Atención: {count} boda(s) superan el nuevo límite y se eliminarán permanentemente. Esta acción no se puede deshacer.",
@@ -1246,6 +1266,8 @@
       "aiBasic": "Llamadas IA básico",
       "aiPremium": "Llamadas IA premium",
       "whatsapp": "Mensajes WhatsApp",
+      "emails": "Emails al mes",
+      "contracts": "Contratos al mes",
       "comingSoon": "Próximamente",
       "noLimit": "Sin límite",
       "phone": "Teléfono",

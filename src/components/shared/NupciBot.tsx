@@ -457,7 +457,7 @@ export function NupciBot() {
       } else {
         // JSON fallback response
         const data = await res.json();
-        const replyContent = data.success && data.data?.reply ? data.data.reply : t('chat.errorReply');
+        const replyContent = data.success && data.data?.reply ? data.data.reply : (data.error?.message || t('chat.errorReply'));
         const updatedHistory: ChatMessage[] = [...newHistory, { role: 'assistant', content: replyContent }];
         if (userMsgCount >= 5) {
           updatedHistory.push({ role: 'assistant', content: t('chat.limitReached') });

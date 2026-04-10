@@ -140,7 +140,9 @@ export async function sendInvitation(
         renderedBody,
         family.preferred_language.toLowerCase() as I18nLanguage,
         family.wedding.couple_names,
-        absoluteImageUrl || null
+        absoluteImageUrl || null,
+        family.wedding.planner_id,
+        wedding_id
       );
     } else if (channel === "SMS") {
       messageResult = await sendDynamicMessage(
@@ -182,17 +184,21 @@ export async function sendInvitation(
         const { sendWhatsAppWithContentTemplate } = await import("@/lib/sms/twilio");
 
         const whatsappVars = mapToWhatsAppVariables(variables, absoluteImageUrl);
-        messageResult = await sendWhatsAppWithContentTemplate(
-          family.whatsapp_number!,
-          contentTemplateId,
-          whatsappVars
-        );
+        messageResult = await sendWhatsAppWithContentTemplate({
+          to: family.whatsapp_number!,
+          contentSid: contentTemplateId,
+          contentVariables: whatsappVars,
+          plannerId: family.wedding.planner_id,
+          weddingId: wedding_id,
+        });
       } else {
         messageResult = await sendDynamicMessage(
           family.whatsapp_number!,
           renderedBody,
           MessageType.WHATSAPP,
-          absoluteImageUrl
+          absoluteImageUrl,
+          family.wedding.planner_id,
+          wedding_id
         );
       }
     } else {
@@ -279,6 +285,19 @@ export async function sendInvitationsBulk(
         waLinks.push({ family_id: option.family_id, waLink: result.waLink });
       }
     } else {
+      // If error is a license limit error, stop the process and throw
+      const isLimitError = 
+        result.error?.includes('cupo') || 
+        result.error?.includes('quota') || 
+        result.error?.includes('limit') || 
+        result.error?.includes('plan') || 
+        result.error?.includes('licencia') ||
+        result.error?.includes('license');
+
+      if (isLimitError) {
+        throw new Error(result.error);
+      }
+
       errors.push({
         family_id: option.family_id,
         error: result.error || "Unknown error",
