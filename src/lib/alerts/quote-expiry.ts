@@ -46,11 +46,14 @@ export async function processExpiredQuotes(): Promise<ExpiredQuotesResult> {
 
   for (const quote of expiredQuotes) {
     try {
-      // Mark as EXPIRED
-      await prisma.quote.update({
-        where: { id: quote.id },
+      // Mark as EXPIRED — only if still SENT (guard against concurrent status changes)
+      const updated = await prisma.quote.updateMany({
+        where: { id: quote.id, status: 'SENT' },
         data: { status: 'EXPIRED' },
       });
+
+      // Skip alert if the quote was no longer SENT (e.g. accepted/rejected concurrently)
+      if (updated.count === 0) continue;
 
       // Queue alert deliveries sequentially.
       // skipDispatch=true prevents N concurrent processPendingDeliveries calls —
