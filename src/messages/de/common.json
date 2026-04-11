@@ -1875,6 +1875,7 @@
       "createNew": "Neu Erstellen",
       "startFromScratch": "Von Grund auf Neu Anfangen",
       "startFromTemplate": "Von einer Systemvorlage Anfangen",
+      "startFromCompleteTemplate": "Von einer vollständigen Vorlage starten",
       "templateName": "Vorlagenname",
       "save": "Speichern",
       "saved": "Gespeichert",
@@ -2990,5 +2991,66 @@
     "mentionTaskContextLabel": "Kontext des Notizblocks:",
     "bulletList": "• Liste",
     "orderedList": "1. Liste"
+  },
+  "trialSignup": {
+    "title": "Starten Sie Ihre Kostenlose Testversion",
+    "subtitle": "Richten Sie Ihr Konto in wenigen Minuten ein. Keine Kreditkarte erforderlich.",
+    "fields": {
+      "companyName": "Unternehmensname",
+      "companyNamePlaceholder": "Ihr Hochzeitsplanungsunternehmen",
+      "email": "E-Mail-Adresse",
+      "emailPlaceholder": "sie@unternehmen.com",
+      "emailNote": "Wir unterstützen nur die Anmeldung mit Google oder Facebook",
+      "logo": "Logo-URL des Unternehmens",
+      "logoPlaceholder": "https://ihr-logo.com/logo.png",
+      "logoNote": "Optional",
+      "phone": "Telefonnummer",
+      "phoneNote": "Optional",
+      "phonePlaceholder": "0151 23456789",
+      "country": "Land"
+    },
+    "submit": "Mein kostenloses Konto erstellen",
+    "retry": "Erneut versuchen",
+    "steps": {
+      "verifying": "Ihre Daten werden überprüft...",
+      "creating": "Ihr Konto wird erstellt...",
+      "settingUp": "Ihr Arbeitsbereich wird eingerichtet...",
+      "loadingDemo": "Demo-Hochzeitsdaten werden geladen...",
+      "sendingEmail": "Ihr Zugangslink wird gesendet..."
+    },
+    "success": {
+      "title": "Ihr Konto ist bereit!",
+      "emailSent": "Wir haben einen Anmeldelink gesendet an",
+      "checkInbox": "Prüfen Sie Ihren Posteingang und klicken Sie auf den Link, um sich anzumelden.",
+      "learnMore": "Erfahren Sie auf unserer, wie Sie das Beste aus der Plattform herausholen",
+      "docsLink": "Dokumentationsseite",
+      "backHome": "Zurück zur Startseite"
+    },
+    "errors": {
+      "emailExists": "Ein Konto mit dieser E-Mail existiert bereits. Bitte melden Sie sich an.",
+      "recaptchaFailed": "Sicherheitsüberprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+      "invalidLogo": "Bitte geben Sie eine gültige URL für Ihr Logo ein.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.",
+      "configError": "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut."
+    }
+  },
+  "trialBanner": {
+    "message": "Sie befinden sich im Testmodus mit einer Demo-Hochzeit.",
+    "learnMore": "Mehr erfahren",
+    "modal": {
+      "title": "Testmodus",
+      "subtitle": "Dies ist ein Demo-Konto mit einer Test-Hochzeit.",
+      "restrictions": {
+        "title": "Folgende Funktionen sind im Testmodus deaktiviert:",
+        "notifications": "Benachrichtigungen senden (SMS, WhatsApp, E-Mail)",
+        "ai": "KI-Funktionen (Hochzeitsassistent, KI-generierte Inhalte)",
+        "realWeddings": "Weitere echte Hochzeiten erstellen"
+      },
+      "ctaText": "Bereit alle Funktionen freizuschalten? Chatten Sie mit uns für eine Live-Demo oder ein Upgrade.",
+      "chatWithUs": "Jetzt mit uns chatten",
+      "contactAdmin": "Administrator für Schulung oder Upgrade kontaktieren",
+      "close": "Schließen"
+    }
   }
 }

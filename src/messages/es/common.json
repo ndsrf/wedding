@@ -69,8 +69,8 @@
         "limitReachedPlanner": "Has alcanzado tu cupo mensual de {resource} ({used}/{limit}). Para seguir disfrutando de todas las ventajas de la IA y ampliar tus límites, contacta con nuestro equipo de soporte.",
         "noDelete": "Tu plan actual no incluye la opción de borrar o deshabilitar bodas. Contacta con nuestro servicio de atención al cliente para ampliar tu licencia y acceder a funciones avanzadas de gestión.",
         "resources": {
-          "WHATSAPP": "mensajes de WhatsApp",
-          "WHATSAPP_WEDDING": "mensajes de WhatsApp para esta boda",
+          "WHATSAPP": "mensajes de WhatsApp/SMS",
+          "WHATSAPP_WEDDING": "mensajes de WhatsApp/SMS para esta boda",
           "AI_STANDARD": "consultas de IA estándar",
           "AI_PREMIUM": "procesamientos de IA premium",
           "EMAIL": "emails",
@@ -2222,6 +2222,7 @@
       "createNew": "Crear Nuevo",
       "startFromScratch": "Empezar desde Cero",
       "startFromTemplate": "Empezar desde una Plantilla del Sistema",
+      "startFromCompleteTemplate": "Empezar desde un template completo",
       "templateName": "Nombre de la plantilla",
       "save": "Guardar",
       "saved": "Guardado",
@@ -3066,5 +3067,66 @@
     "mentionTaskContextLabel": "Contexto del bloque de notas:",
     "bulletList": "• Lista",
     "orderedList": "1. Lista"
+  },
+  "trialSignup": {
+    "title": "Empieza tu Prueba Gratuita",
+    "subtitle": "Configura tu cuenta en minutos. Sin tarjeta de crédito.",
+    "fields": {
+      "companyName": "Nombre de la Empresa",
+      "companyNamePlaceholder": "Tu Empresa de Wedding Planning",
+      "email": "Correo Electrónico",
+      "emailPlaceholder": "tu@empresa.com",
+      "emailNote": "Solo aceptamos inicio de sesión con Google o Facebook",
+      "logo": "URL del Logo de la Empresa",
+      "logoPlaceholder": "https://tu-logo.com/logo.png",
+      "logoNote": "Opcional",
+      "phone": "Teléfono",
+      "phoneNote": "Opcional",
+      "phonePlaceholder": "612 345 678",
+      "country": "País"
+    },
+    "submit": "Crear mi Cuenta Gratuita",
+    "retry": "Intentar de nuevo",
+    "steps": {
+      "verifying": "Verificando tus datos...",
+      "creating": "Creando tu cuenta...",
+      "settingUp": "Configurando tu espacio de trabajo...",
+      "loadingDemo": "Cargando datos de boda de demostración...",
+      "sendingEmail": "Enviando tu enlace de acceso..."
+    },
+    "success": {
+      "title": "¡Tu cuenta está lista!",
+      "emailSent": "Hemos enviado un enlace de acceso a",
+      "checkInbox": "Revisa tu bandeja de entrada y haz clic en el enlace para iniciar sesión.",
+      "learnMore": "Aprende a sacar el máximo partido a la plataforma en nuestra",
+      "docsLink": "página de documentación",
+      "backHome": "Volver al Inicio"
+    },
+    "errors": {
+      "emailExists": "Ya existe una cuenta con este correo. Por favor, inicia sesión.",
+      "recaptchaFailed": "La verificación de seguridad falló. Por favor, inténtalo de nuevo.",
+      "invalidEmail": "Por favor, introduce una dirección de correo válida.",
+      "invalidLogo": "Por favor, introduce una URL válida para el logo.",
+      "generic": "Algo salió mal. Por favor, inténtalo de nuevo más tarde.",
+      "configError": "El servicio no está disponible temporalmente. Por favor, inténtalo más tarde."
+    }
+  },
+  "trialBanner": {
+    "message": "Estás en modo de prueba con una boda de demostración.",
+    "learnMore": "Más información",
+    "modal": {
+      "title": "Modo de prueba",
+      "subtitle": "Esta es una cuenta de demostración con una boda de prueba.",
+      "restrictions": {
+        "title": "Las siguientes funciones están desactivadas en el modo de prueba:",
+        "notifications": "Envío de notificaciones (SMS, WhatsApp, Email)",
+        "ai": "Funciones de IA (Asistente de bodas, contenido generado por IA)",
+        "realWeddings": "Crear bodas reales adicionales"
+      },
+      "ctaText": "¿Listo para desbloquear todas las funciones? Chatea con nosotros para una demo en vivo o para actualizar tu plan.",
+      "chatWithUs": "Chatea con nosotros ahora",
+      "contactAdmin": "Contactar al administrador para formación o actualización",
+      "close": "Cerrar"
+    }
   }
 }

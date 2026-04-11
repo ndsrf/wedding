@@ -18,6 +18,9 @@ import { sendDynamicEmail } from '@/lib/email/resend';
 import { sendDynamicMessage, MessageType } from '@/lib/sms/twilio';
 import { buildWhatsAppLink } from '@/lib/notifications/whatsapp-links';
 import { toAbsoluteUrl } from '@/lib/images/processor';
+import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
+import { ResourceType } from '@prisma/client';
+import { getTranslations } from 'next-intl/server';
 
 // ============================================================================
 // SCHEMAS
@@ -531,6 +534,46 @@ export async function sendParticipantLinkHandler(
 
   const { channel, custom_message } = parsed.data;
   const wedding = participant.menu.wedding;
+  const t = await getTranslations();
+
+  // ─── License & Validation Checks ──────────────────────────────────────────
+
+  if (channel === 'EMAIL') {
+    if (!participant.email) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: t('admin.guests.errors.noEmail') } },
+        { status: 400 },
+      );
+    }
+    const limitResult = await checkResourceLimit({ type: ResourceType.EMAIL, plannerId: wedding.planner_id, weddingId: wedding.id });
+    if (!limitResult.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'LIMIT_REACHED', message: await formatLimitError({ resourceType: limitResult.resourceType!, limit: limitResult.limit!, used: limitResult.used!, role: 'planner', language: participant.language }) } }, { status: 403 });
+    }
+  } else if (channel === 'WHATSAPP') {
+    const phone = participant.whatsapp_number || participant.phone;
+    if (!phone) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: t('admin.guests.errors.noWhatsapp') } },
+        { status: 400 },
+      );
+    }
+    const limitResult = await checkResourceLimit({ type: ResourceType.WHATSAPP, plannerId: wedding.planner_id, weddingId: wedding.id });
+    if (!limitResult.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'LIMIT_REACHED', message: await formatLimitError({ resourceType: limitResult.resourceType!, limit: limitResult.limit!, used: limitResult.used!, role: 'planner', language: participant.language }) } }, { status: 403 });
+    }
+  } else if (channel === 'SMS') {
+    const phone = participant.phone || participant.whatsapp_number;
+    if (!phone) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: t('admin.guests.errors.noPhone') } },
+        { status: 400 },
+      );
+    }
+    const limitResult = await checkResourceLimit({ type: ResourceType.WHATSAPP, plannerId: wedding.planner_id, weddingId: wedding.id }); // SMS grouped with WhatsApp
+    if (!limitResult.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'LIMIT_REACHED', message: await formatLimitError({ resourceType: limitResult.resourceType!, limit: limitResult.limit!, used: limitResult.used!, role: 'planner', language: participant.language }) } }, { status: 403 });
+    }
+  }
 
   const tastingLink = toAbsoluteUrl(`/tasting/${participant.magic_token}`) ?? '';
   const variables = {
@@ -578,14 +621,8 @@ export async function sendParticipantLinkHandler(
   }
 
   if (channel === 'EMAIL') {
-    if (!participant.email) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'No email address for participant' } },
-        { status: 400 },
-      );
-    }
     const result = await sendDynamicEmail(
-      participant.email,
+      participant.email!,
       messageSubject,
       messageBody,
       'en',
@@ -600,14 +637,9 @@ export async function sendParticipantLinkHandler(
         { status: 500 },
       );
     }
+    await recordResourceUsage({ type: ResourceType.EMAIL, plannerId: wedding.planner_id, weddingId: wedding.id });
   } else if (channel === 'WHATSAPP') {
     const phone = participant.whatsapp_number || participant.phone;
-    if (!phone) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'No phone number for participant' } },
-        { status: 400 },
-      );
-    }
     if (!contentTemplateId) {
       return NextResponse.json(
         {
@@ -624,7 +656,7 @@ export async function sendParticipantLinkHandler(
     const { sendWhatsAppWithContentTemplate } = await import('@/lib/sms/twilio');
     const whatsappVars = mapToWhatsAppVariables(variables);
     const result = await sendWhatsAppWithContentTemplate({
-      to: phone,
+      to: phone!,
       contentSid: contentTemplateId,
       contentVariables: whatsappVars,
       plannerId: wedding.planner_id,
@@ -636,16 +668,11 @@ export async function sendParticipantLinkHandler(
         { status: 500 },
       );
     }
+    await recordResourceUsage({ type: ResourceType.WHATSAPP, plannerId: wedding.planner_id, weddingId: wedding.id });
   } else {
     const phone = participant.phone || participant.whatsapp_number;
-    if (!phone) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'No phone number for participant' } },
-        { status: 400 },
-      );
-    }
     const result = await sendDynamicMessage(
-      phone,
+      phone!,
       messageBody,
       MessageType.SMS,
       undefined,
@@ -658,6 +685,7 @@ export async function sendParticipantLinkHandler(
         { status: 500 },
       );
     }
+    await recordResourceUsage({ type: ResourceType.WHATSAPP, plannerId: wedding.planner_id, weddingId: wedding.id });
   }
 
   await prisma.tastingParticipant.update({

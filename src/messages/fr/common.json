@@ -1875,6 +1875,7 @@
       "createNew": "Créer Nouveau",
       "startFromScratch": "Commencer à Zéro",
       "startFromTemplate": "Commencer à partir d'un Modèle Système",
+      "startFromCompleteTemplate": "Commencer depuis un modèle complet",
       "templateName": "Nom du modèle",
       "save": "Enregistrer",
       "saved": "Enregistré",
@@ -2990,5 +2991,66 @@
     "mentionTaskContextLabel": "Contexte du bloc de notes :",
     "bulletList": "• Liste",
     "orderedList": "1. Liste"
+  },
+  "trialSignup": {
+    "title": "Commencez votre Essai Gratuit",
+    "subtitle": "Configurez votre compte en quelques minutes. Sans carte de crédit.",
+    "fields": {
+      "companyName": "Nom de l'Entreprise",
+      "companyNamePlaceholder": "Votre Agence de Wedding Planning",
+      "email": "Adresse E-mail",
+      "emailPlaceholder": "vous@entreprise.com",
+      "emailNote": "Nous acceptons uniquement la connexion Google ou Facebook",
+      "logo": "URL du Logo de l'Entreprise",
+      "logoPlaceholder": "https://votre-logo.com/logo.png",
+      "logoNote": "Optionnel",
+      "phone": "Numéro de Téléphone",
+      "phoneNote": "Optionnel",
+      "phonePlaceholder": "06 12 34 56 78",
+      "country": "Pays"
+    },
+    "submit": "Créer mon Compte Gratuit",
+    "retry": "Réessayer",
+    "steps": {
+      "verifying": "Vérification de vos informations...",
+      "creating": "Création de votre compte...",
+      "settingUp": "Configuration de votre espace de travail...",
+      "loadingDemo": "Chargement des données de mariage de démonstration...",
+      "sendingEmail": "Envoi de votre lien d'accès..."
+    },
+    "success": {
+      "title": "Votre compte est prêt !",
+      "emailSent": "Nous avons envoyé un lien de connexion à",
+      "checkInbox": "Consultez votre boîte de réception et cliquez sur le lien pour vous connecter.",
+      "learnMore": "Apprenez à tirer le meilleur parti de la plateforme dans notre",
+      "docsLink": "page de documentation",
+      "backHome": "Retour à l'Accueil"
+    },
+    "errors": {
+      "emailExists": "Un compte avec cet e-mail existe déjà. Veuillez vous connecter.",
+      "recaptchaFailed": "La vérification de sécurité a échoué. Veuillez réessayer.",
+      "invalidEmail": "Veuillez entrer une adresse e-mail valide.",
+      "invalidLogo": "Veuillez entrer une URL valide pour votre logo.",
+      "generic": "Quelque chose a mal tourné. Veuillez réessayer plus tard.",
+      "configError": "Le service est temporairement indisponible. Veuillez réessayer plus tard."
+    }
+  },
+  "trialBanner": {
+    "message": "Vous êtes en mode essai avec un mariage de démonstration.",
+    "learnMore": "En savoir plus",
+    "modal": {
+      "title": "Mode essai",
+      "subtitle": "Il s'agit d'un compte de démonstration avec un mariage de test.",
+      "restrictions": {
+        "title": "Les fonctionnalités suivantes sont désactivées en mode essai :",
+        "notifications": "Envoi de notifications (SMS, WhatsApp, Email)",
+        "ai": "Fonctionnalités IA (Assistant mariage, contenu généré par IA)",
+        "realWeddings": "Création de mariages réels supplémentaires"
+      },
+      "ctaText": "Prêt à débloquer toutes les fonctionnalités ? Chattez avec nous pour une démo en direct ou pour mettre à niveau votre plan.",
+      "chatWithUs": "Chattez avec nous maintenant",
+      "contactAdmin": "Contacter l'administrateur pour une formation ou une mise à niveau",
+      "close": "Fermer"
+    }
   }
 }

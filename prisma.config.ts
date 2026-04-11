@@ -8,6 +8,7 @@ export default defineConfig({
   schema: isVector ? 'prisma/vector/schema.prisma' : 'prisma/schema.prisma',
   migrations: {
     path: isVector ? 'prisma/vector/migrations' : 'prisma/migrations',
+    seed: 'node --require esbuild-register prisma/seed.ts',
   },
   datasource: {
     url: isVector ? env('VECTOR_DATABASE_URL') : env('DATABASE_URL'),

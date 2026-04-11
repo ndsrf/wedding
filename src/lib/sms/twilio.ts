@@ -109,8 +109,8 @@ export async function sendMessage(
   try {
     const { to, body, type, mediaUrl, plannerId, weddingId, role, language } = options;
 
-    // Check resource limit if plannerId is provided and type is WHATSAPP
-    if (type === MessageType.WHATSAPP && plannerId) {
+    // Check resource limit if plannerId is provided (shared with WhatsApp)
+    if (plannerId) {
       const result = await checkResourceLimit({
         plannerId,
         weddingId,
@@ -199,8 +199,8 @@ export async function sendMessage(
       status: message.status,
     });
 
-    // Record usage if successful and type is WHATSAPP
-    if (type === MessageType.WHATSAPP && plannerId) {
+    // Record usage if successful (shared with WhatsApp)
+    if (plannerId) {
       void recordResourceUsage({
         plannerId,
         weddingId,

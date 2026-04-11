@@ -3,7 +3,7 @@ import { generateAMPMetadata } from '@/lib/amp';
 import { getTranslations } from '@/lib/i18n/server';
 import { Language } from '@/lib/i18n/config';
 import AMPLink from '@/components/AMPLink';
-import ReCaptchaWrapper from './ReCaptchaWrapper';
+import ReCaptchaWrapper from '@/components/ReCaptchaWrapper';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;

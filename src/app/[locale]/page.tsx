@@ -12,6 +12,7 @@ import LandingFeatureCard from '@/components/LandingFeatureCard';
 import { ArcadeEmbed } from '@/components/ArcadeEmbed';
 import VideoHero from '@/components/guest/VideoHero';
 import ResourcesDropdown from '@/components/ResourcesDropdown';
+import TrialSignupButton from '@/components/TrialSignupButton';
 import { ChevronsRight } from 'lucide-react';
 
 const LANDING_FEATURES: Array<{
@@ -190,6 +191,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         subtitle={t('landing.hero.subtitle', { commercialName })}
         ctaPrimary={t('landing.hero.cta.primary')}
         ctaSecondary={t('landing.hero.cta.secondary')}
+        locale={locale}
       />
 
       {/* Features Section */}
@@ -374,12 +376,11 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                   <span className="text-gray-700">{t('landing.pricing.plans.trial.features.2')}</span>
                 </li>
               </ul>
-              <Link
-                href="/contact"
+              <TrialSignupButton
+                label={t('landing.pricing.cta')}
+                locale={locale}
                 className="block w-full py-3 px-6 text-center bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
-              >
-                {t('landing.pricing.cta')}
-              </Link>
+              />
             </div>
 
             {/* Standard Plan */}
@@ -481,12 +482,11 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           <p className="text-xl text-white/90 mb-10">
             {t('landing.cta.subtitle', { commercialName })}
           </p>
-          <Link
-            href="/contact"
+          <TrialSignupButton
+            label={t('landing.cta.button')}
+            locale={locale}
             className="inline-block px-10 py-4 bg-white text-rose-600 rounded-full text-lg font-semibold hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            {t('landing.cta.button')}
-          </Link>
+          />
         </div>
       </section>
 

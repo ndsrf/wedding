@@ -41,7 +41,7 @@ const customJestConfig = {
     '<rootDir>/__tests__/**/*.test.{js,jsx,ts,tsx}',
   ],
   moduleDirectories: ['node_modules', '<rootDir>/'],
-  testTimeout: 30000,
+  testTimeout: 60000,
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

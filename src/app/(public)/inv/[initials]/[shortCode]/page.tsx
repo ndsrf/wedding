@@ -35,10 +35,11 @@ import RedirectWithSpinner from './RedirectWithSpinner';
 export const revalidate = 86400; // 24 hours – keep in sync with SHORT_URL_CACHE_TTL_HOURS
 export const dynamicParams = true;
 
-// Initials: 2-3 uppercase ASCII letters, optionally followed by digits (LJ, LJ1, AB12…)
-const INITIALS_RE = /^[A-Z]{2,3}\d*$/;
-// Short code: exactly 3-4 base-62 characters
-const CODE_RE     = /^[a-zA-Z0-9]{3,4}$/;
+// Initials: 1-3 uppercase ASCII letters followed by 1-4 alphanumeric chars
+// (ensureWeddingInitials produces e.g. "LJaB"; seed produces e.g. "AL684")
+const INITIALS_RE = /^[A-Z]{1,3}[a-zA-Z0-9]{1,4}$/;
+// Short code: 5-6 base-62 characters (generateShortCode uses len=5, fallback len=6)
+const CODE_RE     = /^[a-zA-Z0-9]{5,6}$/;
 
 interface Props {
   params:      Promise<{ initials: string; shortCode: string }>;

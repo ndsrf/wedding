@@ -79,6 +79,10 @@ export default function PlannerDetailPage() {
   const [newSubAccount, setNewSubAccount] = useState({ name: '', email: '' });
   const [addingSubAccount, setAddingSubAccount] = useState(false);
   const [actioningSubId, setActioningSubId] = useState<string | null>(null);
+  // Email editing
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [emailDraft, setEmailDraft] = useState('');
+  const [savingEmail, setSavingEmail] = useState(false);
   // UI state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -131,6 +135,28 @@ export default function PlannerDetailPage() {
       .catch((err) => setError(err instanceof Error ? err.message : 'An error occurred'))
       .finally(() => setIsLoading(false));
   }, [fetchPlanner, fetchLicense, fetchSubAccounts]);
+
+  // ─── Save email ──────────────────────────────────────────────────────────────
+  const handleSaveEmail = async () => {
+    if (!planner) return;
+    setSavingEmail(true);
+    try {
+      const res = await fetch(`/api/master/planners/${plannerId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailDraft }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'Failed to update email');
+      setPlanner((p) => p ? { ...p, email: data.data.email } : p);
+      setEditingEmail(false);
+      showToastSuccess(tCommon('success.updated'));
+    } catch (err) {
+      showToastError(err instanceof Error ? err.message : tCommon('errors.generic'));
+    } finally {
+      setSavingEmail(false);
+    }
+  };
 
   // ─── Save license ────────────────────────────────────────────────────────────
   const handleSaveLicense = async () => {
@@ -253,7 +279,42 @@ export default function PlannerDetailPage() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                 {planner?.name ?? '…'}
               </h1>
-              <p className="mt-1 text-base text-gray-600">{planner?.email}</p>
+              {editingEmail ? (
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    type="email"
+                    value={emailDraft}
+                    onChange={(e) => setEmailDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveEmail();
+                      if (e.key === 'Escape') setEditingEmail(false);
+                    }}
+                    autoFocus
+                    className="px-3 py-1.5 border-2 border-purple-400 rounded-lg text-base text-gray-800 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleSaveEmail}
+                    disabled={savingEmail}
+                    className="px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 transition-all"
+                  >
+                    {savingEmail ? tCommon('loading') : tCommon('buttons.save')}
+                  </button>
+                  <button
+                    onClick={() => setEditingEmail(false)}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    {tCommon('buttons.cancel')}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setEmailDraft(planner?.email ?? ''); setEditingEmail(true); }}
+                  className="mt-1 text-base text-gray-600 hover:text-purple-600 transition-colors group flex items-center gap-1.5"
+                >
+                  {planner?.email}
+                  <span className="opacity-0 group-hover:opacity-100 text-xs text-purple-500 transition-opacity">(edit)</span>
+                </button>
+              )}
             </div>
             <Link
               href="/master/planners"

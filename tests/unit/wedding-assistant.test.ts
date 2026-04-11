@@ -30,6 +30,8 @@ jest.mock('@google/genai', () => {
 // ─── Imports (after mocks) ───────────────────────────────────────────────────
 
 import { generateWeddingReply } from '@/lib/ai/wedding-assistant';
+import { prisma } from '@/lib/db/prisma';
+import { AuthProvider } from '@prisma/client';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -125,6 +127,26 @@ function setEnv(vars: Record<string, string | undefined>) {
 
 describe('generateWeddingReply', () => {
   const originalEnv = { ...process.env };
+
+  beforeAll(async () => {
+    await prisma.weddingPlanner.create({
+      data: {
+        id: 'planner-1',
+        name: 'Test Planner',
+        email: 'test@planner.com',
+        auth_provider: AuthProvider.GOOGLE,
+        created_by: 'test',
+      },
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.weddingPlanner.delete({
+      where: {
+        id: 'planner-1',
+      },
+    });
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

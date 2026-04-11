@@ -306,35 +306,57 @@ export async function exportInvitationTemplateHandler(
 // IMPORT — POST /invitation-template/import
 // ============================================================================
 
+const PRESET_FILES: Record<string, string> = {
+  nupci: 'Invitacion%20de%20ejemplo%20Nupci.nupcinv',
+};
+
 export async function importInvitationTemplateHandler(
   weddingId: string,
   req: NextRequest,
 ): Promise<NextResponse> {
   const formData = await req.formData();
-  const file = formData.get('file') as File | null;
+  const nameOverride = formData.get('name');
+  const preset = formData.get('preset');
 
-  if (!file) {
-    return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+  let buffer: Buffer;
+
+  if (preset && typeof preset === 'string' && PRESET_FILES[preset]) {
+    const cdnBase = process.env.NEXT_PUBLIC_CDN_STORAGE ?? '';
+    const url = `${cdnBase}/${PRESET_FILES[preset]}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch preset file: ${res.statusText}`);
+    buffer = Buffer.from(await res.arrayBuffer());
+  } else {
+    const file = formData.get('file') as File | null;
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    }
+
+    if (
+      file.name &&
+      !file.name.toLowerCase().endsWith('.nupcinv') &&
+      file.type !== 'application/octet-stream' &&
+      file.type !== ''
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Please upload a .nupcinv file.' },
+        { status: 400 },
+      );
+    }
+
+    buffer = Buffer.from(await file.arrayBuffer());
   }
-
-  if (
-    file.name &&
-    !file.name.toLowerCase().endsWith('.nupcinv') &&
-    file.type !== 'application/octet-stream' &&
-    file.type !== ''
-  ) {
-    return NextResponse.json(
-      { error: 'Invalid file type. Please upload a .nupcinv file.' },
-      { status: 400 },
-    );
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer());
   const { design, templateName, warnings } = await importInvitationTemplate(buffer, weddingId);
 
   if (warnings.length > 0) {
     console.warn('[InvitationImport] Warnings during import:', warnings);
   }
+
+  const finalName =
+    typeof nameOverride === 'string' && nameOverride.trim()
+      ? nameOverride.trim()
+      : templateName;
 
   let pre_rendered_html = null;
   try {
@@ -347,7 +369,7 @@ export async function importInvitationTemplateHandler(
   const template = await prisma.invitationTemplate.create({
     data: {
       wedding_id: weddingId,
-      name: templateName,
+      name: finalName,
       design: design as unknown as Prisma.InputJsonValue,
       pre_rendered_html: pre_rendered_html as unknown as Prisma.InputJsonValue,
       based_on_preset: null,

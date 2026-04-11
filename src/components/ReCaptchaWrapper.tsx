@@ -9,10 +9,12 @@ export default function ReCaptchaWrapper({
 }) {
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
 
-  if (!recaptchaSiteKey) {
-    console.error('❌ NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not configured - reCAPTCHA will not work!');
-    console.error('Please set this environment variable in your Vercel project settings or .env file');
-    // Still render children without reCAPTCHA wrapper if key is missing
+  if (!recaptchaSiteKey || process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'development') {
+      console.error('❌ NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not configured - reCAPTCHA will not work!');
+      console.error('Please set this environment variable in your Vercel project settings or .env file');
+    }
+    // Skip reCAPTCHA in development or when key is missing
     return <>{children}</>;
   }
 

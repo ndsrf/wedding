@@ -115,6 +115,9 @@ export function InvitationBuilderPageContent({
   const [isImporting, setIsImporting] = useState(false);
   const importFileRef = useRef<HTMLInputElement>(null);
 
+  // Complete template selection (e.g. "Invitacion de ejemplo Nupci")
+  const [selectedCompleteTemplate, setSelectedCompleteTemplate] = useState<string | null>(null);
+
   const templateApi = `${apiPaths.apiBase}/invitation-template`;
 
   const seedById = useMemo(
@@ -173,6 +176,26 @@ export function InvitationBuilderPageContent({
 
     try {
       setIsSavingTemplate(true);
+
+      // Complete template: server fetches the preset file from CDN
+      if (selectedCompleteTemplate === 'nupci') {
+        const formData = new FormData();
+        formData.append('preset', 'nupci');
+        formData.append('name', newTemplateName.trim());
+        const res = await fetch(`${templateApi}/import`, { method: 'POST', body: formData });
+        if (!res.ok) {
+          const body = await res.json();
+          throw new Error(body.error || 'Failed to import template');
+        }
+        const body = await res.json();
+        const template = body.template as UserTemplate;
+        setCurrentTemplate(template);
+        setUserTemplates((prev) => [template, ...prev]);
+        setView('editor');
+        setNewTemplateName('');
+        setSelectedCompleteTemplate(null);
+        return;
+      }
 
       let design: TemplateDesign;
       if (selectedSeed) {
@@ -316,6 +339,7 @@ export function InvitationBuilderPageContent({
     setView('list');
     setNewTemplateName('');
     setSelectedSeed(null);
+    setSelectedCompleteTemplate(null);
   };
 
   const handleExportTemplate = async (template: UserTemplate) => {
@@ -591,9 +615,9 @@ export function InvitationBuilderPageContent({
 
           <div className="bg-white rounded-lg shadow p-6 mb-8">
             <button
-              onClick={() => setSelectedSeed(null)}
+              onClick={() => { setSelectedSeed(null); setSelectedCompleteTemplate(null); }}
               className={`w-full p-6 text-center rounded-lg border-2 transition ${
-                selectedSeed === null
+                selectedSeed === null && selectedCompleteTemplate === null
                   ? 'border-amber-600 bg-amber-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
@@ -604,12 +628,36 @@ export function InvitationBuilderPageContent({
           </div>
 
           <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('startFromCompleteTemplate')}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => { setSelectedCompleteTemplate('nupci'); setSelectedSeed(null); }}
+                className={`p-4 text-left rounded-lg border-2 transition overflow-hidden ${
+                  selectedCompleteTemplate === 'nupci'
+                    ? 'border-amber-600 bg-amber-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="w-full h-48 rounded-md overflow-hidden mb-3 bg-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_CDN_STORAGE ?? ''}/Invitacion%20de%20ejemplo%20Nupci.png`}
+                    alt="Invitacion de ejemplo Nupci"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="text-lg font-semibold text-gray-900">Invitacion de ejemplo Nupci</p>
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('startFromTemplate')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {systemSeeds.map((seed) => (
                 <button
                   key={seed.id}
-                  onClick={() => setSelectedSeed(seed.id)}
+                  onClick={() => { setSelectedSeed(seed.id); setSelectedCompleteTemplate(null); }}
                   className={`p-6 text-left rounded-lg border-2 transition ${
                     selectedSeed === seed.id
                       ? 'border-amber-600 bg-amber-50'

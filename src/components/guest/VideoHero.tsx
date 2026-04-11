@@ -1,18 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import TrialSignupModal from '@/components/TrialSignupModal';
 
 interface VideoHeroProps {
   title: string;
   subtitle: string;
   ctaPrimary: string;
   ctaSecondary: string;
+  locale: string;
 }
 
+const CDN = process.env.NEXT_PUBLIC_CDN_STORAGE ?? '';
 const VIDEOS = [
-  'https://cdn.nupci.com/background2.mp4',
-  'https://cdn.nupci.com/background1.mp4',
+  `${CDN}/background2.mp4`,
+  `${CDN}/background1.mp4`,
 ];
 
 export default function VideoHero({
@@ -20,8 +22,10 @@ export default function VideoHero({
   subtitle,
   ctaPrimary,
   ctaSecondary,
+  locale,
 }: VideoHeroProps) {
   const [currentVideo, setCurrentVideo] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Alternar entre los dos vídeos cada 15 segundos para dar tiempo a verlos
@@ -56,11 +60,11 @@ export default function VideoHero({
       </div>
 
       {/* Overlay - Color corporativo #eabec3 con 30% opacidad */}
-      <div 
+      <div
         className="absolute inset-0 z-10"
         style={{ backgroundColor: 'rgba(234, 190, 195, 0.3)' }}
       />
-      
+
       {/* Darker overlay for better text contrast */}
       <div className="absolute inset-0 z-10 bg-black/40" />
 
@@ -73,18 +77,19 @@ export default function VideoHero({
           <p className="text-xl md:text-2xl mb-12 font-light drop-shadow-md text-white/95 leading-relaxed">
             {subtitle}
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Link
-              href="/contact"
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
               className="w-full sm:w-auto px-10 py-4 bg-white text-rose-600 rounded-full text-lg font-bold shadow-2xl hover:scale-105 transition-all duration-300 hover:bg-gray-50 flex items-center justify-center"
             >
               {ctaPrimary}
               <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-            </Link>
-            
+            </button>
+
             <a
               href="#features"
               className="w-full sm:w-auto px-10 py-4 bg-transparent border-2 border-white text-white rounded-full text-lg font-bold backdrop-blur-sm hover:bg-white/20 hover:scale-105 transition-all duration-300 flex items-center justify-center"
@@ -106,6 +111,12 @@ export default function VideoHero({
           </svg>
         </a>
       </div>
+
+      <TrialSignupModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        locale={locale}
+      />
     </section>
   );
 }

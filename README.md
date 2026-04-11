@@ -785,6 +785,8 @@ You can use the same secret for all environments or generate separate ones for b
 - `MASTER_ADMIN_EMAILS` - Comma-separated admin emails
 - `ROLE_REVALIDATION_INTERVAL_MINUTES` - How often (in minutes) to re-validate a logged-in user's role against the database; lower values detect permission changes faster, higher values reduce DB load (default: 60)
 - `CRON_SECRET` - Secret used to authenticate calls to `/api/cron/alerts`; required on Vercel (Vercel sets this header automatically), optional on self-hosted (endpoint is only called internally)
+- `NEXT_PUBLIC_CDN_STORAGE` - Base URL for CDN-hosted static assets (landing page videos, invitation builder example templates). Example: `https://cdn.nupci.com`
+- `NEXT_PUBLIC_CRISP_WEBSITE_ID` - Crisp live chat widget ID ([crisp.chat](https://crisp.chat)); omit to disable the widget
 
 ### SSL/HTTPS Configuration
 

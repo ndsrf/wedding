@@ -69,8 +69,8 @@
         "limitReachedPlanner": "You've reached your monthly quota for {resource} ({used}/{limit}). To continue enjoying all AI benefits and increase your limits, please contact our support team.",
         "noDelete": "Your current plan doesn't include the option to delete or disable weddings. Contact our customer support team to upgrade your license and access advanced management features.",
         "resources": {
-          "WHATSAPP": "WhatsApp messages",
-          "WHATSAPP_WEDDING": "WhatsApp messages for this wedding",
+          "WHATSAPP": "WhatsApp/SMS messages",
+          "WHATSAPP_WEDDING": "WhatsApp/SMS messages for this wedding",
           "AI_STANDARD": "standard AI queries",
           "AI_PREMIUM": "premium AI processings",
           "EMAIL": "emails",
@@ -2237,6 +2237,7 @@
       "createNew": "Create New Template",
       "startFromScratch": "Start from scratch",
       "startFromTemplate": "Start from a system template",
+      "startFromCompleteTemplate": "Start from a complete template",
       "templateName": "Template name",
       "save": "Save",
       "saved": "Saved",
@@ -3089,5 +3090,66 @@
     "mentionTaskContextLabel": "Notes block context:",
     "bulletList": "• List",
     "orderedList": "1. List"
+  },
+  "trialSignup": {
+    "title": "Start Your Free Trial",
+    "subtitle": "Set up your account in minutes. No credit card required.",
+    "fields": {
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "Your Wedding Planning Company",
+      "email": "Email Address",
+      "emailPlaceholder": "you@company.com",
+      "emailNote": "We support Google and Facebook login only",
+      "logo": "Company Logo URL",
+      "logoPlaceholder": "https://your-logo.com/logo.png",
+      "logoNote": "Optional",
+      "phone": "Phone Number",
+      "phoneNote": "Optional",
+      "phonePlaceholder": "612 345 678",
+      "country": "Country"
+    },
+    "submit": "Create My Free Account",
+    "retry": "Try Again",
+    "steps": {
+      "verifying": "Verifying your details...",
+      "creating": "Creating your account...",
+      "settingUp": "Setting up your workspace...",
+      "loadingDemo": "Loading demo wedding data...",
+      "sendingEmail": "Sending your access link..."
+    },
+    "success": {
+      "title": "Your account is ready!",
+      "emailSent": "We've sent a login link to",
+      "checkInbox": "Check your inbox and click the link to sign in.",
+      "learnMore": "Learn how to get the most out of the platform in our",
+      "docsLink": "documentation page",
+      "backHome": "Back to Home"
+    },
+    "errors": {
+      "emailExists": "An account with this email already exists. Please sign in.",
+      "recaptchaFailed": "Security verification failed. Please try again.",
+      "invalidEmail": "Please enter a valid email address.",
+      "invalidLogo": "Please enter a valid URL for your logo.",
+      "generic": "Something went wrong. Please try again later.",
+      "configError": "The service is temporarily unavailable. Please try again later."
+    }
+  },
+  "trialBanner": {
+    "message": "You are in trial mode with a test wedding.",
+    "learnMore": "Learn more",
+    "modal": {
+      "title": "Trial Mode",
+      "subtitle": "This is a demo account with a test wedding.",
+      "restrictions": {
+        "title": "The following features are disabled in trial mode:",
+        "notifications": "Sending notifications (SMS, WhatsApp, Email)",
+        "ai": "AI features (Wedding Assistant, AI-generated content)",
+        "realWeddings": "Creating additional real weddings"
+      },
+      "ctaText": "Ready to unlock all features? Chat with us for a live demo or to upgrade your plan.",
+      "chatWithUs": "Chat with us now",
+      "contactAdmin": "Contact admin for training or upgrade",
+      "close": "Close"
+    }
   }
 }

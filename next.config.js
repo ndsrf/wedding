@@ -71,6 +71,8 @@ const nextConfig = {
       'https://demo.arcade.software',
       'https://player.vimeo.com',
       'https://f.vimeocdn.com',
+      // Crisp live chat
+      'https://client.crisp.chat',
     ];
     if (process.env.NODE_ENV !== 'production') {
       scriptSrcDirectives.push("'unsafe-eval'");
@@ -79,10 +81,10 @@ const nextConfig = {
     const cspDirectives = [
       "default-src 'self'",
       `script-src ${scriptSrcDirectives.join(' ')}`,
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https: https://demo.arcade.software https://*.vimeo.com https://*.vimeocdn.com https://*.vercel-storage.com",
-      "connect-src 'self' https: wss://api.liveblocks.io https://demo.arcade.software https://*.vimeo.com https://*.vercel-storage.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
+      "font-src 'self' https://fonts.gstatic.com data: https://client.crisp.chat",
+      "img-src 'self' data: blob: https: https://demo.arcade.software https://*.vimeo.com https://*.vimeocdn.com https://*.vercel-storage.com https://image.crisp.chat https://storage.crisp.chat",
+      "connect-src 'self' https: wss://api.liveblocks.io wss://client.relay.crisp.chat https://demo.arcade.software https://*.vimeo.com https://*.vercel-storage.com https://client.crisp.chat https://storage.crisp.chat",
       "media-src 'self' https://*.vercel-storage.com https://cdn.nupci.com",
       "frame-src 'self' https://accounts.google.com https://www.facebook.com https://www.google.com https://demo.arcade.software https://player.vimeo.com https://vimeo.com",
       "frame-ancestors 'self'",

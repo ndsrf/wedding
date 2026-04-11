@@ -1875,6 +1875,7 @@
       "createNew": "Crea Nuovo",
       "startFromScratch": "Inizia da Zero",
       "startFromTemplate": "Inizia da un Modello di Sistema",
+      "startFromCompleteTemplate": "Inizia da un modello completo",
       "templateName": "Nome modello",
       "save": "Salva",
       "saved": "Salvato",
@@ -2991,5 +2992,66 @@
     "mentionTaskContextLabel": "Contesto del blocco note:",
     "bulletList": "• Elenco",
     "orderedList": "1. Elenco"
+  },
+  "trialSignup": {
+    "title": "Inizia la tua Prova Gratuita",
+    "subtitle": "Configura il tuo account in pochi minuti. Senza carta di credito.",
+    "fields": {
+      "companyName": "Nome dell'Azienda",
+      "companyNamePlaceholder": "La Tua Agenzia di Matrimoni",
+      "email": "Indirizzo Email",
+      "emailPlaceholder": "tu@azienda.com",
+      "emailNote": "Supportiamo solo l'accesso con Google o Facebook",
+      "logo": "URL del Logo Aziendale",
+      "logoPlaceholder": "https://tuo-logo.com/logo.png",
+      "logoNote": "Facoltativo",
+      "phone": "Numero di Telefono",
+      "phoneNote": "Facoltativo",
+      "phonePlaceholder": "347 123 4567",
+      "country": "Paese"
+    },
+    "submit": "Crea il mio Account Gratuito",
+    "retry": "Riprova",
+    "steps": {
+      "verifying": "Verifica delle tue informazioni...",
+      "creating": "Creazione del tuo account...",
+      "settingUp": "Configurazione del tuo spazio di lavoro...",
+      "loadingDemo": "Caricamento dei dati del matrimonio demo...",
+      "sendingEmail": "Invio del tuo link di accesso..."
+    },
+    "success": {
+      "title": "Il tuo account è pronto!",
+      "emailSent": "Abbiamo inviato un link di accesso a",
+      "checkInbox": "Controlla la tua casella di posta e clicca sul link per accedere.",
+      "learnMore": "Scopri come sfruttare al meglio la piattaforma nella nostra",
+      "docsLink": "pagina della documentazione",
+      "backHome": "Torna alla Home"
+    },
+    "errors": {
+      "emailExists": "Esiste già un account con questa email. Effettua l'accesso.",
+      "recaptchaFailed": "Verifica di sicurezza fallita. Riprova.",
+      "invalidEmail": "Inserisci un indirizzo email valido.",
+      "invalidLogo": "Inserisci un URL valido per il logo.",
+      "generic": "Qualcosa è andato storto. Riprova più tardi.",
+      "configError": "Il servizio è temporaneamente non disponibile. Riprova più tardi."
+    }
+  },
+  "trialBanner": {
+    "message": "Sei in modalità di prova con un matrimonio di dimostrazione.",
+    "learnMore": "Scopri di più",
+    "modal": {
+      "title": "Modalità di prova",
+      "subtitle": "Questo è un account demo con un matrimonio di test.",
+      "restrictions": {
+        "title": "Le seguenti funzionalità sono disabilitate in modalità di prova:",
+        "notifications": "Invio di notifiche (SMS, WhatsApp, Email)",
+        "ai": "Funzionalità AI (Assistente matrimonio, contenuti generati dall'AI)",
+        "realWeddings": "Creazione di matrimoni reali aggiuntivi"
+      },
+      "ctaText": "Pronto a sbloccare tutte le funzionalità? Chatta con noi per una demo dal vivo o per aggiornare il tuo piano.",
+      "chatWithUs": "Chatta con noi ora",
+      "contactAdmin": "Contatta l'amministratore per formazione o aggiornamento",
+      "close": "Chiudi"
+    }
   }
 }
