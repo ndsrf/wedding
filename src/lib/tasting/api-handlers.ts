@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
 import { computeEffectiveStatus } from '@/lib/tasting/status';
@@ -92,18 +93,7 @@ async function getOrCreateMenu(weddingId: string, roundNumber = 1) {
   });
 }
 
-function mapMenuWithScores(menuData: {
-  sections: Array<{
-    dishes: Array<{
-      scores: Array<{ score: number }>;
-      [key: string]: unknown;
-    }>;
-    [key: string]: unknown;
-  }>;
-  status: 'OPEN' | 'CLOSED';
-  tasting_date: Date | null;
-  [key: string]: unknown;
-}) {
+function mapMenuWithScores(menuData: MenuWithScores) {
   const sections = menuData.sections.map((section) => ({
     ...section,
     dishes: section.dishes.map((dish) => {
@@ -130,7 +120,9 @@ const menuInclude = {
     },
   },
   participants: { orderBy: { created_at: 'asc' as const } },
-};
+} satisfies Prisma.TastingMenuInclude;
+
+type MenuWithScores = Prisma.TastingMenuGetPayload<{ include: typeof menuInclude }>;
 
 // ============================================================================
 // SHARED DISH QUERY
@@ -252,7 +244,7 @@ export async function getTastingMenuHandler(weddingId: string, menuId?: string) 
     }),
   ]);
 
-  const menu = menuData ? mapMenuWithScores(menuData as Parameters<typeof mapMenuWithScores>[0]) : null;
+  const menu = menuData ? mapMenuWithScores(menuData) : null;
 
   return NextResponse.json({
     success: true,

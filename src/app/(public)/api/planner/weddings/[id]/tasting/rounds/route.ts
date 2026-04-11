@@ -10,21 +10,27 @@ import { validatePlannerAccess } from '@/lib/guests/planner-access';
 import { getAllRoundsHandler, createRoundHandler } from '@/lib/tasting/api-handlers';
 
 type Params = { params: Promise<{ id: string }> };
+type Handler = (weddingId: string) => ReturnType<typeof getAllRoundsHandler>;
 
-export async function GET(_request: NextRequest, { params }: Params) {
+async function withPlannerAccess(
+  request: NextRequest,
+  { params }: Params,
+  handler: Handler,
+): Promise<NextResponse> {
   const user = await requireRole('planner');
-  if (!user.planner_id) return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'No planner' } }, { status: 403 });
+  if (!user.planner_id) {
+    return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'No planner' } }, { status: 403 });
+  }
   const { id: weddingId } = await params;
   const denied = await validatePlannerAccess(user.planner_id, weddingId);
   if (denied) return denied;
-  return getAllRoundsHandler(weddingId);
+  return handler(weddingId);
 }
 
-export async function POST(_request: NextRequest, { params }: Params) {
-  const user = await requireRole('planner');
-  if (!user.planner_id) return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'No planner' } }, { status: 403 });
-  const { id: weddingId } = await params;
-  const denied = await validatePlannerAccess(user.planner_id, weddingId);
-  if (denied) return denied;
-  return createRoundHandler(weddingId);
+export async function GET(request: NextRequest, ctx: Params) {
+  return withPlannerAccess(request, ctx, getAllRoundsHandler);
+}
+
+export async function POST(request: NextRequest, ctx: Params) {
+  return withPlannerAccess(request, ctx, createRoundHandler);
 }

@@ -33,6 +33,7 @@ export interface TastingSection {
 
 export interface TastingMenu {
   id: string;
+  round_number: number;
   title: string;
   description: string | null;
   tasting_date: string | null;

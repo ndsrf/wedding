@@ -270,7 +270,7 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
     const sectionOrder: string[] = [];
 
     for (const menu of allMenus) {
-      const roundNumber = (menu as TastingMenu & { round_number?: number }).round_number ?? 1;
+      const roundNumber = menu.round_number;
       const roundTitle = menu.title;
 
       for (const section of menu.sections) {

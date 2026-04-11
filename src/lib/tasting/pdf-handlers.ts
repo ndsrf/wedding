@@ -354,19 +354,12 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     );
   }
 
-  // Legacy shape expected by the rest of the function
-  const menuDataLegacy = {
-    id: allMenus[0]?.id ?? 'combined',
-    sections: consolidatedSections,
-  };
-
   // Pre-fetch all images in parallel using raw DB URLs as cache keys
-  // (reusing the function-scoped variable below)
-  const rawDishUrls2 = consolidatedSections.flatMap((s) => s.dishes.map((d) => d.image_url));
-  const rawLogoUrl2 = planner?.logo_url ?? null;
-  const imageCache2 = await prefetchImages([rawLogoUrl2, ...rawDishUrls2]);
+  const rawDishUrls = consolidatedSections.flatMap((s) => s.dishes.map((d) => d.image_url));
+  const rawLogoUrl = planner?.logo_url ?? null;
+  const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls]);
 
-  const sections = menuDataLegacy.sections
+  const sections = consolidatedSections
     .filter((s) => s.dishes.length > 0)
     .map((section) => ({
       id: section.id,
@@ -375,7 +368,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
         id: dish.id,
         name: sanitize(dish.name) ?? '',
         description: sanitize(dish.description, 300),
-        image_url: dish.image_url ? (imageCache2.get(dish.image_url) ?? null) : null,
+        image_url: dish.image_url ? (imageCache.get(dish.image_url) ?? null) : null,
       })),
     }));
 
@@ -386,7 +379,7 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
 
   const plannerInfo = {
     name: sanitize(planner?.name) ?? 'Wedding Planner',
-    logoUrl: rawLogoUrl2 ? (imageCache2.get(rawLogoUrl2) ?? null) : null,
+    logoUrl: rawLogoUrl ? (imageCache.get(rawLogoUrl) ?? null) : null,
   };
 
   let buffer: Buffer;
@@ -406,5 +399,5 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     );
   }
 
-  return buildPdfResponse(buffer, `wedding-menu-${menuDataLegacy.id}.pdf`);
+  return buildPdfResponse(buffer, `wedding-menu-${allMenus[0]?.id ?? 'combined'}.pdf`);
 }
