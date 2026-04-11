@@ -113,6 +113,7 @@ export function TrialModeBanner({ statusEndpoint }: TrialModeBannerProps) {
 
           <button
             onClick={() => setModalOpen(true)}
+            data-tutorial="trial-banner-learn-more"
             className="text-amber-700 underline hover:text-amber-900 font-semibold transition-colors whitespace-nowrap"
           >
             {t('learnMore')}

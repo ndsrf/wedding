@@ -3111,6 +3111,20 @@
       "configError": "El servicio no está disponible temporalmente. Por favor, inténtalo más tarde."
     }
   },
+  "demoTutorial": {
+    "welcome": {
+      "title": "¡Bienvenido a Nupci!",
+      "description": "Echa un vistazo a este vídeo para aprender a usar la aplicación:"
+    },
+    "firstWedding": {
+      "title": "Tu primera boda",
+      "description": "Pulsa en el cuadro de la boda de Ana & Luis para ver todos sus detalles."
+    },
+    "support": {
+      "title": "Soporte y Ayuda",
+      "description": "¿Tienes dudas? Pulsa en \"Más información\" para chatear con el equipo de Nupci en tiempo real."
+    }
+  },
   "trialBanner": {
     "message": "Estás en modo de prueba con una boda de demostración.",
     "learnMore": "Más información",

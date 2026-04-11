@@ -3134,6 +3134,20 @@
       "configError": "The service is temporarily unavailable. Please try again later."
     }
   },
+  "demoTutorial": {
+    "welcome": {
+      "title": "Welcome to Nupci!",
+      "description": "Take a look at this video to learn how to use the app:"
+    },
+    "firstWedding": {
+      "title": "Your first wedding",
+      "description": "Click on Ana & Luis's wedding card to see all the details."
+    },
+    "support": {
+      "title": "Support & Help",
+      "description": "Have questions? Click \"Learn more\" to chat with the Nupci team in real-time."
+    }
+  },
   "trialBanner": {
     "message": "You are in trial mode with a test wedding.",
     "learnMore": "Learn more",

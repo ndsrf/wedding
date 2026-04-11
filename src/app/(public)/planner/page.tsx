@@ -12,6 +12,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { UpcomingTasksWidget } from '@/components/planner/UpcomingTasksWidget';
 import PrivateHeader from '@/components/PrivateHeader';
+import { DemoTutorial } from '@/components/shared/DemoTutorial';
 import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 import type { PlannerStats } from '@/types/api';
@@ -147,6 +148,7 @@ export default async function PlannerDashboardPage() {
 
   return (
     <div className="min-h-screen">
+      <DemoTutorial statusEndpoint="/api/planner/trial-status" />
       {/* Top Header: Logo, Language, Sign-out */}
       <PrivateHeader
         hideBackButton
@@ -241,6 +243,7 @@ export default async function PlannerDashboardPage() {
                     key={wedding.id}
                     href={`/planner/weddings/${wedding.id}`}
                     prefetch={false}
+                    data-tutorial={wedding.couple_names === 'Ana & Luis' ? 'wedding-card-ana-y-luis' : undefined}
                     className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-rose-200 transition-all"
                   >
                     <div className="flex-shrink-0 w-14 h-16 bg-gradient-to-b from-rose-500 to-pink-600 text-white rounded-xl flex flex-col items-center justify-center shadow-md">

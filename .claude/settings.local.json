@@ -106,7 +106,10 @@
       "mcp__linear-server__save_comment",
       "mcp__linear-server__list_issue_statuses",
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate status 2>&1 | tail -30)",
-      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate status 2>&1)"
+      "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate status 2>&1)",
+      "Bash(npm audit:*)",
+      "Bash(npm list:*)",
+      "Bash(npm show:*)"
     ]
   }
 }
