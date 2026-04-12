@@ -24,6 +24,8 @@ interface TrialSignupModalProps {
 
 type Stage = 'form' | 'sending' | 'verification' | 'loading' | 'success' | 'error';
 
+const RESEND_COOLDOWN_SECONDS = 60;
+
 const STEP_KEYS = [
   'verifying',
   'creating',
@@ -134,7 +136,7 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
   }, []);
 
   const startCooldown = () => {
-    setResendCooldown(60);
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
     cooldownRef.current = setInterval(() => {
       setResendCooldown(prev => {
         if (prev <= 1) {
@@ -225,6 +227,18 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
         // Update cached token for final submission
         pendingFormRef.current = { ...data, recaptchaToken };
         startCooldown();
+        setStage('verification');
+      } else if (json.error === 'RATE_LIMITED') {
+        // Server enforced cooldown — jump straight to verification with remaining time
+        const retryAfter: number = json.retryAfter ?? RESEND_COOLDOWN_SECONDS;
+        pendingFormRef.current = { ...data, recaptchaToken };
+        setResendCooldown(retryAfter);
+        cooldownRef.current = setInterval(() => {
+          setResendCooldown(prev => {
+            if (prev <= 1) { clearInterval(cooldownRef.current!); return 0; }
+            return prev - 1;
+          });
+        }, 1000);
         setStage('verification');
       } else {
         const errorMap: Record<string, string> = {

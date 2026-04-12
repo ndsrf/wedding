@@ -1455,12 +1455,12 @@ model TastingScore {
 // -----------------------------------------------------------------------------
 
 model EmailVerificationCode {
-  id         String   @id @default(uuid())
-  email      String
-  code       String
-  expires_at DateTime
-  created_at DateTime @default(now())
+  id           String   @id @default(uuid())
+  email        String   @unique
+  code         String
+  expires_at   DateTime
+  last_sent_at DateTime @default(now())
+  created_at   DateTime @default(now())
 
-  @@index([email])
   @@map("email_verification_codes")
 }

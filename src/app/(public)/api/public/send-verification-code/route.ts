@@ -4,15 +4,15 @@
  * Sends a 6-digit verification code to an email address as the first step
  * of the trial signup flow. The code is stored in the database with a 15-minute
  * expiry and must be submitted alongside the full signup form.
+ *
+ * Rate limited to one code per email per 60 seconds (enforced server-side).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Resend } from 'resend';
+import { randomInt } from 'node:crypto';
 import { prisma } from '@/lib/db';
-import { render } from '@react-email/render';
-import { EmailVerificationCodeEmail } from '@/lib/email/templates/email-verification-code';
-import React from 'react';
+import { sendEmailVerificationCode } from '@/lib/email/resend';
 
 // ============================================================================
 // VALIDATION
@@ -51,6 +51,9 @@ async function verifyRecaptcha(token: string): Promise<boolean> {
 // ROUTE HANDLER
 // ============================================================================
 
+const RESEND_COOLDOWN_SECONDS = 60;
+const CODE_TTL_MINUTES = 15;
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
@@ -80,7 +83,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 2. Check email uniqueness
+    // 2. Check email uniqueness (account must not already exist)
     const existing = await prisma.weddingPlanner.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(
@@ -89,59 +92,48 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 3. Generate 6-digit code
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    // 3. Server-side rate limiting — one code per email per 60 seconds
+    const previousCode = await prisma.emailVerificationCode.findUnique({ where: { email } });
+    if (previousCode) {
+      const secondsSinceLast = (Date.now() - previousCode.last_sent_at.getTime()) / 1000;
+      if (secondsSinceLast < RESEND_COOLDOWN_SECONDS) {
+        const retryAfter = Math.ceil(RESEND_COOLDOWN_SECONDS - secondsSinceLast);
+        return NextResponse.json(
+          { success: false, error: 'RATE_LIMITED', retryAfter },
+          { status: 429 }
+        );
+      }
+    }
 
-    // 4. Delete any previous codes for this email, then store new code
-    await prisma.emailVerificationCode.deleteMany({ where: { email } });
-    await prisma.emailVerificationCode.create({
-      data: { email, code, expires_at: expiresAt },
+    // 4. Generate cryptographically secure 6-digit code and upsert into DB
+    const code = String(randomInt(100000, 1000000));
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + CODE_TTL_MINUTES * 60 * 1000);
+
+    await prisma.emailVerificationCode.upsert({
+      where: { email },
+      create: { email, code, expires_at: expiresAt, last_sent_at: now },
+      update: { code, expires_at: expiresAt, last_sent_at: now },
     });
 
-    // 5. Send verification email
-    const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.EMAIL_FROM || 'noreply@weddingapp.com';
-    const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
+    // 5. Send verification email via the centralised email service
+    const langMap: Record<string, 'es' | 'en' | 'fr' | 'it' | 'de'> = {
+      es: 'es', en: 'en', fr: 'fr', it: 'it', de: 'de',
+    };
+    const emailLang = langMap[locale] ?? 'es';
 
-    if (!apiKey) {
-      console.error('[send-verification-code] RESEND_API_KEY not set');
-      // In development without API key we still return success so the code can be read from DB
+    const emailResult = await sendEmailVerificationCode(email, emailLang, companyName, code);
+
+    if (!emailResult.success) {
+      console.error('[send-verification-code] Failed to send email:', emailResult.error);
+      // In development without a Resend key, allow the flow to continue so the
+      // code can be retrieved directly from the database during testing.
       if (!isDev) {
         return NextResponse.json(
           { success: false, error: 'INTERNAL_ERROR' },
           { status: 500 }
         );
       }
-    } else {
-      const langMap: Record<string, 'es' | 'en' | 'fr' | 'it' | 'de'> = {
-        es: 'es', en: 'en', fr: 'fr', it: 'it', de: 'de',
-      };
-      const emailLang = langMap[locale] ?? 'es';
-
-      const html = await render(
-        React.createElement(EmailVerificationCodeEmail, {
-          language: emailLang,
-          code,
-          plannerName: companyName,
-        })
-      );
-
-      const resend = new Resend(apiKey);
-      await resend.emails.send({
-        from: `${commercialName} <${fromEmail}>`,
-        to: [email],
-        subject: emailLang === 'es'
-          ? `Tu código de verificación: ${code}`
-          : emailLang === 'fr'
-            ? `Votre code de vérification : ${code}`
-            : emailLang === 'it'
-              ? `Il tuo codice di verifica: ${code}`
-              : emailLang === 'de'
-                ? `Ihr Verifizierungscode: ${code}`
-                : `Your verification code: ${code}`,
-        html,
-      });
     }
 
     console.log(`[send-verification-code] Code sent to: ${email}`);

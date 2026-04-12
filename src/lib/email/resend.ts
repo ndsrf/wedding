@@ -13,6 +13,7 @@ import { RSVPReminderEmail } from './templates/rsvp-reminder';
 import { RSVPConfirmationEmail } from './templates/rsvp-confirmation';
 import { PaymentConfirmationEmail } from './templates/payment-confirmation';
 import { DynamicMessageEmail } from './templates/dynamic-message';
+import { EmailVerificationCodeEmail } from './templates/email-verification-code';
 import React from 'react';
 
 // Initialize Resend client lazily to avoid build-time API key requirement
@@ -58,6 +59,7 @@ export enum EmailTemplate {
   RSVP_REMINDER = 'rsvp_reminder',
   RSVP_CONFIRMATION = 'rsvp_confirmation',
   PAYMENT_CONFIRMATION = 'payment_confirmation',
+  EMAIL_VERIFICATION_CODE = 'email_verification_code',
 }
 
 export interface EmailOptions {
@@ -105,6 +107,8 @@ function getTemplateComponent(
       return RSVPConfirmationEmail(props as Parameters<typeof RSVPConfirmationEmail>[0]);
     case EmailTemplate.PAYMENT_CONFIRMATION:
       return PaymentConfirmationEmail(props as Parameters<typeof PaymentConfirmationEmail>[0]);
+    case EmailTemplate.EMAIL_VERIFICATION_CODE:
+      return EmailVerificationCodeEmail(props as Parameters<typeof EmailVerificationCodeEmail>[0]);
     default:
       throw new Error(`Unknown email template: ${template}`);
   }
@@ -149,6 +153,13 @@ function getEmailSubject(template: EmailTemplate, language: Language): string {
       fr: 'Confirmation de Paiement Reçu',
       it: 'Conferma di Pagamento Ricevuto',
       de: 'Zahlungsbestätigung Erhalten',
+    },
+    [EmailTemplate.EMAIL_VERIFICATION_CODE]: {
+      es: 'Tu código de verificación',
+      en: 'Your verification code',
+      fr: 'Votre code de vérification',
+      it: 'Il tuo codice di verifica',
+      de: 'Ihr Verifizierungscode',
     },
   };
 
@@ -458,6 +469,25 @@ export async function sendPaymentConfirmation(
     },
     plannerId,
     weddingId,
+  });
+}
+
+/**
+ * Helper function to send email verification code (trial signup)
+ * Does NOT count against license email limits — it is a pre-signup system email.
+ */
+export async function sendEmailVerificationCode(
+  to: string,
+  language: Language,
+  plannerName: string,
+  code: string
+): Promise<EmailResult> {
+  return sendEmail({
+    to,
+    template: EmailTemplate.EMAIL_VERIFICATION_CODE,
+    language,
+    variables: { plannerName, code },
+    // No plannerId — skips resource-limit checks intentionally
   });
 }
 
