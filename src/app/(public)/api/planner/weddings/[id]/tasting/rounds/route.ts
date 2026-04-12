@@ -10,7 +10,7 @@ import { validatePlannerAccess } from '@/lib/guests/planner-access';
 import { getAllRoundsHandler, createRoundHandler } from '@/lib/tasting/api-handlers';
 
 type Params = { params: Promise<{ id: string }> };
-type Handler = (weddingId: string) => ReturnType<typeof getAllRoundsHandler>;
+type Handler = (weddingId: string) => Promise<NextResponse>;
 
 async function withPlannerAccess(
   _request: NextRequest,
