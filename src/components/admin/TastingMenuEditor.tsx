@@ -34,6 +34,7 @@ export interface TastingSection {
 
 export interface TastingMenu {
   id: string;
+  round_number: number;
   title: string;
   description: string | null;
   tasting_date: string | null;
@@ -63,6 +64,7 @@ interface ImportSelections {
 interface Props {
   menu: TastingMenu | null;
   apiBase: string; // e.g. '/api/admin/tasting' or '/api/planner/weddings/[id]/tasting'
+  menuId?: string; // ID of the active tasting round (menu); undefined → round 1 / default
   onMenuChange: (menu: TastingMenu) => void;
   readOnly?: boolean;
 }
@@ -91,7 +93,7 @@ async function fetchJson(url: string, options?: RequestInit) {
   return { ...data, status: res.status };
 }
 
-export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = false }: Props) {
+export function TastingMenuEditor({ menu, apiBase, menuId, onMenuChange, readOnly = false }: Props) {
   const t = useTranslations('admin.tastingMenu');
   const { error: showToastError } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -167,14 +169,15 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
           ? new Date(menuTastingDate).toISOString()
           : null,
       };
-      const data = await fetchJson(apiBase, {
+      const saveUrl = menuId ? `${apiBase}?menuId=${menuId}` : apiBase;
+      const data = await fetchJson(saveUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       if (!data.success) throw new Error(data.error?.message ?? t('menu.error'));
       onMenuChange({
-        ...(menu ?? { id: data.data.id, sections: [] }),
+        ...(menu ?? { id: data.data.id, round_number: data.data.round_number ?? 1, sections: [] }),
         title: menuTitle,
         description: menuDescription || null,
         tasting_date: menuTastingDate || null,
@@ -193,13 +196,15 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
     if (!addingSectionName.trim()) return;
     setAddingSection(true);
     try {
+      const sectionBody: Record<string, string> = { name: addingSectionName.trim() };
+      if (menuId) sectionBody.menu_id = menuId;
       const data = await fetchJson(`${apiBase}/sections`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: addingSectionName.trim() }),
+        body: JSON.stringify(sectionBody),
       });
       if (!data.success) throw new Error(data.error?.message ?? 'Failed to add section');
-      const current = menu ?? { id: data.data.menu_id, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
+      const current = menu ?? { id: data.data.menu_id, round_number: 1, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
       onMenuChange({ ...current, sections: [...current.sections, { ...data.data, dishes: [] }] });
       setAddingSectionName('');
     } catch (err) {
@@ -419,16 +424,18 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
         const parsedSection = importPreview.sections[si];
 
         // Create section
+        const importSectionBody: Record<string, string> = { name: parsedSection.name };
+        if (menuId) importSectionBody.menu_id = menuId;
         const sectionData = await fetchJson(`${apiBase}/sections`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: parsedSection.name }),
+          body: JSON.stringify(importSectionBody),
         });
         if (!sectionData.success) continue;
 
         const newSection: TastingSection = { ...sectionData.data, dishes: [] };
         if (!currentMenu) {
-          currentMenu = { id: sectionData.data.menu_id, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
+          currentMenu = { id: sectionData.data.menu_id, round_number: 1, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
         }
         currentMenu = { ...currentMenu, sections: [...currentMenu.sections, newSection] };
 
@@ -570,15 +577,15 @@ export function TastingMenuEditor({ menu, apiBase, onMenuChange, readOnly = fals
       {/* Import from PDF/Image */}
       {!readOnly && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div>
+          <div className="flex flex-wrap items-start gap-3 mb-2">
+            <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-gray-900">{t('import.title')}</h3>
               <p className="text-xs text-gray-500 mt-0.5">{t('import.description')}</p>
             </div>
             <button
               onClick={handleImportClick}
               disabled={importing}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 shrink-0"
             >
               {importing ? (
                 <><WeddingSpinner size="sm" />{t('import.processing')}</>

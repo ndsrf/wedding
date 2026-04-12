@@ -23,6 +23,7 @@ export interface TastingParticipant {
 interface Props {
   participants: TastingParticipant[];
   apiBase: string;
+  menuId?: string; // ID of the active tasting round (menu); undefined → round 1 / default
   onParticipantsChange: (participants: TastingParticipant[]) => void;
   readOnly?: boolean;
   weddingLanguage?: 'ES' | 'EN' | 'FR' | 'IT' | 'DE';
@@ -113,7 +114,7 @@ function ParticipantFormFields({
 }
 
 export function TastingParticipantManager({
-  participants, apiBase, onParticipantsChange, readOnly = false, weddingLanguage = 'ES', whatsappMode = 'BUSINESS',
+  participants, apiBase, menuId, onParticipantsChange, readOnly = false, weddingLanguage = 'ES', whatsappMode = 'BUSINESS',
 }: Props) {
   const t = useTranslations('admin.tastingMenu');
 
@@ -150,6 +151,7 @@ export function TastingParticipantManager({
           whatsapp_number: form.whatsapp_number || undefined,
           channel_preference: form.channel_preference || undefined,
           language: form.language,
+          ...(menuId ? { menu_id: menuId } : {}),
         }),
       });
       const data = await res.json();

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db/prisma';
 import { computeEffectiveStatus } from '@/lib/tasting/status';
@@ -35,6 +36,7 @@ const upsertMenuSchema = z.object({
 
 const createSectionSchema = z.object({
   name: z.string().min(1).max(200),
+  menu_id: z.string().uuid().optional(),
 });
 
 const updateSectionSchema = z.object({
@@ -61,6 +63,7 @@ const createParticipantSchema = z.object({
   whatsapp_number: z.string().max(50).optional().or(z.literal('')),
   channel_preference: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
   language: z.enum(['ES', 'EN', 'FR', 'IT', 'DE']).optional(),
+  menu_id: z.string().uuid().optional(),
 });
 
 const updateParticipantSchema = z.object({
@@ -85,57 +88,178 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
 // HELPERS
 // ============================================================================
 
-async function getOrCreateMenu(weddingId: string) {
+async function getOrCreateMenu(weddingId: string, roundNumber = 1) {
   return prisma.tastingMenu.upsert({
-    where: { wedding_id: weddingId },
-    create: { wedding_id: weddingId, title: 'Tasting Menu' },
+    where: { wedding_id_round_number: { wedding_id: weddingId, round_number: roundNumber } },
+    create: { wedding_id: weddingId, round_number: roundNumber, title: 'Tasting Menu' },
     update: {},
   });
+}
+
+function mapMenuWithScores(menuData: MenuWithScores) {
+  const sections = menuData.sections.map((section) => ({
+    ...section,
+    dishes: section.dishes.map((dish) => {
+      const scores = dish.scores || [];
+      const avg =
+        scores.length > 0
+          ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / scores.length) * 10) / 10
+          : null;
+      return { ...dish, average_score: avg, score_count: scores.length };
+    }),
+  }));
+  const effective_status = computeEffectiveStatus(menuData.status, menuData.tasting_date);
+  return { ...menuData, sections, effective_status };
+}
+
+const menuInclude = {
+  sections: {
+    orderBy: { order: 'asc' as const },
+    include: {
+      dishes: {
+        orderBy: { order: 'asc' as const },
+        include: { scores: { select: { score: true } } },
+      },
+    },
+  },
+  participants: { orderBy: { created_at: 'asc' as const } },
+} satisfies Prisma.TastingMenuInclude;
+
+type MenuWithScores = Prisma.TastingMenuGetPayload<{ include: typeof menuInclude }>;
+
+// ============================================================================
+// SHARED DISH QUERY
+// ============================================================================
+
+export interface FlatDish {
+  id: string;
+  name: string;
+  description: string | null;
+  average_score: number | null;
+  score_count: number;
+  section_name: string;
+}
+
+/**
+ * Fetch all dishes from every tasting round for a wedding, flattened into a
+ * single array with pre-computed average scores.  Used by the AI menu generator
+ * and any other place that needs the full dish catalogue across rounds.
+ */
+export async function getAllDishesForWedding(weddingId: string): Promise<FlatDish[]> {
+  const allMenus = await prisma.tastingMenu.findMany({
+    where: { wedding_id: weddingId },
+    orderBy: { round_number: 'asc' },
+    include: {
+      sections: {
+        orderBy: { order: 'asc' },
+        include: {
+          dishes: {
+            orderBy: { order: 'asc' },
+            include: { scores: { select: { score: true } } },
+          },
+        },
+      },
+    },
+  });
+
+  const allDishes = allMenus.flatMap(menu =>
+    menu.sections.flatMap(section =>
+      section.dishes.map(dish => {
+        const scores = dish.scores ?? [];
+        const score_count = scores.length;
+        const average_score =
+          score_count > 0
+            ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / score_count) * 10) / 10
+            : null;
+        return {
+          id: dish.id,
+          name: dish.name,
+          description: dish.description,
+          average_score,
+          score_count,
+          section_name: section.name,
+        };
+      }),
+    ),
+  );
+
+  // Consolidate by section + dish name, keeping the variant with the best score.
+  // This ensures the AI generator sees each unique dish only once, at its best rating.
+  const keyMap = new Map<string, FlatDish>();
+  for (const dish of allDishes) {
+    const key = `${dish.section_name.toLowerCase()}|||${dish.name.trim().toLowerCase()}`;
+    const existing = keyMap.get(key);
+    if (!existing || (dish.average_score ?? -Infinity) > (existing.average_score ?? -Infinity)) {
+      keyMap.set(key, dish);
+    }
+  }
+  return Array.from(keyMap.values());
+}
+
+// ============================================================================
+// ROUNDS HANDLERS
+// ============================================================================
+
+export async function getAllRoundsHandler(weddingId: string) {
+  const rounds = await prisma.tastingMenu.findMany({
+    where: { wedding_id: weddingId },
+    orderBy: { round_number: 'asc' },
+    select: {
+      id: true,
+      round_number: true,
+      title: true,
+      tasting_date: true,
+      status: true,
+      created_at: true,
+    },
+  });
+  return NextResponse.json({ success: true, data: rounds });
+}
+
+export async function createRoundHandler(weddingId: string) {
+  const maxRound = await prisma.tastingMenu.aggregate({
+    where: { wedding_id: weddingId },
+    _max: { round_number: true },
+  });
+  const nextRound = (maxRound._max.round_number ?? 0) + 1;
+
+  const menu = await prisma.tastingMenu.create({
+    data: {
+      wedding_id: weddingId,
+      round_number: nextRound,
+      title: `Tasting Round ${nextRound}`,
+    },
+    include: menuInclude,
+  });
+
+  const effective_status = computeEffectiveStatus(menu.status, menu.tasting_date);
+  return NextResponse.json({ success: true, data: { ...menu, effective_status } }, { status: 201 });
 }
 
 // ============================================================================
 // MENU HANDLERS
 // ============================================================================
 
-export async function getTastingMenuHandler(weddingId: string) {
+export async function getTastingMenuHandler(weddingId: string, menuId?: string) {
+  const whereClause = menuId
+    ? { id: menuId, wedding_id: weddingId }
+    : undefined;
+
   const [menuData, wedding] = await Promise.all([
-    prisma.tastingMenu.findUnique({
-      where: { wedding_id: weddingId },
-      include: {
-        sections: {
-          orderBy: { order: 'asc' },
-          include: {
-            dishes: {
-              orderBy: { order: 'asc' },
-              include: { scores: { select: { score: true } } },
-            },
-          },
-        },
-        participants: { orderBy: { created_at: 'asc' } },
-      },
-    }),
+    menuId
+      ? prisma.tastingMenu.findFirst({ where: whereClause, include: menuInclude })
+      : prisma.tastingMenu.findFirst({
+          where: { wedding_id: weddingId },
+          orderBy: { round_number: 'asc' },
+          include: menuInclude,
+        }),
     prisma.wedding.findUnique({
       where: { id: weddingId },
       select: { default_language: true, whatsapp_mode: true },
     }),
   ]);
 
-  let menu: unknown = menuData;
-  if (menuData) {
-    const sections = menuData.sections.map((section) => ({
-      ...section,
-      dishes: section.dishes.map((dish) => {
-        const scores = dish.scores || [];
-        const avg =
-          scores.length > 0
-            ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / scores.length) * 10) / 10
-            : null;
-        return { ...dish, average_score: avg, score_count: scores.length };
-      }),
-    }));
-    const effective_status = computeEffectiveStatus(menuData.status, menuData.tasting_date);
-    menu = { ...menuData, sections, effective_status };
-  }
+  const menu = menuData ? mapMenuWithScores(menuData) : null;
 
   return NextResponse.json({
     success: true,
@@ -146,6 +270,9 @@ export async function getTastingMenuHandler(weddingId: string) {
 }
 
 export async function upsertTastingMenuHandler(weddingId: string, request: NextRequest) {
+  const url = new URL(request.url);
+  const menuId = url.searchParams.get('menuId');
+
   const body = await request.json();
   const parsed = upsertMenuSchema.safeParse(body);
   if (!parsed.success) {
@@ -161,11 +288,27 @@ export async function upsertTastingMenuHandler(weddingId: string, request: NextR
     tasting_date: tasting_date ? new Date(tasting_date) : tasting_date === null ? null : undefined,
   };
 
-  const menu = await prisma.tastingMenu.upsert({
-    where: { wedding_id: weddingId },
-    create: { wedding_id: weddingId, ...data },
-    update: data,
-  });
+  let menu;
+  if (menuId) {
+    // Update a specific round by its ID
+    const existing = await prisma.tastingMenu.findFirst({
+      where: { id: menuId, wedding_id: weddingId },
+    });
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Round not found' } },
+        { status: 404 },
+      );
+    }
+    menu = await prisma.tastingMenu.update({ where: { id: menuId }, data });
+  } else {
+    // Upsert round 1 (legacy / default behaviour)
+    menu = await prisma.tastingMenu.upsert({
+      where: { wedding_id_round_number: { wedding_id: weddingId, round_number: 1 } },
+      create: { wedding_id: weddingId, round_number: 1, ...data },
+      update: data,
+    });
+  }
 
   const effective_status = computeEffectiveStatus(menu.status, menu.tasting_date);
   return NextResponse.json({ success: true, data: { ...menu, effective_status } });
@@ -186,16 +329,32 @@ export async function createSectionHandler(weddingId: string, request: NextReque
       );
     }
 
-    const menu = await getOrCreateMenu(weddingId);
+    let menuId: string;
+    if (parsed.data.menu_id) {
+      // Validate the menu belongs to this wedding
+      const menu = await prisma.tastingMenu.findFirst({
+        where: { id: parsed.data.menu_id, wedding_id: weddingId },
+      });
+      if (!menu) {
+        return NextResponse.json(
+          { success: false, error: { code: 'NOT_FOUND', message: 'Round not found' } },
+          { status: 404 },
+        );
+      }
+      menuId = menu.id;
+    } else {
+      const menu = await getOrCreateMenu(weddingId);
+      menuId = menu.id;
+    }
 
     const maxOrder = await prisma.tastingSection.aggregate({
-      where: { menu_id: menu.id },
+      where: { menu_id: menuId },
       _max: { order: true },
     });
     const nextOrder = (maxOrder._max.order ?? -1) + 1;
 
     const section = await prisma.tastingSection.create({
-      data: { menu_id: menu.id, name: parsed.data.name, order: nextOrder },
+      data: { menu_id: menuId, name: parsed.data.name, order: nextOrder },
       include: { dishes: true },
     });
 
@@ -415,8 +574,9 @@ export async function deleteDishImageHandler(dishId: string, weddingId: string) 
 // ============================================================================
 
 export async function getParticipantsHandler(weddingId: string) {
-  const menu = await prisma.tastingMenu.findUnique({
+  const menu = await prisma.tastingMenu.findFirst({
     where: { wedding_id: weddingId },
+    orderBy: { round_number: 'asc' },
     include: { participants: { orderBy: { created_at: 'asc' } } },
   });
   return NextResponse.json({ success: true, data: menu?.participants ?? [] });
@@ -432,11 +592,26 @@ export async function createParticipantHandler(weddingId: string, request: NextR
     );
   }
 
-  const menu = await getOrCreateMenu(weddingId);
+  let menuId: string;
+  if (parsed.data.menu_id) {
+    const menu = await prisma.tastingMenu.findFirst({
+      where: { id: parsed.data.menu_id, wedding_id: weddingId },
+    });
+    if (!menu) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Round not found' } },
+        { status: 404 },
+      );
+    }
+    menuId = menu.id;
+  } else {
+    const menu = await getOrCreateMenu(weddingId);
+    menuId = menu.id;
+  }
 
   const participant = await prisma.tastingParticipant.create({
     data: {
-      menu_id: menu.id,
+      menu_id: menuId,
       name: parsed.data.name,
       email: parsed.data.email || null,
       phone: parsed.data.phone || null,

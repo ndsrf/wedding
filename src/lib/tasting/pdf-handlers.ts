@@ -169,48 +169,53 @@ function buildPdfResponse(buffer: Buffer, filename: string) {
 
 // ─── Tasting Report ──────────────────────────────────────────────────────────
 
-export async function generateTastingReportHandler(weddingId: string) {
-  const [menuData, weddingCtx] = await Promise.all([
-    prisma.tastingMenu.findUnique({
-      where: { wedding_id: weddingId },
+export async function generateTastingReportHandler(weddingId: string, menuId?: string) {
+  const menuSelect = {
+    id: true,
+    title: true,
+    description: true,
+    tasting_date: true,
+    participants: {
+      select: { name: true },
+      orderBy: { name: 'asc' as const },
+    },
+    sections: {
+      orderBy: { order: 'asc' as const },
       select: {
         id: true,
-        title: true,
-        description: true,
-        tasting_date: true,
-        participants: {
-          select: { name: true },
-          orderBy: { name: 'asc' },
-        },
-        sections: {
-          orderBy: { order: 'asc' },
+        name: true,
+        order: true,
+        dishes: {
+          orderBy: { order: 'asc' as const },
           select: {
             id: true,
             name: true,
+            description: true,
+            image_url: true,
             order: true,
-            dishes: {
-              orderBy: { order: 'asc' },
+            scores: {
               select: {
-                id: true,
-                name: true,
-                description: true,
+                score: true,
+                notes: true,
                 image_url: true,
-                order: true,
-                scores: {
-                  select: {
-                    score: true,
-                    notes: true,
-                    image_url: true,
-                    participant: { select: { name: true } },
-                  },
-                  orderBy: { created_at: 'asc' },
-                },
+                participant: { select: { name: true } },
               },
+              orderBy: { created_at: 'asc' as const },
             },
           },
         },
       },
-    }),
+    },
+  };
+
+  const [menuData, weddingCtx] = await Promise.all([
+    menuId
+      ? prisma.tastingMenu.findFirst({ where: { id: menuId, wedding_id: weddingId }, select: menuSelect })
+      : prisma.tastingMenu.findFirst({
+          where: { wedding_id: weddingId },
+          orderBy: { round_number: 'asc' },
+          select: menuSelect,
+        }),
     getWeddingContext(weddingId),
   ]);
 
@@ -299,9 +304,11 @@ export async function generateTastingReportHandler(weddingId: string) {
 // ─── Menu PDF ────────────────────────────────────────────────────────────────
 
 export async function generateTastingMenuPDFHandler(weddingId: string) {
-  const [menuData, { planner, coupleNames, weddingDate }] = await Promise.all([
-    prisma.tastingMenu.findUnique({
+  // For the menu PDF we consolidate selected dishes from ALL rounds
+  const [allMenus, { planner, coupleNames, weddingDate }] = await Promise.all([
+    prisma.tastingMenu.findMany({
       where: { wedding_id: weddingId },
+      orderBy: { round_number: 'asc' },
       select: {
         id: true,
         sections: {
@@ -326,7 +333,23 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     getWeddingContext(weddingId),
   ]);
 
-  if (!menuData) {
+  // Consolidate sections from all rounds by section name (case-insensitive, trimmed)
+  type PdfSection = { id: string; name: string; dishes: Array<{ id: string; name: string; description: string | null; image_url: string | null }> };
+  const sectionMap = new Map<string, PdfSection>();
+  const sectionOrder: string[] = [];
+  for (const menu of allMenus) {
+    for (const s of menu.sections) {
+      const key = s.name.trim().toLowerCase();
+      if (!sectionMap.has(key)) {
+        sectionMap.set(key, { id: s.id, name: s.name.trim(), dishes: [] });
+        sectionOrder.push(key);
+      }
+      sectionMap.get(key)!.dishes.push(...s.dishes);
+    }
+  }
+  const consolidatedSections = sectionOrder.map(k => sectionMap.get(k)!);
+
+  if (consolidatedSections.length === 0 && allMenus.length === 0) {
     return NextResponse.json(
       { success: false, error: { code: 'NOT_FOUND', message: 'No tasting menu found' } },
       { status: 404 },
@@ -334,11 +357,11 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
   }
 
   // Pre-fetch all images in parallel using raw DB URLs as cache keys
-  const rawDishUrls = menuData.sections.flatMap((s) => s.dishes.map((d) => d.image_url));
+  const rawDishUrls = consolidatedSections.flatMap((s) => s.dishes.map((d) => d.image_url));
   const rawLogoUrl = planner?.logo_url ?? null;
   const imageCache = await prefetchImages([rawLogoUrl, ...rawDishUrls]);
 
-  const sections = menuData.sections
+  const sections = consolidatedSections
     .filter((s) => s.dishes.length > 0)
     .map((section) => ({
       id: section.id,
@@ -378,5 +401,5 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     );
   }
 
-  return buildPdfResponse(buffer, `wedding-menu-${menuData.id}.pdf`);
+  return buildPdfResponse(buffer, `wedding-menu-${allMenus[0]?.id ?? 'combined'}.pdf`);
 }

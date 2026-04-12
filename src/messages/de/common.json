@@ -2428,6 +2428,11 @@
         "tastingReport": "Degustationsbericht",
         "weddingMenu": "Hochzeitsmenü",
         "error": "PDF-Generierung fehlgeschlagen"
+      },
+      "rounds": {
+        "selectRound": "Runde:",
+        "addRound": "Weitere Runde hinzufügen",
+        "roundLabel": "Runde {number}"
       }
     },
     "menu": {
@@ -2443,7 +2448,8 @@
       "generateError": "Fehler beim Generieren des Menüs",
       "aiReasoning": "KI-Begründung",
       "exportXlsx": "Als Excel exportieren",
-      "exportPdf": "Als PDF exportieren"
+      "exportPdf": "Als PDF exportieren",
+      "rounds": "Verkostungsrunden:"
     },
     "finanzas": {
       "title": "Gewinn- und Verlustrechnung",
