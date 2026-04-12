@@ -13,7 +13,7 @@ type Params = { params: Promise<{ id: string }> };
 type Handler = (weddingId: string) => ReturnType<typeof getAllRoundsHandler>;
 
 async function withPlannerAccess(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: Params,
   handler: Handler,
 ): Promise<NextResponse> {
