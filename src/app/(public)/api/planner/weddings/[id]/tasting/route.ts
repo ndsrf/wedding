@@ -11,13 +11,14 @@ import { getTastingMenuHandler, upsertTastingMenuHandler } from '@/lib/tasting/a
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function GET(_request: NextRequest, { params }: Params) {
+export async function GET(request: NextRequest, { params }: Params) {
   const user = await requireRole('planner');
   if (!user.planner_id) return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'No planner' } }, { status: 403 });
   const { id: weddingId } = await params;
   const denied = await validatePlannerAccess(user.planner_id, weddingId);
   if (denied) return denied;
-  return getTastingMenuHandler(weddingId);
+  const menuId = request.nextUrl.searchParams.get('menuId') ?? undefined;
+  return getTastingMenuHandler(weddingId, menuId);
 }
 
 export async function POST(request: NextRequest, { params }: Params) {

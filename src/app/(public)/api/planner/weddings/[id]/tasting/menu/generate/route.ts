@@ -24,6 +24,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { validatePlannerAccess } from '@/lib/guests/planner-access';
 import { prisma } from '@/lib/db/prisma';
 import { generateBestMenu } from '@/lib/ai/menu-generator';
+import { getAllDishesForWedding } from '@/lib/tasting/api-handlers';
 
 const generateMenuSchema = z.object({
   appetizers: z.number().int().min(0).max(20),
@@ -67,34 +68,20 @@ export async function POST(
       );
     }
 
-    // Fetch wedding context, tasting menu, and guest profile in parallel
-    const [wedding, tastingMenu, guestMembers] = await Promise.all([
+    // Fetch wedding context, all dishes (across rounds), and guest profile in parallel
+    const [wedding, dishes, guestMembers] = await Promise.all([
       prisma.wedding.findUnique({
         where: { id: weddingId },
         select: { wedding_date: true, location: true, wedding_country: true, default_language: true },
       }),
-      prisma.tastingMenu.findUnique({
-        where: { wedding_id: weddingId },
-        include: {
-          sections: {
-            orderBy: { order: 'asc' },
-            include: {
-              dishes: {
-                orderBy: { order: 'asc' },
-                include: { scores: { select: { score: true } } },
-              },
-            },
-          },
-        },
-      }),
-      // Collect ages and dietary restrictions from all family members of this wedding
+      getAllDishesForWedding(weddingId),
       prisma.familyMember.findMany({
         where: { family: { wedding_id: weddingId } },
         select: { age: true, dietary_restrictions: true },
       }),
     ]);
 
-    if (!tastingMenu) {
+    if (dishes.length === 0) {
       return NextResponse.json(
         { success: false, error: { code: 'NOT_FOUND', message: 'No tasting menu found for this wedding' } },
         { status: 404 },
@@ -107,7 +94,6 @@ export async function POST(
       ? Math.round((ages.reduce((s, a) => s + a, 0) / ages.length) * 10) / 10
       : null;
 
-    // Aggregate dietary restrictions: split on common delimiters, lowercase, deduplicate
     const allRestrictions = guestMembers
       .flatMap(m =>
         (m.dietary_restrictions ?? '')
@@ -122,33 +108,6 @@ export async function POST(
       averageAge,
       dietaryRestrictions,
     };
-
-    // ── Flatten dishes with computed average scores ──────────────────────────
-    const dishes = tastingMenu.sections.flatMap(section =>
-      section.dishes.map(dish => {
-        const scores = dish.scores ?? [];
-        const score_count = scores.length;
-        const average_score =
-          score_count > 0
-            ? Math.round((scores.reduce((sum, s) => sum + s.score, 0) / score_count) * 10) / 10
-            : null;
-        return {
-          id: dish.id,
-          name: dish.name,
-          description: dish.description,
-          average_score,
-          score_count,
-          section_name: section.name,
-        };
-      }),
-    );
-
-    if (dishes.length === 0) {
-      return NextResponse.json(
-        { success: false, error: { code: 'NO_DISHES', message: 'No dishes available in the tasting menu' } },
-        { status: 422 },
-      );
-    }
 
     const result = await generateBestMenu({
       dishes,

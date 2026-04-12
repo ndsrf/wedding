@@ -1,5 +1,6 @@
 /**
  * WeddingMenuSelector — Select dishes for the final wedding menu.
+ * Shows dishes from all tasting rounds, consolidated by section name.
  * Used in both the admin and planner views.
  */
 
@@ -27,9 +28,34 @@ function Stars({ value }: { value: number }) {
   );
 }
 
+// ─── Consolidated dish type (merges same-named dishes across rounds) ──────────
+
+interface ConsolidatedDish {
+  id: string; // canonical ID (from the round with the best score)
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  average_score: number | null; // best score across all rounds
+  score_count: number;
+  order: number;
+  section_id: string;
+  rounds: Array<{ round_number: number; round_title: string }>; // every round this dish appears in
+  allIds: string[]; // all dish IDs for this name+section across rounds
+}
+
+interface SectionWithConsolidatedDishes {
+  name: string;
+  dishes: ConsolidatedDish[];
+}
+
+// ─── Props ───────────────────────────────────────────────────────────────────
+
 interface Props {
-  menu: TastingMenu | null;
-  apiBase: string; // e.g. '/api/admin/tasting' or '/api/planner/weddings/[id]/tasting'
+  /** All tasting rounds (menus) for this wedding */
+  allMenus: TastingMenu[];
+  /** The primary (first) menu used for save/export operations */
+  primaryMenu: TastingMenu | null;
+  apiBase: string;
   onMenuChange: (menu: TastingMenu) => void;
   isLoading?: boolean;
   pdfUrl?: string;
@@ -163,7 +189,75 @@ function GenerateMenuPanel({ apiBase, onGenerated }: GenerateMenuPanelProps) {
   );
 }
 
-export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = false, pdfUrl }: Props) {
+// ─── Round badge ─────────────────────────────────────────────────────────────
+
+function RoundBadge({ roundNumber }: { roundNumber: number }) {
+  const colors = [
+    'bg-blue-100 text-blue-700',
+    'bg-purple-100 text-purple-700',
+    'bg-amber-100 text-amber-700',
+    'bg-teal-100 text-teal-700',
+    'bg-pink-100 text-pink-700',
+  ];
+  const color = colors[(roundNumber - 1) % colors.length];
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${color}`}>
+      R{roundNumber}
+    </span>
+  );
+}
+
+// ─── DishRow ─────────────────────────────────────────────────────────────────
+
+function DishRow({
+  dish,
+  checked,
+  onToggle,
+  showRoundBadges,
+}: {
+  dish: ConsolidatedDish;
+  checked: boolean;
+  onToggle: () => void;
+  showRoundBadges: boolean;
+}) {
+  return (
+    <div className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onToggle}
+        className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+      />
+      <div className="flex gap-3 flex-1 min-w-0">
+        {dish.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={dish.image_url} alt={dish.name} className="h-12 w-12 rounded object-cover border border-gray-200 shrink-0" />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <p className="text-sm font-medium text-gray-800 truncate">{dish.name}</p>
+            {showRoundBadges && dish.rounds.map(r => (
+              <RoundBadge key={r.round_number} roundNumber={r.round_number} />
+            ))}
+          </div>
+          {dish.description && <p className="text-xs text-gray-500 line-clamp-1">{dish.description}</p>}
+          {dish.average_score !== null && (
+            <div className="mt-1 flex items-center gap-2">
+              <Stars value={Math.round(dish.average_score || 0)} />
+              <span className="text-xs font-bold text-rose-600">
+                {dish.average_score.toFixed(1)}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChange, isLoading = false, pdfUrl }: Props) {
   const t = useTranslations('admin.menu');
   const tCommon = useTranslations('common');
 
@@ -174,37 +268,96 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfError, setPdfError] = useState(false);
 
-  // Local state for checkboxes
+  // Local state for checkboxes (dish id → selected)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Initialize selectedIds from menu
-  useEffect(() => {
-    if (menu) {
-      const ids = new Set<string>();
-      menu.sections.forEach(s => {
-        s.dishes.forEach(d => {
-          if (d.is_selected) ids.add(d.id);
-        });
-      });
-      setSelectedIds(ids);
+  // Build consolidated sections from all menus
+  const hasMultipleRounds = allMenus.length > 1;
+
+  const consolidatedSections = useMemo((): SectionWithConsolidatedDishes[] => {
+    // Outer map keyed by normalized section name (trimmed + lowercase) for case-insensitive merge
+    const sectionMap = new Map<string, Map<string, ConsolidatedDish>>();
+    const sectionOrder: string[] = []; // normalized keys, in insertion order
+    const sectionDisplayNames = new Map<string, string>(); // normalized key → display name
+
+    for (const menu of allMenus) {
+      const roundNumber = menu.round_number;
+      const roundTitle = menu.title;
+
+      for (const section of menu.sections) {
+        const sectionKey = section.name.trim().toLowerCase();
+        if (!sectionMap.has(sectionKey)) {
+          sectionMap.set(sectionKey, new Map());
+          sectionOrder.push(sectionKey);
+          sectionDisplayNames.set(sectionKey, section.name.trim());
+        }
+        const dishMap = sectionMap.get(sectionKey)!;
+
+        for (const dish of section.dishes) {
+          const dishKey = dish.name.trim().toLowerCase();
+          const existing = dishMap.get(dishKey);
+          const score = dish.average_score ?? null;
+
+          if (!existing) {
+            dishMap.set(dishKey, {
+              id: dish.id,
+              name: dish.name,
+              description: dish.description ?? null,
+              image_url: dish.image_url ?? null,
+              average_score: score,
+              score_count: dish.score_count ?? 0,
+              order: dish.order,
+              section_id: dish.section_id,
+              rounds: [{ round_number: roundNumber, round_title: roundTitle }],
+              allIds: [dish.id],
+            });
+          } else {
+            // Promote to canonical if this round has a better score
+            if (score !== null && (existing.average_score === null || score > existing.average_score)) {
+              existing.id = dish.id;
+              existing.average_score = score;
+              existing.score_count = dish.score_count ?? 0;
+              if (dish.image_url) existing.image_url = dish.image_url;
+            }
+            existing.rounds.push({ round_number: roundNumber, round_title: roundTitle });
+            existing.allIds.push(dish.id);
+          }
+        }
+      }
     }
-  }, [menu]);
 
-  const availableDishes = useMemo(() => {
-    if (!menu) return [];
-    return menu.sections.map(s => ({
-      ...s,
-      dishes: s.dishes.filter(d => !selectedIds.has(d.id))
-    })).filter(s => s.dishes.length > 0);
-  }, [menu, selectedIds]);
+    return sectionOrder.map(key => ({
+      name: sectionDisplayNames.get(key)!,
+      dishes: Array.from(sectionMap.get(key)!.values()),
+    }));
+  }, [allMenus]);
 
-  const selectedDishes = useMemo(() => {
-    if (!menu) return [];
-    return menu.sections.map(s => ({
-      ...s,
-      dishes: s.dishes.filter(d => selectedIds.has(d.id))
-    })).filter(s => s.dishes.length > 0);
-  }, [menu, selectedIds]);
+  // Initialize selectedIds from all menus
+  useEffect(() => {
+    const ids = new Set<string>();
+    for (const menu of allMenus) {
+      for (const section of menu.sections) {
+        for (const dish of section.dishes) {
+          if (dish.is_selected) ids.add(dish.id);
+        }
+      }
+    }
+    setSelectedIds(ids);
+  }, [allMenus]);
+
+  const availableSections = useMemo(() =>
+    consolidatedSections
+      .map(s => ({ ...s, dishes: s.dishes.filter(d => !d.allIds.some(id => selectedIds.has(id))) }))
+      .filter(s => s.dishes.length > 0),
+    [consolidatedSections, selectedIds]
+  );
+
+  const selectedSections = useMemo(() =>
+    consolidatedSections
+      .map(s => ({ ...s, dishes: s.dishes.filter(d => d.allIds.some(id => selectedIds.has(id))) }))
+      .filter(s => s.dishes.length > 0),
+    [consolidatedSections, selectedIds]
+  );
 
   // Checkbox state for "Available" list
   const [availableChecked, setAvailableChecked] = useState<Set<string>>(new Set());
@@ -221,16 +374,16 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
     });
   };
 
-  const handleToggleSection = (section: TastingSection, list: 'available' | 'selected') => {
+  const handleToggleSection = (sectionDishes: ConsolidatedDish[], list: 'available' | 'selected') => {
     const setter = list === 'available' ? setAvailableChecked : setSelectedChecked;
-    const dishIds = section.dishes.map((d: TastingDish) => d.id);
+    const dishIds = sectionDishes.map(d => d.id);
     setter(prev => {
       const next = new Set(prev);
-      const allChecked = dishIds.every((id: string) => next.has(id));
+      const allChecked = dishIds.every(id => next.has(id));
       if (allChecked) {
-        dishIds.forEach((id: string) => next.delete(id));
+        dishIds.forEach(id => next.delete(id));
       } else {
-        dishIds.forEach((id: string) => next.add(id));
+        dishIds.forEach(id => next.add(id));
       }
       return next;
     });
@@ -249,14 +402,16 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
       const data = await res.json();
       if (!data.success) throw new Error(data.error?.message ?? t('saveError'));
       setSaveSuccess(true);
-      if (menu) {
+      const selectedSet = new Set(dishIds);
+      // Update all menus in state
+      for (const menu of allMenus) {
         onMenuChange({
           ...menu,
-          sections: menu.sections.map(s => ({
+          sections: menu.sections.map((s: TastingSection) => ({
             ...s,
-            dishes: s.dishes.map(d => ({
+            dishes: s.dishes.map((d: TastingDish) => ({
               ...d,
-              is_selected: new Set(dishIds).has(d.id)
+              is_selected: selectedSet.has(d.id)
             }))
           }))
         });
@@ -270,16 +425,27 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
   };
 
   const moveCheckedToSelected = () => {
+    const allConsolidated = consolidatedSections.flatMap(s => s.dishes);
     const nextIds = new Set(selectedIds);
-    availableChecked.forEach(id => nextIds.add(id));
+    availableChecked.forEach(canonicalId => {
+      // Remove all round variants, then add only the canonical ID
+      const dish = allConsolidated.find(d => d.id === canonicalId);
+      if (dish) dish.allIds.forEach(id => nextIds.delete(id));
+      nextIds.add(canonicalId);
+    });
     setSelectedIds(nextIds);
     setAvailableChecked(new Set());
     handleSave(Array.from(nextIds));
   };
 
   const moveCheckedToAvailable = () => {
+    const allConsolidated = consolidatedSections.flatMap(s => s.dishes);
     const nextIds = new Set(selectedIds);
-    selectedChecked.forEach(id => nextIds.delete(id));
+    selectedChecked.forEach(canonicalId => {
+      const dish = allConsolidated.find(d => d.id === canonicalId);
+      if (dish) dish.allIds.forEach(id => nextIds.delete(id));
+      else nextIds.delete(canonicalId);
+    });
     setSelectedIds(nextIds);
     setSelectedChecked(new Set());
     handleSave(Array.from(nextIds));
@@ -337,7 +503,7 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
     );
   }
 
-  if (!menu) {
+  if (!primaryMenu) {
     return (
       <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
         <p className="text-gray-500">{t('noDishes')}</p>
@@ -356,6 +522,25 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
   return (
     <div className="space-y-6">
       <GenerateMenuPanel apiBase={apiBase} onGenerated={handleGeneratedMenu} />
+
+      {/* Round legend when multiple rounds */}
+      {hasMultipleRounds && (
+        <div className="flex items-center gap-3 flex-wrap bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5">
+          <span className="text-xs font-medium text-gray-600">{t('rounds')}</span>
+          {allMenus.map((menu) => {
+            const roundNumber = menu.round_number;
+            return (
+              <span key={menu.id} className="flex items-center gap-1 text-xs text-gray-600">
+                <RoundBadge roundNumber={roundNumber} />
+                <span>{menu.title}</span>
+                {menu.tasting_date && (
+                  <span className="text-gray-400">({new Date(menu.tasting_date).toLocaleDateString()})</span>
+                )}
+              </span>
+            );
+          })}
+        </div>
+      )}
 
       <div className="flex items-center justify-between">
         <div>
@@ -437,48 +622,29 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
             <span className="text-xs text-gray-500">{availableChecked.size} {tCommon('selection.selectedCount', { count: availableChecked.size })}</span>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {availableDishes.length === 0 && (
+            {availableSections.length === 0 && (
               <p className="text-sm text-gray-400 italic text-center py-8">No more available dishes</p>
             )}
-            {availableDishes.map(section => (
-              <div key={section.id} className="space-y-2">
+            {availableSections.map(section => (
+              <div key={section.name} className="space-y-2">
                 <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
                   <input
                     type="checkbox"
-                    checked={section.dishes.every((d: TastingDish) => availableChecked.has(d.id))}
-                    onChange={() => handleToggleSection(section as TastingSection, 'available')}
+                    checked={section.dishes.every(d => availableChecked.has(d.id))}
+                    onChange={() => handleToggleSection(section.dishes, 'available')}
                     className="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
                   />
                   <span className="text-sm font-bold text-gray-700 uppercase tracking-tight">{section.name}</span>
                 </div>
                 <div className="pl-6 space-y-2">
-                  {section.dishes.map((dish: TastingDish) => (
-                    <div key={dish.id} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100">
-                      <input
-                        type="checkbox"
-                        checked={availableChecked.has(dish.id)}
-                        onChange={() => handleToggleDish(dish.id, 'available')}
-                        className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
-                      />
-                      <div className="flex gap-3 flex-1 min-w-0">
-                        {dish.image_url && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={dish.image_url} alt={dish.name} className="h-12 w-12 rounded object-cover border border-gray-200 shrink-0" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-gray-800 truncate">{dish.name}</p>
-                          {dish.description && <p className="text-xs text-gray-500 line-clamp-1">{dish.description}</p>}
-                          {dish.average_score !== null && (
-                            <div className="mt-1 flex items-center gap-2">
-                              <Stars value={Math.round(dish.average_score || 0)} />
-                              <span className="text-xs font-bold text-rose-600">
-                                {dish.average_score?.toFixed(1)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                  {section.dishes.map(dish => (
+                    <DishRow
+                      key={dish.id}
+                      dish={dish}
+                      checked={availableChecked.has(dish.id)}
+                      onToggle={() => handleToggleDish(dish.id, 'available')}
+                      showRoundBadges={hasMultipleRounds}
+                    />
                   ))}
                 </div>
               </div>
@@ -517,40 +683,29 @@ export function WeddingMenuSelector({ menu, apiBase, onMenuChange, isLoading = f
             <span className="text-xs text-gray-500">{selectedChecked.size} {tCommon('selection.selectedCount', { count: selectedChecked.size })}</span>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {selectedDishes.length === 0 && (
+            {selectedSections.length === 0 && (
               <p className="text-sm text-gray-400 italic text-center py-8">No dishes selected yet</p>
             )}
-            {selectedDishes.map(section => (
-              <div key={section.id} className="space-y-2">
+            {selectedSections.map(section => (
+              <div key={section.name} className="space-y-2">
                 <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
                   <input
                     type="checkbox"
-                    checked={section.dishes.every((d: TastingDish) => selectedChecked.has(d.id))}
-                    onChange={() => handleToggleSection(section as TastingSection, 'selected')}
+                    checked={section.dishes.every(d => selectedChecked.has(d.id))}
+                    onChange={() => handleToggleSection(section.dishes, 'selected')}
                     className="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
                   />
                   <span className="text-sm font-bold text-gray-700 uppercase tracking-tight">{section.name}</span>
                 </div>
                 <div className="pl-6 space-y-2">
-                  {section.dishes.map((dish: TastingDish) => (
-                    <div key={dish.id} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100">
-                      <input
-                        type="checkbox"
-                        checked={selectedChecked.has(dish.id)}
-                        onChange={() => handleToggleDish(dish.id, 'selected')}
-                        className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
-                      />
-                      <div className="flex gap-3 flex-1 min-w-0">
-                        {dish.image_url && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={dish.image_url} alt={dish.name} className="h-12 w-12 rounded object-cover border border-gray-200 shrink-0" />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{dish.name}</p>
-                          {dish.description && <p className="text-xs text-gray-500 line-clamp-1">{dish.description}</p>}
-                        </div>
-                      </div>
-                    </div>
+                  {section.dishes.map(dish => (
+                    <DishRow
+                      key={dish.id}
+                      dish={dish}
+                      checked={selectedChecked.has(dish.id)}
+                      onToggle={() => handleToggleDish(dish.id, 'selected')}
+                      showRoundBadges={hasMultipleRounds}
+                    />
                   ))}
                 </div>
               </div>

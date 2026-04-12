@@ -22,6 +22,16 @@ import { TastingMenuEditor, type TastingMenu } from '@/components/admin/TastingM
 import { TastingParticipantManager, type TastingParticipant } from '@/components/admin/TastingParticipantManager';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface TastingRound {
+  id: string;
+  round_number: number;
+  title: string;
+  tasting_date: string | null;
+  status: 'OPEN' | 'CLOSED';
+}
+
 // ─── PDF Download Button ──────────────────────────────────────────────────────
 
 function PdfDownloadButton({
@@ -101,23 +111,31 @@ export function TastingPageContent({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Rounds
+  const [rounds, setRounds] = useState<TastingRound[]>([]);
+  const [activeRoundId, setActiveRoundId] = useState<string | null>(null);
+  const [addingRound, setAddingRound] = useState(false);
+
   const [menu, setMenu] = useState<TastingMenu | null>(null);
   const [participants, setParticipants] = useState<TastingParticipant[]>([]);
   const [weddingLanguage, setWeddingLanguage] = useState<Language>('ES');
   const [whatsappMode, setWhatsappMode] = useState<'BUSINESS' | 'LINKS'>('BUSINESS');
 
-  const fetchData = useCallback(async () => {
+  // Fetch the data for a specific round (or the first round if no menuId)
+  const fetchRoundData = useCallback(async (menuId?: string) => {
     try {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(apiBase);
+      const url = menuId ? `${apiBase}?menuId=${menuId}` : apiBase;
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.data) {
           const { sections, participants: p, ...rest } = data.data;
           setMenu({ ...rest, sections: sections ?? [] });
           setParticipants(p ?? []);
+          if (!menuId) setActiveRoundId(data.data.id ?? null);
         }
         if (data.wedding_language) setWeddingLanguage(data.wedding_language as Language);
         if (data.whatsapp_mode === 'BUSINESS' || data.whatsapp_mode === 'LINKS') setWhatsappMode(data.whatsapp_mode);
@@ -129,42 +147,149 @@ export function TastingPageContent({
     }
   }, [apiBase, t]);
 
+  // Fetch rounds list
+  const fetchRounds = useCallback(async () => {
+    try {
+      const res = await fetch(`${apiBase}/rounds`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) setRounds(data.data ?? []);
+      }
+    } catch {
+      // Non-critical — rounds list is supplemental
+    }
+  }, [apiBase]);
+
+  // Initial load
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    async function init() {
+      await Promise.all([fetchRoundData(), fetchRounds()]);
+    }
+    init();
+  }, [fetchRoundData, fetchRounds]);
+
+  const handleRoundChange = async (menuId: string) => {
+    setActiveRoundId(menuId);
+    await fetchRoundData(menuId);
+  };
+
+  const handleAddRound = async () => {
+    setAddingRound(true);
+    try {
+      const res = await fetch(`${apiBase}/rounds`, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          const newRound = data.data;
+          setRounds(prev => [...prev, {
+            id: newRound.id,
+            round_number: newRound.round_number,
+            title: newRound.title,
+            tasting_date: newRound.tasting_date ?? null,
+            status: newRound.status,
+          }]);
+          setActiveRoundId(newRound.id);
+          const { sections, participants: p, ...rest } = newRound;
+          setMenu({ ...rest, sections: sections ?? [] });
+          setParticipants(p ?? []);
+        }
+      }
+    } catch {
+      // Silently fail — user can retry
+    } finally {
+      setAddingRound(false);
+    }
+  };
+
+  // Keep rounds list in sync when the active menu changes (e.g. title/date update)
+  const handleMenuChange = (updated: TastingMenu) => {
+    setMenu(updated);
+    setRounds(prev => prev.map(r => r.id === updated.id ? {
+      ...r,
+      title: updated.title,
+      tasting_date: updated.tasting_date,
+      status: updated.status,
+    } : r));
+  };
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'menu', label: t('tabs.menu') },
     { id: 'participants', label: `${t('tabs.participants')} (${participants.length})` },
   ];
 
+  const reportUrl = activeRoundId
+    ? `${apiBase}/report?menuId=${activeRoundId}`
+    : `${apiBase}/report`;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <PrivateHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-6 gap-4">
-          <div className="flex items-center">
-            <Link href={backHref} className="text-gray-500 hover:text-gray-700 mr-3">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6 gap-3">
+          <div className="flex items-center min-w-0">
+            <Link href={backHref} className="text-gray-500 hover:text-gray-700 mr-3 shrink-0">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">🍽️ {t('title')}</h1>
-              {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold text-gray-900 truncate">🍽️ {t('title')}</h1>
+              {subtitle && <p className="mt-1 text-sm text-gray-500 truncate">{subtitle}</p>}
             </div>
           </div>
-          {!loading && menu && (
-            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
-              <PdfDownloadButton
-                url={`${apiBase}/report`}
-                label={t('pdf.tastingReport')}
-                filename="tasting-report.pdf"
-              />
+          {!loading && (
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              {menu && (
+                <PdfDownloadButton
+                  url={reportUrl}
+                  label={t('pdf.tastingReport')}
+                  filename="tasting-report.pdf"
+                />
+              )}
+              {!isReadOnly && (
+                <button
+                  onClick={handleAddRound}
+                  disabled={addingRound}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-rose-200 bg-rose-50 text-xs font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  {addingRound ? (
+                    <WeddingSpinner size="sm" />
+                  ) : (
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  )}
+                  {t('rounds.addRound')}
+                </button>
+              )}
             </div>
           )}
         </div>
+
+        {/* Round selector */}
+        {rounds.length > 1 && (
+          <div className="mb-5 flex items-center gap-3">
+            <label className="text-sm font-medium text-gray-700 shrink-0">
+              {t('rounds.selectRound')}
+            </label>
+            <select
+              value={activeRoundId ?? ''}
+              onChange={e => handleRoundChange(e.target.value)}
+              className="flex-1 max-w-xs px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white"
+            >
+              {rounds.map(r => (
+                <option key={r.id} value={r.id}>
+                  {t('rounds.roundLabel', { number: r.round_number })}
+                  {r.tasting_date ? ` — ${new Date(r.tasting_date).toLocaleDateString()}` : ''}
+                  {r.title && r.title !== `Tasting Round ${r.round_number}` && r.title !== 'Tasting Menu'
+                    ? ` (${r.title})`
+                    : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
@@ -192,7 +317,7 @@ export function TastingPageContent({
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-red-600">{error}</p>
-            <button onClick={fetchData} className="mt-4 text-sm text-rose-600 underline">
+            <button onClick={() => fetchRoundData(activeRoundId ?? undefined)} className="mt-4 text-sm text-rose-600 underline">
               Retry
             </button>
           </div>
@@ -202,7 +327,8 @@ export function TastingPageContent({
               <TastingMenuEditor
                 menu={menu}
                 apiBase={apiBase}
-                onMenuChange={setMenu}
+                menuId={activeRoundId ?? undefined}
+                onMenuChange={handleMenuChange}
                 readOnly={isReadOnly}
               />
             )}
@@ -210,6 +336,7 @@ export function TastingPageContent({
               <TastingParticipantManager
                 participants={participants}
                 apiBase={apiBase}
+                menuId={activeRoundId ?? undefined}
                 onParticipantsChange={setParticipants}
                 readOnly={isReadOnly}
                 weddingLanguage={weddingLanguage}

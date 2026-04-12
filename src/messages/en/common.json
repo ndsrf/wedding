@@ -2506,6 +2506,11 @@
         "tastingReport": "Tasting Report",
         "weddingMenu": "Wedding Menu",
         "error": "Failed to generate PDF"
+      },
+      "rounds": {
+        "selectRound": "Round:",
+        "addRound": "Add another round",
+        "roundLabel": "Round {number}"
       }
     },
     "menu": {
@@ -2533,7 +2538,8 @@
       "generating": "Generating...",
       "generateSuccess": "Menu generated successfully",
       "generateError": "Error generating the menu",
-      "aiReasoning": "AI reasoning"
+      "aiReasoning": "AI reasoning",
+      "rounds": "Tasting rounds:"
     },
     "finanzas": {
       "title": "P&L Statement",

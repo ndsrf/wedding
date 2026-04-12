@@ -39,36 +39,63 @@ interface MenuPageContentProps {
 // ============================================================================
 
 export function MenuPageContent({ apiPaths, isReadOnly: _isReadOnly, header }: MenuPageContentProps) {
-  const [menu, setMenu] = useState<TastingMenu | null>(null);
+  const [allMenus, setAllMenus] = useState<TastingMenu[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchMenu() {
+    async function fetchMenus() {
       try {
-        const res = await fetch(apiPaths.apiBase);
-        const data = await res.json();
-        if (data.success) {
-          setMenu(data.data);
+        // Fetch all rounds
+        const roundsRes = await fetch(`${apiPaths.apiBase}/rounds`);
+        const roundsData = await roundsRes.json();
+        const rounds: Array<{ id: string }> = roundsData.success ? (roundsData.data ?? []) : [];
+
+        if (rounds.length === 0) {
+          // No rounds yet — fall back to the single menu endpoint
+          const res = await fetch(apiPaths.apiBase);
+          const data = await res.json();
+          if (data.success && data.data) {
+            setAllMenus([data.data]);
+          }
+          return;
         }
+
+        // Fetch full data for every round in parallel
+        const menus = await Promise.all(
+          rounds.map(async (r) => {
+            const res = await fetch(`${apiPaths.apiBase}?menuId=${r.id}`);
+            const data = await res.json();
+            return data.success ? data.data : null;
+          })
+        );
+        setAllMenus(menus.filter(Boolean));
       } catch (err) {
-        console.error('Failed to fetch menu:', err);
+        console.error('Failed to fetch menus:', err);
       } finally {
         setLoading(false);
       }
     }
-    fetchMenu();
+    fetchMenus();
   }, [apiPaths.apiBase]);
+
+  // The primary menu (first round) is used for mutation operations
+  const primaryMenu = allMenus[0] ?? null;
+
+  const handleMenuChange = (updated: TastingMenu) => {
+    setAllMenus(prev => prev.map(m => m.id === updated.id ? updated : m));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {header}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <WeddingMenuSelector
-          menu={menu}
+          allMenus={allMenus}
+          primaryMenu={primaryMenu}
           apiBase={apiPaths.apiBase}
-          onMenuChange={setMenu}
+          onMenuChange={handleMenuChange}
           isLoading={loading}
-          pdfUrl={menu ? `${apiPaths.apiBase}/menu/pdf` : undefined}
+          pdfUrl={primaryMenu ? `${apiPaths.apiBase}/menu/pdf` : undefined}
         />
       </main>
     </div>

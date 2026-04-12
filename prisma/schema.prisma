@@ -234,7 +234,7 @@ model Wedding {
   providers                       WeddingProvider[]
   itinerary_items                 ItineraryItem[]
   photos                          WeddingPhoto[]
-  tasting_menu                    TastingMenu?
+  tasting_menus                   TastingMenu[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   customer                        Customer?          @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   contract                        Contract?          @relation("WeddingContract", fields: [contract_id], references: [id], onDelete: SetNull)
@@ -1364,7 +1364,8 @@ enum TastingMenuStatus {
 
 model TastingMenu {
   id           String             @id @default(uuid())
-  wedding_id   String             @unique
+  wedding_id   String
+  round_number Int                @default(1)
   title        String             @default("Tasting Menu")
   description  String?            @db.Text
   tasting_date DateTime?
@@ -1375,6 +1376,7 @@ model TastingMenu {
   sections     TastingSection[]
   participants TastingParticipant[]
 
+  @@unique([wedding_id, round_number])
   @@index([wedding_id])
   @@map("tasting_menus")
 }
