@@ -3011,6 +3011,19 @@
     },
     "submit": "Créer mon Compte Gratuit",
     "retry": "Réessayer",
+    "verification": {
+      "sending": "Envoi du code de vérification...",
+      "sentTo": "Nous avons envoyé un code à 6 chiffres à",
+      "checkSpam": "Si vous ne le voyez pas, vérifiez votre dossier spam.",
+      "codeLabel": "Code de vérification",
+      "codePlaceholder": "000000",
+      "invalidFormat": "Veuillez entrer les 6 chiffres du code.",
+      "submit": "Vérifier et créer le compte",
+      "noCode": "Vous n'avez pas reçu le code ?",
+      "resend": "Renvoyer",
+      "resendIn": "Renvoyer dans {seconds}s",
+      "oauthNote": "Important : vous ne pouvez accéder à la plateforme qu'en vous connectant avec votre compte Google ou Facebook/Meta. Les mots de passe ne sont pas utilisés."
+    },
     "steps": {
       "verifying": "Vérification de vos informations...",
       "creating": "Création de votre compte...",
@@ -3032,7 +3045,10 @@
       "invalidEmail": "Veuillez entrer une adresse e-mail valide.",
       "invalidLogo": "Veuillez entrer une URL valide pour votre logo.",
       "generic": "Quelque chose a mal tourné. Veuillez réessayer plus tard.",
-      "configError": "Le service est temporairement indisponible. Veuillez réessayer plus tard."
+      "configError": "Le service est temporairement indisponible. Veuillez réessayer plus tard.",
+      "codeInvalid": "Le code saisi est incorrect. Veuillez réessayer.",
+      "codeExpired": "Le code a expiré. Veuillez en demander un nouveau.",
+      "codeNotFound": "Aucun code actif trouvé. Veuillez en demander un nouveau."
     }
   },
   "trialBanner": {

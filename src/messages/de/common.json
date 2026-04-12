@@ -3011,6 +3011,19 @@
     },
     "submit": "Mein kostenloses Konto erstellen",
     "retry": "Erneut versuchen",
+    "verification": {
+      "sending": "Verifizierungscode wird gesendet...",
+      "sentTo": "Wir haben einen 6-stelligen Code gesendet an",
+      "checkSpam": "Falls Sie ihn nicht sehen, prüfen Sie Ihren Spam-Ordner.",
+      "codeLabel": "Verifizierungscode",
+      "codePlaceholder": "000000",
+      "invalidFormat": "Bitte geben Sie alle 6 Ziffern des Codes ein.",
+      "submit": "Verifizieren und Konto erstellen",
+      "noCode": "Keinen Code erhalten?",
+      "resend": "Erneut senden",
+      "resendIn": "Erneut senden in {seconds}s",
+      "oauthNote": "Wichtig: Sie können sich nur mit Ihrem Google- oder Facebook/Meta-Konto auf der Plattform anmelden. Passwörter werden nicht verwendet."
+    },
     "steps": {
       "verifying": "Ihre Daten werden überprüft...",
       "creating": "Ihr Konto wird erstellt...",
@@ -3032,7 +3045,10 @@
       "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
       "invalidLogo": "Bitte geben Sie eine gültige URL für Ihr Logo ein.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.",
-      "configError": "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut."
+      "configError": "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
+      "codeInvalid": "Der eingegebene Code ist falsch. Bitte versuchen Sie es erneut.",
+      "codeExpired": "Der Code ist abgelaufen. Bitte fordern Sie einen neuen an.",
+      "codeNotFound": "Kein aktiver Code gefunden. Bitte fordern Sie einen neuen an."
     }
   },
   "trialBanner": {
