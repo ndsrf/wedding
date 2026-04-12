@@ -32,6 +32,9 @@ const STEP_KEYS = [
   'settingUp',
   'loadingDemo',
   'sendingEmail',
+  'preparingWelcome',
+  'almostThere',
+  'finalTouches',
 ] as const;
 
 function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProps) {

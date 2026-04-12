@@ -3105,7 +3105,10 @@
       "creating": "Creando tu cuenta...",
       "settingUp": "Configurando tu espacio de trabajo...",
       "loadingDemo": "Cargando datos de boda de demostración...",
-      "sendingEmail": "Enviando tu enlace de acceso..."
+      "sendingEmail": "Enviando tu enlace de acceso...",
+      "preparingWelcome": "Preparando tu bienvenida personalizada...",
+      "almostThere": "¡Ya casi está! Dando los últimos retoques...",
+      "finalTouches": "Poniendo el lazo final a tu cuenta..."
     },
     "success": {
       "title": "¡Tu cuenta está lista!",
