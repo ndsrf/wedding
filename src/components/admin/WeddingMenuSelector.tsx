@@ -275,20 +275,23 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
   const hasMultipleRounds = allMenus.length > 1;
 
   const consolidatedSections = useMemo((): SectionWithConsolidatedDishes[] => {
-    // Outer map: section name → dish name (lowercase) → ConsolidatedDish
+    // Outer map keyed by normalized section name (trimmed + lowercase) for case-insensitive merge
     const sectionMap = new Map<string, Map<string, ConsolidatedDish>>();
-    const sectionOrder: string[] = [];
+    const sectionOrder: string[] = []; // normalized keys, in insertion order
+    const sectionDisplayNames = new Map<string, string>(); // normalized key → display name
 
     for (const menu of allMenus) {
       const roundNumber = menu.round_number;
       const roundTitle = menu.title;
 
       for (const section of menu.sections) {
-        if (!sectionMap.has(section.name)) {
-          sectionMap.set(section.name, new Map());
-          sectionOrder.push(section.name);
+        const sectionKey = section.name.trim().toLowerCase();
+        if (!sectionMap.has(sectionKey)) {
+          sectionMap.set(sectionKey, new Map());
+          sectionOrder.push(sectionKey);
+          sectionDisplayNames.set(sectionKey, section.name.trim());
         }
-        const dishMap = sectionMap.get(section.name)!;
+        const dishMap = sectionMap.get(sectionKey)!;
 
         for (const dish of section.dishes) {
           const dishKey = dish.name.trim().toLowerCase();
@@ -323,9 +326,9 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
       }
     }
 
-    return sectionOrder.map(name => ({
-      name,
-      dishes: Array.from(sectionMap.get(name)!.values()),
+    return sectionOrder.map(key => ({
+      name: sectionDisplayNames.get(key)!,
+      dishes: Array.from(sectionMap.get(key)!.values()),
     }));
   }, [allMenus]);
 

@@ -479,15 +479,20 @@ export async function POST(request: NextRequest) {
       });
       if (tastingMenus.length > 0) {
         // Consolidate selected dishes across all rounds
-        const sectionMap = new Map<string, typeof tastingMenus[0]['sections'][0]['dishes']>();
+        const sectionMap = new Map<string, { name: string; dishes: typeof tastingMenus[0]['sections'][0]['dishes'] }>();
+        const sectionOrder: string[] = [];
         for (const menu of tastingMenus) {
           for (const section of menu.sections) {
-            if (!sectionMap.has(section.name)) sectionMap.set(section.name, []);
-            sectionMap.get(section.name)!.push(...section.dishes);
+            const key = section.name.trim().toLowerCase();
+            if (!sectionMap.has(key)) {
+              sectionMap.set(key, { name: section.name.trim(), dishes: [] });
+              sectionOrder.push(key);
+            }
+            sectionMap.get(key)!.dishes.push(...section.dishes);
           }
         }
         menuContext = {
-          sections: Array.from(sectionMap.entries()).map(([name, dishes]) => ({ name, dishes })),
+          sections: sectionOrder.map(k => sectionMap.get(k)!),
         };
       }
     } catch (err) {

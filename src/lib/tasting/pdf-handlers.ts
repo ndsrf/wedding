@@ -333,19 +333,21 @@ export async function generateTastingMenuPDFHandler(weddingId: string) {
     getWeddingContext(weddingId),
   ]);
 
-  // Consolidate sections from all rounds by section name
-  const sectionMap = new Map<string, { id: string; name: string; dishes: Array<{ id: string; name: string; description: string | null; image_url: string | null }> }>();
+  // Consolidate sections from all rounds by section name (case-insensitive, trimmed)
+  type PdfSection = { id: string; name: string; dishes: Array<{ id: string; name: string; description: string | null; image_url: string | null }> };
+  const sectionMap = new Map<string, PdfSection>();
   const sectionOrder: string[] = [];
   for (const menu of allMenus) {
     for (const s of menu.sections) {
-      if (!sectionMap.has(s.name)) {
-        sectionMap.set(s.name, { id: s.id, name: s.name, dishes: [] });
-        sectionOrder.push(s.name);
+      const key = s.name.trim().toLowerCase();
+      if (!sectionMap.has(key)) {
+        sectionMap.set(key, { id: s.id, name: s.name.trim(), dishes: [] });
+        sectionOrder.push(key);
       }
-      sectionMap.get(s.name)!.dishes.push(...s.dishes);
+      sectionMap.get(key)!.dishes.push(...s.dishes);
     }
   }
-  const consolidatedSections = sectionOrder.map(n => sectionMap.get(n)!);
+  const consolidatedSections = sectionOrder.map(k => sectionMap.get(k)!);
 
   if (consolidatedSections.length === 0 && allMenus.length === 0) {
     return NextResponse.json(
