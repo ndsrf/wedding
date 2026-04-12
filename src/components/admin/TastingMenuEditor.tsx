@@ -575,15 +575,15 @@ export function TastingMenuEditor({ menu, apiBase, menuId, onMenuChange, readOnl
       {/* Import from PDF/Image */}
       {!readOnly && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div>
+          <div className="flex flex-wrap items-start gap-3 mb-2">
+            <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-gray-900">{t('import.title')}</h3>
               <p className="text-xs text-gray-500 mt-0.5">{t('import.description')}</p>
             </div>
             <button
               onClick={handleImportClick}
               disabled={importing}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 shrink-0"
             >
               {importing ? (
                 <><WeddingSpinner size="sm" />{t('import.processing')}</>

@@ -226,20 +226,20 @@ export function TastingPageContent({
       <PrivateHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-6 gap-4">
-          <div className="flex items-center">
-            <Link href={backHref} className="text-gray-500 hover:text-gray-700 mr-3">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6 gap-3">
+          <div className="flex items-center min-w-0">
+            <Link href={backHref} className="text-gray-500 hover:text-gray-700 mr-3 shrink-0">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">🍽️ {t('title')}</h1>
-              {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold text-gray-900 truncate">🍽️ {t('title')}</h1>
+              {subtitle && <p className="mt-1 text-sm text-gray-500 truncate">{subtitle}</p>}
             </div>
           </div>
           {!loading && (
-            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
               {menu && (
                 <PdfDownloadButton
                   url={reportUrl}

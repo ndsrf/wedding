@@ -159,7 +159,7 @@ export async function getAllDishesForWedding(weddingId: string): Promise<FlatDis
     },
   });
 
-  return allMenus.flatMap(menu =>
+  const allDishes = allMenus.flatMap(menu =>
     menu.sections.flatMap(section =>
       section.dishes.map(dish => {
         const scores = dish.scores ?? [];
@@ -179,6 +179,18 @@ export async function getAllDishesForWedding(weddingId: string): Promise<FlatDis
       }),
     ),
   );
+
+  // Consolidate by section + dish name, keeping the variant with the best score.
+  // This ensures the AI generator sees each unique dish only once, at its best rating.
+  const keyMap = new Map<string, FlatDish>();
+  for (const dish of allDishes) {
+    const key = `${dish.section_name.toLowerCase()}|||${dish.name.trim().toLowerCase()}`;
+    const existing = keyMap.get(key);
+    if (!existing || (dish.average_score ?? -Infinity) > (existing.average_score ?? -Infinity)) {
+      keyMap.set(key, dish);
+    }
+  }
+  return Array.from(keyMap.values());
 }
 
 // ============================================================================

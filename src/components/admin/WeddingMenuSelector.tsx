@@ -28,17 +28,24 @@ function Stars({ value }: { value: number }) {
   );
 }
 
-// ─── Extended dish type with round info ──────────────────────────────────────
+// ─── Consolidated dish type (merges same-named dishes across rounds) ──────────
 
-interface DishWithRound extends TastingDish {
-  round_number: number;
-  round_title: string;
-  menu_id: string;
+interface ConsolidatedDish {
+  id: string; // canonical ID (from the round with the best score)
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  average_score: number | null; // best score across all rounds
+  score_count: number;
+  order: number;
+  section_id: string;
+  rounds: Array<{ round_number: number; round_title: string }>; // every round this dish appears in
+  allIds: string[]; // all dish IDs for this name+section across rounds
 }
 
-interface SectionWithRoundDishes {
+interface SectionWithConsolidatedDishes {
   name: string;
-  dishes: DishWithRound[];
+  dishes: ConsolidatedDish[];
 }
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -206,12 +213,12 @@ function DishRow({
   dish,
   checked,
   onToggle,
-  showRoundBadge,
+  showRoundBadges,
 }: {
-  dish: DishWithRound;
+  dish: ConsolidatedDish;
   checked: boolean;
   onToggle: () => void;
-  showRoundBadge: boolean;
+  showRoundBadges: boolean;
 }) {
   return (
     <div className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100">
@@ -229,14 +236,16 @@ function DishRow({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             <p className="text-sm font-medium text-gray-800 truncate">{dish.name}</p>
-            {showRoundBadge && <RoundBadge roundNumber={dish.round_number} />}
+            {showRoundBadges && dish.rounds.map(r => (
+              <RoundBadge key={r.round_number} roundNumber={r.round_number} />
+            ))}
           </div>
           {dish.description && <p className="text-xs text-gray-500 line-clamp-1">{dish.description}</p>}
           {dish.average_score !== null && (
             <div className="mt-1 flex items-center gap-2">
               <Stars value={Math.round(dish.average_score || 0)} />
               <span className="text-xs font-bold text-rose-600">
-                {dish.average_score?.toFixed(1)}
+                {dish.average_score.toFixed(1)}
               </span>
             </div>
           )}
@@ -265,8 +274,9 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
   // Build consolidated sections from all menus
   const hasMultipleRounds = allMenus.length > 1;
 
-  const consolidatedSections = useMemo((): SectionWithRoundDishes[] => {
-    const sectionMap = new Map<string, DishWithRound[]>();
+  const consolidatedSections = useMemo((): SectionWithConsolidatedDishes[] => {
+    // Outer map: section name → dish name (lowercase) → ConsolidatedDish
+    const sectionMap = new Map<string, Map<string, ConsolidatedDish>>();
     const sectionOrder: string[] = [];
 
     for (const menu of allMenus) {
@@ -275,17 +285,48 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
 
       for (const section of menu.sections) {
         if (!sectionMap.has(section.name)) {
-          sectionMap.set(section.name, []);
+          sectionMap.set(section.name, new Map());
           sectionOrder.push(section.name);
         }
-        const dishes = sectionMap.get(section.name)!;
+        const dishMap = sectionMap.get(section.name)!;
+
         for (const dish of section.dishes) {
-          dishes.push({ ...dish, round_number: roundNumber, round_title: roundTitle, menu_id: menu.id });
+          const dishKey = dish.name.trim().toLowerCase();
+          const existing = dishMap.get(dishKey);
+          const score = dish.average_score ?? null;
+
+          if (!existing) {
+            dishMap.set(dishKey, {
+              id: dish.id,
+              name: dish.name,
+              description: dish.description ?? null,
+              image_url: dish.image_url ?? null,
+              average_score: score,
+              score_count: dish.score_count ?? 0,
+              order: dish.order,
+              section_id: dish.section_id,
+              rounds: [{ round_number: roundNumber, round_title: roundTitle }],
+              allIds: [dish.id],
+            });
+          } else {
+            // Promote to canonical if this round has a better score
+            if (score !== null && (existing.average_score === null || score > existing.average_score)) {
+              existing.id = dish.id;
+              existing.average_score = score;
+              existing.score_count = dish.score_count ?? 0;
+              if (dish.image_url) existing.image_url = dish.image_url;
+            }
+            existing.rounds.push({ round_number: roundNumber, round_title: roundTitle });
+            existing.allIds.push(dish.id);
+          }
         }
       }
     }
 
-    return sectionOrder.map(name => ({ name, dishes: sectionMap.get(name)! }));
+    return sectionOrder.map(name => ({
+      name,
+      dishes: Array.from(sectionMap.get(name)!.values()),
+    }));
   }, [allMenus]);
 
   // Initialize selectedIds from all menus
@@ -303,14 +344,14 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
 
   const availableSections = useMemo(() =>
     consolidatedSections
-      .map(s => ({ ...s, dishes: s.dishes.filter(d => !selectedIds.has(d.id)) }))
+      .map(s => ({ ...s, dishes: s.dishes.filter(d => !d.allIds.some(id => selectedIds.has(id))) }))
       .filter(s => s.dishes.length > 0),
     [consolidatedSections, selectedIds]
   );
 
   const selectedSections = useMemo(() =>
     consolidatedSections
-      .map(s => ({ ...s, dishes: s.dishes.filter(d => selectedIds.has(d.id)) }))
+      .map(s => ({ ...s, dishes: s.dishes.filter(d => d.allIds.some(id => selectedIds.has(id))) }))
       .filter(s => s.dishes.length > 0),
     [consolidatedSections, selectedIds]
   );
@@ -330,7 +371,7 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
     });
   };
 
-  const handleToggleSection = (sectionDishes: DishWithRound[], list: 'available' | 'selected') => {
+  const handleToggleSection = (sectionDishes: ConsolidatedDish[], list: 'available' | 'selected') => {
     const setter = list === 'available' ? setAvailableChecked : setSelectedChecked;
     const dishIds = sectionDishes.map(d => d.id);
     setter(prev => {
@@ -381,16 +422,27 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
   };
 
   const moveCheckedToSelected = () => {
+    const allConsolidated = consolidatedSections.flatMap(s => s.dishes);
     const nextIds = new Set(selectedIds);
-    availableChecked.forEach(id => nextIds.add(id));
+    availableChecked.forEach(canonicalId => {
+      // Remove all round variants, then add only the canonical ID
+      const dish = allConsolidated.find(d => d.id === canonicalId);
+      if (dish) dish.allIds.forEach(id => nextIds.delete(id));
+      nextIds.add(canonicalId);
+    });
     setSelectedIds(nextIds);
     setAvailableChecked(new Set());
     handleSave(Array.from(nextIds));
   };
 
   const moveCheckedToAvailable = () => {
+    const allConsolidated = consolidatedSections.flatMap(s => s.dishes);
     const nextIds = new Set(selectedIds);
-    selectedChecked.forEach(id => nextIds.delete(id));
+    selectedChecked.forEach(canonicalId => {
+      const dish = allConsolidated.find(d => d.id === canonicalId);
+      if (dish) dish.allIds.forEach(id => nextIds.delete(id));
+      else nextIds.delete(canonicalId);
+    });
     setSelectedIds(nextIds);
     setSelectedChecked(new Set());
     handleSave(Array.from(nextIds));
@@ -472,8 +524,8 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
       {hasMultipleRounds && (
         <div className="flex items-center gap-3 flex-wrap bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5">
           <span className="text-xs font-medium text-gray-600">{t('rounds')}</span>
-          {allMenus.map((menu, idx) => {
-            const roundNumber = (menu as TastingMenu & { round_number?: number }).round_number ?? (idx + 1);
+          {allMenus.map((menu) => {
+            const roundNumber = menu.round_number;
             return (
               <span key={menu.id} className="flex items-center gap-1 text-xs text-gray-600">
                 <RoundBadge roundNumber={roundNumber} />
@@ -588,7 +640,7 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
                       dish={dish}
                       checked={availableChecked.has(dish.id)}
                       onToggle={() => handleToggleDish(dish.id, 'available')}
-                      showRoundBadge={hasMultipleRounds}
+                      showRoundBadges={hasMultipleRounds}
                     />
                   ))}
                 </div>
@@ -649,7 +701,7 @@ export function WeddingMenuSelector({ allMenus, primaryMenu, apiBase, onMenuChan
                       dish={dish}
                       checked={selectedChecked.has(dish.id)}
                       onToggle={() => handleToggleDish(dish.id, 'selected')}
-                      showRoundBadge={hasMultipleRounds}
+                      showRoundBadges={hasMultipleRounds}
                     />
                   ))}
                 </div>
