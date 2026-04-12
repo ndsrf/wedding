@@ -3033,7 +3033,12 @@
       "sendingEmail": "Invio del tuo link di accesso...",
       "preparingWelcome": "Preparando il tuo benvenuto personalizzato...",
       "almostThere": "Ci siamo quasi! Ultimi ritocchi in corso...",
-      "finalTouches": "Stiamo mettendo il fiocco sul tuo nuovo account..."
+      "finalTouches": "Stiamo mettendo il fiocco sul tuo nuovo account...",
+      "securingData": "Protezione dei dati del tuo account...",
+      "finalizingSetup": "Finalizzazione degli ultimi dettagli della configurazione...",
+      "takingLonger": "Ci sta volendo un po' più del solito — grazie per la pazienza!",
+      "stillWorking": "Stiamo preparando il tuo account con la massima cura...",
+      "worthTheWait": "I matrimoni più belli meritano la migliore piattaforma. Quasi pronto!"
     },
     "success": {
       "title": "Il tuo account è pronto!",

@@ -35,6 +35,14 @@ const STEP_KEYS = [
   'preparingWelcome',
   'almostThere',
   'finalTouches',
+  'securingData',
+  'finalizingSetup',
+] as const;
+
+const EXTENDED_KEYS = [
+  'takingLonger',
+  'stillWorking',
+  'worthTheWait',
 ] as const;
 
 function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProps) {
@@ -72,7 +80,10 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
     phone: '',
   });
 
+  const [extended, setExtended] = useState(false);
+  const [extendedStep, setExtendedStep] = useState(0);
   const stepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const extendedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Reset when locale changes
@@ -104,10 +115,14 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
   useEffect(() => {
     if (stage === 'loading') {
       setCurrentStep(0);
+      setExtended(false);
+      setExtendedStep(0);
       stepTimerRef.current = setInterval(() => {
         setCurrentStep(prev => {
           if (prev < STEP_KEYS.length - 1) return prev + 1;
           clearInterval(stepTimerRef.current!);
+          stepTimerRef.current = null;
+          setExtended(true);
           return prev;
         });
       }, 3500);
@@ -116,11 +131,27 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
         clearInterval(stepTimerRef.current);
         stepTimerRef.current = null;
       }
+      setExtended(false);
+      setExtendedStep(0);
     }
     return () => {
       if (stepTimerRef.current) clearInterval(stepTimerRef.current);
     };
   }, [stage]);
+
+  // Cycle through extended "still working" messages once all main steps are shown
+  useEffect(() => {
+    if (!extended) return;
+    extendedTimerRef.current = setInterval(() => {
+      setExtendedStep(p => (p + 1) % EXTENDED_KEYS.length);
+    }, 5000);
+    return () => {
+      if (extendedTimerRef.current) {
+        clearInterval(extendedTimerRef.current);
+        extendedTimerRef.current = null;
+      }
+    };
+  }, [extended]);
 
   // Focus first digit box when verification stage is shown
   useEffect(() => {
@@ -627,7 +658,9 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
 
               {/* Step message */}
               <p className="text-lg font-medium text-gray-800 mb-2">
-                {t(`steps.${STEP_KEYS[currentStep]}`)}
+                {extended
+                  ? t(`steps.${EXTENDED_KEYS[extendedStep]}`)
+                  : t(`steps.${STEP_KEYS[currentStep]}`)}
               </p>
 
               {/* Progress dots */}
@@ -636,7 +669,7 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
                   <div
                     key={i}
                     className={`h-2 rounded-full transition-all duration-500 ${
-                      i <= currentStep
+                      extended || i <= currentStep
                         ? 'w-6 bg-rose-500'
                         : 'w-2 bg-gray-200'
                     }`}

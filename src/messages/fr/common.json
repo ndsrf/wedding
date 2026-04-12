@@ -3032,7 +3032,12 @@
       "sendingEmail": "Envoi de votre lien d'accès...",
       "preparingWelcome": "Préparation de votre accueil personnalisé...",
       "almostThere": "Presque prêt ! On peaufine les derniers détails...",
-      "finalTouches": "On noue le ruban sur votre nouveau compte..."
+      "finalTouches": "On noue le ruban sur votre nouveau compte...",
+      "securingData": "Sécurisation des données de votre compte...",
+      "finalizingSetup": "Finalisation des derniers détails de votre configuration...",
+      "takingLonger": "Cela prend un peu plus de temps que prévu — merci pour votre patience !",
+      "stillWorking": "Nous préparons votre compte avec le plus grand soin...",
+      "worthTheWait": "Les plus beaux mariages méritent la meilleure plateforme. Presque prêt !"
     },
     "success": {
       "title": "Votre compte est prêt !",

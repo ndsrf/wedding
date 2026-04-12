@@ -3108,7 +3108,12 @@
       "sendingEmail": "Enviando tu enlace de acceso...",
       "preparingWelcome": "Preparando tu bienvenida personalizada...",
       "almostThere": "¡Ya casi está! Dando los últimos retoques...",
-      "finalTouches": "Poniendo el lazo final a tu cuenta..."
+      "finalTouches": "Poniendo el lazo final a tu cuenta...",
+      "securingData": "Protegiendo los datos de tu cuenta...",
+      "finalizingSetup": "Ultimando los detalles de tu configuración...",
+      "takingLonger": "Esto está tardando un poco más... ¡gracias por tu paciencia!",
+      "stillWorking": "Seguimos construyendo tu cuenta con todo el cariño...",
+      "worthTheWait": "Las mejores bodas merecen la mejor plataforma. ¡Ya casi!"
     },
     "success": {
       "title": "¡Tu cuenta está lista!",
