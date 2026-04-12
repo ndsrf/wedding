@@ -3029,7 +3029,10 @@
       "creating": "Création de votre compte...",
       "settingUp": "Configuration de votre espace de travail...",
       "loadingDemo": "Chargement des données de mariage de démonstration...",
-      "sendingEmail": "Envoi de votre lien d'accès..."
+      "sendingEmail": "Envoi de votre lien d'accès...",
+      "preparingWelcome": "Préparation de votre accueil personnalisé...",
+      "almostThere": "Presque prêt ! On peaufine les derniers détails...",
+      "finalTouches": "On noue le ruban sur votre nouveau compte..."
     },
     "success": {
       "title": "Votre compte est prêt !",

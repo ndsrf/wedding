@@ -3128,7 +3128,10 @@
       "creating": "Creating your account...",
       "settingUp": "Setting up your workspace...",
       "loadingDemo": "Loading demo wedding data...",
-      "sendingEmail": "Sending your access link..."
+      "sendingEmail": "Sending your access link...",
+      "preparingWelcome": "Preparing your personalised welcome...",
+      "almostThere": "Almost there! Adding the final touches...",
+      "finalTouches": "Tying the ribbon on your new account..."
     },
     "success": {
       "title": "Your account is ready!",

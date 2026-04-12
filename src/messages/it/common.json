@@ -3030,7 +3030,10 @@
       "creating": "Creazione del tuo account...",
       "settingUp": "Configurazione del tuo spazio di lavoro...",
       "loadingDemo": "Caricamento dei dati del matrimonio demo...",
-      "sendingEmail": "Invio del tuo link di accesso..."
+      "sendingEmail": "Invio del tuo link di accesso...",
+      "preparingWelcome": "Preparando il tuo benvenuto personalizzato...",
+      "almostThere": "Ci siamo quasi! Ultimi ritocchi in corso...",
+      "finalTouches": "Stiamo mettendo il fiocco sul tuo nuovo account..."
     },
     "success": {
       "title": "Il tuo account è pronto!",
