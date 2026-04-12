@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
@@ -41,11 +41,12 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
   const [errorKey, setErrorKey] = useState<string>('generic');
   const [submittedEmail, setSubmittedEmail] = useState('');
 
-  // Verification code state
-  const [verificationCode, setVerificationCode] = useState('');
+  // Verification code state — 6 individual digit boxes
+  const [digits, setDigits] = useState<string[]>(Array(6).fill(''));
   const [codeError, setCodeError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const digitRefs = useRef<(HTMLInputElement | null)[]>(Array(6).fill(null));
 
   // Cached form data to use after verification
   const pendingFormRef = useRef<{
@@ -68,7 +69,6 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
 
   const stepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-  const codeInputRef = useRef<HTMLInputElement>(null);
 
   // Reset when locale changes
   useEffect(() => {
@@ -117,12 +117,12 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
     };
   }, [stage]);
 
-  // Focus code input when verification stage is shown
+  // Focus first digit box when verification stage is shown
   useEffect(() => {
     if (stage === 'verification') {
-      setVerificationCode('');
+      setDigits(Array(6).fill(''));
       setCodeError('');
-      setTimeout(() => codeInputRef.current?.focus(), 100);
+      setTimeout(() => digitRefs.current[0]?.focus(), 100);
     }
   }, [stage]);
 
@@ -145,6 +145,53 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
       });
     }, 1000);
   };
+
+  // ---- OTP digit box handlers ----
+  const handleDigitChange = useCallback((index: number, value: string) => {
+    const digit = value.replace(/\D/g, '').slice(-1); // keep only last digit
+    setCodeError('');
+    setDigits(prev => {
+      const next = [...prev];
+      next[index] = digit;
+      return next;
+    });
+    if (digit && index < 5) {
+      digitRefs.current[index + 1]?.focus();
+    }
+  }, []);
+
+  const handleDigitKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (digits[index]) {
+        // Clear current box
+        setDigits(prev => { const n = [...prev]; n[index] = ''; return n; });
+      } else if (index > 0) {
+        // Move to previous and clear it
+        digitRefs.current[index - 1]?.focus();
+        setDigits(prev => { const n = [...prev]; n[index - 1] = ''; return n; });
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      digitRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      digitRefs.current[index + 1]?.focus();
+    }
+  }, [digits]);
+
+  const handleDigitPaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    setCodeError('');
+    setDigits(prev => {
+      const next = [...prev];
+      for (let i = 0; i < 6; i++) next[i] = pasted[i] ?? '';
+      return next;
+    });
+    // Focus the box after the last pasted digit (or last box)
+    const focusIdx = Math.min(pasted.length, 5);
+    digitRefs.current[focusIdx]?.focus();
+  }, []);
+  // ---- end OTP handlers ----
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -222,7 +269,7 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
     e.preventDefault();
     setCodeError('');
 
-    const code = verificationCode.trim();
+    const code = digits.join('');
     if (!/^\d{6}$/.test(code)) {
       setCodeError(t('verification.invalidFormat'));
       return;
@@ -271,6 +318,7 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
         // For code errors, go back to verification stage with inline error
         if (['codeInvalid', 'codeExpired', 'codeNotFound'].includes(key)) {
           setCodeError(t(`errors.${key}`));
+          setDigits(Array(6).fill(''));
           setStage('verification');
         } else {
           setErrorKey(key);
@@ -292,7 +340,7 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
   const handleRetry = () => {
     setStage('form');
     setErrorKey('generic');
-    setVerificationCode('');
+    setDigits(Array(6).fill(''));
     setCodeError('');
   };
 
@@ -466,30 +514,38 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
                 <p className="text-sm text-gray-500 mt-1">{t('verification.checkSpam')}</p>
               </div>
 
-              {/* Code input */}
+              {/* Code input — 6 individual digit boxes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
                   {t('verification.codeLabel')} <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  ref={codeInputRef}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d{6}"
-                  maxLength={6}
-                  required
-                  value={verificationCode}
-                  onChange={e => {
-                    setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6));
-                    setCodeError('');
-                  }}
-                  placeholder={t('verification.codePlaceholder')}
-                  className={`w-full px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] border rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 transition-all ${
-                    codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                  }`}
-                />
+                <div className="flex justify-center gap-2.5" role="group" aria-label={t('verification.codeLabel')}>
+                  {digits.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={el => { digitRefs.current[i] = el; }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                      onChange={e => handleDigitChange(i, e.target.value)}
+                      onKeyDown={e => handleDigitKeyDown(i, e)}
+                      onPaste={handleDigitPaste}
+                      onFocus={e => e.target.select()}
+                      className={`w-11 h-14 text-center text-2xl font-bold font-mono rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 ${
+                        codeError
+                          ? 'border-red-400 bg-red-50 text-red-700'
+                          : digit
+                            ? 'border-rose-400 bg-rose-50 text-rose-700'
+                            : 'border-gray-200 bg-gray-50 text-gray-900 hover:border-gray-300'
+                      }`}
+                      aria-label={`Dígito ${i + 1}`}
+                    />
+                  ))}
+                </div>
                 {codeError && (
-                  <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+                  <p className="mt-2 text-sm text-red-600 flex items-center justify-center gap-1">
                     <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
@@ -510,7 +566,7 @@ function TrialSignupModalInner({ isOpen, onClose, locale }: TrialSignupModalProp
 
               <button
                 type="submit"
-                disabled={verificationCode.length !== 6}
+                disabled={digits.join('').length !== 6}
                 className="w-full py-3 px-6 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full font-semibold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {t('verification.submit')}
