@@ -3038,7 +3038,12 @@
       "sendingEmail": "Envoi de votre lien d'accès...",
       "preparingWelcome": "Préparation de votre accueil personnalisé...",
       "almostThere": "Presque terminé ! Finalisation des derniers détails...",
-      "finalTouches": "Mise en place du ruban final sur votre nouveau compte..."
+      "finalTouches": "Mise en place du ruban final sur votre nouveau compte...",
+      "securingData": "Sécurisation des données de votre compte...",
+      "finalizingSetup": "Finalisation des derniers détails de votre configuration...",
+      "takingLonger": "Cela prend un peu plus de temps que prévu — merci pour votre patience !",
+      "stillWorking": "Nous préparons votre compte avec le plus grand soin...",
+      "worthTheWait": "Les plus beaux mariages méritent la meilleure plateforme. Presque prêt !"
     },
     "success": {
       "title": "Votre compte est prêt !",
