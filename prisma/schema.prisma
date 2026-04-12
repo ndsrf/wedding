@@ -1449,3 +1449,18 @@ model TastingScore {
   @@index([participant_id])
   @@map("tasting_scores")
 }
+
+// -----------------------------------------------------------------------------
+// EMAIL VERIFICATION CODES — temporary codes for trial signup verification
+// -----------------------------------------------------------------------------
+
+model EmailVerificationCode {
+  id         String   @id @default(uuid())
+  email      String
+  code       String
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  @@index([email])
+  @@map("email_verification_codes")
+}

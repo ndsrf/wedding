@@ -24,6 +24,7 @@ const trialSignupSchema = z.object({
   phone: z.string().max(30).optional(),
   recaptchaToken: z.string().min(1, 'reCAPTCHA token is required'),
   locale: z.string().default('es'),
+  verificationCode: z.string().length(6, 'Verification code must be 6 digits').regex(/^\d{6}$/, 'Invalid code'),
 });
 
 // ============================================================================
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       throw err;
     }
 
-    const { companyName, email, logoUrl, phone, recaptchaToken, locale } = validated;
+    const { companyName, email, logoUrl, phone, recaptchaToken, locale, verificationCode } = validated;
 
     // 2. Verify reCAPTCHA (skip in development)
     const isDev = process.env.NODE_ENV === 'development';
@@ -164,7 +165,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 3. Check email uniqueness
+    // 3. Validate email verification code
+    const storedCode = await prisma.emailVerificationCode.findFirst({
+      where: { email },
+      orderBy: { created_at: 'desc' },
+    });
+
+    if (!storedCode) {
+      return NextResponse.json(
+        { success: false, error: 'CODE_NOT_FOUND' },
+        { status: 400 }
+      );
+    }
+
+    if (new Date() > storedCode.expires_at) {
+      await prisma.emailVerificationCode.deleteMany({ where: { email } });
+      return NextResponse.json(
+        { success: false, error: 'CODE_EXPIRED' },
+        { status: 400 }
+      );
+    }
+
+    if (storedCode.code !== verificationCode) {
+      return NextResponse.json(
+        { success: false, error: 'CODE_INVALID' },
+        { status: 400 }
+      );
+    }
+
+    // Code is valid — clean it up before creating the account
+    await prisma.emailVerificationCode.deleteMany({ where: { email } });
+
+    // 4. Check email uniqueness
     const existing = await prisma.weddingPlanner.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(

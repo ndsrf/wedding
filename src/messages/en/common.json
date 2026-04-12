@@ -3110,6 +3110,19 @@
     },
     "submit": "Create My Free Account",
     "retry": "Try Again",
+    "verification": {
+      "sending": "Sending verification code...",
+      "sentTo": "We sent a 6-digit code to",
+      "checkSpam": "If you don't see it, check your spam folder.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "000000",
+      "invalidFormat": "Please enter all 6 digits of the code.",
+      "submit": "Verify and create account",
+      "noCode": "Didn't receive the code?",
+      "resend": "Resend",
+      "resendIn": "Resend in {seconds}s",
+      "oauthNote": "Important: you can only sign in to the platform with your Google or Facebook/Meta account. Passwords are not used."
+    },
     "steps": {
       "verifying": "Verifying your details...",
       "creating": "Creating your account...",
@@ -3131,7 +3144,10 @@
       "invalidEmail": "Please enter a valid email address.",
       "invalidLogo": "Please enter a valid URL for your logo.",
       "generic": "Something went wrong. Please try again later.",
-      "configError": "The service is temporarily unavailable. Please try again later."
+      "configError": "The service is temporarily unavailable. Please try again later.",
+      "codeInvalid": "The code you entered is incorrect. Please try again.",
+      "codeExpired": "The code has expired. Please request a new one.",
+      "codeNotFound": "No active code found. Please request a new one."
     }
   },
   "demoTutorial": {

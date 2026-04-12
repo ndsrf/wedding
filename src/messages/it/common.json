@@ -3012,6 +3012,19 @@
     },
     "submit": "Crea il mio Account Gratuito",
     "retry": "Riprova",
+    "verification": {
+      "sending": "Invio del codice di verifica...",
+      "sentTo": "Abbiamo inviato un codice di 6 cifre a",
+      "checkSpam": "Se non lo vedi, controlla la cartella spam.",
+      "codeLabel": "Codice di verifica",
+      "codePlaceholder": "000000",
+      "invalidFormat": "Inserisci tutte le 6 cifre del codice.",
+      "submit": "Verifica e crea account",
+      "noCode": "Non hai ricevuto il codice?",
+      "resend": "Invia di nuovo",
+      "resendIn": "Invia di nuovo tra {seconds}s",
+      "oauthNote": "Importante: puoi accedere alla piattaforma solo con il tuo account Google o Facebook/Meta. Le password non sono utilizzate."
+    },
     "steps": {
       "verifying": "Verifica delle tue informazioni...",
       "creating": "Creazione del tuo account...",
@@ -3033,7 +3046,10 @@
       "invalidEmail": "Inserisci un indirizzo email valido.",
       "invalidLogo": "Inserisci un URL valido per il logo.",
       "generic": "Qualcosa è andato storto. Riprova più tardi.",
-      "configError": "Il servizio è temporaneamente non disponibile. Riprova più tardi."
+      "configError": "Il servizio è temporaneamente non disponibile. Riprova più tardi.",
+      "codeInvalid": "Il codice inserito non è corretto. Riprova.",
+      "codeExpired": "Il codice è scaduto. Richiedine uno nuovo.",
+      "codeNotFound": "Nessun codice attivo trovato. Richiedine uno nuovo."
     }
   },
   "trialBanner": {
