@@ -3031,8 +3031,8 @@
       "loadingDemo": "Chargement des données de mariage de démonstration...",
       "sendingEmail": "Envoi de votre lien d'accès...",
       "preparingWelcome": "Préparation de votre accueil personnalisé...",
-      "almostThere": "Presque prêt ! On peaufine les derniers détails...",
-      "finalTouches": "On noue le ruban sur votre nouveau compte..."
+      "almostThere": "Presque terminé ! Finalisation des derniers détails...",
+      "finalTouches": "Mise en place du ruban final sur votre nouveau compte..."
     },
     "success": {
       "title": "Votre compte est prêt !",
