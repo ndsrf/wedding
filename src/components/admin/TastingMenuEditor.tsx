@@ -175,7 +175,7 @@ export function TastingMenuEditor({ menu, apiBase, menuId, onMenuChange, readOnl
       });
       if (!data.success) throw new Error(data.error?.message ?? t('menu.error'));
       onMenuChange({
-        ...(menu ?? { id: data.data.id, sections: [] }),
+        ...(menu ?? { id: data.data.id, round_number: data.data.round_number ?? 1, sections: [] }),
         title: menuTitle,
         description: menuDescription || null,
         tasting_date: menuTastingDate || null,
@@ -202,7 +202,7 @@ export function TastingMenuEditor({ menu, apiBase, menuId, onMenuChange, readOnl
         body: JSON.stringify(sectionBody),
       });
       if (!data.success) throw new Error(data.error?.message ?? 'Failed to add section');
-      const current = menu ?? { id: data.data.menu_id, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
+      const current = menu ?? { id: data.data.menu_id, round_number: 1, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
       onMenuChange({ ...current, sections: [...current.sections, { ...data.data, dishes: [] }] });
       setAddingSectionName('');
     } catch (err) {
