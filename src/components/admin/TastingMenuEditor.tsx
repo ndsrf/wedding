@@ -433,7 +433,7 @@ export function TastingMenuEditor({ menu, apiBase, menuId, onMenuChange, readOnl
 
         const newSection: TastingSection = { ...sectionData.data, dishes: [] };
         if (!currentMenu) {
-          currentMenu = { id: sectionData.data.menu_id, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
+          currentMenu = { id: sectionData.data.menu_id, round_number: 1, title: menuTitle, description: menuDescription || null, tasting_date: null, status: 'CLOSED' as const, sections: [] };
         }
         currentMenu = { ...currentMenu, sections: [...currentMenu.sections, newSection] };
 
