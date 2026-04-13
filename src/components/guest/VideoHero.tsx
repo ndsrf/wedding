@@ -53,6 +53,7 @@ export default function VideoHero({
               playsInline
               className="h-full w-full object-cover"
             >
+              <source src={src.replace('.mp4', '.webm')} type="video/webm" />
               <source src={src} type="video/mp4" />
             </video>
           </div>
