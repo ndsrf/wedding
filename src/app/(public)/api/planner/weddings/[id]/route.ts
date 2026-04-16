@@ -49,6 +49,8 @@ const updateWeddingSchema = z
     default_language: z.nativeEnum(Language).optional(),
     whatsapp_mode: z.nativeEnum(WhatsAppMode).optional(),
     customer_id: z.string().uuid().nullable().optional(),
+    planned_guests: z.number().int().positive().nullable().optional(),
+    planned_gift_per_person: z.number().positive().nullable().optional(),
   })
   .partial();
 
@@ -178,6 +180,8 @@ export async function GET(
                 payment_tracking_mode: wedding.payment_tracking_mode,
                 gift_iban: wedding.gift_iban,
                 allow_guest_additions: wedding.allow_guest_additions,
+      planned_guests: wedding.planned_guests,
+      planned_gift_per_person: wedding.planned_gift_per_person ? Number(wedding.planned_gift_per_person) : null,
       default_language: wedding.default_language,
       wedding_country: wedding.wedding_country,
       status: wedding.status,
@@ -400,6 +404,8 @@ export async function PATCH(
       default_language: Language;
       whatsapp_mode: WhatsAppMode;
       customer_id: string | null;
+      planned_guests: number | null;
+      planned_gift_per_person: number | null;
       updated_by: string;
     }> = {
       ...restData,

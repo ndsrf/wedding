@@ -19,8 +19,8 @@ interface PaymentItem {
   reference_code_used: string | null;
   auto_matched: boolean;
   status: GiftStatus;
-  transaction_date: Date;
-  created_at: Date;
+  transaction_date: string; // JSON wire format — always a string from the API
+  created_at: string;
   family: {
     id: string;
     name: string;

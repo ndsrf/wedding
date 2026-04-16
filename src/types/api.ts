@@ -206,6 +206,10 @@ export interface CreateWeddingRequest {
   customer_id?: string | null;
   /** Originating contract to link for billing / traceability */
   contract_id?: string | null;
+  /** Expected number of attending guests (used for payment planning) */
+  planned_guests?: number | null;
+  /** Expected gift amount per person in EUR (used for payment planning) */
+  planned_gift_per_person?: number | null;
 }
 
 export type CreateWeddingResponse = APIResponse<Wedding>;
@@ -489,7 +493,17 @@ export interface ListPaymentsQuery {
   family_id?: string;
 }
 
-export type ListPaymentsResponse = APIResponse<PaginatedResponse<GiftWithFamily>>;
+export type ListPaymentsResponse = APIResponse<
+  PaginatedResponse<GiftWithFamily> & {
+    stats: {
+      total: number;
+      pending: number;
+      received: number;
+      confirmed: number;
+      totalAmount: number;
+    };
+  }
+>;
 
 // POST /api/admin/payments
 export interface RecordPaymentRequest {
