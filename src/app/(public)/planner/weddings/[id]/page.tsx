@@ -365,6 +365,11 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                   icon: <CurrencyIcon className="h-3 w-3" />,
                 },
                 {
+                  href: `/planner/weddings/${weddingId}/finanzas`,
+                  label: t('admin.dashboard.finanzas'),
+                  icon: <CurrencyIcon className="h-3 w-3" />,
+                },
+                {
                   href: `/planner/weddings/${weddingId}/notas`,
                   label: t('notes.title'),
                   icon: (
