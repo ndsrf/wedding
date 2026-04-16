@@ -55,26 +55,16 @@ export async function GET(
           : null,
         total_guests: totalGuestCount,
         attending_count: attendingCount,
-        providers: providers.map((p: {
-          id: string;
-          category_id: string;
-          budgeted_price: unknown;
-          total_price: unknown;
-          category: { name: string; price_type: string };
-          payments: Array<{ amount: unknown }>;
-        }) => ({
+        providers: providers.map((p) => ({
           id: p.id,
           category_id: p.category_id,
           category_name: p.category.name,
           price_type: p.category.price_type,
           budgeted_price: p.budgeted_price ? Number(p.budgeted_price) : null,
           total_price: p.total_price ? Number(p.total_price) : null,
-          paid: p.payments.reduce(
-            (sum: number, pay: { amount: unknown }) => sum + Number(pay.amount),
-            0
-          ),
+          paid: p.payments.reduce((sum, pay) => sum + Number(pay.amount), 0),
         })),
-        gifts: gifts.map((g: { amount: unknown; status: string }) => ({
+        gifts: gifts.map((g) => ({
           amount: Number(g.amount),
           status: g.status,
         })),

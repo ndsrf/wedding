@@ -14,7 +14,6 @@
  */
 
 import { useState, useEffect, useCallback, useRef, type ChangeEvent } from 'react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -96,11 +95,12 @@ export function FinanzasPageContent({
     if (plannedGuests === '') return;
     setSavingGuests(true);
     try {
-      await fetch(weddingApiBase, {
+      const res = await fetch(weddingApiBase, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planned_guests: Number(plannedGuests) }),
       });
+      if (!res.ok) throw new Error(`Failed to save planned guests: ${res.status}`);
       await fetchData();
     } catch (error) {
       console.error('Error saving planned guests:', error);
@@ -225,22 +225,9 @@ export function FinanzasPageContent({
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <PrivateHeader />
+      <PrivateHeader title={t('title')} backUrl={backHref} subtitle={subtitle} />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-
-        {/* Page header */}
-        <div className="flex items-center min-w-0 mb-2">
-          <Link href={backHref} className="text-gray-500 hover:text-gray-700 mr-3 shrink-0">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900 truncate">{t('title')}</h1>
-            {subtitle && <p className="mt-1 text-sm text-gray-500 truncate">{subtitle}</p>}
-          </div>
-        </div>
 
         {isLoading ? (
           <div className="flex justify-center py-20">
