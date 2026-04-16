@@ -20,6 +20,7 @@ import {
   LocationType,
   QuoteStatus,
   ContractStatus,
+  AuthProvider,
   PrismaClient,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -300,8 +301,8 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       data: {
         email: weddingAdminEmail,
         name: wedding.couple_names,
-        auth_provider: 'GOOGLE' as const,
-        preferred_language: 'EN' as Language,
+        auth_provider: AuthProvider.GOOGLE,
+        preferred_language: Language.EN,
         invited_by: plannerId,
         wedding_id: wedding.id,
       },
