@@ -96,19 +96,43 @@ export async function listPaymentsHandler(
   if (status) whereClause.status = status;
   if (family_id) whereClause.family_id = family_id;
 
-  const total = await prisma.gift.count({ where: whereClause });
-
-  const payments = await prisma.gift.findMany({
-    where: whereClause,
-    skip,
-    take: limit,
-    orderBy: { transaction_date: 'desc' },
-    include: {
-      family: {
-        select: { id: true, name: true, email: true },
+  // Run count, per-status aggregates, total-amount sum, and page fetch in parallel.
+  // The groupBy/aggregate queries cover ALL matching rows (no pagination) so the
+  // stats cards reflect the full dataset, not just the current page.
+  const [total, statusCounts, amountAgg, payments] = await Promise.all([
+    prisma.gift.count({ where: whereClause }),
+    prisma.gift.groupBy({
+      by: ['status'],
+      where: whereClause,
+      _count: { _all: true },
+    }),
+    prisma.gift.aggregate({
+      where: whereClause,
+      _sum: { amount: true },
+    }),
+    prisma.gift.findMany({
+      where: whereClause,
+      skip,
+      take: limit,
+      orderBy: { transaction_date: 'desc' },
+      include: {
+        family: {
+          select: { id: true, name: true, email: true },
+        },
       },
-    },
-  });
+    }),
+  ]);
+
+  const countByStatus = (s: 'PENDING' | 'RECEIVED' | 'CONFIRMED') =>
+    statusCounts.find((r) => r.status === s)?._count._all ?? 0;
+
+  const stats = {
+    total,
+    pending: countByStatus('PENDING'),
+    received: countByStatus('RECEIVED'),
+    confirmed: countByStatus('CONFIRMED'),
+    totalAmount: Number(amountAgg._sum.amount ?? 0),
+  };
 
   const items = payments.map((p) => ({
     ...p,
@@ -120,6 +144,7 @@ export async function listPaymentsHandler(
     data: {
       items,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      stats,
     },
   };
 
@@ -255,7 +280,30 @@ export async function updatePaymentHandler(
 
   if (validatedData.status) updateData.status = validatedData.status;
   if (validatedData.amount) updateData.amount = validatedData.amount;
-  if (validatedData.transaction_date) updateData.transaction_date = new Date(validatedData.transaction_date);
+  if (validatedData.transaction_date) {
+    const transactionDate = new Date(validatedData.transaction_date);
+    const now = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    if (transactionDate > now) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Transaction date cannot be in the future' },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    if (transactionDate < oneYearAgo) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Transaction date cannot be more than 1 year in the past' },
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    updateData.transaction_date = transactionDate;
+  }
 
   const payment = await prisma.gift.update({
     where: { id: paymentId },

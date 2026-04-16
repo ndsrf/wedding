@@ -493,7 +493,17 @@ export interface ListPaymentsQuery {
   family_id?: string;
 }
 
-export type ListPaymentsResponse = APIResponse<PaginatedResponse<GiftWithFamily>>;
+export type ListPaymentsResponse = APIResponse<
+  PaginatedResponse<GiftWithFamily> & {
+    stats: {
+      total: number;
+      pending: number;
+      received: number;
+      confirmed: number;
+      totalAmount: number;
+    };
+  }
+>;
 
 // POST /api/admin/payments
 export interface RecordPaymentRequest {

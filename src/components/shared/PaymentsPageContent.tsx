@@ -32,8 +32,8 @@ interface PaymentItem {
   reference_code_used: string | null;
   auto_matched: boolean;
   status: GiftStatus;
-  transaction_date: Date;
-  created_at: Date;
+  transaction_date: string; // JSON wire format — always a string from the API
+  created_at: string;
   family: {
     id: string;
     name: string;
@@ -96,15 +96,8 @@ export function PaymentsPageContent({ apiPaths, isReadOnly, header }: PaymentsPa
       if (data.success) {
         setPayments(data.data.items);
         setTotalPages(data.data.pagination.totalPages);
-
-        const allPayments = data.data.items as PaymentItem[];
-        setStats({
-          total: allPayments.length,
-          pending: allPayments.filter((p) => p.status === 'PENDING').length,
-          received: allPayments.filter((p) => p.status === 'RECEIVED').length,
-          confirmed: allPayments.filter((p) => p.status === 'CONFIRMED').length,
-          totalAmount: allPayments.reduce((sum, p) => sum + p.amount, 0),
-        });
+        // Use server-computed stats so they reflect ALL payments, not just the current page
+        setStats(data.data.stats);
       }
     } catch (error) {
       console.error('Error fetching payments:', error);
