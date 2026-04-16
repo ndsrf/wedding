@@ -201,10 +201,6 @@ export interface Wedding {
   // CRM linkage
   customer_id: string | null;
   contract_id: string | null;
-
-  // Payment planning estimates
-  planned_guests: number | null;
-  planned_gift_per_person: number | null;
 }
 
 export interface WeddingAdmin {
@@ -370,6 +366,9 @@ export interface WeddingWithStats extends Wedding {
   rsvp_completion_percentage: number;
   attending_count: number;
   payment_received_count: number;
+  /** Payment planning estimates — returned as numbers (converted from DB Decimal) */
+  planned_guests?: number | null;
+  planned_gift_per_person?: number | null;
 }
 
 export interface GiftWithFamily extends Gift {
