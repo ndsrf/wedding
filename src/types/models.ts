@@ -201,6 +201,10 @@ export interface Wedding {
   // CRM linkage
   customer_id: string | null;
   contract_id: string | null;
+
+  // Payment planning estimates
+  planned_guests: number | null;
+  planned_gift_per_person: number | null;
 }
 
 export interface WeddingAdmin {
