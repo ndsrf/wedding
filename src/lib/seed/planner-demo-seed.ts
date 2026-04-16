@@ -20,6 +20,7 @@ import {
   LocationType,
   QuoteStatus,
   ContractStatus,
+  AuthProvider,
   PrismaClient,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -289,6 +290,24 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       planned_guests: 150,
     },
   });
+
+  // Wedding Admin (Couple) - for E2E testing and couple access
+  const weddingAdminEmail = process.env.WEDDING_ADMIN_EMAIL || 'admin@example.com';
+  const existingAdmin = await client.weddingAdmin.findFirst({
+    where: { email: weddingAdminEmail, wedding_id: wedding.id }
+  });
+  if (!existingAdmin) {
+    await client.weddingAdmin.create({
+      data: {
+        email: weddingAdminEmail,
+        name: wedding.couple_names,
+        auth_provider: AuthProvider.GOOGLE,
+        preferred_language: Language.EN,
+        invited_by: plannerId,
+        wedding_id: wedding.id,
+      },
+    });
+  }
 
   // Propagate planner templates -> wedding templates
   const plannerTemplates = await client.plannerMessageTemplate.findMany({ where: { planner_id: plannerId } });
