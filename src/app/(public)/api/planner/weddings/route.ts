@@ -198,6 +198,9 @@ export async function GET(request: NextRequest) {
         rsvp_completion_percentage,
         attending_count,
         payment_received_count,
+        planned_gift_per_person: wedding.planned_gift_per_person
+          ? Number(wedding.planned_gift_per_person)
+          : null,
       };
     });
 
