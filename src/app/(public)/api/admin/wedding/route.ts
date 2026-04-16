@@ -541,12 +541,7 @@ export async function PATCH(request: NextRequest) {
 
     const response: UpdateWeddingConfigResponse = {
       success: true,
-      data: {
-        ...wedding,
-        planned_gift_per_person: wedding.planned_gift_per_person
-          ? Number(wedding.planned_gift_per_person)
-          : null,
-      },
+      data: wedding,
     };
 
     return NextResponse.json(response, { status: 200 });
