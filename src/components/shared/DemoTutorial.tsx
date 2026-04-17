@@ -13,16 +13,14 @@ export function DemoTutorial({ statusEndpoint }: DemoTutorialProps) {
   const [isTrialMode, setIsTrialMode] = useState(false);
   const t = useTranslations('demoTutorial');
   const tCommon = useTranslations('common.buttons');
-  const vimeoUrl = process.env.NEXT_PUBLIC_VIMEO_PLANNER_TUTORIAL_URL || "https://player.vimeo.com/video/1182292327";
+  const vimeoUrl = process.env.NEXT_PUBLIC_VIMEO_PLANNER_TUTORIAL_URL || 'https://player.vimeo.com/video/1182292327';
 
   useEffect(() => {
-    // Check trial status
     fetch(statusEndpoint)
       .then(r => r.json())
       .then(d => {
         if (d.isTrialMode === true) {
           setIsTrialMode(true);
-          // Check if tutorial was already shown
           const tutorialShown = localStorage.getItem('nupci_planner_tutorial_shown');
           if (!tutorialShown) {
             setRun(true);
@@ -39,9 +37,7 @@ export function DemoTutorial({ statusEndpoint }: DemoTutorialProps) {
       title: t('welcome.title'),
       content: (
         <div className="w-full">
-          <p className="mb-4 text-sm text-gray-600">
-            {t('welcome.description')}
-          </p>
+          <p className="mb-4 text-sm text-gray-600">{t('welcome.description')}</p>
           <div className="relative pb-[56.25%] h-0 overflow-hidden max-w-full bg-black rounded-lg shadow-inner">
             <iframe
               src={vimeoUrl}
@@ -49,24 +45,68 @@ export function DemoTutorial({ statusEndpoint }: DemoTutorialProps) {
               frameBorder="0"
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
-            ></iframe>
+            />
           </div>
         </div>
       ),
       skipBeacon: true,
     },
     {
-      target: '[data-tutorial="wedding-card-ana-y-luis"]',
-      title: t('firstWedding.title'),
-      content: t('firstWedding.description'),
+      target: 'body',
+      placement: 'center',
+      title: t('plannerOverview.title'),
+      content: t('plannerOverview.description'),
+      skipBeacon: true,
+    },
+    {
+      target: 'body',
+      placement: 'center',
+      title: t('trialMode.title'),
+      content: t('trialMode.description'),
+      skipBeacon: true,
+    },
+    {
+      target: '[data-tutorial="planner-header"]',
+      title: t('header.title'),
+      content: t('header.description'),
       placement: 'bottom',
     },
     {
-      target: '[data-tutorial="trial-banner-learn-more"]',
-      title: t('support.title'),
-      content: t('support.description'),
+      target: '[data-tutorial="planner-stats"]',
+      title: t('stats.title'),
+      content: t('stats.description'),
       placement: 'bottom',
-    }
+    },
+    {
+      target: '[data-tutorial="upcoming-weddings"]',
+      title: t('upcomingWeddings.title'),
+      content: t('upcomingWeddings.description'),
+      placement: 'top',
+    },
+    {
+      target: '[data-tutorial="upcoming-tasks"]',
+      title: t('upcomingTasks.title'),
+      content: t('upcomingTasks.description'),
+      placement: 'top',
+    },
+    {
+      target: '[data-tutorial="quotes-finances"]',
+      title: t('quotesFinances.title'),
+      content: t('quotesFinances.description'),
+      placement: 'top',
+    },
+    {
+      target: '[data-tutorial="quick-actions"]',
+      title: t('quickActions.title'),
+      content: t('quickActions.description'),
+      placement: 'top',
+    },
+    {
+      target: '[data-tutorial="wedding-card-ana-y-luis"]',
+      title: t('openWedding.title'),
+      content: t('openWedding.description'),
+      placement: 'bottom',
+    },
   ];
 
   const handleJoyrideEvent = (data: EventData) => {
@@ -87,7 +127,7 @@ export function DemoTutorial({ statusEndpoint }: DemoTutorialProps) {
       scrollToFirstStep
       onEvent={handleJoyrideEvent}
       options={{
-        primaryColor: '#f43f5e', // rose-500
+        primaryColor: '#f43f5e',
         zIndex: 1000,
       }}
       styles={{
@@ -98,9 +138,9 @@ export function DemoTutorial({ statusEndpoint }: DemoTutorialProps) {
       locale={{
         back: tCommon('back'),
         close: tCommon('close'),
-        last: tCommon('confirm'), // Or some other finalization text
+        last: tCommon('confirm'),
         next: tCommon('next'),
-        skip: t('welcome.title') === '¡Bienvenido a Nupci!' ? 'Saltar' : 'Skip', // Simple fallback for skip if not in common
+        skip: t('skip'),
       }}
     />
   );

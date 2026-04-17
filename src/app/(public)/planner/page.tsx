@@ -166,7 +166,7 @@ export default async function PlannerDashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* KPI Stats Strip */}
         {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div data-tutorial="planner-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
               <div className="flex items-start justify-between">
                 <div>
@@ -224,7 +224,7 @@ export default async function PlannerDashboardPage() {
 
         {/* Upcoming Weddings */}
         {stats && stats.upcoming_weddings.length > 0 && (
-          <div>
+          <div data-tutorial="upcoming-weddings">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">{t('planner.dashboard.upcomingWeddings')}</h2>
               <Link href="/planner/weddings" prefetch={false} className="text-sm text-rose-600 hover:text-rose-700 font-medium">
@@ -272,12 +272,12 @@ export default async function PlannerDashboardPage() {
         )}
 
         {/* Upcoming Tasks Widget */}
-        <div>
+        <div data-tutorial="upcoming-tasks">
           <UpcomingTasksWidget />
         </div>
 
         {/* Quotes & Finances */}
-        <div>
+        <div data-tutorial="quotes-finances">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('planner.quotesFinances.dashboard.sectionTitle')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
@@ -331,7 +331,7 @@ export default async function PlannerDashboardPage() {
         </div>
 
         {/* Quick Links */}
-        <div>
+        <div data-tutorial="quick-actions">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('planner.dashboard.quickActions')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <Link

@@ -3065,6 +3065,89 @@
       "codeNotFound": "Kein aktiver Code gefunden. Bitte fordern Sie einen neuen an."
     }
   },
+  "demoTutorial": {
+    "skip": "Überspringen",
+    "welcome": {
+      "title": "Willkommen bei Nupci!",
+      "description": "Schauen Sie sich dieses Video an, um zu lernen, wie Sie die App verwenden:"
+    },
+    "plannerOverview": {
+      "title": "Wedding-Planner-Ansicht",
+      "description": "Willkommen auf Ihrem Wedding-Planner-Dashboard! Von hier aus können Sie alle Ihre Hochzeiten, Ihre Unternehmensdetails, Veranstaltungsorte, Kunden, Lieferanten, Angebote, Verträge und Rechnungen verwalten — alles an einem Ort."
+    },
+    "trialMode": {
+      "title": "Sie Befinden Sich im Testmodus",
+      "description": "Es gibt eine Standard-Demo-Hochzeit (Ana & Luis), die Sie nicht löschen können, und Sie können im Testmodus keine weiteren Hochzeiten erstellen. Sobald Ihre Lizenz vollständig aktiviert ist, können Sie Hochzeiten löschen oder neue erstellen, KI-Funktionen nutzen und WhatsApp-Nachrichten senden."
+    },
+    "header": {
+      "title": "Navigationsleiste",
+      "description": "Über die Navigationsleiste können Sie die Sprache der App ändern, eine neue Hochzeit erstellen oder sich abmelden."
+    },
+    "stats": {
+      "title": "Ihre Statistiken",
+      "description": "Dieser Abschnitt zeigt Ihre wichtigsten Kennzahlen: Gesamte verwaltete Hochzeiten, Gesamte Gäste über alle Hochzeiten und der Prozentsatz der RSVP-Bestätigungen über alle Ihre Hochzeiten."
+    },
+    "upcomingWeddings": {
+      "title": "Bevorstehende Hochzeiten",
+      "description": "Hier können Sie Ihre bevorstehenden Hochzeiten sehen, einschließlich der Demo-Hochzeit. Klicken Sie auf eine Hochzeitskarte, um sie zu öffnen und alle Details zu verwalten."
+    },
+    "upcomingTasks": {
+      "title": "Bevorstehende Aufgaben",
+      "description": "Dieses Widget zeigt bevorstehende Aufgaben für alle Ihre Hochzeiten — Aufgaben, die Ihnen, den Paaren oder anderen zugewiesen sind. Behalten Sie von einem Ort aus den Überblick."
+    },
+    "quotesFinances": {
+      "title": "Angebote, Verträge & Rechnungen",
+      "description": "Verwalten Sie hier Ihre Finanzdokumente: Erstellen und versenden Sie Angebote, verwalten Sie Verträge und verfolgen Sie Rechnungen & Zahlungen — alles an einem Ort."
+    },
+    "quickActions": {
+      "title": "Schnellaktionen",
+      "description": "Konfigurieren Sie mehrere Elemente, die sich auf die von Ihnen erstellten Hochzeiten auswirken: Checklisten-Vorlagen, Lieferantenlisten, Einladungsvorlagen, Veranstaltungsorte, Kundenverwaltung, Unternehmensprofil und mehr."
+    },
+    "openWedding": {
+      "title": "Demo-Hochzeit Öffnen",
+      "description": "Lassen Sie uns nun eine einzelne Hochzeit erkunden. Klicken Sie auf die Demo-Hochzeitskarte, um sie zu öffnen und Ihre Tour fortzusetzen."
+    },
+    "weddingOverview": {
+      "title": "Einzelne Hochzeitsseite",
+      "description": "Willkommen auf der Verwaltungsseite der einzelnen Hochzeit! Sie können dem Paar auch über ein Paar-Portal Zugang gewähren — sie haben Zugang zu denselben Informationen, sodass Sie Details einfach teilen können, da Änderungen auf beiden Seiten angezeigt werden."
+    },
+    "editWedding": {
+      "title": "Hochzeitsdetails Bearbeiten",
+      "description": "Klicken Sie auf die Schaltfläche Bearbeiten, um die wichtigsten Details dieser Hochzeit zu aktualisieren: Datum, Ort, Namen des Paares, Dresscode und mehr."
+    },
+    "itinerary": {
+      "title": "Hochzeitsablauf",
+      "description": "Hier können Sie den vollständigen Tagesablauf der Hochzeit mit allen Ereignissen und ihren Orten sehen. Bearbeiten Sie ihn, um Zeremonien, Empfänge und andere Veranstaltungen hinzuzufügen."
+    },
+    "guestList": {
+      "title": "Gästeliste",
+      "description": "Verwalten Sie Ihre vollständige Gästeliste: Fügen Sie Gäste hinzu oder entfernen Sie sie, verfolgen Sie Zusagen und senden Sie Benachrichtigungen an Familien per SMS, WhatsApp oder E-Mail."
+    },
+    "tasksFinances": {
+      "title": "Aufgaben & Finanzen",
+      "description": "Verfolgen Sie die Aufgaben Ihrer Hochzeits-Checkliste, verwalten Sie Lieferantenausgaben, erfassen Sie Zahlungen und verfolgen Sie das Gesamtbudget — alles in diesem Abschnitt."
+    },
+    "invitationsTemplates": {
+      "title": "Einladungen & Vorlagen",
+      "description": "Gestalten Sie schöne digitale Einladungen und verwalten Sie Nachrichtenvorlagen für Benachrichtigungen an Ihre Gäste."
+    },
+    "foodDrinks": {
+      "title": "Essen & Getränke",
+      "description": "Verwalten Sie das Hochzeitsmenü, die Details zur Verkostung und den Sitzplan für den Empfang."
+    },
+    "reports": {
+      "title": "Berichte",
+      "description": "Erstellen Sie detaillierte Berichte für diese Hochzeit: Gästezusammenfassungen, Zahlungsstatus, RSVP-Aufschlüsselungen und mehr."
+    },
+    "inviteCouple": {
+      "title": "Das Paar Einladen",
+      "description": "Verwenden Sie die Schaltfläche \"Admin einladen\", um dem Paar (oder seinem Koordinator) Zugang zur Verwaltung der Hochzeit über ihr eigenes Portal zu geben. Sie können in Echtzeit mit Ihnen zusammenarbeiten — Änderungen werden auf beiden Seiten angezeigt."
+    },
+    "support": {
+      "title": "Wir Sind für Sie Da!",
+      "description": "Das war die vollständige Tour! Haben Sie Fragen oder benötigen Sie Hilfe? Klicken Sie oben auf \"Mehr erfahren\", um in Echtzeit mit dem Nupci-Team zu chatten."
+    }
+  },
   "trialBanner": {
     "message": "Sie befinden sich im Testmodus mit einer Demo-Hochzeit.",
     "learnMore": "Mehr erfahren",

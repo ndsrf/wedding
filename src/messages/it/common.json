@@ -3061,6 +3061,89 @@
       "codeNotFound": "Nessun codice attivo trovato. Richiedine uno nuovo."
     }
   },
+  "demoTutorial": {
+    "skip": "Salta",
+    "welcome": {
+      "title": "Benvenuto su Nupci!",
+      "description": "Guarda questo video per imparare a usare l'applicazione:"
+    },
+    "plannerOverview": {
+      "title": "Vista Wedding Planner",
+      "description": "Benvenuto nel tuo pannello di controllo Wedding Planner! Da qui puoi gestire tutti i tuoi matrimoni, i dettagli dell'azienda, le location, i clienti, i fornitori, i preventivi, i contratti e le fatture — tutto in un unico posto."
+    },
+    "trialMode": {
+      "title": "Sei in Modalità di Prova",
+      "description": "C'è un matrimonio demo predefinito (Ana & Luis) che non puoi eliminare, e non puoi creare matrimoni aggiuntivi in modalità di prova. Una volta che la tua licenza sarà completamente attivata, potrai eliminare o creare altri matrimoni, utilizzare le funzionalità AI e inviare messaggi WhatsApp."
+    },
+    "header": {
+      "title": "Barra di Navigazione",
+      "description": "Dall'intestazione puoi cambiare la lingua dell'app, creare un nuovo matrimonio o disconnetterti."
+    },
+    "stats": {
+      "title": "Le Tue Statistiche",
+      "description": "Questa sezione mostra i tuoi indicatori chiave: Totale matrimoni gestiti, Totale ospiti su tutti i matrimoni e la percentuale di completamento RSVP su tutti i tuoi matrimoni."
+    },
+    "upcomingWeddings": {
+      "title": "Prossimi Matrimoni",
+      "description": "Qui puoi vedere i tuoi prossimi matrimoni, incluso il matrimonio demo. Clicca su qualsiasi scheda matrimonio per aprirla e gestire tutti i suoi dettagli."
+    },
+    "upcomingTasks": {
+      "title": "Prossimi Compiti",
+      "description": "Questo widget mostra i prossimi compiti di tutti i tuoi matrimoni — compiti assegnati a te, alle coppie o ad altri. Rimani aggiornato su tutto da un unico posto."
+    },
+    "quotesFinances": {
+      "title": "Preventivi, Contratti & Fatture",
+      "description": "Gestisci i tuoi documenti finanziari qui: crea e invia Preventivi, gestisci Contratti e tieni traccia di Fatture & Pagamenti — tutto in un unico posto."
+    },
+    "quickActions": {
+      "title": "Azioni Rapide",
+      "description": "Configura più elementi che influenzeranno i matrimoni che crei: modelli di checklist, elenchi di fornitori, modelli di inviti, location, gestione clienti, profilo aziendale e altro ancora."
+    },
+    "openWedding": {
+      "title": "Apri il Matrimonio Demo",
+      "description": "Ora esploriamo un matrimonio individuale. Clicca sulla scheda del matrimonio demo per aprirlo e continuare il tour."
+    },
+    "weddingOverview": {
+      "title": "Pagina Matrimonio Individuale",
+      "description": "Benvenuto nella pagina di gestione del matrimonio individuale! Puoi anche dare accesso alla coppia tramite un Portale Coppia — avranno accesso alle stesse informazioni, quindi puoi condividere facilmente i dettagli poiché le modifiche si riflettono su entrambi i lati."
+    },
+    "editWedding": {
+      "title": "Modifica i Dettagli del Matrimonio",
+      "description": "Clicca il pulsante Modifica per aggiornare i dettagli principali di questo matrimonio: data, luogo, nomi della coppia, dress code e altro ancora."
+    },
+    "itinerary": {
+      "title": "Programma del Matrimonio",
+      "description": "Qui puoi vedere il programma completo della giornata del matrimonio con tutti gli eventi e le loro location. Modificalo per aggiungere cerimonie, ricevimenti e altri eventi."
+    },
+    "guestList": {
+      "title": "Lista degli Ospiti",
+      "description": "Gestisci la tua lista degli ospiti completa: aggiungi o rimuovi ospiti, tieni traccia delle conferme e invia notifiche alle famiglie tramite SMS, WhatsApp o Email."
+    },
+    "tasksFinances": {
+      "title": "Compiti & Finanze",
+      "description": "Tieni traccia dei compiti della tua checklist del matrimonio, gestisci le spese dei fornitori, registra i pagamenti e monitora il budget complessivo — tutto in questa sezione."
+    },
+    "invitationsTemplates": {
+      "title": "Inviti & Modelli",
+      "description": "Progetta bellissimi inviti digitali e gestisci i modelli di messaggi per le notifiche ai tuoi ospiti."
+    },
+    "foodDrinks": {
+      "title": "Cibo & Bevande",
+      "description": "Gestisci il menu del matrimonio, i dettagli della degustazione e il piano dei posti per il ricevimento."
+    },
+    "reports": {
+      "title": "Rapporti",
+      "description": "Genera rapporti dettagliati per questo matrimonio: riepiloghi degli ospiti, stato dei pagamenti, ripartizioni RSVP e altro ancora."
+    },
+    "inviteCouple": {
+      "title": "Invita la Coppia",
+      "description": "Usa il pulsante \"Invita Admin\" per dare alla coppia (o al loro coordinatore) l'accesso per gestire il matrimonio tramite il proprio portale. Possono collaborare con te in tempo reale — le modifiche si riflettono su entrambi i lati."
+    },
+    "support": {
+      "title": "Siamo Qui per Aiutarti!",
+      "description": "Questo è il tour completo! Hai domande o hai bisogno di aiuto? Clicca su \"Scopri di più\" in alto per chattare con il team di Nupci in tempo reale."
+    }
+  },
   "trialBanner": {
     "message": "Sei in modalità di prova con un matrimonio di dimostrazione.",
     "learnMore": "Scopri di più",

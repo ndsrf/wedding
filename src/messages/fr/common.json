@@ -3065,6 +3065,89 @@
       "codeNotFound": "Aucun code actif trouvé. Veuillez en demander un nouveau."
     }
   },
+  "demoTutorial": {
+    "skip": "Passer",
+    "welcome": {
+      "title": "Bienvenue sur Nupci !",
+      "description": "Regardez cette vidéo pour apprendre à utiliser l'application :"
+    },
+    "plannerOverview": {
+      "title": "Vue Wedding Planner",
+      "description": "Bienvenue sur votre tableau de bord Wedding Planner ! Depuis ici, vous pouvez gérer tous vos mariages, les détails de votre entreprise, les lieux, les clients, les prestataires, les devis, les contrats et les factures — tout en un seul endroit."
+    },
+    "trialMode": {
+      "title": "Vous Êtes en Mode Essai",
+      "description": "Il y a un mariage de démonstration par défaut (Ana & Luis) que vous ne pouvez pas supprimer, et vous ne pouvez pas créer de mariages supplémentaires en mode essai. Une fois votre licence entièrement activée, vous pourrez supprimer ou créer davantage de mariages, utiliser les fonctionnalités IA et envoyer des messages WhatsApp."
+    },
+    "header": {
+      "title": "Barre de Navigation",
+      "description": "Depuis l'en-tête, vous pouvez changer la langue de l'application, créer un nouveau mariage ou vous déconnecter."
+    },
+    "stats": {
+      "title": "Vos Statistiques",
+      "description": "Cette section affiche vos indicateurs clés : Total des mariages gérés, Total des invités sur tous les mariages, et le pourcentage de confirmation de présence (RSVP) sur tous vos mariages."
+    },
+    "upcomingWeddings": {
+      "title": "Mariages à Venir",
+      "description": "Ici vous pouvez voir vos prochains mariages, y compris le mariage de démonstration. Cliquez sur n'importe quelle carte de mariage pour l'ouvrir et gérer tous ses détails."
+    },
+    "upcomingTasks": {
+      "title": "Prochaines Tâches",
+      "description": "Ce widget affiche les prochaines tâches de tous vos mariages — tâches assignées à vous, aux couples ou à d'autres personnes. Restez au courant de tout depuis un seul endroit."
+    },
+    "quotesFinances": {
+      "title": "Devis, Contrats & Factures",
+      "description": "Gérez vos documents financiers ici : créez et envoyez des Devis, gérez des Contrats et suivez les Factures & Paiements — tout en un seul endroit."
+    },
+    "quickActions": {
+      "title": "Actions Rapides",
+      "description": "Configurez plusieurs éléments qui affecteront les mariages que vous créez : modèles de checklist, listes de prestataires, modèles d'invitations, lieux, gestion des clients, profil d'entreprise et plus encore."
+    },
+    "openWedding": {
+      "title": "Ouvrir le Mariage de Démonstration",
+      "description": "Explorons maintenant un mariage individuel. Cliquez sur la carte du mariage de démonstration pour l'ouvrir et continuer votre visite guidée."
+    },
+    "weddingOverview": {
+      "title": "Page de Mariage Individuel",
+      "description": "Bienvenue sur la page de gestion du mariage individuel ! Vous pouvez également donner accès au couple via un Portail Couple — ils auront accès aux mêmes informations, vous pouvez donc partager facilement les détails car les modifications sont reflétées des deux côtés."
+    },
+    "editWedding": {
+      "title": "Modifier les Détails du Mariage",
+      "description": "Cliquez sur le bouton Modifier pour mettre à jour les détails principaux de ce mariage : date, lieu, noms du couple, code vestimentaire et plus encore."
+    },
+    "itinerary": {
+      "title": "Itinéraire du Mariage",
+      "description": "Ici vous pouvez voir l'itinéraire complet de la journée du mariage avec tous les événements et leurs lieux. Modifiez-le pour ajouter des cérémonies, des réceptions et d'autres événements."
+    },
+    "guestList": {
+      "title": "Liste des Invités",
+      "description": "Gérez votre liste d'invités complète : ajoutez ou supprimez des invités, suivez les confirmations et envoyez des notifications aux familles par SMS, WhatsApp ou Email."
+    },
+    "tasksFinances": {
+      "title": "Tâches & Finances",
+      "description": "Suivez les tâches de votre checklist de mariage, gérez les dépenses des prestataires, enregistrez les paiements et suivez le budget global — tout dans cette section."
+    },
+    "invitationsTemplates": {
+      "title": "Invitations & Modèles",
+      "description": "Créez de belles invitations numériques et gérez les modèles de messages pour les notifications à vos invités."
+    },
+    "foodDrinks": {
+      "title": "Nourriture & Boissons",
+      "description": "Gérez le menu du mariage, les détails de la dégustation et le plan de table pour la réception."
+    },
+    "reports": {
+      "title": "Rapports",
+      "description": "Générez des rapports détaillés pour ce mariage : résumés des invités, état des paiements, ventilation des confirmations et plus encore."
+    },
+    "inviteCouple": {
+      "title": "Inviter le Couple",
+      "description": "Utilisez le bouton \"Inviter Admin\" pour donner au couple (ou à son coordinateur) l'accès pour gérer le mariage via leur propre portail. Ils peuvent collaborer avec vous en temps réel — les modifications sont reflétées des deux côtés."
+    },
+    "support": {
+      "title": "Nous Sommes Là pour Vous Aider !",
+      "description": "C'est la fin de la visite guidée ! Vous avez des questions ou besoin d'aide ? Cliquez sur \"En savoir plus\" en haut pour discuter avec l'équipe Nupci en temps réel."
+    }
+  },
   "trialBanner": {
     "message": "Vous êtes en mode essai avec un mariage de démonstration.",
     "learnMore": "En savoir plus",
