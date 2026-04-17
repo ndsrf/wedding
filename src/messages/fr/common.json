@@ -1574,6 +1574,7 @@
       "importSuccess": "Liste d'invités importée avec succès",
       "importError": "Erreur d'importation. Veuillez vérifier le fichier.",
       "bulkActions": "Actions groupées",
+      "selectAll": "Tout sélectionner",
       "copyGeneralInvitationLink": "Copier le lien d'invitation général",
       "deleteSelected": "Supprimer la sélection",
       "selectGuestsHint": "Sélectionnez les invités dans la liste pour effectuer des actions groupées",
