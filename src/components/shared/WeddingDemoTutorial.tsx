@@ -38,7 +38,6 @@ export function WeddingDemoTutorial() {
       title: t('editWedding.title'),
       content: t('editWedding.description'),
       placement: 'bottom',
-      disableScrolling: true,
     },
     {
       target: '[data-tutorial="wedding-itinerary"]',

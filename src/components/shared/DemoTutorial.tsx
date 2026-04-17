@@ -70,7 +70,6 @@ export function DemoTutorial({ statusEndpoint }: DemoTutorialProps) {
       title: t('header.title'),
       content: t('header.description'),
       placement: 'bottom',
-      disableScrolling: true,
     },
     {
       target: '[data-tutorial="planner-stats"]',
