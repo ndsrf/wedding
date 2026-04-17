@@ -32,23 +32,12 @@ export async function DELETE(
     if (denied) return denied;
 
     const result = await prisma.$transaction(async (tx) => {
-      const families = await tx.family.findMany({
-        where: { wedding_id: weddingId },
-        select: { id: true },
-      });
-
-      const familyIds = families.map((f) => f.id);
-
-      if (familyIds.length === 0) {
-        return { deletedFamilies: 0, deletedMembers: 0 };
-      }
-
       const deletedMembers = await tx.familyMember.deleteMany({
-        where: { family_id: { in: familyIds } },
+        where: { family: { wedding_id: weddingId } },
       });
 
       const deletedFamilies = await tx.family.deleteMany({
-        where: { id: { in: familyIds } },
+        where: { wedding_id: weddingId },
       });
 
       return {

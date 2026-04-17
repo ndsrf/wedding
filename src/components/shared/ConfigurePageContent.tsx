@@ -68,21 +68,26 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
   };
 
   const handleSubmit = async (data: UpdateWeddingConfigRequest) => {
-    const response = await fetch(apiPaths.weddingApi, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch(apiPaths.weddingApi, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Failed to save configuration');
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Failed to save configuration');
+      }
+
+      setWedding((prev) => (prev ? { ...prev, ...result.data } : null));
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error('Error saving configuration:', err);
+      throw err;
     }
-
-    setWedding((prev) => (prev ? { ...prev, ...result.data } : null));
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   const handleCancel = () => {
