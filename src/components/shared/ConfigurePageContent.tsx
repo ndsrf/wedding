@@ -46,8 +46,7 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
 
   useEffect(() => {
     fetchWedding();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiPaths.weddingApi]);
+  }, []);
 
   const fetchWedding = async () => {
     try {
