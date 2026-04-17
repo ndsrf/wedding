@@ -411,6 +411,13 @@ export function GuestsPageContent({
     return data.data.path as string;
   };
 
+  const handleCopyWhatsAppText = async (guestId: string): Promise<string> => {
+    const response = await fetch(`${apiPaths.guests}/${guestId}/whatsapp-text`);
+    const data = await response.json();
+    if (!data.success) throw new Error('Failed to fetch WhatsApp text');
+    return data.data.text as string;
+  };
+
   const handleDeleteGuest = (guestId: string) => {
     const guest = guests.find((g) => g.id === guestId);
     if (guest) {
@@ -931,6 +938,7 @@ export function GuestsPageContent({
               onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
               onCopyInvLink={handleCopyInvLink}
+              onCopyWhatsAppText={handleCopyWhatsAppText}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
               onSelectGuest={handleSelectGuest}

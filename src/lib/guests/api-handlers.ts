@@ -30,6 +30,10 @@ import { importVCF } from '@/lib/vcf/import';
 import { validateVCF } from '@/lib/vcf/parser';
 import { generateTemplate } from '@/lib/excel/templates';
 import { getShortUrlPath } from '@/lib/short-url';
+import { renderTemplate } from '@/lib/templates';
+import { getTemplateForSending } from '@/lib/templates/crud';
+import { formatDateByLanguage } from '@/lib/date-formatter';
+import type { Language as I18nLanguage } from '@/lib/i18n/config';
 
 // ============================================================================
 // SHARED ERROR HANDLER
@@ -938,5 +942,122 @@ export async function getGuestInvLinkHandler(
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
     return handleGuestApiError(error, { operation: 'fetch invitation link' });
+  }
+}
+
+// ============================================================================
+// WHATSAPP MESSAGE TEXT
+// ============================================================================
+
+const WHATSAPP_FALLBACK_MESSAGES: Record<string, {
+  greeting: (familyName: string) => string;
+  body: (coupleNames: string, weddingDate: string, cutoffDate: string) => string;
+  cta: string;
+}> = {
+  es: {
+    greeting: (n) => `Hola, Familia ${n}!`,
+    body: (c, d, f) => `Te recordamos que aún no hemos recibido tu confirmación de asistencia para la boda de ${c} el ${d}. Por favor, confirma antes del ${f}.`,
+    cta: 'Confirmar asistencia',
+  },
+  en: {
+    greeting: (n) => `Hello, ${n} Family!`,
+    body: (c, d, f) => `This is a friendly reminder that we haven't received your RSVP for ${c}'s wedding on ${d}. Please confirm by ${f}.`,
+    cta: 'Confirm attendance',
+  },
+  fr: {
+    greeting: (n) => `Bonjour, Famille ${n}!`,
+    body: (c, d, f) => `Nous vous rappelons que nous n'avons pas encore reçu votre confirmation de présence pour le mariage de ${c} le ${d}. Merci de confirmer avant le ${f}.`,
+    cta: 'Confirmer la présence',
+  },
+  it: {
+    greeting: (n) => `Ciao, Famiglia ${n}!`,
+    body: (c, d, f) => `Ti ricordiamo che non abbiamo ancora ricevuto la tua conferma di partecipazione al matrimonio di ${c} il ${d}. Per favore, conferma entro il ${f}.`,
+    cta: 'Conferma partecipazione',
+  },
+  de: {
+    greeting: (n) => `Hallo, Familie ${n}!`,
+    body: (c, d, f) => `Wir möchten Sie daran erinnern, dass wir noch keine Rückmeldung zu Ihrer Teilnahme an der Hochzeit von ${c} am ${d} erhalten haben. Bitte bestätigen Sie bis zum ${f}.`,
+    cta: 'Teilnahme bestätigen',
+  },
+};
+
+/**
+ * GET …/guests/:id/whatsapp-text  — Get the WhatsApp message text for a family
+ * Returns the text that would be sent: invitation if not yet sent, reminder otherwise.
+ */
+export async function getGuestWhatsAppTextHandler(
+  familyId: string,
+  weddingId: string,
+): Promise<NextResponse> {
+  try {
+    const family = await prisma.family.findUnique({
+      where: { id: familyId },
+      select: {
+        id: true,
+        wedding_id: true,
+        name: true,
+        preferred_language: true,
+        reference_code: true,
+        wedding: {
+          select: {
+            couple_names: true,
+            wedding_date: true,
+            wedding_time: true,
+            location: true,
+            rsvp_cutoff_date: true,
+          },
+        },
+      },
+    });
+
+    if (!family || family.wedding_id !== weddingId) {
+      const body: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Guest not found' },
+      };
+      return NextResponse.json(body, { status: 404 });
+    }
+
+    const invitationSent = await prisma.trackingEvent.findFirst({
+      where: { family_id: familyId, event_type: 'INVITATION_SENT' },
+      select: { id: true },
+    });
+
+    const templateType = invitationSent ? 'REMINDER' : 'INVITATION';
+    const language = family.preferred_language;
+    const languageLower = language.toLowerCase() as I18nLanguage;
+    const wedding = family.wedding!;
+
+    const weddingDate = formatDateByLanguage(wedding.wedding_date, languageLower);
+    const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, languageLower);
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const shortPath = await getShortUrlPath(familyId);
+    const magicLink = `${baseUrl}${shortPath}`;
+
+    const template = await getTemplateForSending(weddingId, templateType, language, 'WHATSAPP');
+
+    let text: string;
+
+    if (template) {
+      const variables = {
+        familyName: family.name,
+        coupleNames: wedding.couple_names,
+        weddingDate,
+        weddingTime: wedding.wedding_time || '',
+        location: wedding.location || '',
+        magicLink,
+        rsvpCutoffDate: cutoffDate,
+        ...(family.reference_code && { referenceCode: family.reference_code }),
+      };
+      text = renderTemplate(template.body, variables);
+    } else {
+      const messages = WHATSAPP_FALLBACK_MESSAGES[languageLower] ?? WHATSAPP_FALLBACK_MESSAGES['es'];
+      text = `${messages.greeting(family.name)}\n\n${messages.body(wedding.couple_names, weddingDate, cutoffDate)}\n\n${messages.cta}: ${magicLink}`;
+    }
+
+    const response: APIResponse = { success: true, data: { text } };
+    return NextResponse.json(response, { status: 200 });
+  } catch (error) {
+    return handleGuestApiError(error, { operation: 'fetch whatsapp text' });
   }
 }
