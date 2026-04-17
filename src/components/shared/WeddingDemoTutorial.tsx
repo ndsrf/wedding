@@ -1,17 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Joyride, Step, EventData, STATUS } from 'react-joyride';
 import { useTranslations } from 'next-intl';
 
-export function WeddingDemoTutorial() {
+interface WeddingDemoTutorialProps {
+  statusEndpoint?: '/api/planner/trial-status' | '/api/admin/trial-status';
+}
+
+export function WeddingDemoTutorial({ statusEndpoint = '/api/planner/trial-status' }: WeddingDemoTutorialProps) {
   const [run, setRun] = useState(false);
   const [isTrialMode, setIsTrialMode] = useState(false);
   const t = useTranslations('demoTutorial');
   const tCommon = useTranslations('common.buttons');
 
   useEffect(() => {
-    fetch('/api/planner/trial-status')
+    fetch(statusEndpoint)
       .then(r => r.json())
       .then(d => {
         if (d.isTrialMode === true) {
@@ -23,9 +27,9 @@ export function WeddingDemoTutorial() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [statusEndpoint]);
 
-  const steps: Step[] = [
+  const steps: Step[] = useMemo(() => [
     {
       target: 'body',
       placement: 'center',
@@ -87,7 +91,7 @@ export function WeddingDemoTutorial() {
       content: t('support.description'),
       placement: 'bottom',
     },
-  ];
+  ], [t]);
 
   const handleJoyrideEvent = (data: EventData) => {
     const { status } = data;

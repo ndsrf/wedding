@@ -343,7 +343,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
           {/* Secondary Actions */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {/* Tasks & Finances — grouped */}
-            <div data-tutorial="wedding-tasks-finances">
+            <div data-tutorial="wedding-tasks-finances" className="h-full">
             <NavGroup
               title={t('admin.dashboard.tasksAndFinances')}
               headerBgClass="bg-teal-50"
@@ -388,7 +388,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
 
             </div>
             {/* Invitations & Templates — grouped */}
-            <div data-tutorial="wedding-invitations-templates">
+            <div data-tutorial="wedding-invitations-templates" className="h-full">
             <NavGroup
               title={t('admin.dashboard.invitationsAndTemplates')}
               headerBgClass="bg-pink-50"
@@ -422,7 +422,7 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
 
             </div>
             {/* Food & Drinks — grouped, includes seating plan */}
-            <div data-tutorial="wedding-food-drinks">
+            <div data-tutorial="wedding-food-drinks" className="h-full">
             <NavGroup
               title={t('admin.tastingMenu.nav')}
               headerBgClass="bg-rose-50"
