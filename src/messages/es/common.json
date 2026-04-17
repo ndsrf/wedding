@@ -3137,17 +3137,86 @@
     }
   },
   "demoTutorial": {
+    "skip": "Saltar",
     "welcome": {
       "title": "¡Bienvenido a Nupci!",
       "description": "Echa un vistazo a este vídeo para aprender a usar la aplicación:"
     },
-    "firstWedding": {
-      "title": "Tu primera boda",
-      "description": "Pulsa en el cuadro de la boda de Ana & Luis para ver todos sus detalles."
+    "plannerOverview": {
+      "title": "Vista del Wedding Planner",
+      "description": "¡Bienvenido a tu panel de Wedding Planner! Desde aquí puedes gestionar todas tus bodas, los datos de tu empresa, ubicaciones, clientes, proveedores, presupuestos, contratos y facturas — todo en un solo lugar."
+    },
+    "trialMode": {
+      "title": "Estás en Modo de Prueba",
+      "description": "Hay una boda de demostración por defecto (Ana & Luis) que no puedes eliminar, y no puedes crear bodas adicionales en modo de prueba. Una vez que tu licencia esté completamente activada, podrás eliminar o crear más bodas, usar funciones de IA y enviar mensajes de WhatsApp."
+    },
+    "header": {
+      "title": "Cabecera de Navegación",
+      "description": "Desde la cabecera puedes cambiar el idioma de la aplicación, crear una nueva boda o cerrar sesión."
+    },
+    "stats": {
+      "title": "Tus Estadísticas",
+      "description": "Esta sección muestra tus métricas clave: Total de Bodas gestionadas, Total de Invitados en todas las bodas y el porcentaje de confirmaciones de asistencia (RSVP) en todas tus bodas."
+    },
+    "upcomingWeddings": {
+      "title": "Próximas Bodas",
+      "description": "Aquí puedes ver tus próximas bodas, incluida la boda de demostración. Pulsa en cualquier tarjeta de boda para abrirla y gestionar todos sus detalles."
+    },
+    "upcomingTasks": {
+      "title": "Próximas Tareas",
+      "description": "Este widget muestra las próximas tareas de todas tus bodas — tareas asignadas a ti, a las parejas o a otras personas. Mantente al día de todo desde un solo lugar."
+    },
+    "quotesFinances": {
+      "title": "Presupuestos, Contratos y Facturas",
+      "description": "Gestiona tus documentos financieros aquí: crea y envía Presupuestos, gestiona Contratos y controla Facturas y Pagos — todo en un solo lugar."
+    },
+    "quickActions": {
+      "title": "Acciones Rápidas",
+      "description": "Configura múltiples elementos que afectarán a las bodas que crees: plantillas de checklist, listas de proveedores, plantillas de invitaciones, ubicaciones, gestión de clientes, perfil de empresa y más."
+    },
+    "openWedding": {
+      "title": "Abrir la Boda de Demostración",
+      "description": "Ahora exploremos una boda individual. Pulsa en la tarjeta de la boda de demostración para abrirla y continuar con el tour."
+    },
+    "weddingOverview": {
+      "title": "Página de Boda Individual",
+      "description": "¡Bienvenido a la página de gestión de la boda individual! También puedes dar acceso a la pareja a través de un Portal de Pareja — tendrán acceso a la misma información, por lo que pueden compartir detalles fácilmente ya que los cambios se reflejan en ambos lados."
+    },
+    "editWedding": {
+      "title": "Editar Detalles de la Boda",
+      "description": "Pulsa el botón Editar para actualizar los datos principales de esta boda: fecha, lugar, nombres de la pareja, código de vestimenta y más."
+    },
+    "itinerary": {
+      "title": "Itinerario de la Boda",
+      "description": "Aquí puedes ver el itinerario completo del día de la boda con todos los eventos y sus ubicaciones. Edítalo para añadir ceremonias, recepciones y otros eventos."
+    },
+    "guestList": {
+      "title": "Lista de Invitados",
+      "description": "Gestiona tu lista de invitados completa: añade o elimina invitados, controla las confirmaciones y envía notificaciones a las familias por SMS, WhatsApp o Email."
+    },
+    "tasksFinances": {
+      "title": "Tareas y Finanzas",
+      "description": "Controla las tareas de tu checklist de boda, gestiona los gastos de proveedores, registra pagos y sigue el presupuesto general — todo en esta sección."
+    },
+    "invitationsTemplates": {
+      "title": "Invitaciones y Plantillas",
+      "description": "Diseña hermosas invitaciones digitales y gestiona las plantillas de mensajes para las notificaciones a tus invitados."
+    },
+    "foodDrinks": {
+      "title": "Comida y Bebida",
+      "description": "Gestiona el menú de la boda, los detalles de la degustación y el plan de asientos para la recepción."
+    },
+    "reports": {
+      "title": "Informes",
+      "description": "Genera informes detallados para esta boda: resúmenes de invitados, estado de pagos, desglose de confirmaciones y más."
+    },
+    "inviteCouple": {
+      "title": "Invitar a la Pareja",
+      "description": "Usa el botón \"Invitar Admin\" para dar acceso a la pareja (o su coordinador) para gestionar la boda a través de su propio portal. Pueden colaborar contigo en tiempo real — los cambios se reflejan en ambos lados."
     },
     "support": {
-      "title": "Soporte y Ayuda",
-      "description": "¿Tienes dudas? Pulsa en \"Más información\" para chatear con el equipo de Nupci en tiempo real."
+      "title": "¡Estamos Aquí para Ayudar!",
+      "description": "¡Eso es todo el tour! ¿Tienes preguntas o necesitas ayuda? Pulsa en \"Más información\" en la parte superior para chatear con el equipo de Nupci en tiempo real."
     }
   },
   "trialBanner": {

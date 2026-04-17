@@ -3160,17 +3160,86 @@
     }
   },
   "demoTutorial": {
+    "skip": "Skip",
     "welcome": {
       "title": "Welcome to Nupci!",
       "description": "Take a look at this video to learn how to use the app:"
     },
-    "firstWedding": {
-      "title": "Your first wedding",
-      "description": "Click on Ana & Luis's wedding card to see all the details."
+    "plannerOverview": {
+      "title": "Wedding Planner View",
+      "description": "Welcome to your Wedding Planner dashboard! From here you can manage all your weddings, company details, locations, clients, suppliers, quotes, contracts and invoices — everything in one place."
+    },
+    "trialMode": {
+      "title": "You Are in Trial Mode",
+      "description": "There is a default demo wedding (Ana & Luis) that you cannot delete, and you cannot create additional weddings in trial mode. Once your license is fully activated, you will be free to delete or create more weddings, use AI features, and send WhatsApp messages."
+    },
+    "header": {
+      "title": "Navigation Header",
+      "description": "From the header you can change the language of the app, create a new wedding, or sign out."
+    },
+    "stats": {
+      "title": "Your Statistics",
+      "description": "This section shows your key metrics: Total Weddings managed, Total Guests across all weddings, and the percentage of RSVP completion across all your weddings."
+    },
+    "upcomingWeddings": {
+      "title": "Upcoming Weddings",
+      "description": "Here you can see your upcoming weddings, including the demo wedding. Click on any wedding card to open it and manage all its details."
+    },
+    "upcomingTasks": {
+      "title": "Upcoming Tasks",
+      "description": "This widget shows upcoming tasks across all your weddings — tasks assigned to you, to the couples, or to others. Stay on top of everything from one place."
+    },
+    "quotesFinances": {
+      "title": "Quotes, Contracts & Invoices",
+      "description": "Manage your financial documents here: create and send Quotes, manage Contracts, and track Invoices & Payments — all in one place."
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Configure multiple items that will affect the weddings you create: checklist templates, supplier lists, invitation templates, locations, client management, company profile, and more."
+    },
+    "openWedding": {
+      "title": "Open the Demo Wedding",
+      "description": "Now let's explore an individual wedding. Click on the demo wedding card to open it and continue your tour."
+    },
+    "weddingOverview": {
+      "title": "Individual Wedding Page",
+      "description": "Welcome to the individual wedding management page! You can also give access to the couple via a Couple Portal — they will have access to the same information, so you can share details easily as changes are reflected on both sides."
+    },
+    "editWedding": {
+      "title": "Edit Wedding Details",
+      "description": "Click the Edit button to update the main details of this wedding: date, location, couple names, dress code, and more."
+    },
+    "itinerary": {
+      "title": "Wedding Itinerary",
+      "description": "Here you can see the full wedding day itinerary with all events and their locations. Edit it to add ceremonies, receptions, and other events."
+    },
+    "guestList": {
+      "title": "Guest List",
+      "description": "Manage your complete guest list here: add or remove guests, track RSVPs, and send notifications to families by SMS, WhatsApp, or Email."
+    },
+    "tasksFinances": {
+      "title": "Tasks & Finances",
+      "description": "Keep track of your wedding checklist tasks, manage supplier expenses, record payments, and track the overall budget — all in this section."
+    },
+    "invitationsTemplates": {
+      "title": "Invitations & Templates",
+      "description": "Design beautiful digital invitations and manage message templates for notifications to your guests."
+    },
+    "foodDrinks": {
+      "title": "Food & Drinks",
+      "description": "Manage the wedding menu, tasting details, and seating plan for the reception."
+    },
+    "reports": {
+      "title": "Reports",
+      "description": "Generate detailed reports for this wedding: guest summaries, payment status, RSVP breakdowns, and more."
+    },
+    "inviteCouple": {
+      "title": "Invite the Couple",
+      "description": "Use the \"Invite Admin\" button to give the couple (or their coordinator) access to manage the wedding through their own portal. They can collaborate with you in real time — changes are reflected on both sides."
     },
     "support": {
-      "title": "Support & Help",
-      "description": "Have questions? Click \"Learn more\" to chat with the Nupci team in real-time."
+      "title": "We Are Here to Help!",
+      "description": "That's the full tour! Have questions or need help? Click \"Learn more\" at the top to chat with the Nupci team in real-time."
     }
   },
   "trialBanner": {
