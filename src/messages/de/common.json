@@ -1499,6 +1499,7 @@
       "importingVcf": "Importieren...",
       "selected": "ausgewählt",
       "copyInvLink": "Einladungslink kopieren",
+      "copyWhatsAppText": "WhatsApp-Einladungstext kopieren",
       "table": {
         "family": "Familie",
         "members": "Mitglieder",

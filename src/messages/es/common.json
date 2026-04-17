@@ -1840,6 +1840,7 @@
       "importingVcf": "Importando...",
       "selected": "seleccionados",
       "copyInvLink": "Copiar enlace de invitación",
+      "copyWhatsAppText": "Copiar texto de invitación WhatsApp",
       "table": {
         "family": "Familia",
         "members": "Miembros",
