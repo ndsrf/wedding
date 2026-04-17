@@ -591,6 +591,19 @@ export function GuestsPageContent({
     }
   };
 
+  const handleSelectAllCurrentPage = () => {
+    const currentPageSelectableIds = guests
+      .filter(g => g.rsvp_status !== 'submitted')
+      .map(g => g.id);
+    const allCurrentPageSelected = currentPageSelectableIds.length > 0 &&
+      currentPageSelectableIds.every(id => selectedGuestIds.includes(id));
+    if (allCurrentPageSelected) {
+      setSelectedGuestIds(prev => prev.filter(id => !currentPageSelectableIds.includes(id)));
+    } else {
+      setSelectedGuestIds(prev => Array.from(new Set([...prev, ...currentPageSelectableIds])));
+    }
+  };
+
   const handleOpenBulkReminderModal = () => {
     setReminderFamily(null);
     setReminderMode('reminder');
@@ -889,6 +902,12 @@ export function GuestsPageContent({
                     )}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={handleSelectAllCurrentPage}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    >
+                      {t('admin.guests.selectAll')}
+                    </button>
                     {weddingShortCode && (
                       <button
                         onClick={handleCopyGeneralInvLink}

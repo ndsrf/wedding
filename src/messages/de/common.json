@@ -1574,6 +1574,7 @@
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
       "bulkActions": "Massenaktionen",
+      "selectAll": "Alle auswählen",
       "copyGeneralInvitationLink": "Allgemeinen Einladungslink kopieren",
       "deleteSelected": "Ausgewählte löschen",
       "selectGuestsHint": "Wählen Sie Gäste aus der Liste aus, um Massenaktionen durchzuführen",

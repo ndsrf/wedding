@@ -1919,6 +1919,7 @@
       "importSuccess": "Guest list imported successfully",
       "importError": "Import error. Please check the file.",
       "bulkActions": "Bulk Actions",
+      "selectAll": "Select All",
       "copyGeneralInvitationLink": "Copy general invitation link",
       "deleteSelected": "Delete Selected",
       "selectGuestsHint": "Select guests from the list to perform bulk actions",
