@@ -178,11 +178,12 @@ grep -o "apiPaths\.[a-zA-Z_]*\|apiBase" src/components/shared/<Feature>PageConte
 | Menu | `/admin/menu` | `/planner/weddings/[id]/menu` | ✅ Done |
 | Tasting | `/admin/tasting` | `/planner/weddings/[id]/tasting` | ✅ Done |
 | Seating | `/admin/seating` | `/planner/weddings/[id]/seating` | ✅ Done |
-| Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ⬜ Pending |
+| Checklist | `/admin/checklist` | `/planner/weddings/[id]/checklist` | ✅ Done |
 | Reports | `/admin/reports` | `/planner/weddings/[id]/reports` | ✅ Done |
 | Providers | `/admin/providers` | `/planner/weddings/[id]/providers` | ✅ Done |
 | Invitation Builder | `/admin/invitation-builder` | `/planner/weddings/[id]/invitation-builder` | ✅ Done |
-| Templates | `/admin/templates` | `/planner/weddings/[id]/templates` | ⬜ Pending |
+| Templates | `/admin/templates` | `/planner/weddings/[id]/templates` | ✅ Done |
+| Configure | `/admin/configure` | `/planner/weddings/[id]/configure` | ✅ Done |
 
 > Not all screens need consolidation. Evaluate if the planner version has meaningful differences before merging.
 

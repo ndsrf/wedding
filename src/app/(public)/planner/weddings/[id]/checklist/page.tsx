@@ -1,52 +1,34 @@
 /**
- * Wedding Planner - Wedding Checklist Management Page
+ * Wedding Planner - Checklist Page (thin wrapper)
  *
- * Dedicated page for wedding planners to manage a specific wedding's checklist
+ * Resolves planner-specific context (wedding ID from URL) and delegates all
+ * rendering to the shared ChecklistPageContent component.
+ *
+ * See CONSOLIDATION_PLAN.md for the full consolidation strategy.
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { buildNupciTitle, useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCoupleNames } from '@/hooks/useCoupleNames';
-import { ChecklistEditor } from '@/components/admin/ChecklistEditor';
-import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import { ChecklistPageContent } from '@/components/shared/ChecklistPageContent';
 
-interface ChecklistPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function ChecklistPage({ params }: ChecklistPageProps) {
+export default function ChecklistPage() {
   const t = useTranslations();
-  const [weddingId, setWeddingId] = useState<string | null>(null);
+  const { id: weddingId } = useParams() as { id: string };
   const weddingName = useCoupleNames(weddingId);
   useDocumentTitle(buildNupciTitle(t('admin.checklist.title'), weddingName));
 
-  useEffect(() => {
-    params.then(({ id }) => setWeddingId(id));
-  }, [params]);
-
-  if (!weddingId) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white shadow rounded-lg p-8 text-center">
-            <WeddingSpinner size="md" className="mx-auto" />
-            <p className="mt-4 text-gray-500">{t('common.loading')}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+    <ChecklistPageContent
+      weddingId={weddingId}
+      isReadOnly={false}
+      header={
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center">
               <Link href={`/planner/weddings/${weddingId}`} className="text-gray-500 hover:text-gray-700 mr-4">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,23 +36,17 @@ export default function ChecklistPage({ params }: ChecklistPageProps) {
                 </svg>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {t('planner.checklist.title')}
-                </h1>
-                <p className="mt-1 text-sm text-gray-500">
-                  {weddingName && `${weddingName} • `}
-                  {t('planner.checklist.subtitle')}
-                </p>
+                <h1 className="text-2xl font-bold text-gray-900">{t('admin.checklist.title')}</h1>
+                {weddingName && (
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    {weddingName} &bull; {t('admin.checklist.subtitle')}
+                  </p>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ChecklistEditor weddingId={weddingId} readOnly={false} />
-      </main>
-    </div>
+        </header>
+      }
+    />
   );
 }
