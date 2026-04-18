@@ -158,7 +158,7 @@ function WeddingPanel({
         {openPanel === 'past' && (
           <ul className="mt-1 space-y-1 pl-2">
             {pastWeddings.length === 0 ? (
-              <li className="text-xs text-gray-400 italic">{noPastLabel}</li>
+              <li className="text-xs text-gray-400 italic">{t('noPastWeddings')}</li>
             ) : (
               pastWeddings.map((w) => (
                 <li key={w.id}>
