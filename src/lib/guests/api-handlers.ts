@@ -982,8 +982,12 @@ const WHATSAPP_FALLBACK_MESSAGES: Record<string, {
 };
 
 /**
- * GET …/guests/:id/whatsapp-text  — Get the WhatsApp message text for a family
- * Returns the text that would be sent: invitation if not yet sent, reminder otherwise.
+ * GET …/guests/:id/whatsapp-text  — Get the WhatsApp message text for a family.
+ * Returns the text that mirrors what the visible action button would send:
+ *   - SAVE_THE_DATE  if save-the-date is enabled and not yet sent and no invitation sent
+ *   - CONFIRMATION   if RSVP already submitted
+ *   - INVITATION     if no invitation has been sent yet
+ *   - REMINDER       if invitation already sent and RSVP pending
  */
 export async function getGuestWhatsAppTextHandler(
   familyId: string,
@@ -998,6 +1002,15 @@ export async function getGuestWhatsAppTextHandler(
         name: true,
         preferred_language: true,
         reference_code: true,
+        save_the_date_sent: true,
+        members: { select: { attending: true } },
+        // Only look for INVITATION_SENT — REMINDER_SENT can only exist after it,
+        // so a single take:1 on this event type is both deterministic and sufficient.
+        tracking_events: {
+          where: { event_type: 'INVITATION_SENT' },
+          select: { id: true },
+          take: 1,
+        },
         wedding: {
           select: {
             couple_names: true,
@@ -1005,6 +1018,7 @@ export async function getGuestWhatsAppTextHandler(
             wedding_time: true,
             location: true,
             rsvp_cutoff_date: true,
+            save_the_date_enabled: true,
           },
         },
       },
@@ -1018,37 +1032,60 @@ export async function getGuestWhatsAppTextHandler(
       return NextResponse.json(body, { status: 404 });
     }
 
-    const invitationSent = await prisma.trackingEvent.findFirst({
-      where: { family_id: familyId, event_type: 'INVITATION_SENT' },
-      select: { id: true },
-    });
-
-    const templateType = invitationSent ? 'REMINDER' : 'INVITATION';
-    const language = family.preferred_language;
-    const languageLower = language.toLowerCase() as I18nLanguage;
+    // Mirror the same state flags used by the GuestTable button visibility.
+    // REMINDER_SENT can only be created after INVITATION_SENT, so checking
+    // INVITATION_SENT is sufficient for both the save-the-date guard (anySent)
+    // and the invitation-vs-reminder distinction (invitationSent).
+    const invitationSent = family.tracking_events.length > 0;
+    const hasRsvp = family.members.some(m => m.attending !== null);
     const wedding = family.wedding!;
 
+    // Determine template type with the same priority as button visibility
+    let templateType: 'SAVE_THE_DATE' | 'INVITATION' | 'REMINDER' | 'CONFIRMATION';
+    if (wedding.save_the_date_enabled && !family.save_the_date_sent && !invitationSent) {
+      templateType = 'SAVE_THE_DATE';
+    } else if (hasRsvp) {
+      templateType = 'CONFIRMATION';
+    } else if (!invitationSent) {
+      templateType = 'INVITATION';
+    } else {
+      templateType = 'REMINDER';
+    }
+
+    const language = family.preferred_language;
+    const languageLower = language.toLowerCase() as I18nLanguage;
     const weddingDate = formatDateByLanguage(wedding.wedding_date, languageLower);
     const cutoffDate = formatDateByLanguage(wedding.rsvp_cutoff_date, languageLower);
     const baseUrl = process.env.APP_URL || 'http://localhost:3000';
     const shortPath = await getShortUrlPath(familyId);
     const magicLink = `${baseUrl}${shortPath}`;
 
-    const template = await getTemplateForSending(weddingId, templateType, language, 'WHATSAPP');
+    const variables = {
+      familyName: family.name,
+      coupleNames: wedding.couple_names,
+      weddingDate,
+      weddingTime: wedding.wedding_time || '',
+      location: wedding.location || '',
+      magicLink,
+      rsvpCutoffDate: cutoffDate,
+      ...(family.reference_code && { referenceCode: family.reference_code }),
+    };
+
+    const specificTemplate = await getTemplateForSending(weddingId, templateType, language, 'WHATSAPP');
+
+    // For CONFIRMATION, only use the specific template — a reminder asking the guest
+    // to RSVP would be wrong once they have already confirmed.
+    if (!specificTemplate && templateType === 'CONFIRMATION') {
+      const body: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'No confirmation template configured' } };
+      return NextResponse.json(body, { status: 404 });
+    }
+
+    // For other types fall back to the REMINDER template, then to hardcoded text.
+    const template = specificTemplate ??
+      (templateType !== 'REMINDER' ? await getTemplateForSending(weddingId, 'REMINDER', language, 'WHATSAPP') : null);
 
     let text: string;
-
     if (template) {
-      const variables = {
-        familyName: family.name,
-        coupleNames: wedding.couple_names,
-        weddingDate,
-        weddingTime: wedding.wedding_time || '',
-        location: wedding.location || '',
-        magicLink,
-        rsvpCutoffDate: cutoffDate,
-        ...(family.reference_code && { referenceCode: family.reference_code }),
-      };
       text = renderTemplate(template.body, variables);
     } else {
       const messages = WHATSAPP_FALLBACK_MESSAGES[languageLower] ?? WHATSAPP_FALLBACK_MESSAGES['es'];
