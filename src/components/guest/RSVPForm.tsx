@@ -223,7 +223,7 @@ export default function RSVPForm({
   const attendingCount = members.filter((m) => m.attending).length;
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-4 sm:p-6">
       <h3 className="text-2xl font-bold text-gray-900 mb-4">
         {t('guest.rsvp.title')}
       </h3>
@@ -267,7 +267,7 @@ export default function RSVPForm({
 
       {/* Add Member Section */}
       {wedding.allow_guest_additions && (
-        <div className="mb-2 p-4 bg-gray-50 rounded-lg">
+        <div className="mb-2 p-3 sm:p-4 bg-gray-50 rounded-lg">
           {!showAddMember ? (
             <button
               type="button"
@@ -317,7 +317,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={handleAddMember}
-                  className="flex-1 py-3 px-6 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="flex-1 py-2.5 px-4 bg-blue-600 text-white rounded-lg text-base font-semibold hover:bg-blue-700 transition-colors"
                 >
                   {t('common.buttons.add')}
                 </button>
@@ -328,7 +328,7 @@ export default function RSVPForm({
                     setNewMember({ name: '', type: 'ADULT', age: '' });
                     setError(null);
                   }}
-                  className="flex-1 py-3 px-6 bg-gray-300 text-gray-700 rounded-lg text-lg font-semibold hover:bg-gray-400 transition-colors"
+                  className="flex-1 py-2.5 px-4 bg-gray-300 text-gray-700 rounded-lg text-base font-semibold hover:bg-gray-400 transition-colors"
                 >
                   {t('common.buttons.cancel')}
                 </button>
@@ -346,7 +346,7 @@ export default function RSVPForm({
         wedding.extra_info_1_enabled ||
         wedding.extra_info_2_enabled ||
         wedding.extra_info_3_enabled) && (
-        <div className="mb-2 p-4 bg-gray-50 rounded-lg space-y-4">
+        <div className="mb-2 p-3 sm:p-4 bg-gray-50 rounded-lg space-y-4">
           <h4 className="text-xl font-bold text-gray-900">
             {t('guest.rsvp.additionalQuestions')}
           </h4>
@@ -361,7 +361,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setTransportationAnswer(true)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     transportationAnswer === true
                       ? 'bg-green-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -372,7 +372,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setTransportationAnswer(false)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     transportationAnswer === false
                       ? 'bg-red-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -392,7 +392,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion1Answer(true)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     extraQuestion1Answer === true
                       ? 'bg-green-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -403,7 +403,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion1Answer(false)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     extraQuestion1Answer === false
                       ? 'bg-red-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -423,7 +423,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion2Answer(true)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     extraQuestion2Answer === true
                       ? 'bg-green-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -434,7 +434,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion2Answer(false)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     extraQuestion2Answer === false
                       ? 'bg-red-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -454,7 +454,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion3Answer(true)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     extraQuestion3Answer === true
                       ? 'bg-green-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -465,7 +465,7 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion3Answer(false)}
-                  className={`flex-1 py-3 px-6 rounded-lg text-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
                     extraQuestion3Answer === false
                       ? 'bg-red-600 text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'

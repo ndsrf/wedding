@@ -194,6 +194,9 @@ function TemplateBlock({
           color: textBlock.style.color,
           textAlign: textBlock.style.textAlign,
           whiteSpace: 'pre-line',
+          overflowWrap: 'break-word',
+          wordBreak: 'break-word',
+          maxWidth: '100%',
           padding: '0 1rem',
           margin: 0,
         }}

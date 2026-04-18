@@ -37,7 +37,7 @@ export default function FamilyMemberCard({
   };
 
   return (
-    <div className="border-2 border-gray-200 rounded-lg p-5 bg-white">
+    <div className="border-2 border-gray-200 rounded-lg p-4 bg-white">
       {/* Member Info */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
