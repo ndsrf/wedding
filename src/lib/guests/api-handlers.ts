@@ -1004,10 +1004,12 @@ export async function getGuestWhatsAppTextHandler(
         reference_code: true,
         save_the_date_sent: true,
         members: { select: { attending: true } },
+        // Only look for INVITATION_SENT — REMINDER_SENT can only exist after it,
+        // so a single take:1 on this event type is both deterministic and sufficient.
         tracking_events: {
-          where: { event_type: { in: ['INVITATION_SENT', 'REMINDER_SENT'] } },
-          select: { event_type: true },
-          take: 2,
+          where: { event_type: 'INVITATION_SENT' },
+          select: { id: true },
+          take: 1,
         },
         wedding: {
           select: {
@@ -1030,15 +1032,17 @@ export async function getGuestWhatsAppTextHandler(
       return NextResponse.json(body, { status: 404 });
     }
 
-    // Mirror the same state flags used by the GuestTable button visibility
-    const anySent = family.tracking_events.length > 0; // matches guest.invitation_sent
-    const invitationSent = family.tracking_events.some(e => e.event_type === 'INVITATION_SENT');
+    // Mirror the same state flags used by the GuestTable button visibility.
+    // REMINDER_SENT can only be created after INVITATION_SENT, so checking
+    // INVITATION_SENT is sufficient for both the save-the-date guard (anySent)
+    // and the invitation-vs-reminder distinction (invitationSent).
+    const invitationSent = family.tracking_events.length > 0;
     const hasRsvp = family.members.some(m => m.attending !== null);
     const wedding = family.wedding!;
 
     // Determine template type with the same priority as button visibility
     let templateType: 'SAVE_THE_DATE' | 'INVITATION' | 'REMINDER' | 'CONFIRMATION';
-    if (wedding.save_the_date_enabled && !family.save_the_date_sent && !anySent) {
+    if (wedding.save_the_date_enabled && !family.save_the_date_sent && !invitationSent) {
       templateType = 'SAVE_THE_DATE';
     } else if (hasRsvp) {
       templateType = 'CONFIRMATION';
@@ -1067,9 +1071,17 @@ export async function getGuestWhatsAppTextHandler(
       ...(family.reference_code && { referenceCode: family.reference_code }),
     };
 
-    // Try the specific template, fall back through REMINDER (which has hardcoded fallback)
-    const template =
-      await getTemplateForSending(weddingId, templateType, language, 'WHATSAPP') ??
+    const specificTemplate = await getTemplateForSending(weddingId, templateType, language, 'WHATSAPP');
+
+    // For CONFIRMATION, only use the specific template — a reminder asking the guest
+    // to RSVP would be wrong once they have already confirmed.
+    if (!specificTemplate && templateType === 'CONFIRMATION') {
+      const body: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'No confirmation template configured' } };
+      return NextResponse.json(body, { status: 404 });
+    }
+
+    // For other types fall back to the REMINDER template, then to hardcoded text.
+    const template = specificTemplate ??
       (templateType !== 'REMINDER' ? await getTemplateForSending(weddingId, 'REMINDER', language, 'WHATSAPP') : null);
 
     let text: string;
