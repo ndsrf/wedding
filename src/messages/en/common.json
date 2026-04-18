@@ -3139,7 +3139,12 @@
       "sendingEmail": "Sending your access link...",
       "preparingWelcome": "Preparing your personalised welcome...",
       "almostThere": "Almost there! Adding the final touches...",
-      "finalTouches": "Tying the ribbon on your new account..."
+      "finalTouches": "Tying the ribbon on your new account...",
+      "securingData": "Securing your account data...",
+      "finalizingSetup": "Finalising the last details of your setup...",
+      "takingLonger": "Taking a little longer than usual — thank you for your patience!",
+      "stillWorking": "Still crafting your account with care...",
+      "worthTheWait": "The best weddings deserve a great platform. Almost ready!"
     },
     "success": {
       "title": "Your account is ready!",
