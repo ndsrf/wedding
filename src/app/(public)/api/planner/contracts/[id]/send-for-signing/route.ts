@@ -144,6 +144,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
         signerName: data.signer_name,
         createdAt: contract.created_at,
+        signedAt: new Date(),
         labels,
         locale,
       }) as never
