@@ -133,7 +133,7 @@ export interface ThemeCSSVariables {
   // Style variables
   '--button-radius': string;
   '--card-shadow': string;
-  '--spacing': string;
+  '--theme-spacing': string;
   '--border-radius'?: string;
   '--border-width'?: string;
   '--input-height'?: string;
