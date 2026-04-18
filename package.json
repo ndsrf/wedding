@@ -46,7 +46,7 @@
     "@liveblocks/react": "^3.15.3",
     "@liveblocks/react-tiptap": "^3.15.3",
     "@liveblocks/yjs": "^3.15.3",
-    "@opentelemetry/instrumentation-undici": "^0.24.0",
+    "@opentelemetry/instrumentation-undici": "^0.25.0",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@prisma/instrumentation": "^7.5.0",
