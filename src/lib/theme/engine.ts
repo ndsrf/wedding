@@ -158,7 +158,7 @@ function generateCSSVariables(config: ThemeConfigWithDefaults): string {
   // Style variables
   variables.push(`  --button-radius: ${config.styles.buttonRadius};`);
   variables.push(`  --card-shadow: ${config.styles.cardShadow};`);
-  variables.push(`  --spacing: ${config.styles.spacing};`);
+  variables.push(`  --theme-spacing: ${config.styles.spacing};`);
   variables.push(`  --border-radius: ${config.styles.borderRadius};`);
   variables.push(`  --border-width: ${config.styles.borderWidth};`);
   variables.push(`  --input-height: ${config.styles.inputStyle.height};`);

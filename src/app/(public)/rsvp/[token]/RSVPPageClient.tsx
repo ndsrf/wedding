@@ -163,7 +163,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           --font-body: ${theme.config.fonts.body};
           --button-radius: ${theme.config.styles.buttonRadius};
           --card-shadow: ${theme.config.styles.cardShadow};
-          --spacing: ${theme.config.styles.spacing};
+          --theme-spacing: ${theme.config.styles.spacing};
         }
       `}</style>
 
