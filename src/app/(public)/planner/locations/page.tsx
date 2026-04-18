@@ -83,19 +83,12 @@ function TagInput({ tags, onChange, placeholder, hint }: { tags: string[]; onCha
 
 function WeddingPanel({
   weddings,
-  activeLabel,
-  pastLabel,
-  noActiveLabel,
-  noPastLabel,
   locale,
 }: {
   weddings: LocationWedding[];
-  activeLabel: string;
-  pastLabel: string;
-  noActiveLabel: string;
-  noPastLabel: string;
   locale: string;
 }) {
+  const t = useTranslations('planner.locations');
   const [openPanel, setOpenPanel] = useState<'active' | 'past' | null>(null);
 
   const { activeWeddings, pastWeddings } = useMemo(() => {
@@ -129,7 +122,7 @@ function WeddingPanel({
         {openPanel === 'active' && (
           <ul className="mt-1 space-y-1 pl-2">
             {activeWeddings.length === 0 ? (
-              <li className="text-xs text-gray-400 italic">{noActiveLabel}</li>
+              <li className="text-xs text-gray-400 italic">{t('noActiveWeddings')}</li>
             ) : (
               activeWeddings.map((w) => (
                 <li key={w.id}>
@@ -530,10 +523,6 @@ export default function LocationsPage() {
                 {location.weddings !== undefined && (
                   <WeddingPanel
                     weddings={location.weddings}
-                    activeLabel={t('activeWeddings')}
-                    pastLabel={t('pastWeddings')}
-                    noActiveLabel={t('noActiveWeddings')}
-                    noPastLabel={t('noPastWeddings')}
                     locale={locale}
                   />
                 )}
