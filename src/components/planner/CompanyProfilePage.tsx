@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface CompanyProfile {
   id: string;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function CompanyProfilePage({ initialProfile }: Props) {
+  const t = useTranslations('planner.companyProfile');
   const [profile, setProfile] = useState<CompanyProfile>(initialProfile);
   const [form, setForm] = useState({
     name: initialProfile.name,
@@ -67,10 +69,10 @@ export function CompanyProfilePage({ initialProfile }: Props) {
       const json = await res.json();
       if (!res.ok) throw new Error(JSON.stringify(json.error));
       setProfile((p) => ({ ...p, ...json.data }));
-      setSaveMsg('Saved successfully');
+      setSaveMsg(t('savedSuccessfully'));
       setTimeout(() => setSaveMsg(null), 3000);
     } catch (err) {
-      setSaveMsg('Failed to save. Please try again.');
+      setSaveMsg(t('saveFailed'));
       console.error(err);
     } finally {
       setSaving(false);
@@ -91,14 +93,14 @@ export function CompanyProfilePage({ initialProfile }: Props) {
         body: fd,
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Upload failed');
+      if (!res.ok) throw new Error(json.error ?? t('uploadFailed'));
       if (type === 'logo') {
         setProfile((p) => ({ ...p, logo_url: json.data.logo_url }));
       } else {
         setProfile((p) => ({ ...p, signature_url: json.data.signature_url }));
       }
     } catch (err) {
-      alert('Upload failed. Please try again.');
+      alert(t('uploadFailed'));
       console.error(err);
     } finally {
       setUploading(false);
@@ -115,7 +117,7 @@ export function CompanyProfilePage({ initialProfile }: Props) {
         setProfile((p) => ({ ...p, signature_url: null }));
       }
     } catch (err) {
-      alert('Failed to remove image.');
+      alert(t('removeFailed'));
       console.error(err);
     }
   }
@@ -124,12 +126,12 @@ export function CompanyProfilePage({ initialProfile }: Props) {
     <div className="space-y-8">
       {/* Company Details */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-5">Company Details</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-5">{t('companyDetails')}</h2>
         <form onSubmit={handleSave} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Display Name <span className="text-rose-500">*</span>
+                {t('displayName')} <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
@@ -137,62 +139,62 @@ export function CompanyProfilePage({ initialProfile }: Props) {
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 required
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                placeholder="Your business name"
+                placeholder={t('displayNamePlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Legal Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('legalName')}</label>
               <input
                 type="text"
                 value={form.legal_name}
                 onChange={(e) => setForm((f) => ({ ...f, legal_name: e.target.value }))}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                placeholder="Legal business name"
+                placeholder={t('legalNamePlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('companyEmail')}</label>
               <input
                 type="email"
                 value={form.company_email}
                 onChange={(e) => setForm((f) => ({ ...f, company_email: e.target.value }))}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                placeholder="contact@yourcompany.com"
+                placeholder={t('companyEmailPlaceholder')}
               />
-              <p className="mt-1 text-xs text-gray-400">Shown on quotes and invoices instead of your login email</p>
+              <p className="mt-1 text-xs text-gray-400">{t('companyEmailHint')}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">VAT / Tax Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('vatNumber')}</label>
               <input
                 type="text"
                 value={form.vat_number}
                 onChange={(e) => setForm((f) => ({ ...f, vat_number: e.target.value }))}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                placeholder="VAT or tax identification number"
+                placeholder={t('vatNumberPlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('phone')}</label>
               <input
                 type="tel"
                 value={form.phone}
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                placeholder="+1 234 567 8900"
+                placeholder={t('phonePlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('whatsapp')}</label>
               <input
                 type="tel"
                 value={form.whatsapp}
                 onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value }))}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                placeholder="+1 234 567 8900"
+                placeholder={t('phonePlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('instagram')}</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
                 <input
@@ -200,29 +202,29 @@ export function CompanyProfilePage({ initialProfile }: Props) {
                   value={form.instagram}
                   onChange={(e) => setForm((f) => ({ ...f, instagram: e.target.value.replace(/^@/, '') }))}
                   className="w-full rounded-lg border border-gray-200 pl-7 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                  placeholder="yourbusiness"
+                  placeholder={t('instagramPlaceholder')}
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('website')}</label>
               <input
                 type="url"
                 value={form.website}
                 onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-                placeholder="https://yourwebsite.com"
+                placeholder={t('websitePlaceholder')}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('address')}</label>
             <textarea
               value={form.address}
               onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
               rows={3}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
-              placeholder="Street, City, Postal Code, Country"
+              placeholder={t('addressPlaceholder')}
             />
           </div>
           <div className="flex items-center gap-3">
@@ -231,7 +233,7 @@ export function CompanyProfilePage({ initialProfile }: Props) {
               disabled={saving}
               className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-sm disabled:opacity-50"
             >
-              {saving ? 'Saving…' : 'Save Details'}
+              {saving ? t('saving') : t('saveDetails')}
             </button>
             {saveMsg && (
               <span className={`text-sm ${saveMsg.startsWith('Failed') ? 'text-red-500' : 'text-green-600'}`}>
@@ -244,9 +246,9 @@ export function CompanyProfilePage({ initialProfile }: Props) {
 
       {/* Logo */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-1">Company Logo</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-1">{t('companyLogo')}</h2>
         <p className="text-sm text-gray-500 mb-5">
-          Shown in the header of quotes, contracts, and invoices.
+          {t('companyLogoSubtitle')}
         </p>
         <input
           ref={logoInputRef}
@@ -288,7 +290,7 @@ export function CompanyProfilePage({ initialProfile }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               )}
-              {logoUploading ? 'Uploading…' : profile.logo_url ? 'Replace Logo' : 'Upload Logo'}
+              {logoUploading ? t('uploading') : profile.logo_url ? t('replaceLogo') : t('uploadLogo')}
             </button>
             {profile.logo_url && (
               <button
@@ -296,20 +298,19 @@ export function CompanyProfilePage({ initialProfile }: Props) {
                 onClick={() => handleRemoveImage('logo')}
                 className="text-sm text-red-500 hover:text-red-600 text-left"
               >
-                Remove logo
+                {t('removeLogo')}
               </button>
             )}
-            <p className="text-xs text-gray-400">JPEG, PNG or WebP · Max 5 MB</p>
+            <p className="text-xs text-gray-400">{t('imageHintLogo')}</p>
           </div>
         </div>
       </div>
 
       {/* Signature / Stamp */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-1">Company Signature / Stamp</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-1">{t('companySignature')}</h2>
         <p className="text-sm text-gray-500 mb-5">
-          Placed in the planner signature section when generating or sending contracts.
-          Use a transparent-background PNG for best results.
+          {t('companySignatureSubtitle')}
         </p>
         <input
           ref={signatureInputRef}
@@ -351,7 +352,7 @@ export function CompanyProfilePage({ initialProfile }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               )}
-              {signatureUploading ? 'Uploading…' : profile.signature_url ? 'Replace Signature' : 'Upload Signature / Stamp'}
+              {signatureUploading ? t('uploading') : profile.signature_url ? t('replaceSignature') : t('uploadSignature')}
             </button>
             {profile.signature_url && (
               <button
@@ -359,10 +360,10 @@ export function CompanyProfilePage({ initialProfile }: Props) {
                 onClick={() => handleRemoveImage('signature')}
                 className="text-sm text-red-500 hover:text-red-600 text-left"
               >
-                Remove signature
+                {t('removeSignature')}
               </button>
             )}
-            <p className="text-xs text-gray-400">JPEG, PNG or WebP · Transparent PNG recommended</p>
+            <p className="text-xs text-gray-400">{t('imageHintSignature')}</p>
           </div>
         </div>
       </div>

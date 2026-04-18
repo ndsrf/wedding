@@ -458,8 +458,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Company Profile</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Logo, details, signature for documents</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('planner.dashboard.companyProfile')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{t('planner.dashboard.companyProfileSubtitle')}</p>
               </div>
             </Link>
 
