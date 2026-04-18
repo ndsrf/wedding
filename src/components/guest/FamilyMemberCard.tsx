@@ -1,10 +1,3 @@
-/**
- * Family Member Card Component
- *
- * Card for displaying and editing a single family member's RSVP details.
- * Shows/hides dietary and accessibility fields based on attending status.
- */
-
 'use client';
 
 import { useTranslations } from 'next-intl';
@@ -37,64 +30,62 @@ export default function FamilyMemberCard({
   };
 
   return (
-    <div className="border-2 border-gray-200 rounded-lg p-4 bg-white">
+    <div className="border border-gray-200 rounded-lg p-3 bg-white">
       {/* Member Info */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <h4 className="text-xl font-bold text-gray-900">{member.name}</h4>
-          <p className="text-base text-gray-600">
-            {getMemberTypeLabel(member.type)}
-            {member.age && ` • ${t('guest.members.yearsOld', { count: member.age })}`}
-            {member.added_by_guest && (
-              <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {t('guest.members.addedByYou')}
-              </span>
-            )}
-          </p>
-        </div>
+      <div className="mb-3">
+        <h4 className="text-base font-bold text-gray-900">{member.name}</h4>
+        <p className="text-sm text-gray-500">
+          {getMemberTypeLabel(member.type)}
+          {member.age && ` • ${t('guest.members.yearsOld', { count: member.age })}`}
+          {member.added_by_guest && (
+            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
+              {t('guest.members.addedByYou')}
+            </span>
+          )}
+        </p>
       </div>
 
       {/* Attending Toggle */}
-      <div className="mb-4">
-        <label className="flex items-center space-x-3 cursor-pointer">
+      <div className="mb-3">
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={attending}
             onChange={(e) => onAttendingChange(e.target.checked)}
-            className="w-7 h-7 rounded border-2 border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 cursor-pointer"
+            className="w-5 h-5 rounded border-2 border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 cursor-pointer flex-shrink-0"
           />
-          <span className="text-lg font-semibold text-gray-900">
+          <span className="text-sm font-semibold text-gray-900">
             {attending ? `✓ ${t('guest.rsvp.attending')}` : t('guest.rsvp.attend')}
           </span>
         </label>
       </div>
 
-      {/* Dietary Restrictions (only if attending) */}
+      {/* Dietary & Accessibility (only if attending) */}
       {attending && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <label className="block text-base font-semibold text-gray-700 mb-2">
-              {t('guest.rsvp.dietaryRestrictions')} ({t('common.optional', { defaultValue: 'optional' })})
+            <label className="block text-xs font-semibold text-gray-600 mb-1">
+              {t('guest.rsvp.dietaryRestrictions')} ({t('common.optional', { defaultValue: 'opcional' })})
             </label>
             <input
               type="text"
               value={dietaryRestrictions}
               onChange={(e) => onDietaryChange(e.target.value)}
               placeholder={t('guest.rsvp.dietaryPlaceholder')}
-              className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-base font-semibold text-gray-700 mb-2">
-              {t('guest.rsvp.accessibilityNeeds')} ({t('common.optional', { defaultValue: 'optional' })})
+            <label className="block text-xs font-semibold text-gray-600 mb-1">
+              {t('guest.rsvp.accessibilityNeeds')} ({t('common.optional', { defaultValue: 'opcional' })})
             </label>
             <input
               type="text"
               value={accessibilityNeeds}
               onChange={(e) => onAccessibilityChange(e.target.value)}
               placeholder={t('guest.rsvp.accessibilityPlaceholder')}
-              className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
             />
           </div>
         </div>

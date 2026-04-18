@@ -66,15 +66,16 @@ export default function LanguageSelector({
         disabled={updating}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className="flex items-center gap-1 px-2 py-1 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-1 border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ padding: '4px 8px', fontSize: '13px', lineHeight: '18px' }}
       >
         {updating ? (
           <WeddingSpinner size="sm" />
         ) : (
           <>
-            <span className="text-base leading-none">{currentLang.flag}</span>
-            <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{currentLang.code}</span>
-            <svg className="w-3 h-3 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span style={{ fontSize: '16px', lineHeight: '1' }}>{currentLang.flag}</span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#374151', letterSpacing: '0.05em' }}>{currentLang.code}</span>
+            <svg className="flex-shrink-0" style={{ width: '10px', height: '10px', color: '#6b7280' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </>

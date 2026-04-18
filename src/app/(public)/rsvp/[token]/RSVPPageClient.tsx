@@ -87,14 +87,14 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           weddingId={wedding.id}
         />
       ) : (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-1">
             {t('guest.welcome.title', { familyName: family.name })} 👋
           </h2>
-          <p className="text-xl text-gray-600 mb-4">
+          <p className="text-sm text-gray-600 mb-3">
             {t('guest.welcome.subtitle')}
           </p>
-          <div className="space-y-2 text-lg text-gray-700">
+          <div className="space-y-1 text-sm text-gray-700">
             <p>
               <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
             </p>
@@ -114,8 +114,8 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
             )}
           </div>
           {wedding.additional_info && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-lg text-gray-700">{wedding.additional_info}</p>
+            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-gray-700">{wedding.additional_info}</p>
             </div>
           )}
         </div>

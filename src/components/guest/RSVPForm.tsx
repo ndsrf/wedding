@@ -209,11 +209,11 @@ export default function RSVPForm({
 
   if (rsvpCutoffPassed) {
     return (
-      <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6">
-        <h3 className="text-2xl font-bold text-yellow-900 mb-2">
+      <div className="bg-yellow-50 border border-yellow-400 rounded-lg p-4">
+        <h3 className="text-base font-bold text-yellow-900 mb-1">
           {t('guest.rsvp.cutoffPassed')}
         </h3>
-        <p className="text-lg text-yellow-800">
+        <p className="text-sm text-yellow-800">
           {t('guest.rsvp.cutoffPassed')}
         </p>
       </div>
@@ -223,23 +223,23 @@ export default function RSVPForm({
   const attendingCount = members.filter((m) => m.attending).length;
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-      <h3 className="text-2xl font-bold text-gray-900 mb-4">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-3 sm:p-4">
+      <h3 className="text-lg font-bold text-gray-900 mb-2">
         {t('guest.rsvp.title')}
       </h3>
-      <p className="text-lg text-gray-600 mb-2">
+      <p className="text-sm text-gray-600 mb-3">
         {t('guest.rsvp.instructions')}
       </p>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border-2 border-red-400 rounded-lg">
-          <p className="text-lg text-red-800">{error}</p>
+        <div className="mb-4 p-3 bg-red-50 border border-red-400 rounded-lg">
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
       {/* Family Members */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {family.members.map((member) => {
           const memberUpdate = members.find((m) => m.id === member.id);
           if (!memberUpdate) return null;
@@ -267,18 +267,18 @@ export default function RSVPForm({
 
       {/* Add Member Section */}
       {wedding.allow_guest_additions && (
-        <div className="mb-2 p-3 sm:p-4 bg-gray-50 rounded-lg">
+        <div className="mt-3 p-3 bg-gray-50 rounded-lg">
           {!showAddMember ? (
             <button
               type="button"
               onClick={() => setShowAddMember(true)}
-              className="w-full py-4 px-6 bg-white border-2 border-gray-300 rounded-lg text-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               + {t('guest.members.addMember')}
             </button>
           ) : (
-            <div className="space-y-4">
-              <h4 className="text-xl font-bold text-gray-900">
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-gray-900">
                 {t('guest.members.addMember')}
               </h4>
               <input
@@ -288,7 +288,7 @@ export default function RSVPForm({
                 onChange={(e) =>
                   setNewMember({ ...newMember, name: e.target.value })
                 }
-                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
               />
               <select
                 value={newMember.type}
@@ -298,7 +298,7 @@ export default function RSVPForm({
                     type: e.target.value as 'ADULT' | 'CHILD' | 'INFANT',
                   })
                 }
-                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
               >
                 <option value="ADULT">{t('guest.members.types.adult')}</option>
                 <option value="CHILD">{t('guest.members.types.child')}</option>
@@ -306,18 +306,18 @@ export default function RSVPForm({
               </select>
               <input
                 type="number"
-                placeholder={`${t('guest.members.age')} (optional)`}
+                placeholder={`${t('guest.members.age')} (opcional)`}
                 value={newMember.age}
                 onChange={(e) =>
                   setNewMember({ ...newMember, age: e.target.value })
                 }
-                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
               />
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleAddMember}
-                  className="flex-1 py-2.5 px-4 bg-blue-600 text-white rounded-lg text-base font-semibold hover:bg-blue-700 transition-colors"
+                  className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
                 >
                   {t('common.buttons.add')}
                 </button>
@@ -328,7 +328,7 @@ export default function RSVPForm({
                     setNewMember({ name: '', type: 'ADULT', age: '' });
                     setError(null);
                   }}
-                  className="flex-1 py-2.5 px-4 bg-gray-300 text-gray-700 rounded-lg text-base font-semibold hover:bg-gray-400 transition-colors"
+                  className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-colors"
                 >
                   {t('common.buttons.cancel')}
                 </button>
@@ -346,25 +346,25 @@ export default function RSVPForm({
         wedding.extra_info_1_enabled ||
         wedding.extra_info_2_enabled ||
         wedding.extra_info_3_enabled) && (
-        <div className="mb-2 p-3 sm:p-4 bg-gray-50 rounded-lg space-y-4">
-          <h4 className="text-xl font-bold text-gray-900">
+        <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+          <h4 className="text-sm font-bold text-gray-900">
             {t('guest.rsvp.additionalQuestions')}
           </h4>
 
           {/* Transportation Question */}
           {wedding.transportation_question_enabled && (
             <div className="space-y-2">
-              <p className="text-lg text-gray-700">
+              <p className="text-sm text-gray-700">
                 {wedding.transportation_question_text || t('guest.rsvp.defaultTransportationQuestion')}
               </p>
-              <div className="flex gap-4">
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setTransportationAnswer(true)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     transportationAnswer === true
                       ? 'bg-green-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.yes')}
@@ -372,10 +372,10 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setTransportationAnswer(false)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     transportationAnswer === false
                       ? 'bg-red-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.no')}
@@ -387,15 +387,15 @@ export default function RSVPForm({
           {/* Extra Yes/No Question 1 */}
           {wedding.extra_question_1_enabled && wedding.extra_question_1_text && (
             <div className="space-y-2">
-              <p className="text-lg text-gray-700">{wedding.extra_question_1_text}</p>
-              <div className="flex gap-4">
+              <p className="text-sm text-gray-700">{wedding.extra_question_1_text}</p>
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setExtraQuestion1Answer(true)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     extraQuestion1Answer === true
                       ? 'bg-green-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.yes')}
@@ -403,10 +403,10 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion1Answer(false)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     extraQuestion1Answer === false
                       ? 'bg-red-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.no')}
@@ -418,15 +418,15 @@ export default function RSVPForm({
           {/* Extra Yes/No Question 2 */}
           {wedding.extra_question_2_enabled && wedding.extra_question_2_text && (
             <div className="space-y-2">
-              <p className="text-lg text-gray-700">{wedding.extra_question_2_text}</p>
-              <div className="flex gap-4">
+              <p className="text-sm text-gray-700">{wedding.extra_question_2_text}</p>
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setExtraQuestion2Answer(true)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     extraQuestion2Answer === true
                       ? 'bg-green-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.yes')}
@@ -434,10 +434,10 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion2Answer(false)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     extraQuestion2Answer === false
                       ? 'bg-red-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.no')}
@@ -449,15 +449,15 @@ export default function RSVPForm({
           {/* Extra Yes/No Question 3 */}
           {wedding.extra_question_3_enabled && wedding.extra_question_3_text && (
             <div className="space-y-2">
-              <p className="text-lg text-gray-700">{wedding.extra_question_3_text}</p>
-              <div className="flex gap-4">
+              <p className="text-sm text-gray-700">{wedding.extra_question_3_text}</p>
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setExtraQuestion3Answer(true)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     extraQuestion3Answer === true
                       ? 'bg-green-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.yes')}
@@ -465,10 +465,10 @@ export default function RSVPForm({
                 <button
                   type="button"
                   onClick={() => setExtraQuestion3Answer(false)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-base font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                     extraQuestion3Answer === false
                       ? 'bg-red-600 text-white'
-                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {t('common.no')}
@@ -479,45 +479,45 @@ export default function RSVPForm({
 
           {/* Extra Info Field 1 */}
           {wedding.extra_info_1_enabled && wedding.extra_info_1_label && (
-            <div className="space-y-2">
-              <label className="text-lg text-gray-700 block">
+            <div className="space-y-1">
+              <label className="text-sm text-gray-700 block font-medium">
                 {wedding.extra_info_1_label}
               </label>
               <input
                 type="text"
                 value={extraInfo1Value}
                 onChange={(e) => setExtraInfo1Value(e.target.value)}
-                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
               />
             </div>
           )}
 
           {/* Extra Info Field 2 */}
           {wedding.extra_info_2_enabled && wedding.extra_info_2_label && (
-            <div className="space-y-2">
-              <label className="text-lg text-gray-700 block">
+            <div className="space-y-1">
+              <label className="text-sm text-gray-700 block font-medium">
                 {wedding.extra_info_2_label}
               </label>
               <input
                 type="text"
                 value={extraInfo2Value}
                 onChange={(e) => setExtraInfo2Value(e.target.value)}
-                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
               />
             </div>
           )}
 
           {/* Extra Info Field 3 */}
           {wedding.extra_info_3_enabled && wedding.extra_info_3_label && (
-            <div className="space-y-2">
-              <label className="text-lg text-gray-700 block">
+            <div className="space-y-1">
+              <label className="text-sm text-gray-700 block font-medium">
                 {wedding.extra_info_3_label}
               </label>
               <input
                 type="text"
                 value={extraInfo3Value}
                 onChange={(e) => setExtraInfo3Value(e.target.value)}
-                className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
               />
             </div>
           )}
@@ -525,8 +525,8 @@ export default function RSVPForm({
       )}
 
       {/* Summary */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-        <p className="text-xl font-semibold text-blue-900">
+      <div className="mt-4 mb-3 p-3 bg-blue-50 rounded-lg">
+        <p className="text-sm font-semibold text-blue-900">
           {t('guest.rsvp.attendingSummary', { count: attendingCount })}
         </p>
       </div>
@@ -535,12 +535,12 @@ export default function RSVPForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-5 px-6 bg-green-600 text-white rounded-lg text-xl font-bold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-lg"
+        className="w-full py-3 bg-green-600 text-white rounded-lg text-base font-bold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-md"
       >
         {submitting ? t('common.loading') : t('guest.rsvp.submit')}
       </button>
 
-      <p className="mt-4 text-center text-base text-gray-500">
+      <p className="mt-3 text-center text-xs text-gray-500">
         {t('guest.edit.canEdit', { date: new Date(wedding.rsvp_cutoff_date).toLocaleDateString(locale) })}
       </p>
     </form>
