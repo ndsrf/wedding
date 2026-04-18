@@ -426,8 +426,8 @@ export default async function PlannerDashboardPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Locations</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Manage ceremony venues and event locations</p>
+                <h3 className="text-sm font-semibold text-gray-900">{t('planner.dashboard.locations')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{t('planner.dashboard.locationsSubtitle')}</p>
               </div>
             </Link>
 

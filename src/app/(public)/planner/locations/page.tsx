@@ -1,15 +1,9 @@
-/**
- * Location Management Page
- *
- * Allows wedding planners to manage their locations (ceremony venues, events, etc.)
- * with Google Maps integration, tags, and wedding associations.
- */
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { MapPin, Plus, Edit2, Trash2, ExternalLink, Tag, X, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 
@@ -37,7 +31,7 @@ interface Location {
 
 type LocationFormData = Omit<Location, 'id' | '_count' | 'weddings'>;
 
-function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+function TagInput({ tags, onChange, placeholder, hint }: { tags: string[]; onChange: (tags: string[]) => void; placeholder: string; hint: string }) {
   const [inputValue, setInputValue] = useState('');
 
   const addTag = (value: string) => {
@@ -62,33 +56,39 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
   };
 
   return (
-    <div className="flex flex-wrap gap-1.5 p-2 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 min-h-[42px]">
-      {tags.map((tag) => (
-        <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-          {tag}
-          <button type="button" onClick={() => onChange(tags.filter((t) => t !== tag))} className="hover:text-blue-600">
-            <X className="h-3 w-3" />
-          </button>
-        </span>
-      ))}
-      <input
-        type="text"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={handleBlur}
-        placeholder={tags.length === 0 ? 'Escribe un tag y pulsa Enter...' : ''}
-        className="flex-1 min-w-[120px] outline-none text-sm bg-transparent"
-      />
+    <div>
+      <div className="flex flex-wrap gap-1.5 p-2 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 min-h-[42px]">
+        {tags.map((tag) => (
+          <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+            {tag}
+            <button type="button" onClick={() => onChange(tags.filter((t) => t !== tag))} className="hover:text-blue-600">
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          placeholder={tags.length === 0 ? placeholder : ''}
+          className="flex-1 min-w-[120px] outline-none text-sm bg-transparent"
+        />
+      </div>
+      <p className="mt-1 text-xs text-gray-500">{hint}</p>
     </div>
   );
 }
 
 function WeddingPanel({
   weddings,
+  locale,
 }: {
   weddings: LocationWedding[];
+  locale: string;
 }) {
+  const t = useTranslations('planner.locations');
   const [openPanel, setOpenPanel] = useState<'active' | 'past' | null>(null);
 
   const { activeWeddings, pastWeddings } = useMemo(() => {
@@ -102,7 +102,7 @@ function WeddingPanel({
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   const toggle = (panel: 'active' | 'past') => {
@@ -111,19 +111,18 @@ function WeddingPanel({
 
   return (
     <div className="mt-3 pt-3 border-t border-gray-200 space-y-1">
-      {/* Active weddings */}
       <div>
         <button
           onClick={() => toggle('active')}
           className="flex items-center justify-between w-full text-xs text-left text-green-700 font-medium hover:text-green-900 py-0.5"
         >
-          <span>Bodas activas ({activeWeddings.length})</span>
+          <span>{t('activeWeddings', { count: activeWeddings.length })}</span>
           {openPanel === 'active' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
         {openPanel === 'active' && (
           <ul className="mt-1 space-y-1 pl-2">
             {activeWeddings.length === 0 ? (
-              <li className="text-xs text-gray-400 italic">Sin bodas activas</li>
+              <li className="text-xs text-gray-400 italic">{t('noActiveWeddings')}</li>
             ) : (
               activeWeddings.map((w) => (
                 <li key={w.id}>
@@ -141,19 +140,18 @@ function WeddingPanel({
         )}
       </div>
 
-      {/* Past weddings */}
       <div>
         <button
           onClick={() => toggle('past')}
           className="flex items-center justify-between w-full text-xs text-left text-gray-500 font-medium hover:text-gray-700 py-0.5"
         >
-          <span>Bodas pasadas ({pastWeddings.length})</span>
+          <span>{t('pastWeddings', { count: pastWeddings.length })}</span>
           {openPanel === 'past' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
         {openPanel === 'past' && (
           <ul className="mt-1 space-y-1 pl-2">
             {pastWeddings.length === 0 ? (
-              <li className="text-xs text-gray-400 italic">Sin bodas pasadas</li>
+              <li className="text-xs text-gray-400 italic">{t('noPastWeddings')}</li>
             ) : (
               pastWeddings.map((w) => (
                 <li key={w.id}>
@@ -175,7 +173,10 @@ function WeddingPanel({
 }
 
 export default function LocationsPage() {
-  useDocumentTitle('Nupci - Localizaciones');
+  const t = useTranslations('planner.locations');
+  const commonT = useTranslations('common.buttons');
+  const locale = useLocale();
+  useDocumentTitle(`Nupci - ${t('pageTitle')}`);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -214,7 +215,7 @@ export default function LocationsPage() {
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
-    locations.forEach((l) => l.tags?.forEach((t) => set.add(t)));
+    locations.forEach((l) => l.tags?.forEach((tag) => set.add(tag)));
     return Array.from(set).sort();
   }, [locations]);
 
@@ -225,7 +226,7 @@ export default function LocationsPage() {
       result = result.filter((l) => l.name.toLowerCase().includes(q));
     }
     if (tagFilter.size > 0) {
-      result = result.filter((l) => l.tags?.some((t) => tagFilter.has(t)));
+      result = result.filter((l) => l.tags?.some((tag) => tagFilter.has(tag)));
     }
     return result;
   }, [locations, nameFilter, tagFilter]);
@@ -284,13 +285,11 @@ export default function LocationsPage() {
 
   const handleDelete = async (location: Location) => {
     if (location._count && (location._count.weddings > 0 || location._count.itinerary_items > 0)) {
-      alert(
-        `No se puede eliminar esta localización. Está siendo usada en ${location._count.weddings} boda(s) y ${location._count.itinerary_items} elemento(s) de itinerario.`
-      );
+      alert(t('deleteError', { weddings: location._count.weddings, items: location._count.itinerary_items }));
       return;
     }
 
-    if (!confirm(`¿Seguro que quieres eliminar "${location.name}"?`)) return;
+    if (!confirm(t('deleteConfirm', { name: location.name }))) return;
 
     try {
       const response = await fetch(`/api/planner/locations/${location.id}`, {
@@ -334,7 +333,7 @@ export default function LocationsPage() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Dashboard
+            {t('backToDashboard')}
           </Link>
         </div>
       </div>
@@ -346,16 +345,16 @@ export default function LocationsPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                 <MapPin className="h-6 w-6" />
-                Locations
+                {t('pageTitle')}
               </h1>
-              <p className="mt-1 text-sm text-gray-600">Manage ceremony venues, event locations, and more</p>
+              <p className="mt-1 text-sm text-gray-600">{t('pageSubtitle')}</p>
             </div>
             <button
               onClick={() => setShowForm(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
-              Add Location
+              {t('addLocation')}
             </button>
           </div>
         </div>
@@ -372,7 +371,7 @@ export default function LocationsPage() {
                 type="text"
                 value={nameFilter}
                 onChange={(e) => setNameFilter(e.target.value)}
-                placeholder="Filtrar por nombre..."
+                placeholder={t('filterByName')}
                 className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {nameFilter && (
@@ -387,7 +386,7 @@ export default function LocationsPage() {
             {allTags.length > 0 && (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs text-gray-500 flex items-center gap-1">
-                  <Tag className="h-3 w-3" /> Tags:
+                  <Tag className="h-3 w-3" /> {t('tags')}:
                 </span>
                 {allTags.map((tag) => (
                   <button
@@ -408,7 +407,7 @@ export default function LocationsPage() {
                     onClick={() => setTagFilter(new Set())}
                     className="text-xs text-gray-400 hover:text-gray-600 underline"
                   >
-                    Limpiar
+                    {t('clearFilters')}
                   </button>
                 )}
               </div>
@@ -419,22 +418,22 @@ export default function LocationsPage() {
         {loading && (
           <div className="text-center py-12">
             <WeddingSpinner size="md" />
-            <p className="mt-2 text-sm text-gray-600">Loading locations...</p>
+            <p className="mt-2 text-sm text-gray-600">{t('loading')}</p>
           </div>
         )}
 
         {!loading && locations.length === 0 && (
           <div className="bg-white shadow rounded-lg p-12 text-center">
             <MapPin className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No locations</h3>
-            <p className="mt-1 text-sm text-gray-600">Get started by creating a new location.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('noLocations')}</h3>
+            <p className="mt-1 text-sm text-gray-600">{t('noLocationsSubtitle')}</p>
             <div className="mt-6">
               <button
                 onClick={() => setShowForm(true)}
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Location
+                {t('addLocation')}
               </button>
             </div>
           </div>
@@ -443,7 +442,7 @@ export default function LocationsPage() {
         {!loading && locations.length > 0 && filteredLocations.length === 0 && (
           <div className="bg-white shadow rounded-lg p-8 text-center">
             <Search className="mx-auto h-8 w-8 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600">No se encontraron localizaciones con los filtros aplicados.</p>
+            <p className="mt-2 text-sm text-gray-600">{t('noResults')}</p>
           </div>
         )}
 
@@ -459,14 +458,14 @@ export default function LocationsPage() {
                     <button
                       onClick={() => handleEdit(location)}
                       className="p-2 text-gray-400 hover:text-blue-600"
-                      title="Edit"
+                      title={t('edit')}
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(location)}
                       className="p-2 text-gray-400 hover:text-red-600 disabled:opacity-30"
-                      title="Delete"
+                      title={t('delete')}
                       disabled={!!(location._count && (location._count.weddings > 0 || location._count.itinerary_items > 0))}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -503,7 +502,7 @@ export default function LocationsPage() {
                       className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                     >
                       <MapPin className="h-3 w-3" />
-                      View on Google Maps
+                      {t('viewOnGoogleMaps')}
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
@@ -515,14 +514,17 @@ export default function LocationsPage() {
                       className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      Visit Website
+                      {t('visitWebsite')}
                     </a>
                   )}
                 </div>
 
                 {/* Wedding panels */}
                 {location.weddings !== undefined && (
-                  <WeddingPanel weddings={location.weddings} />
+                  <WeddingPanel
+                    weddings={location.weddings}
+                    locale={locale}
+                  />
                 )}
               </div>
             ))}
@@ -535,7 +537,7 @@ export default function LocationsPage() {
         <div className="fixed inset-0 bg-gray-500/75 flex items-start justify-center p-4 z-50 overflow-y-auto">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full my-8 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingLocation ? 'Edit Location' : 'Add Location'}
+              {editingLocation ? t('editTitle') : t('createTitle')}
             </h2>
 
             {error && (
@@ -547,7 +549,7 @@ export default function LocationsPage() {
             <form onSubmit={handleCreateOrUpdate} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location Name *
+                  {t('locationName')}
                 </label>
                 <input
                   type="text"
@@ -555,26 +557,26 @@ export default function LocationsPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Grand Ballroom, Garden Terrace"
+                  placeholder={t('namePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
+                  {t('address')}
                 </label>
                 <input
                   type="text"
                   value={formData.address || ''}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., 123 Main St, City, State, ZIP"
+                  placeholder={t('addressPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Google Maps URL
+                  {t('googleMapsUrl')}
                 </label>
                 <input
                   type="url"
@@ -583,14 +585,12 @@ export default function LocationsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="https://maps.google.com/..."
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Link to Google Maps location (right-click on map → Share → Copy link)
-                </p>
+                <p className="mt-1 text-xs text-gray-500">{t('googleMapsHint')}</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Website URL
+                  {t('websiteUrl')}
                 </label>
                 <input
                   type="url"
@@ -603,29 +603,28 @@ export default function LocationsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
+                  {t('notes')}
                 </label>
                 <textarea
                   value={formData.notes || ''}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Additional information about this location..."
+                  placeholder={t('notesPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                   <Tag className="h-3.5 w-3.5" />
-                  Tags
+                  {t('tags')}
                 </label>
                 <TagInput
                   tags={formData.tags ?? []}
                   onChange={(tags) => setFormData({ ...formData, tags })}
+                  placeholder={t('tagInputPlaceholder')}
+                  hint={t('tagInputHint')}
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Pulsa Enter o coma para añadir un tag. Backspace para eliminar el último.
-                </p>
               </div>
 
               <div className="flex justify-end space-x-3 pt-4 border-t">
@@ -635,14 +634,14 @@ export default function LocationsPage() {
                   disabled={isSubmitting}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Cancel
+                  {commonT('cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Saving...' : editingLocation ? 'Update' : 'Create'}
+                  {isSubmitting ? t('saving') : editingLocation ? t('update') : t('create')}
                 </button>
               </div>
             </form>
