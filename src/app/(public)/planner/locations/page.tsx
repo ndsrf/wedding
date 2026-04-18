@@ -123,7 +123,7 @@ function WeddingPanel({
           onClick={() => toggle('active')}
           className="flex items-center justify-between w-full text-xs text-left text-green-700 font-medium hover:text-green-900 py-0.5"
         >
-          <span>{activeLabel.replace('{count}', String(activeWeddings.length))}</span>
+          <span>{t('activeWeddings', { count: activeWeddings.length })}</span>
           {openPanel === 'active' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
         {openPanel === 'active' && (
