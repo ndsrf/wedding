@@ -366,7 +366,19 @@ export function ContractPDF({ title, content, company, signerName, createdAt, si
               <View style={styles.sigLine} />
             )}
             <Text style={styles.sigDateLabel}>
-              {labels.signatureDate}{signedAt ? ` ${new Date(signedAt).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}
+              {labels.signatureDate}
+              {signedAt && (
+                <>
+                  {' '}
+                  <Text style={styles.metaBold}>
+                    {signedAt.toLocaleDateString(locale, {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </Text>
+                </>
+              )}
             </Text>
           </View>
 
