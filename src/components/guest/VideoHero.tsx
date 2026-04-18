@@ -113,11 +113,13 @@ export default function VideoHero({
         </a>
       </div>
 
-      <TrialSignupModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        locale={locale}
-      />
+      {isModalOpen && (
+        <TrialSignupModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          locale={locale}
+        />
+      )}
     </section>
   );
 }

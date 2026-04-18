@@ -21,11 +21,13 @@ export default function TrialSignupButton({ label, locale, className }: TrialSig
       >
         {label}
       </button>
-      <TrialSignupModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        locale={locale}
-      />
+      {isOpen && (
+        <TrialSignupModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          locale={locale}
+        />
+      )}
     </>
   );
 }
