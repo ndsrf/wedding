@@ -152,7 +152,7 @@ function WeddingPanel({
           onClick={() => toggle('past')}
           className="flex items-center justify-between w-full text-xs text-left text-gray-500 font-medium hover:text-gray-700 py-0.5"
         >
-          <span>{pastLabel.replace('{count}', String(pastWeddings.length))}</span>
+          <span>{t('pastWeddings', { count: pastWeddings.length })}</span>
           {openPanel === 'past' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
         {openPanel === 'past' && (
