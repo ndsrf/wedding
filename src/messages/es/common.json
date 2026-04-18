@@ -419,12 +419,12 @@
       "alertSettingsSubtitle": "Configura las notificaciones del planner",
       "locations": "Localizaciones",
       "locationsSubtitle": "Gestiona lugares de ceremonia y ubicaciones de eventos",
-      "companyProfile": "Perfil de Empresa",
+      "companyProfile": "Perfil de la empresa",
       "companyProfileSubtitle": "Logotipo, datos y firma para documentos"
     },
     "companyProfile": {
-      "pageTitle": "Perfil de Empresa",
-      "pageSubtitle": "Gestiona los datos de tu empresa, logotipo y firma usados en presupuestos, contratos y facturas.",
+      "pageTitle": "Perfil de la empresa",
+      "pageSubtitle": "Gestiona los datos, el logotipo y la firma de tu empresa que se utilizan en presupuestos, contratos y facturas",
       "companyDetails": "Datos de la Empresa",
       "displayName": "Nombre Visible",
       "displayNamePlaceholder": "Nombre de tu empresa",
