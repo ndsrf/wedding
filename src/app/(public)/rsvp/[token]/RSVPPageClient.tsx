@@ -150,7 +150,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
   );
 
   return (
-    <div className="min-h-screen" style={{ background: isGardenBirds ? theme.config.colors.background : '#f9fafb' }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: isGardenBirds ? theme.config.colors.background : '#f9fafb' }}>
       {/* Apply theme CSS */}
       <style jsx global>{`
         :root {
@@ -191,20 +191,22 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
         <>
           {/* Header */}
           <div className="bg-white shadow-sm border-b border-gray-200">
-            <div className="max-w-4xl mx-auto px-4 py-1 flex justify-between items-center">
-              <h1 className="text-xl font-bold text-gray-900">
+            <div className="max-w-4xl mx-auto px-4 py-1 flex justify-between items-center gap-2">
+              <h1 className="text-lg font-bold text-gray-900 min-w-0 truncate flex-1">
                 {wedding.couple_names}
               </h1>
-              <LanguageSelector
-                token={token}
-                currentLanguage={family.preferred_language}
-                onLanguageChange={() => window.location.reload()}
-              />
+              <div className="flex-shrink-0">
+                <LanguageSelector
+                  token={token}
+                  currentLanguage={family.preferred_language}
+                  onLanguageChange={() => window.location.reload()}
+                />
+              </div>
             </div>
           </div>
 
           {/* Main Content */}
-          <div>
+          <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
             {mainContent}
           </div>
 

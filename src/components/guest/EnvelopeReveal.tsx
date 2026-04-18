@@ -240,7 +240,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
             </div>
           </div>
         ) : (
-          <div className="w-full content-enter">
+          <div className="w-full content-enter relative">
             {/* Hero Welcome Section */}
             <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-12 header-enter">
               {/* Decorative string lights */}
