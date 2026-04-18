@@ -68,7 +68,7 @@
     "@vercel/otel": "^2.1.1",
     "@vercel/speed-insights": "^2.0.0",
     "ai": "^6.0.116",
-    "diff": "^8.0.0",
+    "diff": "^9.0.0",
     "dotenv": "^17.2.3",
     "esbuild-register": "^3.6.0",
     "exceljs": "^4.4.0",
