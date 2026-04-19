@@ -202,6 +202,7 @@ export function GuestsPageContent({
   const [selectedTimelineFamilyId, setSelectedTimelineFamilyId] = useState<string | null>(null);
   const [selectedTimelineFamilyName, setSelectedTimelineFamilyName] = useState<string | null>(null);
 
+  const [isExtraActionsExpanded, setIsExtraActionsExpanded] = useState(false);
   // Bulk reminder state
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const selectedGuestIdsRef = useRef(selectedGuestIds);
@@ -660,6 +661,7 @@ export function GuestsPageContent({
     setIsReminderModalOpen(true);
   };
 
+  const [isBulkActionsExpanded, setIsBulkActionsExpanded] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
@@ -770,14 +772,51 @@ export function GuestsPageContent({
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Info and Actions Bar */}
-        <div className="bg-white shadow-sm rounded-lg p-4 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-sm text-gray-600">
-                {totalGuests} {t('admin.guests.list')} • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
-              </p>
-            </div>
+        {/* Page Header & Primary Action */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 bg-white shadow-sm rounded-lg p-4 border border-gray-100">
+          <div>
+            <p className="text-sm text-gray-600">
+              {totalGuests} {t('admin.guests.list')} • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
+            </p>
+          </div>
+          {!isReadOnly && (
+            <button
+              onClick={handleAddGuest}
+              className="w-full sm:w-auto px-6 py-2.5 text-sm font-bold text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700 shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {t('admin.guests.add')}
+            </button>
+          )}
+        </div>
+
+        {/* Secondary Actions (Import/Export) - Collapsible on mobile */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+          {/* Mobile Toggle */}
+          <button
+            onClick={() => setIsExtraActionsExpanded(!isExtraActionsExpanded)}
+            className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 lg:hidden"
+          >
+            <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              {t('common.buttons.export')} / {t('common.buttons.import')}
+            </span>
+            <svg
+              className={`w-5 h-5 text-gray-500 transition-transform ${isExtraActionsExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Actions Content */}
+          <div className={`${isExtraActionsExpanded ? 'block' : 'hidden'} lg:block p-4`}>
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
               <button
                 onClick={handleDownloadTemplate}
@@ -889,14 +928,6 @@ export function GuestsPageContent({
                   />
                 </label>
               )}
-              {!isReadOnly && (
-                <button
-                  onClick={handleAddGuest}
-                  className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700"
-                >
-                  {t('admin.guests.add')}
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -939,68 +970,96 @@ export function GuestsPageContent({
 
             {/* Bulk Actions Section */}
             {!isReadOnly && (
-              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+                {/* Mobile Toggle Header */}
+                <button
+                  onClick={() => setIsBulkActionsExpanded(!isBulkActionsExpanded)}
+                  className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 lg:hidden"
+                >
                   <div className="flex items-center gap-4">
                     <h3 className="text-sm font-medium text-gray-900">
                       {t('admin.guests.bulkActions')}
                     </h3>
                     {selectedGuestIds.length > 0 && (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
-                        {selectedGuestIds.length} {t('admin.guests.selected')}
+                        {selectedGuestIds.length}
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <button
-                      onClick={handleSelectAllCurrentPage}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                    >
-                      {t('admin.guests.selectPage')}
-                    </button>
-                    <button
-                      onClick={handleSelectAllItems}
-                      disabled={isSelectingAll}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      {isSelectingAll ? '…' : selectedGuestIds.length > 0 ? t('admin.guests.deselectAll') : t('admin.guests.selectAll')}
-                    </button>
-                    {weddingShortCode && (
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform ${isBulkActionsExpanded ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Bulk Actions Content */}
+                <div className={`${isBulkActionsExpanded ? 'block' : 'hidden'} lg:block p-4`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="hidden lg:flex items-center gap-4">
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {t('admin.guests.bulkActions')}
+                      </h3>
+                      {selectedGuestIds.length > 0 && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                          {selectedGuestIds.length} {t('admin.guests.selected')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                       <button
-                        onClick={handleCopyGeneralInvLink}
-                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
+                        onClick={handleSelectAllCurrentPage}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                       >
-                        {copiedGeneralLink ? '✓' : t('admin.guests.copyGeneralInvitationLink')}
+                        {t('admin.guests.selectPage')}
                       </button>
-                    )}
-                    <button
-                      onClick={() => setIsBulkDeleteDialogOpen(true)}
-                      disabled={selectedGuestIds.length === 0}
-                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t('admin.guests.deleteSelected')}
-                    </button>
-                    <button
-                      onClick={() => setIsBulkEditModalOpen(true)}
-                      disabled={selectedGuestIds.length === 0}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t('admin.guests.bulkEdit.button')}
-                    </button>
-                    <button
-                      onClick={handleOpenBulkReminderModal}
-                      disabled={selectedGuestIds.length === 0}
-                      className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t('admin.reminders.send')}
-                    </button>
+                      <button
+                        onClick={handleSelectAllItems}
+                        disabled={isSelectingAll}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        {isSelectingAll ? '…' : selectedGuestIds.length > 0 ? t('admin.guests.deselectAll') : t('admin.guests.selectAll')}
+                      </button>
+                      {weddingShortCode && (
+                        <button
+                          onClick={handleCopyGeneralInvLink}
+                          className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
+                        >
+                          {copiedGeneralLink ? '✓' : t('admin.guests.copyGeneralInvitationLink')}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setIsBulkDeleteDialogOpen(true)}
+                        disabled={selectedGuestIds.length === 0}
+                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {t('admin.guests.deleteSelected')}
+                      </button>
+                      <button
+                        onClick={() => setIsBulkEditModalOpen(true)}
+                        disabled={selectedGuestIds.length === 0}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {t('admin.guests.bulkEdit.button')}
+                      </button>
+                      <button
+                        onClick={handleOpenBulkReminderModal}
+                        disabled={selectedGuestIds.length === 0}
+                        className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {t('admin.reminders.send')}
+                      </button>
+                    </div>
                   </div>
+                  {selectedGuestIds.length === 0 && (
+                    <p className="mt-2 text-xs text-gray-500">
+                      {t('admin.guests.selectGuestsHint')}
+                    </p>
+                  )}
                 </div>
-                {selectedGuestIds.length === 0 && (
-                  <p className="mt-2 text-xs text-gray-500">
-                    {t('admin.guests.selectGuestsHint')}
-                  </p>
-                )}
               </div>
             )}
 
@@ -1242,7 +1301,7 @@ export function GuestsPageContent({
 
             <span className="hidden sm:inline-block sm:h-screen sm:align-middle">&#8203;</span>
 
-            <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+            <div className="relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">

@@ -249,6 +249,7 @@ export function renderAMPPage(config: {
     }
     .logo-img {
       margin: 0 auto;
+      width: auto;
     }
     h1 { font-family: serif; color: #111; margin-top: 30px; }
     h2 { font-family: serif; color: #333; margin-top: 25px; }
@@ -278,7 +279,7 @@ export function renderAMPPage(config: {
 <body>
   <header>
     <a href="/${locale}">
-      <amp-img src="/images/nupci.webp" width="150" height="60" layout="intrinsic" alt="${commercialName}" class="logo-img"></amp-img>
+      <amp-img src="/images/nupci.webp" width="107" height="60" layout="intrinsic" alt="${commercialName}" class="logo-img"></amp-img>
     </a>
   </header>
   <div class="container">

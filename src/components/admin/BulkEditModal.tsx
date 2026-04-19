@@ -30,6 +30,7 @@ export interface BulkEditUpdates {
   invited_by_admin_id?: string | null;
   set_all_attending?: boolean;
   set_all_not_attending?: boolean;
+  rsvp_status?: 'pending' | 'submitted';
 }
 
 export function BulkEditModal({
@@ -44,6 +45,7 @@ export function BulkEditModal({
   const [channel, setChannel] = useState<Channel | 'none' | ''>('');
   const [invitedBy, setInvitedBy] = useState<string | 'none' | ''>('');
   const [attendance, setAttendance] = useState<'attending' | 'not_attending' | ''>('');
+  const [rsvpStatus, setRsvpStatus] = useState<'pending' | 'submitted' | ''>('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +69,9 @@ export function BulkEditModal({
     } else if (attendance === 'not_attending') {
       updates.set_all_not_attending = true;
     }
+    if (rsvpStatus) {
+      updates.rsvp_status = rsvpStatus as 'pending' | 'submitted';
+    }
 
     // Check if at least one field is selected
     if (Object.keys(updates).length === 0) {
@@ -83,6 +88,7 @@ export function BulkEditModal({
       setChannel('');
       setInvitedBy('');
       setAttendance('');
+      setRsvpStatus('');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
@@ -97,6 +103,7 @@ export function BulkEditModal({
       setChannel('');
       setInvitedBy('');
       setAttendance('');
+      setRsvpStatus('');
       setError(null);
       onClose();
     }
@@ -125,7 +132,7 @@ export function BulkEditModal({
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-y-auto max-h-[60vh] px-1">
                 {/* Language */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -135,7 +142,7 @@ export function BulkEditModal({
                     value={language}
                     onChange={(e) => setLanguage(e.target.value as Language | '')}
                     disabled={saving}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
                   >
                     <option value="">{t('admin.guests.bulkEdit.noChange')}</option>
                     <option value="ES">Español</option>
@@ -143,6 +150,23 @@ export function BulkEditModal({
                     <option value="FR">Français</option>
                     <option value="IT">Italiano</option>
                     <option value="DE">Deutsch</option>
+                  </select>
+                </div>
+
+                {/* RSVP Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('admin.guests.rsvpStatus')}
+                  </label>
+                  <select
+                    value={rsvpStatus}
+                    onChange={(e) => setRsvpStatus(e.target.value as 'pending' | 'submitted' | '')}
+                    disabled={saving}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
+                  >
+                    <option value="">{t('admin.guests.bulkEdit.noChange')}</option>
+                    <option value="pending">{t('admin.guests.filters.pending')}</option>
+                    <option value="submitted">{t('admin.guests.filters.submitted')}</option>
                   </select>
                 </div>
 
@@ -155,7 +179,7 @@ export function BulkEditModal({
                     value={channel}
                     onChange={(e) => setChannel(e.target.value as Channel | 'none' | '')}
                     disabled={saving}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
                   >
                     <option value="">{t('admin.guests.bulkEdit.noChange')}</option>
                     <option value="WHATSAPP">WhatsApp</option>
@@ -174,7 +198,7 @@ export function BulkEditModal({
                     value={invitedBy}
                     onChange={(e) => setInvitedBy(e.target.value)}
                     disabled={saving}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
                   >
                     <option value="">{t('admin.guests.bulkEdit.noChange')}</option>
                     {admins.map((admin) => (
@@ -195,7 +219,7 @@ export function BulkEditModal({
                     value={attendance}
                     onChange={(e) => setAttendance(e.target.value as 'attending' | 'not_attending' | '')}
                     disabled={saving}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
                   >
                     <option value="">{t('admin.guests.bulkEdit.noChange')}</option>
                     <option value="attending">{t('admin.guests.bulkEdit.setAllAttending')}</option>

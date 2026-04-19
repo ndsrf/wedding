@@ -416,8 +416,8 @@ export default function WeddingLookupForm({ initials, serverLanguage, wedding }:
               <Image
                 src="/images/nupci.webp"
                 alt={commercialName}
-                width={400}
-                height={160}
+                width={668}
+                height={374}
                 className="h-12 w-auto"
                 priority
               />

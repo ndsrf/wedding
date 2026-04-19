@@ -76,9 +76,9 @@ export default function PrivateHeader({
               <Image
                 src="/images/nupci.webp"
                 alt={commercialName}
-                width={240}
-                height={96}
-                className="h-24 w-auto"
+                width={668}
+                height={374}
+                className="h-12 w-auto"
                 priority
               />
             </Link>

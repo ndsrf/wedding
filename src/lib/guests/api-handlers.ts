@@ -126,12 +126,17 @@ const bulkUpdateSchema = z.object({
     invited_by_admin_id: z.string().uuid().nullable().optional(),
     set_all_attending: z.boolean().optional(),
     set_all_not_attending: z.boolean().optional(),
+    rsvp_status: z.enum(['pending', 'submitted']).optional(),
   }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }
   ).refine(
-    (data) => !(data.set_all_attending && data.set_all_not_attending),
-    { message: 'Cannot set both attending and not attending' }
+    (data) => {
+      const attendanceConflict = data.set_all_attending && data.set_all_not_attending;
+      const rsvpConflict = data.rsvp_status && (data.set_all_attending || data.set_all_not_attending);
+      return !attendanceConflict && !rsvpConflict;
+    },
+    { message: 'Cannot set conflicting attendance or RSVP statuses' }
   ),
 });
 
@@ -567,7 +572,17 @@ export async function bulkUpdateGuestsHandler(
         updatedFamilies = family_ids.length;
       }
 
-      if (updates.set_all_attending !== undefined || updates.set_all_not_attending !== undefined) {
+      if (updates.rsvp_status === 'pending') {
+        updatedMembers = (await tx.familyMember.updateMany({
+          where: { family_id: { in: family_ids } },
+          data: { attending: null },
+        })).count;
+      } else if (updates.rsvp_status === 'submitted') {
+        updatedMembers = (await tx.familyMember.updateMany({
+          where: { family_id: { in: family_ids }, attending: null },
+          data: { attending: true },
+        })).count;
+      } else if (updates.set_all_attending !== undefined || updates.set_all_not_attending !== undefined) {
         updatedMembers = (await tx.familyMember.updateMany({
           where: { family_id: { in: family_ids } },
           data: { attending: updates.set_all_attending ? true : updates.set_all_not_attending ? false : null },
