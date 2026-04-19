@@ -3337,7 +3337,7 @@
     },
     "support": {
       "title": "We Are Here to Help!",
-      "description": "That's the full tour! Have questions or need help? Click \"Learn more\" at the top to chat with the Nupci team in real-time."
+      "description": "That's the full tour! Have questions or need help? Click the \"Help\" button in the bottom-right to chat with the Nupci team in real-time."
     }
   },
   "trialBanner": {
@@ -3356,6 +3356,7 @@
       "chatWithUs": "Chat with us now",
       "contactAdmin": "Contact admin for training or upgrade",
       "close": "Close"
-    }
+    },
+    "helpLabel": "Help"
   }
 }

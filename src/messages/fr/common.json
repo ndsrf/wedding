@@ -3238,8 +3238,9 @@
     },
     "support": {
       "title": "Nous Sommes Là pour Vous Aider !",
-      "description": "C'est la fin de la visite guidée ! Vous avez des questions ou besoin d'aide ? Cliquez sur \"En savoir plus\" en haut pour discuter avec l'équipe Nupci en temps réel."
+      "description": "C'est la fin de la visite ! Vous avez des questions ou besoin d'aide ? Cliquez sur le bouton \"Aide\" en bas à droite pour discuter avec l'équipe Nupci en temps réel."
     }
+
   },
   "trialBanner": {
     "message": "Vous êtes en mode essai avec un mariage de démonstration.",
@@ -3255,8 +3256,9 @@
       },
       "ctaText": "Prêt à débloquer toutes les fonctionnalités ? Chattez avec nous pour une démo en direct ou pour mettre à niveau votre plan.",
       "chatWithUs": "Chattez avec nous maintenant",
-      "contactAdmin": "Contacter l'administrateur pour une formation ou une mise à niveau",
+      "contactAdmin": "Contacter l'administrateur pour formation ou mise à niveau",
       "close": "Fermer"
-    }
+    },
+    "helpLabel": "Aide"
   }
 }

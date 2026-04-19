@@ -3314,7 +3314,7 @@
     },
     "support": {
       "title": "¡Estamos Aquí para Ayudar!",
-      "description": "¡Eso es todo el tour! ¿Tienes preguntas o necesitas ayuda? Pulsa en \"Más información\" en la parte superior para chatear con el equipo de Nupci en tiempo real."
+      "description": "¡Eso es todo el tour! ¿Tienes preguntas o necesitas ayuda? Haz clic en el botón de \"Ayuda\" en la esquina inferior derecha para chatear con el equipo de Nupci en tiempo real."
     }
   },
   "trialBanner": {
@@ -3333,6 +3333,7 @@
       "chatWithUs": "Chatea con nosotros ahora",
       "contactAdmin": "Contactar al administrador para formación o actualización",
       "close": "Cerrar"
-    }
+    },
+    "helpLabel": "Ayuda"
   }
 }

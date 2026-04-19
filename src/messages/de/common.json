@@ -3238,7 +3238,7 @@
     },
     "support": {
       "title": "Wir Sind für Sie Da!",
-      "description": "Das war die vollständige Tour! Haben Sie Fragen oder benötigen Sie Hilfe? Klicken Sie oben auf \"Mehr erfahren\", um in Echtzeit mit dem Nupci-Team zu chatten."
+      "description": "Das war die vollständige Tour! Haben Sie Fragen oder benötigen Sie Hilfe? Klicken Sie auf die Schaltfläche \"Hilfe\" unten rechts, um in Echtzeit mit dem Nupci-Team zu chatten."
     }
   },
   "trialBanner": {
@@ -3257,6 +3257,7 @@
       "chatWithUs": "Jetzt mit uns chatten",
       "contactAdmin": "Administrator für Schulung oder Upgrade kontaktieren",
       "close": "Schließen"
-    }
+    },
+    "helpLabel": "Hilfe"
   }
 }

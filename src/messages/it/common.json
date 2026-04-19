@@ -3239,7 +3239,7 @@
     },
     "support": {
       "title": "Siamo Qui per Aiutarti!",
-      "description": "Questo è il tour completo! Hai domande o hai bisogno di aiuto? Clicca su \"Scopri di più\" in alto per chattare con il team di Nupci in tempo reale."
+      "description": "Questo è il tour completo! Hai domande o hai bisogno di aiuto? Clicca sul pulsante \"Aiuto\" in basso a destra per chattare con il team di Nupci in tempo reale."
     }
   },
   "trialBanner": {
@@ -3256,8 +3256,9 @@
       },
       "ctaText": "Pronto a sbloccare tutte le funzionalità? Chatta con noi per una demo dal vivo o per aggiornare il tuo piano.",
       "chatWithUs": "Chatta con noi ora",
-      "contactAdmin": "Contatta l'amministratore per formazione o aggiornamento",
+      "contactAdmin": "Contatta l'amministratore per formazione o upgrade",
       "close": "Chiudi"
-    }
+    },
+    "helpLabel": "Aiuto"
   }
 }

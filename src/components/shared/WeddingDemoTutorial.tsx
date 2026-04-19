@@ -86,10 +86,10 @@ export function WeddingDemoTutorial({ statusEndpoint = '/api/planner/trial-statu
       placement: 'bottom',
     },
     {
-      target: '[data-tutorial="trial-banner-learn-more"]',
+      target: '[data-tutorial="crisp-help-button"]',
       title: t('support.title'),
       content: t('support.description'),
-      placement: 'bottom',
+      placement: 'left',
     },
   ], [t]);
 

@@ -72,6 +72,9 @@ export function TrialModeBanner({ statusEndpoint }: TrialModeBannerProps) {
     window.$crisp.push(['set', 'session:segments', [['trial']]]);
     window.$crisp.push(['set', 'session:data', [[['mode', 'trial']]]]);
 
+    // Hide the default bubble so we can use our own button with a label
+    window.$crisp.push(['do', 'chat:hide']);
+
     // Inject script once
     if (!document.querySelector('script[src*="crisp.chat"]')) {
       const script = document.createElement('script');
@@ -86,6 +89,7 @@ export function TrialModeBanner({ statusEndpoint }: TrialModeBannerProps) {
   const handleChatClick = () => {
     setModalOpen(false);
     if (typeof window !== 'undefined' && window.$crisp) {
+      window.$crisp.push(['do', 'chat:show']);
       window.$crisp.push(['do', 'chat:open']);
     }
   };
@@ -247,6 +251,26 @@ export function TrialModeBanner({ statusEndpoint }: TrialModeBannerProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Floating Crisp Button (only shown in trial mode when Crisp is configured) */}
+      {isTrialMode && crispConfigured && (
+        <button
+          onClick={handleChatClick}
+          data-tutorial="crisp-help-button"
+          className="fixed bottom-[116px] right-6 z-50 h-14 px-5 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-100 flex items-center gap-2 hover:bg-blue-700 hover:scale-105 transition-all"
+          aria-label="Chat with support"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+          <span className="font-bold text-sm whitespace-nowrap">{t('helpLabel')}</span>
+        </button>
       )}
     </>
   );
