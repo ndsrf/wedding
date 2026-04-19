@@ -39,7 +39,7 @@ export function CompanyProfilePage({ initialProfile }: Props) {
     website: initialProfile.website ?? '',
   });
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [saveMsg, setSaveMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [signatureUploading, setSignatureUploading] = useState(false);
 
@@ -69,10 +69,10 @@ export function CompanyProfilePage({ initialProfile }: Props) {
       const json = await res.json();
       if (!res.ok) throw new Error(JSON.stringify(json.error));
       setProfile((p) => ({ ...p, ...json.data }));
-      setSaveMsg(t('savedSuccessfully'));
+      setSaveMsg({ text: t('savedSuccessfully'), ok: true });
       setTimeout(() => setSaveMsg(null), 3000);
     } catch (err) {
-      setSaveMsg(t('saveFailed'));
+      setSaveMsg({ text: t('saveFailed'), ok: false });
       console.error(err);
     } finally {
       setSaving(false);
@@ -236,8 +236,8 @@ export function CompanyProfilePage({ initialProfile }: Props) {
               {saving ? t('saving') : t('saveDetails')}
             </button>
             {saveMsg && (
-              <span className={`text-sm ${saveMsg.startsWith('Failed') ? 'text-red-500' : 'text-green-600'}`}>
-                {saveMsg}
+              <span className={`text-sm ${saveMsg.ok ? 'text-green-600' : 'text-red-500'}`}>
+                {saveMsg.text}
               </span>
             )}
           </div>
