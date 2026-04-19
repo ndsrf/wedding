@@ -22,7 +22,7 @@ import { API_ERROR_CODES } from '@/types/api';
 import type { Prisma } from '@prisma/client';
 import { createFamily, getFamilyWithMembers, updateFamily, deleteFamily } from '@/lib/guests/crud';
 import { createFamilySchema, updateFamilySchema } from '@/lib/guests/validation';
-import { getCached, invalidateCache, CACHE_KEYS } from '@/lib/cache/redis';
+import { getCached, setCached, invalidateCache, invalidateCachePattern, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { exportGuestData, exportGuestDataSimplified } from '@/lib/excel/export';
 import type { ExportFormat } from '@/lib/excel/export';
 import { importGuestList } from '@/lib/excel/import';
@@ -104,7 +104,8 @@ export function handleGuestApiError(
 
 const listGuestsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(50),
+  limit: z.coerce.number().int().positive().max(200).default(50),
+  ids_only: z.coerce.boolean().default(false),
   rsvp_status: z.enum(['pending', 'submitted']).optional(),
   attendance: z.enum(['yes', 'no', 'partial']).optional(),
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
@@ -114,11 +115,11 @@ const listGuestsQuerySchema = z.object({
 });
 
 const bulkDeleteSchema = z.object({
-  family_ids: z.array(z.string().uuid()).min(1).max(100),
+  family_ids: z.array(z.string().uuid()).min(1).max(1000),
 });
 
 const bulkUpdateSchema = z.object({
-  family_ids: z.array(z.string().uuid()).min(1).max(100),
+  family_ids: z.array(z.string().uuid()).min(1).max(1000),
   updates: z.object({
     preferred_language: z.enum(['ES', 'EN', 'FR', 'IT', 'DE']).optional(),
     channel_preference: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).nullable().optional(),
@@ -137,8 +138,20 @@ const bulkUpdateSchema = z.object({
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 // ============================================================================
-// CACHE INVALIDATION HELPER
+// CACHE HELPERS
 // ============================================================================
+
+/**
+ * Build a deterministic cache-key suffix from filter/pagination params.
+ * Sorting entries ensures the same filters always map to the same key.
+ */
+function buildGuestCacheParamsKey(params: Record<string, string | number | boolean | undefined>): string {
+  return Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('|');
+}
 
 /**
  * Invalidate all stats caches that are affected by a guest mutation on weddingId.
@@ -158,6 +171,8 @@ async function invalidateStatsForWedding(weddingId: string): Promise<void> {
     invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
     invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
     invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
+    invalidateCachePattern(`wedding:guests:list:${weddingId}:*`),
+    invalidateCachePattern(`wedding:guests:ids:${weddingId}:*`),
     ...(plannerId
       ? [
           invalidateCache(CACHE_KEYS.plannerStats(plannerId)),
@@ -182,6 +197,7 @@ export async function listGuestsHandler(
     const queryParams = listGuestsQuerySchema.parse({
       page: searchParams.get('page') || 1,
       limit: searchParams.get('limit') || 50,
+      ids_only: searchParams.get('ids_only') || false,
       rsvp_status: searchParams.get('rsvp_status') || undefined,
       attendance: searchParams.get('attendance') || undefined,
       channel: searchParams.get('channel') || undefined,
@@ -190,8 +206,7 @@ export async function listGuestsHandler(
       search: searchParams.get('search') || undefined,
     });
 
-    const { page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search } = queryParams;
-    const skip = (page - 1) * limit;
+    const { page, limit, ids_only, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search } = queryParams;
 
     const whereClause: Prisma.FamilyWhereInput = { wedding_id: weddingId };
 
@@ -223,6 +238,42 @@ export async function listGuestsHandler(
 
     if (payment_status) {
       whereClause.gifts = { some: { status: payment_status } };
+    }
+
+    // ---- ids_only mode: return just selectable family IDs (no RSVP submitted) ----
+    if (ids_only) {
+      const filterKey = buildGuestCacheParamsKey({ rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search });
+      const cacheKey = CACHE_KEYS.guestIds(weddingId, filterKey);
+
+      const cached = await getCached<{ ids: string[]; total: number }>(cacheKey);
+      if (cached) {
+        return NextResponse.json({ success: true, data: cached }, { status: 200 });
+      }
+
+      // Only return families that haven't submitted RSVP (selectable for bulk actions)
+      const selectableClause: Prisma.FamilyWhereInput = {
+        ...whereClause,
+        members: { every: { attending: null } },
+      };
+      const selectableFamilies = await prisma.family.findMany({
+        where: selectableClause,
+        select: { id: true },
+        orderBy: { name: 'asc' },
+      });
+      const result = { ids: selectableFamilies.map((f) => f.id), total: selectableFamilies.length };
+      await setCached(cacheKey, result, CACHE_TTL.GUEST_IDS);
+      return NextResponse.json({ success: true, data: result }, { status: 200 });
+    }
+
+    // ---- normal paginated list ----
+    const skip = (page - 1) * limit;
+    const pageKey = buildGuestCacheParamsKey({ page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search });
+    const cacheKey = CACHE_KEYS.guestList(weddingId, pageKey);
+
+    const cachedList = await getCached<ListGuestsResponse['data']>(cacheKey);
+    if (cachedList) {
+      const response: ListGuestsResponse = { success: true, data: cachedList };
+      return NextResponse.json(response, { status: 200 });
     }
 
     const total = await prisma.family.count({ where: whereClause });
@@ -288,14 +339,13 @@ export async function listGuestsHandler(
       };
     });
 
-    const response: ListGuestsResponse = {
-      success: true,
-      data: {
-        items: familiesWithStatus,
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-      },
+    const listData: ListGuestsResponse['data'] = {
+      items: familiesWithStatus,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
+    await setCached(cacheKey, listData, CACHE_TTL.GUEST_LIST);
 
+    const response: ListGuestsResponse = { success: true, data: listData };
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
     return handleGuestApiError(error, { operation: 'fetch guests' });

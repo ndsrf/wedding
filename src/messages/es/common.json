@@ -87,7 +87,11 @@
     },
     "pagination": {
       "page": "Página",
-      "of": "de"
+      "of": "de",
+      "rowsPerPage": "Filas por página:",
+      "total": "{count} en total",
+      "first": "Primero",
+      "last": "Último"
     },
     "selection": {
       "selectAll": "Seleccionar todo",
@@ -2001,6 +2005,8 @@
       },
       "bulkActions": "Acciones en lote",
       "selectAll": "Seleccionar todos",
+      "selectPage": "Seleccionar página",
+      "deselectAll": "Deseleccionar todos",
       "copyGeneralInvitationLink": "Copiar enlace de invitación general",
       "deleteSelected": "Eliminar seleccionados",
       "selectGuestsHint": "Selecciona invitados de la lista para realizar acciones en lote",

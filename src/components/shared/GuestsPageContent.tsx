@@ -153,6 +153,9 @@ export function GuestsPageContent({
   const [additionsLoading, setAdditionsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalGuests, setTotalGuests] = useState(0);
+  const [limit, setLimit] = useState(50);
+  const [isSelectingAll, setIsSelectingAll] = useState(false);
   const [activeTab, setActiveTab] = useState<'guests' | 'additions'>('guests');
   const [weddingConfig, setWeddingConfig] = useState<WeddingQuestionConfig | null>(null);
   const [weddingGiftIban, setWeddingGiftIban] = useState<string | null>(null);
@@ -196,6 +199,7 @@ export function GuestsPageContent({
     try {
       const params = new URLSearchParams();
       params.set('page', page.toString());
+      params.set('limit', limit.toString());
       if (filters.rsvp_status) params.set('rsvp_status', filters.rsvp_status);
       if (filters.attendance) params.set('attendance', filters.attendance);
       if (filters.channel) params.set('channel', filters.channel);
@@ -209,13 +213,14 @@ export function GuestsPageContent({
       if (data.success) {
         setGuests(data.data.items);
         setTotalPages(data.data.pagination.totalPages);
+        setTotalGuests(data.data.pagination.total);
       }
     } catch (error) {
       console.error('Error fetching guests:', error);
     } finally {
       setLoading(false);
     }
-  }, [apiPaths.guests, page, filters]);
+  }, [apiPaths.guests, page, limit, filters]);
 
   const fetchGuestAdditions = useCallback(async () => {
     setAdditionsLoading(true);
@@ -288,6 +293,16 @@ export function GuestsPageContent({
       console.error('Error fetching admins:', error);
     }
   }, [apiPaths.admins]);
+
+  const handleFilterChange = useCallback((newFilters: Filters) => {
+    setFilters(newFilters);
+    setPage(1);
+  }, []);
+
+  const handleLimitChange = useCallback((newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  }, []);
 
   // Initialize filters from URL search params
   useEffect(() => {
@@ -604,6 +619,32 @@ export function GuestsPageContent({
     }
   };
 
+  const handleSelectAllItems = useCallback(async () => {
+    if (selectedGuestIds.length > 0) {
+      setSelectedGuestIds([]);
+      return;
+    }
+    setIsSelectingAll(true);
+    try {
+      const params = new URLSearchParams({ ids_only: 'true' });
+      if (filters.rsvp_status) params.set('rsvp_status', filters.rsvp_status);
+      if (filters.attendance) params.set('attendance', filters.attendance);
+      if (filters.channel) params.set('channel', filters.channel);
+      if (filters.payment_status) params.set('payment_status', filters.payment_status);
+      if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
+      if (filters.search) params.set('search', filters.search);
+      const response = await fetch(`${apiPaths.guests}?${params.toString()}`);
+      const data = await response.json();
+      if (data.success) {
+        setSelectedGuestIds(data.data.ids);
+      }
+    } catch (error) {
+      console.error('Error fetching all guest IDs:', error);
+    } finally {
+      setIsSelectingAll(false);
+    }
+  }, [apiPaths.guests, filters, selectedGuestIds]);
+
   const handleOpenBulkReminderModal = () => {
     setReminderFamily(null);
     setReminderMode('reminder');
@@ -725,7 +766,7 @@ export function GuestsPageContent({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="text-sm text-gray-600">
-                {guests.length} guests • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
+                {totalGuests} {t('admin.guests.list')} • {t('common.pagination.page')} {page} {t('common.pagination.of')} {totalPages}
               </p>
             </div>
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
@@ -885,7 +926,7 @@ export function GuestsPageContent({
         {activeTab === 'guests' ? (
           <>
             {/* Filters */}
-            <GuestFilters filters={filters} admins={admins} onFilterChange={setFilters} />
+            <GuestFilters filters={filters} admins={admins} onFilterChange={handleFilterChange} />
 
             {/* Bulk Actions Section */}
             {!isReadOnly && (
@@ -906,7 +947,14 @@ export function GuestsPageContent({
                       onClick={handleSelectAllCurrentPage}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                     >
-                      {t('admin.guests.selectAll')}
+                      {t('admin.guests.selectPage')}
+                    </button>
+                    <button
+                      onClick={handleSelectAllItems}
+                      disabled={isSelectingAll}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      {isSelectingAll ? '…' : selectedGuestIds.length > 0 ? t('admin.guests.deselectAll') : t('admin.guests.selectAll')}
                     </button>
                     {weddingShortCode && (
                       <button
@@ -965,13 +1013,38 @@ export function GuestsPageContent({
             />
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Rows per page */}
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <span>{t('common.pagination.rowsPerPage')}</span>
+                <select
+                  value={limit}
+                  onChange={(e) => handleLimitChange(Number(e.target.value))}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-rose-500 focus:border-rose-500"
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+                <span className="text-gray-500">{t('common.pagination.total', { count: totalGuests })}</span>
+              </div>
+
+              {/* Page navigation */}
+              {totalPages > 1 && (
                 <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <button
+                    onClick={() => setPage(1)}
+                    disabled={page === 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    title={t('common.pagination.first')}
+                  >
+                    ««
+                  </button>
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                   >
                     {t('common.buttons.previous')}
                   </button>
@@ -981,13 +1054,21 @@ export function GuestsPageContent({
                   <button
                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
-                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                   >
                     {t('common.buttons.next')}
                   </button>
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={page === totalPages}
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    title={t('common.pagination.last')}
+                  >
+                    »»
+                  </button>
                 </nav>
-              </div>
-            )}
+              )}
+            </div>
           </>
         ) : (
           <GuestAdditionsReview

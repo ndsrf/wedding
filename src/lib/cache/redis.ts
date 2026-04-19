@@ -45,6 +45,10 @@ export const CACHE_KEYS = {
   adminIcon: (weddingId: string) => `icon:admin:${weddingId}`,
   /** Rendered PNG bytes (base64) for the per-planner favicon */
   plannerIcon: (plannerId: string) => `icon:planner:${plannerId}`,
+  /** Paginated guest list for GET /api/.../guests (keyed by wedding + params) */
+  guestList: (weddingId: string, paramsKey: string) => `wedding:guests:list:${weddingId}:${paramsKey}`,
+  /** Selectable guest IDs for "select all" across pages (keyed by wedding + filter params) */
+  guestIds: (weddingId: string, paramsKey: string) => `wedding:guests:ids:${weddingId}:${paramsKey}`,
 } as const;
 
 // ============================================================================
@@ -60,6 +64,10 @@ export const CACHE_TTL = {
   UPCOMING_TASKS: 120, // 2 minutes
   /** All favicons — 1 week TTL, invalidated on relevant data changes */
   ICON: 604800, // 7 days
+  /** Guest list pages — short TTL, invalidated on any guest mutation */
+  GUEST_LIST: 30, // 30 seconds
+  /** Guest ID lists for "select all" — slightly longer, invalidated on mutations */
+  GUEST_IDS: 60, // 60 seconds
 } as const;
 
 // ============================================================================
