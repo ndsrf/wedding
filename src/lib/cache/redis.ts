@@ -45,6 +45,14 @@ export const CACHE_KEYS = {
   adminIcon: (weddingId: string) => `icon:admin:${weddingId}`,
   /** Rendered PNG bytes (base64) for the per-planner favicon */
   plannerIcon: (plannerId: string) => `icon:planner:${plannerId}`,
+  /** Paginated guest list for GET /api/.../guests (keyed by wedding + params) */
+  guestList: (weddingId: string, paramsKey: string) => `wedding:guests:list:${weddingId}:${paramsKey}`,
+  /** Selectable guest IDs for "select all" across pages (keyed by wedding + filter params) */
+  guestIds: (weddingId: string, paramsKey: string) => `wedding:guests:ids:${weddingId}:${paramsKey}`,
+  /** Glob pattern for bulk-invalidating all guest list pages for a wedding */
+  guestListPattern: (weddingId: string) => `wedding:guests:list:${weddingId}:*`,
+  /** Glob pattern for bulk-invalidating all guest ID sets for a wedding */
+  guestIdsPattern: (weddingId: string) => `wedding:guests:ids:${weddingId}:*`,
 } as const;
 
 // ============================================================================
@@ -60,6 +68,10 @@ export const CACHE_TTL = {
   UPCOMING_TASKS: 120, // 2 minutes
   /** All favicons — 1 week TTL, invalidated on relevant data changes */
   ICON: 604800, // 7 days
+  /** Guest list pages — invalidated explicitly on any guest mutation; TTL is a safety fallback */
+  GUEST_LIST: 300, // 5 minutes
+  /** Guest ID lists for "select all" — invalidated explicitly on mutations */
+  GUEST_IDS: 300, // 5 minutes
 } as const;
 
 // ============================================================================
@@ -93,9 +105,10 @@ export function getClient(): Redis | null {
     });
 
     client.on('error', (err: Error) => {
-      // Log but do not crash — callers treat Redis as optional
-      console.warn('[Redis] Connection error (caching disabled):', err.message);
-      _client = null;
+      // Log but do not nullify the client — ioredis reconnects automatically.
+      // Nullifying here would permanently disable caching for the process
+      // lifetime on any transient network blip.
+      console.warn('[Redis] Connection error:', err.message);
     });
 
     _client = client;

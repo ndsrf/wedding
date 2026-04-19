@@ -87,7 +87,11 @@
     },
     "pagination": {
       "page": "Page",
-      "of": "of"
+      "of": "of",
+      "rowsPerPage": "Rows per page:",
+      "total": "{count} total",
+      "first": "First",
+      "last": "Last"
     },
     "selection": {
       "selectAll": "Select All",
@@ -2005,6 +2009,8 @@
       "importError": "Import error. Please check the file.",
       "bulkActions": "Bulk Actions",
       "selectAll": "Select All",
+      "selectPage": "Select Page",
+      "deselectAll": "Deselect All",
       "copyGeneralInvitationLink": "Copy general invitation link",
       "deleteSelected": "Delete Selected",
       "selectGuestsHint": "Select guests from the list to perform bulk actions",

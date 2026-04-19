@@ -70,7 +70,11 @@
     },
     "pagination": {
       "page": "Page",
-      "of": "sur"
+      "of": "sur",
+      "rowsPerPage": "Lignes par page :",
+      "total": "{count} au total",
+      "first": "Premier",
+      "last": "Dernier"
     },
     "selection": {
       "selectAll": "Tout sélectionner",
@@ -1660,6 +1664,8 @@
       "importError": "Erreur d'importation. Veuillez vérifier le fichier.",
       "bulkActions": "Actions groupées",
       "selectAll": "Tout sélectionner",
+      "selectPage": "Sélectionner la page",
+      "deselectAll": "Tout désélectionner",
       "copyGeneralInvitationLink": "Copier le lien d'invitation général",
       "deleteSelected": "Supprimer la sélection",
       "selectGuestsHint": "Sélectionnez les invités dans la liste pour effectuer des actions groupées",

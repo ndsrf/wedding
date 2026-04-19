@@ -143,6 +143,14 @@ test.describe('Add Guest - EXISTING_WEDDING Mode', () => {
     // Wait for the modal to disappear or success message to appear
     await expect(modal).not.toBeVisible({ timeout: 10000 });
 
+    // Search for the new guest (may be on a later page due to alphabetical ordering)
+    const searchInput = page.locator('#search');
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
+    await searchInput.fill('Test Family Smith');
+
+    // Wait for the filtered results to load
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+
     // Verify the new guest appears in the table
     const guestTable = page.locator('table, [role="table"]').first();
     await expect(guestTable).toContainText('Test Family Smith', { timeout: 10000 });
