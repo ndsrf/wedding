@@ -1,15 +1,20 @@
 /**
- * Remote MCP Server — POST /mcp
+ * Remote MCP Server — /mcp
  *
- * Implements the Model Context Protocol (JSON-RPC 2.0) over HTTP.
- * Auth: Authorization: Bearer <npci_api_key>
+ * Implements the MCP SSE transport (compatible with Claude Desktop):
  *
- * Supported methods:
- *   initialize, ping, tools/list, tools/call, resources/list, resources/read
- *   notifications/* → 202 (no body)
+ *   GET  /mcp                    — open SSE stream; server sends an "endpoint" event
+ *                                  with the URL the client should POST messages to
+ *   POST /mcp?sessionId=<id>     — receive a JSON-RPC 2.0 message for an active session;
+ *                                  responses are pushed back over the SSE stream
+ *   POST /mcp                    — stateless mode (no SSE); useful for curl testing
+ *   GET  /mcp (no SSE Accept)    — diagnostic JSON (key info + usage)
  *
- * All wedding-admin tools are available with a wedding_admin key.
- * The get_planner_weddings tool is available with a planner key.
+ * Auth: Authorization: Bearer <npci_api_key> on every request.
+ *
+ * This module keeps sessions in a process-level Map, which works correctly
+ * on a persistent Node.js server. Each session is cleaned up when the SSE
+ * connection is closed by the client.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -25,35 +30,38 @@ interface JsonRpcRequest {
   params?: unknown;
 }
 
-interface JsonRpcSuccess {
-  jsonrpc: '2.0';
-  id: string | number | null;
-  result: unknown;
+// ── Session store (process-level, persistent Node.js server only) ─────────────
+
+interface Session {
+  controller: ReadableStreamDefaultController<Uint8Array>;
+  ctx: ApiKeyContext;
+  pingInterval: ReturnType<typeof setInterval>;
 }
 
-interface JsonRpcError {
-  jsonrpc: '2.0';
-  id: string | number | null;
-  error: { code: number; message: string; data?: unknown };
+const sessions = new Map<string, Session>();
+
+function sseChunk(event: string, data: string): Uint8Array {
+  return new TextEncoder().encode(`event: ${event}\ndata: ${data}\n\n`);
 }
 
+function ssePing(): Uint8Array {
+  return new TextEncoder().encode(': ping\n\n');
+}
 
-// ── MCP Constants ─────────────────────────────────────────────────────────────
+// ── MCP constants ─────────────────────────────────────────────────────────────
 
 const PROTOCOL_VERSION = '2024-11-05';
 const SERVER_INFO = { name: 'nupci', version: '1.0.0' };
 
-// JSON-RPC error codes
 const ERR = {
   PARSE: -32700,
-  INVALID: -32600,
   NOT_FOUND: -32601,
   INVALID_PARAMS: -32602,
   INTERNAL: -32603,
   UNAUTHORIZED: -32001,
 };
 
-// ── Tool Definitions ──────────────────────────────────────────────────────────
+// ── Tool definitions ──────────────────────────────────────────────────────────
 
 const ADMIN_TOOL_DEFS = [
   {
@@ -128,7 +136,7 @@ const ADMIN_TOOL_DEFS = [
         title: { type: 'string', description: 'The reminder title' },
         description: { type: 'string', description: 'Additional details (optional)' },
         dueDate: { type: 'string', description: 'Absolute due date in YYYY-MM-DD format (optional)' },
-        dueDateRelative: { type: 'string', description: "Relative due date, e.g. 'WEDDING_DATE-60' for 2 months before (optional)" },
+        dueDateRelative: { type: 'string', description: "Relative due date e.g. 'WEDDING_DATE-60' (optional)" },
       },
       required: ['title'],
     },
@@ -159,7 +167,7 @@ function getToolDefs(ctx: ApiKeyContext) {
     : ADMIN_TOOL_DEFS;
 }
 
-// ── Platform docs resource ────────────────────────────────────────────────────
+// ── Platform docs ─────────────────────────────────────────────────────────────
 
 const PLATFORM_DOCS_URI = 'platform://docs';
 
@@ -167,31 +175,25 @@ const PLATFORM_DOCS = `
 # Nupci Wedding Management Platform — Quick Reference
 
 ## Roles
-- **Wedding Admin (Couple)**: Manages guests, RSVPs, seating, invitations, checklist, providers, and payments for their specific wedding.
-- **Wedding Planner**: Manages multiple weddings, CRM, quotes, contracts, invoices, and templates.
+- **Wedding Admin (Couple)**: manages guests, RSVPs, seating, checklist, providers, and payments for their specific wedding.
+- **Wedding Planner**: manages multiple weddings, CRM, quotes, contracts, invoices, and templates.
 
 ## Guest Management
-- Guests are organised as **Families** (a family unit may have multiple members).
-- Each member has a name, type (adult/child/infant), age, and RSVP status.
-- Families have a preferred channel (WhatsApp, Email, SMS) and language (EN, ES, FR, IT, DE).
+Guests are organised as Families (a unit may have multiple members). Each member has a name, type (adult/child/infant), age, and RSVP status. Families have a preferred channel (WhatsApp, Email, SMS) and language (EN, ES, FR, IT, DE).
 
 ## RSVP Workflow
-1. Planner or admin sends invitation with a magic link via WhatsApp/Email/SMS.
-2. Guest opens the link (no account needed) and confirms/declines attendance for each member.
+1. Planner/admin sends an invitation with a magic link.
+2. Guest opens the link (no account needed) and confirms/declines attendance per member.
 3. Optionally answers dietary, transport, and custom questions.
 
 ## Seating
-- Tables are numbered and have a fixed capacity.
-- Attending members can be assigned to tables.
-- suggest_tables_for_family ranks tables by: enough free seats → most shared-admin guests → closest average age.
+Tables are numbered with fixed capacity. suggest_tables_for_family ranks by: enough free seats → most shared-admin guests → closest average age.
 
 ## Checklist & Reminders
-- Reminders are checklist tasks in the "Reminders" section.
-- Due dates can be absolute (YYYY-MM-DD) or relative (WEDDING_DATE±days).
+Due dates can be absolute (YYYY-MM-DD) or relative (WEDDING_DATE±days).
 
 ## Invoices & Providers
-- Invoices are linked to the wedding via quotes or contracts.
-- Providers (vendors) can be assigned with agreed amounts and payment tracking.
+Invoices link to the wedding via quotes or contracts. Providers can be assigned with agreed amounts and payment tracking.
 `.trim();
 
 // ── Tool execution ────────────────────────────────────────────────────────────
@@ -201,16 +203,14 @@ async function executeTool(
   args: Record<string, unknown>,
   ctx: ApiKeyContext,
 ): Promise<unknown> {
-  const toolCtx = {
+  const tools = buildTools({
     weddingId: ctx.wedding_id,
     plannerId: ctx.planner_id,
     role: ctx.role,
-  };
+  });
 
-  const tools = buildTools(toolCtx);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tool = (tools as any)[name];
-
   if (!tool?.execute) {
     throw { code: ERR.NOT_FOUND, message: `Unknown tool: ${name}` };
   }
@@ -224,11 +224,7 @@ async function executeTool(
 
 // ── JSON-RPC dispatcher ───────────────────────────────────────────────────────
 
-async function dispatch(
-  method: string,
-  params: unknown,
-  ctx: ApiKeyContext,
-): Promise<unknown> {
+async function dispatch(method: string, params: unknown, ctx: ApiKeyContext): Promise<unknown> {
   switch (method) {
     case 'initialize':
       return {
@@ -248,41 +244,30 @@ async function dispatch(
       if (!name) throw { code: ERR.INVALID_PARAMS, message: 'tools/call requires params.name' };
       try {
         const result = await executeTool(name, toolArgs as Record<string, unknown>, ctx);
-        return {
-          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-        };
+        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       } catch (err) {
-        // Return tool error as isError result (not a JSON-RPC error)
-        const msg = err instanceof Error ? err.message : typeof err === 'object' && err !== null && 'message' in err ? String((err as { message: unknown }).message) : 'Tool execution failed';
-        return {
-          content: [{ type: 'text', text: msg }],
-          isError: true,
-        };
+        const msg = err instanceof Error ? err.message
+          : typeof err === 'object' && err !== null && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : 'Tool execution failed';
+        return { content: [{ type: 'text', text: msg }], isError: true };
       }
     }
 
     case 'resources/list':
       return {
-        resources: [
-          {
-            uri: PLATFORM_DOCS_URI,
-            name: 'Nupci Platform Documentation',
-            description: 'Quick reference for platform features and workflows.',
-            mimeType: 'text/markdown',
-          },
-        ],
+        resources: [{
+          uri: PLATFORM_DOCS_URI,
+          name: 'Nupci Platform Documentation',
+          description: 'Quick reference for platform features and workflows.',
+          mimeType: 'text/markdown',
+        }],
       };
 
     case 'resources/read': {
       const { uri } = params as { uri: string };
-      if (uri !== PLATFORM_DOCS_URI) {
-        throw { code: ERR.INVALID_PARAMS, message: `Unknown resource: ${uri}` };
-      }
-      return {
-        contents: [
-          { uri: PLATFORM_DOCS_URI, mimeType: 'text/markdown', text: PLATFORM_DOCS },
-        ],
-      };
+      if (uri !== PLATFORM_DOCS_URI) throw { code: ERR.INVALID_PARAMS, message: `Unknown resource: ${uri}` };
+      return { contents: [{ uri: PLATFORM_DOCS_URI, mimeType: 'text/markdown', text: PLATFORM_DOCS }] };
     }
 
     default:
@@ -290,22 +275,86 @@ async function dispatch(
   }
 }
 
-// ── Route handler ─────────────────────────────────────────────────────────────
+// ── Auth helper ───────────────────────────────────────────────────────────────
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  // Auth: Bearer API key only
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json<JsonRpcError>(
-      { jsonrpc: '2.0', id: null, error: { code: ERR.UNAUTHORIZED, message: 'Authorization: Bearer <api_key> required' } },
-      { status: 401 },
-    );
+async function authenticate(request: NextRequest): Promise<ApiKeyContext | null> {
+  const auth = request.headers.get('Authorization');
+  if (!auth?.startsWith('Bearer ')) return null;
+  return validateApiKey(auth.slice(7));
+}
+
+// ── GET — SSE stream or diagnostic ───────────────────────────────────────────
+
+export async function GET(request: NextRequest) {
+  const ctx = await authenticate(request);
+  const accept = request.headers.get('Accept') ?? '';
+
+  if (!ctx) {
+    if (accept.includes('text/event-stream')) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+    return NextResponse.json({ error: 'Authorization: Bearer <api_key> required' }, { status: 401 });
   }
 
-  const ctx = await validateApiKey(authHeader.slice(7));
+  // SSE connection (Claude Desktop, other SSE-capable clients)
+  if (accept.includes('text/event-stream')) {
+    const sessionId = crypto.randomUUID();
+    const postUrl = `/mcp?sessionId=${sessionId}`;
+
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        const pingInterval = setInterval(() => {
+          try {
+            controller.enqueue(ssePing());
+          } catch {
+            clearInterval(pingInterval);
+          }
+        }, 25_000);
+
+        sessions.set(sessionId, { controller, ctx, pingInterval });
+
+        // Send the endpoint URL — client will POST messages here
+        controller.enqueue(sseChunk('endpoint', JSON.stringify(postUrl)));
+      },
+      cancel() {
+        const session = sessions.get(sessionId);
+        if (session) clearInterval(session.pingInterval);
+        sessions.delete(sessionId);
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
+
+  // Diagnostic JSON (plain curl, browser)
+  return NextResponse.json({
+    server: SERVER_INFO,
+    protocol: PROTOCOL_VERSION,
+    role: ctx.role,
+    transport: 'SSE — connect with Accept: text/event-stream, then POST JSON-RPC 2.0 to the returned endpoint URL.',
+    example: {
+      step1: `curl -N -H "Authorization: Bearer <key>" -H "Accept: text/event-stream" https://your-domain.com/mcp`,
+      step2: `curl -X POST "https://your-domain.com/mcp?sessionId=<id from step1>" -H "Authorization: Bearer <key>" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`,
+      stateless: `curl -X POST https://your-domain.com/mcp -H "Authorization: Bearer <key>" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`,
+    },
+  });
+}
+
+// ── POST — receive JSON-RPC message ──────────────────────────────────────────
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const ctx = await authenticate(request);
   if (!ctx) {
-    return NextResponse.json<JsonRpcError>(
-      { jsonrpc: '2.0', id: null, error: { code: ERR.UNAUTHORIZED, message: 'Invalid or expired API key' } },
+    return NextResponse.json(
+      { jsonrpc: '2.0', id: null, error: { code: ERR.UNAUTHORIZED, message: 'Authorization: Bearer <api_key> required' } },
       { status: 401 },
     );
   }
@@ -314,37 +363,58 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     body = await request.json() as JsonRpcRequest;
   } catch {
-    return NextResponse.json<JsonRpcError>(
+    return NextResponse.json(
       { jsonrpc: '2.0', id: null, error: { code: ERR.PARSE, message: 'Parse error' } },
       { status: 400 },
     );
   }
 
-  // Notifications have no id — return 202 with no body
+  // Notifications have no id — nothing to respond to
   if (!('id' in body) || body.id === undefined) {
     return new NextResponse(null, { status: 202 });
   }
 
   const id = body.id ?? null;
 
+  // ── SSE session mode ────────────────────────────────────────────────────────
+  const sessionId = new URL(request.url).searchParams.get('sessionId');
+  if (sessionId) {
+    const session = sessions.get(sessionId);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Session not found or expired. Reconnect via GET /mcp with Accept: text/event-stream.' },
+        { status: 400 },
+      );
+    }
+
+    // Dispatch and push response over the SSE stream
+    try {
+      const result = await dispatch(body.method, body.params, session.ctx);
+      const message = JSON.stringify({ jsonrpc: '2.0', id, result });
+      session.controller.enqueue(sseChunk('message', message));
+    } catch (err: unknown) {
+      const isRpcError = typeof err === 'object' && err !== null && 'code' in err && 'message' in err;
+      const code = isRpcError ? Number((err as { code: number }).code) : ERR.INTERNAL;
+      const message = isRpcError ? String((err as { message: string }).message) : 'Internal error';
+      session.controller.enqueue(sseChunk('message', JSON.stringify({ jsonrpc: '2.0', id, error: { code, message } })));
+    }
+
+    return new NextResponse(null, { status: 202 });
+  }
+
+  // ── Stateless mode (curl testing, simple clients) ───────────────────────────
   try {
     const result = await dispatch(body.method, body.params, ctx);
-    return NextResponse.json<JsonRpcSuccess>(
+    return NextResponse.json(
       { jsonrpc: '2.0', id, result },
-      {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-        },
-      },
+      { headers: { 'Access-Control-Allow-Origin': '*' } },
     );
   } catch (err: unknown) {
     const isRpcError = typeof err === 'object' && err !== null && 'code' in err && 'message' in err;
     const code = isRpcError ? Number((err as { code: number }).code) : ERR.INTERNAL;
     const message = isRpcError ? String((err as { message: string }).message) : 'Internal error';
     console.error('[MCP] dispatch error:', err);
-    return NextResponse.json<JsonRpcError>({ jsonrpc: '2.0', id, error: { code, message } });
+    return NextResponse.json({ jsonrpc: '2.0', id, error: { code, message } });
   }
 }
 
@@ -353,8 +423,8 @@ export async function OPTIONS() {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept',
     },
   });
 }

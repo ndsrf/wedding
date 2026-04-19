@@ -1791,6 +1791,48 @@ The remote server implements the MCP Streamable HTTP transport (JSON-RPC 2.0). I
 
 ---
 
+### Troubleshooting
+
+**`curl https://your-domain.com/mcp` returns nothing**
+
+`curl` defaults to GET. The MCP protocol only uses POST, so an unadorned GET returned a silent 405. The endpoint now responds to GET with a diagnostic JSON payload — use it to verify your key and connectivity:
+
+```bash
+curl -H "Authorization: Bearer npci_your_key_here" https://www.nupci.com/mcp
+```
+
+A valid key returns the server info and your role. An invalid or expired key returns a 401.
+
+**Sending actual MCP requests (POST)**
+
+All JSON-RPC calls must be POST with `Content-Type: application/json`:
+
+```bash
+# List available tools
+curl -X POST https://www.nupci.com/mcp \
+  -H "Authorization: Bearer npci_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+
+# Call a tool
+curl -X POST https://www.nupci.com/mcp \
+  -H "Authorization: Bearer npci_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_rsvp_status","arguments":{}}}'
+```
+
+**401 Unauthorized**
+
+- The key may have expired (30-day TTL). Regenerate it from the account page.
+- Make sure the `Authorization` header is spelled correctly and the value starts with `Bearer ` (note the space).
+
+**Tool returns an error**
+
+- Tools that require a wedding context (e.g. `get_guest_list`) will fail with a planner-role key unless the planner's key has a `wedding_id` set. Use a wedding-admin key for wedding-specific operations.
+- A planner key is needed for `get_planner_weddings`.
+
+---
+
 ### MCP API endpoints (backend)
 
 The MCP server calls these endpoints on the platform. All require an `Authorization: Bearer npci_...` header.
