@@ -1648,7 +1648,7 @@ This persists across container restarts and updates.
 
 ## MCP Server (Claude Desktop Integration)
 
-The `mcp-server/` directory contains a standalone [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants like Claude Desktop direct access to the platform's wedding management tools — the same capabilities as NupciBot, but as structured MCP tools you can invoke from any MCP-compatible client.
+The platform exposes a [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants like Claude Desktop direct access to the platform's wedding management tools — the same capabilities as NupciBot, but as structured MCP tools you can invoke from any MCP-compatible client.
 
 ### What it can do
 
@@ -1676,31 +1676,58 @@ The raw key is shown **once** — copy it before navigating away. The key expire
 
 ---
 
-### Step 2 — Install and build the MCP server
+### Step 2 — Configure Claude Desktop
 
-```bash
-cd mcp-server
-npm install
-npm run build
-# Output: mcp-server/dist/index.js
-```
-
-To run without building (uses `tsx`):
-
-```bash
-npm run dev
-```
-
----
-
-### Step 3 — Configure Claude Desktop
+Claude Desktop connects to remote MCP servers via [`mcp-remote`](https://www.npmjs.com/package/mcp-remote), a lightweight proxy that bridges HTTP/SSE to stdio. No installation needed — `npx` fetches it automatically.
 
 Edit your Claude Desktop configuration file:
 
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-Add the `nupci` server entry:
+Add the `nupci` server entry, replacing `npci_your_key_here` with the key you copied:
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://your-domain.com/mcp",
+        "--header",
+        "Authorization: Bearer npci_your_key_here"
+      ]
+    }
+  }
+}
+```
+
+The role (wedding admin or planner) is determined automatically from the API key. The account page shows a ready-to-paste config snippet with your key already filled in.
+
+---
+
+### Step 3 — Restart Claude Desktop
+
+Restart the app. You should see the Nupci tools available in the tool picker. Try asking:
+
+> "How many guests have RSVP'd so far?"
+> "Assign the García family to table 5."
+> "Add a reminder to confirm the florist 2 weeks before the wedding."
+
+---
+
+### Alternative: local stdio server
+
+If you need the MCP server to run locally (e.g. for offline use or custom tooling), the `mcp-server/` directory contains a standalone stdio-based server.
+
+```bash
+cd mcp-server
+npm install
+npm run build
+```
+
+Then configure Claude Desktop:
 
 ```json
 {
@@ -1717,106 +1744,60 @@ Add the `nupci` server entry:
 }
 ```
 
-If you prefer to run with `tsx` (no build step):
+**Other HTTP MCP clients** (not Claude Desktop): point them at `https://your-domain.com/mcp` with `Authorization: Bearer npci_your_key_here`. The endpoint supports both SSE transport and stateless JSON-RPC POST.
+
+---
+
+### Troubleshooting
+
+**Claude Desktop shows "not valid MCP server configurations"**
+
+Claude Desktop does not support a bare `url` field for remote servers — it only accepts `command`-based stdio entries. Use `mcp-remote` as the bridge:
 
 ```json
 {
   "mcpServers": {
     "nupci": {
       "command": "npx",
-      "args": ["tsx", "/absolute/path/to/mcp-server/src/index.ts"],
-      "env": {
-        "NUPCI_URL": "https://your-domain.com",
-        "NUPCI_API_KEY": "npci_your_key_here"
-      }
+      "args": [
+        "mcp-remote",
+        "https://your-domain.com/mcp",
+        "--header",
+        "Authorization: Bearer npci_your_key_here"
+      ]
     }
   }
 }
 ```
 
-The role (wedding admin or planner) is determined automatically from the API key — no extra configuration needed.
+**Verifying connectivity with curl**
 
----
-
-### Step 4 — Restart Claude Desktop
-
-Restart the app. You should see the Nupci tools available in the tool picker. Try asking:
-
-> "How many guests have RSVP'd so far?"
-> "Assign the García family to table 5."
-> "Add a reminder to confirm the florist 2 weeks before the wedding."
-
----
-
-### Alternative: Remote MCP server (no local install)
-
-The platform exposes a remote MCP endpoint at `/mcp`. No local server needed — connect any MCP client directly to the deployment URL.
-
-#### Getting your API key
-
-1. Log in to the platform.
-2. Go to **My Account**:
-   - Couples/wedding admins: `/admin/account`
-   - Wedding planners: `/planner/account`
-3. Scroll to the **AI Integration (MCP)** section.
-4. Click **Generate API key** (or **Regenerate key** if one already exists).
-5. Copy the key immediately — it starts with `npci_` and is shown **only once**. Keys expire after 30 days; regenerate from the same page when needed.
-
-#### Claude Desktop config
-
-Replace `npci_your_key_here` with the key you copied above:
-
-```json
-{
-  "mcpServers": {
-    "nupci": {
-      "url": "https://your-domain.com/mcp",
-      "headers": {
-        "Authorization": "Bearer npci_your_key_here"
-      }
-    }
-  }
-}
-```
-
-The config file location:
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-After saving, restart Claude Desktop. The account page also shows a ready-to-paste config snippet with your key already filled in.
-
-**Claude.ai or other HTTP MCP clients:** point them at `https://your-domain.com/mcp` with the same `Authorization` header.
-
-The remote server implements the MCP Streamable HTTP transport (JSON-RPC 2.0). It exposes the same tools and resources as the local server. Auth is by API key only (no cookies).
-
----
-
-### Troubleshooting
-
-**`curl https://your-domain.com/mcp` returns nothing**
-
-`curl` defaults to GET. The MCP protocol only uses POST, so an unadorned GET returned a silent 405. The endpoint now responds to GET with a diagnostic JSON payload — use it to verify your key and connectivity:
+The endpoint responds to a plain GET with diagnostic JSON — use it to confirm your key works:
 
 ```bash
-curl -H "Authorization: Bearer npci_your_key_here" https://www.nupci.com/mcp
+curl "https://your-domain.com/mcp?api_key=npci_your_key_here"
 ```
 
 A valid key returns the server info and your role. An invalid or expired key returns a 401.
 
-**Sending actual MCP requests (POST)**
+You can also pass the key as a header if you prefer:
+
+```bash
+curl -H "Authorization: Bearer npci_your_key_here" https://your-domain.com/mcp
+```
+
+**Sending MCP requests manually (curl)**
 
 All JSON-RPC calls must be POST with `Content-Type: application/json`:
 
 ```bash
 # List available tools
-curl -X POST https://www.nupci.com/mcp \
-  -H "Authorization: Bearer npci_your_key_here" \
+curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 
 # Call a tool
-curl -X POST https://www.nupci.com/mcp \
-  -H "Authorization: Bearer npci_your_key_here" \
+curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_rsvp_status","arguments":{}}}'
 ```
@@ -1824,7 +1805,7 @@ curl -X POST https://www.nupci.com/mcp \
 **401 Unauthorized**
 
 - The key may have expired (30-day TTL). Regenerate it from the account page.
-- Make sure the `Authorization` header is spelled correctly and the value starts with `Bearer ` (note the space).
+- Make sure the key is URL-encoded in the query string (the `npci_` format should not need encoding, but avoid trailing spaces).
 
 **Tool returns an error**
 
@@ -1835,7 +1816,7 @@ curl -X POST https://www.nupci.com/mcp \
 
 ### MCP API endpoints (backend)
 
-The MCP server calls these endpoints on the platform. All require an `Authorization: Bearer npci_...` header.
+The MCP server calls these endpoints on the platform. All require auth via `Authorization: Bearer npci_...` header or `?api_key=npci_...` query parameter.
 
 | Method | Path | Description |
 |--------|------|-------------|

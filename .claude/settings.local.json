@@ -109,7 +109,8 @@
       "Bash(DATABASE_URL=\"postgresql://wedding:wedding@postgresql.lan:5432/wed1\" npx prisma migrate status 2>&1)",
       "Bash(npm audit:*)",
       "Bash(npm list:*)",
-      "Bash(npm show:*)"
+      "Bash(npm show:*)",
+      "WebFetch(domain:claude.com)"
     ]
   }
 }

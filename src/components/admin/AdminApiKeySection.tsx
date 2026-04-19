@@ -55,8 +55,8 @@ export default function AdminApiKeySection({ existingKey, mcpUrl }: Props) {
     ? JSON.stringify({
         mcpServers: {
           nupci: {
-            url: mcpUrl,
-            headers: { Authorization: `Bearer ${key}` },
+            command: 'npx',
+            args: ['mcp-remote', mcpUrl, '--header', `Authorization: Bearer ${key}`],
           },
         },
       }, null, 2)

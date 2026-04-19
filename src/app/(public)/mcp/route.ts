@@ -278,9 +278,13 @@ async function dispatch(method: string, params: unknown, ctx: ApiKeyContext): Pr
 // ── Auth helper ───────────────────────────────────────────────────────────────
 
 async function authenticate(request: NextRequest): Promise<ApiKeyContext | null> {
+  // Accept key from Authorization header OR ?api_key= query param
   const auth = request.headers.get('Authorization');
-  if (!auth?.startsWith('Bearer ')) return null;
-  return validateApiKey(auth.slice(7));
+  const rawKey = auth?.startsWith('Bearer ')
+    ? auth.slice(7)
+    : new URL(request.url).searchParams.get('api_key') ?? null;
+  if (!rawKey) return null;
+  return validateApiKey(rawKey);
 }
 
 // ── GET — SSE stream or diagnostic ───────────────────────────────────────────
@@ -299,7 +303,12 @@ export async function GET(request: NextRequest) {
   // SSE connection (Claude Desktop, other SSE-capable clients)
   if (accept.includes('text/event-stream')) {
     const sessionId = crypto.randomUUID();
-    const postUrl = `/mcp?sessionId=${sessionId}`;
+    // Include the raw key in the POST URL so Claude Desktop doesn't need
+    // to re-send an Authorization header on subsequent POST requests.
+    const rawKey = new URL(request.url).searchParams.get('api_key') ?? '';
+    const postUrl = rawKey
+      ? `/mcp?sessionId=${sessionId}&api_key=${encodeURIComponent(rawKey)}`
+      : `/mcp?sessionId=${sessionId}`;
 
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
@@ -351,14 +360,6 @@ export async function GET(request: NextRequest) {
 // ── POST — receive JSON-RPC message ──────────────────────────────────────────
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const ctx = await authenticate(request);
-  if (!ctx) {
-    return NextResponse.json(
-      { jsonrpc: '2.0', id: null, error: { code: ERR.UNAUTHORIZED, message: 'Authorization: Bearer <api_key> required' } },
-      { status: 401 },
-    );
-  }
-
   let body: JsonRpcRequest;
   try {
     body = await request.json() as JsonRpcRequest;
@@ -377,6 +378,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const id = body.id ?? null;
 
   // ── SSE session mode ────────────────────────────────────────────────────────
+  // Session was authenticated at GET /mcp time — no need to re-check auth here.
   const sessionId = new URL(request.url).searchParams.get('sessionId');
   if (sessionId) {
     const session = sessions.get(sessionId);
@@ -403,6 +405,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   // ── Stateless mode (curl testing, simple clients) ───────────────────────────
+  const ctx = await authenticate(request);
+  if (!ctx) {
+    return NextResponse.json(
+      { jsonrpc: '2.0', id, error: { code: ERR.UNAUTHORIZED, message: 'Authorization: Bearer <api_key> required' } },
+      { status: 401 },
+    );
+  }
   try {
     const result = await dispatch(body.method, body.params, ctx);
     return NextResponse.json(
