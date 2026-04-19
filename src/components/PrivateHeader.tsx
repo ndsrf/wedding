@@ -45,7 +45,7 @@ export default function PrivateHeader({
   return (
     <header data-tutorial="planner-header" className="bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Left: Logo and Back Button */}
           <div className="flex items-center gap-4">
             {!hideBackButton && (
@@ -78,7 +78,7 @@ export default function PrivateHeader({
                 alt={commercialName}
                 width={668}
                 height={374}
-                className="h-12 w-auto"
+                className="h-16 w-auto"
                 priority
               />
             </Link>

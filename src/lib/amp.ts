@@ -279,7 +279,7 @@ export function renderAMPPage(config: {
 <body>
   <header>
     <a href="/${locale}">
-      <amp-img src="/images/nupci.webp" width="107" height="60" layout="intrinsic" alt="${commercialName}" class="logo-img"></amp-img>
+      <amp-img src="/images/nupci.webp" width="142" height="80" layout="intrinsic" alt="${commercialName}" class="logo-img"></amp-img>
     </a>
   </header>
   <div class="container">
