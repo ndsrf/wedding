@@ -108,7 +108,7 @@ function generateReferenceCode(): string {
 /**
  * Check if reference code is unique
  */
-async function ensureUniqueReferenceCode(wedding_id: string): Promise<string> {
+async function ensureUniqueReferenceCode(): Promise<string> {
   let code = generateReferenceCode();
   let attempts = 0;
   const maxAttempts = 10;
@@ -116,7 +116,6 @@ async function ensureUniqueReferenceCode(wedding_id: string): Promise<string> {
   while (attempts < maxAttempts) {
     const existing = await prisma.family.findFirst({
       where: {
-        wedding_id,
         reference_code: code,
       },
     });
@@ -381,7 +380,8 @@ function validateImportData(
 
 /**
  * Import guest list from Excel file
- * Validates data and creates Family and FamilyMember records in a transaction
+ * Validates data and creates Family and FamilyMember records row-by-row
+ * to avoid long-running transactions and potential timeouts.
  *
  * @param wedding_id - Wedding ID to import guests for
  * @param file - Excel file buffer
@@ -397,7 +397,7 @@ export async function importGuestList(
   weddingCountry?: string | null
 ): Promise<ImportResult> {
   try {
-    // Parse Excel file
+    // 1. Parse Excel file
     const rows = parseExcelFile(file);
 
     if (rows.length === 0) {
@@ -428,7 +428,7 @@ export async function importGuestList(
       };
     }
 
-    // Fetch admins for the wedding to resolve invitedBy
+    // 2. Fetch admins for the wedding to resolve invitedBy
     const weddingAdmins = await prisma.weddingAdmin.findMany({
       where: { wedding_id },
       select: { id: true, name: true, email: true },
@@ -450,7 +450,7 @@ export async function importGuestList(
       }
     }
 
-    // Validate data
+    // 3. Validate data (initial basic validation)
     const { errors, warnings } = validateImportData(rows, defaultLanguage, adminNames);
 
     if (errors.length > 0) {
@@ -464,76 +464,203 @@ export async function importGuestList(
       };
     }
 
-    // Perform atomic import in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      let familiesCreated = 0;
-      let membersCreated = 0;
+    // 4. Pre-validation / Preparation phase
+    // Fetch existing data for database-level validation
+    const providedCodes = rows.map(r => r.referenceCode).filter(Boolean) as string[];
+    const [dbExistingCodes, dbExistingFamilies] = await Promise.all([
+      providedCodes.length > 0 
+        ? prisma.family.findMany({ 
+            where: { reference_code: { in: providedCodes } },
+            select: { reference_code: true }
+          })
+        : [],
+      prisma.family.findMany({
+        where: { wedding_id },
+        select: { email: true, phone: true, whatsapp_number: true }
+      })
+    ]);
 
-      for (const row of rows) {
-        // Generate magic token
-        const magicToken = randomUUID();
+    const existingCodesSet = new Set(dbExistingCodes.map(c => c.reference_code));
+    const dbEmails = new Set(dbExistingFamilies.map(f => f.email?.toLowerCase()).filter(Boolean));
+    const dbPhones = new Set(dbExistingFamilies.map(f => f.phone).filter(Boolean));
+    const dbWhatsapps = new Set(dbExistingFamilies.map(f => f.whatsapp_number).filter(Boolean));
 
-        // Use provided reference code from the file, or auto-generate for AUTOMATED payment mode
-        const referenceCode = row.referenceCode
-          ? row.referenceCode
-          : paymentMode === 'AUTOMATED' ? await ensureUniqueReferenceCode(wedding_id) : null;
+    interface PreparedRow {
+      data: ImportRow;
+      magicToken: string;
+      referenceCode: string | null;
+      resolvedAdminId: string | null;
+      processedPhone: string | null;
+      processedWhatsapp: string | null;
+    }
 
-        // Resolve invited_by_admin_id: match by name first, then email, then default
-        const resolvedAdminId = row.invitedBy
-          ? (adminLookup.get(row.invitedBy.toLowerCase()) || defaultAdminId)
-          : defaultAdminId;
+    const preparedRows: PreparedRow[] = [];
+    const usedReferenceCodes = new Set<string>();
 
-        // Process phone numbers with country prefix
-        const processedPhone = processPhoneNumber(row.phone, weddingCountry);
-        const processedWhatsapp = processPhoneNumber(row.whatsapp, weddingCountry);
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const rowNum = i + 2;
 
-        // Create family
-        const family = await tx.family.create({
-          data: {
-            wedding_id,
-            name: row.familyName,
-            email: row.email,
-            phone: processedPhone,
-            whatsapp_number: processedWhatsapp,
-            magic_token: magicToken,
-            reference_code: referenceCode,
-            preferred_language: row.language,
-            channel_preference: row.channel,
-            invited_by_admin_id: resolvedAdminId,
-          },
+      // Database-level validation
+      if (row.referenceCode && existingCodesSet.has(row.referenceCode)) {
+        errors.push({
+          row: rowNum,
+          field: 'Reference Code',
+          message: `Reference code '${row.referenceCode}' already exists in database`,
         });
+      }
 
-        familiesCreated++;
+      // Check for duplicates in DB for this wedding (warnings only)
+      if (row.email && dbEmails.has(row.email.toLowerCase())) {
+        warnings.push({
+          row: rowNum,
+          field: 'Email',
+          message: `Guest with email '${row.email}' already exists in this wedding`,
+        });
+      }
 
-        // Create family members
-        for (const member of row.members) {
-          await tx.familyMember.create({
+      const processedPhone = processPhoneNumber(row.phone, weddingCountry);
+      if (processedPhone && dbPhones.has(processedPhone)) {
+        warnings.push({
+          row: rowNum,
+          field: 'Phone',
+          message: `Guest with phone '${row.phone}' already exists in this wedding`,
+        });
+      }
+
+      const processedWhatsapp = processPhoneNumber(row.whatsapp, weddingCountry);
+      if (processedWhatsapp && dbWhatsapps.has(processedWhatsapp)) {
+        warnings.push({
+          row: rowNum,
+          field: 'WhatsApp',
+          message: `Guest with WhatsApp '${row.whatsapp}' already exists in this wedding`,
+        });
+      }
+
+      // Resolve admin ID
+      const resolvedAdminId = row.invitedBy
+        ? (adminLookup.get(row.invitedBy.toLowerCase()) || defaultAdminId)
+        : defaultAdminId;
+
+      // Generate magic token (UUIDs are virtually guaranteed unique)
+      const magicToken = randomUUID();
+
+      // Handle reference code generation
+      let referenceCode = row.referenceCode;
+      if (!referenceCode && paymentMode === 'AUTOMATED') {
+        referenceCode = await ensureUniqueReferenceCode();
+        
+        // Ensure it's not already used in this same import batch
+        let attempts = 0;
+        while (usedReferenceCodes.has(referenceCode) && attempts < 10) {
+          referenceCode = await ensureUniqueReferenceCode();
+          attempts++;
+        }
+      }
+      
+      if (referenceCode) {
+        usedReferenceCodes.add(referenceCode);
+      }
+
+      preparedRows.push({
+        data: row,
+        magicToken,
+        referenceCode,
+        resolvedAdminId,
+        processedPhone,
+        processedWhatsapp,
+      });
+    }
+
+    // Stop if we found database-level validation errors
+    if (errors.length > 0) {
+      return {
+        success: false,
+        familiesCreated: 0,
+        membersCreated: 0,
+        errors,
+        warnings,
+        message: `Database validation failed with ${errors.length} error(s)`,
+      };
+    }
+
+    // 5. Execution phase: Perform import row-by-row
+    // This avoids the 5s transaction timeout for large guest lists.
+    let familiesCreatedCount = 0;
+    let membersCreatedCount = 0;
+    const importErrors: ValidationError[] = [];
+
+    for (let i = 0; i < preparedRows.length; i++) {
+      const prepared = preparedRows[i];
+      const rowNum = i + 2;
+
+      try {
+        await prisma.$transaction(async (tx) => {
+          // Create family
+          const family = await tx.family.create({
             data: {
-              family_id: family.id,
-              name: member.name,
-              type: member.type,
-              age: member.age,
-              attending: member.attending,
-              added_by_guest: false,
-              dietary_restrictions: member.dietaryRestrictions,
-              accessibility_needs: member.accessibilityNeeds,
+              wedding_id,
+              name: prepared.data.familyName,
+              email: prepared.data.email,
+              phone: prepared.processedPhone,
+              whatsapp_number: prepared.processedWhatsapp,
+              magic_token: prepared.magicToken,
+              reference_code: prepared.referenceCode,
+              preferred_language: prepared.data.language,
+              channel_preference: prepared.data.channel,
+              invited_by_admin_id: prepared.resolvedAdminId,
             },
           });
 
-          membersCreated++;
-        }
+          // Create family members
+          for (const member of prepared.data.members) {
+            await tx.familyMember.create({
+              data: {
+                family_id: family.id,
+                name: member.name,
+                type: member.type,
+                age: member.age,
+                attending: member.attending,
+                added_by_guest: false,
+                dietary_restrictions: member.dietaryRestrictions,
+                accessibility_needs: member.accessibilityNeeds,
+              },
+            });
+            membersCreatedCount++;
+          }
+        });
+        familiesCreatedCount++;
+      } catch (err) {
+        console.error(`Error importing row ${rowNum}:`, err);
+        importErrors.push({
+          row: rowNum,
+          field: 'System',
+          message: err instanceof Error ? err.message : 'Unknown error during creation',
+        });
+        // We continue with other rows even if one fails
       }
+    }
 
-      return { familiesCreated, membersCreated };
-    });
+    if (importErrors.length > 0 && familiesCreatedCount === 0) {
+      return {
+        success: false,
+        familiesCreated: 0,
+        membersCreated: 0,
+        errors: importErrors,
+        warnings,
+        message: 'Import failed completely',
+      };
+    }
 
     return {
       success: true,
-      familiesCreated: result.familiesCreated,
-      membersCreated: result.membersCreated,
-      errors: [],
+      familiesCreated: familiesCreatedCount,
+      membersCreated: membersCreatedCount,
+      errors: importErrors,
       warnings,
-      message: `Successfully imported ${result.familiesCreated} families with ${result.membersCreated} members`,
+      message: importErrors.length > 0 
+        ? `Import partially successful: ${familiesCreatedCount} families created, ${importErrors.length} failed.`
+        : `Successfully imported ${familiesCreatedCount} families with ${membersCreatedCount} members`,
     };
   } catch (error) {
     console.error('Import error:', error);

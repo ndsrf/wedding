@@ -12,6 +12,7 @@ jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     family: {
       findFirst: jest.fn(),
+      findMany: jest.fn(),
       create: jest.fn(),
     },
     weddingAdmin: {
@@ -29,6 +30,7 @@ jest.mock('@/lib/db/prisma', () => ({
 describe('Excel Import - Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (prisma.family.findMany as jest.Mock).mockResolvedValue([]);
   });
 
   it('should reject empty file', async () => {
