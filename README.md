@@ -1802,6 +1802,42 @@ curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_rsvp_status","arguments":{}}}'
 ```
 
+**Windows: `spawn npx ENOENT` — npx not found**
+
+Claude Desktop on Windows doesn't inherit your full PATH, so `npx` may not be found even if Node.js is installed. Use the full absolute path to `npx.cmd` instead.
+
+First, find the path by running this in a Command Prompt:
+
+```
+where npx
+```
+
+Then use that path as the `command`. If the path contains spaces (e.g. `C:\Program Files\nodejs\`), either use the user-scoped path (no spaces) or the Windows 8.3 short path:
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "command": "C:\\Users\\YOUR_USERNAME\\AppData\\Roaming\\npm\\npx.cmd",
+      "args": ["mcp-remote", "https://your-domain.com/mcp", "--header", "Authorization: Bearer npci_your_key_here"]
+    }
+  }
+}
+```
+
+If Node.js is under `C:\Program Files\nodejs\`, use the 8.3 short path to avoid the space:
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "command": "C:\\PROGRA~1\\nodejs\\npx.cmd",
+      "args": ["mcp-remote", "https://your-domain.com/mcp", "--header", "Authorization: Bearer npci_your_key_here"]
+    }
+  }
+}
+```
+
 **401 Unauthorized**
 
 - The key may have expired (30-day TTL). Regenerate it from the account page.
