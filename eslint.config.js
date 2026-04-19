@@ -16,6 +16,7 @@ module.exports = [
       '.env*',
       '*.min.js',
       'next-env.d.ts',
+      'mcp-server',
     ],
   },
   {
