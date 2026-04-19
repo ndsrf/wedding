@@ -648,6 +648,7 @@ export function GuestsPageContent({
       }
     } catch (error) {
       console.error('Error fetching all guest IDs:', error);
+      showNotification('error', t('common.errors.generic'));
     } finally {
       setIsSelectingAll(false);
     }

@@ -250,18 +250,21 @@ export async function listGuestsHandler(
         return NextResponse.json({ success: true, data: cached }, { status: 200 });
       }
 
-      // Only return families that haven't submitted RSVP (selectable for bulk actions).
-      // Rebuild from scratch — spreading whereClause and overwriting `members` would silently
-      // drop attendance/rsvp_status member conditions. Selectable families are by definition
-      // pending (every member attending=null), so attendance/rsvp_status filters don't apply.
-      const selectableClause: Prisma.FamilyWhereInput = {
-        wedding_id: weddingId,
-        members: { every: { attending: null } },
-        ...(whereClause.OR && { OR: whereClause.OR }),
-        ...(whereClause.channel_preference !== undefined && { channel_preference: whereClause.channel_preference }),
-        ...(whereClause.invited_by_admin_id !== undefined && { invited_by_admin_id: whereClause.invited_by_admin_id }),
-        ...(whereClause.gifts !== undefined && { gifts: whereClause.gifts }),
-      };
+      // Build selectableClause by extending whereClause with the "every member pending" constraint.
+      // We can't simply spread whereClause and overwrite `members` — that silently drops any
+      // `members` or `AND` already set by rsvp_status / attendance filters. Instead, move
+      // those entries into an explicit AND so all active filters still apply. A "submitted"
+      // filter combined with "every attending=null" yields 0 results, which is correct.
+      const pendingConstraint: Prisma.FamilyWhereInput = { members: { every: { attending: null } } };
+      const { members: existingMembers, AND: existingAnd, ...baseClause } = whereClause;
+      const andClauses: Prisma.FamilyWhereInput[] = [
+        ...(existingAnd
+          ? (Array.isArray(existingAnd) ? existingAnd : [existingAnd]) as Prisma.FamilyWhereInput[]
+          : []),
+        ...(existingMembers ? [{ members: existingMembers }] : []),
+        pendingConstraint,
+      ];
+      const selectableClause: Prisma.FamilyWhereInput = { ...baseClause, AND: andClauses };
       const selectableFamilies = await prisma.family.findMany({
         where: selectableClause,
         select: { id: true },
