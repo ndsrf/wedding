@@ -147,7 +147,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
  */
 function buildGuestCacheParamsKey(params: Record<string, string | number | boolean | undefined>): string {
   return Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .filter(([, v]) => v !== undefined && v !== null && v !== '' && v !== false)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${k}=${v}`)
     .join('|');
@@ -276,28 +276,28 @@ export async function listGuestsHandler(
       return NextResponse.json(response, { status: 200 });
     }
 
-    const total = await prisma.family.count({ where: whereClause });
-
-    const families = await prisma.family.findMany({
-      where: whereClause,
-      skip,
-      take: limit,
-      orderBy: { name: 'asc' },
-      include: {
-        members: true,
-        gifts: { select: { status: true, amount: true } },
-        tracking_events: {
-          where: { event_type: 'INVITATION_SENT' },
-          select: { id: true },
-          take: 1,
+    const [total, families, weddingAdmins] = await Promise.all([
+      prisma.family.count({ where: whereClause }),
+      prisma.family.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { name: 'asc' },
+        include: {
+          members: true,
+          gifts: { select: { status: true, amount: true } },
+          tracking_events: {
+            where: { event_type: 'INVITATION_SENT' },
+            select: { id: true },
+            take: 1,
+          },
         },
-      },
-    });
-
-    const weddingAdmins = await prisma.weddingAdmin.findMany({
-      where: { wedding_id: weddingId },
-      select: { id: true, name: true, email: true },
-    });
+      }),
+      prisma.weddingAdmin.findMany({
+        where: { wedding_id: weddingId },
+        select: { id: true, name: true, email: true },
+      }),
+    ]);
     const adminMap = new Map(weddingAdmins.map((a) => [a.id, a]));
 
     const familiesWithStatus = families.map((family) => {

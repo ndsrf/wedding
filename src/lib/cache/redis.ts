@@ -64,10 +64,10 @@ export const CACHE_TTL = {
   UPCOMING_TASKS: 120, // 2 minutes
   /** All favicons — 1 week TTL, invalidated on relevant data changes */
   ICON: 604800, // 7 days
-  /** Guest list pages — short TTL, invalidated on any guest mutation */
-  GUEST_LIST: 30, // 30 seconds
-  /** Guest ID lists for "select all" — slightly longer, invalidated on mutations */
-  GUEST_IDS: 60, // 60 seconds
+  /** Guest list pages — invalidated explicitly on any guest mutation; TTL is a safety fallback */
+  GUEST_LIST: 300, // 5 minutes
+  /** Guest ID lists for "select all" — invalidated explicitly on mutations */
+  GUEST_IDS: 300, // 5 minutes
 } as const;
 
 // ============================================================================
@@ -101,9 +101,10 @@ export function getClient(): Redis | null {
     });
 
     client.on('error', (err: Error) => {
-      // Log but do not crash — callers treat Redis as optional
-      console.warn('[Redis] Connection error (caching disabled):', err.message);
-      _client = null;
+      // Log but do not nullify the client — ioredis reconnects automatically.
+      // Nullifying here would permanently disable caching for the process
+      // lifetime on any transient network blip.
+      console.warn('[Redis] Connection error:', err.message);
     });
 
     _client = client;
