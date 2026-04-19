@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { GuestTable } from '@/components/admin/GuestTable';
@@ -133,6 +133,21 @@ export interface GuestsPageContentProps {
 }
 
 // ============================================================================
+// HELPERS
+// ============================================================================
+
+function buildFilterParams(filters: Filters): URLSearchParams {
+  const params = new URLSearchParams();
+  if (filters.rsvp_status) params.set('rsvp_status', filters.rsvp_status);
+  if (filters.attendance) params.set('attendance', filters.attendance);
+  if (filters.channel) params.set('channel', filters.channel);
+  if (filters.payment_status) params.set('payment_status', filters.payment_status);
+  if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
+  if (filters.search) params.set('search', filters.search);
+  return params;
+}
+
+// ============================================================================
 // COMPONENT
 // ============================================================================
 
@@ -189,6 +204,8 @@ export function GuestsPageContent({
 
   // Bulk reminder state
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
+  const selectedGuestIdsRef = useRef(selectedGuestIds);
+  useEffect(() => { selectedGuestIdsRef.current = selectedGuestIds; }, [selectedGuestIds]);
 
   // -------------------------------------------------------------------------
   // DATA FETCHING
@@ -197,17 +214,12 @@ export function GuestsPageContent({
   const fetchGuests = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
+      const params = buildFilterParams(filters);
       params.set('page', page.toString());
       params.set('limit', limit.toString());
-      if (filters.rsvp_status) params.set('rsvp_status', filters.rsvp_status);
-      if (filters.attendance) params.set('attendance', filters.attendance);
-      if (filters.channel) params.set('channel', filters.channel);
-      if (filters.payment_status) params.set('payment_status', filters.payment_status);
-      if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
-      if (filters.search) params.set('search', filters.search);
 
       const response = await fetch(`${apiPaths.guests}?${params.toString()}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
 
       if (data.success) {
@@ -620,20 +632,16 @@ export function GuestsPageContent({
   };
 
   const handleSelectAllItems = useCallback(async () => {
-    if (selectedGuestIds.length > 0) {
+    if (selectedGuestIdsRef.current.length > 0) {
       setSelectedGuestIds([]);
       return;
     }
     setIsSelectingAll(true);
     try {
-      const params = new URLSearchParams({ ids_only: 'true' });
-      if (filters.rsvp_status) params.set('rsvp_status', filters.rsvp_status);
-      if (filters.attendance) params.set('attendance', filters.attendance);
-      if (filters.channel) params.set('channel', filters.channel);
-      if (filters.payment_status) params.set('payment_status', filters.payment_status);
-      if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
-      if (filters.search) params.set('search', filters.search);
+      const params = buildFilterParams(filters);
+      params.set('ids_only', 'true');
       const response = await fetch(`${apiPaths.guests}?${params.toString()}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       if (data.success) {
         setSelectedGuestIds(data.data.ids);
@@ -643,7 +651,7 @@ export function GuestsPageContent({
     } finally {
       setIsSelectingAll(false);
     }
-  }, [apiPaths.guests, filters, selectedGuestIds]);
+  }, [apiPaths.guests, filters]);
 
   const handleOpenBulkReminderModal = () => {
     setReminderFamily(null);

@@ -49,6 +49,10 @@ export const CACHE_KEYS = {
   guestList: (weddingId: string, paramsKey: string) => `wedding:guests:list:${weddingId}:${paramsKey}`,
   /** Selectable guest IDs for "select all" across pages (keyed by wedding + filter params) */
   guestIds: (weddingId: string, paramsKey: string) => `wedding:guests:ids:${weddingId}:${paramsKey}`,
+  /** Glob pattern for bulk-invalidating all guest list pages for a wedding */
+  guestListPattern: (weddingId: string) => `wedding:guests:list:${weddingId}:*`,
+  /** Glob pattern for bulk-invalidating all guest ID sets for a wedding */
+  guestIdsPattern: (weddingId: string) => `wedding:guests:ids:${weddingId}:*`,
 } as const;
 
 // ============================================================================

@@ -171,8 +171,8 @@ async function invalidateStatsForWedding(weddingId: string): Promise<void> {
     invalidateCache(CACHE_KEYS.adminWedding(weddingId)),
     invalidateCache(CACHE_KEYS.adminDashboard(weddingId)),
     invalidateCache(CACHE_KEYS.plannerWeddingDetail(weddingId)),
-    invalidateCachePattern(`wedding:guests:list:${weddingId}:*`),
-    invalidateCachePattern(`wedding:guests:ids:${weddingId}:*`),
+    invalidateCachePattern(CACHE_KEYS.guestListPattern(weddingId)),
+    invalidateCachePattern(CACHE_KEYS.guestIdsPattern(weddingId)),
     ...(plannerId
       ? [
           invalidateCache(CACHE_KEYS.plannerStats(plannerId)),
@@ -250,10 +250,17 @@ export async function listGuestsHandler(
         return NextResponse.json({ success: true, data: cached }, { status: 200 });
       }
 
-      // Only return families that haven't submitted RSVP (selectable for bulk actions)
+      // Only return families that haven't submitted RSVP (selectable for bulk actions).
+      // Rebuild from scratch — spreading whereClause and overwriting `members` would silently
+      // drop attendance/rsvp_status member conditions. Selectable families are by definition
+      // pending (every member attending=null), so attendance/rsvp_status filters don't apply.
       const selectableClause: Prisma.FamilyWhereInput = {
-        ...whereClause,
+        wedding_id: weddingId,
         members: { every: { attending: null } },
+        ...(whereClause.OR && { OR: whereClause.OR }),
+        ...(whereClause.channel_preference !== undefined && { channel_preference: whereClause.channel_preference }),
+        ...(whereClause.invited_by_admin_id !== undefined && { invited_by_admin_id: whereClause.invited_by_admin_id }),
+        ...(whereClause.gifts !== undefined && { gifts: whereClause.gifts }),
       };
       const selectableFamilies = await prisma.family.findMany({
         where: selectableClause,
