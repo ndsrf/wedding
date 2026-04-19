@@ -374,6 +374,39 @@
     }
   },
   "planner": {
+    "nupcibot": {
+      "subtitle": "Ihr Planungsassistent",
+      "close": "Schließen",
+      "referencesTitle": "Referenzen",
+      "greeting": "Hallo! Ich bin NupciBot, Ihr Planungsassistent. Ich helfe Ihnen mit Gästen, Rechnungen, Dienstleistern und allem rund um Ihre Hochzeiten.",
+      "viewWeddings": "Meine Hochzeiten anzeigen",
+      "viewReports": "Berichte anzeigen",
+      "contactSupport": {
+        "button": "Nupci-Support kontaktieren",
+        "title": "Support kontaktieren",
+        "subtitle": "Nachricht an das Nupci-Team senden",
+        "description": "Haben Sie eine Frage oder ein Problem? Schicken Sie uns eine Nachricht und wir antworten per E-Mail.",
+        "topicLabel": "Betreff",
+        "topicPlaceholder": "z.B. Frage zu Rechnungen",
+        "messageLabel": "Ihre Nachricht",
+        "messagePlaceholder": "Schreiben Sie hier Ihre Nachricht...",
+        "send": "Nachricht senden",
+        "sending": "Wird gesendet...",
+        "back": "Zurück zum Menü",
+        "successTitle": "Nachricht gesendet!",
+        "successDesc": "Das Nupci-Team wird Ihnen in Kürze per E-Mail antworten.",
+        "errorGeneric": "Nachricht konnte nicht gesendet werden. Bitte erneut versuchen."
+      },
+      "chat": {
+        "title": "NupciBot Chat",
+        "subtitle": "Stellen Sie mir beliebige Fragen",
+        "greeting": "Hallo! Stellen Sie mir beliebige Fragen — Gästelisten, RSVPs, Rechnungen, Dienstleister oder die Funktionsweise der Plattform.",
+        "menuPlaceholder": "Fragen Sie mich alles...",
+        "placeholder": "Frage eingeben...",
+        "errorReply": "Entschuldigung, ich konnte gerade keine Antwort generieren. Bitte erneut versuchen.",
+        "limitReached": "Sie haben das Limit von 5 Fragen pro Sitzung erreicht. Bitte schließen Sie den Chat und öffnen Sie ihn erneut, um eine neue Unterhaltung zu beginnen."
+      }
+    },
     "dashboard": {
       "title": "Planer-Dashboard",
       "welcome": "Willkommen, {name}",

@@ -374,6 +374,39 @@
     }
   },
   "planner": {
+    "nupcibot": {
+      "subtitle": "Votre assistant de planification",
+      "close": "Fermer",
+      "referencesTitle": "Références",
+      "greeting": "Bonjour ! Je suis NupciBot, votre assistant de planification. Je peux vous aider avec les invités, les factures, les prestataires et tout ce qui concerne vos mariages.",
+      "viewWeddings": "Voir mes mariages",
+      "viewReports": "Voir les rapports",
+      "contactSupport": {
+        "button": "Contacter le support Nupci",
+        "title": "Contacter le support",
+        "subtitle": "Envoyez un message à l'équipe Nupci",
+        "description": "Vous avez une question ou un problème ? Envoyez-nous un message et nous vous répondrons par email.",
+        "topicLabel": "Sujet",
+        "topicPlaceholder": "ex. Question sur les factures",
+        "messageLabel": "Votre message",
+        "messagePlaceholder": "Écrivez votre message ici...",
+        "send": "Envoyer le message",
+        "sending": "Envoi en cours...",
+        "back": "Retour au menu",
+        "successTitle": "Message envoyé !",
+        "successDesc": "L'équipe Nupci vous répondra par email sous peu.",
+        "errorGeneric": "Impossible d'envoyer le message. Veuillez réessayer."
+      },
+      "chat": {
+        "title": "Chat NupciBot",
+        "subtitle": "Posez-moi n'importe quelle question",
+        "greeting": "Bonjour ! Posez-moi toutes vos questions — listes d'invités, RSVPs, factures, prestataires ou fonctionnement de la plateforme.",
+        "menuPlaceholder": "Demandez-moi ce que vous voulez...",
+        "placeholder": "Posez une question...",
+        "errorReply": "Désolé, je n'ai pas pu générer de réponse pour l'instant. Veuillez réessayer.",
+        "limitReached": "Vous avez atteint la limite de 5 questions par session. Veuillez fermer le chat et le rouvrir pour démarrer une nouvelle conversation."
+      }
+    },
     "dashboard": {
       "title": "Tableau de Bord Organisateur",
       "welcome": "Bienvenue, {name}",

@@ -374,6 +374,39 @@
     }
   },
   "planner": {
+    "nupcibot": {
+      "subtitle": "Il tuo assistente di pianificazione",
+      "close": "Chiudi",
+      "referencesTitle": "Riferimenti",
+      "greeting": "Ciao! Sono NupciBot, il tuo assistente di pianificazione. Posso aiutarti con gli ospiti, le fatture, i fornitori e tutto ciò che riguarda i tuoi matrimoni.",
+      "viewWeddings": "Vedi i miei matrimoni",
+      "viewReports": "Vedi i rapporti",
+      "contactSupport": {
+        "button": "Contatta il supporto Nupci",
+        "title": "Contatta il supporto",
+        "subtitle": "Invia un messaggio al team Nupci",
+        "description": "Hai una domanda o un problema? Inviaci un messaggio e ti risponderemo via email.",
+        "topicLabel": "Argomento / Oggetto",
+        "topicPlaceholder": "es. Domanda sulle fatture",
+        "messageLabel": "Il tuo messaggio",
+        "messagePlaceholder": "Scrivi il tuo messaggio qui...",
+        "send": "Invia messaggio",
+        "sending": "Invio in corso...",
+        "back": "Torna al menu",
+        "successTitle": "Messaggio inviato!",
+        "successDesc": "Il team Nupci ti risponderà via email a breve.",
+        "errorGeneric": "Impossibile inviare il messaggio. Riprova."
+      },
+      "chat": {
+        "title": "Chat NupciBot",
+        "subtitle": "Chiedimi qualsiasi cosa",
+        "greeting": "Ciao! Chiedimi qualsiasi cosa — liste ospiti, RSVP, fatture, fornitori o come funziona la piattaforma.",
+        "menuPlaceholder": "Chiedimi quello che vuoi...",
+        "placeholder": "Fai una domanda...",
+        "errorReply": "Mi dispiace, non ho potuto generare una risposta in questo momento. Riprova.",
+        "limitReached": "Hai raggiunto il limite di 5 domande per sessione. Per favore, chiudi la chat e riaprila per iniziare una nuova conversazione."
+      }
+    },
     "dashboard": {
       "title": "Dashboard Organizzatore",
       "welcome": "Benvenuto, {name}",

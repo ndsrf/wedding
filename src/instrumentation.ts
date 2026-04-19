@@ -80,28 +80,48 @@ export async function register() {
     try {
       const { isVectorEnabled, vectorPrisma } = await import('@/lib/db/vector-prisma');
       if (isVectorEnabled() && vectorPrisma) {
-        const { PLATFORM_DOCS } = await import('@/lib/ai/nupcibot');
+        const { PLATFORM_DOCS_ADMIN_TOTAL, PLATFORM_DOCS_PLANNER_TOTAL } = await import('@/lib/ai/nupcibot');
         const { createHash } = await import('crypto');
-        const contentHash = createHash('md5').update(PLATFORM_DOCS).digest('hex');
+        const { ingestTextContent } = await import('@/lib/ai/ingestion');
 
-        const rows = await vectorPrisma.$queryRawUnsafe<{ metadata: Record<string, unknown> | null }>(
-          `SELECT metadata FROM document_chunks WHERE "sourceName" = $1 LIMIT 1`,
-          'system-platform-docs',
-        );
+        // Clean up legacy unified docs if they exist
+        await vectorPrisma.documentChunk.deleteMany({
+          where: { sourceName: 'system-platform-docs' }
+        }).catch(() => {});
 
-        if (rows[0]?.metadata?.contentHash === contentHash) {
-          console.log('[VectorDB] Platform docs already up to date');
-        } else {
-          const { ingestTextContent } = await import('@/lib/ai/ingestion');
-          console.log('[VectorDB] Seeding platform docs...');
-          await ingestTextContent({
-            text: PLATFORM_DOCS,
-            sourceName: 'system-platform-docs',
-            docType: 'SYSTEM_MANUAL',
-            fullUrl: `${process.env.APP_URL}/docs`,
-            metadata: { contentHash },
-          });
-          console.log('[VectorDB] ✓ Platform docs seeded');
+        const docs = [
+          { role: 'admin', text: PLATFORM_DOCS_ADMIN_TOTAL, source: 'system-platform-docs-admin' },
+          { role: 'planner', text: PLATFORM_DOCS_PLANNER_TOTAL, source: 'system-platform-docs-planner' },
+        ];
+
+        for (const doc of docs) {
+          const contentHash = createHash('md5').update(doc.text).digest('hex');
+
+          // Always try to fetch to check existence and metadata
+          const rows = await vectorPrisma.$queryRawUnsafe<{ metadata: any }>(
+            `SELECT metadata FROM document_chunks WHERE "sourceName" = $1 LIMIT 1`,
+            doc.source,
+          );
+
+          const existingHash = rows?.[0]?.metadata?.contentHash;
+          const existingRole = rows?.[0]?.metadata?.role;
+
+          if (existingHash === contentHash && existingRole === doc.role) {
+            console.log(`[VectorDB] ${doc.source} already up to date`);
+          } else {
+            console.log(`[VectorDB] Seeding/Updating ${doc.source}...`);
+            // Explicitly delete existing for this source to ensure clean role-metadata replacement
+            await vectorPrisma.documentChunk.deleteMany({ where: { sourceName: doc.source } });
+            
+            await ingestTextContent({
+              text: doc.text,
+              sourceName: doc.source,
+              docType: 'SYSTEM_MANUAL',
+              fullUrl: `${process.env.APP_URL || 'https://nupci.com'}/docs`,
+              metadata: { contentHash, role: doc.role },
+            });
+            console.log(`[VectorDB] ✓ ${doc.source} seeded`);
+          }
         }
       }
     } catch (error) {

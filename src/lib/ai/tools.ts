@@ -31,10 +31,13 @@ export function buildTools(ctx: ToolContext): ToolSet {
     // ── RAG Knowledge Base Search ──────────────────────────────────────────
     search_knowledge_base: tool({
       description:
-        'Search the wedding knowledge base and documents for relevant information. Use this to answer questions about wedding details, ways of working, or platform documentation.',
+        'Search the platform documentation and wedding knowledge base. ' +
+        'MANDATORY for any questions about how features work, navigation, or business workflows. ' +
+        'Examples: "how to create a quote", "how to manage providers", "digital signatures", "guest rsvp setup". ' +
+        'Returns specific instructions and deep links.',
       inputSchema: zodSchema(
         z.object({
-          query: z.string().describe('The search query to find relevant documents'),
+          query: z.string().describe('The search query (English or Spanish) to find relevant documentation'),
         }),
       ),
       execute: async ({ query }: { query: string }) => {
@@ -607,6 +610,142 @@ export function buildTools(ctx: ToolContext): ToolSet {
         } catch (err) {
           console.error('[TOOLS] add_reminder error:', err);
           return { error: 'Failed to add reminder' };
+        }
+      },
+    }),
+
+    // ── Get Planner Weddings ──────────────────────────────────────────────
+    get_planner_weddings: tool({
+      description:
+        'Get a list of all weddings managed by this planner. Returns wedding names, dates, guest counts, and RSVP completion.',
+      inputSchema: zodSchema(z.object({})),
+      execute: async () => {
+        if (!ctx.plannerId) return { error: 'No planner context available' };
+        try {
+          const weddings = await prisma.wedding.findMany({
+            where: { planner_id: ctx.plannerId },
+            select: {
+              id: true,
+              couple_names: true,
+              wedding_date: true,
+              _count: { select: { families: true } },
+            },
+            orderBy: { wedding_date: 'asc' },
+          });
+
+          // For each wedding compute RSVP completion
+          const results = await Promise.all(
+            weddings.map(async (w) => {
+              const families = await prisma.family.findMany({
+                where: { wedding_id: w.id },
+                include: { members: { select: { attending: true } } },
+              });
+              const total = families.length;
+              const submitted = families.filter((f) => f.members.some((m) => m.attending !== null)).length;
+              return {
+                id: w.id,
+                coupleNames: w.couple_names,
+                weddingDate: w.wedding_date.toISOString().split('T')[0],
+                totalFamilies: total,
+                rsvpSubmitted: submitted,
+                rsvpPending: total - submitted,
+                completionPct: total > 0 ? Math.round((submitted / total) * 100) : 0,
+              };
+            }),
+          );
+
+          return results;
+        } catch (err) {
+          console.error('[TOOLS] get_planner_weddings error:', err);
+          return { error: 'Failed to retrieve weddings' };
+        }
+      },
+    }),
+
+    // ── Get Wedding Invoices ──────────────────────────────────────────────
+    get_wedding_invoices: tool({
+      description:
+        'Get a summary of invoices and payments for the current wedding. Returns invoice status, amounts, and outstanding balances.',
+      inputSchema: zodSchema(z.object({})),
+      execute: async () => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          // Find invoices linked to this wedding via quote or contract
+          const invoices = await prisma.invoice.findMany({
+            where: {
+              OR: [
+                { quote: { converted_to_wedding_id: ctx.weddingId } },
+                { contract: { weddings: { some: { id: ctx.weddingId } } } }
+              ]
+            },
+            include: {
+              line_items: { select: { name: true, quantity: true, unit_price: true } },
+              payments: { select: { amount: true, payment_date: true } },
+            },
+            orderBy: { created_at: 'desc' },
+          });
+
+          return invoices.map((inv) => {
+            const total = inv.line_items.reduce((sum, li) => sum + Number(li.quantity) * Number(li.unit_price), 0);
+            const paid = inv.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+            return {
+              id: inv.id,
+              invoiceNumber: inv.invoice_number,
+              status: inv.status,
+              total,
+              paid,
+              outstanding: total - paid,
+              lineItemCount: inv.line_items.length,
+              paymentCount: inv.payments.length,
+            };
+          });
+        } catch (err) {
+          console.error('[TOOLS] get_wedding_invoices error:', err);
+          return { error: 'Failed to retrieve invoices' };
+        }
+      },
+    }),
+
+    // ── Get Wedding Providers ─────────────────────────────────────────────
+    get_wedding_providers: tool({
+      description:
+        'Get the list of providers (vendors) assigned to the current wedding, including their category and payment status.',
+      inputSchema: zodSchema(z.object({})),
+      execute: async () => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const weddingProviders = await prisma.weddingProvider.findMany({
+            where: { wedding_id: ctx.weddingId },
+            include: {
+              category: { select: { name: true } },
+              provider: {
+                select: {
+                  name: true,
+                  phone: true,
+                  email: true,
+                },
+              },
+              payments: { select: { amount: true, date: true } },
+            },
+            orderBy: { created_at: 'asc' },
+          });
+
+          return weddingProviders.map((wp) => {
+            const totalPaid = wp.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+            const agreedAmount = wp.total_price ? Number(wp.total_price) : null;
+            return {
+              providerName: wp.provider?.name || wp.name || 'Unknown',
+              category: wp.category.name,
+              agreedAmount,
+              totalPaid,
+              outstanding: agreedAmount !== null ? agreedAmount - totalPaid : null,
+              phone: wp.provider?.phone || wp.phone,
+              email: wp.provider?.email || wp.email,
+            };
+          });
+        } catch (err) {
+          console.error('[TOOLS] get_wedding_providers error:', err);
+          return { error: 'Failed to retrieve providers' };
         }
       },
     }),

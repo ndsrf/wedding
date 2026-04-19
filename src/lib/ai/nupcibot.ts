@@ -285,65 +285,120 @@ View and edit wedding information:
 const PLATFORM_DOCS_PLANNER = `
 ## Planner Pages & Features
 
-### Client Management (/planner/clients)
-Manage all clients (couples) associated with the planner:
-- View a list of all clients with their contact details (name, email, phone, address, ID number, notes).
-- See each client's linked weddings, quotes, contracts, and invoices at a glance.
-- Create, edit, and delete client records.
-- Centralizes the full client relationship history in one place.
+### Planner Dashboard (/planner)
+The central command center for wedding planners.
+- **Key Metrics**: Total active weddings, total guests across all weddings, and overall RSVP completion percentage.
+- **Upcoming Weddings**: A quick-view list of the next 5 upcoming weddings with countdowns.
+- **Upcoming Tasks**: A unified widget showing pending tasks across all managed weddings.
+- **Quick Actions**: Direct links to create a new wedding, manage providers, edit templates, and access the checklist library.
 
 ---
 
-### Location Management (/planner/locations)
-Create and manage reusable ceremony venues and event locations:
-- Store location details: name, address, Google Maps URL, website, and notes.
-- Reuse locations across multiple weddings and itinerary items.
-- Track which weddings and itinerary entries are using each location.
-- Prevent accidental deletion of locations that are currently in use.
+### Wedding Management (/planner/weddings)
+The list of all weddings managed by the planner.
+- **Status tracking**: View active and archived/deleted weddings.
+- **Wedding Details**: Each wedding shows the couple names, date, location, and guest stats.
+- **Access Control**: From the wedding detail page, planners can invite Wedding Admins (the couple) and manage their access.
+- **Sub-sections**: Planners have full access to all /admin features for each wedding (Guests, Seating, Payments, etc.).
+
+---
+
+### Client Management (/planner/clients)
+A CRM dedicated to wedding clients (couples):
+- **Client Records**: Store contact information, ID numbers, addresses, and private notes.
+- **Relationship History**: View all weddings, quotes, contracts, and invoices linked to a specific client in one unified timeline.
+- **Lifecycle tracking**: Track clients from initial inquiry (quote) to active planning (wedding) and final billing.
+
+---
+
+### Provider Library (/planner/providers)
+A centralized library of vendors and service providers:
+- **Reusable Directory**: Save providers with their category (catering, music, flowers, etc.), contact details, and general notes.
+- **Wedding Assignment**: Assign providers from this library to specific weddings.
+- **Category Management**: Organize providers by type for easy searching.
+- **Traceability**: Track which weddings are using each provider.
+
+---
+
+### Checklist Template Library (/planner/checklist-template)
+Standardize workflows by creating master checklist templates:
+- **Template Creation**: Build a standard list of tasks with descriptions and assignment roles (Couple or Planner).
+- **Relative Deadlines**: Set due dates relative to the wedding date (e.g., "12 months before", "2 weeks before").
+- **Import to Wedding**: When a new wedding is created, planners can import these templates to instantly populate the wedding checklist.
+- **Global Updates**: Editing a template doesn't affect existing weddings but ensures all future weddings follow the updated process.
 
 ---
 
 ### Quotes & Budgets (/planner/quotes-finances → Quotes tab)
-Create and manage professional quotes for clients:
-- Itemized line items with description, quantity, unit price, and total.
-- Apply discounts and tax rates; automatic subtotal/total calculation.
-- Quote statuses: Draft, Sent, Accepted, Rejected, Expired.
-- Set expiry dates and track acceptance.
-- Export quotes to PDF.
-- Convert an accepted quote into an invoice with one click.
-- Dashboard cards show: total quotes, accepted quotes, total invoiced amount, and amount received.
+Create professional proposals for clients:
+- **Itemized Quotes**: Add line items with quantities and unit prices.
+- **Financial Controls**: Apply tax rates and discounts; automatic subtotal and total calculations.
+- **Acceptance Workflow**: Set expiry dates. Quotes can be accepted, rejected, or expired.
+- **One-Click Conversion**: Accepted quotes can be instantly converted into invoices.
+- **Export**: Generate professional PDF versions of quotes for sharing.
 
 ---
 
 ### Contracts & Digital Signature (/planner/quotes-finances → Contracts tab)
-Draft, share, and sign legally binding contracts:
-- Rich-text editor (TipTap/ProseMirror) for contract content.
-- Contract templates with AI-powered placeholder filling: the AI uses wedding/client context to auto-fill template placeholders.
-- Real-time collaborative editing via Liveblocks (multiple users can edit simultaneously).
-- Share contracts with clients via a unique secure link (no login required for clients).
-- Digital signature integration via DocuSeal:
-  - Request client signature (client receives a signing link).
-  - Sign manually on behalf of the client.
-  - Download signed PDF and audit trail PDF.
-- Contract statuses: Draft, Shared, Signing, Signed, Cancelled.
-- Comments and annotations sidebar for review.
-- Link contracts to quotes and customers.
+Draft and manage legal agreements:
+- **Rich-Text Editor**: Create complex contract documents with a built-in editor.
+- **AI-Powered Templates**: Create contract templates and use AI to automatically fill in client names, wedding dates, and amounts based on the context.
+- **Real-time Collaboration**: Multiple team members can edit a contract simultaneously.
+- **Digital Signature**: Integrated with DocuSeal for secure, legally binding signatures.
+- **Audit Trail**: Track when a contract was shared, viewed, and signed. Download signed PDFs with audit certificates.
 
 ---
 
-### Invoices & Payment Tracking (/planner/quotes-finances → Invoices tab)
-Issue invoices and track payments with full pending payment management:
-- Create invoices with itemized line items, discounts, and tax rates.
-- Unique invoice numbers assigned automatically.
-- Invoice statuses: Draft, Issued, Partial, Paid, Overdue, Cancelled.
-- Record multiple partial payments per invoice:
-  - Payment methods: Cash, Bank Transfer, PayPal, Bizum, Revolut, Other.
-  - Each payment has amount, date, reference, and notes.
-- Real-time tracking of amount paid vs total amount outstanding.
-- Export invoices to PDF.
-- Convert quotes into invoices directly.
+### Invoices & Payments (/planner/quotes-finances → Invoices tab)
+Full-cycle billing management:
+- **Invoice Generation**: Issue invoices with unique, automatic numbering series.
+- **Flexible Statuses**: Draft, Issued, Partial, Paid, Overdue, Cancelled.
+- **Partial Payments**: Record multiple payments against a single invoice using various methods (Bank Transfer, Cash, PayPal, etc.).
+- **Balance Tracking**: Real-time view of total amount, amount paid, and outstanding balance.
+- **PDF Export**: Generate invoices as PDFs for clients.
 
 ---
+
+### Location Management (/planner/locations)
+A shared library of ceremony and reception venues:
+- **Details**: Store names, addresses, maps links, and technical notes for each venue.
+- **Usage tracking**: See every wedding and itinerary item that uses a specific location.
+- **Conflict Prevention**: System prevents deleting locations that are currently assigned to active weddings.
+
+---
+
+### Message Template Library (/planner/templates)
+Define master message templates for all channels:
+- **Template Types**: Invitation, Reminder, Confirmation, Save the Date, Tasting Menu.
+- **Multi-channel**: Design templates for WhatsApp (Business or Links), Email, and SMS.
+- **Multi-language**: Write templates in all 5 supported languages (EN, ES, FR, IT, DE).
+- **Personalization**: Use {{variable}} placeholders to auto-populate data when sending.
+
+---
+
+### Planner Reports (/planner/reports)
+Global reporting across the planner's entire business:
+- **Global Guest List**: Export guest data for all active weddings.
+- **Global Provider List**: Export list of all vendors in the library.
+- **Wedding Financials**: Aggregated report of quotes, invoices, and payments across all clients.
+- **Operational Reports**: Checklist status summary across all weddings.
+
+---
+
+### Company Profile (/planner/company-profile)
+Configure the planner's brand identity:
+- **Branding**: Upload company logo and set the legal company name.
+- **Legal details**: Set the tax ID, address, and contact info used in quotes and invoices.
+- **Digital Signature**: Save a default signature to be used in automated contract signing.
+- **Billing series**: Configure custom prefixes and starting numbers for invoices and proformas.
+
+---
+
+### Alert Settings (/planner/alert-settings)
+Manage platform notifications:
+- **Guest Alerts**: Be notified when guests open links, submit RSVPs, or send messages.
+- **Financial Alerts**: Receive notifications for accepted quotes, signed contracts, or received payments.
+- **Email Digest**: Configure daily or real-time email notifications for business activity.
 `;
 
 /**
@@ -355,6 +410,12 @@ export function getPlatformDocs(role: 'admin' | 'planner'): string {
     ? PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_PLANNER
     : PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_ADMIN;
 }
+
+/** Admin-only platform docs */
+export const PLATFORM_DOCS_ADMIN_TOTAL = PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_ADMIN;
+
+/** Planner-only platform docs */
+export const PLATFORM_DOCS_PLANNER_TOTAL = PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_PLANNER;
 
 /** Full docs (shared + admin + planner) – kept for backward-compat seeding */
 export const PLATFORM_DOCS = PLATFORM_DOCS_SHARED + '\n\n' + PLATFORM_DOCS_ADMIN + '\n\n' + PLATFORM_DOCS_PLANNER;

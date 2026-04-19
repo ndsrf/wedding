@@ -5,6 +5,8 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 import HyperDXProvider from '@/components/observability/HyperDXProvider';
 import { ToastProvider } from '@/components/ui/Toast';
+import { UniversalNupciBot } from '@/components/shared/UniversalNupciBot';
+import { SessionWrapper } from '@/components/auth/SessionWrapper';
 import '../globals.css'
 
 export default async function PublicLayout({
@@ -34,9 +36,12 @@ export default async function PublicLayout({
       <body>
         <HyperDXProvider />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
+          <SessionWrapper>
+            <ToastProvider>
+              {children}
+              <UniversalNupciBot />
+            </ToastProvider>
+          </SessionWrapper>
         </NextIntlClientProvider>
         <SpeedInsights />
         <Analytics />

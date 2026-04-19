@@ -404,6 +404,39 @@
     }
   },
   "planner": {
+    "nupcibot": {
+      "subtitle": "Your planning assistant",
+      "close": "Close",
+      "referencesTitle": "References",
+      "greeting": "Hi! I'm NupciBot, your planning assistant. I can help with guests, invoices, providers, and anything about your weddings.",
+      "viewWeddings": "View my weddings",
+      "viewReports": "View reports",
+      "contactSupport": {
+        "button": "Contact Nupci support",
+        "title": "Contact Support",
+        "subtitle": "Send a message to the Nupci team",
+        "description": "Have a question or issue? Send us a message and we'll get back to you by email.",
+        "topicLabel": "Topic / Subject",
+        "topicPlaceholder": "e.g. Question about invoices",
+        "messageLabel": "Your message",
+        "messagePlaceholder": "Write your message here...",
+        "send": "Send Message",
+        "sending": "Sending...",
+        "back": "Back to menu",
+        "successTitle": "Message sent!",
+        "successDesc": "The Nupci team will reply to your email shortly.",
+        "errorGeneric": "Failed to send message. Please try again."
+      },
+      "chat": {
+        "title": "NupciBot Chat",
+        "subtitle": "Ask me anything",
+        "greeting": "Hi! Ask me anything — guest lists, RSVPs, invoices, providers, or how the platform works.",
+        "menuPlaceholder": "Ask me anything...",
+        "placeholder": "Type a question...",
+        "errorReply": "Sorry, I couldn't generate a reply right now. Please try again.",
+        "limitReached": "You've reached the limit of 5 questions per session. Please close the chat and open it again to start a new conversation."
+      }
+    },
     "dashboard": {
       "title": "Planner Dashboard",
       "welcome": "Welcome, {name}",

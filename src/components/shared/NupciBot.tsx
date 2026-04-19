@@ -116,7 +116,7 @@ function AssistantMessage({ content, t }: { content: string; t: (key: string) =>
   );
 }
 
-type Screen = 'menu' | 'message-planner' | 'chat';
+type Screen = 'menu' | 'message-planner' | 'chat' | 'contact-support';
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -206,9 +206,7 @@ function PanelHeader({
 
 // ── Session storage helpers ─────────────────────────────────────────────────
 
-const STORAGE_KEY = 'nupcibot_state';
-
-const VALID_SCREENS: Screen[] = ['menu', 'message-planner', 'chat'];
+const VALID_SCREENS: Screen[] = ['menu', 'message-planner', 'chat', 'contact-support'];
 
 const DEFAULT_BOT_STATE: { isOpen: boolean; screen: Screen; chatHistory: ChatMessage[] } = {
   isOpen: false,
@@ -216,9 +214,9 @@ const DEFAULT_BOT_STATE: { isOpen: boolean; screen: Screen; chatHistory: ChatMes
   chatHistory: [],
 };
 
-function loadBotState(): typeof DEFAULT_BOT_STATE {
+function loadBotState(key: string): typeof DEFAULT_BOT_STATE {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(key);
     if (!raw) return DEFAULT_BOT_STATE;
     const parsed = JSON.parse(raw);
     return {
@@ -231,22 +229,34 @@ function loadBotState(): typeof DEFAULT_BOT_STATE {
   }
 }
 
-function saveBotState(state: { isOpen: boolean; screen: Screen; chatHistory: ChatMessage[] }) {
+function saveBotState(key: string, state: { isOpen: boolean; screen: Screen; chatHistory: ChatMessage[] }) {
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    sessionStorage.setItem(key, JSON.stringify(state));
   } catch { /* ignore */ }
 }
 
-function clearBotState() {
+function clearBotState(key: string) {
   try {
-    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(key);
   } catch { /* ignore */ }
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-export function NupciBot() {
-  const t = useTranslations('admin.nupcibot');
+interface NupciBotProps {
+  variant?: 'admin' | 'planner';   // default: 'admin'
+  apiEndpoint?: string;            // default: '/api/admin/nupcibot/chat'
+  storageKey?: string;             // default: 'nupcibot_admin_state'
+  weddingId?: string;              // optional — passed to chat API body
+}
+
+export function NupciBot({
+  variant = 'admin',
+  apiEndpoint = '/api/admin/nupcibot/chat',
+  storageKey = 'nupcibot_admin_state',
+  weddingId,
+}: NupciBotProps) {
+  const t = useTranslations(variant === 'planner' ? 'planner.nupcibot' : 'admin.nupcibot');
   const locale = useLocale();
   const { data: session } = useSession();
   const userName = session?.user?.name ?? undefined;
@@ -255,9 +265,9 @@ export function NupciBot() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // Message Planner state
+  // Form state (used for both Message Planner and Contact Support)
   const [topic, setTopic] = useState('');
-  const [plannerMessage, setPlannerMessage] = useState('');
+  const [formMessage, setFormMessage] = useState('');
   const [messageSent, setMessageSent] = useState(false);
   const [sendError, setSendError] = useState('');
 
@@ -270,19 +280,19 @@ export function NupciBot() {
 
   // Restore state from sessionStorage on mount
   useEffect(() => {
-    const saved = loadBotState();
+    const saved = loadBotState(storageKey);
     if (saved.isOpen) setIsOpen(true);
     if (saved.screen) setScreen(saved.screen);
     if (saved.chatHistory.length > 0) setChatHistory(saved.chatHistory);
-  }, []);
+  }, [storageKey]);
 
   // Only persist state when the bot is open — prevents re-saving cleared state
   // after handleClose calls clearBotState()
   useEffect(() => {
     if (isOpen) {
-      saveBotState({ isOpen, screen, chatHistory });
+      saveBotState(storageKey, { isOpen, screen, chatHistory });
     }
-  }, [isOpen, screen, chatHistory]);
+  }, [isOpen, screen, chatHistory, storageKey]);
 
   useEffect(() => {
     if (screen === 'chat' && chatEndRef.current) {
@@ -298,13 +308,13 @@ export function NupciBot() {
   // state after the panel's closing animation has finished (300 ms)
   function handleClose() {
     setIsOpen(false);
-    clearBotState();
+    clearBotState(storageKey);
     setTimeout(() => {
       setScreen('menu');
       setMessageSent(false);
       setSendError('');
       setTopic('');
-      setPlannerMessage('');
+      setFormMessage('');
       setChatHistory([]);
       setChatInput('');
     }, 300);
@@ -329,30 +339,42 @@ export function NupciBot() {
 
   // ── Navigate: reports ──
   function handleViewReports() {
-    router.push('/admin/reports');
+    router.push(variant === 'planner' ? '/planner/reports' : '/admin/reports');
   }
 
-  // ── Send message to planner ──
-  async function handleSendToPlanner() {
-    if (!topic.trim() || !plannerMessage.trim()) return;
+  // ── Navigate: weddings ──
+  function handleViewWeddings() {
+    router.push('/planner/weddings');
+  }
+
+  // ── Send message to planner or support ──
+  async function handleSendForm() {
+    if (!topic.trim() || !formMessage.trim()) return;
     setIsLoading(true);
     setSendError('');
+
+    const endpoint = variant === 'planner' 
+      ? '/api/planner/nupcibot/contact-support' 
+      : '/api/admin/nupcibot/message-planner';
+
     try {
-      const res = await fetch('/api/admin/nupcibot/message-planner', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: topic.trim(), message: plannerMessage.trim() }),
+        body: JSON.stringify({ topic: topic.trim(), message: formMessage.trim() }),
       });
       const data = await res.json();
       if (data.success) {
         setMessageSent(true);
         setTopic('');
-        setPlannerMessage('');
+        setFormMessage('');
       } else {
-        setSendError(data.error?.message || t('messagePlanner.errorGeneric'));
+        const defaultError = variant === 'planner' ? t('contactSupport.errorGeneric') : t('messagePlanner.errorGeneric');
+        setSendError(data.error?.message || defaultError);
       }
     } catch {
-      setSendError(t('messagePlanner.errorGeneric'));
+      const defaultError = variant === 'planner' ? t('contactSupport.errorGeneric') : t('messagePlanner.errorGeneric');
+      setSendError(defaultError);
     } finally {
       setIsLoading(false);
     }
@@ -372,7 +394,7 @@ export function NupciBot() {
     setIsChatLoading(true);
 
     try {
-      const res = await fetch('/api/admin/nupcibot/chat', {
+      const res = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -380,6 +402,7 @@ export function NupciBot() {
           history: chatHistory,
           language: locale.toUpperCase(),
           userName,
+          ...(weddingId ? { weddingId } : {}),
         }),
       });
 
@@ -508,50 +531,98 @@ export function NupciBot() {
           </div>
         </div>
 
-        {/* Option: configure wedding */}
-        <button
-          onClick={handleHelpConfigure}
-          disabled={isLoading}
-          className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-rose-100 hover:border-rose-300 hover:bg-rose-50 transition-all disabled:opacity-50 group"
-        >
-          <div className="flex-shrink-0 w-8 h-8 bg-rose-50 group-hover:bg-rose-100 rounded-lg flex items-center justify-center transition-colors">
-            <svg className="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-          </div>
-          <span className="text-sm font-medium text-gray-800 flex-1">
-            {isLoading ? '...' : t('helpConfigure')}
-          </span>
-          {!isLoading && <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-rose-400 transition-colors flex-shrink-0" />}
-        </button>
+        {variant === 'planner' ? (
+          <>
+            {/* Planner Option: view my weddings */}
+            <button
+              onClick={handleViewWeddings}
+              className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-rose-100 hover:border-rose-300 hover:bg-rose-50 transition-all group"
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-rose-50 group-hover:bg-rose-100 rounded-lg flex items-center justify-center transition-colors">
+                <svg className="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-gray-800 flex-1">{t('viewWeddings')}</span>
+              <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-rose-400 transition-colors flex-shrink-0" />
+            </button>
 
-        {/* Option: view reports */}
-        <button
-          onClick={handleViewReports}
-          className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50 transition-all group"
-        >
-          <div className="flex-shrink-0 w-8 h-8 bg-emerald-50 group-hover:bg-emerald-100 rounded-lg flex items-center justify-center transition-colors">
-            <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <span className="text-sm font-medium text-gray-800 flex-1">{t('viewReports')}</span>
-          <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
-        </button>
+            {/* Planner Option: view reports */}
+            <button
+              onClick={handleViewReports}
+              className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50 transition-all group"
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-emerald-50 group-hover:bg-emerald-100 rounded-lg flex items-center justify-center transition-colors">
+                <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-gray-800 flex-1">{t('viewReports')}</span>
+              <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+            </button>
 
-        {/* Option: message planner */}
-        <button
-          onClick={() => setScreen('message-planner')}
-          className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-50 transition-all group"
-        >
-          <div className="flex-shrink-0 w-8 h-8 bg-blue-50 group-hover:bg-blue-100 rounded-lg flex items-center justify-center transition-colors">
-            <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <span className="text-sm font-medium text-gray-800 flex-1">{t('messagePlanner.button')}</span>
-          <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
-        </button>
+            {/* Planner Option: contact support */}
+            <button
+              onClick={() => setScreen('contact-support')}
+              className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-50 transition-all group"
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-50 group-hover:bg-blue-100 rounded-lg flex items-center justify-center transition-colors">
+                <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-gray-800 flex-1">{t('contactSupport.button')}</span>
+              <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Admin Option: configure wedding */}
+            <button
+              onClick={handleHelpConfigure}
+              disabled={isLoading}
+              className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-rose-100 hover:border-rose-300 hover:bg-rose-50 transition-all disabled:opacity-50 group"
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-rose-50 group-hover:bg-rose-100 rounded-lg flex items-center justify-center transition-colors">
+                <svg className="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-gray-800 flex-1">
+                {isLoading ? '...' : t('helpConfigure')}
+              </span>
+              {!isLoading && <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-rose-400 transition-colors flex-shrink-0" />}
+            </button>
+
+            {/* Admin Option: view reports */}
+            <button
+              onClick={handleViewReports}
+              className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50 transition-all group"
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-emerald-50 group-hover:bg-emerald-100 rounded-lg flex items-center justify-center transition-colors">
+                <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-gray-800 flex-1">{t('viewReports')}</span>
+              <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+            </button>
+
+            {/* Admin Option: message planner */}
+            <button
+              onClick={() => setScreen('message-planner')}
+              className="w-full text-left flex items-center gap-3 p-3 rounded-xl border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-50 transition-all group"
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-50 group-hover:bg-blue-100 rounded-lg flex items-center justify-center transition-colors">
+                <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-gray-800 flex-1">{t('messagePlanner.button')}</span>
+              <ChevronIcon className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+            </button>
+          </>
+        )}
 
         {/* Chat input */}
         <div className="flex gap-2 mt-1">
@@ -576,7 +647,10 @@ export function NupciBot() {
     );
   }
 
-  function renderMessagePlanner() {
+  function renderForm(type: 'planner' | 'support') {
+    const isPlanner = type === 'planner';
+    const prefix = isPlanner ? 'messagePlanner' : 'contactSupport';
+
     return (
       <div className="p-4 flex flex-col gap-3">
         {messageSent ? (
@@ -586,34 +660,34 @@ export function NupciBot() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-gray-800 mb-1">{t('messagePlanner.successTitle')}</p>
-            <p className="text-xs text-gray-500">{t('messagePlanner.successDesc')}</p>
+            <p className="text-sm font-semibold text-gray-800 mb-1">{t(`${prefix}.successTitle`)}</p>
+            <p className="text-xs text-gray-500">{t(`${prefix}.successDesc`)}</p>
             <button
               onClick={handleBack}
               className="mt-4 text-sm text-rose-600 hover:text-rose-700 font-medium"
             >
-              {t('messagePlanner.back')}
+              {t(`${prefix}.back`)}
             </button>
           </div>
         ) : (
           <>
-            <p className="text-xs text-gray-500 leading-relaxed">{t('messagePlanner.description')}</p>
+            <p className="text-xs text-gray-500 leading-relaxed">{t(`${prefix}.description`)}</p>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">{t('messagePlanner.topicLabel')}</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t(`${prefix}.topicLabel`)}</label>
               <input
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder={t('messagePlanner.topicPlaceholder')}
+                placeholder={t(`${prefix}.topicPlaceholder`)}
                 className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">{t('messagePlanner.messageLabel')}</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t(`${prefix}.messageLabel`)}</label>
               <textarea
-                value={plannerMessage}
-                onChange={(e) => setPlannerMessage(e.target.value)}
-                placeholder={t('messagePlanner.messagePlaceholder')}
+                value={formMessage}
+                onChange={(e) => setFormMessage(e.target.value)}
+                placeholder={t(`${prefix}.messagePlaceholder`)}
                 rows={4}
                 className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent resize-none"
               />
@@ -622,16 +696,16 @@ export function NupciBot() {
               <p className="text-xs text-red-500">{sendError}</p>
             )}
             <button
-              onClick={handleSendToPlanner}
-              disabled={isLoading || !topic.trim() || !plannerMessage.trim()}
+              onClick={handleSendForm}
+              disabled={isLoading || !topic.trim() || !formMessage.trim()}
               className="w-full py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-sm font-semibold rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <span>{t('messagePlanner.sending')}</span>
+                <span>{t(`${prefix}.sending`)}</span>
               ) : (
                 <>
                   <SendIcon className="h-4 w-4" />
-                  {t('messagePlanner.send')}
+                  {t(`${prefix}.send`)}
                 </>
               )}
             </button>
@@ -720,8 +794,15 @@ export function NupciBot() {
 
   const screenTitles: Record<Screen, { title: string; subtitle: string }> = {
     menu: { title: 'NupciBot', subtitle: t('subtitle') },
-    'message-planner': { title: t('messagePlanner.title'), subtitle: t('messagePlanner.subtitle') },
     chat: { title: t('chat.title'), subtitle: t('chat.subtitle') },
+    'message-planner': { 
+      title: variant === 'admin' ? t('messagePlanner.title') : 'Message Planner', 
+      subtitle: variant === 'admin' ? t('messagePlanner.subtitle') : '' 
+    },
+    'contact-support': { 
+      title: variant === 'planner' ? t('contactSupport.title') : 'Contact Support', 
+      subtitle: variant === 'planner' ? t('contactSupport.subtitle') : '' 
+    },
   };
 
   return (
@@ -737,7 +818,8 @@ export function NupciBot() {
           />
           <div className="flex-1 overflow-hidden">
             {screen === 'menu' && renderMenu()}
-            {screen === 'message-planner' && renderMessagePlanner()}
+            {screen === 'message-planner' && renderForm('planner')}
+            {screen === 'contact-support' && renderForm('support')}
             {screen === 'chat' && renderChat()}
           </div>
         </div>

@@ -81,7 +81,10 @@ export async function retrieveChunks(params: RetrievalParams): Promise<Retrieved
              AND "docType" IN ('WAYS_OF_WORKING'::"DocType", 'WEDDING_DOCUMENT'::"DocType", 'REFERENCES'::"DocType")
              AND ("weddingId" IS NULL OR "weddingId" = $2)
            )
-           OR ("docType" = 'SYSTEM_MANUAL'::"DocType")
+           OR (
+             "docType" = 'SYSTEM_MANUAL'::"DocType"
+             AND (metadata->>'role' = 'admin' OR metadata->>'role' IS NULL)
+           )
          )
          ORDER BY score ASC
          LIMIT $4`,
@@ -92,6 +95,7 @@ export async function retrieveChunks(params: RetrievalParams): Promise<Retrieved
       );
     } else {
       // Planner scope: own docs across weddings + system manuals + references
+      // If weddingId is present, the planner is "inside" a wedding and should see admin docs too.
       rows = await vectorPrisma.$queryRawUnsafe<RawChunkRow>(
         `SELECT 
           content, "sourceName", "fullUrl", metadata, "docType", 
@@ -100,7 +104,14 @@ export async function retrieveChunks(params: RetrievalParams): Promise<Retrieved
          FROM document_chunks
          WHERE (
            ("plannerId" = $2)
-           OR ("docType" = 'SYSTEM_MANUAL'::"DocType")
+           OR (
+             "docType" = 'SYSTEM_MANUAL'::"DocType"
+             AND (
+               metadata->>'role' = 'planner' 
+               OR (metadata->>'role' = 'admin' AND $4 IS NOT NULL)
+               OR metadata->>'role' IS NULL
+             )
+           )
            OR ("docType" = 'REFERENCES'::"DocType")
          )
          ORDER BY score ASC
@@ -108,6 +119,7 @@ export async function retrieveChunks(params: RetrievalParams): Promise<Retrieved
         vectorStr,
         plannerId ?? '',
         topK,
+        weddingId ?? null,
       );
     }
     console.log(`[RETRIEVAL] Found ${rows?.length ?? 0} matches:`, rows?.map(r => r.sourceName));

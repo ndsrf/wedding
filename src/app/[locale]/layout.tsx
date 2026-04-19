@@ -9,6 +9,8 @@ import { Analytics } from '@vercel/analytics/next'
 import CookieConsent from '@/components/CookieConsent'
 import HyperDXProvider from '@/components/observability/HyperDXProvider'
 import { ToastProvider } from '@/components/ui/Toast'
+import { UniversalNupciBot } from '@/components/shared/UniversalNupciBot'
+import { SessionWrapper } from '@/components/auth/SessionWrapper'
 import '../globals.css'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -77,10 +79,13 @@ export default async function RootLayout({
       <body>
         <HyperDXProvider />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ToastProvider>
-            {children}
-            <CookieConsent />
-          </ToastProvider>
+          <SessionWrapper>
+            <ToastProvider>
+              {children}
+              <CookieConsent />
+              <UniversalNupciBot />
+            </ToastProvider>
+          </SessionWrapper>
         </NextIntlClientProvider>
         <SpeedInsights />
         <Analytics />
