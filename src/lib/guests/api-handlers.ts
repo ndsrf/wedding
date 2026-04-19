@@ -147,7 +147,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
  */
 function buildGuestCacheParamsKey(params: Record<string, string | number | boolean | undefined>): string {
   return Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== null && v !== '' && v !== false)
+    .filter(([, v]) => v !== undefined && v !== null && v !== '')
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${k}=${v}`)
     .join('|');
