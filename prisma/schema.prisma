@@ -1466,3 +1466,21 @@ model EmailVerificationCode {
 
   @@map("email_verification_codes")
 }
+
+// -----------------------------------------------------------------------------
+// WEDDING API KEYS — for MCP server and programmatic access
+// -----------------------------------------------------------------------------
+
+model WeddingApiKey {
+  id           String    @id @default(uuid())
+  name         String
+  key_hash     String    @unique
+  role         String    // "wedding_admin" or "planner"
+  wedding_id   String?
+  planner_id   String?
+  created_at   DateTime  @default(now())
+  last_used_at DateTime?
+  expires_at   DateTime?
+
+  @@map("wedding_api_keys")
+}

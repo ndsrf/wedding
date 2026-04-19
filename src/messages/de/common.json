@@ -1368,7 +1368,22 @@
       "bankAccount": "Bankkonto (IBAN)",
       "bankAccountPlaceholder": "DE00 0000 0000 0000 0000 00",
       "acceptsBizum": "Akzeptiert Bizum",
-      "acceptsRevolut": "Akzeptiert Revolut"
+      "acceptsRevolut": "Akzeptiert Revolut",
+      "apiKey": {
+        "generate": "API-Schlüssel generieren",
+        "regenerate": "Schlüssel neu generieren",
+        "generating": "Generiere...",
+        "copy": "Kopieren",
+        "copied": "Kopiert!",
+        "expiresOn": "Läuft ab am",
+        "warningOnce": "Kopiere diesen Schlüssel jetzt – er wird nicht erneut angezeigt.",
+        "keyLabel": "Dein API-Schlüssel",
+        "configLabel": "Claude Desktop Konfiguration",
+        "noKey": "Noch kein API-Schlüssel. Generiere einen, um einen KI-Assistenten zu verbinden.",
+        "configNote": "Füge diesen Ausschnitt in deine Claude Desktop Konfigurationsdatei ein.",
+        "title": "KI-Integration (MCP)",
+        "subtitle": "Verbinde Claude Desktop und andere KI-Assistenten zur Verwaltung deiner Hochzeiten"
+      }
     }
   },
   "admin": {
@@ -2667,7 +2682,22 @@
       "bizum": "Bizum",
       "revolut": "Revolut",
       "reference": "Verwendungszweck",
-      "noPendingDue": "Kein Fälligkeitsdatum"
+      "noPendingDue": "Kein Fälligkeitsdatum",
+      "apiKey": {
+        "generate": "API-Schlüssel generieren",
+        "regenerate": "Schlüssel neu generieren",
+        "generating": "Generiere...",
+        "copy": "Kopieren",
+        "copied": "Kopiert!",
+        "expiresOn": "Läuft ab am",
+        "warningOnce": "Kopiere diesen Schlüssel jetzt – er wird nicht erneut angezeigt.",
+        "keyLabel": "Dein API-Schlüssel",
+        "configLabel": "Claude Desktop Konfiguration",
+        "noKey": "Noch kein API-Schlüssel. Generiere einen, um einen KI-Assistenten zu verbinden.",
+        "configNote": "Füge diesen Ausschnitt in deine Claude Desktop Konfigurationsdatei ein.",
+        "title": "KI-Integration (MCP)",
+        "subtitle": "Verbinde Claude Desktop und andere KI-Assistenten mit deiner Hochzeit"
+      }
     }
   },
   "guest": {
@@ -2952,7 +2982,8 @@
           "description": "Dieses Video (auf Spanisch) zeigt die Funktionen des Paar-Portals, von dem aus sie:\n\n• Digitale Einladungen und Nachrichtenvorlagen erstellen können\n• Die Gästeliste und spezielle Bedürfnisse (Allergien, Intoleranzen) verwalten können\n• Den Sitzplan entwerfen können\n• Budgets, Zahlungen und Lieferanten kontrollieren können\n• Die Geschenkliste und das Verkostungsmenü verwalten können"
         }
       ]
-    },    "overview": {
+    },
+    "overview": {
       "title": "Was ist {commercialName}?",
       "content1": "{commercialName} ist eine umfassende Hochzeitsverwaltungsplattform, die speziell für Hochzeitsplaner entwickelt wurde. Sie bietet eine vollständige Lösung zur gleichzeitigen Verwaltung mehrerer Hochzeiten, von der Gästelistenverwaltung über Einladungen bis zur Geschenkverfolgung.",
       "content2": "Mit einer Multi-Tenant-Architektur ermöglicht {commercialName} Hochzeitsplanern die gleichzeitige Verwaltung mehrerer Paare und gibt jedem Paar über eine intuitive Benutzeroberfläche sicheren Zugriff auf die Daten ihrer eigenen Hochzeit."

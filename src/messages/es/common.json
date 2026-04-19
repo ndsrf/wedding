@@ -1396,7 +1396,22 @@
       "bankAccount": "Cuenta corriente (IBAN)",
       "bankAccountPlaceholder": "ES00 0000 0000 0000 0000 0000",
       "acceptsBizum": "Acepta Bizum",
-      "acceptsRevolut": "Acepta Revolut"
+      "acceptsRevolut": "Acepta Revolut",
+      "apiKey": {
+        "generate": "Generar clave API",
+        "regenerate": "Regenerar clave",
+        "generating": "Generando...",
+        "copy": "Copiar",
+        "copied": "¡Copiado!",
+        "expiresOn": "Expira el",
+        "warningOnce": "Copia esta clave ahora, no se volverá a mostrar.",
+        "keyLabel": "Tu clave API",
+        "configLabel": "Configuración de Claude Desktop",
+        "noKey": "Sin clave API todavía. Genera una para conectar un asistente de IA.",
+        "configNote": "Añade este fragmento al archivo de configuración de Claude Desktop.",
+        "title": "Integración IA (MCP)",
+        "subtitle": "Conecta Claude Desktop y otros asistentes de IA para gestionar tus bodas"
+      }
     }
   },
   "admin": {
@@ -2742,7 +2757,22 @@
       "bizum": "Bizum",
       "revolut": "Revolut",
       "reference": "Referencia",
-      "noPendingDue": "Sin fecha de vencimiento"
+      "noPendingDue": "Sin fecha de vencimiento",
+      "apiKey": {
+        "generate": "Generar clave API",
+        "regenerate": "Regenerar clave",
+        "generating": "Generando...",
+        "copy": "Copiar",
+        "copied": "¡Copiado!",
+        "expiresOn": "Expira el",
+        "warningOnce": "Copia esta clave ahora, no se volverá a mostrar.",
+        "keyLabel": "Tu clave API",
+        "configLabel": "Configuración de Claude Desktop",
+        "noKey": "Sin clave API todavía. Genera una para conectar un asistente de IA.",
+        "configNote": "Añade este fragmento al archivo de configuración de Claude Desktop.",
+        "title": "Integración IA (MCP)",
+        "subtitle": "Conecta Claude Desktop y otros asistentes de IA a tu boda"
+      }
     }
   },
   "guest": {

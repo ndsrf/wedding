@@ -8,12 +8,14 @@
  */
 
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { resolvePaymentScheduleDate } from '@/lib/wedding-utils';
 import { getTranslations } from '@/lib/i18n/server';
 import PrivateHeader from '@/components/PrivateHeader';
 import AdminAccountClient from '@/components/admin/AdminAccountClient';
+import AdminApiKeySection from '@/components/admin/AdminApiKeySection';
 
 export async function generateMetadata() {
   const { t } = await getTranslations();
@@ -30,7 +32,13 @@ export default async function AdminAccountPage() {
 
   if (!user.wedding_id) redirect('/admin');
 
-  const [{ t }, admin, wedding] = await Promise.all([
+  // Determine base URL for MCP endpoint
+  const headersList = await headers();
+  const host = headersList.get('x-forwarded-host') ?? headersList.get('host') ?? 'localhost:3000';
+  const proto = headersList.get('x-forwarded-proto') ?? 'http';
+  const mcpUrl = `${proto}://${host}/mcp`;
+
+  const [{ t }, admin, wedding, existingApiKey] = await Promise.all([
     getTranslations(),
     prisma.weddingAdmin.findFirst({
       where: { id: user.id },
@@ -67,6 +75,11 @@ export default async function AdminAccountPage() {
           },
         },
       },
+    }),
+    prisma.weddingApiKey.findFirst({
+      where: { wedding_id: user.wedding_id, role: 'wedding_admin' },
+      select: { id: true, name: true, expires_at: true, last_used_at: true },
+      orderBy: { created_at: 'desc' },
     }),
   ]);
 
@@ -203,7 +216,7 @@ export default async function AdminAccountPage() {
         </div>
       </div>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <AdminAccountClient
           admin={admin}
           contract={contractData}
@@ -211,6 +224,15 @@ export default async function AdminAccountPage() {
           invoices={invoiceList}
           paymentSchedule={scheduleList}
           plannerPayment={plannerPayment}
+        />
+        <AdminApiKeySection
+          existingKey={existingApiKey ? {
+            id: existingApiKey.id,
+            name: existingApiKey.name,
+            expires_at: existingApiKey.expires_at?.toISOString() ?? null,
+            last_used_at: existingApiKey.last_used_at?.toISOString() ?? null,
+          } : null}
+          mcpUrl={mcpUrl}
         />
       </main>
     </div>

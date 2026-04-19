@@ -1646,6 +1646,169 @@ Data is stored in Docker volumes:
 
 This persists across container restarts and updates.
 
+## MCP Server (Claude Desktop Integration)
+
+The `mcp-server/` directory contains a standalone [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants like Claude Desktop direct access to the platform's wedding management tools — the same capabilities as NupciBot, but as structured MCP tools you can invoke from any MCP-compatible client.
+
+### What it can do
+
+| Tool | Description |
+|------|-------------|
+| `get_guest_list` | List all guest families with RSVP status |
+| `get_rsvp_status` | Aggregate RSVP stats (totals, completion %) |
+| `update_family_rsvp` | Update attendance for a family or specific members |
+| `assign_family_to_table` | Assign attending members to a seating table |
+| `suggest_tables_for_family` | Rank best tables for a family to sit at |
+| `add_reminder` | Add a task/reminder to the wedding checklist |
+| `get_wedding_invoices` | List invoices and payment balances |
+| `get_wedding_providers` | List vendors with agreed amounts and payments |
+| `get_planner_weddings` | *(Planner role only)* List all managed weddings |
+
+It also exposes a `platform://docs` resource with a quick-reference guide to the platform.
+
+---
+
+### Step 1 — Generate an API key
+
+Log in to the platform and go to **My Account** (`/admin/account` for couples, `/planner/account` for planners). Scroll to the **AI Integration (MCP)** section and click **Generate API key**.
+
+The raw key is shown **once** — copy it before navigating away. The key expires after 30 days; regenerate it at any time from the same page.
+
+---
+
+### Step 2 — Install and build the MCP server
+
+```bash
+cd mcp-server
+npm install
+npm run build
+# Output: mcp-server/dist/index.js
+```
+
+To run without building (uses `tsx`):
+
+```bash
+npm run dev
+```
+
+---
+
+### Step 3 — Configure Claude Desktop
+
+Edit your Claude Desktop configuration file:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add the `nupci` server entry:
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-server/dist/index.js"],
+      "env": {
+        "NUPCI_URL": "https://your-domain.com",
+        "NUPCI_API_KEY": "npci_your_key_here"
+      }
+    }
+  }
+}
+```
+
+If you prefer to run with `tsx` (no build step):
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "command": "npx",
+      "args": ["tsx", "/absolute/path/to/mcp-server/src/index.ts"],
+      "env": {
+        "NUPCI_URL": "https://your-domain.com",
+        "NUPCI_API_KEY": "npci_your_key_here"
+      }
+    }
+  }
+}
+```
+
+The role (wedding admin or planner) is determined automatically from the API key — no extra configuration needed.
+
+---
+
+### Step 4 — Restart Claude Desktop
+
+Restart the app. You should see the Nupci tools available in the tool picker. Try asking:
+
+> "How many guests have RSVP'd so far?"
+> "Assign the García family to table 5."
+> "Add a reminder to confirm the florist 2 weeks before the wedding."
+
+---
+
+### Alternative: Remote MCP server (no local install)
+
+The platform exposes a remote MCP endpoint at `/mcp`. No local server needed — connect any MCP client directly to the deployment URL.
+
+#### Getting your API key
+
+1. Log in to the platform.
+2. Go to **My Account**:
+   - Couples/wedding admins: `/admin/account`
+   - Wedding planners: `/planner/account`
+3. Scroll to the **AI Integration (MCP)** section.
+4. Click **Generate API key** (or **Regenerate key** if one already exists).
+5. Copy the key immediately — it starts with `npci_` and is shown **only once**. Keys expire after 30 days; regenerate from the same page when needed.
+
+#### Claude Desktop config
+
+Replace `npci_your_key_here` with the key you copied above:
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "url": "https://your-domain.com/mcp",
+      "headers": {
+        "Authorization": "Bearer npci_your_key_here"
+      }
+    }
+  }
+}
+```
+
+The config file location:
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+After saving, restart Claude Desktop. The account page also shows a ready-to-paste config snippet with your key already filled in.
+
+**Claude.ai or other HTTP MCP clients:** point them at `https://your-domain.com/mcp` with the same `Authorization` header.
+
+The remote server implements the MCP Streamable HTTP transport (JSON-RPC 2.0). It exposes the same tools and resources as the local server. Auth is by API key only (no cookies).
+
+---
+
+### MCP API endpoints (backend)
+
+The MCP server calls these endpoints on the platform. All require an `Authorization: Bearer npci_...` header.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/admin/mcp/guests` | Guest list |
+| `GET` | `/api/admin/mcp/rsvp-status` | RSVP stats |
+| `POST` | `/api/admin/mcp/update-rsvp` | Update RSVP |
+| `POST` | `/api/admin/mcp/assign-table` | Assign to table |
+| `GET` | `/api/admin/mcp/suggest-tables?familyName=&topN=` | Table suggestions |
+| `POST` | `/api/admin/mcp/reminders` | Add reminder |
+| `GET` | `/api/admin/mcp/invoices` | Invoices |
+| `GET` | `/api/admin/mcp/providers` | Providers |
+| `GET` | `/api/planner/mcp/weddings` | Planner's weddings |
+
+---
+
 ## Project Structure
 
 ```
@@ -1654,7 +1817,8 @@ wedding/
 ├── prisma/           # Database schema and migrations
 ├── public/           # Static assets
 ├── tests/            # Test files
-└── docker/           # Docker configuration
+├── docker/           # Docker configuration
+└── mcp-server/       # MCP server for Claude Desktop integration
 ```
 
 ## License

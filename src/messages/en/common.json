@@ -75,7 +75,7 @@
           "AI_PREMIUM": "premium AI processings",
           "EMAIL": "emails",
           "CONTRACT": "contracts"
-          }
+        }
       }
     },
     "success": {
@@ -155,7 +155,7 @@
       },
       "trial": "Free trial • 1 wedding • No credit card",
       "moreVideos": "You can watch more videos in our <link>documentation</link> section"
-      },
+    },
     "features": {
       "title": "Everything You Need to Plan Perfect Weddings",
       "subtitle": "Powerful tools designed for professional wedding planners",
@@ -1400,7 +1400,22 @@
       "bankAccount": "Bank account (IBAN)",
       "bankAccountPlaceholder": "GB00 XXXX XXXX XXXX XXXX XX",
       "acceptsBizum": "Accepts Bizum",
-      "acceptsRevolut": "Accepts Revolut"
+      "acceptsRevolut": "Accepts Revolut",
+      "apiKey": {
+        "generate": "Generate API key",
+        "regenerate": "Regenerate key",
+        "generating": "Generating...",
+        "copy": "Copy",
+        "copied": "Copied!",
+        "expiresOn": "Expires on",
+        "warningOnce": "Copy this key now — it will not be shown again.",
+        "keyLabel": "Your API key",
+        "configLabel": "Claude Desktop configuration",
+        "noKey": "No API key yet. Generate one to connect an AI assistant.",
+        "configNote": "Add this snippet to your Claude Desktop configuration file.",
+        "title": "AI Integration (MCP)",
+        "subtitle": "Connect Claude Desktop and other AI assistants to manage your weddings"
+      }
     }
   },
   "admin": {
@@ -2757,7 +2772,22 @@
       "bizum": "Bizum",
       "revolut": "Revolut",
       "reference": "Reference",
-      "noPendingDue": "No due date"
+      "noPendingDue": "No due date",
+      "apiKey": {
+        "generate": "Generate API key",
+        "regenerate": "Regenerate key",
+        "generating": "Generating...",
+        "copy": "Copy",
+        "copied": "Copied!",
+        "expiresOn": "Expires on",
+        "warningOnce": "Copy this key now — it will not be shown again.",
+        "keyLabel": "Your API key",
+        "configLabel": "Claude Desktop configuration",
+        "noKey": "No API key yet. Generate one to connect an AI assistant.",
+        "configNote": "Add this snippet to your Claude Desktop configuration file.",
+        "title": "AI Integration (MCP)",
+        "subtitle": "Connect Claude Desktop and other AI assistants to your wedding"
+      }
     }
   },
   "guest": {
@@ -3051,7 +3081,8 @@
           "description": "This video (in Spanish) shows the couple portal features, where they can:\n\n• Create digital invitations and message templates\n• Manage guest list and special needs (allergies, intolerances)\n• Design the seating plan\n• Control budgets, payments, and suppliers\n• Manage gift list and tasting menu"
         }
       ]
-    },    "overview": {
+    },
+    "overview": {
       "title": "What is {commercialName}?",
       "content1": "{commercialName} is a comprehensive wedding management platform designed specifically for wedding planners. It provides a complete solution for managing multiple weddings simultaneously, from guest list management to invitations to gift tracking.",
       "content2": "Built with a multi-tenant architecture, {commercialName} allows wedding planners to manage multiple couples at once, while giving each couple secure access to their own wedding data through an intuitive interface."
