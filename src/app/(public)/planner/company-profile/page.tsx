@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from '@/lib/i18n/server';
 import PrivateHeader from '@/components/PrivateHeader';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { CompanyProfilePage } from '@/components/planner/CompanyProfilePage';
 
 export async function generateMetadata() {
-  const t = await getTranslations('planner.companyProfile');
-  return { title: `Nupci – ${t('pageTitle')}` };
+  const { t } = await getTranslations();
+  return { title: `Nupci – ${t('planner.companyProfile.pageTitle')}` };
 }
 
 export default async function CompanyProfileServerPage() {
@@ -41,7 +41,7 @@ export default async function CompanyProfileServerPage() {
 
   if (!planner) redirect('/api/auth/signin');
 
-  const t = await getTranslations('planner.companyProfile');
+  const { t } = await getTranslations();
 
   return (
     <div className="min-h-screen">
@@ -49,9 +49,9 @@ export default async function CompanyProfileServerPage() {
 
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <h1 className="text-2xl font-bold text-gray-900 font-playfair">{t('pageTitle')}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-playfair">{t('planner.companyProfile.pageTitle')}</h1>
           <p className="mt-0.5 text-sm text-gray-500">
-            {t('pageSubtitle')}
+            {t('planner.companyProfile.pageSubtitle')}
           </p>
         </div>
       </div>
