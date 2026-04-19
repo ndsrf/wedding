@@ -995,6 +995,48 @@ export function GuestsPageContent({
               </div>
             )}
 
+            {/* Top pagination nav (visible when there are multiple pages) */}
+            {totalPages > 1 && (
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-500">{t('common.pagination.total', { count: totalGuests })}</span>
+                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <button
+                    onClick={() => setPage(1)}
+                    disabled={page === 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    title={t('common.pagination.first')}
+                  >
+                    ««
+                  </button>
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {t('common.buttons.previous')}
+                  </button>
+                  <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 whitespace-nowrap">
+                    {page} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {t('common.buttons.next')}
+                  </button>
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={page === totalPages}
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    title={t('common.pagination.last')}
+                  >
+                    »»
+                  </button>
+                </nav>
+              </div>
+            )}
+
             {/* Guest Table */}
             <GuestTable
               guests={guests}
@@ -1012,7 +1054,7 @@ export function GuestsPageContent({
               onSelectAll={handleSelectAll}
             />
 
-            {/* Pagination */}
+            {/* Bottom pagination: rows-per-page + full nav */}
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               {/* Rows per page */}
               <div className="flex items-center gap-2 text-sm text-gray-700">
