@@ -162,6 +162,7 @@ model Wedding {
   wedding_day_theme_id            String?            // Optional override theme for the day of the wedding
   wedding_day_invitation_template_id String?         // Optional override invitation template for the day of the wedding
   invitation_template_id          String?
+  design_system                   Json?              // WeddingDesignSystem — visual identity generated via Claude Design
   couple_names                    String
   wedding_date                    DateTime
   wedding_time                    String
