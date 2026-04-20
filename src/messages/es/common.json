@@ -2035,6 +2035,12 @@
       },
       "importSuccess": "Lista de invitados importada exitosamente",
       "importError": "Error de importación. Por favor, revisa el archivo.",
+      "labels": {
+        "title": "Etiquetas",
+        "addLabel": "Añadir etiqueta",
+        "createNew": "Crear nueva etiqueta",
+        "noLabels": "No hay etiquetas"
+      },
       "form": {
         "addTitle": "Añadir Familia de Invitados",
         "editTitle": "Editar Familia de Invitados",

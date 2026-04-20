@@ -2,13 +2,14 @@
  * Guest Filters Component
  *
  * Filter controls for the guest list
- * Supports RSVP status, attendance, channel, and payment status filters
+ * Supports RSVP status, attendance, channel, payment status, and label filters
  */
 
 'use client';
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import type { GuestLabel } from '@/types/models';
 
 interface GuestFiltersProps {
   filters: {
@@ -17,13 +18,15 @@ interface GuestFiltersProps {
     channel?: string;
     payment_status?: string;
     invited_by_admin_id?: string;
+    label_id?: string;
     search?: string;
   };
   admins: Array<{ id: string; name: string; email: string }>;
+  labels?: GuestLabel[];
   onFilterChange: (filters: GuestFiltersProps['filters']) => void;
 }
 
-export function GuestFilters({ filters, admins, onFilterChange }: GuestFiltersProps) {
+export function GuestFilters({ filters, admins, labels = [], onFilterChange }: GuestFiltersProps) {
   const t = useTranslations();
   const [isExpanded, setIsExpanded] = React.useState(false);
 
@@ -69,7 +72,7 @@ export function GuestFilters({ filters, admins, onFilterChange }: GuestFiltersPr
 
       {/* Filters Content */}
       <div className={`${isExpanded ? 'block' : 'hidden'} lg:block p-4`}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7">
           {/* Search */}
           <div>
             <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
@@ -175,6 +178,28 @@ export function GuestFilters({ filters, admins, onFilterChange }: GuestFiltersPr
               ))}
             </select>
           </div>
+
+          {/* Label */}
+          {labels.length > 0 && (
+            <div>
+              <label htmlFor="label_id" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('admin.guests.labels.title')}
+              </label>
+              <select
+                id="label_id"
+                value={filters.label_id || ''}
+                onChange={(e) => handleChange('label_id', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
+              >
+                <option value="">{t('admin.guests.filters.all')}</option>
+                {labels.map((label) => (
+                  <option key={label.id} value={label.id}>
+                    {label.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Clear Filters Button */}

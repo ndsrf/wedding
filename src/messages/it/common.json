@@ -1710,6 +1710,12 @@
       },
       "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file.",
+      "labels": {
+        "title": "Etichette",
+        "addLabel": "Aggiungi etichetta",
+        "createNew": "Crea nuova etichetta",
+        "noLabels": "Nessuna etichetta"
+      },
       "bulkActions": "Azioni di massa",
       "selectAll": "Seleziona tutti",
       "selectPage": "Seleziona pagina",

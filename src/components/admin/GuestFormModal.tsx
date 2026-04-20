@@ -9,7 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { FamilyMemberForm, type FamilyMemberFormData } from './FamilyMemberForm';
-import type { Language, Channel } from '@/types/models';
+import type { Language, Channel, GuestLabel } from '@/types/models';
 
 interface GuestFormData {
   name: string;
@@ -20,6 +20,7 @@ interface GuestFormData {
   preferred_language: Language;
   invited_by_admin_id?: string | null;
   private_notes?: string | null;
+  label_ids?: string[];
   members: FamilyMemberFormData[];
   // RSVP Question Answers
   transportation_answer?: boolean | null;
@@ -53,6 +54,7 @@ interface GuestFormModalProps {
   mode: 'add' | 'edit';
   initialData?: GuestFormData;
   admins: Array<{ id: string; name: string; email: string }>;
+  labels?: GuestLabel[];
   weddingConfig?: WeddingQuestionConfig;
   onSubmit: (data: GuestFormData) => Promise<void>;
   onCancel: () => void;
@@ -67,6 +69,7 @@ const defaultFormData: GuestFormData = {
   preferred_language: 'ES',
   invited_by_admin_id: null,
   private_notes: null,
+  label_ids: [],
   members: [],
   // RSVP Question Answers
   transportation_answer: null,
@@ -83,6 +86,7 @@ export function GuestFormModal({
   mode,
   initialData,
   admins,
+  labels = [],
   weddingConfig,
   onSubmit,
   onCancel,
@@ -297,6 +301,57 @@ export function GuestFormModal({
                     </option>
                   ))}
                 </select>
+              </div>
+            )}
+
+            {/* Labels */}
+            {labels.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('admin.guests.labels.title')}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {labels.map((label) => {
+                    const isSelected = (formData.label_ids || []).includes(label.id);
+                    const style = label.color
+                      ? {
+                          backgroundColor: isSelected ? label.color + '33' : 'transparent',
+                          color: label.color,
+                          borderColor: label.color + (isSelected ? 'aa' : '55'),
+                        }
+                      : undefined;
+                    return (
+                      <button
+                        key={label.id}
+                        type="button"
+                        onClick={() => {
+                          const current = formData.label_ids || [];
+                          setFormData({
+                            ...formData,
+                            label_ids: isSelected
+                              ? current.filter((id) => id !== label.id)
+                              : [...current, label.id],
+                          });
+                        }}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
+                          !label.color
+                            ? isSelected
+                              ? 'bg-purple-100 text-purple-800 border-purple-300'
+                              : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+                            : ''
+                        }`}
+                        style={style}
+                      >
+                        {isSelected && (
+                          <svg className="w-3 h-3 mr-1.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        {label.name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 

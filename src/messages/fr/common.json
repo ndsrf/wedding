@@ -1710,6 +1710,12 @@
       },
       "importSuccess": "Liste d'invités importée avec succès",
       "importError": "Erreur d'importation. Veuillez vérifier le fichier.",
+      "labels": {
+        "title": "Étiquettes",
+        "addLabel": "Ajouter une étiquette",
+        "createNew": "Créer une nouvelle étiquette",
+        "noLabels": "Aucune étiquette"
+      },
       "bulkActions": "Actions groupées",
       "selectAll": "Tout sélectionner",
       "selectPage": "Sélectionner la page",

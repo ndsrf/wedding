@@ -1710,6 +1710,12 @@
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
+      "labels": {
+        "title": "Etiketten",
+        "addLabel": "Etikett hinzufügen",
+        "createNew": "Neues Etikett erstellen",
+        "noLabels": "Keine Etiketten"
+      },
       "bulkActions": "Massenaktionen",
       "selectAll": "Alle auswählen",
       "selectPage": "Seite auswählen",
