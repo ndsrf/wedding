@@ -325,6 +325,19 @@ export function GuestsPageContent({
     }
   }, [apiPaths.labels]);
 
+  const handleCreateLabel = useCallback(async (name: string): Promise<GuestLabel> => {
+    if (!apiPaths.labels) throw new Error('Labels endpoint not configured');
+    const response = await fetch(apiPaths.labels, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.error?.message || 'Failed to create label');
+    setLabels((prev) => [...prev, data.data]);
+    return data.data as GuestLabel;
+  }, [apiPaths.labels]);
+
   const handleFilterChange = useCallback((newFilters: Filters) => {
     setFilters(newFilters);
     setPage(1);
@@ -1213,6 +1226,7 @@ export function GuestsPageContent({
         mode={formMode}
         admins={admins}
         labels={labels}
+        onCreateLabel={apiPaths.labels ? handleCreateLabel : undefined}
         initialData={
           selectedGuest
             ? {

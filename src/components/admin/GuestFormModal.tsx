@@ -55,6 +55,7 @@ interface GuestFormModalProps {
   initialData?: GuestFormData;
   admins: Array<{ id: string; name: string; email: string }>;
   labels?: GuestLabel[];
+  onCreateLabel?: (name: string) => Promise<GuestLabel>;
   weddingConfig?: WeddingQuestionConfig;
   onSubmit: (data: GuestFormData) => Promise<void>;
   onCancel: () => void;
@@ -87,6 +88,7 @@ export function GuestFormModal({
   initialData,
   admins,
   labels = [],
+  onCreateLabel,
   weddingConfig,
   onSubmit,
   onCancel,
@@ -95,6 +97,14 @@ export function GuestFormModal({
   const [formData, setFormData] = useState<GuestFormData>(defaultFormData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newLabelInput, setNewLabelInput] = useState('');
+  const [creatingLabel, setCreatingLabel] = useState(false);
+  const [localLabels, setLocalLabels] = useState<GuestLabel[]>([]);
+
+  // Sync localLabels when the prop changes (parent fetches new labels)
+  useEffect(() => {
+    setLocalLabels(labels);
+  }, [labels]);
 
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
@@ -107,8 +117,25 @@ export function GuestFormModal({
         setFormData(data);
       }
       setError(null);
+      setNewLabelInput('');
     }
   }, [isOpen, initialData, mode, admins]);
+
+  const handleCreateLabel = async () => {
+    const name = newLabelInput.trim();
+    if (!name || !onCreateLabel) return;
+    setCreatingLabel(true);
+    try {
+      const newLabel = await onCreateLabel(name);
+      setLocalLabels((prev) => [...prev, newLabel]);
+      setFormData((prev) => ({ ...prev, label_ids: [...(prev.label_ids || []), newLabel.id] }));
+      setNewLabelInput('');
+    } catch {
+      // silently ignore; parent can show a toast if needed
+    } finally {
+      setCreatingLabel(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -305,55 +332,79 @@ export function GuestFormModal({
             )}
 
             {/* Labels */}
-            {labels.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.guests.labels.title')}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {labels.map((label) => {
-                    const isSelected = (formData.label_ids || []).includes(label.id);
-                    const style = label.color
-                      ? {
-                          backgroundColor: isSelected ? label.color + '33' : 'transparent',
-                          color: label.color,
-                          borderColor: label.color + (isSelected ? 'aa' : '55'),
-                        }
-                      : undefined;
-                    return (
-                      <button
-                        key={label.id}
-                        type="button"
-                        onClick={() => {
-                          const current = formData.label_ids || [];
-                          setFormData({
-                            ...formData,
-                            label_ids: isSelected
-                              ? current.filter((id) => id !== label.id)
-                              : [...current, label.id],
-                          });
-                        }}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
-                          !label.color
-                            ? isSelected
-                              ? 'bg-purple-100 text-purple-800 border-purple-300'
-                              : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
-                            : ''
-                        }`}
-                        style={style}
-                      >
-                        {isSelected && (
-                          <svg className="w-3 h-3 mr-1.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                        {label.name}
-                      </button>
-                    );
-                  })}
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('admin.guests.labels.title')}
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {localLabels.map((label) => {
+                  const isSelected = (formData.label_ids || []).includes(label.id);
+                  const style = label.color
+                    ? {
+                        backgroundColor: isSelected ? label.color + '33' : 'transparent',
+                        color: label.color,
+                        borderColor: label.color + (isSelected ? 'aa' : '55'),
+                      }
+                    : undefined;
+                  return (
+                    <button
+                      key={label.id}
+                      type="button"
+                      onClick={() => {
+                        const current = formData.label_ids || [];
+                        setFormData({
+                          ...formData,
+                          label_ids: isSelected
+                            ? current.filter((id) => id !== label.id)
+                            : [...current, label.id],
+                        });
+                      }}
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
+                        !label.color
+                          ? isSelected
+                            ? 'bg-purple-100 text-purple-800 border-purple-300'
+                            : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+                          : ''
+                      }`}
+                      style={style}
+                    >
+                      {isSelected && (
+                        <svg className="w-3 h-3 mr-1.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                      {label.name}
+                    </button>
+                  );
+                })}
               </div>
-            )}
+              {onCreateLabel && (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newLabelInput}
+                    onChange={(e) => setNewLabelInput(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        await handleCreateLabel();
+                      }
+                    }}
+                    placeholder={t('admin.guests.labels.createNew')}
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                    disabled={creatingLabel}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateLabel}
+                    disabled={creatingLabel || !newLabelInput.trim()}
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {creatingLabel ? '…' : '+'}
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Private Notes */}
             <div>
