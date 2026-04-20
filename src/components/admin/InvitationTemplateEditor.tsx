@@ -728,7 +728,7 @@ export function InvitationTemplateEditor({
                     />
                   )}
 
-                  {block.type === 'spacer' && isSelected ? (
+                  {block.type === 'spacer' && selectedBlockId === block.id ? (
                     <SpacerBlockEditor
                       block={block as SpacerBlockType}
                       onUpdate={handleUpdateSpacerBlock}
@@ -738,7 +738,7 @@ export function InvitationTemplateEditor({
                     <div style={{ height: (block as SpacerBlockType).height, display: 'block' }} aria-hidden="true" />
                   ) : null}
 
-                  {block.type === 'embed' && isSelected ? (
+                  {block.type === 'embed' && selectedBlockId === block.id ? (
                     <EmbedBlockEditor
                       block={block as EmbedBlockType}
                       onUpdate={handleUpdateEmbedBlock}
