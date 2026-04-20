@@ -1737,7 +1737,10 @@
         "setAllNotAttending": "Segna tutti i membri come non partecipanti",
         "attendanceNote": "Questo aggiornerà tutti i membri della famiglia degli ospiti selezionati",
         "noChanges": "Seleziona almeno una proprietà da aggiornare",
-        "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo"
+        "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo",
+        "addLabel": "Aggiungi etichetta",
+        "removeLabel": "Rimuovi etichetta",
+        "labelConflict": "L'etichetta da aggiungere e rimuovere sono uguali; entrambe verranno ignorate"
       }
     },
     "notifications": {

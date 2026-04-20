@@ -1737,7 +1737,10 @@
         "setAllNotAttending": "Marquer tous les membres comme absents",
         "attendanceNote": "Cela mettra à jour tous les membres de la famille des invités sélectionnés",
         "noChanges": "Veuillez sélectionner au moins une propriété à mettre à jour",
-        "updateSuccess": "{count} {count, plural, one {invité mis à jour} other {invités mis à jour}} avec succès"
+        "updateSuccess": "{count} {count, plural, one {invité mis à jour} other {invités mis à jour}} avec succès",
+        "addLabel": "Ajouter une étiquette",
+        "removeLabel": "Supprimer une étiquette",
+        "labelConflict": "L'étiquette à ajouter et à supprimer sont identiques ; les deux seront ignorées"
       }
     },
     "notifications": {

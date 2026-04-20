@@ -1325,6 +1325,7 @@ export function GuestsPageContent({
         onClose={() => setIsBulkEditModalOpen(false)}
         selectedCount={selectedGuestIds.length}
         admins={admins}
+        labels={labels}
         onSave={handleBulkEdit}
       />
 

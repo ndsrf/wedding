@@ -133,6 +133,8 @@ const bulkUpdateSchema = z.object({
     set_all_attending: z.boolean().optional(),
     set_all_not_attending: z.boolean().optional(),
     rsvp_status: z.enum(['pending', 'submitted']).optional(),
+    add_label_id: z.string().uuid().optional(),
+    remove_label_id: z.string().uuid().optional(),
   }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }
@@ -569,6 +571,18 @@ export async function bulkUpdateGuestsHandler(
       }
     }
 
+    // Verify label IDs belong to this wedding if provided
+    for (const labelId of [updates.add_label_id, updates.remove_label_id].filter(Boolean) as string[]) {
+      const label = await prisma.guestLabel.findFirst({ where: { id: labelId, wedding_id: weddingId } });
+      if (!label) {
+        const res: APIResponse = {
+          success: false,
+          error: { code: API_ERROR_CODES.NOT_FOUND, message: `Label ${labelId} not found` },
+        };
+        return NextResponse.json(res, { status: 404 });
+      }
+    }
+
     const result = await prisma.$transaction(async (tx) => {
       let updatedFamilies = 0;
       let updatedMembers = 0;
@@ -599,6 +613,28 @@ export async function bulkUpdateGuestsHandler(
           where: { family_id: { in: family_ids } },
           data: { attending: updates.set_all_attending ? true : updates.set_all_not_attending ? false : null },
         })).count;
+      }
+
+      // Add label: insert only for families that don't already have it
+      if (updates.add_label_id) {
+        const existing = await tx.familyLabelAssignment.findMany({
+          where: { label_id: updates.add_label_id, family_id: { in: family_ids } },
+          select: { family_id: true },
+        });
+        const alreadyHave = new Set(existing.map((e) => e.family_id));
+        const toAdd = family_ids.filter((id) => !alreadyHave.has(id));
+        if (toAdd.length > 0) {
+          await tx.familyLabelAssignment.createMany({
+            data: toAdd.map((family_id) => ({ family_id, label_id: updates.add_label_id! })),
+          });
+        }
+      }
+
+      // Remove label: delete assignments that exist
+      if (updates.remove_label_id) {
+        await tx.familyLabelAssignment.deleteMany({
+          where: { label_id: updates.remove_label_id, family_id: { in: family_ids } },
+        });
       }
 
       return { updatedFamilies, updatedMembers };
