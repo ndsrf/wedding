@@ -177,7 +177,7 @@ export async function createFamily(
 export async function getFamilyWithMembers(
   family_id: string,
   wedding_id: string
-): Promise<(FamilyWithMembers & { labels: { id: string; name: string; color: string | null }[] }) | null> {
+): Promise<FamilyWithMembers | null> {
   const family = await prisma.family.findFirst({
     where: {
       id: family_id,
@@ -195,10 +195,8 @@ export async function getFamilyWithMembers(
 
   if (!family) return null;
 
-  return {
-    ...family,
-    labels: family.labels.map((la) => la.label),
-  };
+  const { labels: rawLabels, ...rest } = family;
+  return { ...rest, labels: rawLabels.map((la) => la.label) } as FamilyWithMembers;
 }
 
 /**

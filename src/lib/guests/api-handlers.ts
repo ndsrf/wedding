@@ -623,19 +623,12 @@ export async function bulkUpdateGuestsHandler(
         })).count;
       }
 
-      // Add label: insert only for families that don't already have it
+      // Add label: skip families that already have it via skipDuplicates
       if (updates.add_label_id) {
-        const existing = await tx.familyLabelAssignment.findMany({
-          where: { label_id: updates.add_label_id, family_id: { in: family_ids } },
-          select: { family_id: true },
+        await tx.familyLabelAssignment.createMany({
+          data: family_ids.map((family_id) => ({ family_id, label_id: updates.add_label_id! })),
+          skipDuplicates: true,
         });
-        const alreadyHave = new Set(existing.map((e) => e.family_id));
-        const toAdd = family_ids.filter((id) => !alreadyHave.has(id));
-        if (toAdd.length > 0) {
-          await tx.familyLabelAssignment.createMany({
-            data: toAdd.map((family_id) => ({ family_id, label_id: updates.add_label_id! })),
-          });
-        }
       }
 
       // Remove label: delete assignments that exist
