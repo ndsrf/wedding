@@ -66,6 +66,7 @@ interface Filters {
   payment_status?: string;
   invited_by_admin_id?: string;
   label_id?: string;
+  label_id_invert?: boolean;
   search?: string;
 }
 
@@ -147,6 +148,7 @@ function buildFilterParams(filters: Filters): URLSearchParams {
   if (filters.payment_status) params.set('payment_status', filters.payment_status);
   if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
   if (filters.label_id) params.set('label_id', filters.label_id);
+  if (filters.label_id_invert) params.set('label_id_invert', 'true');
   if (filters.search) params.set('search', filters.search);
   return params;
 }

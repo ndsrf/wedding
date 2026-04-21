@@ -2031,7 +2031,8 @@
         "unpaid": "No Regalado",
         "received": "Recibido",
         "searchPlaceholder": "Nombre o email...",
-        "clearAll": "Limpiar filtros"
+        "clearAll": "Limpiar filtros",
+        "invertLabel": "Invertir"
       },
       "importSuccess": "Lista de invitados importada exitosamente",
       "importError": "Error de importación. Por favor, revisa el archivo.",

@@ -1690,7 +1690,8 @@
         "unpaid": "Kein Geschenk",
         "received": "Erhalten",
         "searchPlaceholder": "Name oder E-Mail...",
-        "clearAll": "Filter löschen"
+        "clearAll": "Filter löschen",
+        "invertLabel": "Umkehren"
       },
       "form": {
         "addTitle": "Gastfamilie hinzufügen",

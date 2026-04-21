@@ -1690,7 +1690,8 @@
         "unpaid": "Nessun Regalo",
         "received": "Ricevuto",
         "searchPlaceholder": "Nome o email...",
-        "clearAll": "Cancella filtri"
+        "clearAll": "Cancella filtri",
+        "invertLabel": "Inverti"
       },
       "form": {
         "addTitle": "Aggiungi Famiglia Ospiti",

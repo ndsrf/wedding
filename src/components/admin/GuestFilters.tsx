@@ -19,6 +19,7 @@ interface GuestFiltersProps {
     payment_status?: string;
     invited_by_admin_id?: string;
     label_id?: string;
+    label_id_invert?: boolean;
     search?: string;
   };
   admins: Array<{ id: string; name: string; email: string }>;
@@ -30,8 +31,11 @@ export function GuestFilters({ filters, admins, labels = [], onFilterChange }: G
   const t = useTranslations();
   const [isExpanded, setIsExpanded] = React.useState(false);
 
-  // Check if any filter is active
-  const hasActiveFilters = Object.values(filters).some(v => v !== undefined && v !== '');
+  // Check if any filter is active (treat label_id_invert:true as active)
+  const hasActiveFilters =
+    Object.entries(filters).some(([k, v]) =>
+      k === 'label_id_invert' ? v === true : v !== undefined && v !== ''
+    );
 
   // Auto-expand if filters are active
   React.useEffect(() => {
@@ -179,7 +183,7 @@ export function GuestFilters({ filters, admins, labels = [], onFilterChange }: G
             </select>
           </div>
 
-          {/* Label */}
+          {/* Label + invert checkbox */}
           {labels.length > 0 && (
             <div>
               <label htmlFor="label_id" className="block text-sm font-medium text-gray-700 mb-1">
@@ -198,6 +202,17 @@ export function GuestFilters({ filters, admins, labels = [], onFilterChange }: G
                   </option>
                 ))}
               </select>
+              <label className="mt-1.5 flex items-center gap-1.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={filters.label_id_invert === true}
+                  onChange={(e) =>
+                    onFilterChange({ ...filters, label_id_invert: e.target.checked || undefined })
+                  }
+                  className="h-3.5 w-3.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <span className="text-xs text-gray-600">{t('admin.guests.filters.invertLabel')}</span>
+              </label>
             </div>
           )}
         </div>

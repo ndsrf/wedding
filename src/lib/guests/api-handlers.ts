@@ -112,6 +112,7 @@ const listGuestsQuerySchema = z.object({
   payment_status: z.enum(['PENDING', 'RECEIVED', 'CONFIRMED']).optional(),
   invited_by_admin_id: z.string().uuid().optional(),
   label_id: z.string().uuid().optional(),
+  label_id_invert: z.coerce.boolean().default(false),
   search: z.string().optional(),
 });
 
@@ -217,10 +218,11 @@ export async function listGuestsHandler(
       payment_status: searchParams.get('payment_status') || undefined,
       invited_by_admin_id: searchParams.get('invited_by_admin_id') || undefined,
       label_id: searchParams.get('label_id') || undefined,
+      label_id_invert: searchParams.get('label_id_invert') || false,
       search: searchParams.get('search') || undefined,
     });
 
-    const { page, limit, ids_only, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, search } = queryParams;
+    const { page, limit, ids_only, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search } = queryParams;
 
     const whereClause: Prisma.FamilyWhereInput = { wedding_id: weddingId };
 
@@ -232,7 +234,13 @@ export async function listGuestsHandler(
     }
     if (channel) whereClause.channel_preference = channel;
     if (invited_by_admin_id) whereClause.invited_by_admin_id = invited_by_admin_id;
-    if (label_id) whereClause.labels = { some: { label_id } };
+    if (label_id_invert) {
+      // Invert: if a label is selected return families that DON'T have it;
+      // if no label is selected ("all") invert means no families match.
+      whereClause.labels = label_id ? { none: { label_id } } : { some: { label_id: 'impossible-never-match' } };
+    } else if (label_id) {
+      whereClause.labels = { some: { label_id } };
+    }
 
     if (rsvp_status === 'submitted') {
       whereClause.members = { some: { attending: { not: null } } };
@@ -257,7 +265,7 @@ export async function listGuestsHandler(
 
     // ---- ids_only mode: return just selectable family IDs (no RSVP submitted) ----
     if (ids_only) {
-      const filterKey = buildGuestCacheParamsKey({ rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, search });
+      const filterKey = buildGuestCacheParamsKey({ rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search });
       const cacheKey = CACHE_KEYS.guestIds(weddingId, filterKey);
 
       const cached = await getCached<{ ids: string[]; total: number }>(cacheKey);
@@ -292,7 +300,7 @@ export async function listGuestsHandler(
 
     // ---- normal paginated list ----
     const skip = (page - 1) * limit;
-    const pageKey = buildGuestCacheParamsKey({ page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, search });
+    const pageKey = buildGuestCacheParamsKey({ page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search });
     const cacheKey = CACHE_KEYS.guestList(weddingId, pageKey);
 
     const cachedList = await getCached<ListGuestsResponse['data']>(cacheKey);

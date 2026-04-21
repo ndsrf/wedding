@@ -1690,7 +1690,8 @@
         "unpaid": "Pas de Cadeau",
         "received": "Reçu",
         "searchPlaceholder": "Nom ou email...",
-        "clearAll": "Effacer les filtres"
+        "clearAll": "Effacer les filtres",
+        "invertLabel": "Inverser"
       },
       "form": {
         "addTitle": "Ajouter Famille d'Invités",

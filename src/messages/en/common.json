@@ -2035,7 +2035,8 @@
         "unpaid": "No Gift",
         "received": "Received",
         "searchPlaceholder": "Name or email...",
-        "clearAll": "Clear all filters"
+        "clearAll": "Clear all filters",
+        "invertLabel": "Invert"
       },
       "form": {
         "addTitle": "Add Guest Family",
