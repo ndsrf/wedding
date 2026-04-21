@@ -236,8 +236,8 @@ export async function listGuestsHandler(
     if (invited_by_admin_id) whereClause.invited_by_admin_id = invited_by_admin_id;
     if (label_id_invert) {
       // Invert: if a label is selected return families that DON'T have it;
-      // if no label is selected ("all") invert means no families match.
-      whereClause.labels = label_id ? { none: { label_id } } : { some: { label_id: 'impossible-never-match' } };
+      // if no label is selected ("all") invert means families with NO labels.
+      whereClause.labels = label_id ? { none: { label_id } } : { none: {} };
     } else if (label_id) {
       whereClause.labels = { some: { label_id } };
     }
