@@ -30,6 +30,7 @@ export default function GuestsPage() {
       apiPaths={{
         apiBase: plannerBase,
         guests: `${plannerBase}/guests`,
+        labels: `${plannerBase}/guests/labels`,
         guestAdditions: `${plannerBase}/guest-additions`,
         wedding: plannerBase,
         admins: `${plannerBase}/admins`,

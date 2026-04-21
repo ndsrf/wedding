@@ -11,7 +11,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { CheckmarkIcon, ChevronDownIcon } from '@/components/shared/NavIcons';
-import type { FamilyWithMembers, GiftStatus } from '@/types/models';
+import type { FamilyWithMembers, GiftStatus, GuestLabel } from '@/types/models';
 
 interface GuestWithStatus extends FamilyWithMembers {
   rsvp_status: string;
@@ -19,6 +19,7 @@ interface GuestWithStatus extends FamilyWithMembers {
   total_members: number;
   payment_status: GiftStatus | null;
   invitation_sent: boolean;
+  labels?: GuestLabel[];
 }
 
 interface GuestTableProps {
@@ -108,6 +109,20 @@ const getChannelIcon = (channel: string | null): React.ReactElement => {
       return <span className="text-gray-400 text-xs">-</span>;
   }
 };
+
+function LabelBadge({ label }: { label: GuestLabel }) {
+  const style = label.color
+    ? { backgroundColor: label.color + '22', color: label.color, borderColor: label.color + '55' }
+    : undefined;
+  return (
+    <span
+      className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium border border-gray-200 bg-gray-100 text-gray-700"
+      style={style}
+    >
+      {label.name}
+    </span>
+  );
+}
 
 export function GuestTable({
   guests,
@@ -294,6 +309,13 @@ export function GuestTable({
                         {getPreferredContact(guest) && (
                           <span className="text-xs text-gray-500 truncate">{getPreferredContact(guest)}</span>
                         )}
+                        {guest.labels && guest.labels.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {guest.labels.map((label) => (
+                              <LabelBadge key={label.id} label={label} />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -479,6 +501,18 @@ export function GuestTable({
               {/* Expanded View - Show on Click */}
               {isExpanded && (
                 <div className="mt-4 space-y-3 border-t border-gray-200 pt-3">
+                  {/* Labels */}
+                  {guest.labels && guest.labels.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 mb-1">{t('admin.guests.labels.title')}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {guest.labels.map((label) => (
+                          <LabelBadge key={label.id} label={label} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Contact Info */}
                   {getPreferredContact(guest) && (
                     <div>

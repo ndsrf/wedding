@@ -25,6 +25,7 @@ export interface ImportRow {
   channel: Channel | null;
   invitedBy: string | null;
   referenceCode: string | null;
+  labelNames: string[];
   members: Array<{
     name: string;
     type: MemberType;
@@ -167,26 +168,33 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
     const channel = row[6] ? String(row[6]).trim() : null;
     const invitedBy = row[7] ? String(row[7]).trim() : null;
 
-    // Col 38: Reference Code (optional — preserve from export, otherwise auto-generated)
-    const referenceCode = row[38] ? String(row[38]).trim() : null;
+    // Col 8: Labels (comma-separated label names)
+    const labelsRaw = row[8] ? String(row[8]).trim() : null;
+    const labelNames = labelsRaw
+      ? labelsRaw.split(',').map((l) => l.trim()).filter(Boolean)
+      : [];
+
+    // Col 39: Reference Code (optional — preserve from export, otherwise auto-generated)
+    const referenceCode = row[39] ? String(row[39]).trim() : null;
 
     // Parse members (up to 10)
     // Unified column layout:
-    //   Cols  8-37: Member 1-10 basic info — Name (8+i*3), Type (9+i*3), Age (10+i*3)
-    //   Cols 38-45: Extra family summary — Reference Code (38) imported; RSVP counts and
-    //               Payment (39-45) are computed/system-managed and ignored on import
-    //   Cols 46-85: Member 1-10 extra info — Attending (46+i*4) imported,
-    //               Dietary (47+i*4) imported, Accessibility (48+i*4) imported,
-    //               Added By Guest (49+i*4) system-managed, ignored on import
+    //   Col   8:    Labels (comma-separated)
+    //   Cols  9-38: Member 1-10 basic info — Name (9+i*3), Type (10+i*3), Age (11+i*3)
+    //   Cols 39-46: Extra family summary — Reference Code (39) imported; RSVP counts and
+    //               Payment (40-46) are computed/system-managed and ignored on import
+    //   Cols 47-86: Member 1-10 extra info — Attending (47+i*4) imported,
+    //               Dietary (48+i*4) imported, Accessibility (49+i*4) imported,
+    //               Added By Guest (50+i*4) system-managed, ignored on import
     const members: ImportRow['members'] = [];
 
     for (let i = 0; i < 10; i++) {
-      const nameIndex         = 8  + (i * 3);
-      const typeIndex         = 9  + (i * 3);
-      const ageIndex          = 10 + (i * 3);
-      const attendingIndex    = 46 + (i * 4);
-      const dietaryIndex      = 47 + (i * 4);
-      const accessibilityIndex = 48 + (i * 4);
+      const nameIndex         = 9  + (i * 3);
+      const typeIndex         = 10 + (i * 3);
+      const ageIndex          = 11 + (i * 3);
+      const attendingIndex    = 47 + (i * 4);
+      const dietaryIndex      = 48 + (i * 4);
+      const accessibilityIndex = 49 + (i * 4);
 
       const memberName = row[nameIndex] ? String(row[nameIndex]).trim() : '';
       const memberType = row[typeIndex] ? String(row[typeIndex]).trim() : '';
@@ -221,6 +229,7 @@ function parseExcelFile(buffer: Buffer): ImportRow[] {
       channel: validateChannel(channel || undefined),
       invitedBy: invitedBy || null,
       referenceCode: referenceCode || null,
+      labelNames,
       members,
     });
   }
@@ -584,7 +593,28 @@ export async function importGuestList(
       };
     }
 
-    // 5. Execution phase: Perform import row-by-row
+    // 5. Pre-resolve labels: collect all unique label names from all rows,
+    //    upsert them for the wedding, build a name→id map.
+    const allLabelNames = [...new Set(preparedRows.flatMap((pr) => pr.data.labelNames))];
+    const labelIdMap = new Map<string, string>(); // lowercase name → id
+
+    for (const labelName of allLabelNames) {
+      const existing = await prisma.guestLabel.findFirst({
+        where: { wedding_id, name: { equals: labelName, mode: 'insensitive' } },
+        select: { id: true, name: true },
+      });
+      if (existing) {
+        labelIdMap.set(existing.name.toLowerCase(), existing.id);
+      } else {
+        const created = await prisma.guestLabel.create({
+          data: { wedding_id, name: labelName },
+          select: { id: true, name: true },
+        });
+        labelIdMap.set(created.name.toLowerCase(), created.id);
+      }
+    }
+
+    // 6. Execution phase: Perform import row-by-row
     // This avoids the 5s transaction timeout for large guest lists.
     let familiesCreatedCount = 0;
     let membersCreatedCount = 0;
@@ -627,6 +657,17 @@ export async function importGuestList(
               },
             });
             membersCreatedCount++;
+          }
+
+          // Assign labels
+          const resolvedLabelIds = prepared.data.labelNames
+            .map((n) => labelIdMap.get(n.toLowerCase()))
+            .filter((id): id is string => Boolean(id));
+          if (resolvedLabelIds.length > 0) {
+            await tx.familyLabelAssignment.createMany({
+              data: resolvedLabelIds.map((label_id) => ({ family_id: family.id, label_id })),
+              skipDuplicates: true,
+            });
           }
         });
         familiesCreatedCount++;

@@ -225,6 +225,7 @@ model Wedding {
   alert_rules                     AlertRule[]        @relation("WeddingAlertRules")
   alerts                          Alert[]            @relation("WeddingAlerts")
   families                        Family[]
+  guest_labels                    GuestLabel[]
   message_templates               MessageTemplate[]
   invitation_templates            InvitationTemplate[]
   notifications                   Notification[]
@@ -418,6 +419,7 @@ model Family {
   transportation_answer   Boolean?
   wedding                 Wedding         @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
   members                 FamilyMember[]
+  labels                  FamilyLabelAssignment[]
   gifts                   Gift[]
   notifications           Notification[]
   tracking_events         TrackingEvent[]
@@ -431,6 +433,32 @@ model Family {
   @@index([reference_code])
   @@index([email])
   @@map("families")
+}
+
+model GuestLabel {
+  id         String                  @id @default(uuid())
+  wedding_id String
+  name       String
+  color      String?
+  created_at DateTime                @default(now())
+  wedding    Wedding                 @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  families   FamilyLabelAssignment[]
+
+  @@unique([wedding_id, name])
+  @@index([wedding_id])
+  @@map("guest_labels")
+}
+
+model FamilyLabelAssignment {
+  family_id String
+  label_id  String
+  family    Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  label     GuestLabel @relation(fields: [label_id], references: [id], onDelete: Cascade)
+
+  @@id([family_id, label_id])
+  @@index([family_id])
+  @@index([label_id])
+  @@map("family_label_assignments")
 }
 
 model FamilyMember {

@@ -223,6 +223,14 @@ export interface WeddingAdmin {
 // GUEST MANAGEMENT MODELS
 // ============================================================================
 
+export interface GuestLabel {
+  id: string;
+  wedding_id: string;
+  name: string;
+  color: string | null;
+  created_at: Date;
+}
+
 export interface Family {
   id: string;
   wedding_id: string;
@@ -345,6 +353,7 @@ export interface Translation {
 
 export interface FamilyWithMembers extends Family {
   members: FamilyMember[];
+  labels?: GuestLabel[];
 }
 
 export interface FamilyWithRelations extends Family {
@@ -402,6 +411,7 @@ export interface FamilyFilter {
   attendance?: 'yes' | 'no' | 'partial';
   channel?: Channel;
   payment_status?: GiftStatus;
+  label_id?: string;
   search?: string; // Search by family name or email
 }
 

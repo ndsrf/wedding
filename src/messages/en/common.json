@@ -2035,7 +2035,8 @@
         "unpaid": "No Gift",
         "received": "Received",
         "searchPlaceholder": "Name or email...",
-        "clearAll": "Clear all filters"
+        "clearAll": "Clear all filters",
+        "invertLabel": "Invert"
       },
       "form": {
         "addTitle": "Add Guest Family",
@@ -2055,6 +2056,12 @@
       },
       "importSuccess": "Guest list imported successfully",
       "importError": "Import error. Please check the file.",
+      "labels": {
+        "title": "Labels",
+        "addLabel": "Add label",
+        "createNew": "Create new label",
+        "noLabels": "No labels"
+      },
       "bulkActions": "Bulk Actions",
       "selectAll": "Select All",
       "selectPage": "Select Page",
@@ -2076,7 +2083,10 @@
         "setAllNotAttending": "Mark all members as not attending",
         "attendanceNote": "This will update all family members of the selected guests",
         "noChanges": "Please select at least one property to update",
-        "updateSuccess": "{count} {count, plural, one {guest updated} other {guests updated}} successfully"
+        "updateSuccess": "{count} {count, plural, one {guest updated} other {guests updated}} successfully",
+        "addLabel": "Add label",
+        "removeLabel": "Remove label",
+        "labelConflict": "Add and remove label are the same; both will be ignored"
       }
     },
     "notifications": {
