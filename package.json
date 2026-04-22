@@ -128,7 +128,7 @@
     "prisma": "^7.3.0",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.7.3"
+    "typescript": "^6.0.0"
   },
   "overrides": {
     "@hono/node-server": ">=1.19.13",
