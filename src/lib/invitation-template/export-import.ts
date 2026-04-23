@@ -29,6 +29,8 @@ import type {
   AddToCalendarBlock,
   ButtonBlock,
   GalleryBlock,
+  SpacerBlock,
+  EmbedBlock,
 } from '@/types/invitation-template';
 
 // ============================================================================
@@ -48,6 +50,8 @@ export const BLOCK_VERSIONS: Record<TemplateBlock['type'], number> = {
   'add-to-calendar': 1,
   button: 1,
   gallery: 1,
+  spacer: 1,
+  embed: 1,
 } as const;
 
 /** Current format version for the .nupcinv manifest */
@@ -203,6 +207,25 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
         showUploadButton: b.showUploadButton ?? true,
         autoPlayMs: b.autoPlayMs ?? 4000,
         style: b.style ?? { borderRadius: '0.75rem' },
+      };
+    }
+
+    case 'spacer': {
+      const b = block as Partial<SpacerBlock>;
+      return {
+        id: b.id ?? randomUUID(),
+        type: 'spacer',
+        height: b.height ?? '2rem',
+      };
+    }
+
+    case 'embed': {
+      const b = block as Partial<EmbedBlock>;
+      return {
+        id: b.id ?? randomUUID(),
+        type: 'embed',
+        html: b.html ?? '',
+        height: b.height,
       };
     }
 

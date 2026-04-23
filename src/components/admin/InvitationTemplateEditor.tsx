@@ -12,6 +12,8 @@ import type {
   CountdownBlock as CountdownBlockType,
   ButtonBlock as ButtonBlockType,
   GalleryBlock as GalleryBlockType,
+  SpacerBlock as SpacerBlockType,
+  EmbedBlock as EmbedBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
@@ -20,6 +22,8 @@ import { LocationBlockEditor } from './LocationBlockEditor';
 import { CountdownBlockEditor } from './CountdownBlockEditor';
 import { ButtonBlockEditor } from './ButtonBlockEditor';
 import { GalleryBlockEditor } from './GalleryBlockEditor';
+import { SpacerBlockEditor } from './SpacerBlockEditor';
+import { EmbedBlockEditor } from './EmbedBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
@@ -81,6 +85,8 @@ export function InvitationTemplateEditor({
   const isSelectedBlockCountdown = selectedBlock?.type === 'countdown';
   const isSelectedBlockButton = selectedBlock?.type === 'button';
   const isSelectedBlockGallery = selectedBlock?.type === 'gallery';
+  const isSelectedBlockSpacer = selectedBlock?.type === 'spacer';
+  const isSelectedBlockEmbed = selectedBlock?.type === 'embed';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -154,6 +160,10 @@ export function InvitationTemplateEditor({
           autoPlayMs: 4000,
           style: { borderRadius: '0.75rem' },
         };
+      } else if (type === 'spacer') {
+        newBlock = { id: crypto.randomUUID(), type: 'spacer', height: '2rem' };
+      } else if (type === 'embed') {
+        newBlock = { id: crypto.randomUUID(), type: 'embed', html: '' };
       } else {
         return;
       }
@@ -250,6 +260,24 @@ export function InvitationTemplateEditor({
       ...prev,
       blocks: prev.blocks.map((b) =>
         b.id === blockId && b.type === 'gallery' ? ({ ...b, ...updates } as GalleryBlockType) : b
+      ),
+    }));
+  }, []);
+
+  const handleUpdateSpacerBlock = useCallback((blockId: string, updates: Partial<SpacerBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'spacer' ? ({ ...b, ...updates } as SpacerBlockType) : b
+      ),
+    }));
+  }, []);
+
+  const handleUpdateEmbedBlock = useCallback((blockId: string, updates: Partial<EmbedBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'embed' ? ({ ...b, ...updates } as EmbedBlockType) : b
       ),
     }));
   }, []);
@@ -381,6 +409,18 @@ export function InvitationTemplateEditor({
             >
               + {t('blockGallery')}
             </button>
+            <button
+              onClick={() => handleAddBlock('spacer')}
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium"
+            >
+              + Spacer
+            </button>
+            <button
+              onClick={() => handleAddBlock('embed')}
+              className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-gray-700 font-medium"
+            >
+              + Embed HTML
+            </button>
           </div>
         </div>
 
@@ -421,6 +461,20 @@ export function InvitationTemplateEditor({
           <GalleryBlockEditor
             block={selectedBlock}
             onUpdate={handleUpdateGalleryBlock}
+          />
+        )}
+
+        {isSelectedBlockSpacer && selectedBlock && selectedBlock.type === 'spacer' && (
+          <SpacerBlockEditor
+            block={selectedBlock}
+            onUpdate={handleUpdateSpacerBlock}
+          />
+        )}
+
+        {isSelectedBlockEmbed && selectedBlock && selectedBlock.type === 'embed' && (
+          <EmbedBlockEditor
+            block={selectedBlock}
+            onUpdate={handleUpdateEmbedBlock}
           />
         )}
 
@@ -673,6 +727,30 @@ export function InvitationTemplateEditor({
                       style={(block as GalleryBlockType).style}
                     />
                   )}
+
+                  {block.type === 'spacer' && selectedBlockId === block.id ? (
+                    <SpacerBlockEditor
+                      block={block as SpacerBlockType}
+                      onUpdate={handleUpdateSpacerBlock}
+                      canvasMode
+                    />
+                  ) : block.type === 'spacer' ? (
+                    <div style={{ height: (block as SpacerBlockType).height, display: 'block' }} aria-hidden="true" />
+                  ) : null}
+
+                  {block.type === 'embed' && selectedBlockId === block.id ? (
+                    <EmbedBlockEditor
+                      block={block as EmbedBlockType}
+                      onUpdate={handleUpdateEmbedBlock}
+                      canvasMode
+                    />
+                  ) : block.type === 'embed' ? (
+                    <div
+                      className="w-full overflow-hidden"
+                      style={(block as EmbedBlockType).height ? { minHeight: (block as EmbedBlockType).height } : undefined}
+                      dangerouslySetInnerHTML={{ __html: (block as EmbedBlockType).html }}
+                    />
+                  ) : null}
                 </div>
               ))
             )}
