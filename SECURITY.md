@@ -161,6 +161,24 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Rate limiting and file size restrictions in place
 - **Future Plan**: Upgrade to @vercel/blob@2.x when stable and breaking changes are assessed
 
+##### uuid - Missing Buffer Bounds Check
+- **Package**: uuid < 14.0.0 (via exceljs@4.4.0, svix@^1.6.0 via resend@6.0.0)
+- **CVE**: [GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq)
+- **Status**: Fix requires upstream transitive dependencies to update to uuid@14.0.0+
+- **Usage**: Guest list Excel import/export (exceljs), webhook signatures (svix/resend for email sending)
+- **Risk Assessment**:
+  - Buffer bounds check issue when custom buffer is provided
+  - exceljs usage: Only triggered when parsing Excel files; wedding admins only upload trusted guest list files
+  - svix/resend usage: Only triggered when processing webhook signatures; Resend is first-party infrastructure
+  - Low risk: Both dependencies use uuid internally with controlled inputs, not accessible to end users
+  - Severity: Moderate (CVSS 4.3)
+- **Mitigation**:
+  - File upload restrictions (size, type validation)
+  - Only authenticated admins can upload Excel files
+  - No custom buffer provided by untrusted user input
+  - First-party webhook processing via Resend infrastructure
+- **Future Plan**: Update when exceljs and resend release versions with uuid@14.0.0+
+
 ### Recently Fixed
 
 #### 2026-03-13
