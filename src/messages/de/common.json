@@ -1690,7 +1690,8 @@
         "unpaid": "Kein Geschenk",
         "received": "Erhalten",
         "searchPlaceholder": "Name oder E-Mail...",
-        "clearAll": "Filter löschen"
+        "clearAll": "Filter löschen",
+        "invertLabel": "Umkehren"
       },
       "form": {
         "addTitle": "Gastfamilie hinzufügen",
@@ -1710,6 +1711,12 @@
       },
       "importSuccess": "Gästeliste erfolgreich importiert",
       "importError": "Importfehler. Bitte überprüfen Sie die Datei.",
+      "labels": {
+        "title": "Etiketten",
+        "addLabel": "Etikett hinzufügen",
+        "createNew": "Neues Etikett erstellen",
+        "noLabels": "Keine Etiketten"
+      },
       "bulkActions": "Massenaktionen",
       "selectAll": "Alle auswählen",
       "selectPage": "Seite auswählen",
@@ -1731,7 +1738,10 @@
         "setAllNotAttending": "Alle Mitglieder als nicht teilnehmend markieren",
         "attendanceNote": "Dies wird alle Familienmitglieder der ausgewählten Gäste aktualisieren",
         "noChanges": "Bitte wählen Sie mindestens eine Eigenschaft zum Aktualisieren aus",
-        "updateSuccess": "{count} {count, plural, one {Gast aktualisiert} other {Gäste aktualisiert}} erfolgreich"
+        "updateSuccess": "{count} {count, plural, one {Gast aktualisiert} other {Gäste aktualisiert}} erfolgreich",
+        "addLabel": "Etikett hinzufügen",
+        "removeLabel": "Etikett entfernen",
+        "labelConflict": "Hinzufügen- und Entfernen-Etikett sind identisch; beide werden ignoriert"
       }
     },
     "notifications": {

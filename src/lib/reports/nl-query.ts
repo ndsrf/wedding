@@ -33,6 +33,8 @@ const MAX_ROWS = 1000;
 const ALLOWED_TABLES = new Set([
   'families',
   'family_members',
+  'guest_labels',
+  'family_label_assignments',
   'tables',
   'wedding_admins',
   'gifts',
@@ -80,6 +82,15 @@ type TEXT (ADULT/CHILD/INFANT), attending BOOLEAN (true=yes, false=no, null=pend
 age INTEGER, dietary_restrictions TEXT, accessibility_needs TEXT,
 table_id TEXT FK→tables, added_by_guest BOOLEAN, created_at TIMESTAMP
 **NOTE: No direct wedding_id — MUST JOIN with families to scope by wedding.**
+
+### guest_labels
+id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, color TEXT, created_at TIMESTAMP
+
+### family_label_assignments
+family_id TEXT FK→families, label_id TEXT FK→guest_labels
+**NOTE: No direct wedding_id — MUST JOIN with families or guest_labels to scope by wedding.
+To find families with a label: JOIN family_label_assignments fla ON f.id = fla.family_id JOIN guest_labels gl ON fla.label_id = gl.id WHERE gl.wedding_id = $1.
+To list labels with family counts: SELECT gl.name, COUNT(DISTINCT fla.family_id) FROM guest_labels gl LEFT JOIN family_label_assignments fla ON gl.id = fla.label_id WHERE gl.wedding_id = $1 GROUP BY gl.name.**
 
 ### tables
 id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, number INTEGER,
@@ -416,6 +427,8 @@ const ALLOWED_TABLES_PLANNER = new Set([
   'weddings',
   'families',
   'family_members',
+  'guest_labels',
+  'family_label_assignments',
   'tables',
   'wedding_admins',
   'gifts',

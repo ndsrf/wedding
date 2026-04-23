@@ -2031,10 +2031,17 @@
         "unpaid": "No Regalado",
         "received": "Recibido",
         "searchPlaceholder": "Nombre o email...",
-        "clearAll": "Limpiar filtros"
+        "clearAll": "Limpiar filtros",
+        "invertLabel": "Invertir"
       },
       "importSuccess": "Lista de invitados importada exitosamente",
       "importError": "Error de importación. Por favor, revisa el archivo.",
+      "labels": {
+        "title": "Etiquetas",
+        "addLabel": "Añadir etiqueta",
+        "createNew": "Crear nueva etiqueta",
+        "noLabels": "No hay etiquetas"
+      },
       "form": {
         "addTitle": "Añadir Familia de Invitados",
         "editTitle": "Editar Familia de Invitados",
@@ -2072,7 +2079,10 @@
         "setAllNotAttending": "Marcar todos los miembros como no asistentes",
         "attendanceNote": "Esto actualizará todos los miembros familiares de los invitados seleccionados",
         "noChanges": "Por favor selecciona al menos una propiedad para actualizar",
-        "updateSuccess": "{count} {count, plural, one {invitado actualizado} other {invitados actualizados}} exitosamente"
+        "updateSuccess": "{count} {count, plural, one {invitado actualizado} other {invitados actualizados}} exitosamente",
+        "addLabel": "Añadir etiqueta",
+        "removeLabel": "Quitar etiqueta",
+        "labelConflict": "La etiqueta de añadir y quitar son iguales; se ignorarán ambas"
       }
     },
     "notifications": {

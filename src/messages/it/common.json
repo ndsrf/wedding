@@ -1690,7 +1690,8 @@
         "unpaid": "Nessun Regalo",
         "received": "Ricevuto",
         "searchPlaceholder": "Nome o email...",
-        "clearAll": "Cancella filtri"
+        "clearAll": "Cancella filtri",
+        "invertLabel": "Inverti"
       },
       "form": {
         "addTitle": "Aggiungi Famiglia Ospiti",
@@ -1710,6 +1711,12 @@
       },
       "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file.",
+      "labels": {
+        "title": "Etichette",
+        "addLabel": "Aggiungi etichetta",
+        "createNew": "Crea nuova etichetta",
+        "noLabels": "Nessuna etichetta"
+      },
       "bulkActions": "Azioni di massa",
       "selectAll": "Seleziona tutti",
       "selectPage": "Seleziona pagina",
@@ -1731,7 +1738,10 @@
         "setAllNotAttending": "Segna tutti i membri come non partecipanti",
         "attendanceNote": "Questo aggiornerà tutti i membri della famiglia degli ospiti selezionati",
         "noChanges": "Seleziona almeno una proprietà da aggiornare",
-        "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo"
+        "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo",
+        "addLabel": "Aggiungi etichetta",
+        "removeLabel": "Rimuovi etichetta",
+        "labelConflict": "L'etichetta da aggiungere e rimuovere sono uguali; entrambe verranno ignorate"
       }
     },
     "notifications": {

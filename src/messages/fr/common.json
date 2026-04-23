@@ -1690,7 +1690,8 @@
         "unpaid": "Pas de Cadeau",
         "received": "Reçu",
         "searchPlaceholder": "Nom ou email...",
-        "clearAll": "Effacer les filtres"
+        "clearAll": "Effacer les filtres",
+        "invertLabel": "Inverser"
       },
       "form": {
         "addTitle": "Ajouter Famille d'Invités",
@@ -1710,6 +1711,12 @@
       },
       "importSuccess": "Liste d'invités importée avec succès",
       "importError": "Erreur d'importation. Veuillez vérifier le fichier.",
+      "labels": {
+        "title": "Étiquettes",
+        "addLabel": "Ajouter une étiquette",
+        "createNew": "Créer une nouvelle étiquette",
+        "noLabels": "Aucune étiquette"
+      },
       "bulkActions": "Actions groupées",
       "selectAll": "Tout sélectionner",
       "selectPage": "Sélectionner la page",
@@ -1731,7 +1738,10 @@
         "setAllNotAttending": "Marquer tous les membres comme absents",
         "attendanceNote": "Cela mettra à jour tous les membres de la famille des invités sélectionnés",
         "noChanges": "Veuillez sélectionner au moins une propriété à mettre à jour",
-        "updateSuccess": "{count} {count, plural, one {invité mis à jour} other {invités mis à jour}} avec succès"
+        "updateSuccess": "{count} {count, plural, one {invité mis à jour} other {invités mis à jour}} avec succès",
+        "addLabel": "Ajouter une étiquette",
+        "removeLabel": "Supprimer une étiquette",
+        "labelConflict": "L'étiquette à ajouter et à supprimer sont identiques ; les deux seront ignorées"
       }
     },
     "notifications": {
