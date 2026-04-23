@@ -260,8 +260,8 @@ describe('Excel Import - Validation', () => {
 
   it('should accept valid member types', async () => {
     const rows = [
-      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age', 'Member 2 Name', 'Member 2 Type', 'Member 2 Age', 'Member 3 Name', 'Member 3 Type', 'Member 3 Age'],
-      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', '', 'John', 'ADULT', '30', 'Jane', 'CHILD', '10', 'Baby', 'INFANT', '1'],
+      ['Family Name', 'Contact Person', 'Email', 'Phone', 'WhatsApp', 'Language', 'Channel', 'Invited By', 'Labels', 'Member 1 Name', 'Member 1 Type', 'Member 1 Age', 'Member 2 Name', 'Member 2 Type', 'Member 2 Age', 'Member 3 Name', 'Member 3 Type', 'Member 3 Age'],
+      ['Smith Family', 'John Smith', 'test@example.com', '', '', 'EN', '', '', '', 'John', 'ADULT', '30', 'Jane', 'CHILD', '10', 'Baby', 'INFANT', '1'],
     ];
 
     const workbook = XLSX.utils.book_new();

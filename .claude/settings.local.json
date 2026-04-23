@@ -110,7 +110,10 @@
       "Bash(npm audit:*)",
       "Bash(npm list:*)",
       "Bash(npm show:*)",
-      "WebFetch(domain:claude.com)"
+      "WebFetch(domain:claude.com)",
+      "Bash(npm run *)",
+      "Bash(DATABASE_URL=postgresql://wedding:wedding@postgresql.lan:5432/wed1 npx prisma *)",
+      "Bash(npm test *)"
     ]
   }
 }

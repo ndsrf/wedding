@@ -127,7 +127,7 @@ async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
       channel: family.channel_preference,
       invitedByAdmin: family.invited_by_admin_id ? (adminMap.get(family.invited_by_admin_id) || '') : '',
       referenceCode: family.reference_code || '',
-      labels: family.labels.map((la) => la.label.name).join(', '),
+      labels: family.labels ? family.labels.map((la) => la.label.name).join(', ') : '',
       rsvpStatus,
       attendingCount: attendingMembers.length,
       notAttendingCount: notAttendingMembers.length,
