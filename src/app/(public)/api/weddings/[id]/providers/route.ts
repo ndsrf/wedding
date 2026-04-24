@@ -40,10 +40,13 @@ export async function GET(
 
     const weddingProviders = await prisma.weddingProvider.findMany({
       where: { wedding_id: weddingId },
+      orderBy: { created_at: 'asc' },
       include: {
         category: true,
         provider: true,
-        payments: true
+        payments: {
+          orderBy: { date: 'asc' },
+        },
       },
     });
 

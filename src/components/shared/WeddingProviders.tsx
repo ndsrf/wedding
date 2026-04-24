@@ -710,7 +710,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
           {providers.flatMap((wp: WeddingProvider) =>
             wp.payments.map((p: Payment) => ({
               ...p,
-              providerName: wp.provider?.name || wp.name || wp.category.name,
+              providerName: wp.name || wp.provider?.name || wp.category.name,
             }))
           )
             .sort((a: Payment, b: Payment) => new Date(b.date).getTime() - new Date(a.date).getTime())
