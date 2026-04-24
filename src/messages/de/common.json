@@ -262,6 +262,7 @@
       "company": "Unternehmen",
       "support": "Support",
       "about": "Über Uns",
+      "careers": "Karriere",
       "contact": "Kontakt",
       "privacy": "Datenschutzrichtlinie",
       "help": "Hilfecenter",
@@ -302,6 +303,75 @@
       "title": "Fehler beim Senden",
       "message": "Beim Senden Ihrer Nachricht ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
       "retry": "Erneut versuchen"
+    }
+  },
+  "careers": {
+    "title": "Work at {commercialName}",
+    "subtitle": "We aren't looking for employees, but for technical founders and restless minds who want to dominate their craft.",
+    "howWeWork": {
+      "title": "The High-Velocity Model",
+      "description": "At {commercialName}, we have refined our continuous delivery model into a \"High-Trust, High-Velocity\" machine. We don't believe in traditional sprints that fragment time; we prefer managing flow through Kanban and Linear so that moving an idea to production 100 times a week feels like second nature.",
+      "sections": [
+        {
+          "title": "1. Refinement & Review Cycle",
+          "content": "We treat refinement as a controlled flow. When the Linear MCP extracts a feature, we create an asynchronous specification. Before touching a single line of code, the team applies the \"Grill\" protocol: we stress-test the logic, look for edge cases, and validate architectural fit against our steering documents. Only when the product makes sense do we start building."
+        },
+        {
+          "title": "2. Quality as an Asset, Not a Brake",
+          "content": "Our testing layer is our most valuable asset. We use Playwright to automate the \"Golden Path.\" If the CI detects a failure, the deployment is blocked. But we don't just trust robots; every feature generates a unique demo deployment on Vercel for a manual \"feel\" inspection before the final merge."
+        },
+        {
+          "title": "3. Design & Continuous Observability",
+          "content": "We eliminate design debt using Claude Design to maintain visual consistency across our Next.js components. Once in production, we operate without fear: we use Statsig for feature flags and HyperDX to monitor logs and traces in real-time. If something fails, we toggle it off in seconds without needing rollbacks."
+        }
+      ]
+    },
+    "culture": {
+      "title": "Culture and Values",
+      "description": "If you are looking for a company to hide behind a bureaucratic process, {commercialName} is not for you. We look for people with higher-than-average risk tolerance, who prefer being employee #3 instead of #11,000.",
+      "sections": [
+        {
+          "title": "Autonomy and Expression",
+          "content": "We want people who love their work and feel proud of what they accomplish. Here you have freedom to manage your schedule and absolute decision-making power over your area. We don't measure hours in the office; we measure the quality and impact of what you deliver."
+        },
+        {
+          "title": "Voluntary Communication",
+          "content": "We practice proactive communication. We don't wait for anyone to ask what we are doing. We don't \"disappear\" when the day ends if something is critical; we are an elite team that supports each other through ups and downs. If you deliver, the company will always back you up."
+        },
+        {
+          "title": "Zero Bureaucracy",
+          "content": "We invest time in automation, systems, and documentation so you can focus on solving difficult and ambiguous problems. We believe in individual responsibility and confronting our failures to learn from them."
+        }
+      ]
+    },
+    "compensation": {
+      "title": "Compensation and Benefits",
+      "description": "We want the best, so we pay top-of-market salaries. We believe a high salary is the most efficient way to value your work.",
+      "content": "In addition to a competitive salary, we offer comprehensive health, dental, and vision insurance managed through top-tier partners. We don't have a quantified paid time off policy; we trust your judgment to coordinate with the team and take the time you need when you need it."
+    },
+    "development": {
+      "title": "Career Development",
+      "content": "We don't believe in formal career development programs that are often ineffective. Instead, we offer real opportunities to develop competencies in new areas based on the company's growth. If you want to try something new and it aligns with our needs, the door is open."
+    },
+    "positions": {
+      "title": "Open Positions",
+      "requirements": "Profile Requirements",
+      "softwareEngineer": {
+        "title": "Software Engineer (Generalist)",
+        "location": "Remote / Hybrid",
+        "description": "We are looking for someone who can navigate our entire technical stack. Someone who can optimize a Prisma query, polish the UX of a complex form with React, or adjust the CI/CD pipeline. We want engineers who understand the product, not just the code.",
+        "requirements": [
+          "Solid experience in modern web application development and systems architecture",
+          "Ability to work asynchronously and autonomously",
+          "Problem-solver mindset over code-writer mindset",
+          "Experience with observability and automated testing tools"
+        ]
+      }
+    },
+    "cta": {
+      "title": "Are you ready for the challenge?",
+      "button": "Apply via Contact Form",
+      "description": "If the idea of working in a high-performance team where your impact is visible every day motivates you, send us a message detailing your journey and why you fit our philosophy."
     }
   },
   "metadata": {

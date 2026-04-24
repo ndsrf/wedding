@@ -1294,6 +1294,18 @@ The vector schema is defined in `prisma/vector/schema.prisma` (separate from the
 - `src/lib/db/vector-prisma.ts` — Singleton client; exports `isVectorEnabled()` and `vectorPrisma`
 - `src/lib/db/migrationManager.ts` — Calls `prisma db push --schema=prisma/vector/schema.prisma` on startup when enabled
 
+#### Troubleshooting
+
+**Module not found: Can't resolve '@prisma/vector-client'**
+
+This error occurs when the secondary Prisma client for the vector database has not been generated yet. To fix it, run:
+
+```bash
+npx prisma generate --schema=prisma/vector/schema.prisma
+```
+
+Note: If you have `VECTOR_DATABASE_URL` set in your `.env`, this command will use it. If not, you may need to provide it temporarily to satisfy Prisma's validation: `VECTOR_DATABASE_URL=postgresql://tmp npx prisma generate --schema=prisma/vector/schema.prisma`.
+
 ### Google Photos Integration
 
 Each wedding can optionally be linked to a Google Photos album. The app uploads photos directly to the album whenever guests share images (via the invitation gallery upload or WhatsApp). Blob storage is used only as a temporary staging area — once a photo is safely in Google Photos the blob copy is deleted.

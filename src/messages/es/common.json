@@ -281,6 +281,7 @@
       "company": "Empresa",
       "support": "Soporte",
       "about": "Acerca de",
+      "careers": "Trabaja con nosotros",
       "contact": "Contacto",
       "privacy": "Política de Privacidad",
       "help": "Centro de Ayuda",
@@ -321,6 +322,75 @@
       "title": "Error al enviar",
       "message": "Ha ocurrido un error al enviar tu mensaje. Por favor, inténtalo de nuevo.",
       "retry": "Reintentar"
+    }
+  },
+  "careers": {
+    "title": "Trabaja en {commercialName}",
+    "subtitle": "No estamos buscando empleados, sino fundadores técnicos y mentes inquietas que quieran dominar su oficio.",
+    "howWeWork": {
+      "title": "El Modelo de Alta Velocidad",
+      "description": "En {commercialName}, hemos perfeccionado nuestro modelo de entrega continua en una máquina de \"Alta Confianza y Alta Velocidad\". No creemos en los sprints tradicionales que fragmentan el tiempo; preferimos gestionar el flujo mediante Kanban y Linear para que mover una idea a producción 100 veces por semana sea algo natural.",
+      "sections": [
+        {
+          "title": "1. Ciclo de Refinamiento y Revisión",
+          "content": "Tratamos el refinamiento como un flujo controlado. Cuando el Linear MCP extrae una funcionalidad, creamos una especificación asíncrona. Antes de tocar una sola línea de código, el equipo aplica el protocolo \"Grill\": estresamos la lógica, buscamos casos de borde y validamos el ajuste arquitectónico contra nuestros documentos de dirección. Solo cuando el producto tiene sentido, empezamos a construir."
+        },
+        {
+          "title": "2. Calidad como Activo, no como Freno",
+          "content": "Nuestra capa de pruebas es nuestro activo más valioso. Utilizamos Playwright para automatizar el \"Camino Dorado\" (Golden Path). Si el CI detecta un fallo, el despliegue se bloquea. Pero no solo confiamos en los robots; cada funcionalidad genera un despliegue de demostración único en Vercel para una inspección manual de \"sensaciones\" antes del merge final."
+        },
+        {
+          "title": "3. Diseño y Observabilidad Continua",
+          "content": "Eliminamos la deuda de diseño usando Claude Design para mantener la consistencia visual en nuestros componentes de Next.js. Una vez en producción, operamos sin miedo: usamos Statsig para feature flags y HyperDX para monitorizar logs y trazas en tiempo real. Si algo falla, lo apagamos en segundos sin necesidad de rollbacks."
+        }
+      ]
+    },
+    "culture": {
+      "title": "Cultura y Valores",
+      "description": "Si buscas una empresa donde esconderte tras un proceso burocrático, {commercialName} no es para ti. Buscamos personas con una tolerancia al riesgo superior a la media, que prefieran ser el empleado #3 antes que el #11.000.",
+      "sections": [
+        {
+          "title": "Autonomía y Expresión",
+          "content": "Queremos personas que amen su trabajo y se sientan orgullosas de lo que logran. Aquí tienes libertad para gestionar tu horario y capacidad de decisión absoluta sobre tu área. No medimos las horas en la oficina; medimos la calidad y el impacto de lo que entregas."
+        },
+        {
+          "title": "Comunicación Voluntaria",
+          "content": "Practicamos la comunicación proactiva. No esperamos a que nadie nos pregunte qué estamos haciendo. No nos \"desaparecemos\" cuando termina la jornada si hay algo crítico; somos un equipo de élite que se apoya en las buenas y en las malas. Si tú cumples, la empresa te respaldará siempre."
+        },
+        {
+          "title": "Cero Burocracia",
+          "content": "Invertimos tiempo en automatización, sistemas y documentación para que puedas centrarte en resolver problemas difíciles y ambiguos. Creemos en la responsabilidad individual y en confrontar nuestros fallos para aprender de ellos."
+        }
+      ]
+    },
+    "compensation": {
+      "title": "Compensación y Beneficios",
+      "description": "Queremos a los mejores, por eso pagamos salarios en la parte superior del mercado. Creemos que un salario alto es la forma más eficiente de valorar tu trabajo.",
+      "content": "Además de un salario competitivo, ofrecemos seguro médico completo, dental y visión gestionado a través de socios de primer nivel. No tenemos una política de vacaciones cuantificada; confiamos en tu criterio para coordinarte con el equipo y tomarte el tiempo que necesites cuando lo necesites."
+    },
+    "development": {
+      "title": "Desarrollo de Carrera",
+      "content": "No creemos en los programas formales de desarrollo de carrera que suelen ser ineficaces. En su lugar, ofrecemos oportunidades reales para desarrollar competencias en nuevas áreas según el crecimiento de la empresa. Si quieres probar algo nuevo y encaja con nuestras necesidades, la puerta está abierta."
+    },
+    "positions": {
+      "title": "Posiciones Abiertas",
+      "requirements": "Requisitos del Perfil",
+      "softwareEngineer": {
+        "title": "Software Engineer (Generalist)",
+        "location": "Remoto / Híbrido",
+        "description": "Buscamos a alguien que pueda navegar por todo nuestro stack técnico. Alguien que pueda optimizar una consulta en Prisma, pulir la UX de un formulario complejo con React o ajustar el pipeline de CI/CD. Queremos ingenieros que entiendan el producto, no solo el código.",
+        "requirements": [
+          "Sólida experiencia en el desarrollo de aplicaciones web modernas y arquitectura de sistemas",
+          "Capacidad para trabajar de forma asíncrona y autónoma",
+          "Mentalidad de 'solucionador de problemas' por encima de 'escritor de código'",
+          "Experiencia con herramientas de observabilidad y testing automatizado"
+        ]
+      }
+    },
+    "cta": {
+      "title": "¿Estás listo para el reto?",
+      "button": "Aplicar a través de Contacto",
+      "description": "Si te motiva la idea de trabajar en un equipo de alto rendimiento donde tu impacto es visible cada día, envíanos un mensaje detallando tu trayectoria y por qué encajas con nuestra filosofía."
     }
   },
   "metadata": {
