@@ -100,7 +100,9 @@ export function buildTools(ctx: ToolContext): ToolSet {
     // ── RSVP Status Summary ────────────────────────────────────────────────
     get_rsvp_status: tool({
       description:
-        'Get aggregate RSVP statistics: total families, submitted RSVPs, pending, and completion percentage.',
+        'Get aggregate RSVP statistics. ' +
+        'totalFamilies = number of contact groups; totalPeople = number of individual people invited. ' +
+        'attending/notAttending/pendingPeople are all individual person counts.',
       inputSchema: zodSchema(z.object({})),
       execute: async () => {
         if (!ctx.weddingId) return { error: 'No wedding context available' };
@@ -112,17 +114,76 @@ export function buildTools(ctx: ToolContext): ToolSet {
             },
           });
 
-          const total = families.length;
+          const totalFamilies = families.length;
           const submitted = families.filter((f) => f.members.some((m) => m.attending !== null)).length;
-          const pending = total - submitted;
-          const attending = families.flatMap((f) => f.members).filter((m) => m.attending === true).length;
-          const notAttending = families.flatMap((f) => f.members).filter((m) => m.attending === false).length;
-          const completionPct = total > 0 ? Math.round((submitted / total) * 100) : 0;
+          const pending = totalFamilies - submitted;
+          const allMembers = families.flatMap((f) => f.members);
+          const totalPeople = allMembers.length;
+          const attending = allMembers.filter((m) => m.attending === true).length;
+          const notAttending = allMembers.filter((m) => m.attending === false).length;
+          const pendingPeople = allMembers.filter((m) => m.attending === null).length;
+          const completionPct = totalFamilies > 0 ? Math.round((submitted / totalFamilies) * 100) : 0;
 
-          return { total, submitted, pending, attending, notAttending, completionPct };
+          return { totalFamilies, totalPeople, submitted, pending, attending, notAttending, pendingPeople, completionPct };
         } catch (err) {
           console.error('[TOOLS] get_rsvp_status error:', err);
           return { error: 'Failed to retrieve RSVP status' };
+        }
+      },
+    }),
+
+    // ── Guests by Label ───────────────────────────────────────────────────
+    get_guests_by_label: tool({
+      description:
+        'Get the count of individual people (not families) that belong to families tagged with a specific label. ' +
+        'Label matching is case-insensitive. Use this whenever the user asks "how many people/guests have label X" or "cuánta gente tiene la etiqueta X".',
+      inputSchema: zodSchema(
+        z.object({
+          labelName: z.string().describe('The label name to filter by (case-insensitive, e.g. "Bus", "bus", "BUS")'),
+        }),
+      ),
+      execute: async ({ labelName }: { labelName: string }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const families = await prisma.family.findMany({
+            where: {
+              wedding_id: ctx.weddingId,
+              labels: {
+                some: {
+                  label: { name: { equals: labelName, mode: 'insensitive' } },
+                },
+              },
+            },
+            include: {
+              members: { select: { name: true, attending: true, type: true } },
+            },
+            orderBy: { name: 'asc' },
+          });
+
+          const allMembers = families.flatMap((f) => f.members);
+          const totalPeople = allMembers.length;
+          const attending = allMembers.filter((m) => m.attending === true).length;
+          const notAttending = allMembers.filter((m) => m.attending === false).length;
+          const pendingPeople = allMembers.filter((m) => m.attending === null).length;
+
+          return {
+            labelName,
+            totalFamilies: families.length,
+            totalPeople,
+            attending,
+            notAttending,
+            pendingPeople,
+            families: families.map((f) => ({
+              name: f.name,
+              totalMembers: f.members.length,
+              attending: f.members.filter((m) => m.attending === true).length,
+              notAttending: f.members.filter((m) => m.attending === false).length,
+              pending: f.members.filter((m) => m.attending === null).length,
+            })),
+          };
+        } catch (err) {
+          console.error('[TOOLS] get_guests_by_label error:', err);
+          return { error: 'Failed to retrieve guests by label' };
         }
       },
     }),

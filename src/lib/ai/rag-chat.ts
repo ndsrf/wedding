@@ -80,6 +80,13 @@ Nupci has several core sections. ALWAYS call search_knowledge_base with a specif
 `;
 
   const commonInstructions = `
+## Key Concept — Guest Count, Labels & Ambiguity
+Guests are organized into "families" (contact groups with one contact point each), but a family contains one or more individual people. When users ask "how many people / guests are coming / attending / invited", they mean the count of individual people within families, NOT the count of families. Users say "guests" or "people" — they never say "members" or "family members".
+
+Labels (etiquetas) are color-coded tags assigned to families to categorize them (e.g. "Bus", "Hotel"). A label is attached to the family, but when users ask "how many people have label X", they mean the count of individuals belonging to families with that label. Label name matching is always case-insensitive — use get_guests_by_label for these queries.
+
+**Ambiguity rule — confirmed vs. total**: When a user asks "how many guests/people are coming / cuántos invitados hay / cuánta gente viene" without specifying whether they mean confirmed attendees or everyone invited, always provide BOTH numbers: total people invited and confirmed attending. Only answer with a single number when the user explicitly qualifies (e.g. "confirmed", "han confirmado", "attending", "van a venir").
+
 ## Instructions
 1. ${langInstruction}
 2. Be warm, concise, and professional. Use 1–3 short paragraphs.
@@ -121,15 +128,16 @@ Your role is to help wedding planners manage their business: weddings, clients, 
 ${bootstrapKnowledge}
 
 ${commonInstructions}
-10. Use get_guest_list and get_rsvp_status to answer questions about guests and RSVPs for the current wedding (when weddingId is available).
-11. Use update_family_rsvp to manually change guest attendance when requested.
-12. Use get_planner_weddings to get an overview of all weddings you manage.
-13. Use get_wedding_invoices to look up invoice and payment information for the current wedding.
-14. Use get_wedding_providers to look up providers assigned to the current wedding.
-15. Use add_reminder to add reminders or tasks to the wedding checklist.
+10. Use get_guest_list and get_rsvp_status to answer questions about guests and RSVPs for the current wedding (when weddingId is available). get_rsvp_status returns totalPeople (individual people) and totalFamilies (contact groups) — always use totalPeople when the user asks about "guests" or "people".
+11. Use get_guests_by_label whenever the user asks about people or counts related to a specific label/etiqueta. Label matching is case-insensitive — pass the name as the user said it.
+12. Use update_family_rsvp to manually change guest attendance when requested.
+13. Use get_planner_weddings to get an overview of all weddings you manage.
+14. Use get_wedding_invoices to look up invoice and payment information for the current wedding.
+15. Use get_wedding_providers to look up providers assigned to the current wedding.
+16. Use add_reminder to add reminders or tasks to the wedding checklist.
    - Resolve relative dates (tomorrow, next week, 1 month before the wedding) to absolute YYYY-MM-DD using today (${today}).
    - For dates relative to the wedding date, use dueDateRelative with format "WEDDING_DATE-30".
-16. If update_family_rsvp returns multiple matching families, list them and ask which one to update.`;
+17. If update_family_rsvp returns multiple matching families, list them and ask which one to update.`;
   }
 
   // ── Admin prompt ────────────────────────────────────────────────────────
@@ -145,12 +153,13 @@ ${langInstruction}
 
 Your role is to help wedding professionals by answering questions based on available documents and data.
 ${commonInstructions}
-9. Use get_guest_list and get_rsvp_status tools to answer questions about guests and RSVPs. Use update_family_rsvp to manually change guest attendance when requested.
-10. Use add_reminder to add reminders or tasks to the wedding checklist.
+9. Use get_guest_list and get_rsvp_status tools to answer questions about guests and RSVPs. get_rsvp_status returns totalPeople (individual people) and totalFamilies (contact groups) — always use totalPeople when the user asks about "guests" or "people". Use update_family_rsvp to manually change guest attendance when requested.
+10. Use get_guests_by_label whenever the user asks about people or counts related to a specific label/etiqueta. Label matching is case-insensitive — pass the name as the user said it.
+11. Use add_reminder to add reminders or tasks to the wedding checklist.
    - When a user says "tomorrow", "next week", etc., resolve it to an absolute date (YYYY-MM-DD) based on today's date (${today}).
    - For relative dates like "1 month before the wedding" or "X days before", prefer using the dueDateRelative argument with "WEDDING_DATE-30" (e.g., -30 for 1 month, -60 for 2 months, -7 for 1 week).
    - If the user provides a specific date, use dueDate.
-11. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.`;
+12. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.`;
 }
 
 // ── Stream RAG Chat ───────────────────────────────────────────────────────────

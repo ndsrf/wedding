@@ -75,22 +75,26 @@ id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, email T
 whatsapp_number TEXT, preferred_language TEXT (ES/EN/FR/IT/DE),
 channel_preference TEXT (WHATSAPP/EMAIL/SMS), invited_by_admin_id TEXT FK→wedding_admins,
 created_at TIMESTAMP
+**NOTE: A "family" is an organizational contact group with one contact point. It is NOT a single person. The number of people/guests at the wedding is determined by family_members, not by the count of families.**
 
 ### family_members
 id TEXT PK, family_id TEXT FK→families, name TEXT,
 type TEXT (ADULT/CHILD/INFANT), attending BOOLEAN (true=yes, false=no, null=pending),
 age INTEGER, dietary_restrictions TEXT, accessibility_needs TEXT,
 table_id TEXT FK→tables, added_by_guest BOOLEAN, created_at TIMESTAMP
-**NOTE: No direct wedding_id — MUST JOIN with families to scope by wedding.**
+**NOTE: No direct wedding_id — MUST JOIN with families to scope by wedding. These are the actual individuals invited to the wedding. When the user asks "how many guests / people are coming / attending / invited", count family_members rows (filter attending=true for confirmed, attending IS NULL for pending). Users say "guests" or "people" — they never say "members" or "family members".**
 
 ### guest_labels
 id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, color TEXT, created_at TIMESTAMP
+**NOTE: Label name matching is ALWAYS case-insensitive — use LOWER(gl.name) = LOWER('x') or gl.name ILIKE 'x'.**
 
 ### family_label_assignments
 family_id TEXT FK→families, label_id TEXT FK→guest_labels
 **NOTE: No direct wedding_id — MUST JOIN with families or guest_labels to scope by wedding.
-To find families with a label: JOIN family_label_assignments fla ON f.id = fla.family_id JOIN guest_labels gl ON fla.label_id = gl.id WHERE gl.wedding_id = $1.
-To list labels with family counts: SELECT gl.name, COUNT(DISTINCT fla.family_id) FROM guest_labels gl LEFT JOIN family_label_assignments fla ON gl.id = fla.label_id WHERE gl.wedding_id = $1 GROUP BY gl.name.**
+Labels are applied to families (contact groups). When the user asks "how many people/guests have label X", count family_members of families with that label — NOT families.
+- Count PEOPLE with a label: SELECT COUNT(fm.id) FROM family_members fm JOIN families f ON fm.family_id = f.id JOIN family_label_assignments fla ON f.id = fla.family_id JOIN guest_labels gl ON fla.label_id = gl.id WHERE gl.wedding_id = $1 AND LOWER(gl.name) = LOWER('X').
+- List labels with PEOPLE counts: SELECT gl.name, COUNT(fm.id) AS people_count FROM guest_labels gl LEFT JOIN family_label_assignments fla ON gl.id = fla.label_id LEFT JOIN families f ON fla.family_id = f.id LEFT JOIN family_members fm ON fm.family_id = f.id WHERE gl.wedding_id = $1 GROUP BY gl.name.
+- List labels with FAMILY counts (only when the user explicitly asks about families/groups): SELECT gl.name, COUNT(DISTINCT fla.family_id) AS family_count FROM guest_labels gl LEFT JOIN family_label_assignments fla ON gl.id = fla.label_id WHERE gl.wedding_id = $1 GROUP BY gl.name.**
 
 ### tables
 id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, number INTEGER,
@@ -163,7 +167,9 @@ score INTEGER (1–10), notes TEXT, created_at TIMESTAMP
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. family_name, guest_name, attending_status).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. A "family" is a contact group, NOT a person. When the user asks about the number of people/guests coming, attending, or invited, ALWAYS count family_members rows — NEVER count families rows.
+11. Label (etiqueta) name matching is ALWAYS case-insensitive — use LOWER(gl.name) = LOWER('label_name') or gl.name ILIKE 'label_name'. When counting people with a label, join through family_members (not just families).`;
 
 // ============================================================================
 // SQL GENERATION (LLM)
@@ -472,13 +478,23 @@ guest_count INTEGER, created_at TIMESTAMP
 id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, email TEXT, phone TEXT,
 whatsapp_number TEXT, preferred_language TEXT, channel_preference TEXT,
 created_at TIMESTAMP
-**NOTE: Scope via JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1**
+**NOTE: Scope via JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1. A "family" is an organizational contact group with one contact point — NOT a single person. Guest/people counts must come from family_members, not families.**
 
 ### family_members
 id TEXT PK, family_id TEXT FK→families, name TEXT, type TEXT (ADULT/CHILD/INFANT),
 attending BOOLEAN (true=yes, false=no, null=pending), age INTEGER,
 dietary_restrictions TEXT, accessibility_needs TEXT, table_id TEXT FK→tables
-**NOTE: Scope via JOIN families f ON fm.family_id = f.id JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1**
+**NOTE: Scope via JOIN families f ON fm.family_id = f.id JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1. These are the actual individuals invited. When the user asks "how many guests/people are coming/attending/invited", count family_members rows, NOT families. Users say "guests" or "people" — never "members" or "family members".**
+
+### guest_labels
+id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, color TEXT, created_at TIMESTAMP
+**NOTE: Scope via JOIN weddings w ON gl.wedding_id = w.id WHERE w.planner_id = $1. Label name matching is ALWAYS case-insensitive — use LOWER(gl.name) = LOWER('x') or gl.name ILIKE 'x'.**
+
+### family_label_assignments
+family_id TEXT FK→families, label_id TEXT FK→guest_labels
+**NOTE: Labels are applied to families (contact groups). When the user asks "how many people/guests have label X", count family_members of families with that label — NOT families.
+- Scope via JOIN families f ON fla.family_id = f.id JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1.
+- Count PEOPLE with a label: SELECT COUNT(fm.id) FROM family_members fm JOIN families f ON fm.family_id = f.id JOIN family_label_assignments fla ON f.id = fla.family_id JOIN guest_labels gl ON fla.label_id = gl.id JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1 AND LOWER(gl.name) = LOWER('X').**
 
 ### tables
 id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, number INTEGER, capacity INTEGER
@@ -598,7 +614,9 @@ currency TEXT, payment_date TIMESTAMP, method TEXT, reference TEXT
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. couple_names, total_guests, invoice_total).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. A "family" is a contact group, NOT a person. When the user asks about the number of people/guests coming, attending, or invited to a wedding, ALWAYS count family_members rows — NEVER count families rows.
+11. Label (etiqueta) name matching is ALWAYS case-insensitive — use LOWER(gl.name) = LOWER('label_name') or gl.name ILIKE 'label_name'. When counting people with a label, join through family_members (not just families).`;
 
 /**
  * Validate a planner-scoped SQL query.
