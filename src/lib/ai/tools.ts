@@ -24,6 +24,7 @@ import { retrieveChunks } from './retrieval';
 import { prisma } from '@/lib/db/prisma';
 import { convertRelativeDateToAbsolute } from '@/lib/checklist/date-converter';
 import type { RelativeDateFormat } from '@/lib/checklist/date-converter';
+import { invalidateStatsForWedding } from '@/lib/guests/api-handlers';
 
 export interface ToolContext {
   weddingId?: string;
@@ -826,6 +827,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
             },
           });
 
+          await invalidateStatsForWedding(ctx.weddingId);
           return {
             status: 'success',
             message: `Added "${personName}" to group "${family.name}".`,
@@ -910,6 +912,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
             data: updateData,
           });
 
+          await invalidateStatsForWedding(ctx.weddingId);
           return {
             status: 'success',
             message: `Updated "${member.name}" in group "${member.family.name}".`,
@@ -976,7 +979,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
 
           const member = members[0];
           await prisma.familyMember.delete({ where: { id: member.id } });
-
+          await invalidateStatsForWedding(ctx.weddingId);
           return {
             status: 'success',
             message: `Removed "${member.name}" from group "${member.family.name}".`,
@@ -1098,7 +1101,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
             const found = await prisma.guestLabel.findMany({
               where: {
                 wedding_id: ctx.weddingId,
-                name: { in: names, mode: 'insensitive' },
+                OR: names.map((n) => ({ name: { equals: n, mode: 'insensitive' as const } })),
               },
               select: { id: true, name: true },
             });
@@ -1129,6 +1132,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
                 : []),
             ]);
 
+            await invalidateStatsForWedding(ctx.weddingId);
             return {
               status: 'success',
               message:
@@ -1178,6 +1182,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
           });
           const currentLabels = updatedFamily?.labels.map((la) => la.label.name) ?? [];
 
+          await invalidateStatsForWedding(ctx.weddingId);
           return {
             status: errors.length > 0 ? 'partial' : 'success',
             group: family.name,

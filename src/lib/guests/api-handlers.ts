@@ -172,7 +172,7 @@ function buildGuestCacheParamsKey(params: Record<string, string | number | boole
  * Resolves the planner_id via the adminWedding cache first (no extra DB round-trip
  * when the cache is warm) and falls back to a lightweight DB lookup.
  */
-async function invalidateStatsForWedding(weddingId: string): Promise<void> {
+export async function invalidateStatsForWedding(weddingId: string): Promise<void> {
   // Try to get planner_id from the already-cached wedding details
   const cached = await getCached<{ planner_id: string | null }>(CACHE_KEYS.adminWedding(weddingId));
   const plannerId =
