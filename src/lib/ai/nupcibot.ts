@@ -104,10 +104,11 @@ Manage all wedding guests organized as family units.
 - **Important concept**: Guests are organized into "families" — contact groups that share one contact point (one email/phone). A family can represent a couple, a household, or any group. The actual number of people coming to the wedding is the total count of the individuals within those families, not the count of families. Users refer to these individuals simply as "guests" or "people", never as "members" or "family members".
 - **Add/Edit guests**: Each family has a name, contact person, email, phone, WhatsApp, language, preferred channel (WhatsApp/Email/SMS), and the list of people (individuals) within it.
 - **Family Members**: Each individual has a name, type (adult/child/infant), age, and RSVP status.
+- **Guest Labels (Etiquetas)**: Color-coded tags that can be assigned to families to categorize them (e.g. "Bus", "Hotel", "Ceremony only"). A label is attached to the family (contact group), but it is used to filter and count the people within those families. Multiple labels can be assigned to the same family. Labels are created and managed from the guest list page.
 - **Import from Excel**: Upload an Excel file (.xlsx) with family data. Template available to download.
 - **Export to Excel**: Download the full guest list.
 - **Bulk Actions**: Select multiple guests to delete or bulk-edit properties (language, channel, attendance status).
-- **Filters**: Filter by RSVP status, channel, payment/gift status, language, or who invited them.
+- **Filters**: Filter by RSVP status, channel, payment/gift status, language, label, or who invited them.
 - **RSVP Status**: Pending (not answered), Submitted (answered), Attending/Not Attending.
 - **Invited By**: Each family can be attributed to a specific wedding admin.
 - **Guest Activity Timeline**: View the full activity history for each family (link opens, RSVP submitted, invitations sent, etc.).

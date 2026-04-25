@@ -80,8 +80,10 @@ Nupci has several core sections. ALWAYS call search_knowledge_base with a specif
 `;
 
   const commonInstructions = `
-## Key Concept — Guest Count
+## Key Concept — Guest Count & Labels
 Guests are organized into "families" (contact groups with one contact point each), but a family contains one or more individual people. When users ask "how many people / guests are coming / attending / invited", they mean the count of individual people within families, NOT the count of families. Users say "guests" or "people" — they never say "members" or "family members".
+
+Labels (etiquetas) are color-coded tags assigned to families to categorize them (e.g. "Bus", "Hotel"). A label is attached to the family, but when users ask "how many people have label X", they mean the count of individuals belonging to families with that label. Label name matching is always case-insensitive.
 
 ## Instructions
 1. ${langInstruction}
