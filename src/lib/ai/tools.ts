@@ -1096,15 +1096,15 @@ export function buildTools(ctx: ToolContext): ToolSet {
 
           const family = families[0];
 
-          // Helper: resolve label names → GuestLabel rows, collecting not-found names
+          // Helper: resolve label names → GuestLabel rows, collecting not-found names.
+          // Fetches all labels for the wedding and filters in JS to avoid Prisma mode limitations.
           const resolveLabels = async (names: string[]) => {
-            const found = await prisma.guestLabel.findMany({
-              where: {
-                wedding_id: ctx.weddingId,
-                OR: names.map((n) => ({ name: { equals: n, mode: 'insensitive' as const } })),
-              },
+            const allLabels = await prisma.guestLabel.findMany({
+              where: { wedding_id: ctx.weddingId },
               select: { id: true, name: true },
             });
+            const lowerNames = names.map((n) => n.toLowerCase());
+            const found = allLabels.filter((l) => lowerNames.includes(l.name.toLowerCase()));
             const notFound = names.filter(
               (n) => !found.some((l) => l.name.toLowerCase() === n.toLowerCase()),
             );
@@ -1183,11 +1183,18 @@ export function buildTools(ctx: ToolContext): ToolSet {
           const currentLabels = updatedFamily?.labels.map((la) => la.label.name) ?? [];
 
           await invalidateStatsForWedding(ctx.weddingId);
+          const parts: string[] = [];
+          if (removed.length > 0) parts.push(`removed label(s): ${removed.join(', ')}`);
+          if (added.length > 0) parts.push(`added label(s): ${added.join(', ')}`);
           return {
             status: errors.length > 0 ? 'partial' : 'success',
+            message:
+              errors.length > 0
+                ? `Could not complete all label changes for "${family.name}": ${errors.join('; ')}.`
+                : `Labels updated for "${family.name}": ${parts.join('; ')}. Current labels: ${currentLabels.length > 0 ? currentLabels.join(', ') : 'none'}.`,
             group: family.name,
-            added: added.length > 0 ? added : undefined,
-            removed: removed.length > 0 ? removed : undefined,
+            added,
+            removed,
             currentLabels,
             errors: errors.length > 0 ? errors : undefined,
           };

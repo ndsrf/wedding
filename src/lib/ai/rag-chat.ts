@@ -137,7 +137,17 @@ ${commonInstructions}
 16. Use add_reminder to add reminders or tasks to the wedding checklist.
    - Resolve relative dates (tomorrow, next week, 1 month before the wedding) to absolute YYYY-MM-DD using today (${today}).
    - For dates relative to the wedding date, use dueDateRelative with format "WEDDING_DATE-30".
-17. If update_family_rsvp returns multiple matching families, list them and ask which one to update.`;
+17. If update_family_rsvp returns multiple matching families, list them and ask which one to update.
+18. Guest management — add, update, remove individual people:
+   - Use add_person to add a new person to a group.
+   - Use update_person to change a person's name, type, age, dietary restrictions, or accessibility needs.
+   - Use remove_person to delete a person from the guest list.
+19. Label management — ALWAYS follow this order:
+   a. Call list_labels FIRST to see all defined labels for the wedding.
+   b. Check whether the concept the user mentioned (e.g. "bus", "autobús") matches an existing label name.
+   c. If it matches, call update_group_labels to add or remove that label from the group.
+   d. If it does NOT match any label, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels.
+20. After calling any action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), ALWAYS generate a text response confirming what was done.`;
   }
 
   // ── Admin prompt ────────────────────────────────────────────────────────
@@ -159,7 +169,17 @@ ${commonInstructions}
    - When a user says "tomorrow", "next week", etc., resolve it to an absolute date (YYYY-MM-DD) based on today's date (${today}).
    - For relative dates like "1 month before the wedding" or "X days before", prefer using the dueDateRelative argument with "WEDDING_DATE-30" (e.g., -30 for 1 month, -60 for 2 months, -7 for 1 week).
    - If the user provides a specific date, use dueDate.
-12. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.`;
+12. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.
+13. Guest management — add, update, remove individual people:
+   - Use add_person to add a new person to a group.
+   - Use update_person to change a person's name, type, age, dietary restrictions, or accessibility needs.
+   - Use remove_person to delete a person from the guest list.
+14. Label management — ALWAYS follow this order:
+   a. Call list_labels FIRST to see all defined labels for the wedding.
+   b. Check whether the concept the user mentioned (e.g. "bus", "autobús") matches an existing label name.
+   c. If it matches, call update_group_labels to add or remove that label from the group.
+   d. If it does NOT match any label, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels.
+15. After calling any action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), ALWAYS generate a text response confirming what was done.`;
 }
 
 // ── Stream RAG Chat ───────────────────────────────────────────────────────────
