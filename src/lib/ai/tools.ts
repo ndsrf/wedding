@@ -993,8 +993,8 @@ export function buildTools(ctx: ToolContext): ToolSet {
     list_labels: tool({
       description:
         'List all labels (etiquetas) defined for this wedding. Returns each label name and how many groups have it. ' +
-        'CALL THIS TOOL before update_group_labels whenever you are not certain that a word the user mentioned is an existing label. ' +
-        'For example: if the user says "Adelina no viene en bus", call list_labels to check whether "Bus" is a defined label before acting.',
+        'ALWAYS call this tool before update_group_labels to verify that the word the user mentioned actually exists as a label. ' +
+        'If the word is not in this list, do NOT treat it as a label — it may refer to an RSVP question or something else entirely; ask the user to clarify.',
       inputSchema: zodSchema(z.object({})),
       execute: async () => {
         if (!ctx.weddingId) return { error: 'No wedding context available' };
@@ -1025,12 +1025,14 @@ export function buildTools(ctx: ToolContext): ToolSet {
     // ── Update Group Labels ───────────────────────────────────────────────
     update_group_labels: tool({
       description:
-        'Add, remove, or replace labels (etiquetas) on a group of guests. Labels must already exist — call list_labels first if unsure. ' +
+        'Add, remove, or replace labels (etiquetas) on a group of guests. ' +
+        '\n\nCRITICAL — ALWAYS call list_labels before this tool. Labels are fixed tags defined by the planner; you must verify the exact label name exists before acting. ' +
+        'NEVER assume a word is a label. For example, "vegetariano" could be an existing label OR it could refer to an RSVP question answer — they are different things. ' +
+        'If the word the user mentioned does NOT appear in the list returned by list_labels, do NOT use this tool; instead ask the user whether they mean a label or something else (such as an RSVP question).' +
         '\n\nRECOGNIZE INDIRECT LABEL REFERENCES. Users will rarely say "add a label"; instead they phrase it through context:' +
-        '\n- "Adelina no viene en bus" → remove the "Bus" label from group "Adelina"' +
-        '\n- "los García vienen en autobús" → add the "Bus" label to group "García"' +
-        '\n- "los Martínez son vegetarianos" → add the "Vegetariano" (or similar) label to group "Martínez"' +
-        '\nWhen you are unsure whether a word refers to a label, call list_labels first to check.' +
+        '\n- "Adelina no viene en bus" → if "Bus" exists as a label, remove it from group "Adelina"' +
+        '\n- "los García vienen en autobús" → if "Bus" exists as a label, add it to group "García"' +
+        '\nOnly act if the referenced concept matches an existing label name. Otherwise ask for clarification.' +
         '\n\nAMBIGUITY: if the group or label name matches multiple entries, this tool returns an ambiguous status — present the options to the user as a question before retrying.' +
         '\n\nMODES (mutually exclusive):' +
         '\n- labelsToAdd / labelsToRemove: incremental changes (can both be set in one call)' +
