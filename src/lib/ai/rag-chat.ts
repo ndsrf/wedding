@@ -144,9 +144,9 @@ ${commonInstructions}
    - Use remove_person to delete a person from the guest list.
 19. Label management — ALWAYS follow this order:
    a. Call list_labels FIRST to see all defined labels for the wedding.
-   b. Check whether the concept the user mentioned (e.g. "bus", "autobús") matches an existing label name.
-   c. If it matches, call update_group_labels to add or remove that label from the group.
-   d. If it does NOT match any label, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels.
+   b. Find the label whose name best matches the concept the user mentioned (case-insensitive). CRITICAL: pass the EXACT label name returned by list_labels to update_group_labels — never the raw word from the user's message. For example, if list_labels returns "Bus" and the user said "bus", pass labelsToRemove: ["Bus"].
+   c. If a matching label exists, call update_group_labels with the exact name from list_labels.
+   d. If NO label name matches the concept, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels and do NOT call update_group_labels.
 20. When calling an action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), include a SHORT text sentence in the same response BEFORE the tool call (e.g. "Quito la etiqueta Bus de Adelina..." or "Añado a María al grupo García..."). This gives the user immediate feedback.
 21. After a tool returns status 'success', output a confirmation sentence and stop. Do NOT call any tool again.
 22. If any tool returns status 'ambiguous', STOP calling tools immediately. Present the listed options to the user as a question and wait for their reply. Do NOT retry with different names on your own.`;
@@ -178,9 +178,9 @@ ${commonInstructions}
    - Use remove_person to delete a person from the guest list.
 14. Label management — ALWAYS follow this order:
    a. Call list_labels FIRST to see all defined labels for the wedding.
-   b. Check whether the concept the user mentioned (e.g. "bus", "autobús") matches an existing label name.
-   c. If it matches, call update_group_labels to add or remove that label from the group.
-   d. If it does NOT match any label, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels.
+   b. Find the label whose name best matches the concept the user mentioned (case-insensitive). CRITICAL: pass the EXACT label name returned by list_labels to update_group_labels — never the raw word from the user's message. For example, if list_labels returns "Bus" and the user said "bus", pass labelsToRemove: ["Bus"].
+   c. If a matching label exists, call update_group_labels with the exact name from list_labels.
+   d. If NO label name matches the concept, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels and do NOT call update_group_labels.
 15. When calling an action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), include a SHORT text sentence in the same response BEFORE the tool call (e.g. "Quito la etiqueta Bus de Adelina..." or "Añado a María al grupo García..."). This gives the user immediate feedback.
 16. After a tool returns status 'success', output a confirmation sentence and stop. Do NOT call any tool again.
 17. If any tool returns status 'ambiguous', STOP calling tools immediately. Present the listed options to the user as a question and wait for their reply. Do NOT retry with different names on your own.`;

@@ -1118,15 +1118,15 @@ export function buildTools(ctx: ToolContext): ToolSet {
             const notFound = names.filter(
               (n) => !found.some((l) => l.name.toLowerCase() === n.toLowerCase()),
             );
-            return { found, notFound };
+            return { found, notFound, allLabels };
           };
 
           if (replaceWith !== undefined) {
             // Replace all labels
-            const { found, notFound } = replaceWith.length ? await resolveLabels(replaceWith) : { found: [], notFound: [] };
+            const { found, notFound, allLabels } = replaceWith.length ? await resolveLabels(replaceWith) : { found: [], notFound: [], allLabels: [] as {id:string;name:string}[] };
             if (notFound.length > 0) {
               return {
-                error: `The following labels do not exist: ${notFound.join(', ')}. No changes made.`,
+                error: `The following labels do not exist: ${notFound.join(', ')}. No changes made. Available labels: ${allLabels.map(l => l.name).join(', ') || 'none'}.`,
               };
             }
 
@@ -1160,8 +1160,8 @@ export function buildTools(ctx: ToolContext): ToolSet {
           const removed: string[] = [];
 
           if (labelsToAdd?.length) {
-            const { found, notFound } = await resolveLabels(labelsToAdd);
-            if (notFound.length > 0) errors.push(`Labels not found: ${notFound.join(', ')}`);
+            const { found, notFound, allLabels } = await resolveLabels(labelsToAdd);
+            if (notFound.length > 0) errors.push(`Labels not found: ${notFound.join(', ')}. Available labels: ${allLabels.map(l => l.name).join(', ') || 'none'}`);
             if (found.length > 0) {
               await prisma.familyLabelAssignment.createMany({
                 data: found.map((l) => ({ family_id: family.id, label_id: l.id })),
@@ -1172,8 +1172,8 @@ export function buildTools(ctx: ToolContext): ToolSet {
           }
 
           if (labelsToRemove?.length) {
-            const { found, notFound } = await resolveLabels(labelsToRemove);
-            if (notFound.length > 0) errors.push(`Labels not found: ${notFound.join(', ')}`);
+            const { found, notFound, allLabels } = await resolveLabels(labelsToRemove);
+            if (notFound.length > 0) errors.push(`Labels not found: ${notFound.join(', ')}. Available labels: ${allLabels.map(l => l.name).join(', ') || 'none'}`);
             if (found.length > 0) {
               await prisma.familyLabelAssignment.deleteMany({
                 where: {
