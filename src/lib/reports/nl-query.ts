@@ -75,13 +75,14 @@ id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, email T
 whatsapp_number TEXT, preferred_language TEXT (ES/EN/FR/IT/DE),
 channel_preference TEXT (WHATSAPP/EMAIL/SMS), invited_by_admin_id TEXT FK→wedding_admins,
 created_at TIMESTAMP
+**NOTE: A "family" is an organizational contact group with one contact point. It is NOT a single person. The number of people/guests at the wedding is determined by family_members, not by the count of families.**
 
 ### family_members
 id TEXT PK, family_id TEXT FK→families, name TEXT,
 type TEXT (ADULT/CHILD/INFANT), attending BOOLEAN (true=yes, false=no, null=pending),
 age INTEGER, dietary_restrictions TEXT, accessibility_needs TEXT,
 table_id TEXT FK→tables, added_by_guest BOOLEAN, created_at TIMESTAMP
-**NOTE: No direct wedding_id — MUST JOIN with families to scope by wedding.**
+**NOTE: No direct wedding_id — MUST JOIN with families to scope by wedding. These are the actual individuals invited to the wedding. When the user asks "how many guests / people are coming / attending / invited", count family_members rows (filter attending=true for confirmed, attending IS NULL for pending). Users say "guests" or "people" — they never say "members" or "family members".**
 
 ### guest_labels
 id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, color TEXT, created_at TIMESTAMP
@@ -163,7 +164,8 @@ score INTEGER (1–10), notes TEXT, created_at TIMESTAMP
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. family_name, guest_name, attending_status).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. A "family" is a contact group, NOT a person. When the user asks about the number of people/guests coming, attending, or invited, ALWAYS count family_members rows — NEVER count families rows.`;
 
 // ============================================================================
 // SQL GENERATION (LLM)
@@ -472,13 +474,13 @@ guest_count INTEGER, created_at TIMESTAMP
 id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, email TEXT, phone TEXT,
 whatsapp_number TEXT, preferred_language TEXT, channel_preference TEXT,
 created_at TIMESTAMP
-**NOTE: Scope via JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1**
+**NOTE: Scope via JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1. A "family" is an organizational contact group with one contact point — NOT a single person. Guest/people counts must come from family_members, not families.**
 
 ### family_members
 id TEXT PK, family_id TEXT FK→families, name TEXT, type TEXT (ADULT/CHILD/INFANT),
 attending BOOLEAN (true=yes, false=no, null=pending), age INTEGER,
 dietary_restrictions TEXT, accessibility_needs TEXT, table_id TEXT FK→tables
-**NOTE: Scope via JOIN families f ON fm.family_id = f.id JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1**
+**NOTE: Scope via JOIN families f ON fm.family_id = f.id JOIN weddings w ON f.wedding_id = w.id WHERE w.planner_id = $1. These are the actual individuals invited. When the user asks "how many guests/people are coming/attending/invited", count family_members rows, NOT families. Users say "guests" or "people" — never "members" or "family members".**
 
 ### tables
 id TEXT PK, wedding_id TEXT FK→weddings, name TEXT, number INTEGER, capacity INTEGER
@@ -598,7 +600,8 @@ currency TEXT, payment_date TIMESTAMP, method TEXT, reference TEXT
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. couple_names, total_guests, invoice_total).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. A "family" is a contact group, NOT a person. When the user asks about the number of people/guests coming, attending, or invited to a wedding, ALWAYS count family_members rows — NEVER count families rows.`;
 
 /**
  * Validate a planner-scoped SQL query.

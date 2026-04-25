@@ -91,7 +91,7 @@ const PLATFORM_DOCS_ADMIN = `
 ### Dashboard (/admin)
 The main hub for wedding admins. Shows:
 - Wedding details: couple names, date, location, days until wedding countdown
-- Key metrics: total guests, RSVP completion %, attending count, gifts received
+- Key metrics: total guests (= total individual people invited, i.e. family members), RSVP completion %, attending count (= individual people confirmed attending), gifts received
 - RSVP progress bar
 - Upcoming tasks widget
 - Quick links to all sections
@@ -101,8 +101,9 @@ The main hub for wedding admins. Shows:
 
 ### Guest Management (/admin/guests)
 Manage all wedding guests organized as family units.
-- **Add/Edit guests**: Each family has a name, contact person, email, phone, WhatsApp, language, preferred channel (WhatsApp/Email/SMS), and members.
-- **Family Members**: Each member has a name, type (adult/child/infant), age, and RSVP status.
+- **Important concept**: Guests are organized into "families" — contact groups that share one contact point (one email/phone). A family can represent a couple, a household, or any group. The actual number of people coming to the wedding is the total count of the individuals within those families, not the count of families. Users refer to these individuals simply as "guests" or "people", never as "members" or "family members".
+- **Add/Edit guests**: Each family has a name, contact person, email, phone, WhatsApp, language, preferred channel (WhatsApp/Email/SMS), and the list of people (individuals) within it.
+- **Family Members**: Each individual has a name, type (adult/child/infant), age, and RSVP status.
 - **Import from Excel**: Upload an Excel file (.xlsx) with family data. Template available to download.
 - **Export to Excel**: Download the full guest list.
 - **Bulk Actions**: Select multiple guests to delete or bulk-edit properties (language, channel, attendance status).
