@@ -809,7 +809,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
           if (families.length > 1) {
             return {
               status: 'ambiguous',
-              message: `Multiple groups found matching "${groupName}". Please clarify which one you mean.`,
+              message: `STOP: Multiple groups match "${groupName}". Do not retry — present these options to the user and ask which one they mean.`,
               groups: families.map((f) => ({ id: f.id, name: f.name })),
             };
           }
@@ -1089,7 +1089,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
           if (families.length > 1) {
             return {
               status: 'ambiguous',
-              message: `Multiple groups found matching "${groupName}". Please clarify which one you mean.`,
+              message: `STOP: Multiple groups match "${groupName}". Do not retry — present these options to the user and ask which one they mean.`,
               groups: families.map((f) => ({ id: f.id, name: f.name })),
             };
           }

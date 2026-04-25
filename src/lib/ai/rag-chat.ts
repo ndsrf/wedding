@@ -147,7 +147,8 @@ ${commonInstructions}
    b. Check whether the concept the user mentioned (e.g. "bus", "autobús") matches an existing label name.
    c. If it matches, call update_group_labels to add or remove that label from the group.
    d. If it does NOT match any label, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels.
-20. After calling any action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), ALWAYS generate a text response confirming what was done.`;
+20. After calling any action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), ALWAYS generate a text response confirming what was done. Do NOT call the same tool again after a success.
+21. If any tool returns status 'ambiguous', STOP calling tools immediately. Present the listed options to the user as a question and wait for their reply. Do NOT retry with different names on your own.`;
   }
 
   // ── Admin prompt ────────────────────────────────────────────────────────
@@ -179,7 +180,8 @@ ${commonInstructions}
    b. Check whether the concept the user mentioned (e.g. "bus", "autobús") matches an existing label name.
    c. If it matches, call update_group_labels to add or remove that label from the group.
    d. If it does NOT match any label, ask the user whether they mean a label or something else (e.g. an RSVP question answer). Do NOT create new labels.
-15. After calling any action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), ALWAYS generate a text response confirming what was done.`;
+15. After calling any action tool (update_group_labels, add_person, update_person, remove_person, update_family_rsvp), ALWAYS generate a text response confirming what was done. Do NOT call the same tool again after a success.
+16. If any tool returns status 'ambiguous', STOP calling tools immediately. Present the listed options to the user as a question and wait for their reply. Do NOT retry with different names on your own.`;
 }
 
 // ── Stream RAG Chat ───────────────────────────────────────────────────────────
@@ -253,7 +255,7 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
     system,
     messages,
     tools: buildTools({ weddingId, plannerId, role }),
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(10),
     experimental_telemetry: {
       isEnabled: true,
       functionId: 'nupcibot-chat',
@@ -353,7 +355,7 @@ export async function generateRagReply(params: RagChatParams): Promise<string | 
     system,
     messages,
     tools: buildTools({ weddingId, plannerId, role }),
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(10),
     experimental_telemetry: {
       isEnabled: true,
       functionId: 'nupcibot-chat',
