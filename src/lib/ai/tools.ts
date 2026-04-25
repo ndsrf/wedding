@@ -8,6 +8,9 @@
  *   search_knowledge_base - RAG search over DocumentChunk
  *   get_guest_list        - Summary of wedding guest families
  *   get_rsvp_status       - Aggregate RSVP counts and completion percentage
+ *   add_person            - Add a new person to a group
+ *   update_person         - Update a person's details
+ *   remove_person         - Remove a person from a group
  *
  * Depends on: retrieval.ts, prisma.ts
  */
@@ -763,6 +766,223 @@ export function buildTools(ctx: ToolContext): ToolSet {
         } catch (err) {
           console.error('[TOOLS] get_wedding_invoices error:', err);
           return { error: 'Failed to retrieve invoices' };
+        }
+      },
+    }),
+
+    // ── Add Person to Group ───────────────────────────────────────────────
+    add_person: tool({
+      description:
+        'Add a new person (guest, attendee) to an existing group. ' +
+        'Use when the user wants to add a new person or guest. ' +
+        'The group is identified by its name — users will say things like "add María to the García group", ' +
+        '"add a child named Pedro to the Smith guests", or "add Juan to the list". ' +
+        'Infer the group from context if not stated explicitly (e.g. "add Juan" after discussing a specific group).',
+      inputSchema: zodSchema(
+        z.object({
+          groupName: z.string().describe('The name of the group to add the person to (case-insensitive)'),
+          personName: z.string().describe('The full name of the person to add'),
+          type: z
+            .enum(['ADULT', 'CHILD', 'INFANT'])
+            .default('ADULT')
+            .describe('Type of person: ADULT (default), CHILD, or INFANT'),
+          age: z.number().int().min(0).max(150).optional().describe('Age of the person (optional)'),
+          dietary_restrictions: z.string().optional().describe('Dietary restrictions or preferences (optional)'),
+          accessibility_needs: z.string().optional().describe('Accessibility requirements (optional)'),
+        }),
+      ),
+      execute: async ({ groupName, personName, type, age, dietary_restrictions, accessibility_needs }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const families = await prisma.family.findMany({
+            where: {
+              wedding_id: ctx.weddingId,
+              name: { contains: groupName, mode: 'insensitive' },
+            },
+            select: { id: true, name: true },
+          });
+
+          if (families.length === 0) return { error: `No group found matching "${groupName}"` };
+          if (families.length > 1) {
+            return {
+              status: 'ambiguous',
+              message: `Multiple groups found matching "${groupName}". Please clarify which one you mean.`,
+              groups: families.map((f) => ({ id: f.id, name: f.name })),
+            };
+          }
+
+          const family = families[0];
+          const member = await prisma.familyMember.create({
+            data: {
+              family_id: family.id,
+              name: personName,
+              type: type ?? 'ADULT',
+              age: age ?? null,
+              dietary_restrictions: dietary_restrictions ?? null,
+              accessibility_needs: accessibility_needs ?? null,
+              added_by_guest: false,
+            },
+          });
+
+          return {
+            status: 'success',
+            message: `Added "${personName}" to group "${family.name}".`,
+            person: { id: member.id, name: member.name, type: member.type, age: member.age, group: family.name },
+          };
+        } catch (err) {
+          console.error('[TOOLS] add_person error:', err);
+          return { error: 'Failed to add person' };
+        }
+      },
+    }),
+
+    // ── Update Person ─────────────────────────────────────────────────────
+    update_person: tool({
+      description:
+        'Update details of a specific person (guest) such as name, type, age, dietary restrictions, or accessibility needs. ' +
+        'Provide groupName to disambiguate when multiple people share the same name. ' +
+        'Examples: "change María\'s dietary restrictions to vegetarian", "update Pedro\'s age to 8", "rename Juan to Juan Carlos".',
+      inputSchema: zodSchema(
+        z.object({
+          personName: z.string().describe('The current name of the person to update (case-insensitive)'),
+          groupName: z
+            .string()
+            .optional()
+            .describe('The group the person belongs to — use to disambiguate when names are not unique (optional)'),
+          newName: z.string().optional().describe('New name for the person'),
+          type: z.enum(['ADULT', 'CHILD', 'INFANT']).optional().describe('New type: ADULT, CHILD, or INFANT'),
+          age: z.number().int().min(0).max(150).nullable().optional().describe('New age (null to clear)'),
+          dietary_restrictions: z.string().nullable().optional().describe('New dietary restrictions (null to clear)'),
+          accessibility_needs: z.string().nullable().optional().describe('New accessibility needs (null to clear)'),
+        }),
+      ),
+      execute: async ({ personName, groupName, newName, type, age, dietary_restrictions, accessibility_needs }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const familyWhere = {
+            wedding_id: ctx.weddingId,
+            ...(groupName ? { name: { contains: groupName, mode: 'insensitive' as const } } : {}),
+          };
+
+          const members = await prisma.familyMember.findMany({
+            where: {
+              name: { contains: personName, mode: 'insensitive' },
+              family: familyWhere,
+            },
+            include: { family: { select: { id: true, name: true } } },
+          });
+
+          if (members.length === 0) {
+            return {
+              error: `No person found matching "${personName}"${groupName ? ` in group "${groupName}"` : ''}`,
+            };
+          }
+          if (members.length > 1) {
+            return {
+              status: 'ambiguous',
+              message: `Multiple people found matching "${personName}". Please specify the group name.`,
+              people: members.map((m) => ({ name: m.name, group: m.family.name })),
+            };
+          }
+
+          const member = members[0];
+          const updateData: {
+            name?: string;
+            type?: 'ADULT' | 'CHILD' | 'INFANT';
+            age?: number | null;
+            dietary_restrictions?: string | null;
+            accessibility_needs?: string | null;
+          } = {};
+          if (newName !== undefined) updateData.name = newName;
+          if (type !== undefined) updateData.type = type;
+          if (age !== undefined) updateData.age = age;
+          if (dietary_restrictions !== undefined) updateData.dietary_restrictions = dietary_restrictions;
+          if (accessibility_needs !== undefined) updateData.accessibility_needs = accessibility_needs;
+
+          if (Object.keys(updateData).length === 0) {
+            return { error: 'No fields to update provided.' };
+          }
+
+          const updated = await prisma.familyMember.update({
+            where: { id: member.id },
+            data: updateData,
+          });
+
+          return {
+            status: 'success',
+            message: `Updated "${member.name}" in group "${member.family.name}".`,
+            person: {
+              id: updated.id,
+              name: updated.name,
+              type: updated.type,
+              age: updated.age,
+              dietary_restrictions: updated.dietary_restrictions,
+              accessibility_needs: updated.accessibility_needs,
+              group: member.family.name,
+            },
+          };
+        } catch (err) {
+          console.error('[TOOLS] update_person error:', err);
+          return { error: 'Failed to update person' };
+        }
+      },
+    }),
+
+    // ── Remove Person from Group ──────────────────────────────────────────
+    remove_person: tool({
+      description:
+        'Remove a specific person (guest) from the guest list. ' +
+        'Provide groupName to disambiguate when the name is not unique. ' +
+        'Examples: "remove Pedro from the García group", "delete guest María", "remove Juan from the list".',
+      inputSchema: zodSchema(
+        z.object({
+          personName: z.string().describe('The name of the person to remove (case-insensitive)'),
+          groupName: z
+            .string()
+            .optional()
+            .describe('The group the person belongs to — use to disambiguate when names are not unique (optional)'),
+        }),
+      ),
+      execute: async ({ personName, groupName }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const familyWhere = {
+            wedding_id: ctx.weddingId,
+            ...(groupName ? { name: { contains: groupName, mode: 'insensitive' as const } } : {}),
+          };
+
+          const members = await prisma.familyMember.findMany({
+            where: {
+              name: { contains: personName, mode: 'insensitive' },
+              family: familyWhere,
+            },
+            include: { family: { select: { id: true, name: true } } },
+          });
+
+          if (members.length === 0) {
+            return {
+              error: `No person found matching "${personName}"${groupName ? ` in group "${groupName}"` : ''}`,
+            };
+          }
+          if (members.length > 1) {
+            return {
+              status: 'ambiguous',
+              message: `Multiple people found matching "${personName}". Please specify the group name.`,
+              people: members.map((m) => ({ name: m.name, group: m.family.name })),
+            };
+          }
+
+          const member = members[0];
+          await prisma.familyMember.delete({ where: { id: member.id } });
+
+          return {
+            status: 'success',
+            message: `Removed "${member.name}" from group "${member.family.name}".`,
+            removedPerson: { name: member.name, group: member.family.name },
+          };
+        } catch (err) {
+          console.error('[TOOLS] remove_person error:', err);
+          return { error: 'Failed to remove person' };
         }
       },
     }),
