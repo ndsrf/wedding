@@ -797,13 +797,17 @@ export function buildTools(ctx: ToolContext): ToolSet {
       execute: async ({ groupName, personName, type, age, dietary_restrictions, accessibility_needs }) => {
         if (!ctx.weddingId) return { error: 'No wedding context available' };
         try {
-          const families = await prisma.family.findMany({
-            where: {
-              wedding_id: ctx.weddingId,
-              name: { contains: groupName, mode: 'insensitive' },
-            },
+          // Exact match first, contains fallback
+          let families = await prisma.family.findMany({
+            where: { wedding_id: ctx.weddingId, name: { equals: groupName, mode: 'insensitive' } },
             select: { id: true, name: true },
           });
+          if (families.length === 0) {
+            families = await prisma.family.findMany({
+              where: { wedding_id: ctx.weddingId, name: { contains: groupName, mode: 'insensitive' } },
+              select: { id: true, name: true },
+            });
+          }
 
           if (families.length === 0) return { error: `No group found matching "${groupName}"` };
           if (families.length > 1) {
@@ -1072,18 +1076,24 @@ export function buildTools(ctx: ToolContext): ToolSet {
         }
 
         try {
-          // Resolve group
-          const families = await prisma.family.findMany({
-            where: {
-              wedding_id: ctx.weddingId,
-              name: { contains: groupName, mode: 'insensitive' },
-            },
-            select: {
-              id: true,
-              name: true,
-              labels: { include: { label: { select: { id: true, name: true } } } },
-            },
+          // Resolve group — exact match first (insensitive), then contains fallback.
+          // Exact match prevents false-positive ambiguity when other families
+          // happen to contain the group name as a substring.
+          const groupSelect = {
+            id: true,
+            name: true,
+            labels: { include: { label: { select: { id: true, name: true } } } },
+          };
+          let families = await prisma.family.findMany({
+            where: { wedding_id: ctx.weddingId, name: { equals: groupName, mode: 'insensitive' } },
+            select: groupSelect,
           });
+          if (families.length === 0) {
+            families = await prisma.family.findMany({
+              where: { wedding_id: ctx.weddingId, name: { contains: groupName, mode: 'insensitive' } },
+              select: groupSelect,
+            });
+          }
 
           if (families.length === 0) return { error: `No group found matching "${groupName}"` };
           if (families.length > 1) {
