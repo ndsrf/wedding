@@ -11,6 +11,7 @@
  *   add_person            - Add a new person to a group
  *   update_person         - Update a person's details
  *   remove_person         - Remove a person from a group
+ *   update_group_labels   - Add, remove, or replace labels on a group
  *
  * Depends on: retrieval.ts, prisma.ts
  */
@@ -983,6 +984,168 @@ export function buildTools(ctx: ToolContext): ToolSet {
         } catch (err) {
           console.error('[TOOLS] remove_person error:', err);
           return { error: 'Failed to remove person' };
+        }
+      },
+    }),
+
+    // ── Update Group Labels ───────────────────────────────────────────────
+    update_group_labels: tool({
+      description:
+        'Add or remove labels on a group (family). Labels must already exist — this tool will not create new ones. ' +
+        'Use labelsToAdd to attach labels, labelsToRemove to detach them, or replaceWith to set the complete label list at once (pass an empty array to clear all labels). ' +
+        'Examples: "add the Bus label to the García group", "remove VIP from the Smiths", "set the labels for the Pérez group to Bus and Vegetarian".',
+      inputSchema: zodSchema(
+        z.object({
+          groupName: z.string().describe('The name of the group to update (case-insensitive)'),
+          labelsToAdd: z
+            .array(z.string())
+            .optional()
+            .describe('Label names to add to the group (must already exist)'),
+          labelsToRemove: z
+            .array(z.string())
+            .optional()
+            .describe('Label names to remove from the group'),
+          replaceWith: z
+            .array(z.string())
+            .optional()
+            .describe(
+              'Replace the entire label set with these names. Pass an empty array to clear all labels. ' +
+              'Cannot be combined with labelsToAdd or labelsToRemove.',
+            ),
+        }),
+      ),
+      execute: async ({ groupName, labelsToAdd, labelsToRemove, replaceWith }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+
+        // replaceWith cannot be combined with incremental ops
+        if (replaceWith !== undefined && (labelsToAdd?.length || labelsToRemove?.length)) {
+          return { error: 'Use either replaceWith or labelsToAdd/labelsToRemove, not both.' };
+        }
+        if (replaceWith === undefined && !labelsToAdd?.length && !labelsToRemove?.length) {
+          return { error: 'Provide at least one of labelsToAdd, labelsToRemove, or replaceWith.' };
+        }
+
+        try {
+          // Resolve group
+          const families = await prisma.family.findMany({
+            where: {
+              wedding_id: ctx.weddingId,
+              name: { contains: groupName, mode: 'insensitive' },
+            },
+            select: {
+              id: true,
+              name: true,
+              labels: { include: { label: { select: { id: true, name: true } } } },
+            },
+          });
+
+          if (families.length === 0) return { error: `No group found matching "${groupName}"` };
+          if (families.length > 1) {
+            return {
+              status: 'ambiguous',
+              message: `Multiple groups found matching "${groupName}". Please clarify which one you mean.`,
+              groups: families.map((f) => ({ id: f.id, name: f.name })),
+            };
+          }
+
+          const family = families[0];
+
+          // Helper: resolve label names → GuestLabel rows, collecting not-found names
+          const resolveLabels = async (names: string[]) => {
+            const found = await prisma.guestLabel.findMany({
+              where: {
+                wedding_id: ctx.weddingId,
+                name: { in: names, mode: 'insensitive' },
+              },
+              select: { id: true, name: true },
+            });
+            const notFound = names.filter(
+              (n) => !found.some((l) => l.name.toLowerCase() === n.toLowerCase()),
+            );
+            return { found, notFound };
+          };
+
+          if (replaceWith !== undefined) {
+            // Replace all labels
+            const { found, notFound } = replaceWith.length ? await resolveLabels(replaceWith) : { found: [], notFound: [] };
+            if (notFound.length > 0) {
+              return {
+                error: `The following labels do not exist: ${notFound.join(', ')}. No changes made.`,
+              };
+            }
+
+            await prisma.$transaction([
+              prisma.familyLabelAssignment.deleteMany({ where: { family_id: family.id } }),
+              ...(found.length > 0
+                ? [
+                    prisma.familyLabelAssignment.createMany({
+                      data: found.map((l) => ({ family_id: family.id, label_id: l.id })),
+                      skipDuplicates: true,
+                    }),
+                  ]
+                : []),
+            ]);
+
+            return {
+              status: 'success',
+              message:
+                found.length > 0
+                  ? `Labels for "${family.name}" replaced with: ${found.map((l) => l.name).join(', ')}.`
+                  : `All labels cleared from "${family.name}".`,
+              group: family.name,
+              currentLabels: found.map((l) => l.name),
+            };
+          }
+
+          // Incremental add / remove
+          const errors: string[] = [];
+          const added: string[] = [];
+          const removed: string[] = [];
+
+          if (labelsToAdd?.length) {
+            const { found, notFound } = await resolveLabels(labelsToAdd);
+            if (notFound.length > 0) errors.push(`Labels not found: ${notFound.join(', ')}`);
+            if (found.length > 0) {
+              await prisma.familyLabelAssignment.createMany({
+                data: found.map((l) => ({ family_id: family.id, label_id: l.id })),
+                skipDuplicates: true,
+              });
+              added.push(...found.map((l) => l.name));
+            }
+          }
+
+          if (labelsToRemove?.length) {
+            const { found, notFound } = await resolveLabels(labelsToRemove);
+            if (notFound.length > 0) errors.push(`Labels not found: ${notFound.join(', ')}`);
+            if (found.length > 0) {
+              await prisma.familyLabelAssignment.deleteMany({
+                where: {
+                  family_id: family.id,
+                  label_id: { in: found.map((l) => l.id) },
+                },
+              });
+              removed.push(...found.map((l) => l.name));
+            }
+          }
+
+          // Fetch final label state
+          const updatedFamily = await prisma.family.findUnique({
+            where: { id: family.id },
+            select: { labels: { include: { label: { select: { name: true } } } } },
+          });
+          const currentLabels = updatedFamily?.labels.map((la) => la.label.name) ?? [];
+
+          return {
+            status: errors.length > 0 ? 'partial' : 'success',
+            group: family.name,
+            added: added.length > 0 ? added : undefined,
+            removed: removed.length > 0 ? removed : undefined,
+            currentLabels,
+            errors: errors.length > 0 ? errors : undefined,
+          };
+        } catch (err) {
+          console.error('[TOOLS] update_group_labels error:', err);
+          return { error: 'Failed to update group labels' };
         }
       },
     }),
