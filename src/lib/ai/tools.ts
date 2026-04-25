@@ -12,6 +12,7 @@
  *   update_person         - Update a person's details
  *   remove_person         - Remove a person from a group
  *   update_group_labels   - Add, remove, or replace labels on a group
+ *   list_labels           - List all labels defined for the wedding
  *
  * Depends on: retrieval.ts, prisma.ts
  */
@@ -988,12 +989,52 @@ export function buildTools(ctx: ToolContext): ToolSet {
       },
     }),
 
+    // ── List Labels ───────────────────────────────────────────────────────
+    list_labels: tool({
+      description:
+        'List all labels (etiquetas) defined for this wedding. Returns each label name and how many groups have it. ' +
+        'CALL THIS TOOL before update_group_labels whenever you are not certain that a word the user mentioned is an existing label. ' +
+        'For example: if the user says "Adelina no viene en bus", call list_labels to check whether "Bus" is a defined label before acting.',
+      inputSchema: zodSchema(z.object({})),
+      execute: async () => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const labels = await prisma.guestLabel.findMany({
+            where: { wedding_id: ctx.weddingId },
+            select: {
+              id: true,
+              name: true,
+              color: true,
+              _count: { select: { families: true } },
+            },
+            orderBy: { name: 'asc' },
+          });
+
+          return labels.map((l) => ({
+            name: l.name,
+            color: l.color,
+            groupCount: l._count.families,
+          }));
+        } catch (err) {
+          console.error('[TOOLS] list_labels error:', err);
+          return { error: 'Failed to retrieve labels' };
+        }
+      },
+    }),
+
     // ── Update Group Labels ───────────────────────────────────────────────
     update_group_labels: tool({
       description:
-        'Add or remove labels on a group (family). Labels must already exist — this tool will not create new ones. ' +
-        'Use labelsToAdd to attach labels, labelsToRemove to detach them, or replaceWith to set the complete label list at once (pass an empty array to clear all labels). ' +
-        'Examples: "add the Bus label to the García group", "remove VIP from the Smiths", "set the labels for the Pérez group to Bus and Vegetarian".',
+        'Add, remove, or replace labels (etiquetas) on a group of guests. Labels must already exist — call list_labels first if unsure. ' +
+        '\n\nRECOGNIZE INDIRECT LABEL REFERENCES. Users will rarely say "add a label"; instead they phrase it through context:' +
+        '\n- "Adelina no viene en bus" → remove the "Bus" label from group "Adelina"' +
+        '\n- "los García vienen en autobús" → add the "Bus" label to group "García"' +
+        '\n- "los Martínez son vegetarianos" → add the "Vegetariano" (or similar) label to group "Martínez"' +
+        '\nWhen you are unsure whether a word refers to a label, call list_labels first to check.' +
+        '\n\nAMBIGUITY: if the group or label name matches multiple entries, this tool returns an ambiguous status — present the options to the user as a question before retrying.' +
+        '\n\nMODES (mutually exclusive):' +
+        '\n- labelsToAdd / labelsToRemove: incremental changes (can both be set in one call)' +
+        '\n- replaceWith: sets the complete label list; pass [] to clear all labels',
       inputSchema: zodSchema(
         z.object({
           groupName: z.string().describe('The name of the group to update (case-insensitive)'),
