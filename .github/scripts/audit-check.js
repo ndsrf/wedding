@@ -27,6 +27,12 @@ const ACCEPTED_GHSAS = [
   // next.js - MODERATE severity
   'GHSA-3x4c-7xq6-9pq8', // Unbounded next/image disk cache growth (fix requires Next.js 16.x major upgrade)
 
+  // postcss (bundled in next) - MODERATE severity
+  // XSS via Unescaped </style> in CSS Stringify Output. Requires Next.js 16.x major upgrade.
+  // Risk context: postcss is a build-time tool, not runtime code. The vulnerability affects
+  // malicious CSS input during build, not production app execution.
+  'GHSA-qx2v-qp2m-jg93',
+
   // lodash - MODERATE severity
   'GHSA-xxjr-mmjv-4gpg', // Prototype Pollution
 
