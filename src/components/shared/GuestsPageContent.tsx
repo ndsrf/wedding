@@ -475,8 +475,11 @@ export function GuestsPageContent({
     return data.data.path as string;
   };
 
-  const handleCopyWhatsAppText = async (guestId: string): Promise<string> => {
-    const response = await fetch(`${apiPaths.guests}/${guestId}/whatsapp-text`);
+  const handleCopyWhatsAppText = async (guestId: string, skipSaveTheDate = false): Promise<string> => {
+    const url = skipSaveTheDate
+      ? `${apiPaths.guests}/${guestId}/whatsapp-text?skipSaveTheDate=true`
+      : `${apiPaths.guests}/${guestId}/whatsapp-text`;
+    const response = await fetch(url);
     const data = await response.json();
     if (!data.success) throw new Error('Failed to fetch WhatsApp text');
     return data.data.text as string;
@@ -521,17 +524,23 @@ export function GuestsPageContent({
   // -------------------------------------------------------------------------
 
   const handleSendReminder = async (guestId: string) => {
-    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
-      try {
-        const text = await handleCopyWhatsAppText(guestId);
-        await navigator.clipboard.writeText(text);
-        showNotification('success', t('admin.guests.whatsappTextCopied'));
-      } catch {
-        showNotification('error', t('common.errors.generic'));
-      }
-      return;
-    }
     const guest = guests.find((g) => g.id === guestId);
+    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
+      const channelPref = guest?.channel_preference ?? null;
+      if (channelPref === 'WHATSAPP' || channelPref === null) {
+        try {
+          // skipSaveTheDate=true so the bell button always returns INVITATION/REMINDER,
+          // not SAVE_THE_DATE even when save-the-date is enabled but not yet sent.
+          const text = await handleCopyWhatsAppText(guestId, true);
+          await navigator.clipboard.writeText(text);
+          showNotification('success', t('admin.guests.whatsappTextCopied'));
+        } catch {
+          showNotification('error', t('common.errors.generic'));
+        }
+        return;
+      }
+      // EMAIL or SMS guests fall through to the normal reminder modal
+    }
     if (guest) {
       setReminderFamily({
         id: guest.id,
@@ -551,17 +560,22 @@ export function GuestsPageContent({
   };
 
   const handleSendSaveTheDate = async (guestId: string) => {
-    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
-      try {
-        const text = await handleCopyWhatsAppText(guestId);
-        await navigator.clipboard.writeText(text);
-        showNotification('success', t('admin.guests.whatsappTextCopied'));
-      } catch {
-        showNotification('error', t('common.errors.generic'));
-      }
-      return;
-    }
     const guest = guests.find((g) => g.id === guestId);
+    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
+      const channelPref = guest?.channel_preference ?? null;
+      if (channelPref === 'WHATSAPP' || channelPref === null) {
+        try {
+          // No skipSaveTheDate — the calendar button should copy SAVE_THE_DATE text.
+          const text = await handleCopyWhatsAppText(guestId);
+          await navigator.clipboard.writeText(text);
+          showNotification('success', t('admin.guests.whatsappTextCopied'));
+        } catch {
+          showNotification('error', t('common.errors.generic'));
+        }
+        return;
+      }
+      // EMAIL or SMS guests fall through to the normal save-the-date modal
+    }
     if (guest) {
       setReminderFamily({
         id: guest.id,

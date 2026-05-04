@@ -66,7 +66,7 @@ const defaultFormData: GuestFormData = {
   email: null,
   phone: null,
   whatsapp_number: null,
-  channel_preference: null,
+  channel_preference: 'WHATSAPP',
   preferred_language: 'ES',
   invited_by_admin_id: null,
   private_notes: null,

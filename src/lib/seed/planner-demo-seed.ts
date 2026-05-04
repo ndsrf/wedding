@@ -21,6 +21,7 @@ import {
   QuoteStatus,
   ContractStatus,
   AuthProvider,
+  Channel,
   PrismaClient,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -400,6 +401,7 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       data: {
         wedding_id: wedding.id,
         name: generateFamilyGroupName(familyName),
+        channel_preference: Channel.WHATSAPP,
         members: { create: [{ name: `${member1Name.first} ${member1Name.last}`, type: MemberType.ADULT }] },
       },
     });
