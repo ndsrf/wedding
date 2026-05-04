@@ -31,6 +31,7 @@ interface GuestTableProps {
   onViewTimeline?: (guestId: string, guestName: string) => void;
   onCopyInvLink?: (guestId: string) => Promise<string>;
   loading?: boolean;
+  sendingGuestIds?: Set<string>;
   selectedGuestIds?: string[];
   onSelectGuest?: (guestId: string, selected: boolean) => void;
   onSelectAll?: (selected: boolean) => void;
@@ -132,6 +133,7 @@ export function GuestTable({
   onViewTimeline,
   onCopyInvLink,
   loading,
+  sendingGuestIds,
   selectedGuestIds = [],
   onSelectGuest,
   onSelectAll,
@@ -331,7 +333,8 @@ export function GuestTable({
                       {onSendSaveTheDate && !guest.save_the_date_sent && !guest.invitation_sent && (
                         <button
                           onClick={() => onSendSaveTheDate(guest.id)}
-                          className="p-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded"
+                          disabled={sendingGuestIds?.has(guest.id)}
+                          className="p-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded disabled:opacity-50"
                           title={t('admin.reminders.sendSaveTheDate')}
                         >
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -342,7 +345,8 @@ export function GuestTable({
                       {onSendReminder && guest.rsvp_status !== 'submitted' && (
                         <button
                           onClick={() => onSendReminder(guest.id)}
-                          className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded"
+                          disabled={sendingGuestIds?.has(guest.id)}
+                          className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded disabled:opacity-50"
                           title={guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
                         >
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -523,7 +527,8 @@ export function GuestTable({
                               e.stopPropagation();
                               onSendSaveTheDate(guest.id);
                             }}
-                            className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded"
+                            disabled={sendingGuestIds?.has(guest.id)}
+                            className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded disabled:opacity-50"
                             title={t('admin.reminders.sendSaveTheDate')}
                           >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -537,7 +542,8 @@ export function GuestTable({
                               e.stopPropagation();
                               onSendReminder(guest.id);
                             }}
-                            className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded"
+                            disabled={sendingGuestIds?.has(guest.id)}
+                            className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded disabled:opacity-50"
                             title={guest.invitation_sent ? t('admin.reminders.sendReminder') : t('admin.reminders.sendInvite')}
                           >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

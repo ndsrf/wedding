@@ -211,6 +211,9 @@ export function GuestsPageContent({
   const [selectedTimelineFamilyName, setSelectedTimelineFamilyName] = useState<string | null>(null);
 
   const [isExtraActionsExpanded, setIsExtraActionsExpanded] = useState(false);
+  // Guest IDs with an in-flight MANUAL-mode clipboard copy (prevents double-clicks)
+  const [manualCopyingIds, setManualCopyingIds] = useState<Set<string>>(new Set());
+
   // Bulk reminder state
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const selectedGuestIdsRef = useRef(selectedGuestIds);
@@ -528,6 +531,8 @@ export function GuestsPageContent({
     if (weddingConfig?.whatsapp_mode === 'MANUAL') {
       const channelPref = guest?.channel_preference ?? null;
       if (channelPref === 'WHATSAPP' || channelPref === null) {
+        if (manualCopyingIds.has(guestId)) return;
+        setManualCopyingIds(prev => new Set(prev).add(guestId));
         try {
           // skipSaveTheDate=true so the bell button always returns INVITATION/REMINDER,
           // not SAVE_THE_DATE even when save-the-date is enabled but not yet sent.
@@ -536,6 +541,8 @@ export function GuestsPageContent({
           showNotification('success', t('admin.guests.whatsappTextCopied'));
         } catch {
           showNotification('error', t('common.errors.generic'));
+        } finally {
+          setManualCopyingIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
         }
         return;
       }
@@ -564,6 +571,8 @@ export function GuestsPageContent({
     if (weddingConfig?.whatsapp_mode === 'MANUAL') {
       const channelPref = guest?.channel_preference ?? null;
       if (channelPref === 'WHATSAPP' || channelPref === null) {
+        if (manualCopyingIds.has(guestId)) return;
+        setManualCopyingIds(prev => new Set(prev).add(guestId));
         try {
           // No skipSaveTheDate — the calendar button should copy SAVE_THE_DATE text.
           const text = await handleCopyWhatsAppText(guestId);
@@ -571,6 +580,8 @@ export function GuestsPageContent({
           showNotification('success', t('admin.guests.whatsappTextCopied'));
         } catch {
           showNotification('error', t('common.errors.generic'));
+        } finally {
+          setManualCopyingIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
         }
         return;
       }
@@ -1185,6 +1196,7 @@ export function GuestsPageContent({
               onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
               onCopyInvLink={handleCopyInvLink}
+              sendingGuestIds={manualCopyingIds}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
               onSelectGuest={handleSelectGuest}
