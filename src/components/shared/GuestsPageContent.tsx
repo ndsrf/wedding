@@ -72,6 +72,7 @@ interface Filters {
 
 interface WeddingQuestionConfig {
   save_the_date_enabled: boolean;
+  whatsapp_mode: 'BUSINESS' | 'LINKS' | 'MANUAL';
   transportation_question_enabled: boolean;
   transportation_question_text: string | null;
   extra_question_1_enabled: boolean;
@@ -279,6 +280,7 @@ export function GuestsPageContent({
       if (data.success) {
         setWeddingConfig({
           save_the_date_enabled: data.data.save_the_date_enabled || false,
+          whatsapp_mode: data.data.whatsapp_mode || 'BUSINESS',
           transportation_question_enabled: data.data.transportation_question_enabled,
           transportation_question_text: data.data.transportation_question_text,
           extra_question_1_enabled: data.data.extra_question_1_enabled,
@@ -518,7 +520,17 @@ export function GuestsPageContent({
   // REMINDERS
   // -------------------------------------------------------------------------
 
-  const handleSendReminder = (guestId: string) => {
+  const handleSendReminder = async (guestId: string) => {
+    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
+      try {
+        const text = await handleCopyWhatsAppText(guestId);
+        await navigator.clipboard.writeText(text);
+        showNotification('success', t('admin.guests.whatsappTextCopied'));
+      } catch {
+        showNotification('error', t('common.errors.generic'));
+      }
+      return;
+    }
     const guest = guests.find((g) => g.id === guestId);
     if (guest) {
       setReminderFamily({
@@ -539,6 +551,16 @@ export function GuestsPageContent({
   };
 
   const handleSendSaveTheDate = async (guestId: string) => {
+    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
+      try {
+        const text = await handleCopyWhatsAppText(guestId);
+        await navigator.clipboard.writeText(text);
+        showNotification('success', t('admin.guests.whatsappTextCopied'));
+      } catch {
+        showNotification('error', t('common.errors.generic'));
+      }
+      return;
+    }
     const guest = guests.find((g) => g.id === guestId);
     if (guest) {
       setReminderFamily({
@@ -1149,7 +1171,6 @@ export function GuestsPageContent({
               onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
               onCopyInvLink={handleCopyInvLink}
-              onCopyWhatsAppText={handleCopyWhatsAppText}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
               onSelectGuest={handleSelectGuest}
