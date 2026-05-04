@@ -15,6 +15,7 @@ import {
   TaskAssignment,
   PriceType,
   WeddingStatus,
+  WhatsAppMode,
   MemberType,
   TastingMenuStatus,
   LocationType,
@@ -289,6 +290,8 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       short_url_initials: 'AL' + Math.floor(Math.random() * 1000),
       status: WeddingStatus.ACTIVE,
       planned_guests: 150,
+      whatsapp_mode: WhatsAppMode.MANUAL,
+      save_the_date_enabled: true,
     },
   });
 
