@@ -21,7 +21,7 @@ import type {
   CreateWeddingRequest,
 } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
-import { Language, LocationType, PaymentMode, WeddingStatus } from '@prisma/client';
+import { Language, LocationType, PaymentMode, WeddingStatus, WhatsAppMode } from '@prisma/client';
 import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 
 // Validation schema for creating a wedding
@@ -56,10 +56,14 @@ const createWeddingSchema = z.object({
   payment_tracking_mode: z.nativeEnum(PaymentMode),
   allow_guest_additions: z.boolean(),
   default_language: z.nativeEnum(Language),
+  wedding_country: z.string().optional(),
+  whatsapp_mode: z.nativeEnum(WhatsAppMode).optional(),
   /** Customer record to link (for billing / traceability) */
   customer_id: z.string().uuid().optional().nullable(),
   /** Originating contract to link (for billing / traceability) */
   contract_id: z.string().uuid().optional().nullable(),
+  planned_guests: z.number().optional().nullable(),
+  planned_gift_per_person: z.number().optional().nullable(),
 });
 
 // Validation schema for query parameters
