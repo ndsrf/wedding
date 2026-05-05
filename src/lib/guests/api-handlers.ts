@@ -1116,6 +1116,7 @@ const WHATSAPP_FALLBACK_MESSAGES: Record<string, {
 export async function getGuestWhatsAppTextHandler(
   familyId: string,
   weddingId: string,
+  skipSaveTheDate = false,
 ): Promise<NextResponse> {
   try {
     const family = await prisma.family.findUnique({
@@ -1164,9 +1165,11 @@ export async function getGuestWhatsAppTextHandler(
     const hasRsvp = family.members.some(m => m.attending !== null);
     const wedding = family.wedding!;
 
-    // Determine template type with the same priority as button visibility
+    // Determine template type with the same priority as button visibility.
+    // skipSaveTheDate bypasses SAVE_THE_DATE so the invite/reminder bell button
+    // always returns INVITATION or REMINDER even when save-the-date is pending.
     let templateType: 'SAVE_THE_DATE' | 'INVITATION' | 'REMINDER' | 'CONFIRMATION';
-    if (wedding.save_the_date_enabled && !family.save_the_date_sent && !invitationSent) {
+    if (!skipSaveTheDate && wedding.save_the_date_enabled && !family.save_the_date_sent && !invitationSent) {
       templateType = 'SAVE_THE_DATE';
     } else if (hasRsvp) {
       templateType = 'CONFIRMATION';

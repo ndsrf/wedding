@@ -72,6 +72,7 @@ interface Filters {
 
 interface WeddingQuestionConfig {
   save_the_date_enabled: boolean;
+  whatsapp_mode: 'BUSINESS' | 'LINKS' | 'MANUAL';
   transportation_question_enabled: boolean;
   transportation_question_text: string | null;
   extra_question_1_enabled: boolean;
@@ -210,6 +211,9 @@ export function GuestsPageContent({
   const [selectedTimelineFamilyName, setSelectedTimelineFamilyName] = useState<string | null>(null);
 
   const [isExtraActionsExpanded, setIsExtraActionsExpanded] = useState(false);
+  // Guest IDs with an in-flight MANUAL-mode clipboard copy (prevents double-clicks)
+  const [manualCopyingIds, setManualCopyingIds] = useState<Set<string>>(new Set());
+
   // Bulk reminder state
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const selectedGuestIdsRef = useRef(selectedGuestIds);
@@ -279,6 +283,7 @@ export function GuestsPageContent({
       if (data.success) {
         setWeddingConfig({
           save_the_date_enabled: data.data.save_the_date_enabled || false,
+          whatsapp_mode: data.data.whatsapp_mode || 'BUSINESS',
           transportation_question_enabled: data.data.transportation_question_enabled,
           transportation_question_text: data.data.transportation_question_text,
           extra_question_1_enabled: data.data.extra_question_1_enabled,
@@ -473,8 +478,11 @@ export function GuestsPageContent({
     return data.data.path as string;
   };
 
-  const handleCopyWhatsAppText = async (guestId: string): Promise<string> => {
-    const response = await fetch(`${apiPaths.guests}/${guestId}/whatsapp-text`);
+  const handleCopyWhatsAppText = async (guestId: string, skipSaveTheDate = false): Promise<string> => {
+    const url = skipSaveTheDate
+      ? `${apiPaths.guests}/${guestId}/whatsapp-text?skipSaveTheDate=true`
+      : `${apiPaths.guests}/${guestId}/whatsapp-text`;
+    const response = await fetch(url);
     const data = await response.json();
     if (!data.success) throw new Error('Failed to fetch WhatsApp text');
     return data.data.text as string;
@@ -518,8 +526,28 @@ export function GuestsPageContent({
   // REMINDERS
   // -------------------------------------------------------------------------
 
-  const handleSendReminder = (guestId: string) => {
+  const handleSendReminder = async (guestId: string) => {
     const guest = guests.find((g) => g.id === guestId);
+    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
+      const channelPref = guest?.channel_preference ?? null;
+      if (channelPref === 'WHATSAPP' || channelPref === null) {
+        if (manualCopyingIds.has(guestId)) return;
+        setManualCopyingIds(prev => new Set(prev).add(guestId));
+        try {
+          // skipSaveTheDate=true so the bell button always returns INVITATION/REMINDER,
+          // not SAVE_THE_DATE even when save-the-date is enabled but not yet sent.
+          const text = await handleCopyWhatsAppText(guestId, true);
+          await navigator.clipboard.writeText(text);
+          showNotification('success', t('admin.guests.whatsappTextCopied'));
+        } catch {
+          showNotification('error', t('common.errors.generic'));
+        } finally {
+          setManualCopyingIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
+        }
+        return;
+      }
+      // EMAIL or SMS guests fall through to the normal reminder modal
+    }
     if (guest) {
       setReminderFamily({
         id: guest.id,
@@ -540,6 +568,25 @@ export function GuestsPageContent({
 
   const handleSendSaveTheDate = async (guestId: string) => {
     const guest = guests.find((g) => g.id === guestId);
+    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
+      const channelPref = guest?.channel_preference ?? null;
+      if (channelPref === 'WHATSAPP' || channelPref === null) {
+        if (manualCopyingIds.has(guestId)) return;
+        setManualCopyingIds(prev => new Set(prev).add(guestId));
+        try {
+          // No skipSaveTheDate — the calendar button should copy SAVE_THE_DATE text.
+          const text = await handleCopyWhatsAppText(guestId);
+          await navigator.clipboard.writeText(text);
+          showNotification('success', t('admin.guests.whatsappTextCopied'));
+        } catch {
+          showNotification('error', t('common.errors.generic'));
+        } finally {
+          setManualCopyingIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
+        }
+        return;
+      }
+      // EMAIL or SMS guests fall through to the normal save-the-date modal
+    }
     if (guest) {
       setReminderFamily({
         id: guest.id,
@@ -1149,7 +1196,7 @@ export function GuestsPageContent({
               onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
               onCopyInvLink={handleCopyInvLink}
-              onCopyWhatsAppText={handleCopyWhatsAppText}
+              sendingGuestIds={manualCopyingIds}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
               onSelectGuest={handleSelectGuest}

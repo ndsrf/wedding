@@ -640,6 +640,24 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
               <p className="text-xs text-gray-500">{t('planner.weddings.whatsappMode.linksDesc')}</p>
             </div>
           </label>
+          <label className={`flex items-start gap-3 p-3 border rounded-md cursor-pointer transition-colors ${
+            formData.whatsapp_mode === WhatsAppMode.MANUAL
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-300 hover:bg-gray-50'
+          }`}>
+            <input
+              type="radio"
+              name="whatsapp_mode"
+              value={WhatsAppMode.MANUAL}
+              checked={formData.whatsapp_mode === WhatsAppMode.MANUAL}
+              onChange={() => handleChange('whatsapp_mode', WhatsAppMode.MANUAL)}
+              className="mt-0.5"
+            />
+            <div>
+              <p className="text-sm font-medium text-gray-900">{t('planner.weddings.whatsappMode.manual')}</p>
+              <p className="text-xs text-gray-500">{t('planner.weddings.whatsappMode.manualDesc')}</p>
+            </div>
+          </label>
         </div>
       </div>
 

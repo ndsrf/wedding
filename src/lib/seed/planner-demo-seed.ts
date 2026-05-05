@@ -15,12 +15,14 @@ import {
   TaskAssignment,
   PriceType,
   WeddingStatus,
+  WhatsAppMode,
   MemberType,
   TastingMenuStatus,
   LocationType,
   QuoteStatus,
   ContractStatus,
   AuthProvider,
+  Channel,
   PrismaClient,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -288,6 +290,8 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       short_url_initials: 'AL' + Math.floor(Math.random() * 1000),
       status: WeddingStatus.ACTIVE,
       planned_guests: 150,
+      whatsapp_mode: WhatsAppMode.MANUAL,
+      save_the_date_enabled: true,
     },
   });
 
@@ -400,6 +404,7 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       data: {
         wedding_id: wedding.id,
         name: generateFamilyGroupName(familyName),
+        channel_preference: Channel.WHATSAPP,
         members: { create: [{ name: `${member1Name.first} ${member1Name.last}`, type: MemberType.ADULT }] },
       },
     });

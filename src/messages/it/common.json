@@ -765,7 +765,9 @@
         "business": "WhatsApp Business",
         "businessDesc": "Inviare i messaggi direttamente tramite l'API WhatsApp Business (Twilio).",
         "links": "Link WhatsApp",
-        "linksDesc": "Aprire un link wa.me in una nuova scheda del browser per ogni ospite invece di inviare automaticamente."
+        "linksDesc": "Aprire un link wa.me in una nuova scheda del browser per ogni ospite invece di inviare automaticamente.",
+        "manual": "WhatsApp Manuale",
+        "manualDesc": "Copia il testo dell'invito o del promemoria negli appunti quando si fa clic sul pulsante di invio, in modo da poterlo incollare manualmente in WhatsApp."
       },
       "buttons": {
         "saving": "Salvataggio in corso...",
@@ -1707,6 +1709,7 @@
       "selected": "selezionati",
       "copyInvLink": "Copia link di invito",
       "copyWhatsAppText": "Copia testo invito WhatsApp",
+      "whatsappTextCopied": "Messaggio WhatsApp copiato negli appunti",
       "table": {
         "family": "Famiglia",
         "members": "Membri",

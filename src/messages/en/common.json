@@ -795,7 +795,9 @@
         "business": "WhatsApp Business",
         "businessDesc": "Send messages directly via WhatsApp Business API (Twilio).",
         "links": "WhatsApp Links",
-        "linksDesc": "Open a wa.me link in a new browser tab for each guest instead of sending automatically."
+        "linksDesc": "Open a wa.me link in a new browser tab for each guest instead of sending automatically.",
+        "manual": "WhatsApp Manual",
+        "manualDesc": "Copy the invite or reminder text to the clipboard when clicking the send button, so you can paste it manually into WhatsApp."
       },
       "buttons": {
         "saving": "Saving...",
@@ -2052,6 +2054,7 @@
       "selected": "selected",
       "copyInvLink": "Copy invitation link",
       "copyWhatsAppText": "Copy WhatsApp invitation text",
+      "whatsappTextCopied": "WhatsApp message copied to clipboard",
       "table": {
         "family": "Family",
         "members": "Members",
