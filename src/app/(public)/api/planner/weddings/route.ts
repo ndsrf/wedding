@@ -385,12 +385,16 @@ export async function POST(request: NextRequest) {
             payment_tracking_mode: validatedData.payment_tracking_mode,
             allow_guest_additions: validatedData.allow_guest_additions,
             default_language: validatedData.default_language,
+            wedding_country: validatedData.wedding_country,
+            whatsapp_mode: validatedData.whatsapp_mode,
             save_the_date_enabled: true,
             status: 'ACTIVE',
             created_by: user.id,
             // Traceability / billing links (optional, set when created from a contract)
             ...(validatedData.customer_id ? { customer_id: validatedData.customer_id } : {}),
             ...(validatedData.contract_id ? { contract_id: validatedData.contract_id } : {}),
+            ...(validatedData.planned_guests ? { planned_guests: validatedData.planned_guests } : {}),
+            ...(validatedData.planned_gift_per_person ? { planned_gift_per_person: validatedData.planned_gift_per_person } : {}),
           },
         });
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
