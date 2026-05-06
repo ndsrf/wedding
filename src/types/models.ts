@@ -204,8 +204,8 @@ export interface Wedding {
   contract_id: string | null;
 
   // Payment Planning
-  planned_guests: number | null;
-  planned_gift_per_person: Decimal | null;
+  planned_guests?: number | null;
+  planned_gift_per_person?: Decimal | null;
 }
 
 export interface WeddingAdmin {
