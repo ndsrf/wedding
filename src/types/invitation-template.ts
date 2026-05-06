@@ -121,7 +121,20 @@ export interface GalleryBlock {
   };
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock;
+export interface SpacerBlock {
+  id: string;
+  type: 'spacer';
+  height: string; // CSS value, e.g. '2rem', '40px'
+}
+
+export interface EmbedBlock {
+  id: string;
+  type: 'embed';
+  html: string;    // Raw HTML/CSS/SVG rendered as-is (from Claude Design handoffs)
+  height?: string; // Optional reserved height for pre-render placeholder
+}
+
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

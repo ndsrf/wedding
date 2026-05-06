@@ -49,6 +49,22 @@ async function apiGet(path: string, params?: Record<string, string>): Promise<un
   return res.json();
 }
 
+async function apiPut(path: string, body: unknown): Promise<unknown> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new McpError(ErrorCode.InternalError, `API ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
 async function apiPost(path: string, body: unknown): Promise<unknown> {
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
@@ -166,6 +182,94 @@ const ADMIN_TOOLS = [
     description: 'Get the list of service providers (vendors) assigned to this wedding with payment status.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
   },
+  {
+    name: 'list_invitation_templates',
+    description:
+      'List all invitation templates for this wedding. Returns user-created templates and system seed templates. ' +
+      'Read the invitation://schema resource first to understand the TemplateDesign format.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'create_invitation_template',
+    description:
+      'Create a new invitation template from a TemplateDesign JSON. ' +
+      'Read invitation://schema first to generate a valid design. ' +
+      'Text blocks require multilingual content for all 5 languages (ES, EN, FR, IT, DE).',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        name: { type: 'string', description: 'Template name (e.g. "Garden Romance Invitation")' },
+        design: {
+          type: 'object',
+          description: 'TemplateDesign JSON object with globalStyle and blocks array. See invitation://schema.',
+        },
+      },
+      required: ['name', 'design'],
+    },
+  },
+  {
+    name: 'update_invitation_template',
+    description: 'Update an existing invitation template name and/or design.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        templateId: { type: 'string', description: 'ID of the template to update' },
+        name: { type: 'string', description: 'New template name (optional)' },
+        design: { type: 'object', description: 'Updated TemplateDesign JSON (optional)' },
+      },
+      required: ['templateId'],
+    },
+  },
+  {
+    name: 'get_wedding_design_system',
+    description:
+      'Get the wedding design system (color palette, fonts, style) used to keep all documents visually consistent. ' +
+      'Returns null if no design system has been set yet.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'set_wedding_design_system',
+    description:
+      'Save the wedding design system (color palette, fonts, style, motifs). ' +
+      'Use this after generating a design with Claude Design to persist the visual identity. ' +
+      'The same design system should be used for invitations, menus, and seating charts.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        designSystem: {
+          type: 'object',
+          description: 'WeddingDesignSystem object',
+          properties: {
+            palette: {
+              type: 'object',
+              properties: {
+                primary: { type: 'string', description: 'Hex color, e.g. "#8B7355"' },
+                secondary: { type: 'string' },
+                accent: { type: 'string' },
+                background: { type: 'string' },
+                text: { type: 'string' },
+              },
+              required: ['primary', 'secondary', 'accent', 'background', 'text'],
+            },
+            fonts: {
+              type: 'object',
+              properties: {
+                heading: { type: 'string', description: 'Font family name, must be one of the available fonts' },
+                body: { type: 'string' },
+                accent: { type: 'string' },
+              },
+              required: ['heading', 'body'],
+            },
+            style: { type: 'string', description: 'Style descriptor, e.g. "rustic-botanical", "modern-elegant"' },
+            motifs: { type: 'array', items: { type: 'string' }, description: 'Visual motifs, e.g. ["floral", "botanical"]' },
+            backgroundImageUrl: { type: 'string', description: 'URL of a background image or pattern (optional)' },
+          },
+          required: ['palette', 'fonts', 'style'],
+        },
+      },
+      required: ['designSystem'],
+    },
+  },
 ];
 
 const PLANNER_TOOLS = [
@@ -212,6 +316,25 @@ async function handleTool(name: string, args: Record<string, unknown>): Promise<
     case 'get_wedding_providers':
       return apiGet('/api/admin/mcp/providers');
 
+    // ── Invitation Template Tools ────────────────────────────────────────────
+    case 'list_invitation_templates':
+      return apiGet('/api/admin/mcp/invitation-templates');
+
+    case 'create_invitation_template':
+      return apiPost('/api/admin/mcp/invitation-templates', args);
+
+    case 'update_invitation_template': {
+      const { templateId, ...rest } = args;
+      return apiPut(`/api/admin/mcp/invitation-templates/${String(templateId)}`, rest);
+    }
+
+    // ── Wedding Design System Tools ──────────────────────────────────────────
+    case 'get_wedding_design_system':
+      return apiGet('/api/admin/mcp/design-system');
+
+    case 'set_wedding_design_system':
+      return apiPut('/api/admin/mcp/design-system', args);
+
     // ── Planner Tools ────────────────────────────────────────────────────────
     case 'get_planner_weddings':
       return apiGet('/api/planner/mcp/weddings');
@@ -222,6 +345,275 @@ async function handleTool(name: string, args: Record<string, unknown>): Promise<
 }
 
 // ── Resources ──────────────────────────────────────────────────────────────────
+
+const INVITATION_SCHEMA_URI = 'invitation://schema';
+
+const INVITATION_SCHEMA_DOCS = `
+# Nupci Invitation Template — Design Schema Reference
+
+Use this reference to generate valid \`TemplateDesign\` JSON when calling \`create_invitation_template\`.
+
+## Top-Level Structure
+
+\`\`\`json
+{
+  "globalStyle": {
+    "backgroundColor": "#FDFBF7",
+    "backgroundImage": "/themes/garden-birds/botanical-pattern.svg",
+    "paperBackgroundImage": "https://..."
+  },
+  "blocks": [ /* array of TemplateBlock */ ]
+}
+\`\`\`
+
+- \`backgroundColor\`: hex color for the canvas background
+- \`backgroundImage\`: optional URL to a tiling SVG/PNG pattern (use a system theme path or omit)
+- \`paperBackgroundImage\`: optional URL to a user-uploaded paper texture
+
+---
+
+## Block Types
+
+Each block needs a unique \`id\` (generate a UUID v4) and a \`type\`.
+
+### TextBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "text",
+  "content": {
+    "ES": "Texto en español",
+    "EN": "Text in English",
+    "FR": "Texte en français",
+    "IT": "Testo in italiano",
+    "DE": "Text auf Deutsch"
+  },
+  "style": {
+    "fontFamily": "Crimson Text, serif",
+    "fontSize": "2rem",
+    "color": "#2C2416",
+    "textAlign": "center",
+    "fontStyle": "italic",
+    "fontWeight": "normal",
+    "textDecoration": "none"
+  }
+}
+\`\`\`
+
+**Important:** \`content\` MUST include all 5 languages: ES, EN, FR, IT, DE.
+Template variables available: \`{{couple_names}}\`, \`{{wedding_date}}\`
+
+### ImageBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "image",
+  "src": "https://...",
+  "alt": "Wedding photo",
+  "alignment": "center",
+  "zoom": 100
+}
+\`\`\`
+
+- \`alignment\`: "left" | "center" | "right"
+- \`zoom\`: 10–200 (percentage)
+
+### SpacerBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "spacer", "height": "2rem" }
+\`\`\`
+
+Use to add vertical space between blocks. Height accepts any CSS value (rem, px, em).
+
+### DividerBlock (visual separator)
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "embed",
+  "html": "<div style=\\"width:80%;margin:0 auto;border-top:1px solid #D4AF37;\\"></div>",
+  "height": "1px"
+}
+\`\`\`
+
+### EmbedBlock (HTML/SVG for decorative elements)
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "embed",
+  "html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 80\\">...</svg>",
+  "height": "80px"
+}
+\`\`\`
+
+Use \`EmbedBlock\` for: ornamental borders, floral SVG dividers, decorative frames, gradient bands,
+custom typography effects, or any rich HTML/CSS/SVG from Claude Design.
+The HTML is rendered as-is inside the invitation canvas.
+
+### LocationBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "location" }
+\`\`\`
+
+Renders the wedding venue map and address automatically from the wedding data. No extra fields needed.
+
+### CountdownBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "countdown" }
+\`\`\`
+
+Shows a live countdown to the wedding date. Optionally add \`style\` with fontFamily, fontSize, color.
+
+### AddToCalendarBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "add-to-calendar" }
+\`\`\`
+
+Adds a calendar button. No configuration needed.
+
+### ButtonBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "button",
+  "text": { "ES": "RSVP", "EN": "RSVP", "FR": "RSVP", "IT": "RSVP", "DE": "RSVP" },
+  "url": "https://...",
+  "style": {
+    "buttonColor": "#8B7355",
+    "textColor": "#FFFFFF",
+    "fontFamily": "Lora, serif",
+    "alignment": "center"
+  }
+}
+\`\`\`
+
+### GalleryBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "gallery",
+  "columns": 2,
+  "showCaptions": false,
+  "showUploadButton": true,
+  "autoPlayMs": 0
+}
+\`\`\`
+
+---
+
+## Available Fonts
+
+Choose from these font families (all pre-loaded by the platform):
+
+**Elegant Serif** (recommended for headings):
+Crimson Text, Cormorant Garamond, Lora, EB Garamond, Libre Baskerville
+
+**Script & Cursive** (recommended for couple names):
+Alex Brush, Great Vibes, Dancing Script, Parisienne, Sacramento, Allura, Tangerine
+
+**Modern Sans-Serif**:
+Inter, Poppins, Montserrat
+
+Always use the full CSS font stack: \`"Great Vibes, cursive"\`, \`"Crimson Text, serif"\`, \`"Inter, sans-serif"\`
+
+---
+
+## System Theme Palettes
+
+Use these as reference for color harmony:
+
+| Theme | primary | accent | background | text |
+|-------|---------|--------|-----------|------|
+| classic-elegance | #8B7355 | #D4AF37 | #FDFBF7 | #2C2416 |
+| garden-romance | #7C9473 | #E8A5A5 | #F9FBF7 | #2C3E2A |
+| modern-minimal | #2D3748 | #4299E1 | #FFFFFF | #1A202C |
+| rustic-charm | #8B4513 | #CD853F | #FFF8F0 | #3E2723 |
+| beach-breeze | #0891B2 | #F59E0B | #F0FDFA | #164E63 |
+| garden-birds | #6B8E6F | #E8B86D | #FAF9F5 | #3A4F3C |
+
+---
+
+## Example: Minimal Elegant Invitation
+
+\`\`\`json
+{
+  "globalStyle": {
+    "backgroundColor": "#FDFBF7"
+  },
+  "blocks": [
+    {
+      "id": "b1",
+      "type": "spacer",
+      "height": "2rem"
+    },
+    {
+      "id": "b2",
+      "type": "text",
+      "content": {
+        "ES": "Nos vamos a casar",
+        "EN": "We Are Getting Married",
+        "FR": "Nous allons nous marier",
+        "IT": "Ci sposiamo",
+        "DE": "Wir heiraten"
+      },
+      "style": {
+        "fontFamily": "Cormorant Garamond, serif",
+        "fontSize": "1.1rem",
+        "color": "#5C5347",
+        "textAlign": "center",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "id": "b3",
+      "type": "text",
+      "content": {
+        "ES": "{{couple_names}}",
+        "EN": "{{couple_names}}",
+        "FR": "{{couple_names}}",
+        "IT": "{{couple_names}}",
+        "DE": "{{couple_names}}"
+      },
+      "style": {
+        "fontFamily": "Great Vibes, cursive",
+        "fontSize": "3.5rem",
+        "color": "#8B7355",
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "b4",
+      "type": "text",
+      "content": {
+        "ES": "{{wedding_date}}",
+        "EN": "{{wedding_date}}",
+        "FR": "{{wedding_date}}",
+        "IT": "{{wedding_date}}",
+        "DE": "{{wedding_date}}"
+      },
+      "style": {
+        "fontFamily": "Lora, serif",
+        "fontSize": "1.2rem",
+        "color": "#5C5347",
+        "textAlign": "center"
+      }
+    },
+    { "id": "b5", "type": "countdown" },
+    { "id": "b6", "type": "location" },
+    { "id": "b7", "type": "add-to-calendar" }
+  ]
+}
+\`\`\`
+`.trim();
 
 const PLATFORM_DOCS_URI = 'platform://docs';
 
@@ -293,22 +685,27 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       description: 'Quick reference for the Nupci wedding management platform features and workflows.',
       mimeType: 'text/markdown',
     },
+    {
+      uri: INVITATION_SCHEMA_URI,
+      name: 'Invitation Template Schema',
+      description: 'Complete reference for generating TemplateDesign JSON: block types, fonts, theme palettes, and examples.',
+      mimeType: 'text/markdown',
+    },
   ],
 }));
 
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  if (request.params.uri !== PLATFORM_DOCS_URI) {
-    throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${request.params.uri}`);
+  if (request.params.uri === PLATFORM_DOCS_URI) {
+    return {
+      contents: [{ uri: PLATFORM_DOCS_URI, mimeType: 'text/markdown', text: PLATFORM_DOCS_SUMMARY }],
+    };
   }
-  return {
-    contents: [
-      {
-        uri: PLATFORM_DOCS_URI,
-        mimeType: 'text/markdown',
-        text: PLATFORM_DOCS_SUMMARY,
-      },
-    ],
-  };
+  if (request.params.uri === INVITATION_SCHEMA_URI) {
+    return {
+      contents: [{ uri: INVITATION_SCHEMA_URI, mimeType: 'text/markdown', text: INVITATION_SCHEMA_DOCS }],
+    };
+  }
+  throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${request.params.uri}`);
 });
 
 // ── Start ──────────────────────────────────────────────────────────────────────

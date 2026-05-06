@@ -2,7 +2,7 @@
 
 import React, { useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType, GalleryBlock as GalleryBlockType } from '@/types/invitation-template';
+import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType, GalleryBlock as GalleryBlockType, SpacerBlock as SpacerBlockType, EmbedBlock as EmbedBlockType } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
@@ -129,8 +129,8 @@ export default function TemplateRenderer({
         {templateDesign.blocks.map((block, index) => {
           // If we have pre-rendered HTML for this specific block, use it for instant paint
           const blockHtml = staticBlocks?.[block.id];
-          
-          if (blockHtml && (block.type === 'text' || block.type === 'image')) {
+
+          if (blockHtml && (block.type === 'text' || block.type === 'image' || block.type === 'spacer' || block.type === 'embed')) {
             return (
               <React.Fragment key={block.id}>
                 <div 
@@ -284,6 +284,22 @@ function TemplateBlock({
         url={buttonBlock.url}
         style={buttonBlock.style}
         language={language}
+      />
+    );
+  }
+
+  if (block.type === 'spacer') {
+    const spacerBlock = block as SpacerBlockType;
+    return <div style={{ height: spacerBlock.height, display: 'block' }} aria-hidden="true" />;
+  }
+
+  if (block.type === 'embed') {
+    const embedBlock = block as EmbedBlockType;
+    return (
+      <div
+        className="embed-block w-full overflow-hidden"
+        style={embedBlock.height ? { minHeight: embedBlock.height } : undefined}
+        dangerouslySetInnerHTML={{ __html: embedBlock.html }}
       />
     );
   }

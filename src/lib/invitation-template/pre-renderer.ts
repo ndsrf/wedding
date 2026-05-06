@@ -1,9 +1,11 @@
-import type { 
-  TemplateDesign, 
-  TemplateBlock, 
-  SupportedLanguage, 
-  TextBlock, 
-  ImageBlock
+import type {
+  TemplateDesign,
+  TemplateBlock,
+  SupportedLanguage,
+  TextBlock,
+  ImageBlock,
+  SpacerBlock,
+  EmbedBlock,
 } from '@/types/invitation-template';
 
 /**
@@ -19,7 +21,7 @@ export function preRenderTemplate(
   for (const lang of languages) {
     result[lang] = {};
     for (const block of design.blocks) {
-      if (block.type === 'text' || block.type === 'image') {
+      if (block.type === 'text' || block.type === 'image' || block.type === 'spacer' || block.type === 'embed') {
         result[lang][block.id] = renderBlockToHTML(block, lang);
       }
     }
@@ -53,6 +55,17 @@ function renderBlockToHTML(
       'text-align:center;';
 
     return `<div style="${alignmentStyle}margin:0;line-height:0;"><img src="${imageBlock.src}" alt="${imageBlock.alt || ''}" style="width:${zoom}%;height:auto;border-radius:0.5rem;display:inline-block;vertical-align:middle;margin:0;" /></div>`;
+  }
+
+  if (block.type === 'spacer') {
+    const spacerBlock = block as SpacerBlock;
+    return `<div style="height:${spacerBlock.height};display:block;" aria-hidden="true"></div>`;
+  }
+
+  if (block.type === 'embed') {
+    const embedBlock = block as EmbedBlock;
+    const heightStyle = embedBlock.height ? `min-height:${embedBlock.height};` : '';
+    return `<div class="embed-block" style="${heightStyle}width:100%;overflow:hidden;">${embedBlock.html}</div>`;
   }
 
   return '';
