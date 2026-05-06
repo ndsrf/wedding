@@ -31,11 +31,6 @@ export default function FamilyMemberCard({
 }: FamilyMemberCardProps) {
   const t = useTranslations();
 
-  const getMemberTypeLabel = (type: string) => {
-    const key = type.toLowerCase() as 'adult' | 'child' | 'infant';
-    return t(`guest.members.types.${key}`);
-  };
-
   return (
     <div className="border-2 border-gray-200 rounded-lg p-5 bg-white">
       {/* Member Info */}
