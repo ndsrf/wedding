@@ -175,19 +175,47 @@ export const getRSVPPageData = cache(async (
           gift_iban: wedding.gift_iban,
           transportation_question_enabled: wedding.transportation_question_enabled,
           transportation_question_text: wedding.transportation_question_text,
+          transportation_question_text_en: (wedding as Record<string, unknown>).transportation_question_text_en as string | null ?? null,
+          transportation_question_text_fr: (wedding as Record<string, unknown>).transportation_question_text_fr as string | null ?? null,
+          transportation_question_text_it: (wedding as Record<string, unknown>).transportation_question_text_it as string | null ?? null,
+          transportation_question_text_de: (wedding as Record<string, unknown>).transportation_question_text_de as string | null ?? null,
           dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
           extra_question_1_enabled: wedding.extra_question_1_enabled,
           extra_question_1_text: wedding.extra_question_1_text,
+          extra_question_1_text_en: (wedding as Record<string, unknown>).extra_question_1_text_en as string | null ?? null,
+          extra_question_1_text_fr: (wedding as Record<string, unknown>).extra_question_1_text_fr as string | null ?? null,
+          extra_question_1_text_it: (wedding as Record<string, unknown>).extra_question_1_text_it as string | null ?? null,
+          extra_question_1_text_de: (wedding as Record<string, unknown>).extra_question_1_text_de as string | null ?? null,
           extra_question_2_enabled: wedding.extra_question_2_enabled,
           extra_question_2_text: wedding.extra_question_2_text,
+          extra_question_2_text_en: (wedding as Record<string, unknown>).extra_question_2_text_en as string | null ?? null,
+          extra_question_2_text_fr: (wedding as Record<string, unknown>).extra_question_2_text_fr as string | null ?? null,
+          extra_question_2_text_it: (wedding as Record<string, unknown>).extra_question_2_text_it as string | null ?? null,
+          extra_question_2_text_de: (wedding as Record<string, unknown>).extra_question_2_text_de as string | null ?? null,
           extra_question_3_enabled: wedding.extra_question_3_enabled,
           extra_question_3_text: wedding.extra_question_3_text,
+          extra_question_3_text_en: (wedding as Record<string, unknown>).extra_question_3_text_en as string | null ?? null,
+          extra_question_3_text_fr: (wedding as Record<string, unknown>).extra_question_3_text_fr as string | null ?? null,
+          extra_question_3_text_it: (wedding as Record<string, unknown>).extra_question_3_text_it as string | null ?? null,
+          extra_question_3_text_de: (wedding as Record<string, unknown>).extra_question_3_text_de as string | null ?? null,
           extra_info_1_enabled: wedding.extra_info_1_enabled,
           extra_info_1_label: wedding.extra_info_1_label,
+          extra_info_1_label_en: (wedding as Record<string, unknown>).extra_info_1_label_en as string | null ?? null,
+          extra_info_1_label_fr: (wedding as Record<string, unknown>).extra_info_1_label_fr as string | null ?? null,
+          extra_info_1_label_it: (wedding as Record<string, unknown>).extra_info_1_label_it as string | null ?? null,
+          extra_info_1_label_de: (wedding as Record<string, unknown>).extra_info_1_label_de as string | null ?? null,
           extra_info_2_enabled: wedding.extra_info_2_enabled,
           extra_info_2_label: wedding.extra_info_2_label,
+          extra_info_2_label_en: (wedding as Record<string, unknown>).extra_info_2_label_en as string | null ?? null,
+          extra_info_2_label_fr: (wedding as Record<string, unknown>).extra_info_2_label_fr as string | null ?? null,
+          extra_info_2_label_it: (wedding as Record<string, unknown>).extra_info_2_label_it as string | null ?? null,
+          extra_info_2_label_de: (wedding as Record<string, unknown>).extra_info_2_label_de as string | null ?? null,
           extra_info_3_enabled: wedding.extra_info_3_enabled,
           extra_info_3_label: wedding.extra_info_3_label,
+          extra_info_3_label_en: (wedding as Record<string, unknown>).extra_info_3_label_en as string | null ?? null,
+          extra_info_3_label_fr: (wedding as Record<string, unknown>).extra_info_3_label_fr as string | null ?? null,
+          extra_info_3_label_it: (wedding as Record<string, unknown>).extra_info_3_label_it as string | null ?? null,
+          extra_info_3_label_de: (wedding as Record<string, unknown>).extra_info_3_label_de as string | null ?? null,
         },
         theme: themeData,
         ...(invitationTemplate && { 
@@ -224,6 +252,22 @@ export const getRSVPPageData = cache(async (
       (member) => member.attending !== null
     );
 
+    // Resolve question text to the family's preferred language with fallback:
+    // preferred language → EN → ES (base field) → any non-null variant
+    const lang = family.preferred_language.toLowerCase() as 'es' | 'en' | 'fr' | 'it' | 'de';
+    const w = resolvedCache.wedding;
+
+    function resolveText(
+      es: string | null,
+      en: string | null,
+      fr: string | null,
+      it: string | null,
+      de: string | null,
+    ): string | null {
+      const byLang: Record<string, string | null> = { es, en, fr, it, de };
+      return byLang[lang] || en || es || fr || it || de || null;
+    }
+
     // 4. Assemble final response
     const responseData: GuestRSVPPageData = {
       family: {
@@ -233,7 +277,16 @@ export const getRSVPPageData = cache(async (
           created_at: member.created_at,
         })),
       },
-      wedding: resolvedCache.wedding,
+      wedding: {
+        ...w,
+        transportation_question_text: resolveText(w.transportation_question_text, w.transportation_question_text_en, w.transportation_question_text_fr, w.transportation_question_text_it, w.transportation_question_text_de),
+        extra_question_1_text: resolveText(w.extra_question_1_text, w.extra_question_1_text_en, w.extra_question_1_text_fr, w.extra_question_1_text_it, w.extra_question_1_text_de),
+        extra_question_2_text: resolveText(w.extra_question_2_text, w.extra_question_2_text_en, w.extra_question_2_text_fr, w.extra_question_2_text_it, w.extra_question_2_text_de),
+        extra_question_3_text: resolveText(w.extra_question_3_text, w.extra_question_3_text_en, w.extra_question_3_text_fr, w.extra_question_3_text_it, w.extra_question_3_text_de),
+        extra_info_1_label: resolveText(w.extra_info_1_label, w.extra_info_1_label_en, w.extra_info_1_label_fr, w.extra_info_1_label_it, w.extra_info_1_label_de),
+        extra_info_2_label: resolveText(w.extra_info_2_label, w.extra_info_2_label_en, w.extra_info_2_label_fr, w.extra_info_2_label_it, w.extra_info_2_label_de),
+        extra_info_3_label: resolveText(w.extra_info_3_label, w.extra_info_3_label_en, w.extra_info_3_label_fr, w.extra_info_3_label_it, w.extra_info_3_label_de),
+      },
       theme: resolvedCache.theme,
       ...(resolvedCache.invitation_template && { invitation_template: resolvedCache.invitation_template }),
       rsvp_cutoff_passed,

@@ -2031,7 +2031,8 @@
         "cancel": "Annuler",
         "save": "Enregistrer la Configuration",
         "saving": "Enregistrement...",
-        "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer."
+        "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer.",
+        "questionLanguageHint": "Saisissez le texte de la question dans chaque langue (ES obligatoire ; les autres sont facultatifs)"
       },
       "dangerZone": {
         "title": "Zone de danger",

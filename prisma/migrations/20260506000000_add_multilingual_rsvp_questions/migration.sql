@@ -1,0 +1,32 @@
+-- AlterTable: Add multilingual variants (EN, FR, IT, DE) for RSVP question text fields
+-- Spanish uses the existing fields (transportation_question_text, extra_question_*_text, extra_info_*_label)
+
+ALTER TABLE "weddings"
+  ADD COLUMN IF NOT EXISTS "transportation_question_text_en" TEXT,
+  ADD COLUMN IF NOT EXISTS "transportation_question_text_fr" TEXT,
+  ADD COLUMN IF NOT EXISTS "transportation_question_text_it" TEXT,
+  ADD COLUMN IF NOT EXISTS "transportation_question_text_de" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_1_text_en" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_1_text_fr" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_1_text_it" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_1_text_de" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_2_text_en" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_2_text_fr" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_2_text_it" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_2_text_de" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_3_text_en" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_3_text_fr" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_3_text_it" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_question_3_text_de" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_1_label_en" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_1_label_fr" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_1_label_it" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_1_label_de" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_2_label_en" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_2_label_fr" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_2_label_it" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_2_label_de" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_3_label_en" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_3_label_fr" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_3_label_it" TEXT,
+  ADD COLUMN IF NOT EXISTS "extra_info_3_label_de" TEXT;

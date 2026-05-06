@@ -12,6 +12,16 @@ import type { UpdateWeddingConfigRequest } from '@/types/api';
 import type { Wedding } from '@/types/models';
 import { PaymentMode } from '@prisma/client';
 
+type QuestionLanguage = 'es' | 'en' | 'fr' | 'it' | 'de';
+
+const QUESTION_LANGUAGES: { code: QuestionLanguage; label: string; flag: string }[] = [
+  { code: 'es', label: 'ES', flag: '🇪🇸' },
+  { code: 'en', label: 'EN', flag: '🇬🇧' },
+  { code: 'fr', label: 'FR', flag: '🇫🇷' },
+  { code: 'it', label: 'IT', flag: '🇮🇹' },
+  { code: 'de', label: 'DE', flag: '🇩🇪' },
+];
+
 interface RsvpSettingsFormData {
   payment_tracking_mode: PaymentMode;
   gift_iban: string;
@@ -21,25 +31,112 @@ interface RsvpSettingsFormData {
   additional_info: string;
   transportation_question_enabled: boolean;
   transportation_question_text: string;
+  transportation_question_text_en: string;
+  transportation_question_text_fr: string;
+  transportation_question_text_it: string;
+  transportation_question_text_de: string;
   dietary_restrictions_enabled: boolean;
   extra_question_1_enabled: boolean;
   extra_question_1_text: string;
+  extra_question_1_text_en: string;
+  extra_question_1_text_fr: string;
+  extra_question_1_text_it: string;
+  extra_question_1_text_de: string;
   extra_question_2_enabled: boolean;
   extra_question_2_text: string;
+  extra_question_2_text_en: string;
+  extra_question_2_text_fr: string;
+  extra_question_2_text_it: string;
+  extra_question_2_text_de: string;
   extra_question_3_enabled: boolean;
   extra_question_3_text: string;
+  extra_question_3_text_en: string;
+  extra_question_3_text_fr: string;
+  extra_question_3_text_it: string;
+  extra_question_3_text_de: string;
   extra_info_1_enabled: boolean;
   extra_info_1_label: string;
+  extra_info_1_label_en: string;
+  extra_info_1_label_fr: string;
+  extra_info_1_label_it: string;
+  extra_info_1_label_de: string;
   extra_info_2_enabled: boolean;
   extra_info_2_label: string;
+  extra_info_2_label_en: string;
+  extra_info_2_label_fr: string;
+  extra_info_2_label_it: string;
+  extra_info_2_label_de: string;
   extra_info_3_enabled: boolean;
   extra_info_3_label: string;
+  extra_info_3_label_en: string;
+  extra_info_3_label_fr: string;
+  extra_info_3_label_it: string;
+  extra_info_3_label_de: string;
 }
 
 interface RsvpSettingsFormProps {
   wedding: Wedding;
   onSubmit: (data: UpdateWeddingConfigRequest) => Promise<void>;
   onCancel: () => void;
+}
+
+// Language tabs component for entering multilingual question text
+function LanguageTabs({
+  values,
+  onChange,
+  placeholder,
+}: {
+  values: Record<QuestionLanguage, string>;
+  onChange: (lang: QuestionLanguage, value: string) => void;
+  placeholder?: string;
+}) {
+  const [activeTab, setActiveTab] = useState<QuestionLanguage>('es');
+
+  return (
+    <div className="mt-3 ml-6">
+      <div className="flex border-b border-gray-200 mb-2">
+        {QUESTION_LANGUAGES.map(({ code, label, flag }) => (
+          <button
+            key={code}
+            type="button"
+            onClick={() => setActiveTab(code)}
+            className={`px-3 py-1.5 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === code
+                ? 'border-purple-600 text-purple-700'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            {flag} {label}
+          </button>
+        ))}
+      </div>
+      <input
+        type="text"
+        value={values[activeTab]}
+        onChange={(e) => onChange(activeTab, e.target.value)}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+// Helper to get language-specific values for a question field prefix (e.g. "extra_question_1_text")
+function getTextValues(
+  formData: RsvpSettingsFormData,
+  esKey: keyof RsvpSettingsFormData,
+  enKey: keyof RsvpSettingsFormData,
+  frKey: keyof RsvpSettingsFormData,
+  itKey: keyof RsvpSettingsFormData,
+  deKey: keyof RsvpSettingsFormData,
+): Record<QuestionLanguage, string> {
+  return {
+    es: formData[esKey] as string,
+    en: formData[enKey] as string,
+    fr: formData[frKey] as string,
+    it: formData[itKey] as string,
+    de: formData[deKey] as string,
+  };
 }
 
 export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFormProps) {
@@ -53,19 +150,47 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
     additional_info: wedding.additional_info || '',
     transportation_question_enabled: wedding.transportation_question_enabled,
     transportation_question_text: wedding.transportation_question_text || '',
+    transportation_question_text_en: (wedding as Record<string, unknown>).transportation_question_text_en as string || '',
+    transportation_question_text_fr: (wedding as Record<string, unknown>).transportation_question_text_fr as string || '',
+    transportation_question_text_it: (wedding as Record<string, unknown>).transportation_question_text_it as string || '',
+    transportation_question_text_de: (wedding as Record<string, unknown>).transportation_question_text_de as string || '',
     dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
     extra_question_1_enabled: wedding.extra_question_1_enabled,
     extra_question_1_text: wedding.extra_question_1_text || '',
+    extra_question_1_text_en: (wedding as Record<string, unknown>).extra_question_1_text_en as string || '',
+    extra_question_1_text_fr: (wedding as Record<string, unknown>).extra_question_1_text_fr as string || '',
+    extra_question_1_text_it: (wedding as Record<string, unknown>).extra_question_1_text_it as string || '',
+    extra_question_1_text_de: (wedding as Record<string, unknown>).extra_question_1_text_de as string || '',
     extra_question_2_enabled: wedding.extra_question_2_enabled,
     extra_question_2_text: wedding.extra_question_2_text || '',
+    extra_question_2_text_en: (wedding as Record<string, unknown>).extra_question_2_text_en as string || '',
+    extra_question_2_text_fr: (wedding as Record<string, unknown>).extra_question_2_text_fr as string || '',
+    extra_question_2_text_it: (wedding as Record<string, unknown>).extra_question_2_text_it as string || '',
+    extra_question_2_text_de: (wedding as Record<string, unknown>).extra_question_2_text_de as string || '',
     extra_question_3_enabled: wedding.extra_question_3_enabled,
     extra_question_3_text: wedding.extra_question_3_text || '',
+    extra_question_3_text_en: (wedding as Record<string, unknown>).extra_question_3_text_en as string || '',
+    extra_question_3_text_fr: (wedding as Record<string, unknown>).extra_question_3_text_fr as string || '',
+    extra_question_3_text_it: (wedding as Record<string, unknown>).extra_question_3_text_it as string || '',
+    extra_question_3_text_de: (wedding as Record<string, unknown>).extra_question_3_text_de as string || '',
     extra_info_1_enabled: wedding.extra_info_1_enabled,
     extra_info_1_label: wedding.extra_info_1_label || '',
+    extra_info_1_label_en: (wedding as Record<string, unknown>).extra_info_1_label_en as string || '',
+    extra_info_1_label_fr: (wedding as Record<string, unknown>).extra_info_1_label_fr as string || '',
+    extra_info_1_label_it: (wedding as Record<string, unknown>).extra_info_1_label_it as string || '',
+    extra_info_1_label_de: (wedding as Record<string, unknown>).extra_info_1_label_de as string || '',
     extra_info_2_enabled: wedding.extra_info_2_enabled,
     extra_info_2_label: wedding.extra_info_2_label || '',
+    extra_info_2_label_en: (wedding as Record<string, unknown>).extra_info_2_label_en as string || '',
+    extra_info_2_label_fr: (wedding as Record<string, unknown>).extra_info_2_label_fr as string || '',
+    extra_info_2_label_it: (wedding as Record<string, unknown>).extra_info_2_label_it as string || '',
+    extra_info_2_label_de: (wedding as Record<string, unknown>).extra_info_2_label_de as string || '',
     extra_info_3_enabled: wedding.extra_info_3_enabled,
     extra_info_3_label: wedding.extra_info_3_label || '',
+    extra_info_3_label_en: (wedding as Record<string, unknown>).extra_info_3_label_en as string || '',
+    extra_info_3_label_fr: (wedding as Record<string, unknown>).extra_info_3_label_fr as string || '',
+    extra_info_3_label_it: (wedding as Record<string, unknown>).extra_info_3_label_it as string || '',
+    extra_info_3_label_de: (wedding as Record<string, unknown>).extra_info_3_label_de as string || '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,31 +229,55 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
         transportation_question_text: formData.transportation_question_enabled
           ? formData.transportation_question_text || null
           : null,
+        transportation_question_text_en: formData.transportation_question_enabled
+          ? formData.transportation_question_text_en || null
+          : null,
+        transportation_question_text_fr: formData.transportation_question_enabled
+          ? formData.transportation_question_text_fr || null
+          : null,
+        transportation_question_text_it: formData.transportation_question_enabled
+          ? formData.transportation_question_text_it || null
+          : null,
+        transportation_question_text_de: formData.transportation_question_enabled
+          ? formData.transportation_question_text_de || null
+          : null,
         dietary_restrictions_enabled: formData.dietary_restrictions_enabled,
         extra_question_1_enabled: formData.extra_question_1_enabled,
-        extra_question_1_text: formData.extra_question_1_enabled
-          ? formData.extra_question_1_text || null
-          : null,
+        extra_question_1_text: formData.extra_question_1_enabled ? formData.extra_question_1_text || null : null,
+        extra_question_1_text_en: formData.extra_question_1_enabled ? formData.extra_question_1_text_en || null : null,
+        extra_question_1_text_fr: formData.extra_question_1_enabled ? formData.extra_question_1_text_fr || null : null,
+        extra_question_1_text_it: formData.extra_question_1_enabled ? formData.extra_question_1_text_it || null : null,
+        extra_question_1_text_de: formData.extra_question_1_enabled ? formData.extra_question_1_text_de || null : null,
         extra_question_2_enabled: formData.extra_question_2_enabled,
-        extra_question_2_text: formData.extra_question_2_enabled
-          ? formData.extra_question_2_text || null
-          : null,
+        extra_question_2_text: formData.extra_question_2_enabled ? formData.extra_question_2_text || null : null,
+        extra_question_2_text_en: formData.extra_question_2_enabled ? formData.extra_question_2_text_en || null : null,
+        extra_question_2_text_fr: formData.extra_question_2_enabled ? formData.extra_question_2_text_fr || null : null,
+        extra_question_2_text_it: formData.extra_question_2_enabled ? formData.extra_question_2_text_it || null : null,
+        extra_question_2_text_de: formData.extra_question_2_enabled ? formData.extra_question_2_text_de || null : null,
         extra_question_3_enabled: formData.extra_question_3_enabled,
-        extra_question_3_text: formData.extra_question_3_enabled
-          ? formData.extra_question_3_text || null
-          : null,
+        extra_question_3_text: formData.extra_question_3_enabled ? formData.extra_question_3_text || null : null,
+        extra_question_3_text_en: formData.extra_question_3_enabled ? formData.extra_question_3_text_en || null : null,
+        extra_question_3_text_fr: formData.extra_question_3_enabled ? formData.extra_question_3_text_fr || null : null,
+        extra_question_3_text_it: formData.extra_question_3_enabled ? formData.extra_question_3_text_it || null : null,
+        extra_question_3_text_de: formData.extra_question_3_enabled ? formData.extra_question_3_text_de || null : null,
         extra_info_1_enabled: formData.extra_info_1_enabled,
-        extra_info_1_label: formData.extra_info_1_enabled
-          ? formData.extra_info_1_label || null
-          : null,
+        extra_info_1_label: formData.extra_info_1_enabled ? formData.extra_info_1_label || null : null,
+        extra_info_1_label_en: formData.extra_info_1_enabled ? formData.extra_info_1_label_en || null : null,
+        extra_info_1_label_fr: formData.extra_info_1_enabled ? formData.extra_info_1_label_fr || null : null,
+        extra_info_1_label_it: formData.extra_info_1_enabled ? formData.extra_info_1_label_it || null : null,
+        extra_info_1_label_de: formData.extra_info_1_enabled ? formData.extra_info_1_label_de || null : null,
         extra_info_2_enabled: formData.extra_info_2_enabled,
-        extra_info_2_label: formData.extra_info_2_enabled
-          ? formData.extra_info_2_label || null
-          : null,
+        extra_info_2_label: formData.extra_info_2_enabled ? formData.extra_info_2_label || null : null,
+        extra_info_2_label_en: formData.extra_info_2_enabled ? formData.extra_info_2_label_en || null : null,
+        extra_info_2_label_fr: formData.extra_info_2_enabled ? formData.extra_info_2_label_fr || null : null,
+        extra_info_2_label_it: formData.extra_info_2_enabled ? formData.extra_info_2_label_it || null : null,
+        extra_info_2_label_de: formData.extra_info_2_enabled ? formData.extra_info_2_label_de || null : null,
         extra_info_3_enabled: formData.extra_info_3_enabled,
-        extra_info_3_label: formData.extra_info_3_enabled
-          ? formData.extra_info_3_label || null
-          : null,
+        extra_info_3_label: formData.extra_info_3_enabled ? formData.extra_info_3_label || null : null,
+        extra_info_3_label_en: formData.extra_info_3_enabled ? formData.extra_info_3_label_en || null : null,
+        extra_info_3_label_fr: formData.extra_info_3_enabled ? formData.extra_info_3_label_fr || null : null,
+        extra_info_3_label_it: formData.extra_info_3_enabled ? formData.extra_info_3_label_it || null : null,
+        extra_info_3_label_de: formData.extra_info_3_enabled ? formData.extra_info_3_label_de || null : null,
       };
 
       await onSubmit(updateData);
@@ -145,6 +294,22 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
     value: RsvpSettingsFormData[K]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Helper to handle language tab changes for a group of fields
+  const handleLangChange = (
+    lang: QuestionLanguage,
+    value: string,
+    esKey: keyof RsvpSettingsFormData,
+    enKey: keyof RsvpSettingsFormData,
+    frKey: keyof RsvpSettingsFormData,
+    itKey: keyof RsvpSettingsFormData,
+    deKey: keyof RsvpSettingsFormData,
+  ) => {
+    const keyMap: Record<QuestionLanguage, keyof RsvpSettingsFormData> = {
+      es: esKey, en: enKey, fr: frKey, it: itKey, de: deKey,
+    };
+    handleChange(keyMap[lang], value as RsvpSettingsFormData[typeof keyMap[typeof lang]]);
   };
 
   return (
@@ -212,18 +377,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
             </span>
           </label>
           {formData.transportation_question_enabled && (
-            <div className="mt-3 ml-6">
-              <label className="block text-sm text-gray-600 mb-1">
-                {t('transportationText')}
-              </label>
-              <input
-                type="text"
-                value={formData.transportation_question_text}
-                onChange={(e) => handleChange('transportation_question_text', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+            <>
+              <p className="mt-2 ml-6 text-xs text-gray-500">{t('questionLanguageHint')}</p>
+              <LanguageTabs
+                values={getTextValues(formData,
+                  'transportation_question_text', 'transportation_question_text_en',
+                  'transportation_question_text_fr', 'transportation_question_text_it',
+                  'transportation_question_text_de')}
+                onChange={(lang, value) => handleLangChange(lang, value,
+                  'transportation_question_text', 'transportation_question_text_en',
+                  'transportation_question_text_fr', 'transportation_question_text_it',
+                  'transportation_question_text_de')}
                 placeholder={t('transportationPlaceholder')}
               />
-            </div>
+            </>
           )}
         </div>
 
@@ -269,15 +436,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
               <span className="ml-2 text-sm text-gray-700">{t('enableQuestion', { number: 1 })}</span>
             </label>
             {formData.extra_question_1_enabled && (
-              <div className="mt-3 ml-6">
-                <input
-                  type="text"
-                  value={formData.extra_question_1_text}
-                  onChange={(e) => handleChange('extra_question_1_text', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+              <>
+                <p className="mt-2 ml-6 text-xs text-gray-500">{t('questionLanguageHint')}</p>
+                <LanguageTabs
+                  values={getTextValues(formData,
+                    'extra_question_1_text', 'extra_question_1_text_en',
+                    'extra_question_1_text_fr', 'extra_question_1_text_it',
+                    'extra_question_1_text_de')}
+                  onChange={(lang, value) => handleLangChange(lang, value,
+                    'extra_question_1_text', 'extra_question_1_text_en',
+                    'extra_question_1_text_fr', 'extra_question_1_text_it',
+                    'extra_question_1_text_de')}
                   placeholder={t('questionPlaceholder')}
                 />
-              </div>
+              </>
             )}
           </div>
 
@@ -293,15 +465,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
               <span className="ml-2 text-sm text-gray-700">{t('enableQuestion', { number: 2 })}</span>
             </label>
             {formData.extra_question_2_enabled && (
-              <div className="mt-3 ml-6">
-                <input
-                  type="text"
-                  value={formData.extra_question_2_text}
-                  onChange={(e) => handleChange('extra_question_2_text', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+              <>
+                <p className="mt-2 ml-6 text-xs text-gray-500">{t('questionLanguageHint')}</p>
+                <LanguageTabs
+                  values={getTextValues(formData,
+                    'extra_question_2_text', 'extra_question_2_text_en',
+                    'extra_question_2_text_fr', 'extra_question_2_text_it',
+                    'extra_question_2_text_de')}
+                  onChange={(lang, value) => handleLangChange(lang, value,
+                    'extra_question_2_text', 'extra_question_2_text_en',
+                    'extra_question_2_text_fr', 'extra_question_2_text_it',
+                    'extra_question_2_text_de')}
                   placeholder={t('questionPlaceholder')}
                 />
-              </div>
+              </>
             )}
           </div>
 
@@ -317,15 +494,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
               <span className="ml-2 text-sm text-gray-700">{t('enableQuestion', { number: 3 })}</span>
             </label>
             {formData.extra_question_3_enabled && (
-              <div className="mt-3 ml-6">
-                <input
-                  type="text"
-                  value={formData.extra_question_3_text}
-                  onChange={(e) => handleChange('extra_question_3_text', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+              <>
+                <p className="mt-2 ml-6 text-xs text-gray-500">{t('questionLanguageHint')}</p>
+                <LanguageTabs
+                  values={getTextValues(formData,
+                    'extra_question_3_text', 'extra_question_3_text_en',
+                    'extra_question_3_text_fr', 'extra_question_3_text_it',
+                    'extra_question_3_text_de')}
+                  onChange={(lang, value) => handleLangChange(lang, value,
+                    'extra_question_3_text', 'extra_question_3_text_en',
+                    'extra_question_3_text_fr', 'extra_question_3_text_it',
+                    'extra_question_3_text_de')}
                   placeholder={t('questionPlaceholder')}
                 />
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -349,16 +531,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
               <span className="ml-2 text-sm text-gray-700">{t('enableInfo', { number: 1 })}</span>
             </label>
             {formData.extra_info_1_enabled && (
-              <div className="mt-3 ml-6">
-                <label className="block text-sm text-gray-600 mb-1">{t('infoLabel')}</label>
-                <input
-                  type="text"
-                  value={formData.extra_info_1_label}
-                  onChange={(e) => handleChange('extra_info_1_label', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+              <>
+                <p className="mt-2 ml-6 text-xs text-gray-500">{t('questionLanguageHint')}</p>
+                <LanguageTabs
+                  values={getTextValues(formData,
+                    'extra_info_1_label', 'extra_info_1_label_en',
+                    'extra_info_1_label_fr', 'extra_info_1_label_it',
+                    'extra_info_1_label_de')}
+                  onChange={(lang, value) => handleLangChange(lang, value,
+                    'extra_info_1_label', 'extra_info_1_label_en',
+                    'extra_info_1_label_fr', 'extra_info_1_label_it',
+                    'extra_info_1_label_de')}
                   placeholder={t('infoPlaceholder')}
                 />
-              </div>
+              </>
             )}
           </div>
 
@@ -374,16 +560,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
               <span className="ml-2 text-sm text-gray-700">{t('enableInfo', { number: 2 })}</span>
             </label>
             {formData.extra_info_2_enabled && (
-              <div className="mt-3 ml-6">
-                <label className="block text-sm text-gray-600 mb-1">{t('infoLabel')}</label>
-                <input
-                  type="text"
-                  value={formData.extra_info_2_label}
-                  onChange={(e) => handleChange('extra_info_2_label', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+              <>
+                <p className="mt-2 ml-6 text-xs text-gray-500">{t('questionLanguageHint')}</p>
+                <LanguageTabs
+                  values={getTextValues(formData,
+                    'extra_info_2_label', 'extra_info_2_label_en',
+                    'extra_info_2_label_fr', 'extra_info_2_label_it',
+                    'extra_info_2_label_de')}
+                  onChange={(lang, value) => handleLangChange(lang, value,
+                    'extra_info_2_label', 'extra_info_2_label_en',
+                    'extra_info_2_label_fr', 'extra_info_2_label_it',
+                    'extra_info_2_label_de')}
                   placeholder={t('infoPlaceholder')}
                 />
-              </div>
+              </>
             )}
           </div>
 
@@ -399,16 +589,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
               <span className="ml-2 text-sm text-gray-700">{t('enableInfo', { number: 3 })}</span>
             </label>
             {formData.extra_info_3_enabled && (
-              <div className="mt-3 ml-6">
-                <label className="block text-sm text-gray-600 mb-1">{t('infoLabel')}</label>
-                <input
-                  type="text"
-                  value={formData.extra_info_3_label}
-                  onChange={(e) => handleChange('extra_info_3_label', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+              <>
+                <p className="mt-2 ml-6 text-xs text-gray-500">{t('questionLanguageHint')}</p>
+                <LanguageTabs
+                  values={getTextValues(formData,
+                    'extra_info_3_label', 'extra_info_3_label_en',
+                    'extra_info_3_label_fr', 'extra_info_3_label_it',
+                    'extra_info_3_label_de')}
+                  onChange={(lang, value) => handleLangChange(lang, value,
+                    'extra_info_3_label', 'extra_info_3_label_en',
+                    'extra_info_3_label_fr', 'extra_info_3_label_it',
+                    'extra_info_3_label_de')}
                   placeholder={t('infoPlaceholder')}
                 />
-              </div>
+              </>
             )}
           </div>
         </div>

@@ -181,22 +181,50 @@ model Wedding {
   updated_by                      String?
   transportation_question_enabled Boolean            @default(false)
   transportation_question_text    String?
+  transportation_question_text_en String?
+  transportation_question_text_fr String?
+  transportation_question_text_it String?
+  transportation_question_text_de String?
   dietary_restrictions_enabled    Boolean            @default(false)
   save_the_date_enabled           Boolean            @default(false)
   whatsapp_mode                   WhatsAppMode       @default(BUSINESS)
   short_url_initials              String?            @unique
   extra_question_1_enabled        Boolean            @default(false)
   extra_question_1_text           String?
+  extra_question_1_text_en        String?
+  extra_question_1_text_fr        String?
+  extra_question_1_text_it        String?
+  extra_question_1_text_de        String?
   extra_question_2_enabled        Boolean            @default(false)
   extra_question_2_text           String?
+  extra_question_2_text_en        String?
+  extra_question_2_text_fr        String?
+  extra_question_2_text_it        String?
+  extra_question_2_text_de        String?
   extra_question_3_enabled        Boolean            @default(false)
   extra_question_3_text           String?
+  extra_question_3_text_en        String?
+  extra_question_3_text_fr        String?
+  extra_question_3_text_it        String?
+  extra_question_3_text_de        String?
   extra_info_1_enabled            Boolean            @default(false)
   extra_info_1_label              String?
+  extra_info_1_label_en           String?
+  extra_info_1_label_fr           String?
+  extra_info_1_label_it           String?
+  extra_info_1_label_de           String?
   extra_info_2_enabled            Boolean            @default(false)
   extra_info_2_label              String?
+  extra_info_2_label_en           String?
+  extra_info_2_label_fr           String?
+  extra_info_2_label_it           String?
+  extra_info_2_label_de           String?
   extra_info_3_enabled            Boolean            @default(false)
   extra_info_3_label              String?
+  extra_info_3_label_en           String?
+  extra_info_3_label_fr           String?
+  extra_info_3_label_it           String?
+  extra_info_3_label_de           String?
   deleted_at                      DateTime?
   deleted_by                      String?
   license_deleted                 Boolean            @default(false)  // Deleted due to license downgrade; cannot be restored

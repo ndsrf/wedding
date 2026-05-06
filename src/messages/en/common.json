@@ -2392,7 +2392,8 @@
         "submitError": "Failed to save configuration. Please try again.",
         "invitationUrl": "General Invitation URL",
         "copyUrl": "Copy to Clipboard",
-        "copySuccess": "URL copied!"
+        "copySuccess": "URL copied!",
+        "questionLanguageHint": "Enter the question text for each language (ES is required; others are optional)"
       },
       "dangerZone": {
         "title": "Danger Zone",

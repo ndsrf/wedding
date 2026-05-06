@@ -338,6 +338,10 @@ export interface UpdateWeddingConfigRequest {
   // RSVP Configuration - Transportation question
   transportation_question_enabled?: boolean;
   transportation_question_text?: string | null;
+  transportation_question_text_en?: string | null;
+  transportation_question_text_fr?: string | null;
+  transportation_question_text_it?: string | null;
+  transportation_question_text_de?: string | null;
 
   // RSVP Configuration - Dietary restrictions
   dietary_restrictions_enabled?: boolean;
@@ -348,18 +352,42 @@ export interface UpdateWeddingConfigRequest {
   // RSVP Configuration - Extra Yes/No questions (up to 3)
   extra_question_1_enabled?: boolean;
   extra_question_1_text?: string | null;
+  extra_question_1_text_en?: string | null;
+  extra_question_1_text_fr?: string | null;
+  extra_question_1_text_it?: string | null;
+  extra_question_1_text_de?: string | null;
   extra_question_2_enabled?: boolean;
   extra_question_2_text?: string | null;
+  extra_question_2_text_en?: string | null;
+  extra_question_2_text_fr?: string | null;
+  extra_question_2_text_it?: string | null;
+  extra_question_2_text_de?: string | null;
   extra_question_3_enabled?: boolean;
   extra_question_3_text?: string | null;
+  extra_question_3_text_en?: string | null;
+  extra_question_3_text_fr?: string | null;
+  extra_question_3_text_it?: string | null;
+  extra_question_3_text_de?: string | null;
 
   // RSVP Configuration - Extra mandatory info fields (up to 3)
   extra_info_1_enabled?: boolean;
   extra_info_1_label?: string | null;
+  extra_info_1_label_en?: string | null;
+  extra_info_1_label_fr?: string | null;
+  extra_info_1_label_it?: string | null;
+  extra_info_1_label_de?: string | null;
   extra_info_2_enabled?: boolean;
   extra_info_2_label?: string | null;
+  extra_info_2_label_en?: string | null;
+  extra_info_2_label_fr?: string | null;
+  extra_info_2_label_it?: string | null;
+  extra_info_2_label_de?: string | null;
   extra_info_3_enabled?: boolean;
   extra_info_3_label?: string | null;
+  extra_info_3_label_en?: string | null;
+  extra_info_3_label_fr?: string | null;
+  extra_info_3_label_it?: string | null;
+  extra_info_3_label_de?: string | null;
 }
 
 export type UpdateWeddingConfigResponse = APIResponse<Wedding>;

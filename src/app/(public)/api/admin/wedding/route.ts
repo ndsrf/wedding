@@ -50,6 +50,10 @@ const updateWeddingConfigSchema = z.object({
   // RSVP Configuration - Transportation question
   transportation_question_enabled: z.boolean().optional(),
   transportation_question_text: z.string().nullable().optional(),
+  transportation_question_text_en: z.string().nullable().optional(),
+  transportation_question_text_fr: z.string().nullable().optional(),
+  transportation_question_text_it: z.string().nullable().optional(),
+  transportation_question_text_de: z.string().nullable().optional(),
 
   // RSVP Configuration - Dietary restrictions
   dietary_restrictions_enabled: z.boolean().optional(),
@@ -57,18 +61,42 @@ const updateWeddingConfigSchema = z.object({
   // RSVP Configuration - Extra Yes/No questions (up to 3)
   extra_question_1_enabled: z.boolean().optional(),
   extra_question_1_text: z.string().nullable().optional(),
+  extra_question_1_text_en: z.string().nullable().optional(),
+  extra_question_1_text_fr: z.string().nullable().optional(),
+  extra_question_1_text_it: z.string().nullable().optional(),
+  extra_question_1_text_de: z.string().nullable().optional(),
   extra_question_2_enabled: z.boolean().optional(),
   extra_question_2_text: z.string().nullable().optional(),
+  extra_question_2_text_en: z.string().nullable().optional(),
+  extra_question_2_text_fr: z.string().nullable().optional(),
+  extra_question_2_text_it: z.string().nullable().optional(),
+  extra_question_2_text_de: z.string().nullable().optional(),
   extra_question_3_enabled: z.boolean().optional(),
   extra_question_3_text: z.string().nullable().optional(),
+  extra_question_3_text_en: z.string().nullable().optional(),
+  extra_question_3_text_fr: z.string().nullable().optional(),
+  extra_question_3_text_it: z.string().nullable().optional(),
+  extra_question_3_text_de: z.string().nullable().optional(),
 
   // RSVP Configuration - Extra mandatory info fields (up to 3)
   extra_info_1_enabled: z.boolean().optional(),
   extra_info_1_label: z.string().nullable().optional(),
+  extra_info_1_label_en: z.string().nullable().optional(),
+  extra_info_1_label_fr: z.string().nullable().optional(),
+  extra_info_1_label_it: z.string().nullable().optional(),
+  extra_info_1_label_de: z.string().nullable().optional(),
   extra_info_2_enabled: z.boolean().optional(),
   extra_info_2_label: z.string().nullable().optional(),
+  extra_info_2_label_en: z.string().nullable().optional(),
+  extra_info_2_label_fr: z.string().nullable().optional(),
+  extra_info_2_label_it: z.string().nullable().optional(),
+  extra_info_2_label_de: z.string().nullable().optional(),
   extra_info_3_enabled: z.boolean().optional(),
   extra_info_3_label: z.string().nullable().optional(),
+  extra_info_3_label_en: z.string().nullable().optional(),
+  extra_info_3_label_fr: z.string().nullable().optional(),
+  extra_info_3_label_it: z.string().nullable().optional(),
+  extra_info_3_label_de: z.string().nullable().optional(),
 });
 
 /**
@@ -263,21 +291,49 @@ export async function GET() {
       // RSVP Configuration fields
       transportation_question_enabled: wedding.transportation_question_enabled,
       transportation_question_text: wedding.transportation_question_text,
+      transportation_question_text_en: (wedding as Record<string, unknown>).transportation_question_text_en as string | null ?? null,
+      transportation_question_text_fr: (wedding as Record<string, unknown>).transportation_question_text_fr as string | null ?? null,
+      transportation_question_text_it: (wedding as Record<string, unknown>).transportation_question_text_it as string | null ?? null,
+      transportation_question_text_de: (wedding as Record<string, unknown>).transportation_question_text_de as string | null ?? null,
       dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
       save_the_date_enabled: wedding.save_the_date_enabled,
       whatsapp_mode: wedding.whatsapp_mode,
       extra_question_1_enabled: wedding.extra_question_1_enabled,
       extra_question_1_text: wedding.extra_question_1_text,
+      extra_question_1_text_en: (wedding as Record<string, unknown>).extra_question_1_text_en as string | null ?? null,
+      extra_question_1_text_fr: (wedding as Record<string, unknown>).extra_question_1_text_fr as string | null ?? null,
+      extra_question_1_text_it: (wedding as Record<string, unknown>).extra_question_1_text_it as string | null ?? null,
+      extra_question_1_text_de: (wedding as Record<string, unknown>).extra_question_1_text_de as string | null ?? null,
       extra_question_2_enabled: wedding.extra_question_2_enabled,
       extra_question_2_text: wedding.extra_question_2_text,
+      extra_question_2_text_en: (wedding as Record<string, unknown>).extra_question_2_text_en as string | null ?? null,
+      extra_question_2_text_fr: (wedding as Record<string, unknown>).extra_question_2_text_fr as string | null ?? null,
+      extra_question_2_text_it: (wedding as Record<string, unknown>).extra_question_2_text_it as string | null ?? null,
+      extra_question_2_text_de: (wedding as Record<string, unknown>).extra_question_2_text_de as string | null ?? null,
       extra_question_3_enabled: wedding.extra_question_3_enabled,
       extra_question_3_text: wedding.extra_question_3_text,
+      extra_question_3_text_en: (wedding as Record<string, unknown>).extra_question_3_text_en as string | null ?? null,
+      extra_question_3_text_fr: (wedding as Record<string, unknown>).extra_question_3_text_fr as string | null ?? null,
+      extra_question_3_text_it: (wedding as Record<string, unknown>).extra_question_3_text_it as string | null ?? null,
+      extra_question_3_text_de: (wedding as Record<string, unknown>).extra_question_3_text_de as string | null ?? null,
       extra_info_1_enabled: wedding.extra_info_1_enabled,
       extra_info_1_label: wedding.extra_info_1_label,
+      extra_info_1_label_en: (wedding as Record<string, unknown>).extra_info_1_label_en as string | null ?? null,
+      extra_info_1_label_fr: (wedding as Record<string, unknown>).extra_info_1_label_fr as string | null ?? null,
+      extra_info_1_label_it: (wedding as Record<string, unknown>).extra_info_1_label_it as string | null ?? null,
+      extra_info_1_label_de: (wedding as Record<string, unknown>).extra_info_1_label_de as string | null ?? null,
       extra_info_2_enabled: wedding.extra_info_2_enabled,
       extra_info_2_label: wedding.extra_info_2_label,
+      extra_info_2_label_en: (wedding as Record<string, unknown>).extra_info_2_label_en as string | null ?? null,
+      extra_info_2_label_fr: (wedding as Record<string, unknown>).extra_info_2_label_fr as string | null ?? null,
+      extra_info_2_label_it: (wedding as Record<string, unknown>).extra_info_2_label_it as string | null ?? null,
+      extra_info_2_label_de: (wedding as Record<string, unknown>).extra_info_2_label_de as string | null ?? null,
       extra_info_3_enabled: wedding.extra_info_3_enabled,
       extra_info_3_label: wedding.extra_info_3_label,
+      extra_info_3_label_en: (wedding as Record<string, unknown>).extra_info_3_label_en as string | null ?? null,
+      extra_info_3_label_fr: (wedding as Record<string, unknown>).extra_info_3_label_fr as string | null ?? null,
+      extra_info_3_label_it: (wedding as Record<string, unknown>).extra_info_3_label_it as string | null ?? null,
+      extra_info_3_label_de: (wedding as Record<string, unknown>).extra_info_3_label_de as string | null ?? null,
       // Stats
       guest_count: totalGuests,
       rsvp_count: rsvpCount,
@@ -448,11 +504,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Transportation question
-    if (validatedData.transportation_question_enabled !== undefined) {
-      updateData.transportation_question_enabled = validatedData.transportation_question_enabled;
-    }
-    if (validatedData.transportation_question_text !== undefined) {
-      updateData.transportation_question_text = validatedData.transportation_question_text;
+    const transportationFields = [
+      'transportation_question_enabled', 'transportation_question_text',
+      'transportation_question_text_en', 'transportation_question_text_fr',
+      'transportation_question_text_it', 'transportation_question_text_de',
+    ] as const;
+    for (const f of transportationFields) {
+      if (validatedData[f] !== undefined) updateData[f] = validatedData[f];
     }
 
     // Dietary restrictions
@@ -460,44 +518,23 @@ export async function PATCH(request: NextRequest) {
       updateData.dietary_restrictions_enabled = validatedData.dietary_restrictions_enabled;
     }
 
-    // Extra Yes/No questions
-    if (validatedData.extra_question_1_enabled !== undefined) {
-      updateData.extra_question_1_enabled = validatedData.extra_question_1_enabled;
-    }
-    if (validatedData.extra_question_1_text !== undefined) {
-      updateData.extra_question_1_text = validatedData.extra_question_1_text;
-    }
-    if (validatedData.extra_question_2_enabled !== undefined) {
-      updateData.extra_question_2_enabled = validatedData.extra_question_2_enabled;
-    }
-    if (validatedData.extra_question_2_text !== undefined) {
-      updateData.extra_question_2_text = validatedData.extra_question_2_text;
-    }
-    if (validatedData.extra_question_3_enabled !== undefined) {
-      updateData.extra_question_3_enabled = validatedData.extra_question_3_enabled;
-    }
-    if (validatedData.extra_question_3_text !== undefined) {
-      updateData.extra_question_3_text = validatedData.extra_question_3_text;
-    }
-
-    // Extra mandatory info fields
-    if (validatedData.extra_info_1_enabled !== undefined) {
-      updateData.extra_info_1_enabled = validatedData.extra_info_1_enabled;
-    }
-    if (validatedData.extra_info_1_label !== undefined) {
-      updateData.extra_info_1_label = validatedData.extra_info_1_label;
-    }
-    if (validatedData.extra_info_2_enabled !== undefined) {
-      updateData.extra_info_2_enabled = validatedData.extra_info_2_enabled;
-    }
-    if (validatedData.extra_info_2_label !== undefined) {
-      updateData.extra_info_2_label = validatedData.extra_info_2_label;
-    }
-    if (validatedData.extra_info_3_enabled !== undefined) {
-      updateData.extra_info_3_enabled = validatedData.extra_info_3_enabled;
-    }
-    if (validatedData.extra_info_3_label !== undefined) {
-      updateData.extra_info_3_label = validatedData.extra_info_3_label;
+    // Extra Yes/No questions and info fields
+    const rsvpFields = [
+      'extra_question_1_enabled', 'extra_question_1_text',
+      'extra_question_1_text_en', 'extra_question_1_text_fr', 'extra_question_1_text_it', 'extra_question_1_text_de',
+      'extra_question_2_enabled', 'extra_question_2_text',
+      'extra_question_2_text_en', 'extra_question_2_text_fr', 'extra_question_2_text_it', 'extra_question_2_text_de',
+      'extra_question_3_enabled', 'extra_question_3_text',
+      'extra_question_3_text_en', 'extra_question_3_text_fr', 'extra_question_3_text_it', 'extra_question_3_text_de',
+      'extra_info_1_enabled', 'extra_info_1_label',
+      'extra_info_1_label_en', 'extra_info_1_label_fr', 'extra_info_1_label_it', 'extra_info_1_label_de',
+      'extra_info_2_enabled', 'extra_info_2_label',
+      'extra_info_2_label_en', 'extra_info_2_label_fr', 'extra_info_2_label_it', 'extra_info_2_label_de',
+      'extra_info_3_enabled', 'extra_info_3_label',
+      'extra_info_3_label_en', 'extra_info_3_label_fr', 'extra_info_3_label_it', 'extra_info_3_label_de',
+    ] as const;
+    for (const f of rsvpFields) {
+      if (validatedData[f] !== undefined) updateData[f] = validatedData[f];
     }
 
     // Update wedding

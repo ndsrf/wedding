@@ -2377,7 +2377,8 @@
         "submitError": "Error al guardar la configuración. Por favor inténtalo de nuevo.",
         "invitationUrl": "URL General de Invitación",
         "copyUrl": "Copiar al Portapapeles",
-        "copySuccess": "¡URL copiada!"
+        "copySuccess": "¡URL copiada!",
+        "questionLanguageHint": "Introduce el texto de la pregunta en cada idioma (ES es obligatorio; los demás son opcionales)"
       },
       "dangerZone": {
         "title": "Zona de Peligro",

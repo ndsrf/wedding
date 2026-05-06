@@ -2031,7 +2031,8 @@
         "cancel": "Abbrechen",
         "save": "Konfiguration speichern",
         "saving": "Speichern...",
-        "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut."
+        "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut.",
+        "questionLanguageHint": "Geben Sie den Fragetext für jede Sprache ein (ES ist erforderlich; andere sind optional)"
       },
       "dangerZone": {
         "title": "Gefahrenzone",

@@ -2031,7 +2031,8 @@
         "cancel": "Annulla",
         "save": "Salva Configurazione",
         "saving": "Salvataggio...",
-        "submitError": "Impossibile salvare la configurazione. Riprova."
+        "submitError": "Impossibile salvare la configurazione. Riprova.",
+        "questionLanguageHint": "Inserisci il testo della domanda per ogni lingua (ES obbligatorio; gli altri sono facoltativi)"
       },
       "dangerZone": {
         "title": "Zona pericolosa",
