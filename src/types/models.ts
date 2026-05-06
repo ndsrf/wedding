@@ -42,8 +42,6 @@ import type {
   LocationType,
 } from '@prisma/client';
 
-import { Prisma } from '@prisma/client';
-
 export type {
   Language,
   AuthProvider,
@@ -206,7 +204,7 @@ export interface Wedding {
 
   // Payment Planning
   planned_guests?: number | null;
-  planned_gift_per_person?: Prisma.Decimal | null;
+  planned_gift_per_person?: number | null;
 }
 
 export interface WeddingAdmin {

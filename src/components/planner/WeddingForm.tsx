@@ -150,11 +150,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
     wedding_country: initialData?.wedding_country || 'ES',
     whatsapp_mode: initialData?.whatsapp_mode || WhatsAppMode.BUSINESS,
     planned_guests: initialData?.planned_guests ?? null,
-    planned_gift_per_person: initialData?.planned_gift_per_person
-      ? typeof initialData.planned_gift_per_person === 'object'
-        ? Number(initialData.planned_gift_per_person)
-        : initialData.planned_gift_per_person
-      : null,
+    planned_gift_per_person: initialData?.planned_gift_per_person ?? null,
   });
 
   useEffect(() => {
@@ -203,11 +199,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
         wedding_country: initialData.wedding_country || 'ES',
         whatsapp_mode: initialData.whatsapp_mode || WhatsAppMode.BUSINESS,
         planned_guests: initialData.planned_guests ?? null,
-        planned_gift_per_person: initialData.planned_gift_per_person
-          ? typeof initialData.planned_gift_per_person === 'object'
-            ? Number(initialData.planned_gift_per_person)
-            : initialData.planned_gift_per_person
-          : null,
+        planned_gift_per_person: initialData.planned_gift_per_person ?? null,
       });
 
       // Update itinerary when initialData changes
