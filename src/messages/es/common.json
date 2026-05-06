@@ -2879,9 +2879,9 @@
       "dietaryPlaceholder": "Ej. vegetariano, alergias, etc.",
       "accessibilityPlaceholder": "Ej. silla de ruedas, necesidades especiales, etc.",
       "submit": "Confirmar Asistencia",
-      "submitted": "¡Gracias por tu RSVP!",
+      "submitted": "¡Gracias por tu Confirmación!",
       "confirmationMessage": "Hemos recibido tu confirmación. ¡Esperamos verte en la boda!",
-      "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los wedding planners.",
+      "cutoffPassed": "La fecha límite de Confirmación ha pasado. Por favor contacta a los wedding planners.",
       "additionalQuestions": "Preguntas Adicionales",
       "defaultTransportationQuestion": "¿Necesitarás transporte al lugar del evento?",
       "emptyConfirmation": "Estás confirmando que nadie de tu grupo asistirá, ¿es eso lo que quieres confirmar? De lo contrario, cancela y selecciona a los que asistirán de tu grupo"
@@ -2924,8 +2924,8 @@
       "updated": "Idioma actualizado"
     },
     "edit": {
-      "title": "Editar RSVP",
-      "canEdit": "Puedes editar tu RSVP hasta el {date}."
+      "title": "Editar Confirmación",
+      "canEdit": "Puedes editar tu Confirmación hasta el {date}."
     },
     "footer": {
       "contactCouple": "Si tienes alguna pregunta, por favor contacta a la pareja."
