@@ -40,6 +40,7 @@ import type {
   SubscriptionStatus,
   WhatsAppMode,
   LocationType,
+  Decimal,
 } from '@prisma/client';
 
 export type {
@@ -201,6 +202,10 @@ export interface Wedding {
   // CRM linkage
   customer_id: string | null;
   contract_id: string | null;
+
+  // Payment Planning
+  planned_guests: number | null;
+  planned_gift_per_person: Decimal | null;
 }
 
 export interface WeddingAdmin {
