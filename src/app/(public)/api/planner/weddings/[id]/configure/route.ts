@@ -347,7 +347,15 @@ export async function PATCH(
       }
     }
 
-    return NextResponse.json<UpdateWeddingConfigResponse>({ success: true, data: wedding }, { status: 200 });
+    return NextResponse.json<UpdateWeddingConfigResponse>({
+      success: true,
+      data: {
+        ...wedding,
+        planned_gift_per_person: wedding.planned_gift_per_person
+          ? Number(wedding.planned_gift_per_person)
+          : null,
+      },
+    }, { status: 200 });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : '';
     if (msg.includes('UNAUTHORIZED')) {

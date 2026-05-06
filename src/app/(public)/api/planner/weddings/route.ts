@@ -462,7 +462,12 @@ export async function POST(request: NextRequest) {
 
     const response: CreateWeddingResponse = {
       success: true,
-      data: wedding,
+      data: {
+        ...wedding,
+        planned_gift_per_person: wedding.planned_gift_per_person
+          ? Number(wedding.planned_gift_per_person)
+          : null,
+      },
     };
 
     return NextResponse.json(response, { status: 201 });
