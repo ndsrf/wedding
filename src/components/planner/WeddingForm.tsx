@@ -149,6 +149,8 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
     default_language: initialData?.default_language || Language.ES,
     wedding_country: initialData?.wedding_country || 'ES',
     whatsapp_mode: initialData?.whatsapp_mode || WhatsAppMode.BUSINESS,
+    planned_guests: initialData?.planned_guests ?? null,
+    planned_gift_per_person: initialData?.planned_gift_per_person ?? null,
   });
 
   useEffect(() => {
@@ -176,6 +178,8 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
   useEffect(() => {
     if (initialData) {
       setFormData({
+        customer_id: initialData.customer_id ?? null,
+        contract_id: initialData.contract_id ?? null,
         couple_names: initialData.couple_names || '',
         wedding_date: initialData.wedding_date
           ? new Date(initialData.wedding_date).toISOString().split('T')[0]
@@ -194,6 +198,8 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
         default_language: initialData.default_language || Language.ES,
         wedding_country: initialData.wedding_country || 'ES',
         whatsapp_mode: initialData.whatsapp_mode || WhatsAppMode.BUSINESS,
+        planned_guests: initialData.planned_guests ?? null,
+        planned_gift_per_person: initialData.planned_gift_per_person ?? null,
       });
 
       // Update itinerary when initialData changes
