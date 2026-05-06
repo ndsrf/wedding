@@ -94,11 +94,19 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
     const rsvp_completion_percentage =
       row.total_families > 0 ? Math.round((row.families_with_rsvp / row.total_families) * 100) : 0;
 
+    // Convert Decimal values to numbers
+    const convertedUpcomingWeddings = upcoming_weddings.map(wedding => ({
+      ...wedding,
+      planned_gift_per_person: wedding.planned_gift_per_person
+        ? Number(wedding.planned_gift_per_person)
+        : null,
+    }));
+
     const stats: PlannerStats = {
       wedding_count,
       total_guests: row.total_guests,
       rsvp_completion_percentage,
-      upcoming_weddings,
+      upcoming_weddings: convertedUpcomingWeddings,
     };
 
     // Populate cache so repeated loads within the TTL window skip the DB
