@@ -469,7 +469,12 @@ export async function PATCH(
 
     const response: UpdateWeddingResponse = {
       success: true,
-      data: wedding,
+      data: {
+        ...wedding,
+        planned_gift_per_person: wedding.planned_gift_per_person
+          ? Number(wedding.planned_gift_per_person)
+          : null,
+      },
     };
 
     return NextResponse.json(response, { status: 200 });
