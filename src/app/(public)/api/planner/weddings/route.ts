@@ -391,10 +391,10 @@ export async function POST(request: NextRequest) {
             status: 'ACTIVE',
             created_by: user.id,
             // Traceability / billing links (optional, set when created from a contract)
-            ...(validatedData.customer_id ? { customer_id: validatedData.customer_id } : {}),
-            ...(validatedData.contract_id ? { contract_id: validatedData.contract_id } : {}),
-            ...(validatedData.planned_guests ? { planned_guests: validatedData.planned_guests } : {}),
-            ...(validatedData.planned_gift_per_person ? { planned_gift_per_person: validatedData.planned_gift_per_person } : {}),
+            ...(validatedData.customer_id !== undefined ? { customer_id: validatedData.customer_id } : {}),
+            ...(validatedData.contract_id !== undefined ? { contract_id: validatedData.contract_id } : {}),
+            ...(validatedData.planned_guests !== undefined ? { planned_guests: validatedData.planned_guests } : {}),
+            ...(validatedData.planned_gift_per_person !== undefined ? { planned_gift_per_person: validatedData.planned_gift_per_person } : {}),
           },
         });
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
