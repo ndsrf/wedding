@@ -2868,7 +2868,7 @@
       "location": "Ubicación: {location}"
     },
     "rsvp": {
-      "title": "RSVP",
+      "title": "Confirmación",
       "instructions": "Por favor selecciona quién de tu familia asistirá a la boda.",
       "attend": "Asistir",
       "attending": "Asistiendo",

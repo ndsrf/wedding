@@ -42,15 +42,11 @@ export default function FamilyMemberCard({
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <h4 className="text-xl font-bold text-gray-900">{member.name}</h4>
-          <p className="text-base text-gray-600">
-            {getMemberTypeLabel(member.type)}
-            {member.age && ` • ${t('guest.members.yearsOld', { count: member.age })}`}
-            {member.added_by_guest && (
-              <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {t('guest.members.addedByYou')}
-              </span>
-            )}
-          </p>
+          {member.added_by_guest && (
+            <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              {t('guest.members.addedByYou')}
+            </span>
+          )}
         </div>
       </div>
 
