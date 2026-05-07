@@ -107,7 +107,12 @@ export function ContractEditor({
 
         const client = createClient({ authEndpoint: async () => ({ token }) });
         const { room } = client.enterRoom(roomId);
-        const provider = new LiveblocksYjsProvider(room, ydocRef.current);
+        const provider = new LiveblocksYjsProvider(room as ConstructorParameters<typeof LiveblocksYjsProvider>[0], ydocRef.current);
+
+        cleanup = () => {
+          provider.destroy();
+          room.disconnect();
+        };
 
         if (!destroyed) {
           if (currentUser) {
@@ -180,11 +185,6 @@ export function ContractEditor({
               if (isSynced) seedIfEmpty();
             });
           }
-
-          cleanup = () => {
-            provider.destroy();
-            room.disconnect();
-          };
         }
       } catch (err) {
         console.error('Liveblocks init error:', err);
