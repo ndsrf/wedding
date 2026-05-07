@@ -88,6 +88,7 @@ function PlannerWeddingsContent() {
         // Convert empty string or null theme_id to undefined so it's omitted from JSON
         theme_id: formData.theme_id || undefined,
         // Ensure optional strings are either undefined or have content
+        location: formData.location || undefined,
         dress_code: formData.dress_code || undefined,
         additional_info: formData.additional_info || undefined,
       };
