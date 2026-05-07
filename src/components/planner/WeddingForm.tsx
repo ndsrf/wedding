@@ -149,8 +149,8 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
     default_language: initialData?.default_language || Language.ES,
     wedding_country: initialData?.wedding_country || 'ES',
     whatsapp_mode: initialData?.whatsapp_mode || WhatsAppMode.BUSINESS,
-    planned_guests: initialData?.planned_guests ?? null,
-    planned_gift_per_person: initialData?.planned_gift_per_person ?? null,
+    planned_guests: initialData?.planned_guests,
+    planned_gift_per_person: initialData?.planned_gift_per_person,
   });
 
   useEffect(() => {
@@ -198,8 +198,8 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
         default_language: initialData.default_language || Language.ES,
         wedding_country: initialData.wedding_country || 'ES',
         whatsapp_mode: initialData.whatsapp_mode || WhatsAppMode.BUSINESS,
-        planned_guests: initialData.planned_guests ?? null,
-        planned_gift_per_person: initialData.planned_gift_per_person ?? null,
+        planned_guests: initialData.planned_guests,
+        planned_gift_per_person: initialData.planned_gift_per_person,
       });
 
       // Update itinerary when initialData changes
