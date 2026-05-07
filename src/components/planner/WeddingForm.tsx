@@ -302,7 +302,7 @@ export function WeddingForm({ onSubmit, onCancel, initialData, themes = [], pref
 
   const handleChange = (
     field: keyof WeddingFormData,
-    value: string | boolean | PaymentMode | Language | undefined
+    value: string | boolean | PaymentMode | Language | WhatsAppMode | undefined
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field when user starts typing
