@@ -107,7 +107,7 @@ export function ContractEditor({
 
         const client = createClient({ authEndpoint: async () => ({ token }) });
         const { room } = client.enterRoom(roomId);
-        const provider = new LiveblocksYjsProvider(room, ydocRef.current);
+        const provider = new LiveblocksYjsProvider(room as any, ydocRef.current);
 
         if (!destroyed) {
           if (currentUser) {
