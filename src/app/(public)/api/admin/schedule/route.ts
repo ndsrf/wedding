@@ -21,7 +21,7 @@ import {
 } from '@/lib/schedule/api-handlers';
 
 function handleError(err: unknown, label: string): NextResponse {
-  if (err instanceof z.ZodError) return NextResponse.json({ error: err.errors }, { status: 422 });
+  if (err instanceof z.ZodError) return NextResponse.json({ error: err.issues }, { status: 422 });
   const msg = (err as Error).message ?? '';
   if (msg.includes('Unauthorized') || msg.includes('Forbidden')) {
     return NextResponse.json({ error: msg }, { status: 401 });
