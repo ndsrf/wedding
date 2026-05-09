@@ -15,14 +15,16 @@ import type {
   WeddingSchedule,
   ScheduleBlockWithTimes,
   ScheduleStageWithTime,
+  StageProvider,
 } from '@/types/schedule';
 import { computeScheduleWithTimes } from '@/types/schedule';
 
 // ── API paths ─────────────────────────────────────────────────────────────────
 
 export interface ScheduleApiPaths {
-  schedule: string;     // e.g. /api/admin/schedule OR /api/planner/weddings/:id/schedule
-  schedulePdf: string;  // e.g. /api/admin/schedule/pdf OR /api/planner/weddings/:id/schedule/pdf
+  schedule: string;       // e.g. /api/admin/schedule
+  schedulePdf: string;    // e.g. /api/admin/schedule/pdf
+  providersUrl?: string;  // e.g. /api/weddings/:id/providers — enables provider assignment
 }
 
 export interface SchedulePageContentProps {
@@ -43,18 +45,29 @@ function durationLabel(minutes: number) {
   return `${m}min`;
 }
 
+function providerLabel(p: StageProvider) {
+  return p.name || p.category.name;
+}
+
 // ── Stage pill ────────────────────────────────────────────────────────────────
 
 function StagePill({
   stage,
   blockColor,
   viewMode,
+  providers,
+  onProviderChange,
 }: {
   stage: ScheduleStageWithTime;
   blockColor: string;
   viewMode: 'planner' | 'couple';
+  providers: StageProvider[];
+  onProviderChange?: (stageId: string, providerId: string | null) => void;
 }) {
+  const [showSelect, setShowSelect] = useState(false);
   const plannerOnly = !stage.visible_to_couple;
+  const canAssign = viewMode === 'planner' && !!onProviderChange;
+
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
@@ -63,24 +76,80 @@ function StagePill({
           : 'bg-white border-gray-100'
       }`}
     >
+      {/* Time */}
       <div className="flex-shrink-0 w-14 text-right">
         <span className="text-sm font-bold text-gray-800">{stage.calculated_start_time}</span>
       </div>
+
+      {/* Dot */}
       <div
         className="flex-shrink-0 w-2.5 h-2.5 rounded-full"
         style={{ backgroundColor: blockColor }}
       />
+
+      {/* Name + notes */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-800 truncate">{stage.name}</p>
         {stage.notes && viewMode === 'planner' && (
           <p className="text-xs text-gray-400 truncate mt-0.5">{stage.notes}</p>
         )}
       </div>
+
+      {/* Duration */}
       <span className="text-xs text-gray-400 flex-shrink-0">{durationLabel(stage.duration_minutes)}</span>
+
+      {/* Planner-only badge */}
       {plannerOnly && viewMode === 'planner' && (
         <span className="text-xs font-medium text-violet-500 bg-violet-100 px-2 py-0.5 rounded-full flex-shrink-0">
           Solo planner
         </span>
+      )}
+
+      {/* Provider assignment */}
+      {(stage.wedding_provider || canAssign) && (
+        <div className="flex-shrink-0">
+          {showSelect ? (
+            <select
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+              className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-blue-300"
+              value={stage.wedding_provider_id ?? ''}
+              onChange={(e) => {
+                onProviderChange!(stage.id, e.target.value || null);
+                setShowSelect(false);
+              }}
+              onBlur={() => setShowSelect(false)}
+            >
+              <option value="">Sin proveedor</option>
+              {providers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {providerLabel(p)}
+                </option>
+              ))}
+            </select>
+          ) : stage.wedding_provider ? (
+            <button
+              type="button"
+              title={canAssign ? 'Cambiar proveedor' : undefined}
+              onClick={canAssign ? () => setShowSelect(true) : undefined}
+              className={`text-xs font-medium px-2 py-0.5 rounded-full transition-colors ${
+                canAssign
+                  ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                  : 'text-blue-600 bg-blue-50 cursor-default'
+              }`}
+            >
+              {providerLabel(stage.wedding_provider)}
+            </button>
+          ) : canAssign ? (
+            <button
+              type="button"
+              onClick={() => setShowSelect(true)}
+              className="text-xs text-gray-300 hover:text-blue-400 transition-colors"
+            >
+              + Proveedor
+            </button>
+          ) : null}
+        </div>
       )}
     </div>
   );
@@ -91,9 +160,13 @@ function StagePill({
 function BlockSection({
   block,
   viewMode,
+  providers,
+  onProviderChange,
 }: {
   block: ScheduleBlockWithTimes;
   viewMode: 'planner' | 'couple';
+  providers: StageProvider[];
+  onProviderChange?: (stageId: string, providerId: string | null) => void;
 }) {
   const filteredStages = viewMode === 'couple'
     ? block.stages.filter((s) => s.visible_to_couple)
@@ -119,6 +192,8 @@ function BlockSection({
           stage={stage}
           blockColor={block.color ?? '#6366f1'}
           viewMode={viewMode}
+          providers={providers}
+          onProviderChange={onProviderChange}
         />
       ))}
     </div>
@@ -144,8 +219,9 @@ export function SchedulePageContent({
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [providers, setProviders] = useState<StageProvider[]>([]);
 
-  // ── Fetch ─────────────────────────────────────────────────────────────────
+  // ── Fetch schedule ──────────────────────────────────────────────────────────
 
   useEffect(() => {
     fetch(apiPaths.schedule)
@@ -161,9 +237,19 @@ export function SchedulePageContent({
       .finally(() => setLoading(false));
   }, [apiPaths.schedule]);
 
+  // ── Fetch providers (optional) ──────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!apiPaths.providersUrl) return;
+    fetch(apiPaths.providersUrl)
+      .then((r) => r.json())
+      .then((json) => setProviders(json.data ?? []))
+      .catch(() => {}); // providers are optional, fail silently
+  }, [apiPaths.providersUrl]);
+
   const blocksWithTimes: ScheduleBlockWithTimes[] = computeScheduleWithTimes(blocks, startTime);
 
-  // ── Apply template ────────────────────────────────────────────────────────
+  // ── Apply template ──────────────────────────────────────────────────────────
 
   const applyTemplate = useCallback(async () => {
     setApplying(true);
@@ -185,7 +271,7 @@ export function SchedulePageContent({
     }
   }, [apiPaths.schedule, startTime]);
 
-  // ── Save start time ───────────────────────────────────────────────────────
+  // ── Save start time ─────────────────────────────────────────────────────────
 
   const saveStartTime = useCallback(async (time: string) => {
     setSaving(true);
@@ -208,7 +294,29 @@ export function SchedulePageContent({
     if (hasSchedule) saveStartTime(val);
   };
 
-  // ── PDF export ────────────────────────────────────────────────────────────
+  // ── Assign provider to stage ────────────────────────────────────────────────
+
+  const handleProviderChange = useCallback(async (stageId: string, providerId: string | null) => {
+    const providerObj = providerId ? (providers.find((p) => p.id === providerId) ?? null) : null;
+    // Optimistic update
+    setBlocks((prev) =>
+      prev.map((block) => ({
+        ...block,
+        stages: block.stages.map((s) =>
+          s.id === stageId
+            ? { ...s, wedding_provider_id: providerId, wedding_provider: providerObj }
+            : s
+        ),
+      }))
+    );
+    await fetch(apiPaths.schedule, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'stage', stage_id: stageId, wedding_provider_id: providerId }),
+    });
+  }, [apiPaths.schedule, providers]);
+
+  // ── PDF export ──────────────────────────────────────────────────────────────
 
   const exportPdf = async (mode: 'planner' | 'couple') => {
     setExportingPdf(true);
@@ -229,7 +337,7 @@ export function SchedulePageContent({
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -282,6 +390,9 @@ export function SchedulePageContent({
       </div>
     );
   }
+
+  const effectiveViewMode = isPlanner ? viewMode : 'couple';
+  const canAssignProviders = isPlanner && providers.length > 0;
 
   return (
     <div className="min-h-screen">
@@ -390,7 +501,9 @@ export function SchedulePageContent({
                 <BlockSection
                   key={block.id}
                   block={block}
-                  viewMode={isPlanner ? viewMode : 'couple'}
+                  viewMode={effectiveViewMode}
+                  providers={providers}
+                  onProviderChange={canAssignProviders ? handleProviderChange : undefined}
                 />
               ))}
             </div>

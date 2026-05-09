@@ -730,6 +730,7 @@ model WeddingProvider {
   category        ProviderCategory @relation(fields: [category_id], references: [id], onDelete: Restrict)
   provider        Provider? @relation(fields: [provider_id], references: [id], onDelete: Restrict)
   payments        Payment[]
+  schedule_stages ScheduleStage[]
 
   @@unique([wedding_id, category_id, provider_id])
   @@index([wedding_id])
@@ -1553,19 +1554,22 @@ model ScheduleBlock {
 }
 
 model ScheduleStage {
-  id                String        @id @default(uuid())
-  block_id          String
-  name              String
-  duration_minutes  Int
-  order             Int
-  notes             String?       @db.Text
-  visible_to_couple Boolean       @default(true)
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
-  block             ScheduleBlock @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  id                   String          @id @default(uuid())
+  block_id             String
+  name                 String
+  duration_minutes     Int
+  order                Int
+  notes                String?         @db.Text
+  visible_to_couple    Boolean         @default(true)
+  wedding_provider_id  String?
+  created_at           DateTime        @default(now())
+  updated_at           DateTime        @updatedAt
+  block                ScheduleBlock   @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  wedding_provider     WeddingProvider? @relation(fields: [wedding_provider_id], references: [id], onDelete: SetNull)
 
   @@index([block_id])
   @@index([order])
+  @@index([wedding_provider_id])
   @@map("schedule_stages")
 }
 

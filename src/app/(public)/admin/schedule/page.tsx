@@ -44,6 +44,7 @@ export default async function AdminSchedulePage() {
       apiPaths={{
         schedule: '/api/admin/schedule',
         schedulePdf: '/api/admin/schedule/pdf',
+        providersUrl: `/api/weddings/${user!.wedding_id!}/providers`,
       }}
       isPlanner={false}
       coupleNames={wedding?.couple_names ?? undefined}

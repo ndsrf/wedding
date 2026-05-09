@@ -49,6 +49,7 @@ const createStageSchema = z.object({
   order: z.number().int().min(0),
   notes: z.string().max(1000).nullable().optional(),
   visible_to_couple: z.boolean().optional(),
+  wedding_provider_id: z.string().uuid().nullable().optional(),
 });
 
 const reorderSchema = z.object({
@@ -73,6 +74,7 @@ const patchStageSchema = z.object({
   order: z.number().int().min(0).optional(),
   notes: z.string().max(1000).nullable().optional(),
   visible_to_couple: z.boolean().optional(),
+  wedding_provider_id: z.string().uuid().nullable().optional(),
 });
 
 const patchScheduleSchema = z.object({

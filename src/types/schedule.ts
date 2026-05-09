@@ -1,3 +1,10 @@
+// Minimal provider shape needed for stage display
+export interface StageProvider {
+  id: string;
+  name: string | null;
+  category: { name: string };
+}
+
 export interface ScheduleStage {
   id: string;
   block_id: string;
@@ -6,6 +13,8 @@ export interface ScheduleStage {
   order: number;
   notes: string | null;
   visible_to_couple: boolean;
+  wedding_provider_id: string | null;
+  wedding_provider: StageProvider | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -78,6 +87,7 @@ export interface CreateStageData {
   order: number;
   notes?: string | null;
   visible_to_couple?: boolean;
+  wedding_provider_id?: string | null;
 }
 
 export interface UpdateStageData {
@@ -87,6 +97,7 @@ export interface UpdateStageData {
   order?: number;
   notes?: string | null;
   visible_to_couple?: boolean;
+  wedding_provider_id?: string | null;
 }
 
 export interface UpsertWeddingScheduleData {

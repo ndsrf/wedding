@@ -39,7 +39,16 @@ export async function getWeddingSchedule(wedding_id: string): Promise<WeddingSch
     prisma.scheduleBlock.findMany({
       where: { wedding_id, template_id: null },
       orderBy: { order: 'asc' },
-      include: { stages: { orderBy: { order: 'asc' } } },
+      include: {
+        stages: {
+          orderBy: { order: 'asc' },
+          include: {
+            wedding_provider: {
+              select: { id: true, name: true, category: { select: { name: true } } },
+            },
+          },
+        },
+      },
     }),
   ]);
   return {
@@ -72,13 +81,31 @@ export async function deleteBlock(block_id: string) {
 // ============================================================================
 
 export async function createStage(data: CreateStageData) {
-  const { block_id, ...rest } = data;
-  return prisma.scheduleStage.create({ data: { ...rest, block: { connect: { id: block_id } } } });
+  const { block_id, wedding_provider_id, ...rest } = data;
+  return prisma.scheduleStage.create({
+    data: {
+      ...rest,
+      block: { connect: { id: block_id } },
+      ...(wedding_provider_id
+        ? { wedding_provider: { connect: { id: wedding_provider_id } } }
+        : {}),
+    },
+  });
 }
 
 export async function updateStage(data: UpdateStageData) {
-  const { stage_id, ...rest } = data;
-  return prisma.scheduleStage.update({ where: { id: stage_id }, data: rest });
+  const { stage_id, wedding_provider_id, ...rest } = data;
+  return prisma.scheduleStage.update({
+    where: { id: stage_id },
+    data: {
+      ...rest,
+      ...(wedding_provider_id === null
+        ? { wedding_provider: { disconnect: true } }
+        : wedding_provider_id !== undefined
+          ? { wedding_provider: { connect: { id: wedding_provider_id } } }
+          : {}),
+    },
+  });
 }
 
 export async function deleteStage(stage_id: string) {

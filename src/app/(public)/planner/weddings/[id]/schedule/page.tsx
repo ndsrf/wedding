@@ -21,6 +21,7 @@ export default function PlannerWeddingSchedulePage() {
       apiPaths={{
         schedule: `/api/planner/weddings/${weddingId}/schedule`,
         schedulePdf: `/api/planner/weddings/${weddingId}/schedule/pdf`,
+        providersUrl: `/api/weddings/${weddingId}/providers`,
       }}
       isPlanner={true}
       header={
