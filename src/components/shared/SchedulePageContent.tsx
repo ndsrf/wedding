@@ -109,7 +109,6 @@ function StagePill({
         <div className="flex-shrink-0">
           {showSelect ? (
             <select
-              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-blue-300"
               value={stage.wedding_provider_id ?? ''}
