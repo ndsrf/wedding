@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import type {
   ScheduleBlock,
-  WeddingSchedule,
   ScheduleBlockWithTimes,
   ScheduleStageWithTime,
 } from '@/types/schedule';
@@ -118,7 +117,6 @@ function BlockSection({
 
 // ── Main component ────────────────────────────────────────────────────────────
 export function ScheduleEditor({ weddingId, isPlanner = false, coupleNames, weddingDate }: ScheduleEditorProps) {
-  const [schedule, setSchedule] = useState<WeddingSchedule | null>(null);
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
   const [startTime, setStartTime] = useState('10:00');
   const [viewMode, setViewMode] = useState<'planner' | 'couple'>('couple');
@@ -138,7 +136,6 @@ export function ScheduleEditor({ weddingId, isPlanner = false, coupleNames, wedd
       .then((r) => r.json())
       .then((json) => {
         const data = json.data;
-        setSchedule(data.schedule);
         setBlocks(data.blocks ?? []);
         setHasSchedule(!!data.schedule);
         if (data.schedule) setStartTime(data.schedule.start_time);
@@ -163,7 +160,6 @@ export function ScheduleEditor({ weddingId, isPlanner = false, coupleNames, wedd
       });
       const json = await res.json();
       if (!res.ok) throw new Error(JSON.stringify(json.error));
-      setSchedule(json.data.schedule);
       setBlocks(json.data.blocks ?? []);
       setHasSchedule(true);
     } catch (e) {

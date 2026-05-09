@@ -12,7 +12,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import type {
   ScheduleBlock,
-  WeddingSchedule,
   ScheduleBlockWithTimes,
   ScheduleStageWithTime,
   StageProvider,
@@ -209,7 +208,6 @@ export function SchedulePageContent({
   coupleNames,
   weddingDate,
 }: SchedulePageContentProps) {
-  const [schedule, setSchedule] = useState<WeddingSchedule | null>(null);
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
   const [startTime, setStartTime] = useState('10:00');
   const [viewMode, setViewMode] = useState<'planner' | 'couple'>('couple');
@@ -228,7 +226,6 @@ export function SchedulePageContent({
       .then((r) => r.json())
       .then((json) => {
         const data = json.data;
-        setSchedule(data.schedule);
         setBlocks(data.blocks ?? []);
         setHasSchedule(!!data.schedule);
         if (data.schedule) setStartTime(data.schedule.start_time);
@@ -261,7 +258,6 @@ export function SchedulePageContent({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(JSON.stringify(json.error));
-      setSchedule(json.data.schedule);
       setBlocks(json.data.blocks ?? []);
       setHasSchedule(true);
     } catch (e) {
