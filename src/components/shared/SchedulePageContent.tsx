@@ -641,6 +641,8 @@ export function SchedulePageContent({
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [showPdfMenu, setShowPdfMenu] = useState(false);
+  const pdfMenuRef = useRef<HTMLDivElement>(null);
   const [providers, setProviders] = useState<StageProvider[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [activeDragType, setActiveDragType] = useState<'block' | 'stage' | null>(null);
@@ -997,17 +999,33 @@ export function SchedulePageContent({
 
   // ── PDF export ───────────────────────────────────────────────────────────────
 
+  // Close PDF menu when clicking outside
+  useEffect(() => {
+    if (!showPdfMenu) return;
+    function handleOutside(e: MouseEvent) {
+      if (pdfMenuRef.current && !pdfMenuRef.current.contains(e.target as Node)) {
+        setShowPdfMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [showPdfMenu]);
+
   const exportPdf = async (mode: 'planner' | 'couple') => {
+    setShowPdfMenu(false);
     setExportingPdf(true);
     try {
       const res = await fetch(`${apiPaths.schedulePdf}?view=${mode}`);
-      if (!res.ok) throw new Error('Error generating PDF');
+      if (!res.ok) throw new Error('Error al generar el PDF');
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `cronograma-${mode}.pdf`;
+      // Must be in DOM for Firefox to honour the download
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (e) {
       setError((e as Error).message);
@@ -1142,10 +1160,11 @@ export function SchedulePageContent({
             )}
 
             {/* Export PDF */}
-            <div className="relative group">
+            <div className="relative" ref={pdfMenuRef}>
               <button
                 type="button"
                 disabled={exportingPdf}
+                onClick={() => !exportingPdf && setShowPdfMenu((v) => !v)}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm disabled:opacity-50"
               >
                 <svg className="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1154,8 +1173,8 @@ export function SchedulePageContent({
                 </svg>
                 {exportingPdf ? 'Exportando...' : 'Exportar PDF'}
               </button>
-              {!exportingPdf && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden z-10 hidden group-hover:block min-w-[160px]">
+              {showPdfMenu && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden z-20 min-w-[160px]">
                   <button
                     type="button"
                     onClick={() => exportPdf('couple')}
