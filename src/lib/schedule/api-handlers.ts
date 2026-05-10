@@ -191,11 +191,15 @@ export async function getSchedulePdfHandler(
 ): Promise<NextResponse> {
   const wedding = await prisma.wedding.findUnique({
     where: { id: weddingId },
-    select: { couple_names: true, wedding_date: true, planner: { select: { name: true } } },
+    select: {
+      couple_names: true,
+      wedding_date: true,
+      planner: { select: { name: true, logo_url: true } },
+    },
   });
 
   const { schedule, blocks } = await getWeddingSchedule(weddingId);
-  const start_time = schedule?.start_time ?? '10:00';
+  const start_time = schedule?.start_time ?? '08:00';
   const blocksWithTimes = computeScheduleWithTimes(blocks, start_time);
 
   const pdfBuffer = await renderToBuffer(
@@ -208,6 +212,7 @@ export async function getSchedulePdfHandler(
       startTime: start_time,
       viewMode,
       plannerName: wedding?.planner?.name,
+      plannerLogo: wedding?.planner?.logo_url ?? null,
     }) as unknown as Parameters<typeof renderToBuffer>[0]
   );
 
