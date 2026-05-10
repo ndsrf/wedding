@@ -1191,9 +1191,6 @@ export function SchedulePageContent({
             </div>
           )}
 
-          {/* Trash drop zone — visible only while dragging */}
-          <TrashDropZone visible={activeDragId !== null} />
-
           {/* Timeline */}
           <DndContext
             sensors={sensors}
@@ -1202,6 +1199,8 @@ export function SchedulePageContent({
             onDragOver={onDragOver}
             onDragEnd={onDragEnd}
           >
+            {/* Trash drop zone — must be inside DndContext to register as a droppable */}
+            <TrashDropZone visible={activeDragId !== null} />
             <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
               <div className="relative">
                 <div className="absolute left-[4.5rem] top-0 bottom-0 w-px bg-gray-100 pointer-events-none" />
