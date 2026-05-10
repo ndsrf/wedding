@@ -197,8 +197,6 @@ export async function getSchedulePdfHandler(
   const blocksWithTimes = computeScheduleWithTimes(blocks, start_time);
 
   const pdfBuffer = await renderToBuffer(
-    // Cast needed: renderToBuffer expects ReactElement<DocumentProps> but SchedulePDF
-    // is a wrapper component — the constraint is type-only, not a runtime restriction.
     React.createElement(SchedulePDF, {
       blocks: blocksWithTimes,
       coupleNames: wedding?.couple_names ?? '',
@@ -208,7 +206,7 @@ export async function getSchedulePdfHandler(
       startTime: start_time,
       viewMode,
       plannerName: wedding?.planner?.name,
-    }) as unknown as React.ReactElement<{ children?: React.ReactNode }>
+    }) as unknown as Parameters<typeof renderToBuffer>[0]
   );
 
   return new NextResponse(pdfBuffer, {
