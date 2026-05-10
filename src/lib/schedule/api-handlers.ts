@@ -121,8 +121,8 @@ export async function postScheduleHandler(
   }
 
   if (b.type === 'stage') {
-    const parsed = createStageSchema.parse(b);
-    const stage = await createStage(parsed);
+    const { block_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id } = createStageSchema.parse(b);
+    const stage = await createStage({ block_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id });
     return NextResponse.json({ data: stage }, { status: 201 });
   }
 
@@ -146,20 +146,20 @@ export async function patchScheduleHandler(
   const b = body as Record<string, unknown>;
 
   if (b.type === 'schedule') {
-    const parsed = patchScheduleSchema.parse(b);
-    const schedule = await upsertWeddingSchedule(weddingId, parsed);
+    const { start_time, notes } = patchScheduleSchema.parse(b);
+    const schedule = await upsertWeddingSchedule(weddingId, { start_time, notes });
     return NextResponse.json({ data: schedule });
   }
 
   if (b.type === 'block') {
-    const parsed = patchBlockSchema.parse(b);
-    const block = await updateBlock(parsed);
+    const { block_id, name, order, color } = patchBlockSchema.parse(b);
+    const block = await updateBlock({ block_id, name, order, color });
     return NextResponse.json({ data: block });
   }
 
   if (b.type === 'stage') {
-    const parsed = patchStageSchema.parse(b);
-    const stage = await updateStage(parsed);
+    const { stage_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id } = patchStageSchema.parse(b);
+    const stage = await updateStage({ stage_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id });
     return NextResponse.json({ data: stage });
   }
 
