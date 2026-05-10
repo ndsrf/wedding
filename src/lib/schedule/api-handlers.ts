@@ -195,6 +195,16 @@ export async function getSchedulePdfHandler(
       couple_names: true,
       wedding_date: true,
       planner: { select: { name: true, logo_url: true } },
+      itinerary_items: {
+        orderBy: { date_time: 'asc' },
+        select: {
+          id: true,
+          date_time: true,
+          item_type: true,
+          notes: true,
+          location: { select: { name: true, address: true } },
+        },
+      },
     },
   });
 
@@ -213,6 +223,20 @@ export async function getSchedulePdfHandler(
       viewMode,
       plannerName: wedding?.planner?.name,
       plannerLogo: wedding?.planner?.logo_url ?? null,
+      itineraryItems: wedding ? wedding.itinerary_items.map((item: {
+        id: string;
+        date_time: Date;
+        item_type: string;
+        notes: string | null;
+        location: { name: string; address: string | null };
+      }) => ({
+        id: item.id,
+        dateTime: item.date_time.toISOString(),
+        itemType: item.item_type,
+        locationName: item.location.name,
+        address: item.location.address ?? null,
+        notes: item.notes ?? null,
+      })) : [],
     }) as unknown as Parameters<typeof renderToBuffer>[0]
   );
 

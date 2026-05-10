@@ -2,6 +2,22 @@ import React from 'react';
 import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
 import type { ScheduleBlockWithTimes, ScheduleStageWithTime } from '@/types/schedule';
 
+export interface PdfItineraryItem {
+  id: string;
+  dateTime: string;
+  itemType: string;
+  locationName: string;
+  address?: string | null;
+  notes?: string | null;
+}
+
+const ITEM_TYPE_LABELS: Record<string, string> = {
+  CEREMONY: 'Ceremonia',
+  PRE_EVENT: 'Pre-boda',
+  POST_EVENT: 'Post-boda',
+  EVENT: 'Evento',
+};
+
 // ─── Colours ─────────────────────────────────────────────────────────────────
 const ROSE      = '#e11d48';
 const GRAY_900  = '#111827';
@@ -61,7 +77,49 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // ── Itinerary summary ─────────────────────────────────────────────────────
+  // ── Wedding itinerary (locations / events) ────────────────────────────────
+  weddingItinerary: {
+    marginBottom: 24,
+  },
+  wItineraryRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 7,
+    borderBottomWidth: 1,
+    borderBottomColor: GRAY_100,
+    gap: 10,
+  },
+  wItineraryTime: {
+    width: 36,
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_700,
+    flexShrink: 0,
+  },
+  wItineraryBody: { flex: 1 },
+  wItineraryLocation: {
+    fontSize: 10,
+    fontFamily: 'Helvetica-Bold',
+    color: GRAY_900,
+  },
+  wItineraryType: {
+    fontSize: 8,
+    color: ROSE,
+    marginTop: 1,
+  },
+  wItineraryAddress: {
+    fontSize: 7.5,
+    color: GRAY_500,
+    marginTop: 1,
+  },
+  wItineraryNotes: {
+    fontSize: 7.5,
+    color: GRAY_500,
+    fontStyle: 'italic',
+    marginTop: 1,
+  },
+
+  // ── Schedule summary ─────────────────────────────────────────────────────
   sectionTitle: {
     fontSize: 7,
     fontFamily: 'Helvetica-Bold',
@@ -194,6 +252,7 @@ export interface SchedulePDFProps {
   viewMode: 'planner' | 'couple';
   plannerName?: string | null;
   plannerLogo?: string | null;
+  itineraryItems?: PdfItineraryItem[];
 }
 
 export function SchedulePDF({
@@ -203,6 +262,7 @@ export function SchedulePDF({
   viewMode,
   plannerName,
   plannerLogo,
+  itineraryItems = [],
 }: SchedulePDFProps) {
   const filteredBlocks = blocks
     .map((block) => ({
@@ -239,7 +299,38 @@ export function SchedulePDF({
           )}
         </View>
 
-        {/* ── Itinerary summary ── */}
+        {/* ── Wedding itinerary (locations) ── */}
+        {itineraryItems.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Itinerario de la boda</Text>
+            <View style={styles.weddingItinerary}>
+              {itineraryItems.map((item) => {
+                const time = new Date(item.dateTime).toLocaleTimeString('es-ES', {
+                  hour: '2-digit', minute: '2-digit',
+                });
+                return (
+                  <View key={item.id} style={styles.wItineraryRow}>
+                    <Text style={styles.wItineraryTime}>{time}</Text>
+                    <View style={styles.wItineraryBody}>
+                      <Text style={styles.wItineraryLocation}>{item.locationName}</Text>
+                      <Text style={styles.wItineraryType}>
+                        {ITEM_TYPE_LABELS[item.itemType] ?? item.itemType}
+                      </Text>
+                      {item.address && (
+                        <Text style={styles.wItineraryAddress}>{item.address}</Text>
+                      )}
+                      {item.notes && (
+                        <Text style={styles.wItineraryNotes}>{item.notes}</Text>
+                      )}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </>
+        )}
+
+        {/* ── Schedule summary ── */}
         <Text style={styles.sectionTitle}>Itinerario</Text>
         <View style={styles.itinerary}>
           {filteredBlocks.map((block, idx) => {
