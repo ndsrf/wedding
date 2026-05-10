@@ -209,7 +209,7 @@ export async function getSchedulePdfHandler(
     }) as unknown as Parameters<typeof renderToBuffer>[0]
   );
 
-  return new NextResponse(pdfBuffer, {
+  return new NextResponse(new Uint8Array(pdfBuffer), {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="cronograma-${viewMode}.pdf"`,
