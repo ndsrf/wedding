@@ -26,6 +26,7 @@ export interface ScheduleBlock {
   name: string;
   order: number;
   color: string | null;
+  offset_minutes: number | null;
   created_at: Date;
   updated_at: Date;
   stages: ScheduleStage[];
@@ -78,6 +79,7 @@ export interface UpdateBlockData {
   name?: string;
   order?: number;
   color?: string;
+  offset_minutes?: number | null;
 }
 
 export interface CreateStageData {
@@ -117,28 +119,37 @@ export function addMinutesToTime(time: string, minutes: number): string {
   return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
 }
 
-/** Calculate all stage start/end times from a base start_time string "HH:MM". */
+/** Calculate all stage start/end times from a base start_time string "HH:MM".
+ *  Blocks with offset_minutes set start at (start_time + offset) and run in parallel;
+ *  they do not advance the sequential cursor used by following blocks.
+ */
 export function computeScheduleWithTimes(
   blocks: ScheduleBlock[],
   start_time: string
 ): ScheduleBlockWithTimes[] {
-  let cursor = start_time;
+  let cursor = start_time; // tracks the latest end time seen so far
   return blocks
     .slice()
     .sort((a, b) => a.order - b.order)
     .map((block) => {
-      const block_start_time = cursor;
+      const hasOffset = block.offset_minutes !== null && block.offset_minutes !== undefined;
+      const block_start_time = hasOffset
+        ? addMinutesToTime(start_time, block.offset_minutes!)
+        : cursor;
+
+      let stageCursor = block_start_time;
       const sortedStages = block.stages.slice().sort((a, b) => a.order - b.order);
       const stagesWithTimes: ScheduleStageWithTime[] = sortedStages.map((stage) => {
-        const calculated_start_time = cursor;
-        cursor = addMinutesToTime(cursor, stage.duration_minutes);
-        return { ...stage, calculated_start_time, calculated_end_time: cursor };
+        const calculated_start_time = stageCursor;
+        stageCursor = addMinutesToTime(stageCursor, stage.duration_minutes);
+        return { ...stage, calculated_start_time, calculated_end_time: stageCursor };
       });
-      return {
-        ...block,
-        stages: stagesWithTimes,
-        block_start_time,
-        block_end_time: cursor,
-      };
+
+      const block_end_time = stageCursor;
+      // Advance cursor to the latest end time (max), regardless of sequential/parallel.
+      // This ensures the next sequential block starts after everything that ran before it.
+      if (block_end_time > cursor) cursor = block_end_time;
+
+      return { ...block, stages: stagesWithTimes, block_start_time, block_end_time };
     });
 }

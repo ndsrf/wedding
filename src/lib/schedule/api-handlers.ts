@@ -64,6 +64,7 @@ const patchBlockSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   order: z.number().int().min(0).optional(),
   color: z.string().optional(),
+  offset_minutes: z.number().int().min(0).nullable().optional(),
 });
 
 const patchStageSchema = z.object({
@@ -153,8 +154,8 @@ export async function patchScheduleHandler(
   }
 
   if (b.type === 'block') {
-    const { block_id, name, order, color } = patchBlockSchema.parse(b);
-    const block = await updateBlock({ block_id, name, order, color });
+    const { block_id, name, order, color, offset_minutes } = patchBlockSchema.parse(b);
+    const block = await updateBlock({ block_id, name, order, color, offset_minutes });
     return NextResponse.json({ data: block });
   }
 

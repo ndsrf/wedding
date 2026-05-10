@@ -1535,17 +1535,18 @@ model ScheduleTemplate {
 }
 
 model ScheduleBlock {
-  id          String            @id @default(uuid())
-  template_id String?
-  wedding_id  String?
-  name        String
-  order       Int
-  color       String?           @default("#6366f1")
-  created_at  DateTime          @default(now())
-  updated_at  DateTime          @updatedAt
-  stages      ScheduleStage[]
-  template    ScheduleTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
-  wedding     Wedding?          @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  id             String            @id @default(uuid())
+  template_id    String?
+  wedding_id     String?
+  name           String
+  order          Int
+  color          String?           @default("#6366f1")
+  offset_minutes Int?
+  created_at     DateTime          @default(now())
+  updated_at     DateTime          @updatedAt
+  stages         ScheduleStage[]
+  template       ScheduleTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  wedding        Wedding?          @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
 
   @@index([template_id])
   @@index([wedding_id])

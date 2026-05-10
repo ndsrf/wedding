@@ -7,6 +7,7 @@ import {
   closestCorners,
   KeyboardSensor,
   PointerSensor,
+  useDroppable,
   useSensor,
   useSensors,
   type DragStartEvent,
@@ -267,10 +268,15 @@ function SortableStageRow({
         </span>
       )}
 
-      {/* Planner-only badge */}
+      {/* Planner-only eye icon */}
       {plannerOnly && viewMode === 'planner' && (
-        <span className="text-xs font-medium text-violet-500 bg-violet-100 px-1.5 py-0.5 rounded-full flex-shrink-0">
-          Solo planner
+        <span title="Solo visible para el planner" className="flex-shrink-0 leading-none">
+          <svg className="w-3.5 h-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
         </span>
       )}
 
@@ -332,6 +338,44 @@ function SortableStageRow({
   );
 }
 
+// ── Trash drop zone (shown while dragging) ────────────────────────────────────
+
+function TrashDropZone({ visible }: { visible: boolean }) {
+  const { isOver, setNodeRef } = useDroppable({ id: 'trash-zone' });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-6 py-3 rounded-2xl border-2 border-dashed shadow-lg transition-all duration-150 pointer-events-none ${
+        visible ? 'opacity-100' : 'opacity-0'
+      } ${
+        isOver
+          ? 'border-red-400 bg-red-50 text-red-500 scale-105'
+          : 'border-gray-300 bg-white/95 text-gray-400 backdrop-blur-sm'
+      }`}
+      style={{ pointerEvents: visible ? 'auto' : 'none' }}
+    >
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+      <span className="text-sm font-medium">
+        {isOver ? 'Suelta para eliminar' : 'Arrastrar aquí para eliminar'}
+      </span>
+    </div>
+  );
+}
+
+// ── Offset helpers ─────────────────────────────────────────────────────────────
+
+function offsetLabel(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h > 0 && m > 0) return `+${h}h ${m}min desde inicio`;
+  if (h > 0) return `+${h}h desde inicio`;
+  return `+${m}min desde inicio`;
+}
+
 // ── Sortable block section ────────────────────────────────────────────────────
 
 function SortableBlockSection({
@@ -371,6 +415,9 @@ function SortableBlockSection({
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDuration, setNewDuration] = useState('30');
+  const [editOffset, setEditOffset] = useState(false);
+  const [offsetH, setOffsetH] = useState(0);
+  const [offsetM, setOffsetM] = useState(0);
 
   const visibleStages = viewMode === 'couple'
     ? block.stages.filter((s) => s.visible_to_couple)
@@ -389,6 +436,24 @@ function SortableBlockSection({
     setNewName('');
     setNewDuration('30');
     setShowAdd(false);
+  };
+
+  const openOffsetEdit = () => {
+    const cur = block.offset_minutes ?? null;
+    setOffsetH(cur !== null ? Math.floor(cur / 60) : 0);
+    setOffsetM(cur !== null ? cur % 60 : 0);
+    setEditOffset(true);
+  };
+
+  const saveOffset = () => {
+    const total = offsetH * 60 + offsetM;
+    onUpdateBlock(block.id, { offset_minutes: total });
+    setEditOffset(false);
+  };
+
+  const clearOffset = () => {
+    onUpdateBlock(block.id, { offset_minutes: null });
+    setEditOffset(false);
   };
 
   if (viewMode === 'couple' && visibleStages.length === 0) return null;
@@ -434,6 +499,55 @@ function SortableBlockSection({
           </svg>
         </button>
       </div>
+
+      {/* Offset (start time) row — planner view only */}
+      {viewMode === 'planner' && (
+        <div className="pl-8 mb-2">
+          {editOffset ? (
+            <div className="flex items-center gap-2">
+              <svg className="w-3 h-3 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <input
+                type="number" min="0" max="23"
+                className="w-10 text-xs text-center border border-gray-200 rounded-lg px-1 py-0.5 focus:outline-none focus:border-rose-300"
+                value={offsetH}
+                onChange={(e) => setOffsetH(Math.max(0, parseInt(e.target.value) || 0))}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveOffset(); if (e.key === 'Escape') setEditOffset(false); }}
+              />
+              <span className="text-xs text-gray-400">h</span>
+              <input
+                type="number" min="0" max="59"
+                className="w-10 text-xs text-center border border-gray-200 rounded-lg px-1 py-0.5 focus:outline-none focus:border-rose-300"
+                value={offsetM}
+                onChange={(e) => setOffsetM(Math.max(0, parseInt(e.target.value) || 0))}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveOffset(); if (e.key === 'Escape') setEditOffset(false); }}
+              />
+              <span className="text-xs text-gray-400">min desde inicio</span>
+              <button type="button" onClick={saveOffset} className="text-xs text-rose-500 hover:text-rose-600 font-medium">OK</button>
+              <button type="button" onClick={clearOffset} className="text-xs text-gray-400 hover:text-gray-600">↩ fin anterior</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={openOffsetEdit}
+              className={`flex items-center gap-1.5 text-xs transition-colors ${
+                block.offset_minutes !== null && block.offset_minutes !== undefined
+                  ? 'text-amber-500 hover:text-amber-600'
+                  : 'text-gray-300 hover:text-gray-500'
+              }`}
+              title="Editar hora de inicio de esta sección"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {block.offset_minutes !== null && block.offset_minutes !== undefined
+                ? offsetLabel(block.offset_minutes)
+                : 'fin sección anterior'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Stages */}
       <SortableContext items={block.stages.map((s) => s.id)} strategy={verticalListSortingStrategy}>
@@ -519,7 +633,7 @@ export function SchedulePageContent({
   weddingDate,
 }: SchedulePageContentProps) {
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
-  const [startTime, setStartTime] = useState('10:00');
+  const [startTime, setStartTime] = useState('08:00');
   const [viewMode, setViewMode] = useState<'planner' | 'couple'>('planner');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -667,6 +781,14 @@ export function SchedulePageContent({
     setActiveDragType(null);
 
     if (!over) { dragOriginBlockId.current = null; return; }
+
+    // ── Dropped on trash ────────────────────────────────────────────────────
+    if (over.id === 'trash-zone') {
+      dragOriginBlockId.current = null;
+      if (type === 'stage') await handleDeleteStage(draggedId);
+      else await handleDeleteBlock(draggedId);
+      return;
+    }
 
     const overId = over.id as string;
 
@@ -1068,6 +1190,9 @@ export function SchedulePageContent({
               {error}
             </div>
           )}
+
+          {/* Trash drop zone — visible only while dragging */}
+          <TrashDropZone visible={activeDragId !== null} />
 
           {/* Timeline */}
           <DndContext

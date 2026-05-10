@@ -14,14 +14,19 @@ interface DefaultStage {
 interface DefaultBlock {
   name: string;
   color: string;
+  // offset_minutes from start_time; null = sequential (starts after previous block)
+  offset_minutes?: number | null;
   stages: DefaultStage[];
 }
 
-// Planner template — full detail including logistics
+// Planner template — calibrated for a ceremony at 12:30 with start_time 08:00.
+// Preparativos (8:00) and Montaje (8:00) run in parallel so they don't
+// delay the ceremony. Ceremonia is anchored 4h30min from start_time.
 const PLANNER_DEFAULT_TEMPLATE: DefaultBlock[] = [
   {
     name: 'Preparativos',
     color: '#ec4899',
+    offset_minutes: null, // sequential — starts at start_time (08:00)
     stages: [
       { name: 'Llegada de la peluquera', duration_minutes: 90, visible_to_couple: false },
       { name: 'Peinado novia', duration_minutes: 60, visible_to_couple: true },
@@ -34,6 +39,7 @@ const PLANNER_DEFAULT_TEMPLATE: DefaultBlock[] = [
   {
     name: 'Montaje',
     color: '#8b5cf6',
+    offset_minutes: 0, // parallel with Preparativos — also starts at start_time (08:00)
     stages: [
       { name: 'Entrega flores y decoración', duration_minutes: 120, visible_to_couple: false },
       { name: 'Instalación equipo DJ / música', duration_minutes: 90, visible_to_couple: false },
@@ -44,6 +50,7 @@ const PLANNER_DEFAULT_TEMPLATE: DefaultBlock[] = [
   {
     name: 'Ceremonia',
     color: '#f59e0b',
+    offset_minutes: 270, // 4h 30min after start_time → 12:30 when start is 08:00
     stages: [
       { name: 'Llegada de invitados', duration_minutes: 30, visible_to_couple: true },
       { name: 'Entrada del novio', duration_minutes: 5, visible_to_couple: true },
@@ -54,6 +61,7 @@ const PLANNER_DEFAULT_TEMPLATE: DefaultBlock[] = [
   {
     name: 'Banquete',
     color: '#10b981',
+    offset_minutes: null, // sequential — starts after Ceremonia ends
     stages: [
       { name: 'Cóctel de bienvenida', duration_minutes: 90, visible_to_couple: true },
       { name: 'Entrada al salón / sentados', duration_minutes: 15, visible_to_couple: true },
@@ -82,6 +90,7 @@ export async function ensureScheduleTemplate(planner_id: string) {
           name: block.name,
           order: blockIdx,
           color: block.color,
+          offset_minutes: block.offset_minutes ?? null,
           stages: {
             create: block.stages.map((stage, stageIdx) => ({
               name: stage.name,
@@ -104,7 +113,7 @@ export async function ensureScheduleTemplate(planner_id: string) {
 export async function applyScheduleToWedding(
   planner_id: string,
   wedding_id: string,
-  start_time: string = '10:00'
+  start_time: string = '08:00'
 ) {
   // Get (or create) the planner's template
   await ensureScheduleTemplate(planner_id);
@@ -133,8 +142,9 @@ export async function applyScheduleToWedding(
         name: block.name,
         order: block.order,
         color: block.color,
+        offset_minutes: (block as { offset_minutes?: number | null }).offset_minutes ?? null,
         stages: {
-          create: block.stages.map((s) => ({
+          create: block.stages.map((s: { name: string; duration_minutes: number; order: number; notes: string | null; visible_to_couple: boolean }) => ({
             name: s.name,
             duration_minutes: s.duration_minutes,
             order: s.order,
