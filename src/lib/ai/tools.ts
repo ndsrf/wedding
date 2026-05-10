@@ -1066,6 +1066,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
       ),
       execute: async ({ groupName, labelsToAdd, labelsToRemove, replaceWith }) => {
         if (!ctx.weddingId) return { error: 'No wedding context available' };
+        console.log(`[TOOLS] update_group_labels called: groupName="${groupName}" add=${JSON.stringify(labelsToAdd)} remove=${JSON.stringify(labelsToRemove)} replace=${JSON.stringify(replaceWith)}`);
 
         // replaceWith cannot be combined with incremental ops
         if (replaceWith !== undefined && (labelsToAdd?.length || labelsToRemove?.length)) {
@@ -1196,7 +1197,7 @@ export function buildTools(ctx: ToolContext): ToolSet {
           const parts: string[] = [];
           if (removed.length > 0) parts.push(`removed label(s): ${removed.join(', ')}`);
           if (added.length > 0) parts.push(`added label(s): ${added.join(', ')}`);
-          return {
+          const result = {
             status: errors.length > 0 ? 'partial' : 'success',
             message:
               errors.length > 0
@@ -1208,6 +1209,8 @@ export function buildTools(ctx: ToolContext): ToolSet {
             currentLabels,
             errors: errors.length > 0 ? errors : undefined,
           };
+          console.log(`[TOOLS] update_group_labels result: ${JSON.stringify(result)}`);
+          return result;
         } catch (err) {
           console.error('[TOOLS] update_group_labels error:', err);
           return { error: 'Failed to update group labels' };

@@ -271,7 +271,10 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
         // Log the first result content length as a hint
         const firstResult = step.toolResults[0].output;
         const resultCount = Array.isArray(firstResult) ? (firstResult as unknown[]).length : 'unknown';
-        console.log(`[RAG-CHAT] First tool result (${step.toolResults[0].toolName}) count/type: ${resultCount}`);
+        const resultSummary = typeof firstResult === 'object' && firstResult !== null
+          ? JSON.stringify(firstResult).slice(0, 200)
+          : String(firstResult).slice(0, 200);
+        console.log(`[RAG-CHAT] First tool result (${step.toolResults[0].toolName}) count/type: ${resultCount} | ${resultSummary}`);
       }
       if (step.text) {
         console.log(`[RAG-CHAT] Partial text generated in step: ${step.text.length} chars`);
