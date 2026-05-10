@@ -69,6 +69,7 @@ const patchBlockSchema = z.object({
 const patchStageSchema = z.object({
   type: z.literal('stage'),
   stage_id: z.string().uuid(),
+  block_id: z.string().uuid().optional(),
   name: z.string().min(1).max(200).optional(),
   duration_minutes: z.number().int().min(1).max(1440).optional(),
   order: z.number().int().min(0).optional(),
@@ -158,8 +159,8 @@ export async function patchScheduleHandler(
   }
 
   if (b.type === 'stage') {
-    const { stage_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id } = patchStageSchema.parse(b);
-    const stage = await updateStage({ stage_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id });
+    const { stage_id, block_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id } = patchStageSchema.parse(b);
+    const stage = await updateStage({ stage_id, block_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id });
     return NextResponse.json({ data: stage });
   }
 

@@ -94,11 +94,12 @@ export async function createStage(data: CreateStageData) {
 }
 
 export async function updateStage(data: UpdateStageData) {
-  const { stage_id, wedding_provider_id, ...rest } = data;
+  const { stage_id, block_id, wedding_provider_id, ...rest } = data;
   return prisma.scheduleStage.update({
     where: { id: stage_id },
     data: {
       ...rest,
+      ...(block_id !== undefined ? { block: { connect: { id: block_id } } } : {}),
       ...(wedding_provider_id === null
         ? { wedding_provider: { disconnect: true } }
         : wedding_provider_id !== undefined

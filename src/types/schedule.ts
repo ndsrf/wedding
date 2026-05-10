@@ -92,6 +92,7 @@ export interface CreateStageData {
 
 export interface UpdateStageData {
   stage_id: string;
+  block_id?: string;
   name?: string;
   duration_minutes?: number;
   order?: number;

@@ -1,15 +1,28 @@
-/**
- * Schedule Page — Shared Content Component
- *
- * Used by both /admin/schedule and /planner/weddings/[id]/schedule.
- * All API calls go through apiPaths — never hardcoded routes.
- *
- * See CONSOLIDATION_PLAN.md for the full consolidation strategy.
- */
-
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragOverEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import type { DraggableAttributes } from '@dnd-kit/core';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { CSS } from '@dnd-kit/utilities';
 import type {
   ScheduleBlock,
   ScheduleBlockWithTimes,
@@ -21,9 +34,9 @@ import { computeScheduleWithTimes } from '@/types/schedule';
 // ── API paths ─────────────────────────────────────────────────────────────────
 
 export interface ScheduleApiPaths {
-  schedule: string;       // e.g. /api/admin/schedule
-  schedulePdf: string;    // e.g. /api/admin/schedule/pdf
-  providersUrl?: string;  // e.g. /api/weddings/:id/providers — enables provider assignment
+  schedule: string;
+  schedulePdf: string;
+  providersUrl?: string;
 }
 
 export interface SchedulePageContentProps {
@@ -48,58 +61,215 @@ function providerLabel(p: StageProvider) {
   return p.name || p.category.name;
 }
 
-// ── Stage pill ────────────────────────────────────────────────────────────────
+function findBlockForStage(stageId: string, blocks: ScheduleBlock[]): ScheduleBlock | undefined {
+  return blocks.find((b) => b.stages.some((s) => s.id === stageId));
+}
 
-function StagePill({
+// ── Drag handle ───────────────────────────────────────────────────────────────
+
+function DragHandle({
+  listeners,
+  attributes,
+}: {
+  listeners?: SyntheticListenerMap;
+  attributes?: DraggableAttributes;
+}) {
+  return (
+    <button
+      type="button"
+      className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 text-gray-300 hover:text-gray-400 transition-colors touch-none"
+      {...listeners}
+      {...attributes}
+    >
+      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M7 2a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zM7 8a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zM7 14a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4z" />
+      </svg>
+    </button>
+  );
+}
+
+// ── Sortable stage row ────────────────────────────────────────────────────────
+
+function SortableStageRow({
   stage,
   blockColor,
   viewMode,
   providers,
   onProviderChange,
+  onUpdate,
+  onDelete,
 }: {
   stage: ScheduleStageWithTime;
   blockColor: string;
   viewMode: 'planner' | 'couple';
   providers: StageProvider[];
   onProviderChange?: (stageId: string, providerId: string | null) => void;
+  onUpdate: (stageId: string, updates: Record<string, unknown>) => void;
+  onDelete: (stageId: string) => void;
 }) {
-  const [showSelect, setShowSelect] = useState(false);
-  const plannerOnly = !stage.visible_to_couple;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: stage.id, data: { type: 'stage' } });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const [editName, setEditName] = useState(false);
+  const [localName, setLocalName] = useState(stage.name);
+  const [editDuration, setEditDuration] = useState(false);
+  const [localDuration, setLocalDuration] = useState(String(stage.duration_minutes));
+  const [editNotes, setEditNotes] = useState(false);
+  const [localNotes, setLocalNotes] = useState(stage.notes ?? '');
+  const [showProviderSelect, setShowProviderSelect] = useState(false);
+
+  // Keep local state in sync if parent updates (e.g. after API save)
+  const prevStage = useRef(stage);
+  if (prevStage.current.id !== stage.id) {
+    prevStage.current = stage;
+    setLocalName(stage.name);
+    setLocalDuration(String(stage.duration_minutes));
+    setLocalNotes(stage.notes ?? '');
+  }
+
   const canAssign = viewMode === 'planner' && !!onProviderChange;
+  const plannerOnly = !stage.visible_to_couple;
+
+  const saveName = () => {
+    setEditName(false);
+    const trimmed = localName.trim();
+    if (trimmed && trimmed !== stage.name) onUpdate(stage.id, { name: trimmed });
+    else setLocalName(stage.name);
+  };
+
+  const saveDuration = () => {
+    setEditDuration(false);
+    const mins = parseInt(localDuration, 10);
+    if (!isNaN(mins) && mins >= 1 && mins !== stage.duration_minutes) {
+      onUpdate(stage.id, { duration_minutes: mins });
+    } else {
+      setLocalDuration(String(stage.duration_minutes));
+    }
+  };
+
+  const saveNotes = () => {
+    setEditNotes(false);
+    const val = localNotes.trim() || null;
+    if (val !== stage.notes) onUpdate(stage.id, { notes: val });
+  };
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
+      ref={setNodeRef}
+      style={style}
+      className={`group flex items-start gap-2 px-3 py-2.5 rounded-xl border transition-colors ${
+        isDragging ? 'opacity-30' : ''
+      } ${
         plannerOnly && viewMode === 'planner'
           ? 'bg-violet-50 border-violet-100'
           : 'bg-white border-gray-100'
       }`}
     >
+      {/* Drag handle */}
+      <DragHandle listeners={listeners} attributes={attributes} />
+
       {/* Time */}
-      <div className="flex-shrink-0 w-14 text-right">
-        <span className="text-sm font-bold text-gray-800">{stage.calculated_start_time}</span>
+      <div className="flex-shrink-0 w-12 text-right pt-0.5">
+        <span className="text-xs font-bold text-gray-600">{stage.calculated_start_time}</span>
       </div>
 
-      {/* Dot */}
+      {/* Colour dot */}
       <div
-        className="flex-shrink-0 w-2.5 h-2.5 rounded-full"
+        className="flex-shrink-0 w-2 h-2 rounded-full mt-2"
         style={{ backgroundColor: blockColor }}
       />
 
       {/* Name + notes */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">{stage.name}</p>
-        {stage.notes && viewMode === 'planner' && (
-          <p className="text-xs text-gray-400 truncate mt-0.5">{stage.notes}</p>
+        {editName ? (
+          <input
+            autoFocus
+            className="w-full text-sm font-medium text-gray-800 bg-transparent border-b border-rose-300 focus:outline-none pb-0.5"
+            value={localName}
+            onChange={(e) => setLocalName(e.target.value)}
+            onBlur={saveName}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveName();
+              if (e.key === 'Escape') { setLocalName(stage.name); setEditName(false); }
+            }}
+          />
+        ) : (
+          <p
+            className="text-sm font-medium text-gray-800 cursor-text hover:text-rose-600 transition-colors"
+            onClick={() => setEditName(true)}
+          >
+            {stage.name}
+          </p>
+        )}
+
+        {/* Notes row */}
+        {editNotes ? (
+          <input
+            autoFocus
+            className="w-full text-xs text-gray-500 bg-transparent border-b border-gray-200 focus:outline-none mt-1 pb-0.5"
+            placeholder="Añadir nota..."
+            value={localNotes}
+            onChange={(e) => setLocalNotes(e.target.value)}
+            onBlur={saveNotes}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveNotes();
+              if (e.key === 'Escape') { setLocalNotes(stage.notes ?? ''); setEditNotes(false); }
+            }}
+          />
+        ) : (
+          <p
+            className={`text-xs mt-0.5 cursor-text transition-colors ${
+              stage.notes
+                ? 'text-gray-400 hover:text-gray-600'
+                : 'text-gray-200 group-hover:text-gray-400'
+            }`}
+            onClick={() => setEditNotes(true)}
+          >
+            {stage.notes || '+ nota'}
+          </p>
         )}
       </div>
 
       {/* Duration */}
-      <span className="text-xs text-gray-400 flex-shrink-0">{durationLabel(stage.duration_minutes)}</span>
+      {editDuration ? (
+        <input
+          autoFocus
+          type="number"
+          min="1"
+          max="1440"
+          className="w-14 text-xs text-right text-gray-500 bg-transparent border-b border-rose-300 focus:outline-none pb-0.5"
+          value={localDuration}
+          onChange={(e) => setLocalDuration(e.target.value)}
+          onBlur={saveDuration}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') saveDuration();
+            if (e.key === 'Escape') { setLocalDuration(String(stage.duration_minutes)); setEditDuration(false); }
+          }}
+        />
+      ) : (
+        <span
+          className="text-xs text-gray-400 flex-shrink-0 cursor-text hover:text-rose-500 transition-colors pt-0.5"
+          onClick={() => setEditDuration(true)}
+          title="Duración en minutos"
+        >
+          {durationLabel(stage.duration_minutes)}
+        </span>
+      )}
 
       {/* Planner-only badge */}
       {plannerOnly && viewMode === 'planner' && (
-        <span className="text-xs font-medium text-violet-500 bg-violet-100 px-2 py-0.5 rounded-full flex-shrink-0">
+        <span className="text-xs font-medium text-violet-500 bg-violet-100 px-1.5 py-0.5 rounded-full flex-shrink-0">
           Solo planner
         </span>
       )}
@@ -107,29 +277,26 @@ function StagePill({
       {/* Provider assignment */}
       {(stage.wedding_provider || canAssign) && (
         <div className="flex-shrink-0">
-          {showSelect ? (
+          {showProviderSelect ? (
             <select
               autoFocus
               className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-blue-300"
               value={stage.wedding_provider_id ?? ''}
               onChange={(e) => {
                 onProviderChange!(stage.id, e.target.value || null);
-                setShowSelect(false);
+                setShowProviderSelect(false);
               }}
-              onBlur={() => setShowSelect(false)}
+              onBlur={() => setShowProviderSelect(false)}
             >
               <option value="">Sin proveedor</option>
               {providers.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {providerLabel(p)}
-                </option>
+                <option key={p.id} value={p.id}>{providerLabel(p)}</option>
               ))}
             </select>
           ) : stage.wedding_provider ? (
             <button
               type="button"
-              title={canAssign ? 'Cambiar proveedor' : undefined}
-              onClick={canAssign ? () => setShowSelect(true) : undefined}
+              onClick={canAssign ? () => setShowProviderSelect(true) : undefined}
               className={`text-xs font-medium px-2 py-0.5 rounded-full transition-colors ${
                 canAssign
                   ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
@@ -141,7 +308,7 @@ function StagePill({
           ) : canAssign ? (
             <button
               type="button"
-              onClick={() => setShowSelect(true)}
+              onClick={() => setShowProviderSelect(true)}
               className="text-xs text-gray-300 hover:text-blue-400 transition-colors"
             >
               + Proveedor
@@ -149,51 +316,195 @@ function StagePill({
           ) : null}
         </div>
       )}
+
+      {/* Delete stage */}
+      <button
+        type="button"
+        onClick={() => onDelete(stage.id)}
+        className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-red-400 transition-all"
+        title="Eliminar paso"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   );
 }
 
-// ── Block section ─────────────────────────────────────────────────────────────
+// ── Sortable block section ────────────────────────────────────────────────────
 
-function BlockSection({
+function SortableBlockSection({
   block,
   viewMode,
   providers,
   onProviderChange,
+  onUpdateStage,
+  onDeleteStage,
+  onUpdateBlock,
+  onDeleteBlock,
+  onAddStage,
 }: {
   block: ScheduleBlockWithTimes;
   viewMode: 'planner' | 'couple';
   providers: StageProvider[];
   onProviderChange?: (stageId: string, providerId: string | null) => void;
+  onUpdateStage: (stageId: string, updates: Record<string, unknown>) => void;
+  onDeleteStage: (stageId: string) => void;
+  onUpdateBlock: (blockId: string, updates: Record<string, unknown>) => void;
+  onDeleteBlock: (blockId: string) => void;
+  onAddStage: (blockId: string, name: string, durationMinutes: number) => void;
 }) {
-  const filteredStages = viewMode === 'couple'
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: block.id, data: { type: 'block' } });
+
+  const style = { transform: CSS.Transform.toString(transform), transition };
+
+  const [editName, setEditName] = useState(false);
+  const [localName, setLocalName] = useState(block.name);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newDuration, setNewDuration] = useState('30');
+
+  const visibleStages = viewMode === 'couple'
     ? block.stages.filter((s) => s.visible_to_couple)
     : block.stages;
 
-  if (filteredStages.length === 0) return null;
+  const saveName = () => {
+    setEditName(false);
+    const trimmed = localName.trim();
+    if (trimmed && trimmed !== block.name) onUpdateBlock(block.id, { name: trimmed });
+    else setLocalName(block.name);
+  };
+
+  const submitAdd = () => {
+    if (!newName.trim()) return;
+    onAddStage(block.id, newName.trim(), parseInt(newDuration, 10) || 30);
+    setNewName('');
+    setNewDuration('30');
+    setShowAdd(false);
+  };
+
+  if (viewMode === 'couple' && visibleStages.length === 0) return null;
 
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center gap-2 mb-2">
+    <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-30' : ''}>
+      {/* Block header */}
+      <div className="group flex items-center gap-2 mb-2">
+        <DragHandle listeners={listeners} attributes={attributes} />
         <div
           className="w-3 h-3 rounded-full flex-shrink-0"
           style={{ backgroundColor: block.color ?? '#6366f1' }}
         />
-        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{block.name}</h3>
-        <span className="text-xs text-gray-400 ml-auto">
-          {block.block_start_time} – {block.block_end_time}
-        </span>
+        {editName ? (
+          <input
+            autoFocus
+            className="flex-1 text-sm font-bold text-gray-700 uppercase tracking-wide bg-transparent border-b border-rose-300 focus:outline-none"
+            value={localName}
+            onChange={(e) => setLocalName(e.target.value)}
+            onBlur={saveName}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveName();
+              if (e.key === 'Escape') { setLocalName(block.name); setEditName(false); }
+            }}
+          />
+        ) : (
+          <h3
+            className="flex-1 text-sm font-bold text-gray-700 uppercase tracking-wide cursor-text hover:text-rose-600 transition-colors"
+            onClick={() => setEditName(true)}
+          >
+            {block.name}
+          </h3>
+        )}
+        <span className="text-xs text-gray-400">{block.block_start_time} – {block.block_end_time}</span>
+        <button
+          type="button"
+          onClick={() => onDeleteBlock(block.id)}
+          className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-red-400 transition-all"
+          title="Eliminar sección"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      {filteredStages.map((stage) => (
-        <StagePill
-          key={stage.id}
-          stage={stage}
-          blockColor={block.color ?? '#6366f1'}
-          viewMode={viewMode}
-          providers={providers}
-          onProviderChange={onProviderChange}
-        />
-      ))}
+
+      {/* Stages */}
+      <SortableContext items={block.stages.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+        <div className="space-y-1.5 pl-5">
+          {visibleStages.map((stage) => (
+            <SortableStageRow
+              key={stage.id}
+              stage={stage}
+              blockColor={block.color ?? '#6366f1'}
+              viewMode={viewMode}
+              providers={providers}
+              onProviderChange={onProviderChange}
+              onUpdate={onUpdateStage}
+              onDelete={onDeleteStage}
+            />
+          ))}
+        </div>
+      </SortableContext>
+
+      {/* Add stage row */}
+      {viewMode === 'planner' && (
+        <div className="pl-5 pt-1">
+          {showAdd ? (
+            <div className="flex items-center gap-2 py-1">
+              <input
+                autoFocus
+                placeholder="Nombre del paso"
+                className="flex-1 text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-100"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') submitAdd();
+                  if (e.key === 'Escape') setShowAdd(false);
+                }}
+              />
+              <input
+                type="number"
+                min="1"
+                placeholder="min"
+                className="w-16 text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-rose-300 text-center"
+                value={newDuration}
+                onChange={(e) => setNewDuration(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') submitAdd(); }}
+              />
+              <button
+                type="button"
+                onClick={submitAdd}
+                className="text-sm text-white bg-rose-500 hover:bg-rose-600 px-3 py-1.5 rounded-xl transition-colors"
+              >
+                Añadir
+              </button>
+              <button type="button" onClick={() => setShowAdd(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowAdd(true)}
+              className="flex items-center gap-1 text-xs text-gray-300 hover:text-rose-400 transition-colors py-1"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Añadir paso
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -209,7 +520,7 @@ export function SchedulePageContent({
 }: SchedulePageContentProps) {
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
   const [startTime, setStartTime] = useState('10:00');
-  const [viewMode, setViewMode] = useState<'planner' | 'couple'>('couple');
+  const [viewMode, setViewMode] = useState<'planner' | 'couple'>('planner');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasSchedule, setHasSchedule] = useState(false);
@@ -217,6 +528,15 @@ export function SchedulePageContent({
   const [error, setError] = useState<string | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [providers, setProviders] = useState<StageProvider[]>([]);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [activeDragType, setActiveDragType] = useState<'block' | 'stage' | null>(null);
+
+  const dragOriginBlockId = useRef<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   // ── Fetch schedule ──────────────────────────────────────────────────────────
 
@@ -233,14 +553,14 @@ export function SchedulePageContent({
       .finally(() => setLoading(false));
   }, [apiPaths.schedule]);
 
-  // ── Fetch providers (optional) ──────────────────────────────────────────────
+  // ── Fetch providers (optional, silent fail) ─────────────────────────────────
 
   useEffect(() => {
     if (!apiPaths.providersUrl) return;
     fetch(apiPaths.providersUrl)
       .then((r) => r.json())
       .then((json) => setProviders(json.data ?? []))
-      .catch(() => {}); // providers are optional, fail silently
+      .catch(() => {});
   }, [apiPaths.providersUrl]);
 
   const blocksWithTimes: ScheduleBlockWithTimes[] = computeScheduleWithTimes(blocks, startTime);
@@ -271,14 +591,13 @@ export function SchedulePageContent({
   const saveStartTime = useCallback(async (time: string) => {
     setSaving(true);
     try {
-      const res = await fetch(apiPaths.schedule, {
+      await fetch(apiPaths.schedule, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'schedule', start_time: time }),
       });
-      if (!res.ok) throw new Error('Error saving');
-    } catch (e) {
-      setError((e as Error).message);
+    } catch {
+      // non-fatal
     } finally {
       setSaving(false);
     }
@@ -289,29 +608,272 @@ export function SchedulePageContent({
     if (hasSchedule) saveStartTime(val);
   };
 
-  // ── Assign provider to stage ────────────────────────────────────────────────
+  // ── DnD ─────────────────────────────────────────────────────────────────────
 
-  const handleProviderChange = useCallback(async (stageId: string, providerId: string | null) => {
-    const providerObj = providerId ? (providers.find((p) => p.id === providerId) ?? null) : null;
-    // Optimistic update
-    setBlocks((prev) =>
-      prev.map((block) => ({
-        ...block,
-        stages: block.stages.map((s) =>
-          s.id === stageId
-            ? { ...s, wedding_provider_id: providerId, wedding_provider: providerObj }
-            : s
-        ),
-      }))
-    );
-    await fetch(apiPaths.schedule, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'stage', stage_id: stageId, wedding_provider_id: providerId }),
+  function onDragStart({ active }: DragStartEvent) {
+    const type = active.data.current?.type as 'block' | 'stage';
+    setActiveDragId(active.id as string);
+    setActiveDragType(type);
+    if (type === 'stage') {
+      const b = findBlockForStage(active.id as string, blocks);
+      dragOriginBlockId.current = b?.id ?? null;
+    }
+  }
+
+  function onDragOver({ active, over }: DragOverEvent) {
+    if (!over || active.id === over.id) return;
+    if (active.data.current?.type !== 'stage') return;
+
+    const stageId = active.id as string;
+    const overId = over.id as string;
+
+    const activeBlock = findBlockForStage(stageId, blocks);
+    const overBlock =
+      over.data.current?.type === 'block'
+        ? blocks.find((b) => b.id === overId)
+        : findBlockForStage(overId, blocks);
+
+    if (!activeBlock || !overBlock || activeBlock.id === overBlock.id) return;
+
+    // Optimistically move stage to the new block
+    setBlocks((prev) => {
+      const aBlock = prev.find((b) => b.id === activeBlock.id)!;
+      const oBlock = prev.find((b) => b.id === overBlock.id)!;
+      const movingStage = aBlock.stages.find((s) => s.id === stageId)!;
+
+      const newAStages = aBlock.stages
+        .filter((s) => s.id !== stageId)
+        .map((s, i) => ({ ...s, order: i }));
+
+      let insertAt = oBlock.stages.findIndex((s) => s.id === overId);
+      if (insertAt === -1) insertAt = oBlock.stages.length;
+
+      const newOStages = [...oBlock.stages];
+      newOStages.splice(insertAt, 0, movingStage);
+      const newOStagesOrdered = newOStages.map((s, i) => ({ ...s, order: i }));
+
+      return prev.map((b) => {
+        if (b.id === activeBlock.id) return { ...b, stages: newAStages };
+        if (b.id === overBlock.id) return { ...b, stages: newOStagesOrdered };
+        return b;
+      });
     });
-  }, [apiPaths.schedule, providers]);
+  }
 
-  // ── PDF export ──────────────────────────────────────────────────────────────
+  async function onDragEnd({ active, over }: DragEndEvent) {
+    const draggedId = active.id as string;
+    const type = active.data.current?.type as 'block' | 'stage';
+    setActiveDragId(null);
+    setActiveDragType(null);
+
+    if (!over) { dragOriginBlockId.current = null; return; }
+
+    const overId = over.id as string;
+
+    // ── Block reorder ────────────────────────────────────────────────────────
+    if (type === 'block') {
+      if (draggedId === overId) return;
+      setBlocks((prev) => {
+        const oldIdx = prev.findIndex((b) => b.id === draggedId);
+        const newIdx = prev.findIndex((b) => b.id === overId);
+        const reordered = arrayMove(prev, oldIdx, newIdx).map((b, i) => ({ ...b, order: i }));
+        fetch(apiPaths.schedule, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'reorder', entity: 'blocks',
+            updates: reordered.map((b) => ({ id: b.id, order: b.order })),
+          }),
+        });
+        return reordered;
+      });
+      return;
+    }
+
+    // ── Stage reorder / cross-block move ─────────────────────────────────────
+    if (type === 'stage') {
+      const originBlockId = dragOriginBlockId.current;
+      dragOriginBlockId.current = null;
+
+      const currentBlock = findBlockForStage(draggedId, blocks);
+      if (!currentBlock) return;
+
+      const crossBlock = originBlockId && originBlockId !== currentBlock.id;
+
+      if (crossBlock) {
+        // Persist the new block_id
+        await fetch(apiPaths.schedule, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'stage', stage_id: draggedId, block_id: currentBlock.id }),
+        });
+        // Persist order for current block
+        await fetch(apiPaths.schedule, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'reorder', entity: 'stages',
+            updates: currentBlock.stages.map((s, i) => ({ id: s.id, order: i })),
+          }),
+        });
+        // Persist order for the old block
+        const oldBlock = blocks.find((b) => b.id === originBlockId);
+        if (oldBlock) {
+          await fetch(apiPaths.schedule, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'reorder', entity: 'stages',
+              updates: oldBlock.stages.map((s, i) => ({ id: s.id, order: i })),
+            }),
+          });
+        }
+        return;
+      }
+
+      // Same block reorder
+      if (draggedId === overId) return;
+      setBlocks((prev) => {
+        const blockIdx = prev.findIndex((b) => b.id === currentBlock.id);
+        const stages = prev[blockIdx].stages;
+        const oldIdx = stages.findIndex((s) => s.id === draggedId);
+        const newIdx = stages.findIndex((s) => s.id === overId);
+        if (oldIdx === -1 || newIdx === -1) return prev;
+        const reordered = arrayMove(stages, oldIdx, newIdx).map((s, i) => ({ ...s, order: i }));
+        fetch(apiPaths.schedule, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'reorder', entity: 'stages',
+            updates: reordered.map((s) => ({ id: s.id, order: s.order })),
+          }),
+        });
+        const newBlocks = [...prev];
+        newBlocks[blockIdx] = { ...newBlocks[blockIdx], stages: reordered };
+        return newBlocks;
+      });
+    }
+  }
+
+  // ── Stage/block CRUD ─────────────────────────────────────────────────────────
+
+  const handleUpdateStage = useCallback(
+    async (stageId: string, updates: Record<string, unknown>) => {
+      setBlocks((prev) =>
+        prev.map((b) => ({
+          ...b,
+          stages: b.stages.map((s) => (s.id === stageId ? { ...s, ...updates } : s)),
+        }))
+      );
+      await fetch(apiPaths.schedule, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'stage', stage_id: stageId, ...updates }),
+      });
+    },
+    [apiPaths.schedule]
+  );
+
+  const handleUpdateBlock = useCallback(
+    async (blockId: string, updates: Record<string, unknown>) => {
+      setBlocks((prev) => prev.map((b) => (b.id === blockId ? { ...b, ...updates } : b)));
+      await fetch(apiPaths.schedule, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'block', block_id: blockId, ...updates }),
+      });
+    },
+    [apiPaths.schedule]
+  );
+
+  const handleDeleteStage = useCallback(
+    async (stageId: string) => {
+      setBlocks((prev) =>
+        prev.map((b) => ({ ...b, stages: b.stages.filter((s) => s.id !== stageId) }))
+      );
+      await fetch(apiPaths.schedule, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'stage', stage_id: stageId }),
+      });
+    },
+    [apiPaths.schedule]
+  );
+
+  const handleDeleteBlock = useCallback(
+    async (blockId: string) => {
+      setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+      await fetch(apiPaths.schedule, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'block', block_id: blockId }),
+      });
+    },
+    [apiPaths.schedule]
+  );
+
+  const handleAddStage = useCallback(
+    async (blockId: string, name: string, durationMinutes: number) => {
+      const block = blocks.find((b) => b.id === blockId);
+      if (!block) return;
+      const order = block.stages.length;
+      const res = await fetch(apiPaths.schedule, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'stage', block_id: blockId, name, duration_minutes: durationMinutes, order }),
+      });
+      const json = await res.json();
+      if (json.data) {
+        setBlocks((prev) =>
+          prev.map((b) =>
+            b.id === blockId
+              ? { ...b, stages: [...b.stages, { ...json.data, wedding_provider: null }] }
+              : b
+          )
+        );
+      }
+    },
+    [blocks, apiPaths.schedule]
+  );
+
+  const handleAddBlock = useCallback(async () => {
+    const order = blocks.length;
+    const res = await fetch(apiPaths.schedule, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'block', name: 'Nueva sección', order, color: '#6366f1' }),
+    });
+    const json = await res.json();
+    if (json.data) {
+      setBlocks((prev) => [...prev, { ...json.data, stages: [] }]);
+    }
+  }, [blocks, apiPaths.schedule]);
+
+  // ── Provider assignment ──────────────────────────────────────────────────────
+
+  const handleProviderChange = useCallback(
+    async (stageId: string, providerId: string | null) => {
+      const providerObj = providerId ? (providers.find((p) => p.id === providerId) ?? null) : null;
+      setBlocks((prev) =>
+        prev.map((b) => ({
+          ...b,
+          stages: b.stages.map((s) =>
+            s.id === stageId
+              ? { ...s, wedding_provider_id: providerId, wedding_provider: providerObj }
+              : s
+          ),
+        }))
+      );
+      await fetch(apiPaths.schedule, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'stage', stage_id: stageId, wedding_provider_id: providerId }),
+      });
+    },
+    [apiPaths.schedule, providers]
+  );
+
+  // ── PDF export ───────────────────────────────────────────────────────────────
 
   const exportPdf = async (mode: 'planner' | 'couple') => {
     setExportingPdf(true);
@@ -332,7 +894,26 @@ export function SchedulePageContent({
     }
   };
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // ── Render helpers ───────────────────────────────────────────────────────────
+
+  const effectiveViewMode = viewMode;
+  const canAssignProviders = isPlanner && providers.length > 0;
+
+  // Find active item info for DragOverlay
+  const activeStageDrag =
+    activeDragType === 'stage'
+      ? (() => {
+          const b = blocksWithTimes.find((bl) => bl.stages.some((s) => s.id === activeDragId));
+          const s = b?.stages.find((st) => st.id === activeDragId);
+          return b && s ? { stage: s, block: b } : null;
+        })()
+      : null;
+  const activeBlockDrag =
+    activeDragType === 'block'
+      ? blocksWithTimes.find((b) => b.id === activeDragId) ?? null
+      : null;
+
+  // ── Loading ──────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -344,6 +925,8 @@ export function SchedulePageContent({
       </div>
     );
   }
+
+  // ── Empty state ──────────────────────────────────────────────────────────────
 
   if (!hasSchedule) {
     return (
@@ -386,13 +969,11 @@ export function SchedulePageContent({
     );
   }
 
-  const effectiveViewMode = isPlanner ? viewMode : 'couple';
-  const canAssignProviders = isPlanner && providers.length > 0;
+  // ── Main view ────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen">
       {header}
-
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           {/* Controls bar */}
@@ -415,17 +996,6 @@ export function SchedulePageContent({
               <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
                 <button
                   type="button"
-                  onClick={() => setViewMode('couple')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                    viewMode === 'couple'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Vista novios
-                </button>
-                <button
-                  type="button"
                   onClick={() => setViewMode('planner')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                     viewMode === 'planner'
@@ -434,6 +1004,17 @@ export function SchedulePageContent({
                   }`}
                 >
                   Vista planner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('couple')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                    viewMode === 'couple'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Vista novios
                 </button>
               </div>
             )}
@@ -489,24 +1070,71 @@ export function SchedulePageContent({
           )}
 
           {/* Timeline */}
-          <div className="relative">
-            <div className="absolute left-[4.5rem] top-0 bottom-0 w-px bg-gray-100 pointer-events-none" />
-            <div className="space-y-8">
-              {blocksWithTimes.map((block) => (
-                <BlockSection
-                  key={block.id}
-                  block={block}
-                  viewMode={effectiveViewMode}
-                  providers={providers}
-                  onProviderChange={canAssignProviders ? handleProviderChange : undefined}
-                />
-              ))}
-            </div>
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDragEnd={onDragEnd}
+          >
+            <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+              <div className="relative">
+                <div className="absolute left-[4.5rem] top-0 bottom-0 w-px bg-gray-100 pointer-events-none" />
+                <div className="space-y-8">
+                  {blocksWithTimes.map((block) => (
+                    <SortableBlockSection
+                      key={block.id}
+                      block={block}
+                      viewMode={effectiveViewMode}
+                      providers={providers}
+                      onProviderChange={canAssignProviders ? handleProviderChange : undefined}
+                      onUpdateStage={handleUpdateStage}
+                      onDeleteStage={handleDeleteStage}
+                      onUpdateBlock={handleUpdateBlock}
+                      onDeleteBlock={handleDeleteBlock}
+                      onAddStage={handleAddStage}
+                    />
+                  ))}
+                </div>
+              </div>
+            </SortableContext>
 
-          {/* Regenerate from template (planner only) */}
-          {isPlanner && (
-            <div className="pt-4 border-t border-gray-100 flex justify-end">
+            <DragOverlay>
+              {activeStageDrag && (
+                <div className="flex items-center gap-2 bg-white border border-rose-200 rounded-xl px-3 py-2.5 shadow-xl opacity-95">
+                  <div
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: activeStageDrag.block.color ?? '#6366f1' }}
+                  />
+                  <span className="text-sm font-medium text-gray-800">{activeStageDrag.stage.name}</span>
+                  <span className="text-xs text-gray-400 ml-2">{durationLabel(activeStageDrag.stage.duration_minutes)}</span>
+                </div>
+              )}
+              {activeBlockDrag && (
+                <div className="flex items-center gap-2 bg-white border border-rose-200 rounded-xl px-3 py-2.5 shadow-xl opacity-95">
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: activeBlockDrag.color ?? '#6366f1' }}
+                  />
+                  <span className="text-sm font-bold text-gray-700 uppercase tracking-wide">{activeBlockDrag.name}</span>
+                </div>
+              )}
+            </DragOverlay>
+          </DndContext>
+
+          {/* Add block / regenerate */}
+          <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handleAddBlock}
+              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-violet-500 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Añadir sección
+            </button>
+            {isPlanner && (
               <button
                 type="button"
                 onClick={applyTemplate}
@@ -515,8 +1143,8 @@ export function SchedulePageContent({
               >
                 Regenerar desde plantilla
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
     </div>
