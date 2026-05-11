@@ -253,7 +253,7 @@ function StageRow({ stage, viewMode }: { stage: ScheduleStageWithTime; viewMode:
       {providerLine && (
         <Text style={styles.stageProvider}>{providerLine}</Text>
       )}
-      {stage.notes && viewMode === 'planner' && (
+      {stage.notes && (
         <Text style={styles.stageNotes}>{stage.notes}</Text>
       )}
     </>
