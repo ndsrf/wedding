@@ -93,8 +93,8 @@ export async function createStage(data: CreateStageData) {
   });
 }
 
-export async function updateStage(data: UpdateStageData) {
-  const { stage_id, block_id, wedding_provider_id, ...rest } = data;
+export async function updateStage(data: any) {
+  const { stage_id, type, block_id, wedding_provider_id, ...rest } = data;
   return prisma.scheduleStage.update({
     where: { id: stage_id },
     data: {
