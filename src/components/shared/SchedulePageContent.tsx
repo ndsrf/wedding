@@ -62,6 +62,10 @@ function providerLabel(p: StageProvider) {
   return p.name ? `${p.name} (${p.category.name})` : p.category.name;
 }
 
+function providerDisplayName(p: StageProvider) {
+  return p.name ?? p.category.name;
+}
+
 function findBlockForStage(stageId: string, blocks: ScheduleBlock[]): ScheduleBlock | undefined {
   return blocks.find((b) => b.stages.some((s) => s.id === stageId));
 }
@@ -78,7 +82,7 @@ function DragHandle({
   return (
     <button
       type="button"
-      className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 text-gray-300 hover:text-gray-400 transition-colors touch-none"
+      className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-500 transition-colors touch-none"
       {...listeners}
       {...attributes}
     >
@@ -260,7 +264,7 @@ function SortableStageRow({
         />
       ) : (
         <span
-          className="text-xs text-gray-400 flex-shrink-0 cursor-text hover:text-rose-500 transition-colors pt-0.5"
+          className="text-xs text-gray-500 flex-shrink-0 cursor-text hover:text-rose-500 transition-colors pt-0.5"
           onClick={() => setEditDuration(true)}
           title="Duración en minutos"
         >
@@ -295,7 +299,7 @@ function SortableStageRow({
               onBlur={() => setShowProviderSelect(false)}
             >
               <option value="">Sin proveedor</option>
-              {providers.map((p) => (
+              {[...providers].sort((a, b) => providerLabel(a).localeCompare(providerLabel(b), 'es')).map((p) => (
                 <option key={p.id} value={p.id}>{providerLabel(p)}</option>
               ))}
             </select>
@@ -309,13 +313,13 @@ function SortableStageRow({
                   : 'text-blue-600 bg-blue-50 cursor-default'
               }`}
             >
-              {providerLabel(stage.wedding_provider)}
+              {providerDisplayName(stage.wedding_provider)}
             </button>
           ) : canAssign ? (
             <button
               type="button"
               onClick={() => setShowProviderSelect(true)}
-              className="text-xs text-gray-300 hover:text-blue-400 transition-colors"
+              className="text-xs text-gray-500 hover:text-blue-500 transition-colors"
             >
               + Proveedor
             </button>
@@ -327,7 +331,7 @@ function SortableStageRow({
       <button
         type="button"
         onClick={() => onDelete(stage.id)}
-        className="flex-shrink-0 p-1 text-gray-200 hover:text-red-400 transition-colors"
+        className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 transition-colors"
         title="Eliminar paso"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -487,7 +491,7 @@ function SortableBlockSection({
             {block.name}
           </h3>
         )}
-        <span className="text-xs text-gray-400">{block.block_start_time} – {block.block_end_time}</span>
+        <span className="text-xs text-gray-500">{block.block_start_time} – {block.block_end_time}</span>
         <button
           type="button"
           onClick={() => onDeleteBlock(block.id)}
@@ -505,7 +509,7 @@ function SortableBlockSection({
         <div className="pl-8 mb-2">
           {editOffset ? (
             <div className="flex items-center gap-2">
-              <svg className="w-3 h-3 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3 h-3 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <input
@@ -515,7 +519,7 @@ function SortableBlockSection({
                 onChange={(e) => setOffsetH(Math.max(0, parseInt(e.target.value) || 0))}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveOffset(); if (e.key === 'Escape') setEditOffset(false); }}
               />
-              <span className="text-xs text-gray-400">h</span>
+              <span className="text-xs text-gray-500">h</span>
               <input
                 type="number" min="0" max="59"
                 className="w-10 text-xs text-center border border-gray-200 rounded-lg px-1 py-0.5 focus:outline-none focus:border-rose-300"
@@ -523,7 +527,7 @@ function SortableBlockSection({
                 onChange={(e) => setOffsetM(Math.max(0, parseInt(e.target.value) || 0))}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveOffset(); if (e.key === 'Escape') setEditOffset(false); }}
               />
-              <span className="text-xs text-gray-400">min desde inicio</span>
+              <span className="text-xs text-gray-500">min desde inicio</span>
               <button type="button" onClick={saveOffset} className="text-xs text-rose-500 hover:text-rose-600 font-medium">OK</button>
               <button type="button" onClick={clearOffset} className="text-xs text-gray-400 hover:text-gray-600">↩ fin anterior</button>
             </div>
@@ -609,7 +613,7 @@ function SortableBlockSection({
             <button
               type="button"
               onClick={() => setShowAdd(true)}
-              className="flex items-center gap-1 text-xs text-gray-300 hover:text-rose-400 transition-colors py-1"
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-rose-500 transition-colors py-1"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1126,7 +1130,7 @@ export function SchedulePageContent({
                 onChange={(e) => handleStartTimeChange(e.target.value)}
                 className="px-3 py-2 text-sm font-bold text-gray-800 border border-gray-200 rounded-xl focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-200"
               />
-              {saving && <span className="text-xs text-gray-400">Guardando...</span>}
+              {saving && <span className="text-xs text-gray-500">Guardando...</span>}
             </div>
 
             <div className="flex-1" />
@@ -1200,7 +1204,7 @@ export function SchedulePageContent({
           {(coupleNames || weddingDate) && (
             <div className="flex items-center gap-3">
               {coupleNames && <h2 className="text-lg font-bold text-gray-900 font-playfair">{coupleNames}</h2>}
-              {weddingDate && <span className="text-sm text-gray-400">· {weddingDate}</span>}
+              {weddingDate && <span className="text-sm text-gray-500">· {weddingDate}</span>}
             </div>
           )}
 
@@ -1250,7 +1254,7 @@ export function SchedulePageContent({
                     style={{ backgroundColor: activeStageDrag.block.color ?? '#6366f1' }}
                   />
                   <span className="text-sm font-medium text-gray-800">{activeStageDrag.stage.name}</span>
-                  <span className="text-xs text-gray-400 ml-2">{durationLabel(activeStageDrag.stage.duration_minutes)}</span>
+                  <span className="text-xs text-gray-500 ml-2">{durationLabel(activeStageDrag.stage.duration_minutes)}</span>
                 </div>
               )}
               {activeBlockDrag && (
@@ -1270,7 +1274,7 @@ export function SchedulePageContent({
             <button
               type="button"
               onClick={handleAddBlock}
-              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-violet-500 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-violet-500 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1282,7 +1286,7 @@ export function SchedulePageContent({
                 type="button"
                 onClick={applyTemplate}
                 disabled={applying}
-                className="text-xs text-gray-400 hover:text-rose-500 transition-colors disabled:opacity-50"
+                className="text-xs text-gray-500 hover:text-rose-500 transition-colors disabled:opacity-50"
               >
                 Regenerar desde plantilla
               </button>
