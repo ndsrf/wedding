@@ -52,6 +52,7 @@ model WeddingPlanner {
   created_by          String
   last_login_at       DateTime?
   checklist_template  ChecklistTemplate?
+  schedule_template   ScheduleTemplate?
   themes              Theme[]
   weddings            Wedding[]
   provider_categories ProviderCategory[]
@@ -222,6 +223,8 @@ model Wedding {
   google_photos_token_expiry      DateTime?          // When the access token expires
   checklist_sections              ChecklistSection[]
   checklist_tasks                 ChecklistTask[]
+  schedule_blocks                 ScheduleBlock[]
+  wedding_schedule                WeddingSchedule?
   alert_rules                     AlertRule[]        @relation("WeddingAlertRules")
   alerts                          Alert[]            @relation("WeddingAlerts")
   families                        Family[]
@@ -727,6 +730,7 @@ model WeddingProvider {
   category        ProviderCategory @relation(fields: [category_id], references: [id], onDelete: Restrict)
   provider        Provider? @relation(fields: [provider_id], references: [id], onDelete: Restrict)
   payments        Payment[]
+  schedule_stages ScheduleStage[]
 
   @@unique([wedding_id, category_id, provider_id])
   @@index([wedding_id])
@@ -1512,4 +1516,73 @@ model WeddingApiKey {
   expires_at   DateTime?
 
   @@map("wedding_api_keys")
+}
+
+// -----------------------------------------------------------------------------
+// SCHEDULE (Cronograma) — per-planner template + per-wedding instance
+// -----------------------------------------------------------------------------
+
+model ScheduleTemplate {
+  id         String          @id @default(uuid())
+  planner_id String          @unique
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+  blocks     ScheduleBlock[]
+  planner    WeddingPlanner  @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+
+  @@index([planner_id])
+  @@map("schedule_templates")
+}
+
+model ScheduleBlock {
+  id             String            @id @default(uuid())
+  template_id    String?
+  wedding_id     String?
+  name           String
+  order          Int
+  color          String?           @default("#6366f1")
+  offset_minutes Int?
+  created_at     DateTime          @default(now())
+  updated_at     DateTime          @updatedAt
+  stages         ScheduleStage[]
+  template       ScheduleTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  wedding        Wedding?          @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@index([template_id])
+  @@index([wedding_id])
+  @@index([order])
+  @@map("schedule_blocks")
+}
+
+model ScheduleStage {
+  id                   String          @id @default(uuid())
+  block_id             String
+  name                 String
+  duration_minutes     Int
+  order                Int
+  notes                String?         @db.Text
+  visible_to_couple    Boolean         @default(true)
+  wedding_provider_id  String?
+  created_at           DateTime        @default(now())
+  updated_at           DateTime        @updatedAt
+  block                ScheduleBlock   @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  wedding_provider     WeddingProvider? @relation(fields: [wedding_provider_id], references: [id], onDelete: SetNull)
+
+  @@index([block_id])
+  @@index([order])
+  @@index([wedding_provider_id])
+  @@map("schedule_stages")
+}
+
+model WeddingSchedule {
+  id         String   @id @default(uuid())
+  wedding_id String   @unique
+  start_time String   // HH:MM — base time from which all stage times are calculated
+  notes      String?  @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  wedding    Wedding  @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@index([wedding_id])
+  @@map("wedding_schedules")
 }

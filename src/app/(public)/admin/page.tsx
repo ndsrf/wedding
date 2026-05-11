@@ -378,7 +378,7 @@ export default async function AdminDashboardPage() {
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.dashboard.manageWedding')}</h2>
 
-          {/* Primary Actions: Guest Management + Configure Wedding */}
+          {/* Primary Actions: Guest Management + Configure Wedding + Schedule */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             {/* Guest Management - most important, featured */}
             <Link
@@ -418,6 +418,27 @@ export default async function AdminDashboardPage() {
                 <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.configureSubtitle')}</p>
               </div>
               <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" />
+            </Link>
+          </div>
+
+          {/* Cronograma — full-width feature card */}
+          <div className="mb-4">
+            <Link
+              href="/admin/schedule"
+              prefetch={false}
+              className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-violet-100 shadow-sm p-6 hover:shadow-md hover:border-violet-300 hover:bg-violet-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-md shadow-violet-200 group-hover:shadow-violet-300 transition-shadow">
+                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-gray-900">Cronograma</h3>
+                <p className="text-sm text-gray-500 mt-0.5">Horario detallado de tu día de boda con tiempos exactos</p>
+              </div>
+              <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-violet-400 transition-colors flex-shrink-0" />
             </Link>
           </div>
 
