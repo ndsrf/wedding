@@ -80,8 +80,9 @@ export async function deleteBlock(block_id: string) {
 // STAGE CRUD
 // ============================================================================
 
-export async function createStage(data: CreateStageData) {
-  const { block_id, wedding_provider_id, ...rest } = data;
+export async function createStage(data: CreateStageData & { type?: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, block_id, wedding_provider_id, ...rest } = data;
   return prisma.scheduleStage.create({
     data: {
       ...rest,
@@ -93,8 +94,9 @@ export async function createStage(data: CreateStageData) {
   });
 }
 
-export async function updateStage(data: UpdateStageData) {
-  const { stage_id, block_id, wedding_provider_id, ...rest } = data;
+export async function updateStage(data: UpdateStageData & { type?: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { stage_id, type, block_id, wedding_provider_id, ...rest } = data;
   return prisma.scheduleStage.update({
     where: { id: stage_id },
     data: {
