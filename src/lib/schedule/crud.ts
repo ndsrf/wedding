@@ -94,7 +94,8 @@ export async function createStage(data: CreateStageData) {
 }
 
 export async function updateStage(data: UpdateStageData & { type?: string }) {
-  const { stage_id, type: _type, block_id, wedding_provider_id, ...rest } = data;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { stage_id, type, block_id, wedding_provider_id, ...rest } = data;
   return prisma.scheduleStage.update({
     where: { id: stage_id },
     data: {
