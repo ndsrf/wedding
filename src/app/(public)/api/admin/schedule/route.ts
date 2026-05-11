@@ -76,9 +76,10 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    await requireRole('wedding_admin');
+    const user = await requireRole('wedding_admin');
+    if (!user.wedding_id) return NextResponse.json({ error: 'No wedding assigned' }, { status: 400 });
     const body = await req.json();
-    return await deleteScheduleHandler(body);
+    return await deleteScheduleHandler(user.wedding_id, body);
   } catch (err) {
     return handleError(err, 'DELETE');
   }

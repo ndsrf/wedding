@@ -155,12 +155,16 @@ export async function patchScheduleHandler(
 
   if (b.type === 'block') {
     const { block_id, name, order, color, offset_minutes } = patchBlockSchema.parse(b);
+    const existingBlock = await prisma.scheduleBlock.findFirst({ where: { id: block_id, wedding_id: weddingId } });
+    if (!existingBlock) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     const block = await updateBlock({ block_id, name, order, color, offset_minutes });
     return NextResponse.json({ data: block });
   }
 
   if (b.type === 'stage') {
     const { stage_id, block_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id } = patchStageSchema.parse(b);
+    const existingStage = await prisma.scheduleStage.findFirst({ where: { id: stage_id, block: { wedding_id: weddingId } } });
+    if (!existingStage) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     const stage = await updateStage({ stage_id, block_id, name, duration_minutes, order, notes, visible_to_couple, wedding_provider_id });
     return NextResponse.json({ data: stage });
   }
@@ -168,12 +172,18 @@ export async function patchScheduleHandler(
   return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
 }
 
-export async function deleteScheduleHandler(body: unknown): Promise<NextResponse> {
+export async function deleteScheduleHandler(weddingId: string, body: unknown): Promise<NextResponse> {
   const parsed = deleteSchema.parse(body);
   if (parsed.type === 'block') {
-    await deleteBlock(parsed.block_id);
+    const result = await prisma.scheduleBlock.deleteMany({
+      where: { id: parsed.block_id, wedding_id: weddingId },
+    });
+    if (result.count === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   } else {
-    await deleteStage(parsed.stage_id);
+    const result = await prisma.scheduleStage.deleteMany({
+      where: { id: parsed.stage_id, block: { wedding_id: weddingId } },
+    });
+    if (result.count === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
   return NextResponse.json({ data: null });
 }

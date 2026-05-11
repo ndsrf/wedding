@@ -130,32 +130,31 @@ export async function applyScheduleToWedding(
 
   if (!template) return;
 
-  // Delete existing wedding schedule blocks (idempotent re-apply)
-  await prisma.scheduleBlock.deleteMany({ where: { wedding_id, template_id: null } });
-  await prisma.weddingSchedule.deleteMany({ where: { wedding_id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.scheduleBlock.deleteMany({ where: { wedding_id, template_id: null } });
+    await tx.weddingSchedule.deleteMany({ where: { wedding_id } });
 
-  // Copy blocks + stages
-  for (const block of template.blocks) {
-    await prisma.scheduleBlock.create({
-      data: {
-        wedding_id,
-        name: block.name,
-        order: block.order,
-        color: block.color,
-        offset_minutes: (block as { offset_minutes?: number | null }).offset_minutes ?? null,
-        stages: {
-          create: block.stages.map((s: { name: string; duration_minutes: number; order: number; notes: string | null; visible_to_couple: boolean }) => ({
-            name: s.name,
-            duration_minutes: s.duration_minutes,
-            order: s.order,
-            notes: s.notes,
-            visible_to_couple: s.visible_to_couple,
-          })),
+    for (const block of template.blocks) {
+      await tx.scheduleBlock.create({
+        data: {
+          wedding_id,
+          name: block.name,
+          order: block.order,
+          color: block.color,
+          offset_minutes: (block as { offset_minutes?: number | null }).offset_minutes ?? null,
+          stages: {
+            create: block.stages.map((s: { name: string; duration_minutes: number; order: number; notes: string | null; visible_to_couple: boolean }) => ({
+              name: s.name,
+              duration_minutes: s.duration_minutes,
+              order: s.order,
+              notes: s.notes,
+              visible_to_couple: s.visible_to_couple,
+            })),
+          },
         },
-      },
-    });
-  }
+      });
+    }
 
-  // Create wedding schedule config
-  await prisma.weddingSchedule.create({ data: { wedding_id, start_time } });
+    await tx.weddingSchedule.create({ data: { wedding_id, start_time } });
+  });
 }

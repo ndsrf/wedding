@@ -122,6 +122,11 @@ export function addMinutesToTime(time: string, minutes: number): string {
   return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
 }
 
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
 /** Calculate all stage start/end times from a base start_time string "HH:MM".
  *  Blocks with offset_minutes set start at (start_time + offset) and run in parallel;
  *  they do not advance the sequential cursor used by following blocks.
@@ -151,7 +156,7 @@ export function computeScheduleWithTimes(
       const block_end_time = stageCursor;
       // Advance cursor to the latest end time (max), regardless of sequential/parallel.
       // This ensures the next sequential block starts after everything that ran before it.
-      if (block_end_time > cursor) cursor = block_end_time;
+      if (timeToMinutes(block_end_time) > timeToMinutes(cursor)) cursor = block_end_time;
 
       return { ...block, stages: stagesWithTimes, block_start_time, block_end_time };
     });

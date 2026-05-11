@@ -81,7 +81,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
     const body = await req.json();
-    return await deleteScheduleHandler(body);
+    return await deleteScheduleHandler(weddingId, body);
   } catch (err) {
     return handleError(err, 'DELETE');
   }

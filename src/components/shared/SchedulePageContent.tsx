@@ -801,19 +801,17 @@ export function SchedulePageContent({
     // ── Block reorder ────────────────────────────────────────────────────────
     if (type === 'block') {
       if (draggedId === overId) return;
-      setBlocks((prev) => {
-        const oldIdx = prev.findIndex((b) => b.id === draggedId);
-        const newIdx = prev.findIndex((b) => b.id === overId);
-        const reordered = arrayMove(prev, oldIdx, newIdx).map((b, i) => ({ ...b, order: i }));
-        fetch(apiPaths.schedule, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'reorder', entity: 'blocks',
-            updates: reordered.map((b) => ({ id: b.id, order: b.order })),
-          }),
-        });
-        return reordered;
+      const oldIdx = blocks.findIndex((b) => b.id === draggedId);
+      const newIdx = blocks.findIndex((b) => b.id === overId);
+      const reordered = arrayMove(blocks, oldIdx, newIdx).map((b, i) => ({ ...b, order: i }));
+      setBlocks(reordered);
+      fetch(apiPaths.schedule, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'reorder', entity: 'blocks',
+          updates: reordered.map((b) => ({ id: b.id, order: b.order })),
+        }),
       });
       return;
     }
@@ -861,24 +859,22 @@ export function SchedulePageContent({
 
       // Same block reorder
       if (draggedId === overId) return;
-      setBlocks((prev) => {
-        const blockIdx = prev.findIndex((b) => b.id === currentBlock.id);
-        const stages = prev[blockIdx].stages;
-        const oldIdx = stages.findIndex((s) => s.id === draggedId);
-        const newIdx = stages.findIndex((s) => s.id === overId);
-        if (oldIdx === -1 || newIdx === -1) return prev;
-        const reordered = arrayMove(stages, oldIdx, newIdx).map((s, i) => ({ ...s, order: i }));
-        fetch(apiPaths.schedule, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'reorder', entity: 'stages',
-            updates: reordered.map((s) => ({ id: s.id, order: s.order })),
-          }),
-        });
-        const newBlocks = [...prev];
-        newBlocks[blockIdx] = { ...newBlocks[blockIdx], stages: reordered };
-        return newBlocks;
+      const blockIdx = blocks.findIndex((b) => b.id === currentBlock.id);
+      const stages = blocks[blockIdx].stages;
+      const oldIdx = stages.findIndex((s) => s.id === draggedId);
+      const newIdx = stages.findIndex((s) => s.id === overId);
+      if (oldIdx === -1 || newIdx === -1) return;
+      const reordered = arrayMove(stages, oldIdx, newIdx).map((s, i) => ({ ...s, order: i }));
+      const newBlocks = [...blocks];
+      newBlocks[blockIdx] = { ...newBlocks[blockIdx], stages: reordered };
+      setBlocks(newBlocks);
+      fetch(apiPaths.schedule, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'reorder', entity: 'stages',
+          updates: reordered.map((s) => ({ id: s.id, order: s.order })),
+        }),
       });
     }
   }
