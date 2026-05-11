@@ -59,7 +59,7 @@ function durationLabel(minutes: number) {
 }
 
 function providerLabel(p: StageProvider) {
-  return p.name || p.category.name;
+  return p.name ? `${p.name} (${p.category.name})` : p.category.name;
 }
 
 function findBlockForStage(stageId: string, blocks: ScheduleBlock[]): ScheduleBlock | undefined {

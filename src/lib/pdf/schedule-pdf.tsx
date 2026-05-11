@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   wItineraryTime: {
-    width: 36,
+    width: 62,
     fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     color: GRAY_700,
@@ -188,6 +188,12 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     fontStyle: 'italic',
   },
+  stageProvider: {
+    fontSize: 7,
+    color: GRAY_700,
+    marginLeft: 56,
+    marginBottom: 3,
+  },
   plannerOnlyBadge: {
     fontSize: 6,
     color: '#7c3aed',
@@ -227,6 +233,15 @@ function durationLabel(minutes: number) {
 
 function StageRow({ stage, viewMode }: { stage: ScheduleStageWithTime; viewMode: 'planner' | 'couple' }) {
   const isPlannerOnly = viewMode === 'planner' && !stage.visible_to_couple;
+  const p = stage.wedding_provider;
+  const providerLine = p
+    ? [
+        p.name ?? p.category.name,
+        p.contact_name,
+        p.phone,
+        p.email,
+      ].filter(Boolean).join(' · ')
+    : null;
   return (
     <>
       <View style={styles.stageRow}>
@@ -235,6 +250,9 @@ function StageRow({ stage, viewMode }: { stage: ScheduleStageWithTime; viewMode:
         {isPlannerOnly && <Text style={styles.plannerOnlyBadge}>Solo planner</Text>}
         <Text style={styles.stageDuration}>{durationLabel(stage.duration_minutes)}</Text>
       </View>
+      {providerLine && (
+        <Text style={styles.stageProvider}>{providerLine}</Text>
+      )}
       {stage.notes && viewMode === 'planner' && (
         <Text style={styles.stageNotes}>{stage.notes}</Text>
       )}
@@ -305,9 +323,8 @@ export function SchedulePDF({
             <Text style={styles.sectionTitle}>Itinerario de la boda</Text>
             <View style={styles.weddingItinerary}>
               {itineraryItems.map((item) => {
-                const time = new Date(item.dateTime).toLocaleTimeString('es-ES', {
-                  hour: '2-digit', minute: '2-digit',
-                });
+                const dt = new Date(item.dateTime);
+                const time = `${dt.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} ${dt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
                 return (
                   <View key={item.id} style={styles.wItineraryRow}>
                     <Text style={styles.wItineraryTime}>{time}</Text>

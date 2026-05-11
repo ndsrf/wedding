@@ -2,6 +2,9 @@
 export interface StageProvider {
   id: string;
   name: string | null;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
   category: { name: string };
 }
 

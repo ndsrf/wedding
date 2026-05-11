@@ -44,7 +44,7 @@ export async function getWeddingSchedule(wedding_id: string): Promise<WeddingSch
           orderBy: { order: 'asc' },
           include: {
             wedding_provider: {
-              select: { id: true, name: true, category: { select: { name: true } } },
+              select: { id: true, name: true, contact_name: true, email: true, phone: true, category: { select: { name: true } } },
             },
           },
         },
