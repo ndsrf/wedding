@@ -1036,7 +1036,7 @@ export function SchedulePageContent({
 
   // ── Render helpers ───────────────────────────────────────────────────────────
 
-  const effectiveViewMode = viewMode;
+  const effectiveViewMode = isPlanner ? viewMode : 'couple';
   const canAssignProviders = providers.length > 0;
 
   // Find active item info for DragOverlay
