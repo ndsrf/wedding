@@ -178,6 +178,13 @@ export async function middleware(request: NextRequest) {
     });
 
     if (token?.user?.role) {
+      if (pathname === '/') {
+        // Authenticated at bare root: let through to the root page component,
+        // which renders a spinner immediately and redirects client-side.
+        // This avoids the blank-screen gap that a server-side 302 would produce.
+        return NextResponse.next();
+      }
+      // Authenticated at a locale-prefixed root (/en, /es, …): server-side redirect.
       const role = (token.user as AuthenticatedUser).role;
       const redirectPath = getRedirectForRole(role);
       return NextResponse.redirect(new URL(redirectPath, request.url));
