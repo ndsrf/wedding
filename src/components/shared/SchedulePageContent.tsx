@@ -385,6 +385,7 @@ function offsetLabel(minutes: number): string {
 function SortableBlockSection({
   block,
   viewMode,
+  filterPlannerItems = false,
   providers,
   onProviderChange,
   onUpdateStage,
@@ -395,6 +396,7 @@ function SortableBlockSection({
 }: {
   block: ScheduleBlockWithTimes;
   viewMode: 'planner' | 'couple';
+  filterPlannerItems?: boolean;
   providers: StageProvider[];
   onProviderChange?: (stageId: string, providerId: string | null) => void;
   onUpdateStage: (stageId: string, updates: Record<string, unknown>) => void;
@@ -423,7 +425,7 @@ function SortableBlockSection({
   const [offsetH, setOffsetH] = useState(0);
   const [offsetM, setOffsetM] = useState(0);
 
-  const visibleStages = viewMode === 'couple'
+  const visibleStages = (viewMode === 'couple' || filterPlannerItems)
     ? block.stages.filter((s) => s.visible_to_couple)
     : block.stages;
 
@@ -460,7 +462,7 @@ function SortableBlockSection({
     setEditOffset(false);
   };
 
-  if (viewMode === 'couple' && visibleStages.length === 0) return null;
+  if ((viewMode === 'couple' || filterPlannerItems) && visibleStages.length === 0) return null;
 
   return (
     <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-30' : ''}>
@@ -1229,6 +1231,7 @@ export function SchedulePageContent({
                       key={block.id}
                       block={block}
                       viewMode={effectiveViewMode}
+                      filterPlannerItems={!isPlanner}
                       providers={providers}
                       onProviderChange={canAssignProviders ? handleProviderChange : undefined}
                       onUpdateStage={handleUpdateStage}
