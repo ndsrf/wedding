@@ -133,8 +133,6 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: '' });
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
-
   return (
     <>
 <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
