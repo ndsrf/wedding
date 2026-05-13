@@ -12,6 +12,7 @@ import { getToken } from 'next-auth/jwt';
 import type { AuthenticatedUser } from '@/types/api';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { getRedirectForRole } from '@/lib/auth/redirect';
 
 // Create next-intl middleware
 const intlMiddleware = createMiddleware(routing);
@@ -103,22 +104,6 @@ function getRequiredRole(path: string): keyof typeof PROTECTED_ROUTES | null {
   return null;
 }
 
-/**
- * Get redirect URL based on user role
- */
-function getRedirectForRole(role: string): string {
-  switch (role) {
-    case 'master_admin':
-      return '/master';
-    case 'planner':
-      return '/planner';
-    case 'wedding_admin':
-      return '/admin';
-    default:
-      return '/auth/signin';
-  }
-}
-
 // ============================================================================
 // HELPER: Locale negotiation for root path
 // ============================================================================
@@ -178,6 +163,13 @@ export async function middleware(request: NextRequest) {
     });
 
     if (token?.user?.role) {
+      if (pathname === '/') {
+        // Authenticated at bare root: let through to the root page component,
+        // which renders a spinner immediately and redirects client-side.
+        // This avoids the blank-screen gap that a server-side 302 would produce.
+        return NextResponse.next();
+      }
+      // Authenticated at a locale-prefixed root (/en, /es, …): server-side redirect.
       const role = (token.user as AuthenticatedUser).role;
       const redirectPath = getRedirectForRole(role);
       return NextResponse.redirect(new URL(redirectPath, request.url));
