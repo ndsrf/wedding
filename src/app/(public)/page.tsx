@@ -4,14 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
-
-function getDashboardPath(role: string): string {
-  switch (role) {
-    case 'master_admin': return '/master';
-    case 'planner': return '/planner';
-    default: return '/admin';
-  }
-}
+import { getRedirectForRole } from '@/lib/auth/redirect';
 
 export default function RootPage() {
   const { data: session, status } = useSession();
@@ -19,8 +12,12 @@ export default function RootPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
+    if (status === 'unauthenticated') {
+      router.replace('/auth/signin');
+      return;
+    }
     if (session?.user?.role) {
-      router.replace(getDashboardPath(session.user.role));
+      router.replace(getRedirectForRole(session.user.role));
     }
   }, [status, session, router]);
 

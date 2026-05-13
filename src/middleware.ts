@@ -12,6 +12,7 @@ import { getToken } from 'next-auth/jwt';
 import type { AuthenticatedUser } from '@/types/api';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { getRedirectForRole } from '@/lib/auth/redirect';
 
 // Create next-intl middleware
 const intlMiddleware = createMiddleware(routing);
@@ -101,22 +102,6 @@ function getRequiredRole(path: string): keyof typeof PROTECTED_ROUTES | null {
     }
   }
   return null;
-}
-
-/**
- * Get redirect URL based on user role
- */
-function getRedirectForRole(role: string): string {
-  switch (role) {
-    case 'master_admin':
-      return '/master';
-    case 'planner':
-      return '/planner';
-    case 'wedding_admin':
-      return '/admin';
-    default:
-      return '/auth/signin';
-  }
 }
 
 // ============================================================================
