@@ -7,7 +7,6 @@ import { isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
 import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
-import AMPLink from '@/components/AMPLink';
 import LandingFeatureCard from '@/components/LandingFeatureCard';
 import { ArcadeEmbed } from '@/components/ArcadeEmbed';
 import VideoHero from '@/components/guest/VideoHero';
@@ -134,12 +133,9 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: '' });
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
-
   return (
     <>
-      <AMPLink ampUrl={`${baseUrl}/${locale}/amp`} />
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+<div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

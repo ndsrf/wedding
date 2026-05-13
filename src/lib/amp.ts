@@ -196,6 +196,7 @@ export function renderAMPPage(config: {
   content: string;
   styles?: string;
   scripts?: string[];
+  headerNav?: string;
 }): string {
   const {
     locale,
@@ -205,6 +206,7 @@ export function renderAMPPage(config: {
     content,
     styles = '',
     scripts = [],
+    headerNav = '',
   } = config;
 
   const scriptTags = [
@@ -281,6 +283,7 @@ export function renderAMPPage(config: {
     <a href="/${locale}">
       <amp-img src="/images/nupci.webp" width="142" height="80" layout="intrinsic" alt="${commercialName}" class="logo-img"></amp-img>
     </a>
+    ${headerNav}
   </header>
   <div class="container">
     ${content}
