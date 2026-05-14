@@ -133,9 +133,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: '' });
+  const cdnUrl = process.env.NEXT_PUBLIC_CDN_STORAGE ?? '';
   return (
     <>
-<div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -188,6 +189,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         ctaPrimary={t('landing.hero.cta.primary')}
         ctaSecondary={t('landing.hero.cta.secondary')}
         locale={locale}
+        cdnUrl={cdnUrl}
       />
 
       {/* Features Section */}

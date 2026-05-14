@@ -9,13 +9,8 @@ interface VideoHeroProps {
   ctaPrimary: string;
   ctaSecondary: string;
   locale: string;
+  cdnUrl: string;
 }
-
-const CDN = process.env.NEXT_PUBLIC_CDN_STORAGE ?? '';
-const VIDEOS = [
-  `${CDN}/background2.mp4`,
-  `${CDN}/background1.mp4`,
-];
 
 export default function VideoHero({
   title,
@@ -23,7 +18,12 @@ export default function VideoHero({
   ctaPrimary,
   ctaSecondary,
   locale,
+  cdnUrl,
 }: VideoHeroProps) {
+  const VIDEOS = [
+    `${cdnUrl}/background2.mp4`,
+    `${cdnUrl}/background1.mp4`,
+  ];
   const [currentVideo, setCurrentVideo] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
