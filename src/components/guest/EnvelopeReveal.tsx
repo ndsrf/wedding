@@ -444,6 +444,7 @@ export function EnvelopeReveal({ children, coupleNames, weddingDate, weddingTime
                       loading="lazy"
                       allowFullScreen
                       referrerPolicy="no-referrer-when-downgrade"
+                      allow="geolocation"
                       src={`https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                     ></iframe>
                   </div>

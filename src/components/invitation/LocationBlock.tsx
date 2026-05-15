@@ -74,6 +74,7 @@ export function LocationBlock({ location, style }: LocationBlockProps) {
             loading="lazy"
             allowFullScreen
             referrerPolicy="no-referrer-when-downgrade"
+            allow="geolocation"
             src={mapsUrl}
           />
         </div>
