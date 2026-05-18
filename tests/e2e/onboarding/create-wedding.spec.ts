@@ -79,44 +79,17 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     const submitButton = page.locator('form').getByRole('button', { name: /create|save|submit/i });
     await submitButton.click();
 
-    // Wait for success indication
-    // Could be a redirect, success message, or toast notification
-    await page.waitForTimeout(2000);
+    // Wait for the modal to close and URL to change after successful creation.
+    // Wedding creation involves DB operations (template seeding, checklist copy) that
+    // can take several seconds in CI, so use a proper wait instead of a fixed timeout.
+    await page.waitForURL(
+      (url) => url.pathname.includes('/planner') && !url.search.includes('action=create'),
+      { timeout: 15000 }
+    );
 
-    // Verify we're redirected to a wedding detail page or back to dashboard
-    // The URL should contain either /planner/weddings or /planner with updated content
-    const currentUrl = page.url();
-    const isRedirected =
-      currentUrl.includes('/planner/weddings/') ||
-      currentUrl.includes('/planner');
-    expect(isRedirected).toBeTruthy();
-
-    // Verify the wedding appears in the list or we see success feedback
-    const successIndicators = [
-      page.getByText(/john smith.*jane doe/i),
-      page.getByText(/wedding created/i),
-      page.getByText(/success/i),
-    ];
-
-    // At least one success indicator should be visible
-    let foundSuccessIndicator = false;
-    for (const indicator of successIndicators) {
-      if (await indicator.isVisible().catch(() => false)) {
-        foundSuccessIndicator = true;
-        break;
-      }
-    }
-
-    // If we're on the dashboard, check that wedding count increased
-    if (currentUrl.includes('/planner') && !currentUrl.includes('/weddings/')) {
-      // Should see stats cards with at least 1 wedding
-      const weddingCountCard = page.getByText(/total weddings/i).first();
-      if (await weddingCountCard.isVisible().catch(() => false)) {
-        foundSuccessIndicator = true;
-      }
-    }
-
-    expect(foundSuccessIndicator).toBeTruthy();
+    // Wait for any loading state to settle, then verify the new wedding appears in the list
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await expect(page.getByText(/john smith.*jane doe/i).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should show validation errors for invalid wedding data', async ({ page }) => {
