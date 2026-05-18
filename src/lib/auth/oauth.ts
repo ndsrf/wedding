@@ -41,17 +41,9 @@ export function isMasterAdmin(email: string): boolean {
 
     // Case-insensitive email comparison
     const normalizedEmail = email.toLowerCase().trim();
-    const isAdmin = masterAdminEmails.some(
+    return masterAdminEmails.some(
       (adminEmail) => adminEmail.toLowerCase().trim() === normalizedEmail
     );
-
-    console.log('Master admin check:', {
-      email: normalizedEmail,
-      masterAdminEmails,
-      isAdmin
-    });
-
-    return isAdmin;
   } catch (error) {
     console.error('Error reading master admin emails:', error);
     return false;
@@ -105,8 +97,6 @@ export async function detectUserRole(email: string, authProvider: AuthProvider, 
 
   if (!skipPlannerCheck) {
     const planner = await prisma.weddingPlanner.findUnique({ where: { email } });
-
-    console.log(`[Auth Debug] Checking planner for ${email}:`, planner ? 'Found' : 'Not Found');
 
     if (planner) {
       await prisma.weddingPlanner.update({
