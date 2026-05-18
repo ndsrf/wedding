@@ -12,6 +12,19 @@ test.use({ storageState: 'playwright/.auth/planner.json' });
 
 test.describe('Create Wedding - NEW_USER Mode', () => {
   test('should successfully create a new wedding from planner dashboard', async ({ page }) => {
+    // Capture the POST /api/planner/weddings response for diagnostics on failure
+    let weddingApiStatus: number | null = null;
+    let weddingApiBody: string | null = null;
+    page.on('response', async (response) => {
+      if (
+        response.url().includes('/api/planner/weddings') &&
+        response.request().method() === 'POST'
+      ) {
+        weddingApiStatus = response.status();
+        weddingApiBody = await response.text().catch(() => '<unreadable>');
+      }
+    });
+
     // Navigate to planner dashboard
     await page.goto('/planner');
     await page.waitForLoadState('networkidle');
@@ -77,23 +90,25 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     const submitButton = page.locator('form').getByRole('button', { name: /create|save|submit/i });
     await submitButton.click();
 
-    // If there are client-side validation errors, surface them before the long timeout.
-    // Short wait is enough — validation errors render synchronously on submit.
-    await page.waitForTimeout(300);
-    const visibleErrors = page.locator('.text-red-600, .text-red-500').filter({ hasText: /required|invalid|must/i });
-    const errorCount = await visibleErrors.count();
-    if (errorCount > 0) {
-      const errorText = await visibleErrors.first().textContent();
-      throw new Error(`Form validation error prevented submission: "${errorText}"`);
-    }
-
     // Wait for the modal to close and URL to change after successful creation.
-    // Wedding creation involves DB operations (template seeding, checklist copy) that
-    // can take several seconds in CI, so use a proper wait instead of a fixed timeout.
+    // On failure, throw a descriptive error with the API response and any UI error.
     await page.waitForURL(
       (url) => url.pathname.includes('/planner') && url.searchParams.get('action') !== 'create',
       { timeout: 15000 }
-    );
+    ).catch(async (timeoutErr) => {
+      // Collect diagnostics: API response and any error shown in the form
+      const submitErrorEl = page.locator('div.bg-red-50 p');
+      const submitErrorText = await submitErrorEl.first().textContent().catch(() => '');
+      const anyRedText = await page.locator('.text-red-700,.text-red-600,.text-red-500').first().textContent().catch(() => '');
+      throw new Error(
+        `URL did not leave ?action=create after 15s.\n` +
+        `  API POST status: ${weddingApiStatus ?? 'no request observed'}\n` +
+        `  API POST body: ${weddingApiBody ?? 'n/a'}\n` +
+        `  submitError shown: "${submitErrorText}"\n` +
+        `  any red text: "${anyRedText}"\n` +
+        `  current URL: ${page.url()}`
+      );
+    });
 
     // Verify the new wedding appears in the list
     await expect(page.getByText(/john smith.*jane doe/i).first()).toBeVisible({ timeout: 10000 });
