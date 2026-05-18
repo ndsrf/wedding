@@ -45,11 +45,9 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     const dateString = futureDate.toISOString().split('T')[0]; // YYYY-MM-DD format
     await weddingDateInput.fill(dateString);
 
-    // Fill in wedding time (optional)
-    const weddingTimeInput = page.getByLabel(/wedding time|time/i).first();
-    if (await weddingTimeInput.isVisible()) {
-      await weddingTimeInput.fill('18:00');
-    }
+    // Fill in wedding time (required — use stable ID selector)
+    await expect(page.locator('#wedding_time')).toBeVisible({ timeout: 5000 });
+    await page.locator('#wedding_time').fill('18:00');
 
     // Fill in location (now a dropdown of pre-configured locations; optional field)
     const locationSelect = page.locator('#main_event_location_id');
@@ -78,6 +76,16 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     // Submit the form
     const submitButton = page.locator('form').getByRole('button', { name: /create|save|submit/i });
     await submitButton.click();
+
+    // If there are client-side validation errors, surface them before the long timeout.
+    // Short wait is enough — validation errors render synchronously on submit.
+    await page.waitForTimeout(300);
+    const visibleErrors = page.locator('.text-red-600, .text-red-500').filter({ hasText: /required|invalid|must/i });
+    const errorCount = await visibleErrors.count();
+    if (errorCount > 0) {
+      const errorText = await visibleErrors.first().textContent();
+      throw new Error(`Form validation error prevented submission: "${errorText}"`);
+    }
 
     // Wait for the modal to close and URL to change after successful creation.
     // Wedding creation involves DB operations (template seeding, checklist copy) that
