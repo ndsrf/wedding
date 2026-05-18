@@ -83,12 +83,11 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     // Wedding creation involves DB operations (template seeding, checklist copy) that
     // can take several seconds in CI, so use a proper wait instead of a fixed timeout.
     await page.waitForURL(
-      (url) => url.pathname.includes('/planner') && !url.search.includes('action=create'),
+      (url) => url.pathname.includes('/planner') && url.searchParams.get('action') !== 'create',
       { timeout: 15000 }
     );
 
-    // Wait for any loading state to settle, then verify the new wedding appears in the list
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    // Verify the new wedding appears in the list
     await expect(page.getByText(/john smith.*jane doe/i).first()).toBeVisible({ timeout: 10000 });
   });
 
