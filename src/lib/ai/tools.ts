@@ -258,20 +258,36 @@ export function buildTools(ctx: ToolContext): ToolSet {
           if (memberUpdates && memberUpdates.length > 0) {
             const memberMap = new Map(family.members.map((m) => [m.name.toLowerCase(), m]));
             const updatedIds: string[] = [];
+            const toUpdate: Array<{ id: string; attending: boolean; name: string }> = [];
 
-            // Per-member updates — find each member by name (case-insensitive)
             for (const update of memberUpdates) {
               const member = memberMap.get(update.memberName.toLowerCase());
               if (!member) {
                 notFound.push(update.memberName);
                 continue;
               }
-              await prisma.familyMember.update({
-                where: { id: member.id },
-                data: { attending: update.attending },
-              });
-              results.push({ member: member.name, attending: update.attending });
+              toUpdate.push({ id: member.id, attending: update.attending, name: member.name });
               updatedIds.push(member.id);
+            }
+
+            // Batch writes: group by attending value → at most 2 updateMany calls
+            if (toUpdate.length > 0) {
+              const groups = toUpdate.reduce((acc, u) => {
+                const key = String(u.attending);
+                if (!acc[key]) acc[key] = { attending: u.attending, ids: [] };
+                acc[key].ids.push(u.id);
+                return acc;
+              }, {} as Record<string, { attending: boolean; ids: string[] }>);
+
+              await prisma.$transaction(
+                Object.values(groups).map(({ attending, ids }) =>
+                  prisma.familyMember.updateMany({ where: { id: { in: ids } }, data: { attending } })
+                )
+              );
+
+              for (const u of toUpdate) {
+                results.push({ member: u.name, attending: u.attending });
+              }
             }
 
             // Also apply the family-wide flag to remaining members if provided
@@ -689,33 +705,26 @@ export function buildTools(ctx: ToolContext): ToolSet {
               id: true,
               couple_names: true,
               wedding_date: true,
-              _count: { select: { families: true } },
+              families: {
+                select: { members: { select: { attending: true } } },
+              },
             },
             orderBy: { wedding_date: 'asc' },
           });
 
-          // For each wedding compute RSVP completion
-          const results = await Promise.all(
-            weddings.map(async (w) => {
-              const families = await prisma.family.findMany({
-                where: { wedding_id: w.id },
-                include: { members: { select: { attending: true } } },
-              });
-              const total = families.length;
-              const submitted = families.filter((f) => f.members.some((m) => m.attending !== null)).length;
-              return {
-                id: w.id,
-                coupleNames: w.couple_names,
-                weddingDate: w.wedding_date.toISOString().split('T')[0],
-                totalFamilies: total,
-                rsvpSubmitted: submitted,
-                rsvpPending: total - submitted,
-                completionPct: total > 0 ? Math.round((submitted / total) * 100) : 0,
-              };
-            }),
-          );
-
-          return results;
+          return weddings.map((w) => {
+            const total = w.families.length;
+            const submitted = w.families.filter((f) => f.members.some((m) => m.attending !== null)).length;
+            return {
+              id: w.id,
+              coupleNames: w.couple_names,
+              weddingDate: w.wedding_date.toISOString().split('T')[0],
+              totalFamilies: total,
+              rsvpSubmitted: submitted,
+              rsvpPending: total - submitted,
+              completionPct: total > 0 ? Math.round((submitted / total) * 100) : 0,
+            };
+          });
         } catch (err) {
           console.error('[TOOLS] get_planner_weddings error:', err);
           return { error: 'Failed to retrieve weddings' };
