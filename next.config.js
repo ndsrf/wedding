@@ -27,7 +27,7 @@ const nextConfig = {
     instrumentationHook: true,
   },
   // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
-  serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas', 'twilio'],
+  serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas', 'twilio', '@prisma/vector-client'],
   // Optional: Ignore OpenTelemetry warnings in webpack
   webpack: (config, { isServer }) => {
     if (isServer) {

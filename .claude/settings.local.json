@@ -114,7 +114,8 @@
       "Bash(npm run *)",
       "Bash(DATABASE_URL=postgresql://wedding:wedding@postgresql.lan:5432/wed1 npx prisma *)",
       "Bash(npm test *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(git stash *)"
     ]
   }
 }
