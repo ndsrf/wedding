@@ -95,7 +95,7 @@ test.describe('Create Wedding - NEW_USER Mode', () => {
     await page.waitForURL(
       (url) => url.pathname.includes('/planner') && url.searchParams.get('action') !== 'create',
       { timeout: 15000 }
-    ).catch(async (timeoutErr) => {
+    ).catch(async (_timeoutErr) => {
       // Collect diagnostics: API response and any error shown in the form
       const submitErrorEl = page.locator('div.bg-red-50 p');
       const submitErrorText = await submitErrorEl.first().textContent().catch(() => '');
