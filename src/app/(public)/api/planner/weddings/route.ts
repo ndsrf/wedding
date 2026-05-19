@@ -41,8 +41,9 @@ const createWeddingSchema = z.object({
   rsvp_cutoff_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
   dress_code: z.string().optional(),
   additional_info: z.string().optional(),
-  // Accept any value for theme_id - can be UUID (custom themes), slug (system themes), or empty
-  theme_id: z.any()
+  // Accept any value for theme_id - can be UUID (custom themes), slug (system themes), or empty.
+  // .optional() is required in Zod v4: z.any() no longer accepts missing keys by default.
+  theme_id: z.any().optional()
     .transform(val => (val === '' || val === null || val === undefined) ? undefined : val)
     .refine(
       (val) => {
