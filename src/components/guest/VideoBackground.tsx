@@ -33,7 +33,7 @@ export default function VideoBackground() {
             muted
             loop
             playsInline
-            preload={index === 0 ? 'metadata' : 'none'}
+            preload="metadata"
             className="h-full w-full object-cover"
           >
             <source src={src.replace('.mp4', '.webm')} type="video/webm" />
