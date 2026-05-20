@@ -13,7 +13,7 @@ export default function VideoBackground() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentVideo((prev) => (prev === 0 ? 1 : 0));
+      setCurrentVideo((prev) => (prev + 1) % VIDEOS.length);
     }, 15000);
     return () => clearInterval(timer);
   }, []);
