@@ -4,12 +4,13 @@ import { useState } from 'react';
 import TrialSignupModal from './TrialSignupModal';
 
 interface TrialSignupButtonProps {
-  label: string;
+  label?: string;
   locale: string;
   className?: string;
+  children?: React.ReactNode;
 }
 
-export default function TrialSignupButton({ label, locale, className }: TrialSignupButtonProps) {
+export default function TrialSignupButton({ label, locale, className, children }: TrialSignupButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -19,7 +20,7 @@ export default function TrialSignupButton({ label, locale, className }: TrialSig
         className={className}
         type="button"
       >
-        {label}
+        {children || label}
       </button>
       {isOpen && (
         <TrialSignupModal
