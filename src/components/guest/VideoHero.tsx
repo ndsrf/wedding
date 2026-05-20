@@ -41,10 +41,14 @@ export default function VideoHero({
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <TrialSignupButton
-              label={ctaPrimary}
               locale={locale}
               className="w-full sm:w-auto px-10 py-4 bg-white text-rose-600 rounded-full text-lg font-bold shadow-2xl hover:scale-105 transition-all duration-300 hover:bg-gray-50 flex items-center justify-center"
-            />
+            >
+              {ctaPrimary}
+              <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </TrialSignupButton>
 
             <a
               href="#features"
