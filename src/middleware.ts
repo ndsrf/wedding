@@ -184,8 +184,12 @@ export async function middleware(request: NextRequest) {
         routing.locales as string[],
         routing.defaultLocale,
       );
-      // Visible redirect (e.g. / → /es, / → /en)
-      return NextResponse.redirect(new URL(`/${locale}`, request.url));
+      // Visible redirect (e.g. / → /es, / → /en).
+      // Vary: Accept-Language tells the CDN to store one cached redirect per
+      // browser language instead of serving the same destination to everyone.
+      const redirectResponse = NextResponse.redirect(new URL(`/${locale}`, request.url));
+      redirectResponse.headers.set('Vary', 'Accept-Language');
+      return redirectResponse;
     }
 
     // For locale-prefixed roots (/en, /es, …) fall through to intlMiddleware below
