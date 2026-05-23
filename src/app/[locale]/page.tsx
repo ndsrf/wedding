@@ -141,7 +141,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <Link href="/" className="flex items-center">
-              <Image src="/images/nupci.webp" alt={commercialName} width={228} height={128} sizes="228px" className="h-16 w-auto" />
+              <Image src="/images/nupci.webp" alt={commercialName} width={228} height={128} sizes="228px" className="h-16 w-auto" priority />
             </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-700 hover:text-rose-600 transition-colors">

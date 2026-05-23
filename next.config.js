@@ -25,6 +25,8 @@ const nextConfig = {
     // Automatically optimize imports from these packages
     optimizePackageImports: ['lucide-react', 'xlsx', 'zod'],
     instrumentationHook: true,
+    // Inline critical CSS and defer the rest to eliminate render-blocking stylesheet
+    optimizeCss: true,
   },
   // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
   serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas', 'twilio', '@prisma/vector-client'],
