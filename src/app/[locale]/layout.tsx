@@ -63,7 +63,7 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         {/* Speed up CDN video connections */}
-        <link rel="preconnect" href="https://cdn.nupci.com" />
+        <link rel="preconnect" href="https://cdn.nupci.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.nupci.com" />
       </head>
       <body>
