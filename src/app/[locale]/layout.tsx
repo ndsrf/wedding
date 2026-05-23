@@ -62,6 +62,9 @@ export default async function RootLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
+        {/* Speed up CDN video connections */}
+        <link rel="preconnect" href="https://cdn.nupci.com" />
+        <link rel="dns-prefetch" href="https://cdn.nupci.com" />
       </head>
       <body>
         <HyperDXProvider />
