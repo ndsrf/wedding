@@ -13,6 +13,8 @@ export default function HyperDXProvider() {
         consoleCapture: true,
         advancedNetworkCapture: true,
       });
+    }).catch(() => {
+      // Silently ignore: chunk may be blocked by ad-blockers or fail due to network issues
     });
   }, []);
 
