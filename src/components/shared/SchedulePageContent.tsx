@@ -1193,6 +1193,8 @@ export function SchedulePageContent({
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <button
                 type="button"
+                aria-expanded={itineraryOpen}
+                aria-controls="itinerary-section-content"
                 onClick={() => setItineraryOpen((v) => !v)}
                 className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
               >
@@ -1206,6 +1208,7 @@ export function SchedulePageContent({
                 <svg
                   className={`h-4 w-4 text-gray-400 transition-transform ${itineraryOpen ? 'rotate-180' : ''}`}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  aria-hidden="true"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 import { useToast } from "@/components/ui/Toast";
 
 export interface ItineraryStepItem {
@@ -57,10 +57,11 @@ export function ItineraryTimeline({ items, showReadOnlyToast }: ItineraryTimelin
             {/* Content */}
             <div className="pr-2">
               <p className="text-[10px] leading-tight text-gray-500 tabular-nums">
-                {(() => {
-                  const d = new Date(item.dateTime);
-                  return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
-                })()}
+                {new Date(item.dateTime).toLocaleTimeString(undefined, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'UTC',
+                })}
               </p>
               <p
                 className={`text-xs leading-snug font-semibold truncate ${
