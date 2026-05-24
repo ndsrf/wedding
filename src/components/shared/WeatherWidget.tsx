@@ -40,6 +40,7 @@ interface SunTimelineProps {
   solarNoonMin: number;
   sunsetMin: number;
   stages: StageMarker[];
+  lightUnit: string;
 }
 
 function SunTimeline({
@@ -49,6 +50,7 @@ function SunTimeline({
   solarNoonMin,
   sunsetMin,
   stages,
+  lightUnit,
 }: SunTimelineProps) {
   const displayStart = Math.max(0, civilTwilightBeginMin - 60);
   const displayEnd   = Math.min(1440, civilTwilightEndMin + 60);
@@ -108,7 +110,7 @@ function SunTimeline({
                 <div className="bg-gray-900 text-white text-xs rounded-lg px-2 py-1 whitespace-nowrap shadow-lg">
                   <span className="font-medium">{stage.name}</span>
                   <span className="text-gray-300 ml-1">{stage.startTime}</span>
-                  <span className="text-gray-400 ml-1">· {lightPct}% luz</span>
+                  <span className="text-gray-400 ml-1">· {lightPct}% {lightUnit}</span>
                 </div>
                 <div className="w-1.5 h-1.5 bg-gray-900 rotate-45 -mt-0.5" />
               </div>
@@ -150,7 +152,7 @@ function CollapsedPill({ data, onExpand, t }: CollapsedPillProps) {
   const { sunTimes, moonPhase, weather } = data;
   const h   = Math.floor(sunTimes.dayLengthMinutes / 60);
   const m   = sunTimes.dayLengthMinutes % 60;
-  const dayLen = m > 0 ? `${h}h${m}m` : `${h}h`;
+  const dayLen = m > 0 ? `${h}${t('hours')}${m}${t('minutes')}` : `${h}${t('hours')}`;
 
   return (
     <button
@@ -169,7 +171,7 @@ function CollapsedPill({ data, onExpand, t }: CollapsedPillProps) {
       <span className="text-xs text-gray-600">{moonPhase.illumination}%</span>
       <span className="text-gray-300">·</span>
       <span className="text-base">{weather.conditionEmoji}</span>
-      <span className="text-xs text-gray-600">{weather.tempMin}–{weather.tempMax}°C</span>
+      <span className="text-xs text-gray-600">{weather.tempMin}–{weather.tempMax}{t('unitCelsius')}</span>
       <div className="flex-1" />
       <span className="text-xs text-gray-400 group-hover:text-amber-500 transition-colors flex items-center gap-1">
         {t('expand')}
@@ -280,6 +282,7 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
             solarNoonMin={noonMin}
             sunsetMin={setMin}
             stages={stageMarkers}
+            lightUnit={t('light')}
           />
 
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -309,7 +312,7 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
                     <div className="w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
                     <span className="font-medium truncate max-w-[140px]">{stage.name}</span>
                     <span className="text-gray-400">{stage.startTime}</span>
-                    <span className="ml-auto text-gray-500">{lightPct}% luz · {zoneLabel}</span>
+                    <span className="ml-auto text-gray-500">{lightPct}% {t('light')} · {zoneLabel}</span>
                   </div>
                 );
               })}
@@ -350,11 +353,11 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
 
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-gray-50 rounded-xl px-3 py-2">
-              <p className="text-sm font-semibold text-gray-800">{weather.tempMin}–{weather.tempMax}°C</p>
+              <p className="text-sm font-semibold text-gray-800">{weather.tempMin}–{weather.tempMax}{t('unitCelsius')}</p>
               <p className="text-[10px] text-gray-500 mt-0.5">{t('avgTemp')}</p>
             </div>
             <div className="bg-gray-50 rounded-xl px-3 py-2">
-              <p className="text-sm font-semibold text-gray-800">{weather.precipitationMm} mm</p>
+              <p className="text-sm font-semibold text-gray-800">{weather.precipitationMm} {t('unitMm')}</p>
               <p className="text-[10px] text-gray-500 mt-0.5">{t('precipitation')}</p>
             </div>
             <div className="bg-gray-50 rounded-xl px-3 py-2 flex items-center gap-2">

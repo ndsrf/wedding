@@ -3459,6 +3459,9 @@
       "snowy": "Neve",
       "foggy": "Nebbia"
     },
-    "solarNoon": "Mezzogiorno solare"
+    "solarNoon": "Mezzogiorno solare",
+    "light": "luce",
+    "unitCelsius": "°C",
+    "unitMm": "mm"
   }
 }

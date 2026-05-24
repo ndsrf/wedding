@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useNamespacedTranslations } from '@/lib/i18n/client';
 import {
   DndContext,
   DragOverlay,
@@ -61,6 +62,7 @@ export interface SchedulePageContentProps {
 // ── Sun badge (shown inline on each stage row) ────────────────────────────────
 
 function SunBadge({ time, sunTimes }: { time: string; sunTimes: SunTimes }) {
+  const t = useNamespacedTranslations('weatherWidget');
   const { dawnMin, riseMin, noonMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
   const stageMin  = timeToMinutes(time);
   const zone      = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
@@ -70,7 +72,7 @@ function SunBadge({ time, sunTimes }: { time: string; sunTimes: SunTimes }) {
   return (
     <div
       className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 ${bg} ${text}`}
-      title={`${zone} · ${lightPct}% luz`}
+      title={`${t(`lightZones.${zone}`)} · ${lightPct}% ${t('light')}`}
     >
       <span>{emoji}</span>
       <span>{lightPct}%</span>

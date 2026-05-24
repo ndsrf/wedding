@@ -3558,6 +3558,9 @@
       "snowy": "Snow",
       "foggy": "Fog"
     },
-    "solarNoon": "Solar noon"
+    "solarNoon": "Solar noon",
+    "light": "light",
+    "unitCelsius": "°C",
+    "unitMm": "mm"
   }
 }

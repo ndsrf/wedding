@@ -3534,6 +3534,9 @@
       "snowy": "Nieve",
       "foggy": "Niebla"
     },
-    "solarNoon": "Mediodía solar"
+    "solarNoon": "Mediodía solar",
+    "light": "luz",
+    "unitCelsius": "°C",
+    "unitMm": "mm"
   }
 }

@@ -3459,6 +3459,9 @@
       "snowy": "Schnee",
       "foggy": "Nebel"
     },
-    "solarNoon": "Sonnenmittag"
+    "solarNoon": "Sonnenmittag",
+    "light": "Licht",
+    "unitCelsius": "°C",
+    "unitMm": "mm"
   }
 }

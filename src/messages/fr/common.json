@@ -3459,6 +3459,9 @@
       "snowy": "Neige",
       "foggy": "Brouillard"
     },
-    "solarNoon": "Midi solaire"
+    "solarNoon": "Midi solaire",
+    "light": "lumière",
+    "unitCelsius": "°C",
+    "unitMm": "mm"
   }
 }
