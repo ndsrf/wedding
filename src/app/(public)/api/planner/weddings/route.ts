@@ -12,6 +12,8 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
+import { generateDisruptionAlerts } from '@/lib/ai/disruption-alerts';
+import { createTask } from '@/lib/checklist/crud';
 import { ensureWeddingInitials } from '@/lib/short-url';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import type {
@@ -445,6 +447,37 @@ export async function POST(request: NextRequest) {
       // Log error but don't fail wedding creation
       console.error('Failed to copy checklist template to wedding:', error);
       // This is not critical - planner can still manually create checklist if needed
+    }
+
+    // Generate AI disruption alerts and add them to the couple's checklist
+    try {
+      const alerts = await generateDisruptionAlerts({
+        coupleNames: wedding.couple_names,
+        weddingDate: validatedData.wedding_date,
+        location: validatedData.location,
+      });
+
+      if (alerts && alerts.length > 0) {
+        await Promise.all(
+          alerts.map((alert, index) =>
+            createTask({
+              wedding_id: wedding.id,
+              section_id: null,
+              title: `[AI] ${alert.title}`,
+              description: alert.description,
+              assigned_to: 'COUPLE',
+              due_date: null,
+              status: 'PENDING',
+              completed: false,
+              order: index,
+            })
+          )
+        );
+        console.log(`[DISRUPTION_ALERTS] Added ${alerts.length} AI alerts to wedding ${wedding.id}`);
+      }
+    } catch (error) {
+      console.error('Failed to generate disruption alerts for wedding:', error);
+      // Non-critical — wedding creation continues regardless
     }
 
     await Promise.all([
