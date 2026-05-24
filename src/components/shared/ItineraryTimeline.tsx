@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { useToast } from '@/components/ui/Toast';
+import { useLocale, useTranslations } from "next-intl";
+import { useToast } from "@/components/ui/Toast";
 
 export interface ItineraryStepItem {
   id: string | number;
