@@ -3516,13 +3516,13 @@
     "stageAt": "{time} — {pct}% del día",
     "moonPhases": {
       "newMoon": "Luna nueva",
-      "waxingCrescent": "Cuarto creciente",
+      "waxingCrescent": "Luna creciente",
       "firstQuarter": "Cuarto creciente",
       "waxingGibbous": "Gibosa creciente",
       "fullMoon": "Luna llena",
       "waningGibbous": "Gibosa menguante",
       "lastQuarter": "Cuarto menguante",
-      "waningCrescent": "Cuarto menguante"
+      "waningCrescent": "Luna menguante"
     },
     "conditions": {
       "sunny": "Despejado",
