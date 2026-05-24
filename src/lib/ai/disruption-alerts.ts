@@ -49,7 +49,8 @@ const alertsSchema = z.object({
 export async function generateDisruptionAlerts(
   ctx: WeddingAlertContext
 ): Promise<DisruptionAlert[] | null> {
-  const date = new Date(ctx.weddingDate);
+  const [year, month, day] = ctx.weddingDate.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const responseLang = (ctx.language && LANGUAGE_NAMES[ctx.language]) || 'English';
 
