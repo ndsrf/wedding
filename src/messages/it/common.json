@@ -3458,6 +3458,7 @@
       "stormy": "Temporale",
       "snowy": "Neve",
       "foggy": "Nebbia"
-    }
+    },
+    "solarNoon": "Mezzogiorno solare"
   }
 }

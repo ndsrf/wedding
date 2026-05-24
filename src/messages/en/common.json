@@ -3557,6 +3557,7 @@
       "stormy": "Thunderstorm",
       "snowy": "Snow",
       "foggy": "Fog"
-    }
+    },
+    "solarNoon": "Solar noon"
   }
 }

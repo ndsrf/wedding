@@ -55,7 +55,23 @@ export function sunTimesInMinutes(st: SunTimes) {
   return {
     dawnMin: timeToMinutes(st.civilTwilightBegin),
     riseMin: timeToMinutes(st.sunrise),
+    noonMin: timeToMinutes(st.solarNoon),
     setMin:  timeToMinutes(st.sunset),
     duskMin: timeToMinutes(st.civilTwilightEnd),
   };
+}
+
+// Light intensity: 0% at dawn/dusk, 100% at solar noon.
+// Rises linearly dawn→noon, falls linearly noon→dusk, clamps to 0 outside.
+export function lightIntensityPercent(
+  timeMin: number,
+  dawnMin: number,
+  noonMin: number,
+  duskMin: number,
+): number {
+  if (timeMin <= dawnMin || timeMin >= duskMin) return 0;
+  if (timeMin <= noonMin) {
+    return Math.round(((timeMin - dawnMin) / (noonMin - dawnMin)) * 100);
+  }
+  return Math.round(((duskMin - timeMin) / (duskMin - noonMin)) * 100);
 }

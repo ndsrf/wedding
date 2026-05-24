@@ -3533,6 +3533,7 @@
       "stormy": "Tormenta",
       "snowy": "Nieve",
       "foggy": "Niebla"
-    }
+    },
+    "solarNoon": "Mediodía solar"
   }
 }

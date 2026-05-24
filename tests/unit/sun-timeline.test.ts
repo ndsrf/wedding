@@ -4,7 +4,7 @@
  * Tests the time/percentage helpers and getLightZone from sun-utils.
  */
 
-import { timeToMinutes, minutesToHHMM, timeToPercent, getLightZone } from '@/lib/astro-weather/sun-utils';
+import { timeToMinutes, minutesToHHMM, timeToPercent, getLightZone, lightIntensityPercent } from '@/lib/astro-weather/sun-utils';
 
 // ── timeToMinutes ─────────────────────────────────────────────────────────────
 
@@ -145,5 +145,66 @@ describe('getLightZone', () => {
 
   it('returns day just after sunrise', () => {
     expect(getLightZone(RISE + 1, DAWN, RISE, SET, DUSK)).toBe('day');
+  });
+});
+
+// ── lightIntensityPercent ─────────────────────────────────────────────────────
+// Window: dawn=375 (6:15), noon=750 (12:30), dusk=1263 (21:03)
+
+const NOON = 750; // 12:30
+
+describe('lightIntensityPercent', () => {
+  it('returns 0 at civil dawn', () => {
+    expect(lightIntensityPercent(DAWN, DAWN, NOON, DUSK)).toBe(0);
+  });
+
+  it('returns 100 at solar noon', () => {
+    expect(lightIntensityPercent(NOON, DAWN, NOON, DUSK)).toBe(100);
+  });
+
+  it('returns 0 at civil dusk', () => {
+    expect(lightIntensityPercent(DUSK, DAWN, NOON, DUSK)).toBe(0);
+  });
+
+  it('returns 0 before civil dawn', () => {
+    expect(lightIntensityPercent(200, DAWN, NOON, DUSK)).toBe(0);
+  });
+
+  it('returns 0 after civil dusk', () => {
+    expect(lightIntensityPercent(1400, DAWN, NOON, DUSK)).toBe(0);
+  });
+
+  it('returns ~50 halfway between dawn and noon', () => {
+    const mid = Math.round((DAWN + NOON) / 2); // 562 = 9:22
+    const pct = lightIntensityPercent(mid, DAWN, NOON, DUSK);
+    expect(pct).toBeGreaterThanOrEqual(49);
+    expect(pct).toBeLessThanOrEqual(51);
+  });
+
+  it('returns ~50 halfway between noon and dusk', () => {
+    const mid = Math.round((NOON + DUSK) / 2); // 1006 = 16:46
+    const pct = lightIntensityPercent(mid, DAWN, NOON, DUSK);
+    expect(pct).toBeGreaterThanOrEqual(49);
+    expect(pct).toBeLessThanOrEqual(51);
+  });
+
+  it('rises in the morning', () => {
+    const early = lightIntensityPercent(500, DAWN, NOON, DUSK);
+    const later = lightIntensityPercent(650, DAWN, NOON, DUSK);
+    expect(later).toBeGreaterThan(early);
+  });
+
+  it('falls in the afternoon', () => {
+    const earlier = lightIntensityPercent(900, DAWN, NOON, DUSK);
+    const later   = lightIntensityPercent(1100, DAWN, NOON, DUSK);
+    expect(later).toBeLessThan(earlier);
+  });
+
+  it('is always in [0, 100]', () => {
+    for (let t = 0; t < 1440; t += 15) {
+      const pct = lightIntensityPercent(t, DAWN, NOON, DUSK);
+      expect(pct).toBeGreaterThanOrEqual(0);
+      expect(pct).toBeLessThanOrEqual(100);
+    }
   });
 });

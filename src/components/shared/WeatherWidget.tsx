@@ -8,6 +8,7 @@ import {
   timeToMinutes,
   minutesToHHMM,
   timeToPercent,
+  lightIntensityPercent,
   getLightZone,
   sunTimesInMinutes,
 } from '@/lib/astro-weather/sun-utils';
@@ -36,6 +37,7 @@ interface SunTimelineProps {
   civilTwilightBeginMin: number;
   civilTwilightEndMin: number;
   sunriseMin: number;
+  solarNoonMin: number;
   sunsetMin: number;
   stages: StageMarker[];
 }
@@ -44,6 +46,7 @@ function SunTimeline({
   civilTwilightBeginMin,
   civilTwilightEndMin,
   sunriseMin,
+  solarNoonMin,
   sunsetMin,
   stages,
 }: SunTimelineProps) {
@@ -80,10 +83,19 @@ function SunTimeline({
           style={{ background: `linear-gradient(to right, ${gradient})` }}
         />
 
+        {/* Solar noon peak marker */}
+        <div
+          className="absolute top-0 h-6 flex flex-col items-center pointer-events-none"
+          style={{ left: `${pct(solarNoonMin)}%`, transform: 'translateX(-50%)' }}
+        >
+          <div className="w-0.5 h-full bg-white" />
+          <span className="absolute -top-4 text-[11px] leading-none select-none">☀️</span>
+        </div>
+
         {stages.map((stage) => {
-          const stageMin = timeToMinutes(stage.startTime);
-          const pos      = pct(stageMin);
-          const dayPct   = timeToPercent(stageMin, civilTwilightBeginMin, civilTwilightEndMin);
+          const stageMin   = timeToMinutes(stage.startTime);
+          const pos        = pct(stageMin);
+          const lightPct   = lightIntensityPercent(stageMin, civilTwilightBeginMin, solarNoonMin, civilTwilightEndMin);
 
           return (
             <div
@@ -96,7 +108,7 @@ function SunTimeline({
                 <div className="bg-gray-900 text-white text-xs rounded-lg px-2 py-1 whitespace-nowrap shadow-lg">
                   <span className="font-medium">{stage.name}</span>
                   <span className="text-gray-300 ml-1">{stage.startTime}</span>
-                  <span className="text-gray-400 ml-1">· {dayPct}%</span>
+                  <span className="text-gray-400 ml-1">· {lightPct}% luz</span>
                 </div>
                 <div className="w-1.5 h-1.5 bg-gray-900 rotate-45 -mt-0.5" />
               </div>
@@ -108,6 +120,7 @@ function SunTimeline({
           {[
             { min: civilTwilightBeginMin, label: minutesToHHMM(civilTwilightBeginMin) },
             { min: sunriseMin,            label: minutesToHHMM(sunriseMin)            },
+            { min: solarNoonMin,          label: minutesToHHMM(solarNoonMin)          },
             { min: sunsetMin,             label: minutesToHHMM(sunsetMin)             },
             { min: civilTwilightEndMin,   label: minutesToHHMM(civilTwilightEndMin)   },
           ].map(({ min, label }) => (
@@ -212,13 +225,16 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
   }
 
   const { sunTimes, moonPhase, weather } = data;
-  const { dawnMin, riseMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
+  const { dawnMin, riseMin, noonMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
 
+  // Only couple-visible stages belong on the light timeline
   const stageMarkers: StageMarker[] = blocks.flatMap((block) =>
-    block.stages.map((s) => ({
-      name: s.name,
-      startTime: s.calculated_start_time,
-    }))
+    block.stages
+      .filter((s) => s.visible_to_couple)
+      .map((s) => ({
+        name: s.name,
+        startTime: s.calculated_start_time,
+      }))
   );
 
   const moonPhaseName  = t(`moonPhases.${moonPhase.name}`);
@@ -261,16 +277,18 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
             civilTwilightBeginMin={dawnMin}
             civilTwilightEndMin={duskMin}
             sunriseMin={riseMin}
+            solarNoonMin={noonMin}
             sunsetMin={setMin}
             stages={stageMarkers}
           />
 
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
             {[
-              { label: t('civilDawn'), time: sunTimes.civilTwilightBegin, color: 'text-indigo-500' },
-              { label: t('sunrise'),   time: sunTimes.sunrise,            color: 'text-amber-500'  },
-              { label: t('sunset'),    time: sunTimes.sunset,             color: 'text-orange-500' },
-              { label: t('civilDusk'), time: sunTimes.civilTwilightEnd,   color: 'text-violet-500' },
+              { label: t('civilDawn'),  time: sunTimes.civilTwilightBegin, color: 'text-indigo-500' },
+              { label: t('sunrise'),    time: sunTimes.sunrise,             color: 'text-amber-500'  },
+              { label: t('solarNoon'),  time: sunTimes.solarNoon,           color: 'text-yellow-500' },
+              { label: t('sunset'),     time: sunTimes.sunset,              color: 'text-orange-500' },
+              { label: t('civilDusk'),  time: sunTimes.civilTwilightEnd,    color: 'text-violet-500' },
             ].map(({ label, time, color }) => (
               <div key={label} className="bg-gray-50 rounded-xl px-3 py-2">
                 <p className={`text-xs font-semibold ${color}`}>{time}</p>
@@ -282,16 +300,16 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
           {stageMarkers.length > 0 && (
             <div className="mt-3 space-y-1">
               {stageMarkers.map((stage) => {
-                const stageMin = timeToMinutes(stage.startTime);
-                const dayPct   = timeToPercent(stageMin, dawnMin, duskMin);
-                const zone     = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
+                const stageMin  = timeToMinutes(stage.startTime);
+                const lightPct  = lightIntensityPercent(stageMin, dawnMin, noonMin, duskMin);
+                const zone      = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
                 const zoneLabel = t(`lightZones.${zone}`);
                 return (
                   <div key={`${stage.name}-${stage.startTime}`} className="flex items-center gap-2 text-xs text-gray-600">
                     <div className="w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
                     <span className="font-medium truncate max-w-[140px]">{stage.name}</span>
                     <span className="text-gray-400">{stage.startTime}</span>
-                    <span className="ml-auto text-gray-500">{dayPct}% · {zoneLabel}</span>
+                    <span className="ml-auto text-gray-500">{lightPct}% luz · {zoneLabel}</span>
                   </div>
                 );
               })}

@@ -3458,6 +3458,7 @@
       "stormy": "Orage",
       "snowy": "Neige",
       "foggy": "Brouillard"
-    }
+    },
+    "solarNoon": "Midi solaire"
   }
 }

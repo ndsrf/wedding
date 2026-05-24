@@ -35,7 +35,7 @@ import { WeatherWidget, type WeatherFetchStatus } from '@/components/shared/Weat
 import type { WeatherWidgetData, SunTimes } from '@/types/astro-weather';
 import {
   timeToMinutes,
-  timeToPercent,
+  lightIntensityPercent,
   getLightZone,
   sunTimesInMinutes,
   LIGHT_ZONE_STYLE,
@@ -61,19 +61,19 @@ export interface SchedulePageContentProps {
 // ── Sun badge (shown inline on each stage row) ────────────────────────────────
 
 function SunBadge({ time, sunTimes }: { time: string; sunTimes: SunTimes }) {
-  const { dawnMin, riseMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
-  const stageMin = timeToMinutes(time);
-  const zone     = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
-  const pct      = timeToPercent(stageMin, dawnMin, duskMin);
+  const { dawnMin, riseMin, noonMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
+  const stageMin  = timeToMinutes(time);
+  const zone      = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
+  const lightPct  = lightIntensityPercent(stageMin, dawnMin, noonMin, duskMin);
   const { emoji, bg, text } = LIGHT_ZONE_STYLE[zone];
 
   return (
     <div
       className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 ${bg} ${text}`}
-      title={`${zone} · ${pct}%`}
+      title={`${zone} · ${lightPct}% luz`}
     >
       <span>{emoji}</span>
-      <span>{pct}%</span>
+      <span>{lightPct}%</span>
     </div>
   );
 }
