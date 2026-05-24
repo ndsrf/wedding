@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useNamespacedTranslations } from '@/lib/i18n/client';
 import {
   DndContext,
   DragOverlay,
@@ -31,6 +32,15 @@ import type {
   StageProvider,
 } from '@/types/schedule';
 import { computeScheduleWithTimes } from '@/types/schedule';
+import { WeatherWidget, type WeatherFetchStatus } from '@/components/shared/WeatherWidget';
+import type { WeatherWidgetData, SunTimes } from '@/types/astro-weather';
+import {
+  timeToMinutes,
+  lightIntensityPercent,
+  getLightZone,
+  sunTimesInMinutes,
+  LIGHT_ZONE_STYLE,
+} from '@/lib/astro-weather/sun-utils';
 
 // ── API paths ─────────────────────────────────────────────────────────────────
 
@@ -38,6 +48,7 @@ export interface ScheduleApiPaths {
   schedule: string;
   schedulePdf: string;
   providersUrl?: string;
+  weatherUrl?: string;
 }
 
 export interface SchedulePageContentProps {
@@ -46,6 +57,27 @@ export interface SchedulePageContentProps {
   header: React.ReactNode;
   coupleNames?: string;
   weddingDate?: string;
+}
+
+// ── Sun badge (shown inline on each stage row) ────────────────────────────────
+
+function SunBadge({ time, sunTimes }: { time: string; sunTimes: SunTimes }) {
+  const t = useNamespacedTranslations('weatherWidget');
+  const { dawnMin, riseMin, noonMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
+  const stageMin  = timeToMinutes(time);
+  const zone      = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
+  const lightPct  = lightIntensityPercent(stageMin, dawnMin, noonMin, duskMin);
+  const { emoji, bg, text } = LIGHT_ZONE_STYLE[zone];
+
+  return (
+    <div
+      className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 ${bg} ${text}`}
+      title={`${t(`lightZones.${zone}`)} · ${lightPct}% ${t('light')}`}
+    >
+      <span>{emoji}</span>
+      <span>{lightPct}%</span>
+    </div>
+  );
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -100,6 +132,7 @@ function SortableStageRow({
   blockColor,
   viewMode,
   providers,
+  sunTimes,
   onProviderChange,
   onUpdate,
   onDelete,
@@ -108,6 +141,7 @@ function SortableStageRow({
   blockColor: string;
   viewMode: 'planner' | 'couple';
   providers: StageProvider[];
+  sunTimes?: SunTimes;
   onProviderChange?: (stageId: string, providerId: string | null) => void;
   onUpdate: (stageId: string, updates: Record<string, unknown>) => void;
   onDelete: (stageId: string) => void;
@@ -245,6 +279,11 @@ function SortableStageRow({
           </p>
         )}
       </div>
+
+      {/* Light zone badge */}
+      {sunTimes && (
+        <SunBadge time={stage.calculated_start_time} sunTimes={sunTimes} />
+      )}
 
       {/* Duration */}
       {editDuration ? (
@@ -387,6 +426,7 @@ function SortableBlockSection({
   viewMode,
   filterPlannerItems = false,
   providers,
+  sunTimes,
   onProviderChange,
   onUpdateStage,
   onDeleteStage,
@@ -398,6 +438,7 @@ function SortableBlockSection({
   viewMode: 'planner' | 'couple';
   filterPlannerItems?: boolean;
   providers: StageProvider[];
+  sunTimes?: SunTimes;
   onProviderChange?: (stageId: string, providerId: string | null) => void;
   onUpdateStage: (stageId: string, updates: Record<string, unknown>) => void;
   onDeleteStage: (stageId: string) => void;
@@ -565,6 +606,7 @@ function SortableBlockSection({
               blockColor={block.color ?? '#6366f1'}
               viewMode={viewMode}
               providers={providers}
+              sunTimes={sunTimes}
               onProviderChange={onProviderChange}
               onUpdate={onUpdateStage}
               onDelete={onDeleteStage}
@@ -652,6 +694,8 @@ export function SchedulePageContent({
   const [providers, setProviders] = useState<StageProvider[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [activeDragType, setActiveDragType] = useState<'block' | 'stage' | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherWidgetData | null>(null);
+  const [weatherStatus, setWeatherStatus] = useState<WeatherFetchStatus>('loading');
 
   const dragOriginBlockId = useRef<string | null>(null);
 
@@ -684,6 +728,27 @@ export function SchedulePageContent({
       .then((json) => setProviders(json.data ?? []))
       .catch(() => {});
   }, [apiPaths.providersUrl]);
+
+  // ── Fetch weather + sun times ────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!apiPaths.weatherUrl) { setWeatherStatus('no-location'); return; }
+    let cancelled = false;
+    setWeatherStatus('loading');
+
+    fetch(apiPaths.weatherUrl)
+      .then(async (res) => {
+        if (cancelled) return;
+        if (res.status === 404) { setWeatherStatus('no-location'); return; }
+        if (!res.ok) { setWeatherStatus('error'); return; }
+        const json: WeatherWidgetData = await res.json();
+        setWeatherData(json);
+        setWeatherStatus('ok');
+      })
+      .catch(() => { if (!cancelled) setWeatherStatus('error'); });
+
+    return () => { cancelled = true; };
+  }, [apiPaths.weatherUrl]);
 
   const blocksWithTimes: ScheduleBlockWithTimes[] = computeScheduleWithTimes(blocks, startTime);
 
@@ -1118,6 +1183,15 @@ export function SchedulePageContent({
       {header}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
+          {/* Weather & daylight widget */}
+          {apiPaths.weatherUrl && (
+            <WeatherWidget
+              data={weatherData}
+              fetchStatus={weatherStatus}
+              blocks={blocksWithTimes}
+            />
+          )}
+
           {/* Controls bar */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-3">
@@ -1233,6 +1307,7 @@ export function SchedulePageContent({
                       viewMode={effectiveViewMode}
                       filterPlannerItems={!isPlanner}
                       providers={providers}
+                      sunTimes={weatherData?.sunTimes}
                       onProviderChange={canAssignProviders ? handleProviderChange : undefined}
                       onUpdateStage={handleUpdateStage}
                       onDeleteStage={handleDeleteStage}

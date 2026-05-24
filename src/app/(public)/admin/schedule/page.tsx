@@ -31,7 +31,12 @@ export default async function AdminSchedulePage() {
 
   const wedding = await prisma.wedding.findUnique({
     where: { id: user!.wedding_id! },
-    select: { couple_names: true, wedding_date: true },
+    select: {
+      couple_names: true,
+      wedding_date: true,
+      main_event_location: { select: { id: true } },
+      location: true,
+    },
   });
 
   const language = await getLanguageFromRequest();
@@ -45,6 +50,9 @@ export default async function AdminSchedulePage() {
         schedule: '/api/admin/schedule',
         schedulePdf: '/api/admin/schedule/pdf',
         providersUrl: `/api/weddings/${user!.wedding_id!}/providers`,
+        weatherUrl: (wedding?.main_event_location ?? wedding?.location)
+          ? '/api/admin/schedule/weather'
+          : undefined,
       }}
       isPlanner={false}
       coupleNames={wedding?.couple_names ?? undefined}

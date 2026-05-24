@@ -3509,5 +3509,58 @@
       "close": "Close"
     },
     "helpLabel": "Help"
+  },
+  "weatherWidget": {
+    "title": "Light & Weather",
+    "sunrise": "Sunrise",
+    "sunset": "Sunset",
+    "civilDawn": "Civil dawn",
+    "civilDusk": "Civil dusk",
+    "dayLength": "Day length",
+    "hours": "h",
+    "minutes": "min",
+    "moonPhase": "Moon phase",
+    "illumination": "Illumination",
+    "historicalWeather": "Historical weather",
+    "avgTemp": "Temperature",
+    "precipitation": "Precipitation",
+    "referenceYear": "Data from year {year}",
+    "loading": "Loading data...",
+    "error": "Could not load weather data",
+    "noLocation": "Set the main event location to see weather information",
+    "expand": "View daylight & weather",
+    "collapse": "Collapse",
+    "lightZones": {
+      "night": "Night",
+      "dawn": "Dawn",
+      "day": "Day",
+      "goldenHour": "Golden hour",
+      "dusk": "Dusk"
+    },
+    "stageAt": "{time} — {pct}% of daylight",
+    "moonPhases": {
+      "newMoon": "New Moon",
+      "waxingCrescent": "Waxing Crescent",
+      "firstQuarter": "First Quarter",
+      "waxingGibbous": "Waxing Gibbous",
+      "fullMoon": "Full Moon",
+      "waningGibbous": "Waning Gibbous",
+      "lastQuarter": "Last Quarter",
+      "waningCrescent": "Waning Crescent"
+    },
+    "conditions": {
+      "sunny": "Clear sky",
+      "partlyCloudy": "Partly cloudy",
+      "cloudy": "Cloudy",
+      "drizzle": "Drizzle",
+      "rainy": "Rain",
+      "stormy": "Thunderstorm",
+      "snowy": "Snow",
+      "foggy": "Fog"
+    },
+    "solarNoon": "Solar noon",
+    "light": "light",
+    "unitCelsius": "°C",
+    "unitMm": "mm"
   }
 }
