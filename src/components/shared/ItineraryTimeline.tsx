@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 export interface ItineraryStepItem {
   id: string | number;
@@ -14,11 +14,11 @@ export interface ItineraryStepItem {
 
 interface ItineraryTimelineProps {
   items: ItineraryStepItem[];
+  onItemClick?: () => void;
 }
 
-export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
+export function ItineraryTimeline({ items, onItemClick }: ItineraryTimelineProps) {
   const t = useTranslations();
-  const locale = useLocale();
 
   const sorted = [...items].sort(
     (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
@@ -34,8 +34,9 @@ export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
         return (
           <div
             key={item.id}
-            className="flex-shrink-0"
+            className={`flex-shrink-0 ${onItemClick ? 'cursor-pointer' : ''}`}
             style={{ minWidth: 'calc(25vw - 8px)', maxWidth: '140px' }}
+            onClick={onItemClick}
           >
             {/* Dot + connector line */}
             <div className="flex items-center h-3 mb-1.5">
@@ -50,10 +51,10 @@ export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
             {/* Content */}
             <div className="pr-2">
               <p className="text-[10px] leading-tight text-gray-500 tabular-nums">
-                {new Date(item.dateTime).toLocaleTimeString(locale, {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {(() => {
+                  const d = new Date(item.dateTime);
+                  return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+                })()}
               </p>
               <p
                 className={`text-xs leading-snug font-semibold truncate ${
