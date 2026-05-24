@@ -1,30 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNamespacedTranslations } from '@/lib/i18n/client';
 import type { WeatherWidgetData } from '@/types/astro-weather';
 import type { ScheduleBlockWithTimes } from '@/types/schedule';
+import {
+  timeToMinutes,
+  minutesToHHMM,
+  timeToPercent,
+  getLightZone,
+  sunTimesInMinutes,
+} from '@/lib/astro-weather/sun-utils';
 
-// ── Time helpers ──────────────────────────────────────────────────────────────
+export type WeatherFetchStatus = 'loading' | 'ok' | 'no-location' | 'error';
 
-export function timeToMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(':').map(Number);
-  return (h ?? 0) * 60 + (m ?? 0);
-}
+// Re-export helpers so existing tests keep importing from this path.
+export { timeToMinutes, minutesToHHMM, timeToPercent };
 
-export function minutesToHHMM(minutes: number): string {
-  const h = Math.floor(minutes / 60) % 24;
-  const m = minutes % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
-// Returns 0–100 representing how far `timeMin` is between `startMin` and `endMin`.
-// Clamped to [0, 100].
-export function timeToPercent(timeMin: number, startMin: number, endMin: number): number {
-  if (endMin <= startMin) return 0;
-  const pct = ((timeMin - startMin) / (endMin - startMin)) * 100;
-  return Math.max(0, Math.min(100, Math.round(pct)));
-}
+// ── Internal helpers ──────────────────────────────────────────────────────────
 
 function dayLengthLabel(minutes: number, tH: string, tM: string): string {
   const h = Math.floor(minutes / 60);
@@ -36,8 +29,7 @@ function dayLengthLabel(minutes: number, tH: string, tM: string): string {
 
 interface StageMarker {
   name: string;
-  startTime: string; // calculated_start_time from ScheduleStageWithTime
-  color: string;     // Tailwind bg-* colour for the block badge
+  startTime: string;
 }
 
 interface SunTimelineProps {
@@ -55,20 +47,18 @@ function SunTimeline({
   sunsetMin,
   stages,
 }: SunTimelineProps) {
-  // Display window: 1 h before dawn → 1 h after dusk
   const displayStart = Math.max(0, civilTwilightBeginMin - 60);
-  const displayEnd = Math.min(1440, civilTwilightEndMin + 60);
+  const displayEnd   = Math.min(1440, civilTwilightEndMin + 60);
 
   function pct(min: number) {
     return timeToPercent(min, displayStart, displayEnd);
   }
 
-  // CSS gradient stop positions (in %)
-  const nightBefore = pct(civilTwilightBeginMin);
-  const sunrise = pct(sunriseMin);
-  const goldenStart = pct(sunsetMin - 60); // 1 h before sunset = start of golden hour
-  const sunsetPct = pct(sunsetMin);
-  const nightAfter = pct(civilTwilightEndMin);
+  const nightBefore  = pct(civilTwilightBeginMin);
+  const sunrise      = pct(sunriseMin);
+  const goldenStart  = pct(sunsetMin - 60);
+  const sunsetPct    = pct(sunsetMin);
+  const nightAfter   = pct(civilTwilightEndMin);
 
   const gradient = [
     `#0f172a 0%`,
@@ -84,18 +74,16 @@ function SunTimeline({
 
   return (
     <div className="space-y-3">
-      {/* Gradient bar */}
       <div className="relative">
         <div
           className="h-6 rounded-full overflow-hidden"
           style={{ background: `linear-gradient(to right, ${gradient})` }}
         />
 
-        {/* Stage markers */}
         {stages.map((stage) => {
           const stageMin = timeToMinutes(stage.startTime);
-          const pos = pct(stageMin);
-          const dayPct = timeToPercent(stageMin, civilTwilightBeginMin, civilTwilightEndMin);
+          const pos      = pct(stageMin);
+          const dayPct   = timeToPercent(stageMin, civilTwilightBeginMin, civilTwilightEndMin);
 
           return (
             <div
@@ -103,9 +91,7 @@ function SunTimeline({
               className="absolute top-0 h-6 flex flex-col items-center group"
               style={{ left: `${pos}%`, transform: 'translateX(-50%)' }}
             >
-              {/* Tick line */}
               <div className="w-0.5 h-full bg-white/80" />
-              {/* Tooltip */}
               <div className="absolute bottom-full mb-1.5 hidden group-hover:flex flex-col items-center pointer-events-none z-10">
                 <div className="bg-gray-900 text-white text-xs rounded-lg px-2 py-1 whitespace-nowrap shadow-lg">
                   <span className="font-medium">{stage.name}</span>
@@ -118,13 +104,12 @@ function SunTimeline({
           );
         })}
 
-        {/* Key time labels */}
         <div className="relative mt-1 h-4">
           {[
             { min: civilTwilightBeginMin, label: minutesToHHMM(civilTwilightBeginMin) },
-            { min: sunriseMin, label: minutesToHHMM(sunriseMin) },
-            { min: sunsetMin, label: minutesToHHMM(sunsetMin) },
-            { min: civilTwilightEndMin, label: minutesToHHMM(civilTwilightEndMin) },
+            { min: sunriseMin,            label: minutesToHHMM(sunriseMin)            },
+            { min: sunsetMin,             label: minutesToHHMM(sunsetMin)             },
+            { min: civilTwilightEndMin,   label: minutesToHHMM(civilTwilightEndMin)   },
           ].map(({ min, label }) => (
             <span
               key={min}
@@ -140,23 +125,7 @@ function SunTimeline({
   );
 }
 
-// ── Light zone label for a given time ─────────────────────────────────────────
-
-function getLightZone(
-  timeMin: number,
-  civilBegin: number,
-  sunrise: number,
-  sunset: number,
-  civilEnd: number,
-): string {
-  if (timeMin < civilBegin || timeMin > civilEnd) return 'night';
-  if (timeMin < sunrise) return 'dawn';
-  if (timeMin > civilEnd - 60 || timeMin >= sunset) return 'dusk';
-  if (timeMin >= sunset - 60) return 'goldenHour';
-  return 'day';
-}
-
-// ── Collapsed pill ─────────────────────────────────────────────────────────────
+// ── Collapsed pill ────────────────────────────────────────────────────────────
 
 interface CollapsedPillProps {
   data: WeatherWidgetData;
@@ -166,8 +135,8 @@ interface CollapsedPillProps {
 
 function CollapsedPill({ data, onExpand, t }: CollapsedPillProps) {
   const { sunTimes, moonPhase, weather } = data;
-  const h = Math.floor(data.sunTimes.dayLengthMinutes / 60);
-  const m = data.sunTimes.dayLengthMinutes % 60;
+  const h   = Math.floor(sunTimes.dayLengthMinutes / 60);
+  const m   = sunTimes.dayLengthMinutes % 60;
   const dayLen = m > 0 ? `${h}h${m}m` : `${h}h`;
 
   return (
@@ -176,29 +145,19 @@ function CollapsedPill({ data, onExpand, t }: CollapsedPillProps) {
       onClick={onExpand}
       className="w-full flex items-center gap-3 px-4 py-2.5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-amber-200 transition-all text-left group"
     >
-      {/* Sun */}
       <span className="text-base" title={`${t('sunrise')} ${sunTimes.sunrise} · ${t('sunset')} ${sunTimes.sunset}`}>
         ☀️
       </span>
       <span className="text-xs text-gray-600 font-medium">{sunTimes.sunset}</span>
       <span className="text-gray-300">·</span>
-
-      {/* Day length */}
       <span className="text-xs text-gray-500">{dayLen}</span>
       <span className="text-gray-300">·</span>
-
-      {/* Moon */}
       <span className="text-base">{moonPhase.emoji}</span>
       <span className="text-xs text-gray-600">{moonPhase.illumination}%</span>
       <span className="text-gray-300">·</span>
-
-      {/* Weather */}
       <span className="text-base">{weather.conditionEmoji}</span>
       <span className="text-xs text-gray-600">{weather.tempMin}–{weather.tempMax}°C</span>
-
       <div className="flex-1" />
-
-      {/* Expand caret */}
       <span className="text-xs text-gray-400 group-hover:text-amber-500 transition-colors flex items-center gap-1">
         {t('expand')}
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,36 +171,16 @@ function CollapsedPill({ data, onExpand, t }: CollapsedPillProps) {
 // ── Main widget ───────────────────────────────────────────────────────────────
 
 export interface WeatherWidgetProps {
-  weatherUrl: string;
+  data: WeatherWidgetData | null;
+  fetchStatus: WeatherFetchStatus;
   blocks: ScheduleBlockWithTimes[];
 }
 
-export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
+export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps) {
   const t = useNamespacedTranslations('weatherWidget');
-  const [data, setData] = useState<WeatherWidgetData | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ok' | 'no-location' | 'error'>('loading');
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    setStatus('loading');
-
-    fetch(weatherUrl)
-      .then(async (res) => {
-        if (cancelled) return;
-        if (res.status === 404) { setStatus('no-location'); return; }
-        if (!res.ok) { setStatus('error'); return; }
-        const json: WeatherWidgetData = await res.json();
-        setData(json);
-        setStatus('ok');
-      })
-      .catch(() => { if (!cancelled) setStatus('error'); });
-
-    return () => { cancelled = true; };
-  }, [weatherUrl]);
-
-  // ── Loading ────────────────────────────────────────────────────────────────
-  if (status === 'loading') {
+  if (fetchStatus === 'loading') {
     return (
       <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-100 rounded-2xl shadow-sm text-xs text-gray-400">
         <div className="w-3.5 h-3.5 border-2 border-amber-300 border-t-amber-500 rounded-full animate-spin" />
@@ -250,8 +189,7 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
     );
   }
 
-  // ── No location / error ────────────────────────────────────────────────────
-  if (status === 'no-location') {
+  if (fetchStatus === 'no-location') {
     return (
       <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 border border-amber-100 rounded-2xl text-xs text-amber-700">
         <span>📍</span>
@@ -260,7 +198,7 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
     );
   }
 
-  if (status === 'error' || !data) {
+  if (fetchStatus === 'error' || !data) {
     return (
       <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-2xl text-xs text-gray-400">
         <span>⚠️</span>
@@ -269,34 +207,25 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
     );
   }
 
-  // ── Collapsed ──────────────────────────────────────────────────────────────
   if (!expanded) {
     return <CollapsedPill data={data} onExpand={() => setExpanded(true)} t={t} />;
   }
 
-  // ── Expanded ───────────────────────────────────────────────────────────────
   const { sunTimes, moonPhase, weather } = data;
+  const { dawnMin, riseMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
 
-  const dawnMin = timeToMinutes(sunTimes.civilTwilightBegin);
-  const riseMin = timeToMinutes(sunTimes.sunrise);
-  const setMin  = timeToMinutes(sunTimes.sunset);
-  const duskMin = timeToMinutes(sunTimes.civilTwilightEnd);
-
-  // Collect stage markers from all blocks
   const stageMarkers: StageMarker[] = blocks.flatMap((block) =>
     block.stages.map((s) => ({
       name: s.name,
       startTime: s.calculated_start_time,
-      color: block.color ?? 'bg-violet-500',
     }))
   );
 
-  const moonPhaseName = t(`moonPhases.${moonPhase.name}`);
+  const moonPhaseName  = t(`moonPhases.${moonPhase.name}`);
   const conditionLabel = t(`conditions.${weather.condition}`);
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50">
         <div className="flex items-center gap-2">
           <span className="text-base">🌤</span>
@@ -316,8 +245,7 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
       </div>
 
       <div className="p-4 space-y-5">
-
-        {/* ── Sun timeline ── */}
+        {/* Sun timeline */}
         <section>
           <div className="flex items-center gap-1.5 mb-3">
             <span className="text-sm">☀️</span>
@@ -337,7 +265,6 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
             stages={stageMarkers}
           />
 
-          {/* Key times grid */}
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
               { label: t('civilDawn'), time: sunTimes.civilTwilightBegin, color: 'text-indigo-500' },
@@ -352,13 +279,12 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
             ))}
           </div>
 
-          {/* Per-stage daylight percentage list */}
           {stageMarkers.length > 0 && (
             <div className="mt-3 space-y-1">
               {stageMarkers.map((stage) => {
                 const stageMin = timeToMinutes(stage.startTime);
-                const dayPct = timeToPercent(stageMin, dawnMin, duskMin);
-                const zone = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
+                const dayPct   = timeToPercent(stageMin, dawnMin, duskMin);
+                const zone     = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
                 const zoneLabel = t(`lightZones.${zone}`);
                 return (
                   <div key={`${stage.name}-${stage.startTime}`} className="flex items-center gap-2 text-xs text-gray-600">
@@ -373,7 +299,7 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
           )}
         </section>
 
-        {/* ── Moon ── */}
+        {/* Moon */}
         <section className="border-t border-gray-50 pt-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{moonPhase.emoji}</span>
@@ -381,7 +307,6 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
               <p className="text-sm font-semibold text-gray-800">{moonPhaseName}</p>
               <p className="text-xs text-gray-500">{moonPhase.illumination}% {t('illumination')}</p>
             </div>
-            {/* Illumination bar */}
             <div className="flex-1 ml-2">
               <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div
@@ -393,7 +318,7 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
           </div>
         </section>
 
-        {/* ── Historical weather ── */}
+        {/* Historical weather */}
         <section className="border-t border-gray-50 pt-4">
           <div className="flex items-center gap-1.5 mb-3">
             <span className="text-sm">🌡</span>
@@ -407,9 +332,7 @@ export function WeatherWidget({ weatherUrl, blocks }: WeatherWidgetProps) {
 
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-gray-50 rounded-xl px-3 py-2">
-              <p className="text-sm font-semibold text-gray-800">
-                {weather.tempMin}–{weather.tempMax}°C
-              </p>
+              <p className="text-sm font-semibold text-gray-800">{weather.tempMin}–{weather.tempMax}°C</p>
               <p className="text-[10px] text-gray-500 mt-0.5">{t('avgTemp')}</p>
             </div>
             <div className="bg-gray-50 rounded-xl px-3 py-2">

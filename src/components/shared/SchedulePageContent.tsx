@@ -31,7 +31,15 @@ import type {
   StageProvider,
 } from '@/types/schedule';
 import { computeScheduleWithTimes } from '@/types/schedule';
-import { WeatherWidget } from '@/components/shared/WeatherWidget';
+import { WeatherWidget, type WeatherFetchStatus } from '@/components/shared/WeatherWidget';
+import type { WeatherWidgetData, SunTimes } from '@/types/astro-weather';
+import {
+  timeToMinutes,
+  timeToPercent,
+  getLightZone,
+  sunTimesInMinutes,
+  LIGHT_ZONE_STYLE,
+} from '@/lib/astro-weather/sun-utils';
 
 // ── API paths ─────────────────────────────────────────────────────────────────
 
@@ -48,6 +56,26 @@ export interface SchedulePageContentProps {
   header: React.ReactNode;
   coupleNames?: string;
   weddingDate?: string;
+}
+
+// ── Sun badge (shown inline on each stage row) ────────────────────────────────
+
+function SunBadge({ time, sunTimes }: { time: string; sunTimes: SunTimes }) {
+  const { dawnMin, riseMin, setMin, duskMin } = sunTimesInMinutes(sunTimes);
+  const stageMin = timeToMinutes(time);
+  const zone     = getLightZone(stageMin, dawnMin, riseMin, setMin, duskMin);
+  const pct      = timeToPercent(stageMin, dawnMin, duskMin);
+  const { emoji, bg, text } = LIGHT_ZONE_STYLE[zone];
+
+  return (
+    <div
+      className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 ${bg} ${text}`}
+      title={`${zone} · ${pct}%`}
+    >
+      <span>{emoji}</span>
+      <span>{pct}%</span>
+    </div>
+  );
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -102,6 +130,7 @@ function SortableStageRow({
   blockColor,
   viewMode,
   providers,
+  sunTimes,
   onProviderChange,
   onUpdate,
   onDelete,
@@ -110,6 +139,7 @@ function SortableStageRow({
   blockColor: string;
   viewMode: 'planner' | 'couple';
   providers: StageProvider[];
+  sunTimes?: SunTimes;
   onProviderChange?: (stageId: string, providerId: string | null) => void;
   onUpdate: (stageId: string, updates: Record<string, unknown>) => void;
   onDelete: (stageId: string) => void;
@@ -247,6 +277,11 @@ function SortableStageRow({
           </p>
         )}
       </div>
+
+      {/* Light zone badge */}
+      {sunTimes && (
+        <SunBadge time={stage.calculated_start_time} sunTimes={sunTimes} />
+      )}
 
       {/* Duration */}
       {editDuration ? (
@@ -389,6 +424,7 @@ function SortableBlockSection({
   viewMode,
   filterPlannerItems = false,
   providers,
+  sunTimes,
   onProviderChange,
   onUpdateStage,
   onDeleteStage,
@@ -400,6 +436,7 @@ function SortableBlockSection({
   viewMode: 'planner' | 'couple';
   filterPlannerItems?: boolean;
   providers: StageProvider[];
+  sunTimes?: SunTimes;
   onProviderChange?: (stageId: string, providerId: string | null) => void;
   onUpdateStage: (stageId: string, updates: Record<string, unknown>) => void;
   onDeleteStage: (stageId: string) => void;
@@ -567,6 +604,7 @@ function SortableBlockSection({
               blockColor={block.color ?? '#6366f1'}
               viewMode={viewMode}
               providers={providers}
+              sunTimes={sunTimes}
               onProviderChange={onProviderChange}
               onUpdate={onUpdateStage}
               onDelete={onDeleteStage}
@@ -637,7 +675,7 @@ export function SchedulePageContent({
   apiPaths,
   isPlanner = false,
   header,
-  coupleNames: _coupleNames,
+  coupleNames,
   weddingDate,
 }: SchedulePageContentProps) {
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
@@ -654,6 +692,8 @@ export function SchedulePageContent({
   const [providers, setProviders] = useState<StageProvider[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [activeDragType, setActiveDragType] = useState<'block' | 'stage' | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherWidgetData | null>(null);
+  const [weatherStatus, setWeatherStatus] = useState<WeatherFetchStatus>('loading');
 
   const dragOriginBlockId = useRef<string | null>(null);
 
@@ -686,6 +726,27 @@ export function SchedulePageContent({
       .then((json) => setProviders(json.data ?? []))
       .catch(() => {});
   }, [apiPaths.providersUrl]);
+
+  // ── Fetch weather + sun times ────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!apiPaths.weatherUrl) { setWeatherStatus('no-location'); return; }
+    let cancelled = false;
+    setWeatherStatus('loading');
+
+    fetch(apiPaths.weatherUrl)
+      .then(async (res) => {
+        if (cancelled) return;
+        if (res.status === 404) { setWeatherStatus('no-location'); return; }
+        if (!res.ok) { setWeatherStatus('error'); return; }
+        const json: WeatherWidgetData = await res.json();
+        setWeatherData(json);
+        setWeatherStatus('ok');
+      })
+      .catch(() => { if (!cancelled) setWeatherStatus('error'); });
+
+    return () => { cancelled = true; };
+  }, [apiPaths.weatherUrl]);
 
   const blocksWithTimes: ScheduleBlockWithTimes[] = computeScheduleWithTimes(blocks, startTime);
 
@@ -1123,7 +1184,8 @@ export function SchedulePageContent({
           {/* Weather & daylight widget */}
           {apiPaths.weatherUrl && (
             <WeatherWidget
-              weatherUrl={apiPaths.weatherUrl}
+              data={weatherData}
+              fetchStatus={weatherStatus}
               blocks={blocksWithTimes}
             />
           )}
@@ -1243,6 +1305,7 @@ export function SchedulePageContent({
                       viewMode={effectiveViewMode}
                       filterPlannerItems={!isPlanner}
                       providers={providers}
+                      sunTimes={weatherData?.sunTimes}
                       onProviderChange={canAssignProviders ? handleProviderChange : undefined}
                       onUpdateStage={handleUpdateStage}
                       onDeleteStage={handleDeleteStage}

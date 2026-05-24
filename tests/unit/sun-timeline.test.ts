@@ -1,10 +1,10 @@
 /**
  * Unit Tests - Sun Timeline Utilities
  *
- * Tests the time/percentage helper functions exported from WeatherWidget.
+ * Tests the time/percentage helpers and getLightZone from sun-utils.
  */
 
-import { timeToMinutes, minutesToHHMM, timeToPercent } from '@/components/shared/WeatherWidget';
+import { timeToMinutes, minutesToHHMM, timeToPercent, getLightZone } from '@/lib/astro-weather/sun-utils';
 
 // ── timeToMinutes ─────────────────────────────────────────────────────────────
 
@@ -103,5 +103,47 @@ describe('timeToPercent', () => {
   it('produces integer output', () => {
     const pct = timeToPercent(900, 375, 1263);
     expect(Number.isInteger(pct)).toBe(true);
+  });
+});
+
+// ── getLightZone ──────────────────────────────────────────────────────────────
+// Reference window: dawn=375 (6:15), rise=390 (6:30), set=1230 (20:30), dusk=1263 (21:03)
+
+const DAWN = 375;  // 6:15
+const RISE = 390;  // 6:30
+const SET  = 1230; // 20:30
+const DUSK = 1263; // 21:03
+
+describe('getLightZone', () => {
+  it('returns night before civil dawn', () => {
+    expect(getLightZone(300, DAWN, RISE, SET, DUSK)).toBe('night'); // 5:00
+  });
+
+  it('returns night after civil dusk', () => {
+    expect(getLightZone(1320, DAWN, RISE, SET, DUSK)).toBe('night'); // 22:00
+  });
+
+  it('returns dawn between civil dawn and sunrise', () => {
+    expect(getLightZone(380, DAWN, RISE, SET, DUSK)).toBe('dawn'); // 6:20
+  });
+
+  it('returns day during full daylight', () => {
+    expect(getLightZone(720, DAWN, RISE, SET, DUSK)).toBe('day'); // 12:00
+  });
+
+  it('returns goldenHour in the hour before sunset', () => {
+    expect(getLightZone(1185, DAWN, RISE, SET, DUSK)).toBe('goldenHour'); // 19:45 (45 min before 20:30)
+  });
+
+  it('returns dusk at exact sunset time', () => {
+    expect(getLightZone(SET, DAWN, RISE, SET, DUSK)).toBe('dusk');
+  });
+
+  it('returns dusk between sunset and civil dusk', () => {
+    expect(getLightZone(1245, DAWN, RISE, SET, DUSK)).toBe('dusk'); // 20:45
+  });
+
+  it('returns day just after sunrise', () => {
+    expect(getLightZone(RISE + 1, DAWN, RISE, SET, DUSK)).toBe('day');
   });
 });
