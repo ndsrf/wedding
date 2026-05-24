@@ -31,6 +31,7 @@ import type {
   StageProvider,
 } from '@/types/schedule';
 import { computeScheduleWithTimes } from '@/types/schedule';
+import { WeatherWidget } from '@/components/shared/WeatherWidget';
 
 // ── API paths ─────────────────────────────────────────────────────────────────
 
@@ -38,6 +39,7 @@ export interface ScheduleApiPaths {
   schedule: string;
   schedulePdf: string;
   providersUrl?: string;
+  weatherUrl?: string;
 }
 
 export interface SchedulePageContentProps {
@@ -635,7 +637,7 @@ export function SchedulePageContent({
   apiPaths,
   isPlanner = false,
   header,
-  coupleNames,
+  coupleNames: _coupleNames,
   weddingDate,
 }: SchedulePageContentProps) {
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
@@ -1118,6 +1120,14 @@ export function SchedulePageContent({
       {header}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
+          {/* Weather & daylight widget */}
+          {apiPaths.weatherUrl && (
+            <WeatherWidget
+              weatherUrl={apiPaths.weatherUrl}
+              blocks={blocksWithTimes}
+            />
+          )}
+
           {/* Controls bar */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-3">

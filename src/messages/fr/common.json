@@ -3410,5 +3410,54 @@
       "close": "Fermer"
     },
     "helpLabel": "Aide"
+  },
+  "weatherWidget": {
+    "title": "Lumière & météo",
+    "sunrise": "Lever du soleil",
+    "sunset": "Coucher du soleil",
+    "civilDawn": "Aube civile",
+    "civilDusk": "Crépuscule civil",
+    "dayLength": "Durée du jour",
+    "hours": "h",
+    "minutes": "min",
+    "moonPhase": "Phase lunaire",
+    "illumination": "Illumination",
+    "historicalWeather": "Météo historique",
+    "avgTemp": "Température",
+    "precipitation": "Précipitations",
+    "referenceYear": "Données de l'année {year}",
+    "loading": "Chargement...",
+    "error": "Impossible de charger les données météo",
+    "noLocation": "Configurez le lieu principal pour voir la météo",
+    "expand": "Voir la lumière et la météo",
+    "collapse": "Réduire",
+    "lightZones": {
+      "night": "Nuit",
+      "dawn": "Aube",
+      "day": "Jour",
+      "goldenHour": "Heure dorée",
+      "dusk": "Crépuscule"
+    },
+    "stageAt": "{time} — {pct}% de la journée",
+    "moonPhases": {
+      "newMoon": "Nouvelle lune",
+      "waxingCrescent": "Premier croissant",
+      "firstQuarter": "Premier quartier",
+      "waxingGibbous": "Gibbeuse croissante",
+      "fullMoon": "Pleine lune",
+      "waningGibbous": "Gibbeuse décroissante",
+      "lastQuarter": "Dernier quartier",
+      "waningCrescent": "Dernier croissant"
+    },
+    "conditions": {
+      "sunny": "Ciel dégagé",
+      "partlyCloudy": "Partiellement nuageux",
+      "cloudy": "Nuageux",
+      "drizzle": "Bruine",
+      "rainy": "Pluie",
+      "stormy": "Orage",
+      "snowy": "Neige",
+      "foggy": "Brouillard"
+    }
   }
 }

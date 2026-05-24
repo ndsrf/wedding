@@ -3410,5 +3410,54 @@
       "close": "Schließen"
     },
     "helpLabel": "Hilfe"
+  },
+  "weatherWidget": {
+    "title": "Licht & Wetter",
+    "sunrise": "Sonnenaufgang",
+    "sunset": "Sonnenuntergang",
+    "civilDawn": "Bürgerliche Morgendämmerung",
+    "civilDusk": "Bürgerliche Abenddämmerung",
+    "dayLength": "Tageslänge",
+    "hours": "Std",
+    "minutes": "Min",
+    "moonPhase": "Mondphase",
+    "illumination": "Beleuchtung",
+    "historicalWeather": "Historisches Wetter",
+    "avgTemp": "Temperatur",
+    "precipitation": "Niederschlag",
+    "referenceYear": "Daten aus dem Jahr {year}",
+    "loading": "Lade Daten...",
+    "error": "Wetterdaten konnten nicht geladen werden",
+    "noLocation": "Legen Sie den Veranstaltungsort fest, um Wetterdaten anzuzeigen",
+    "expand": "Tageslicht & Wetter anzeigen",
+    "collapse": "Einklappen",
+    "lightZones": {
+      "night": "Nacht",
+      "dawn": "Morgengrauen",
+      "day": "Tag",
+      "goldenHour": "Goldene Stunde",
+      "dusk": "Dämmerung"
+    },
+    "stageAt": "{time} — {pct}% des Tages",
+    "moonPhases": {
+      "newMoon": "Neumond",
+      "waxingCrescent": "Zunehmende Sichel",
+      "firstQuarter": "Erstes Viertel",
+      "waxingGibbous": "Zunehmender Mond",
+      "fullMoon": "Vollmond",
+      "waningGibbous": "Abnehmender Mond",
+      "lastQuarter": "Letztes Viertel",
+      "waningCrescent": "Abnehmende Sichel"
+    },
+    "conditions": {
+      "sunny": "Klarer Himmel",
+      "partlyCloudy": "Teils bewölkt",
+      "cloudy": "Bewölkt",
+      "drizzle": "Nieselregen",
+      "rainy": "Regen",
+      "stormy": "Gewitter",
+      "snowy": "Schnee",
+      "foggy": "Nebel"
+    }
   }
 }

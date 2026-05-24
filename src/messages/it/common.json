@@ -3410,5 +3410,54 @@
       "close": "Chiudi"
     },
     "helpLabel": "Aiuto"
+  },
+  "weatherWidget": {
+    "title": "Luce e meteo",
+    "sunrise": "Alba",
+    "sunset": "Tramonto",
+    "civilDawn": "Crepuscolo mattutino",
+    "civilDusk": "Crepuscolo serale",
+    "dayLength": "Durata del giorno",
+    "hours": "h",
+    "minutes": "min",
+    "moonPhase": "Fase lunare",
+    "illumination": "Illuminazione",
+    "historicalWeather": "Meteo storico",
+    "avgTemp": "Temperatura",
+    "precipitation": "Precipitazioni",
+    "referenceYear": "Dati dell'anno {year}",
+    "loading": "Caricamento...",
+    "error": "Impossibile caricare i dati meteo",
+    "noLocation": "Configura la sede principale per vedere il meteo",
+    "expand": "Vedere luce e meteo",
+    "collapse": "Comprimi",
+    "lightZones": {
+      "night": "Notte",
+      "dawn": "Alba",
+      "day": "Giorno",
+      "goldenHour": "Ora d'oro",
+      "dusk": "Tramonto"
+    },
+    "stageAt": "{time} — {pct}% della giornata",
+    "moonPhases": {
+      "newMoon": "Luna nuova",
+      "waxingCrescent": "Luna crescente",
+      "firstQuarter": "Primo quarto",
+      "waxingGibbous": "Gibbosa crescente",
+      "fullMoon": "Luna piena",
+      "waningGibbous": "Gibbosa calante",
+      "lastQuarter": "Ultimo quarto",
+      "waningCrescent": "Luna calante"
+    },
+    "conditions": {
+      "sunny": "Sereno",
+      "partlyCloudy": "Parzialmente nuvoloso",
+      "cloudy": "Nuvoloso",
+      "drizzle": "Pioggerella",
+      "rainy": "Pioggia",
+      "stormy": "Temporale",
+      "snowy": "Neve",
+      "foggy": "Nebbia"
+    }
   }
 }

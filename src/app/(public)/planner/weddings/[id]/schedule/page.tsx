@@ -22,6 +22,7 @@ export default function PlannerWeddingSchedulePage() {
         schedule: `/api/planner/weddings/${weddingId}/schedule`,
         schedulePdf: `/api/planner/weddings/${weddingId}/schedule/pdf`,
         providersUrl: `/api/weddings/${weddingId}/providers`,
+        weatherUrl: `/api/planner/weddings/${weddingId}/schedule/weather`,
       }}
       isPlanner={true}
       header={
