@@ -353,6 +353,39 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
     }
   }
 
+  // Add sample AI disruption-alert tasks (simulating what the AI generates on real weddings)
+  const firstSection = await client.checklistSection.findFirst({
+    where: { wedding_id: wedding.id, template_id: null },
+    orderBy: { order: 'asc' },
+    select: { id: true },
+  });
+  const aiAlerts = [
+    {
+      title: '[AI] Alta demanda en temporada de bodas',
+      description: 'Septiembre es temporada alta. Reserva transporte y catering con antelación para evitar subidas de precio.',
+    },
+    {
+      title: '[AI] Calor extremo en verano',
+      description: 'Las temperaturas pueden superar 35 °C. Prevé zonas de sombra, bebidas frías y ventilación para los invitados.',
+    },
+    {
+      title: '[AI] Festivos locales en la zona',
+      description: 'Verifica que no haya fiestas patronales cercanas que puedan afectar al tráfico o la disponibilidad de proveedores.',
+    },
+  ];
+  for (let i = 0; i < aiAlerts.length; i++) {
+    await client.checklistTask.create({
+      data: {
+        wedding_id: wedding.id,
+        section_id: firstSection?.id ?? null,
+        title: aiAlerts[i].title,
+        description: aiAlerts[i].description,
+        assigned_to: TaskAssignment.COUPLE,
+        order: i,
+      },
+    });
+  }
+
   // Set due date for planner contract task
   const plannerTask = await client.checklistTask.findFirst({
     where: { wedding_id: wedding.id, title: 'Firmar contrato con Wedding Planner' },

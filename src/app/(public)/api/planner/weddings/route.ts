@@ -449,35 +449,47 @@ export async function POST(request: NextRequest) {
       // This is not critical - planner can still manually create checklist if needed
     }
 
-    // Generate AI disruption alerts and add them to the couple's checklist
-    try {
-      const alerts = await generateDisruptionAlerts({
-        coupleNames: wedding.couple_names,
-        weddingDate: validatedData.wedding_date,
-        location: validatedData.location,
-      });
+    // Generate AI disruption alerts and add them to the couple's checklist.
+    // Skip for the shared demo planner to avoid unnecessary AI calls on seeded data.
+    const isDemoPlanner = plannerId === (process.env.DEMO_PLANNER_ID || 'demo-planner-id');
+    if (!isDemoPlanner) {
+      try {
+        const alerts = await generateDisruptionAlerts({
+          coupleNames: wedding.couple_names,
+          weddingDate: validatedData.wedding_date,
+          location: validatedData.location,
+          language: validatedData.default_language,
+        });
 
-      if (alerts && alerts.length > 0) {
-        await Promise.all(
-          alerts.map((alert, index) =>
-            createTask({
-              wedding_id: wedding.id,
-              section_id: null,
-              title: `[AI] ${alert.title}`,
-              description: alert.description,
-              assigned_to: 'COUPLE',
-              due_date: null,
-              status: 'PENDING',
-              completed: false,
-              order: index,
-            })
-          )
-        );
-        console.log(`[DISRUPTION_ALERTS] Added ${alerts.length} AI alerts to wedding ${wedding.id}`);
+        if (alerts && alerts.length > 0) {
+          // Place alerts in the first checklist section so they are visible, not orphaned.
+          const firstSection = await prisma.checklistSection.findFirst({
+            where: { wedding_id: wedding.id, template_id: null },
+            orderBy: { order: 'asc' },
+            select: { id: true },
+          });
+
+          await Promise.all(
+            alerts.map((alert, index) =>
+              createTask({
+                wedding_id: wedding.id,
+                section_id: firstSection?.id ?? null,
+                title: `[AI] ${alert.title}`,
+                description: alert.description,
+                assigned_to: 'COUPLE',
+                due_date: null,
+                status: 'PENDING',
+                completed: false,
+                order: index,
+              })
+            )
+          );
+          console.log(`[DISRUPTION_ALERTS] Added ${alerts.length} AI alerts to wedding ${wedding.id}`);
+        }
+      } catch (error) {
+        console.error('Failed to generate disruption alerts for wedding:', error);
+        // Non-critical — wedding creation continues regardless
       }
-    } catch (error) {
-      console.error('Failed to generate disruption alerts for wedding:', error);
-      // Non-critical — wedding creation continues regardless
     }
 
     await Promise.all([

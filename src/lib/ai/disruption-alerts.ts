@@ -14,17 +14,29 @@ export interface DisruptionAlert {
   description: string;
 }
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  ES: 'Spanish',
+  EN: 'English',
+  FR: 'French',
+  IT: 'Italian',
+  DE: 'German',
+};
+
 export interface WeddingAlertContext {
   coupleNames: string;
   weddingDate: string; // ISO date YYYY-MM-DD
   location?: string | null;
+  language?: string | null; // Language enum: ES | EN | FR | IT | DE
 }
 
 function buildPrompt(ctx: WeddingAlertContext): string {
   const date = new Date(ctx.weddingDate);
   const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const responseLang = (ctx.language && LANGUAGE_NAMES[ctx.language]) || 'English';
 
   return `You are an expert wedding planner. Given the wedding details below, identify the 3 most important potential disruptions or risks the couple and planner should be aware of and act on proactively.
+
+LANGUAGE: Write all text in ${responseLang}.
 
 Wedding details:
 - Couple: ${ctx.coupleNames}
@@ -36,8 +48,8 @@ Consider: local public holidays or festivals that affect vendor pricing/availabi
 Return ONLY a valid JSON array with exactly 3 objects — no markdown, no extra text:
 [
   {
-    "title": "Short risk title, max 80 characters",
-    "description": "1-2 sentences of actionable advice. Max 200 characters."
+    "title": "Short risk title in ${responseLang}, max 80 characters",
+    "description": "1-2 sentences of actionable advice in ${responseLang}. Max 200 characters."
   }
 ]`;
 }
