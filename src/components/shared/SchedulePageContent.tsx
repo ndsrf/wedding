@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNamespacedTranslations } from '@/lib/i18n/client';
+import { useNamespacedTranslations, useTranslations } from '@/lib/i18n/client';
 import { ItineraryTimeline, type ItineraryStepItem } from '@/components/shared/ItineraryTimeline';
 import {
   DndContext,
@@ -700,6 +700,7 @@ export function SchedulePageContent({
   const [weatherData, setWeatherData] = useState<WeatherWidgetData | null>(null);
   const [weatherStatus, setWeatherStatus] = useState<WeatherFetchStatus>('loading');
   const [itineraryOpen, setItineraryOpen] = useState(false);
+  const t = useTranslations();
 
   const dragOriginBlockId = useRef<string | null>(null);
 
@@ -1200,7 +1201,7 @@ export function SchedulePageContent({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
-                  Itinerario ({itineraryItems.length})
+                  {t('planner.weddings.itinerary.title')} ({itineraryItems.length})
                 </span>
                 <svg
                   className={`h-4 w-4 text-gray-400 transition-transform ${itineraryOpen ? 'rotate-180' : ''}`}

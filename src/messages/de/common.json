@@ -796,7 +796,8 @@
       "confirmRestore": "Diese Hochzeit wiederherstellen? Administratoren erhalten wieder Zugriff.",
       "restoreSuccess": "Hochzeit erfolgreich wiederhergestellt",
       "itinerary": {
-        "title": "Ablauf",
+        "title": "Offizieller Ablauf",
+        "readOnlyMessage": "Diese Informationen können nur von Ihrem Wedding Planner geändert werden.",
         "viewOnMaps": "Auf Google Maps anzeigen →",
         "addStop": "Station hinzufügen",
         "noItems": "Noch keine Ablaufpunkte vorhanden.",
@@ -3360,7 +3361,7 @@
       "description": "Klicken Sie auf die Schaltfläche Bearbeiten, um die wichtigsten Details dieser Hochzeit zu aktualisieren: Datum, Ort, Namen des Paares, Dresscode und mehr."
     },
     "itinerary": {
-      "title": "Hochzeitsablauf",
+      "title": "Offizieller Hochzeitsablauf",
       "description": "Hier können Sie den vollständigen Tagesablauf der Hochzeit mit allen Ereignissen und ihren Orten sehen. Bearbeiten Sie ihn, um Zeremonien, Empfänge und andere Veranstaltungen hinzuzufügen."
     },
     "guestList": {

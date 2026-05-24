@@ -29,7 +29,7 @@ export function ItineraryTimeline({ items, showReadOnlyToast }: ItineraryTimelin
   if (sorted.length === 0) return null;
 
   const handleItemClick = showReadOnlyToast
-    ? () => showToast('Esta información solo puede ser modificada por tu wedding planner.', 'info')
+    ? () => showToast(t('planner.weddings.itinerary.readOnlyMessage'), 'info')
     : undefined;
 
   return (

@@ -796,7 +796,8 @@
       "confirmRestore": "Ripristinare questo matrimonio? Gli amministratori recupereranno l'accesso.",
       "restoreSuccess": "Matrimonio ripristinato con successo",
       "itinerary": {
-        "title": "Itinerario",
+        "title": "Itinerario Ufficiale",
+        "readOnlyMessage": "Queste informazioni possono essere modificate solo dal tuo wedding planner.",
         "viewOnMaps": "Visualizza su Google Maps →",
         "addStop": "Aggiungi tappa",
         "noItems": "Nessun elemento dell'itinerario ancora.",
@@ -3360,7 +3361,7 @@
       "description": "Clicca il pulsante Modifica per aggiornare i dettagli principali di questo matrimonio: data, luogo, nomi della coppia, dress code e altro ancora."
     },
     "itinerary": {
-      "title": "Programma del Matrimonio",
+      "title": "Programma Ufficiale del Matrimonio",
       "description": "Qui puoi vedere il programma completo della giornata del matrimonio con tutti gli eventi e le loro location. Modificalo per aggiungere cerimonie, ricevimenti e altri eventi."
     },
     "guestList": {
