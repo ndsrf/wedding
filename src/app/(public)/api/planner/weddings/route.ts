@@ -12,6 +12,8 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
+import { generateDisruptionAlerts } from '@/lib/ai/disruption-alerts';
+import { createTask } from '@/lib/checklist/crud';
 import { ensureWeddingInitials } from '@/lib/short-url';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import type {
@@ -445,6 +447,75 @@ export async function POST(request: NextRequest) {
       // Log error but don't fail wedding creation
       console.error('Failed to copy checklist template to wedding:', error);
       // This is not critical - planner can still manually create checklist if needed
+    }
+
+    // Generate AI disruption alerts and add them to the couple's checklist.
+    // Skip for the shared demo planner to avoid unnecessary AI calls on seeded data.
+    const isDemoPlanner = plannerId === (process.env.DEMO_PLANNER_ID || 'demo-planner-id');
+    if (!isDemoPlanner) {
+      try {
+        // Resolve the best available location string for the AI.
+        // Prefer the linked Location record (name + address) over the free-text field,
+        // since users typically select a location from the dropdown (setting main_event_location_id)
+        // and leave the plain text field empty.
+        let resolvedLocation: string | null = validatedData.location ?? null;
+        if (wedding.main_event_location_id) {
+          const loc = await prisma.location.findUnique({
+            where: { id: wedding.main_event_location_id },
+            select: { name: true, address: true },
+          });
+          if (loc) {
+            resolvedLocation = [loc.name, loc.address].filter(Boolean).join(', ');
+          }
+        }
+
+        const alerts = await generateDisruptionAlerts({
+          coupleNames: wedding.couple_names,
+          weddingDate: validatedData.wedding_date,
+          location: resolvedLocation,
+          language: validatedData.default_language,
+        });
+
+        if (alerts && alerts.length > 0) {
+          // Place alerts in the first checklist section so they are visible, not orphaned.
+          const firstSection = await prisma.checklistSection.findFirst({
+            where: { wedding_id: wedding.id, template_id: null },
+            orderBy: { order: 'asc' },
+            select: { id: true },
+          });
+
+          // Find the current max order in that section to append without collisions.
+          const maxOrderRow = await prisma.checklistTask.aggregate({
+            where: {
+              wedding_id: wedding.id,
+              template_id: null,
+              section_id: firstSection?.id ?? null,
+            },
+            _max: { order: true },
+          });
+          const nextOrder = (maxOrderRow._max.order ?? -1) + 1;
+
+          await Promise.all(
+            alerts.map((alert, index) =>
+              createTask({
+                wedding_id: wedding.id,
+                section_id: firstSection?.id ?? null,
+                title: `[AI] ${alert.title}`,
+                description: alert.description,
+                assigned_to: 'COUPLE',
+                due_date: null,
+                status: 'PENDING',
+                completed: false,
+                order: nextOrder + index,
+              })
+            )
+          );
+          console.log(`[DISRUPTION_ALERTS] Added ${alerts.length} AI alerts to wedding ${wedding.id}`);
+        }
+      } catch (error) {
+        console.error('Failed to generate disruption alerts for wedding:', error);
+        // Non-critical — wedding creation continues regardless
+      }
     }
 
     await Promise.all([
