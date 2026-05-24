@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { SchedulePageContent } from '@/components/shared/SchedulePageContent';
+import type { ItineraryStepItem } from '@/components/shared/ItineraryTimeline';
 import PrivateHeader from '@/components/PrivateHeader';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 import { getLanguageFromRequest } from '@/lib/i18n/server';
@@ -35,9 +36,33 @@ export default async function AdminSchedulePage() {
       couple_names: true,
       wedding_date: true,
       main_event_location: { select: { id: true } },
+      main_event_location_id: true,
       location: true,
+      itinerary_items: {
+        orderBy: { date_time: 'asc' },
+        select: {
+          id: true,
+          date_time: true,
+          item_type: true,
+          notes: true,
+          location_id: true,
+          location: { select: { name: true, google_maps_url: true } },
+        },
+      },
     },
   });
+
+  const itineraryItems: ItineraryStepItem[] = wedding
+    ? wedding.itinerary_items.map((item) => ({
+        id: item.id,
+        locationName: item.location.name,
+        dateTime: item.date_time.toISOString(),
+        itemType: item.item_type ?? 'EVENT',
+        isMain: item.location_id === wedding.main_event_location_id,
+        googleMapsUrl: item.location.google_maps_url,
+        notes: item.notes,
+      }))
+    : [];
 
   const language = await getLanguageFromRequest();
   const weddingDateStr = wedding?.wedding_date
@@ -57,6 +82,7 @@ export default async function AdminSchedulePage() {
       isPlanner={false}
       coupleNames={wedding?.couple_names ?? undefined}
       weddingDate={weddingDateStr}
+      itineraryItems={itineraryItems.length > 0 ? itineraryItems : undefined}
       header={
         <div>
           <PrivateHeader backUrl="/admin" />

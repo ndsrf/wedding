@@ -796,7 +796,8 @@
       "confirmRestore": "Restaurer ce mariage? Les administrateurs récupéreront l'accès.",
       "restoreSuccess": "Mariage restauré avec succès",
       "itinerary": {
-        "title": "Itinéraire",
+        "title": "Itinéraire Officiel",
+        "readOnlyMessage": "Ces informations ne peuvent être modifiées que par votre wedding planner.",
         "viewOnMaps": "Voir sur Google Maps →",
         "addStop": "Ajouter une étape",
         "noItems": "Aucun élément d'itinéraire pour le moment.",
@@ -3360,7 +3361,7 @@
       "description": "Cliquez sur le bouton Modifier pour mettre à jour les détails principaux de ce mariage : date, lieu, noms du couple, code vestimentaire et plus encore."
     },
     "itinerary": {
-      "title": "Itinéraire du Mariage",
+      "title": "Itinéraire Officiel du Mariage",
       "description": "Ici vous pouvez voir l'itinéraire complet de la journée du mariage avec tous les événements et leurs lieux. Modifiez-le pour ajouter des cérémonies, des réceptions et d'autres événements."
     },
     "guestList": {

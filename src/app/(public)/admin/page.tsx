@@ -274,6 +274,7 @@ export default async function AdminDashboardPage() {
                 googleMapsUrl: item.google_maps_url,
                 notes: item.notes,
               }))}
+              showReadOnlyToast
             />
           </div>
         </div>

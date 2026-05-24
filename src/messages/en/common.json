@@ -826,7 +826,8 @@
       "confirmRestore": "Restore this wedding? Admins will regain access.",
       "restoreSuccess": "Wedding restored successfully",
       "itinerary": {
-        "title": "Itinerary",
+        "title": "Official Itinerary",
+        "readOnlyMessage": "This information can only be changed by your wedding planner.",
         "viewOnMaps": "View on Google Maps →",
         "addStop": "Add stop",
         "noItems": "No itinerary items yet.",
@@ -3459,7 +3460,7 @@
       "description": "Click the Edit button to update the main details of this wedding: date, location, couple names, dress code, and more."
     },
     "itinerary": {
-      "title": "Wedding Itinerary",
+      "title": "Official Wedding Itinerary",
       "description": "Here you can see the full wedding day itinerary with all events and their locations. Edit it to add ceremonies, receptions, and other events."
     },
     "guestList": {

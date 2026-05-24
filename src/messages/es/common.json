@@ -822,7 +822,8 @@
       "confirmRestore": "¿Restaurar esta boda? Los administradores recuperarán el acceso.",
       "restoreSuccess": "Boda restaurada exitosamente",
       "itinerary": {
-        "title": "Itinerario",
+        "title": "Itinerario Oficial",
+        "readOnlyMessage": "Esta información solo puede ser modificada por tu wedding planner.",
         "viewOnMaps": "Ver en Google Maps →",
         "addStop": "Añadir parada",
         "noItems": "Aún no hay elementos en el itinerario.",
@@ -3435,7 +3436,7 @@
       "description": "Pulsa el botón Editar para actualizar los datos principales de esta boda: fecha, lugar, nombres de la pareja, código de vestimenta y más."
     },
     "itinerary": {
-      "title": "Itinerario de la Boda",
+      "title": "Itinerario Oficial de la Boda",
       "description": "Aquí puedes ver el itinerario completo del día de la boda con todos los eventos y sus ubicaciones. Edítalo para añadir ceremonias, recepciones y otros eventos."
     },
     "guestList": {
