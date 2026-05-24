@@ -484,6 +484,17 @@ export async function POST(request: NextRequest) {
             select: { id: true },
           });
 
+          // Find the current max order in that section to append without collisions.
+          const maxOrderRow = await prisma.checklistTask.aggregate({
+            where: {
+              wedding_id: wedding.id,
+              template_id: null,
+              section_id: firstSection?.id ?? null,
+            },
+            _max: { order: true },
+          });
+          const nextOrder = (maxOrderRow._max.order ?? -1) + 1;
+
           await Promise.all(
             alerts.map((alert, index) =>
               createTask({
@@ -495,7 +506,7 @@ export async function POST(request: NextRequest) {
                 due_date: null,
                 status: 'PENDING',
                 completed: false,
-                order: index,
+                order: nextOrder + index,
               })
             )
           );

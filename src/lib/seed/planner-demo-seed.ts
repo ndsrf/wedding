@@ -359,6 +359,12 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
     orderBy: { order: 'asc' },
     select: { id: true },
   });
+  // Compute max order in the section so AI tasks are appended without collisions.
+  const maxOrderRow = await client.checklistTask.aggregate({
+    where: { wedding_id: wedding.id, template_id: null, section_id: firstSection?.id ?? null },
+    _max: { order: true },
+  });
+  let nextOrder = (maxOrderRow._max.order ?? -1) + 1;
   const aiAlerts = [
     {
       title: '[AI] Alta demanda en temporada de bodas',
@@ -373,15 +379,15 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       description: 'Verifica que no haya fiestas patronales cercanas que puedan afectar al tráfico o la disponibilidad de proveedores.',
     },
   ];
-  for (let i = 0; i < aiAlerts.length; i++) {
+  for (const alert of aiAlerts) {
     await client.checklistTask.create({
       data: {
         wedding_id: wedding.id,
         section_id: firstSection?.id ?? null,
-        title: aiAlerts[i].title,
-        description: aiAlerts[i].description,
+        title: alert.title,
+        description: alert.description,
         assigned_to: TaskAssignment.COUPLE,
-        order: i,
+        order: nextOrder++,
       },
     });
   }
