@@ -43,8 +43,8 @@ export async function GET() {
 
     return NextResponse.json(data);
   } catch (err) {
-    const msg = (err as Error).message ?? '';
-    if (msg.includes('Unauthorized') || msg.includes('Forbidden')) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    if (msg.toLowerCase().includes('unauthorized') || msg.toLowerCase().includes('forbidden')) {
       return NextResponse.json({ error: msg }, { status: 401 });
     }
     console.error('[schedule weather admin GET]', err);
