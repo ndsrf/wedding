@@ -36,11 +36,16 @@ const LANGUAGE_NAMES: Record<string, string> = {
 const alertsSchema = z.object({
   alerts: z.array(
     z.object({
-      title: z.string().max(80),
-      description: z.string().max(200),
+      title: z.string(),
+      description: z.string(),
     })
   ).length(3),
 });
+
+// The stored title is "[AI] " + title, which must fit within the 200-char DB limit.
+const TITLE_MAX = 195;
+// Description DB limit is 2000 chars; a generous ceiling that lets sentences complete naturally.
+const DESCRIPTION_MAX = 500;
 
 /**
  * Generate 3 disruption-risk alerts for a wedding based on its location and date.
@@ -73,12 +78,14 @@ Wedding details:
 - Date: ${dateStr}
 - Location: ${ctx.location || 'Not specified'}
 
-Consider: local public holidays or festivals that affect vendor pricing/availability, seasonal weather risks, major local events causing traffic or accommodation shortages, transport price surges (e.g. Christmas, Easter), school holiday periods, seasonal demand spikes, etc.`,
+Consider: local public holidays or festivals that affect vendor pricing/availability, seasonal weather risks, major local events causing traffic or accommodation shortages, transport price surges (e.g. Christmas, Easter), school holiday periods, seasonal demand spikes, etc.
+
+Keep each title short (a few words). Keep each description to 1-2 complete sentences.`,
     });
 
     return object.alerts.map((a) => ({
-      title: a.title,
-      description: a.description,
+      title: a.title.slice(0, TITLE_MAX),
+      description: a.description.slice(0, DESCRIPTION_MAX),
     }));
   } catch (error) {
     console.error('[DISRUPTION_ALERTS] Failed:', error);
