@@ -1211,7 +1211,7 @@ export function SchedulePageContent({
                 </svg>
               </button>
               {itineraryOpen && (
-                <div className="px-4 pb-4 border-t border-gray-50">
+                <div id="itinerary-section-content" className="px-4 pb-4 border-t border-gray-50">
                   <div className="pt-3">
                     <ItineraryTimeline
                       items={itineraryItems}
