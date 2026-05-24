@@ -454,10 +454,25 @@ export async function POST(request: NextRequest) {
     const isDemoPlanner = plannerId === (process.env.DEMO_PLANNER_ID || 'demo-planner-id');
     if (!isDemoPlanner) {
       try {
+        // Resolve the best available location string for the AI.
+        // Prefer the linked Location record (name + address) over the free-text field,
+        // since users typically select a location from the dropdown (setting main_event_location_id)
+        // and leave the plain text field empty.
+        let resolvedLocation: string | null = validatedData.location ?? null;
+        if (wedding.main_event_location_id) {
+          const loc = await prisma.location.findUnique({
+            where: { id: wedding.main_event_location_id },
+            select: { name: true, address: true },
+          });
+          if (loc) {
+            resolvedLocation = [loc.name, loc.address].filter(Boolean).join(', ');
+          }
+        }
+
         const alerts = await generateDisruptionAlerts({
           coupleNames: wedding.couple_names,
           weddingDate: validatedData.wedding_date,
-          location: validatedData.location,
+          location: resolvedLocation,
           language: validatedData.default_language,
         });
 
