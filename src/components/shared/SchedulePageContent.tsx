@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNamespacedTranslations } from '@/lib/i18n/client';
-import { useToast } from '@/components/ui/Toast';
 import { ItineraryTimeline, type ItineraryStepItem } from '@/components/shared/ItineraryTimeline';
 import {
   DndContext,
@@ -702,7 +701,6 @@ export function SchedulePageContent({
   const [weatherStatus, setWeatherStatus] = useState<WeatherFetchStatus>('loading');
   const [itineraryOpen, setItineraryOpen] = useState(false);
 
-  const { showToast } = useToast();
   const dragOriginBlockId = useRef<string | null>(null);
 
   const sensors = useSensors(
@@ -1216,7 +1214,7 @@ export function SchedulePageContent({
                   <div className="pt-3">
                     <ItineraryTimeline
                       items={itineraryItems}
-                      onItemClick={!isPlanner ? () => showToast('Esta información solo puede ser modificada por tu wedding planner.', 'info') : undefined}
+                      showReadOnlyToast={!isPlanner}
                     />
                   </div>
                 </div>

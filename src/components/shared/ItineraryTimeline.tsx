@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useToast } from '@/components/ui/Toast';
 
 export interface ItineraryStepItem {
   id: string | number;
@@ -14,17 +15,22 @@ export interface ItineraryStepItem {
 
 interface ItineraryTimelineProps {
   items: ItineraryStepItem[];
-  onItemClick?: () => void;
+  showReadOnlyToast?: boolean;
 }
 
-export function ItineraryTimeline({ items, onItemClick }: ItineraryTimelineProps) {
+export function ItineraryTimeline({ items, showReadOnlyToast }: ItineraryTimelineProps) {
   const t = useTranslations();
+  const { showToast } = useToast();
 
   const sorted = [...items].sort(
     (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
   );
 
   if (sorted.length === 0) return null;
+
+  const handleItemClick = showReadOnlyToast
+    ? () => showToast('Esta información solo puede ser modificada por tu wedding planner.', 'info')
+    : undefined;
 
   return (
     <div className="flex overflow-x-auto pb-1 gap-0">
@@ -34,9 +40,9 @@ export function ItineraryTimeline({ items, onItemClick }: ItineraryTimelineProps
         return (
           <div
             key={item.id}
-            className={`flex-shrink-0 ${onItemClick ? 'cursor-pointer' : ''}`}
+            className={`flex-shrink-0 ${handleItemClick ? 'cursor-pointer' : ''}`}
             style={{ minWidth: 'calc(25vw - 8px)', maxWidth: '140px' }}
-            onClick={onItemClick}
+            onClick={handleItemClick}
           >
             {/* Dot + connector line */}
             <div className="flex items-center h-3 mb-1.5">
@@ -79,6 +85,7 @@ export function ItineraryTimeline({ items, onItemClick }: ItineraryTimelineProps
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[10px] text-blue-500 hover:text-blue-700 leading-tight"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   Maps ↗
                 </a>
