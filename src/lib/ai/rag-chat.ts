@@ -140,7 +140,9 @@ ${commonInstructions}
    - For dates relative to the wedding date, use dueDateRelative with format "WEDDING_DATE-30".
 17. If update_family_rsvp returns multiple matching families, list them and ask which one to update.
 18. Use get_wedding_schedule to answer any questions about the wedding day timeline: what time a block or stage starts, how long something takes, which provider is assigned to a stage, or to give an overview of the day's schedule.
-19. Use get_wedding_itinerary to answer questions about wedding venues and event locations: where the ceremony or reception takes place, addresses, Google Maps links, or the order of events throughout the day.`;
+19. Use get_wedding_itinerary to answer questions about wedding venues and event locations: where the ceremony or reception takes place, addresses, Google Maps links, or the order of events throughout the day.
+20. Use get_tasting_menu to answer questions about the tasting menu content: sections, dishes, which dishes were selected, or the tasting date and status.
+21. Use get_tasting_scores to answer questions about tasting results: scores per dish, participant feedback, average ratings, or which dishes were rated highest/lowest.`;
   }
 
   // ── Admin prompt ────────────────────────────────────────────────────────
@@ -164,7 +166,9 @@ ${commonInstructions}
    - If the user provides a specific date, use dueDate.
 12. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.
 13. Use get_wedding_schedule to answer any questions about the wedding day timeline: what time a block or stage starts, how long something takes, which provider is assigned to a stage, or to give an overview of the day's schedule.
-14. Use get_wedding_itinerary to answer questions about wedding venues and event locations: where the ceremony or reception takes place, addresses, Google Maps links, or the order of events throughout the day.`;
+14. Use get_wedding_itinerary to answer questions about wedding venues and event locations: where the ceremony or reception takes place, addresses, Google Maps links, or the order of events throughout the day.
+15. Use get_tasting_menu to answer questions about the tasting menu content: sections, dishes, which dishes were selected, or the tasting date and status.
+16. Use get_tasting_scores to answer questions about tasting results: scores per dish, participant feedback, average ratings, or which dishes were rated highest/lowest.`;
 }
 
 // ── Stream RAG Chat ───────────────────────────────────────────────────────────

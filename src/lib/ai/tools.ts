@@ -21,6 +21,7 @@ import { convertRelativeDateToAbsolute } from '@/lib/checklist/date-converter';
 import type { RelativeDateFormat } from '@/lib/checklist/date-converter';
 import { getWeddingSchedule } from '@/lib/schedule/crud';
 import { computeScheduleWithTimes } from '@/types/schedule';
+import { computeEffectiveStatus } from '@/lib/tasting/status';
 
 export interface ToolContext {
   weddingId?: string;
@@ -921,6 +922,154 @@ export function buildTools(ctx: ToolContext): ToolSet {
         } catch (err) {
           console.error('[TOOLS] get_wedding_schedule error:', err);
           return { error: 'Failed to retrieve wedding schedule' };
+        }
+      },
+    }),
+
+    // ── Get Tasting Menu ─────────────────────────────────────────────────
+    get_tasting_menu: tool({
+      description:
+        'Get the tasting menu(s) for the wedding: all rounds, sections, and dishes. ' +
+        'Shows which dishes are selected as the final menu choice and the effective status (OPEN/CLOSED). ' +
+        'Use this when the user asks about the menu, dishes, courses, what food is served, or the tasting menu content.',
+      inputSchema: zodSchema(z.object({})),
+      execute: async () => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const menus = await prisma.tastingMenu.findMany({
+            where: { wedding_id: ctx.weddingId },
+            orderBy: { round_number: 'asc' },
+            include: {
+              sections: {
+                orderBy: { order: 'asc' },
+                include: {
+                  dishes: {
+                    orderBy: { order: 'asc' },
+                    select: { id: true, name: true, description: true, is_selected: true, order: true },
+                  },
+                },
+              },
+              participants: { select: { id: true } },
+            },
+          });
+
+          if (menus.length === 0) {
+            return { status: 'no_menu', message: 'No tasting menu has been created for this wedding yet.' };
+          }
+
+          return menus.map((menu) => ({
+            round: menu.round_number,
+            title: menu.title,
+            description: menu.description,
+            tastingDate: menu.tasting_date?.toISOString() ?? null,
+            status: computeEffectiveStatus(menu.status, menu.tasting_date),
+            participantCount: menu.participants.length,
+            sections: menu.sections.map((section) => ({
+              name: section.name,
+              dishes: section.dishes.map((dish) => ({
+                name: dish.name,
+                description: dish.description,
+                isSelected: dish.is_selected,
+              })),
+            })),
+          }));
+        } catch (err) {
+          console.error('[TOOLS] get_tasting_menu error:', err);
+          return { error: 'Failed to retrieve tasting menu' };
+        }
+      },
+    }),
+
+    // ── Get Tasting Scores ───────────────────────────────────────────────
+    get_tasting_scores: tool({
+      description:
+        'Get the tasting scores submitted by participants for each dish, including per-dish averages and participant notes. ' +
+        'Use this when the user asks about ratings, scores, which dish was best/worst, participant feedback, or tasting results.',
+      inputSchema: zodSchema(
+        z.object({
+          roundNumber: z
+            .number()
+            .int()
+            .optional()
+            .describe('The tasting round to retrieve scores for (default: latest round with scores)'),
+        }),
+      ),
+      execute: async ({ roundNumber }) => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const menuWhere = roundNumber !== undefined
+            ? { wedding_id: ctx.weddingId, round_number: roundNumber }
+            : { wedding_id: ctx.weddingId };
+
+          const menus = await prisma.tastingMenu.findMany({
+            where: menuWhere,
+            orderBy: { round_number: 'asc' },
+            include: {
+              sections: {
+                orderBy: { order: 'asc' },
+                include: {
+                  dishes: {
+                    orderBy: { order: 'asc' },
+                    include: {
+                      scores: {
+                        include: {
+                          participant: { select: { name: true } },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              participants: { select: { id: true, name: true, invite_sent_at: true } },
+            },
+          });
+
+          if (menus.length === 0) {
+            return { status: 'no_menu', message: 'No tasting menu found for the specified round.' };
+          }
+
+          return menus.map((menu) => {
+            const totalParticipants = menu.participants.length;
+            let totalScores = 0;
+            let scoredDishCount = 0;
+
+            const sections = menu.sections.map((section) => ({
+              name: section.name,
+              dishes: section.dishes.map((dish) => {
+                const scores = dish.scores;
+                const scoreValues = scores.map((s) => s.score);
+                const avg = scoreValues.length > 0
+                  ? Math.round((scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length) * 10) / 10
+                  : null;
+                if (avg !== null) { totalScores += avg; scoredDishCount++; }
+                return {
+                  name: dish.name,
+                  isSelected: dish.is_selected,
+                  averageScore: avg,
+                  responseCount: scores.length,
+                  scores: scores.map((s) => ({
+                    participant: s.participant.name,
+                    score: s.score,
+                    notes: s.notes,
+                  })),
+                };
+              }),
+            }));
+
+            return {
+              round: menu.round_number,
+              title: menu.title,
+              tastingDate: menu.tasting_date?.toISOString() ?? null,
+              totalParticipants,
+              overallAverageScore: scoredDishCount > 0
+                ? Math.round((totalScores / scoredDishCount) * 10) / 10
+                : null,
+              sections,
+            };
+          });
+        } catch (err) {
+          console.error('[TOOLS] get_tasting_scores error:', err);
+          return { error: 'Failed to retrieve tasting scores' };
         }
       },
     }),
