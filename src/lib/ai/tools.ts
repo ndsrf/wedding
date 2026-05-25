@@ -1073,5 +1073,360 @@ export function buildTools(ctx: ToolContext): ToolSet {
         }
       },
     }),
+
+    // ── List Quotes ───────────────────────────────────────────────────────
+    list_quotes: tool({
+      description:
+        'List all quotes for this planner with their status, couple names, totals, and event dates. ' +
+        'Optionally filter by status (DRAFT, SENT, ACCEPTED, REJECTED, EXPIRED) or search by couple/customer name. ' +
+        'Use for questions like "show me pending quotes", "which quotes were accepted this year", or "do I have a quote for the García wedding".',
+      inputSchema: zodSchema(
+        z.object({
+          status: z
+            .enum(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED'])
+            .optional()
+            .describe('Filter by quote status'),
+          search: z
+            .string()
+            .optional()
+            .describe('Partial match against couple_names or customer name (case-insensitive)'),
+        }),
+      ),
+      execute: async ({ status, search }) => {
+        if (!ctx.plannerId) return { error: 'No planner context available' };
+        try {
+          const quotes = await prisma.quote.findMany({
+            where: {
+              planner_id: ctx.plannerId,
+              ...(status ? { status } : {}),
+              ...(search
+                ? {
+                    OR: [
+                      { couple_names: { contains: search, mode: 'insensitive' } },
+                      { customer: { name: { contains: search, mode: 'insensitive' } } },
+                    ],
+                  }
+                : {}),
+            },
+            select: {
+              id: true,
+              couple_names: true,
+              status: true,
+              event_date: true,
+              total: true,
+              currency: true,
+              expires_at: true,
+              version: true,
+              created_at: true,
+              customer: { select: { name: true, email: true } },
+            },
+            orderBy: { created_at: 'desc' },
+          });
+
+          return {
+            count: quotes.length,
+            quotes: quotes.map((q) => ({
+              id: q.id,
+              coupleNames: q.couple_names,
+              customer: q.customer?.name ?? null,
+              customerEmail: q.customer?.email ?? null,
+              status: q.status,
+              eventDate: q.event_date?.toISOString().split('T')[0] ?? null,
+              total: Number(q.total),
+              currency: q.currency,
+              expiresAt: q.expires_at?.toISOString().split('T')[0] ?? null,
+              version: q.version,
+              createdAt: q.created_at.toISOString().split('T')[0],
+            })),
+          };
+        } catch (err) {
+          console.error('[TOOLS] list_quotes error:', err);
+          return { error: 'Failed to retrieve quotes' };
+        }
+      },
+    }),
+
+    // ── Get Quote Detail ─────────────────────────────────────────────────
+    get_quote_detail: tool({
+      description:
+        'Get the full detail of a specific quote including all line items. ' +
+        'Use when the user asks about the contents or breakdown of a specific quote.',
+      inputSchema: zodSchema(
+        z.object({
+          quoteId: z.string().describe('The quote ID to look up'),
+        }),
+      ),
+      execute: async ({ quoteId }) => {
+        if (!ctx.plannerId) return { error: 'No planner context available' };
+        try {
+          const quote = await prisma.quote.findFirst({
+            where: { id: quoteId, planner_id: ctx.plannerId },
+            include: {
+              customer: { select: { name: true, email: true, phone: true } },
+              line_items: { select: { name: true, description: true, quantity: true, unit_price: true, total: true } },
+            },
+          });
+
+          if (!quote) return { error: `Quote ${quoteId} not found` };
+
+          return {
+            id: quote.id,
+            coupleNames: quote.couple_names,
+            customer: quote.customer,
+            status: quote.status,
+            eventDate: quote.event_date?.toISOString().split('T')[0] ?? null,
+            location: quote.location,
+            notes: quote.notes,
+            currency: quote.currency,
+            subtotal: Number(quote.subtotal),
+            discount: quote.discount ? Number(quote.discount) : null,
+            taxRate: quote.tax_rate ? Number(quote.tax_rate) : null,
+            total: Number(quote.total),
+            expiresAt: quote.expires_at?.toISOString().split('T')[0] ?? null,
+            version: quote.version,
+            lineItems: quote.line_items.map((li) => ({
+              name: li.name,
+              description: li.description,
+              quantity: Number(li.quantity),
+              unitPrice: Number(li.unit_price),
+              total: Number(li.total),
+            })),
+          };
+        } catch (err) {
+          console.error('[TOOLS] get_quote_detail error:', err);
+          return { error: 'Failed to retrieve quote detail' };
+        }
+      },
+    }),
+
+    // ── List Contracts ────────────────────────────────────────────────────
+    list_contracts: tool({
+      description:
+        'List all contracts for this planner with their status and signing information. ' +
+        'Optionally filter by status (DRAFT, SHARED, SIGNING, SIGNED, CANCELLED) or search by title/customer name. ' +
+        'Use for questions like "which contracts are pending signature", "show signed contracts", or "find the contract for García".',
+      inputSchema: zodSchema(
+        z.object({
+          status: z
+            .enum(['DRAFT', 'SHARED', 'SIGNING', 'SIGNED', 'CANCELLED'])
+            .optional()
+            .describe('Filter by contract status'),
+          search: z
+            .string()
+            .optional()
+            .describe('Partial match against contract title or customer name (case-insensitive)'),
+        }),
+      ),
+      execute: async ({ status, search }) => {
+        if (!ctx.plannerId) return { error: 'No planner context available' };
+        try {
+          const contracts = await prisma.contract.findMany({
+            where: {
+              planner_id: ctx.plannerId,
+              ...(status ? { status } : {}),
+              ...(search
+                ? {
+                    OR: [
+                      { title: { contains: search, mode: 'insensitive' } },
+                      { customer: { name: { contains: search, mode: 'insensitive' } } },
+                      { signer_name: { contains: search, mode: 'insensitive' } },
+                    ],
+                  }
+                : {}),
+            },
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              signed_at: true,
+              signer_name: true,
+              signer_email: true,
+              created_at: true,
+              customer: { select: { name: true, email: true } },
+              quote: { select: { couple_names: true, total: true, currency: true } },
+            },
+            orderBy: { created_at: 'desc' },
+          });
+
+          return {
+            count: contracts.length,
+            contracts: contracts.map((c) => ({
+              id: c.id,
+              title: c.title,
+              customer: c.customer?.name ?? null,
+              customerEmail: c.customer?.email ?? null,
+              coupleNames: c.quote?.couple_names ?? null,
+              quoteTotal: c.quote?.total ? Number(c.quote.total) : null,
+              quoteCurrency: c.quote?.currency ?? null,
+              status: c.status,
+              signerName: c.signer_name,
+              signerEmail: c.signer_email,
+              signedAt: c.signed_at?.toISOString().split('T')[0] ?? null,
+              createdAt: c.created_at.toISOString().split('T')[0],
+            })),
+          };
+        } catch (err) {
+          console.error('[TOOLS] list_contracts error:', err);
+          return { error: 'Failed to retrieve contracts' };
+        }
+      },
+    }),
+
+    // ── List Invoices ─────────────────────────────────────────────────────
+    list_invoices: tool({
+      description:
+        'List all invoices for this planner with their status, amounts, and outstanding balances. ' +
+        'Optionally filter by status (DRAFT, ISSUED, PARTIAL, PAID, OVERDUE, CANCELLED) or search by customer/couple name. ' +
+        'Use for questions like "show overdue invoices", "which invoices are unpaid", "total revenue this month", or "invoices for García".',
+      inputSchema: zodSchema(
+        z.object({
+          status: z
+            .enum(['DRAFT', 'ISSUED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'])
+            .optional()
+            .describe('Filter by invoice status'),
+          search: z
+            .string()
+            .optional()
+            .describe('Partial match against customer name or invoice number (case-insensitive)'),
+        }),
+      ),
+      execute: async ({ status, search }) => {
+        if (!ctx.plannerId) return { error: 'No planner context available' };
+        try {
+          const invoices = await prisma.invoice.findMany({
+            where: {
+              planner_id: ctx.plannerId,
+              ...(status ? { status } : {}),
+              ...(search
+                ? {
+                    OR: [
+                      { invoice_number: { contains: search, mode: 'insensitive' } },
+                      { customer: { name: { contains: search, mode: 'insensitive' } } },
+                      { quote: { couple_names: { contains: search, mode: 'insensitive' } } },
+                    ],
+                  }
+                : {}),
+            },
+            select: {
+              id: true,
+              invoice_number: true,
+              type: true,
+              status: true,
+              currency: true,
+              total: true,
+              amount_paid: true,
+              issued_at: true,
+              due_date: true,
+              customer: { select: { name: true } },
+              quote: { select: { couple_names: true } },
+            },
+            orderBy: { created_at: 'desc' },
+          });
+
+          const totalRevenue = invoices
+            .filter((inv) => ['ISSUED', 'PARTIAL', 'PAID'].includes(inv.status))
+            .reduce((sum, inv) => sum + Number(inv.amount_paid), 0);
+
+          return {
+            count: invoices.length,
+            totalCollected: Math.round(totalRevenue * 100) / 100,
+            invoices: invoices.map((inv) => {
+              const total = Number(inv.total);
+              const paid = Number(inv.amount_paid);
+              return {
+                id: inv.id,
+                invoiceNumber: inv.invoice_number,
+                type: inv.type,
+                customer: inv.customer?.name ?? null,
+                coupleNames: inv.quote?.couple_names ?? null,
+                status: inv.status,
+                currency: inv.currency,
+                total,
+                paid,
+                outstanding: Math.round((total - paid) * 100) / 100,
+                issuedAt: inv.issued_at?.toISOString().split('T')[0] ?? null,
+                dueDate: inv.due_date?.toISOString().split('T')[0] ?? null,
+              };
+            }),
+          };
+        } catch (err) {
+          console.error('[TOOLS] list_invoices error:', err);
+          return { error: 'Failed to retrieve invoices' };
+        }
+      },
+    }),
+
+    // ── Record Invoice Payment ────────────────────────────────────────────
+    record_invoice_payment: tool({
+      description:
+        'Record a new payment received against an invoice. ' +
+        'Use when the user says a client has paid, wants to log a payment, or asks to mark an invoice as paid. ' +
+        'Always confirm the invoice number and amount with the user before calling this tool.',
+      inputSchema: zodSchema(
+        z.object({
+          invoiceId: z.string().describe('The invoice ID to record the payment against'),
+          amount: z.number().positive().describe('Payment amount (in the invoice currency)'),
+          paymentDate: z
+            .string()
+            .describe('Payment date in YYYY-MM-DD format'),
+          method: z
+            .enum(['CASH', 'BANK_TRANSFER', 'PAYPAL', 'BIZUM', 'REVOLUT', 'OTHER'])
+            .optional()
+            .default('BANK_TRANSFER')
+            .describe('Payment method'),
+          reference: z.string().optional().describe('Reference number, transaction ID, or note'),
+        }),
+      ),
+      execute: async ({ invoiceId, amount, paymentDate, method, reference }) => {
+        if (!ctx.plannerId) return { error: 'No planner context available' };
+        try {
+          const invoice = await prisma.invoice.findFirst({
+            where: { id: invoiceId, planner_id: ctx.plannerId },
+            select: { id: true, invoice_number: true, total: true, amount_paid: true, status: true, currency: true },
+          });
+
+          if (!invoice) return { error: `Invoice ${invoiceId} not found` };
+          if (invoice.status === 'CANCELLED') return { error: 'Cannot record payment on a cancelled invoice' };
+
+          const newPaid = Number(invoice.amount_paid) + amount;
+          const total = Number(invoice.total);
+          const newStatus: string =
+            newPaid >= total ? 'PAID' : newPaid > 0 ? 'PARTIAL' : invoice.status;
+
+          await prisma.$transaction([
+            prisma.invoicePayment.create({
+              data: {
+                invoice_id: invoiceId,
+                amount,
+                currency: invoice.currency,
+                payment_date: new Date(paymentDate),
+                method: method ?? 'BANK_TRANSFER',
+                reference: reference ?? null,
+              },
+            }),
+            prisma.invoice.update({
+              where: { id: invoiceId },
+              data: {
+                amount_paid: newPaid,
+                status: newStatus as 'PAID' | 'PARTIAL' | 'ISSUED' | 'OVERDUE',
+              },
+            }),
+          ]);
+
+          return {
+            status: 'success',
+            message: `Payment of ${amount} ${invoice.currency} recorded on invoice ${invoice.invoice_number}.`,
+            invoiceNumber: invoice.invoice_number,
+            amountRecorded: amount,
+            totalPaid: Math.round(newPaid * 100) / 100,
+            outstanding: Math.round((total - newPaid) * 100) / 100,
+            newInvoiceStatus: newStatus,
+          };
+        } catch (err) {
+          console.error('[TOOLS] record_invoice_payment error:', err);
+          return { error: 'Failed to record payment' };
+        }
+      },
+    }),
   };
 }

@@ -142,7 +142,11 @@ ${commonInstructions}
 18. Use get_wedding_schedule to answer any questions about the wedding day timeline: what time a block or stage starts, how long something takes, which provider is assigned to a stage, or to give an overview of the day's schedule.
 19. Use get_wedding_itinerary to answer questions about wedding venues and event locations: where the ceremony or reception takes place, addresses, Google Maps links, or the order of events throughout the day.
 20. Use get_tasting_menu to answer questions about the tasting menu content: sections, dishes, which dishes were selected, or the tasting date and status.
-21. Use get_tasting_scores to answer questions about tasting results: scores per dish, participant feedback, average ratings, or which dishes were rated highest/lowest.`;
+21. Use get_tasting_scores to answer questions about tasting results: scores per dish, participant feedback, average ratings, or which dishes were rated highest/lowest.
+22. Use list_quotes to list or search quotes across all your clients. Use get_quote_detail when the user wants the line-item breakdown of a specific quote.
+23. Use list_contracts to list or search contracts across all your clients — filter by status to find unsigned or pending contracts.
+24. Use list_invoices to list invoices, check outstanding balances, or find overdue payments across all your clients. Use get_wedding_invoices when the question is specifically about a single wedding.
+25. Use record_invoice_payment to log a payment received from a client. Always confirm invoice number and amount before calling.`;
   }
 
   // ── Admin prompt ────────────────────────────────────────────────────────
