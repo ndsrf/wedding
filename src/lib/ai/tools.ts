@@ -822,6 +822,57 @@ export function buildTools(ctx: ToolContext): ToolSet {
       },
     }),
 
+    // ── Get Wedding Itinerary (Locations) ────────────────────────────────
+    get_wedding_itinerary: tool({
+      description:
+        'Get the list of locations and events in the wedding itinerary (ceremony venue, reception hall, pre-event, post-event, etc.). ' +
+        'Use this when the user asks about where the wedding takes place, venue names, addresses, event times, or the order of events on the wedding day.',
+      inputSchema: zodSchema(z.object({})),
+      execute: async () => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const items = await prisma.itineraryItem.findMany({
+            where: { wedding_id: ctx.weddingId },
+            orderBy: { order: 'asc' },
+            include: {
+              location: {
+                select: {
+                  name: true,
+                  address: true,
+                  google_maps_url: true,
+                  url: true,
+                  notes: true,
+                },
+              },
+            },
+          });
+
+          if (items.length === 0) {
+            return { status: 'no_itinerary', message: 'No itinerary has been set up for this wedding yet.' };
+          }
+
+          return {
+            itemCount: items.length,
+            items: items.map((item) => ({
+              type: item.item_type,
+              dateTime: item.date_time.toISOString(),
+              notes: item.notes,
+              location: {
+                name: item.location.name,
+                address: item.location.address,
+                googleMapsUrl: item.location.google_maps_url,
+                websiteUrl: item.location.url,
+                notes: item.location.notes,
+              },
+            })),
+          };
+        } catch (err) {
+          console.error('[TOOLS] get_wedding_itinerary error:', err);
+          return { error: 'Failed to retrieve wedding itinerary' };
+        }
+      },
+    }),
+
     // ── Get Wedding Schedule ──────────────────────────────────────────────
     get_wedding_schedule: tool({
       description:
