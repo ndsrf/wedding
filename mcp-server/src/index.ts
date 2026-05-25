@@ -5,10 +5,14 @@
  * Exposes the Nupci wedding management platform as MCP tools for use
  * with Claude Desktop or any MCP-compatible client.
  *
+ * All tool calls are forwarded to the unified POST /api/mcp endpoint on
+ * the Nupci server — business logic lives there, not here. Adding a new
+ * tool only requires updating tool-handlers.ts on the server side and
+ * adding a tool definition below.
+ *
  * Environment variables:
- *   NUPCI_URL   - Base URL of your Nupci instance (e.g. https://your-domain.com)
+ *   NUPCI_URL    - Base URL of your Nupci instance (e.g. https://your-domain.com)
  *   NUPCI_API_KEY - API key (generated from the platform settings)
- *   NUPCI_ROLE  - "wedding_admin" (default) or "planner"
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -34,29 +38,14 @@ if (!BASE_URL || !API_KEY) {
 
 // ── HTTP Client ────────────────────────────────────────────────────────────────
 
-async function apiGet(path: string, params?: Record<string, string>): Promise<unknown> {
-  const url = new URL(`${BASE_URL}${path}`);
-  if (params) {
-    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  }
-  const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${API_KEY}` },
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new McpError(ErrorCode.InternalError, `API ${res.status}: ${text}`);
-  }
-  return res.json();
-}
-
-async function apiPost(path: string, body: unknown): Promise<unknown> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+async function callTool(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
+  const res = await fetch(`${BASE_URL}/api/mcp`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ tool, args }),
   });
   if (!res.ok) {
     const text = await res.text();
@@ -70,15 +59,26 @@ async function apiPost(path: string, body: unknown): Promise<unknown> {
 const ADMIN_TOOLS = [
   {
     name: 'get_guest_list',
-    description:
-      'Get a summary of the wedding guest list including family names, contact info, and RSVP status.',
+    description: 'Get a summary of the wedding guest list including family names, contact info, and RSVP status.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
   },
   {
     name: 'get_rsvp_status',
     description:
-      'Get aggregate RSVP statistics: total families, submitted RSVPs, pending, and completion percentage.',
+      'Get aggregate RSVP statistics: total families, total people, submitted RSVPs, pending, and completion percentage.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_guests_by_label',
+    description:
+      'Get the count of individual people belonging to families tagged with a specific label. Label matching is case-insensitive.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        labelName: { type: 'string', description: 'The label name to filter by (case-insensitive)' },
+      },
+      required: ['labelName'],
+    },
   },
   {
     name: 'update_family_rsvp',
@@ -108,8 +108,7 @@ const ADMIN_TOOLS = [
   },
   {
     name: 'assign_family_to_table',
-    description:
-      'Assign the attending members of a family to a seating table. Clears any previous assignment first.',
+    description: 'Assign the attending members of a family to a seating table. Clears any previous assignment first.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -118,7 +117,7 @@ const ADMIN_TOOLS = [
         memberNames: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Specific member names to assign (optional; omit to assign all attending members)',
+          description: 'Specific member names to assign (omit to assign all attending members)',
         },
       },
       required: ['familyName', 'tableNumber'],
@@ -148,10 +147,7 @@ const ADMIN_TOOLS = [
         title: { type: 'string', description: 'The reminder title' },
         description: { type: 'string', description: 'Additional details (optional)' },
         dueDate: { type: 'string', description: 'Absolute due date in YYYY-MM-DD format (optional)' },
-        dueDateRelative: {
-          type: 'string',
-          description: 'Relative due date, e.g. "WEDDING_DATE-60" for 2 months before (optional)',
-        },
+        dueDateRelative: { type: 'string', description: 'Relative due date, e.g. "WEDDING_DATE-60" (optional)' },
       },
       required: ['title'],
     },
@@ -166,60 +162,140 @@ const ADMIN_TOOLS = [
     description: 'Get the list of service providers (vendors) assigned to this wedding with payment status.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
   },
+  {
+    name: 'get_wedding_itinerary',
+    description:
+      'Get the wedding itinerary: ceremony venue, reception hall, and other event locations with addresses and times.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_wedding_schedule',
+    description:
+      'Get the full wedding day schedule with blocks and stages including calculated start/end times and assigned providers.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_tasting_menu',
+    description:
+      'Get the tasting menu(s) for the wedding: rounds, sections, dishes, selection status, and tasting date.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_tasting_scores',
+    description:
+      'Get tasting scores submitted by participants for each dish, including per-dish averages and notes.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        roundNumber: { type: 'number', description: 'Tasting round to retrieve (omit for all rounds)' },
+      },
+      required: [],
+    },
+  },
 ];
 
 const PLANNER_TOOLS = [
   {
     name: 'get_planner_weddings',
-    description:
-      'Get a list of all weddings managed by this planner with dates, guest counts, and RSVP completion.',
+    description: 'Get a list of all weddings managed by this planner with dates, guest counts, and RSVP completion.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'list_quotes',
+    description:
+      'List all quotes with status, couple names, and totals. Filter by status (DRAFT, SENT, ACCEPTED, REJECTED, EXPIRED) or search by name.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED'], description: 'Filter by quote status' },
+        search: { type: 'string', description: 'Partial match against couple or customer name' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'get_quote_detail',
+    description: 'Get the full breakdown of a specific quote including all line items.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        quoteId: { type: 'string', description: 'The quote ID to look up' },
+      },
+      required: ['quoteId'],
+    },
+  },
+  {
+    name: 'list_contracts',
+    description:
+      'List all contracts with status and signing information. Filter by status (DRAFT, SHARED, SIGNING, SIGNED, CANCELLED) or search by title/customer.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'SHARED', 'SIGNING', 'SIGNED', 'CANCELLED'], description: 'Filter by contract status' },
+        search: { type: 'string', description: 'Partial match against contract title or customer name' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'list_invoices',
+    description:
+      'List all invoices with amounts and outstanding balances. Filter by status (DRAFT, ISSUED, PARTIAL, PAID, OVERDUE, CANCELLED) or search by customer/invoice number.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'ISSUED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'], description: 'Filter by invoice status' },
+        search: { type: 'string', description: 'Partial match against customer name or invoice number' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'record_invoice_payment',
+    description:
+      'Record a payment received against an invoice. Updates amount_paid and invoice status automatically.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        invoiceId: { type: 'string', description: 'The invoice ID' },
+        amount: { type: 'number', description: 'Payment amount in the invoice currency' },
+        paymentDate: { type: 'string', description: 'Payment date in YYYY-MM-DD format' },
+        method: {
+          type: 'string',
+          enum: ['CASH', 'BANK_TRANSFER', 'PAYPAL', 'BIZUM', 'REVOLUT', 'OTHER'],
+          description: 'Payment method (default: BANK_TRANSFER)',
+        },
+        reference: { type: 'string', description: 'Reference number or transaction ID (optional)' },
+      },
+      required: ['invoiceId', 'amount', 'paymentDate'],
+    },
   },
 ];
 
-// Expose all tools — the backend enforces role-based access per API key
+// Role exposed by the API key governs which tools are meaningful, but we
+// advertise all of them — the server enforces access via the key's role.
 const ALL_TOOLS = [...PLANNER_TOOLS, ...ADMIN_TOOLS];
 
-// ── Tool Handlers ──────────────────────────────────────────────────────────────
+// ── Server ─────────────────────────────────────────────────────────────────────
 
-async function handleTool(name: string, args: Record<string, unknown>): Promise<unknown> {
-  switch (name) {
-    // ── Wedding Admin Tools ──────────────────────────────────────────────────
-    case 'get_guest_list':
-      return apiGet('/api/admin/mcp/guests');
+const server = new Server(
+  { name: 'nupci', version: '1.1.0' },
+  { capabilities: { tools: {}, resources: {} } },
+);
 
-    case 'get_rsvp_status':
-      return apiGet('/api/admin/mcp/rsvp-status');
+server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: ALL_TOOLS }));
 
-    case 'update_family_rsvp':
-      return apiPost('/api/admin/mcp/update-rsvp', args);
-
-    case 'assign_family_to_table':
-      return apiPost('/api/admin/mcp/assign-table', args);
-
-    case 'suggest_tables_for_family': {
-      const params: Record<string, string> = { familyName: String(args.familyName) };
-      if (args.topN) params.topN = String(args.topN);
-      return apiGet('/api/admin/mcp/suggest-tables', params);
-    }
-
-    case 'add_reminder':
-      return apiPost('/api/admin/mcp/reminders', args);
-
-    case 'get_wedding_invoices':
-      return apiGet('/api/admin/mcp/invoices');
-
-    case 'get_wedding_providers':
-      return apiGet('/api/admin/mcp/providers');
-
-    // ── Planner Tools ────────────────────────────────────────────────────────
-    case 'get_planner_weddings':
-      return apiGet('/api/planner/mcp/weddings');
-
-    default:
-      throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: args = {} } = request.params;
+  try {
+    const result = await callTool(name, args as Record<string, unknown>);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  } catch (error) {
+    if (error instanceof McpError) throw error;
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new McpError(ErrorCode.InternalError, msg);
   }
-}
+});
 
 // ── Resources ──────────────────────────────────────────────────────────────────
 
@@ -229,71 +305,50 @@ const PLATFORM_DOCS_SUMMARY = `
 # Nupci Wedding Management Platform — Quick Reference
 
 ## Roles
-- **Wedding Admin (Couple)**: Manages guests, RSVPs, seating, invitations, checklist, providers, and payments for their specific wedding.
-- **Wedding Planner**: Manages multiple weddings, CRM, quotes, contracts, invoices, and templates.
+- **Wedding Admin (Couple)**: Manages guests, RSVPs, seating, invitations, checklist, schedule, itinerary, tasting, and payments for their specific wedding.
+- **Wedding Planner**: Manages multiple weddings, CRM, quotes, contracts, invoices, providers, and templates.
 
 ## Guest Management
 - Guests are organised as **Families** (a family unit may have multiple members).
-- Each member has a name, type (adult/child/infant), age, and RSVP status (attending / not attending / pending).
-- Families have a preferred channel (WhatsApp, Email, SMS) and language (EN, ES, FR, IT, DE).
+- Each member has a name, type (adult/child/infant), age, and RSVP status.
+- Families have a preferred channel (WhatsApp, Email, SMS), language (EN, ES, FR, IT, DE), and optional labels.
 
 ## RSVP Workflow
 1. Planner or admin sends invitation with a magic link via WhatsApp/Email/SMS.
-2. Guest opens the link (no account needed) and confirms/declines attendance for each family member.
-3. Optionally answers dietary, transport, and custom questions.
+2. Guest opens the link (no account needed) and confirms/declines attendance per family member.
 
 ## Seating
-- Tables are numbered and have a fixed capacity.
-- Attending members can be assigned to specific tables.
-- The \`suggest_tables_for_family\` tool ranks tables by: enough free seats → most shared-admin guests → closest average age.
+- Tables are numbered with a fixed capacity.
+- Use suggest_tables_for_family to rank tables by: free seats → shared-admin guests → closest average age.
 
-## Checklist & Reminders
-- Reminders are checklist tasks in the "Reminders" section.
-- Due dates can be absolute (YYYY-MM-DD) or relative (WEDDING_DATE±days).
+## Wedding Schedule
+- Day-of timeline organised as blocks (e.g. Preparation, Ceremony, Reception) with sequential and parallel tracks.
+- Each stage has a calculated start/end time and can have an assigned provider.
 
-## Invoices & Providers
-- Invoices are linked to the wedding via quotes or contracts.
-- Providers (vendors) can be assigned to a wedding with agreed amounts and payment tracking.
+## Itinerary
+- Key venue locations (CEREMONY, EVENT, PRE_EVENT, POST_EVENT) with addresses and Google Maps links.
+
+## Tasting
+- Tasting menus have rounds, sections, and dishes; participants score dishes 1–5.
+- is_selected marks the final menu choice.
+
+## Quotes, Contracts & Invoices
+- Quotes (DRAFT→SENT→ACCEPTED) are linked to customers and can convert to weddings.
+- Contracts (DRAFT→SHARED→SIGNING→SIGNED) support digital signature via DocuSeal.
+- Invoices track total, amount_paid, and outstanding balance; status auto-updates on payment.
 
 ## Pages
 - Wedding Admin panel: /admin
 - Planner dashboard: /planner
 `.trim();
 
-// ── Server ─────────────────────────────────────────────────────────────────────
-
-const server = new Server(
-  { name: 'nupci', version: '1.0.0' },
-  { capabilities: { tools: {}, resources: {} } },
-);
-
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: ALL_TOOLS,
-}));
-
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args = {} } = request.params;
-  try {
-    const result = await handleTool(name, args as Record<string, unknown>);
-    return {
-      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-    };
-  } catch (error) {
-    if (error instanceof McpError) throw error;
-    const msg = error instanceof Error ? error.message : String(error);
-    throw new McpError(ErrorCode.InternalError, msg);
-  }
-});
-
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-  resources: [
-    {
-      uri: PLATFORM_DOCS_URI,
-      name: 'Nupci Platform Documentation',
-      description: 'Quick reference for the Nupci wedding management platform features and workflows.',
-      mimeType: 'text/markdown',
-    },
-  ],
+  resources: [{
+    uri: PLATFORM_DOCS_URI,
+    name: 'Nupci Platform Documentation',
+    description: 'Quick reference for the Nupci wedding management platform features and workflows.',
+    mimeType: 'text/markdown',
+  }],
 }));
 
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
@@ -301,13 +356,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${request.params.uri}`);
   }
   return {
-    contents: [
-      {
-        uri: PLATFORM_DOCS_URI,
-        mimeType: 'text/markdown',
-        text: PLATFORM_DOCS_SUMMARY,
-      },
-    ],
+    contents: [{ uri: PLATFORM_DOCS_URI, mimeType: 'text/markdown', text: PLATFORM_DOCS_SUMMARY }],
   };
 });
 
@@ -316,7 +365,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`Nupci MCP server running (url: ${BASE_URL})\n`);
+  process.stderr.write(`Nupci MCP server v1.1.0 running (url: ${BASE_URL})\n`);
 }
 
 main().catch((err) => {
