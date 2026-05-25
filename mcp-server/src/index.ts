@@ -308,34 +308,70 @@ const PLATFORM_DOCS_SUMMARY = `
 - **Wedding Admin (Couple)**: Manages guests, RSVPs, seating, invitations, checklist, schedule, itinerary, tasting, and payments for their specific wedding.
 - **Wedding Planner**: Manages multiple weddings, CRM, quotes, contracts, invoices, providers, and templates.
 
+## Available Tools by Role
+
+### Wedding Admin tools
+| Tool | Description |
+|------|-------------|
+| get_guest_list | All families with members, contact info, and RSVP status |
+| get_rsvp_status | Aggregate counts: total families/people, attending, pending |
+| get_guests_by_label | Count people whose family has a specific label (case-insensitive) |
+| update_family_rsvp | Set attending true/false per family or per individual member |
+| assign_family_to_table | Seat a family's attending members at a numbered table |
+| suggest_tables_for_family | Rank tables by free seats, shared-admin guests, age similarity |
+| add_reminder | Add a checklist task (absolute or relative date, e.g. WEDDING_DATE-60) |
+| get_wedding_invoices | Invoices and payment status for the wedding |
+| get_wedding_providers | Service providers assigned to the wedding with payment info |
+| get_wedding_itinerary | Venue locations with types, addresses, and Google Maps links |
+| get_wedding_schedule | Full day-of timeline: blocks, stages, start/end times, providers |
+| get_tasting_menu | All tasting rounds, sections, and dishes with selection status |
+| get_tasting_scores | Per-dish scores, averages, and participant notes |
+
+### Wedding Planner tools (in addition to the above)
+| Tool | Description |
+|------|-------------|
+| get_planner_weddings | All weddings managed by this planner |
+| list_quotes | All quotes with status and totals; filter by status or search by name |
+| get_quote_detail | Full line-item breakdown of a specific quote |
+| list_contracts | All contracts with signing status; filter by status or search |
+| list_invoices | All invoices across clients; filter by status or search |
+| record_invoice_payment | Record a payment against an invoice; status auto-updates |
+
 ## Guest Management
 - Guests are organised as **Families** (a family unit may have multiple members).
 - Each member has a name, type (adult/child/infant), age, and RSVP status.
 - Families have a preferred channel (WhatsApp, Email, SMS), language (EN, ES, FR, IT, DE), and optional labels.
 
 ## RSVP Workflow
-1. Planner or admin sends invitation with a magic link via WhatsApp/Email/SMS.
+1. Planner or admin sends an invitation with a magic link via WhatsApp/Email/SMS.
 2. Guest opens the link (no account needed) and confirms/declines attendance per family member.
 
 ## Seating
 - Tables are numbered with a fixed capacity.
-- Use suggest_tables_for_family to rank tables by: free seats → shared-admin guests → closest average age.
+- suggest_tables_for_family ranks by: free seats → most shared-admin guests → closest average age.
 
 ## Wedding Schedule
-- Day-of timeline organised as blocks (e.g. Preparation, Ceremony, Reception) with sequential and parallel tracks.
-- Each stage has a calculated start/end time and can have an assigned provider.
+- Day-of timeline organised as **blocks** (e.g. Preparation, Ceremony, Reception) containing **stages**.
+- Stages run sequentially within a block (parallel tracks also supported).
+- Each stage has a calculated start/end time and an optional assigned provider.
+- Use get_wedding_schedule to answer "what time does X start?" or "who is the photographer during the ceremony?"
 
 ## Itinerary
-- Key venue locations (CEREMONY, EVENT, PRE_EVENT, POST_EVENT) with addresses and Google Maps links.
+- Key venue locations with types: CEREMONY, EVENT, PRE_EVENT, POST_EVENT.
+- Each location has a name, address, and optional Google Maps link.
+- Use get_wedding_itinerary for venue names, addresses, and event times.
 
 ## Tasting
-- Tasting menus have rounds, sections, and dishes; participants score dishes 1–5.
-- is_selected marks the final menu choice.
+- Tasting menus are structured as: Menu → Rounds → Sections → Dishes.
+- Participants score dishes 1–5 and can leave notes.
+- is_selected on a dish marks the final menu choice.
+- Use get_tasting_menu for menu content; get_tasting_scores for ratings and feedback.
 
 ## Quotes, Contracts & Invoices
-- Quotes (DRAFT→SENT→ACCEPTED) are linked to customers and can convert to weddings.
-- Contracts (DRAFT→SHARED→SIGNING→SIGNED) support digital signature via DocuSeal.
-- Invoices track total, amount_paid, and outstanding balance; status auto-updates on payment.
+- **Quotes**: lifecycle DRAFT → SENT → ACCEPTED (or REJECTED/EXPIRED). Linked to a customer; can convert to a wedding.
+- **Contracts**: lifecycle DRAFT → SHARED → SIGNING → SIGNED (or CANCELLED). Digital signature via DocuSeal.
+- **Invoices**: track total, amount_paid, and outstanding balance. Statuses: DRAFT, ISSUED, PARTIAL, PAID, OVERDUE, CANCELLED. Use record_invoice_payment to log a received payment — status updates automatically.
+- Payment methods: CASH, BANK_TRANSFER, PAYPAL, BIZUM, REVOLUT, OTHER (default: BANK_TRANSFER).
 
 ## Pages
 - Wedding Admin panel: /admin
