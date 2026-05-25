@@ -19,6 +19,8 @@ import { retrieveChunks } from './retrieval';
 import { prisma } from '@/lib/db/prisma';
 import { convertRelativeDateToAbsolute } from '@/lib/checklist/date-converter';
 import type { RelativeDateFormat } from '@/lib/checklist/date-converter';
+import { getWeddingSchedule } from '@/lib/schedule/crud';
+import { computeScheduleWithTimes } from '@/types/schedule';
 
 export interface ToolContext {
   weddingId?: string;
@@ -816,6 +818,58 @@ export function buildTools(ctx: ToolContext): ToolSet {
         } catch (err) {
           console.error('[TOOLS] get_wedding_providers error:', err);
           return { error: 'Failed to retrieve providers' };
+        }
+      },
+    }),
+
+    // ── Get Wedding Schedule ──────────────────────────────────────────────
+    get_wedding_schedule: tool({
+      description:
+        'Get the full wedding day schedule with blocks (e.g. Preparation, Ceremony, Reception) and their stages, including calculated start/end times for each stage. ' +
+        'Use this when the user asks about the wedding timeline, what time something starts, how long a block takes, or which provider is assigned to a stage.',
+      inputSchema: zodSchema(z.object({})),
+      execute: async () => {
+        if (!ctx.weddingId) return { error: 'No wedding context available' };
+        try {
+          const { schedule, blocks } = await getWeddingSchedule(ctx.weddingId);
+
+          if (!schedule) {
+            return { status: 'no_schedule', message: 'No schedule has been created for this wedding yet.' };
+          }
+
+          const blocksWithTimes = computeScheduleWithTimes(blocks, schedule.start_time);
+
+          return {
+            startTime: schedule.start_time,
+            notes: schedule.notes,
+            blocks: blocksWithTimes.map((b) => ({
+              name: b.name,
+              startTime: b.block_start_time,
+              endTime: b.block_end_time,
+              isParallel: b.offset_minutes !== null && b.offset_minutes !== undefined,
+              offsetMinutes: b.offset_minutes,
+              totalDurationMinutes: b.stages.reduce((sum, s) => sum + s.duration_minutes, 0),
+              stages: b.stages.map((s) => ({
+                name: s.name,
+                startTime: s.calculated_start_time,
+                endTime: s.calculated_end_time,
+                durationMinutes: s.duration_minutes,
+                notes: s.notes,
+                visibleToCouple: s.visible_to_couple,
+                provider: s.wedding_provider
+                  ? {
+                      name: s.wedding_provider.name,
+                      category: s.wedding_provider.category.name,
+                      phone: s.wedding_provider.phone,
+                      email: s.wedding_provider.email,
+                    }
+                  : null,
+              })),
+            })),
+          };
+        } catch (err) {
+          console.error('[TOOLS] get_wedding_schedule error:', err);
+          return { error: 'Failed to retrieve wedding schedule' };
         }
       },
     }),

@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 // ─── Icon paths ────────────────────────────────────────────────────────────────
 
 const ICONS: Record<string, string[]> = {
+  schedule:          ['M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+  scheduleTemplate:  ['M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
   guests:            ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
   configure:         ['M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z', 'M15 12a3 3 0 11-6 0 3 3 0 016 0z'],
   templates:         ['M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
@@ -77,11 +79,13 @@ const COLORS: Record<string, ColorScheme> = {
   menuSelection:     { icon: 'text-lime-600',    border: 'border-lime-100',    bg: 'bg-lime-50',     badge: 'bg-lime-100',    badgeText: 'text-lime-700' },
   rsvp:              { icon: 'text-rose-600',    border: 'border-rose-100',    bg: 'bg-rose-50',     badge: 'bg-rose-100',    badgeText: 'text-rose-700' },
   tastingGuest:      { icon: 'text-fuchsia-600', border: 'border-fuchsia-100', bg: 'bg-fuchsia-50',  badge: 'bg-fuchsia-100', badgeText: 'text-fuchsia-700' },
+  schedule:          { icon: 'text-teal-600',    border: 'border-teal-100',    bg: 'bg-teal-50',     badge: 'bg-teal-100',    badgeText: 'text-teal-700' },
+  scheduleTemplate:  { icon: 'text-cyan-600',    border: 'border-cyan-100',    bg: 'bg-cyan-50',     badge: 'bg-cyan-100',    badgeText: 'text-cyan-700' },
 };
 
 // Features grouped by persona
-const PLANNER_KEYS  = ['clients', 'locations', 'quotes', 'contracts', 'invoices', 'menuSelection'] as const;
-const COUPLE_KEYS   = ['guests', 'configure', 'templates', 'invitationBuilder', 'notifications', 'reports', 'seating', 'checklist', 'providers', 'payments', 'gallery', 'nupcibot', 'tasting'] as const;
+const PLANNER_KEYS  = ['clients', 'locations', 'quotes', 'contracts', 'invoices', 'menuSelection', 'scheduleTemplate'] as const;
+const COUPLE_KEYS   = ['guests', 'configure', 'templates', 'invitationBuilder', 'notifications', 'reports', 'seating', 'checklist', 'providers', 'payments', 'gallery', 'nupcibot', 'tasting', 'schedule'] as const;
 const GUEST_KEYS    = ['rsvp', 'tastingGuest'] as const;
 
 type FeatureKey = typeof PLANNER_KEYS[number] | typeof COUPLE_KEYS[number] | typeof GUEST_KEYS[number];

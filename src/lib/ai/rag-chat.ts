@@ -77,6 +77,7 @@ Nupci has several core sections. ALWAYS call search_knowledge_base with a specif
 - **Provider Library / Proveedores**: Reusable directory of vendors (/planner/providers).
 - **Checklist Templates / Plantillas de Tareas**: Standardize workflows for all weddings (/planner/checklist-template).
 - **Admin Section / Panel de Boda**: Every wedding has its own admin panel for guests, seating, invitations, etc. (/admin).
+- **Wedding Schedule / Cronograma de Boda**: Minute-by-minute timeline of the wedding day with blocks (Preparativos, Ceremonia, Banquete) and stages. Couples view it at /admin/schedule; planners manage each wedding's schedule at /planner/weddings/[id]/schedule and define a reusable template at /planner/schedule-template.
 `;
 
   const commonInstructions = `
@@ -137,7 +138,8 @@ ${commonInstructions}
 16. Use add_reminder to add reminders or tasks to the wedding checklist.
    - Resolve relative dates (tomorrow, next week, 1 month before the wedding) to absolute YYYY-MM-DD using today (${today}).
    - For dates relative to the wedding date, use dueDateRelative with format "WEDDING_DATE-30".
-17. If update_family_rsvp returns multiple matching families, list them and ask which one to update.`;
+17. If update_family_rsvp returns multiple matching families, list them and ask which one to update.
+18. Use get_wedding_schedule to answer any questions about the wedding day timeline: what time a block or stage starts, how long something takes, which provider is assigned to a stage, or to give an overview of the day's schedule.`;
   }
 
   // ── Admin prompt ────────────────────────────────────────────────────────
@@ -159,7 +161,8 @@ ${commonInstructions}
    - When a user says "tomorrow", "next week", etc., resolve it to an absolute date (YYYY-MM-DD) based on today's date (${today}).
    - For relative dates like "1 month before the wedding" or "X days before", prefer using the dueDateRelative argument with "WEDDING_DATE-30" (e.g., -30 for 1 month, -60 for 2 months, -7 for 1 week).
    - If the user provides a specific date, use dueDate.
-12. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.`;
+12. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.
+13. Use get_wedding_schedule to answer any questions about the wedding day timeline: what time a block or stage starts, how long something takes, which provider is assigned to a stage, or to give an overview of the day's schedule.`;
 }
 
 // ── Stream RAG Chat ───────────────────────────────────────────────────────────

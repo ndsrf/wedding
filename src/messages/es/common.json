@@ -207,6 +207,10 @@
         "menuTasting": {
           "title": "Gestión del Menú y Prueba",
           "description": "Crea menús de degustación, invita a participantes por WhatsApp o email, recoge valoraciones y selecciona el menú final de boda a partir de los platos degustados."
+        },
+        "weddingSchedule": {
+          "title": "Cronograma del Día de la Boda",
+          "description": "Crea cronogramas detallados minuto a minuto para el gran día. Coordina proveedores, bloques y etapas con precisión y exporta un dossier PDF para tu equipo."
         }
       }
     },
@@ -3284,7 +3288,17 @@
         "title": "Experiencia de Degustación",
         "content": "Recibe un enlace personalizado por WhatsApp, email o SMS. Puntuúa cada plato del 1 al 10, añade notas y sube fotos. Consulta las valoraciones del resto de participantes y las puntuaciones medias por plato. Las valoraciones se guardan automáticamente, sin necesidad de cuenta."
       },
-      "goTo": "Ir a"
+      "goTo": "Ir a",
+      "schedule": {
+        "title": "Cronograma de la Boda",
+        "path": "/admin/schedule",
+        "content": "Crea un cronograma detallado minuto a minuto para el día de tu boda. Organiza bloques (preparativos, ceremonia, banquete) y etapas con duraciones personalizables, proveedores y notas. Admite bloques paralelos y exporta un dossier PDF para los proveedores."
+      },
+      "scheduleTemplate": {
+        "title": "Plantilla de Cronograma",
+        "path": "/planner/schedule-template",
+        "content": "Define tu estructura de cronograma reutilizable con bloques y etapas predefinidas. Aplícala a cualquier boda con un clic y ajusta la hora de inicio para calcular automáticamente todos los tiempos en bloques secuenciales y paralelos."
+      }
     },
     "personas": {
       "select": "Selecciona tu perfil",
