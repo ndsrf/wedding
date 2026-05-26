@@ -12,9 +12,11 @@
 import { prisma } from '@/lib/db/prisma';
 import { convertRelativeDateToAbsolute } from '@/lib/checklist/date-converter';
 import type { RelativeDateFormat } from '@/lib/checklist/date-converter';
+import { createSection, createTask } from '@/lib/checklist/crud';
 import { getWeddingSchedule } from '@/lib/schedule/crud';
 import { computeScheduleWithTimes } from '@/types/schedule';
 import { computeEffectiveStatus } from '@/lib/tasting/status';
+import { recordInvoicePayment } from '@/lib/invoices/service';
 
 // ── Context ───────────────────────────────────────────────────────────────────
 
@@ -358,8 +360,10 @@ export async function handleAddReminder(
       where: { wedding_id: ctx.weddingId, template_id: null },
       orderBy: { order: 'desc' },
     });
-    section = await prisma.checklistSection.create({
-      data: { wedding_id: ctx.weddingId, name: localizedSectionName, order: (lastSection?.order ?? 0) + 1 },
+    section = await createSection({
+      wedding_id: ctx.weddingId,
+      name: localizedSectionName,
+      order: (lastSection?.order ?? 0) + 1,
     });
   }
 
@@ -377,17 +381,17 @@ export async function handleAddReminder(
     orderBy: { order: 'desc' },
   });
 
-  const task = await prisma.checklistTask.create({
-    data: {
-      wedding_id: ctx.weddingId,
-      section_id: section.id,
-      title,
-      description,
-      due_date: absoluteDate,
-      due_date_relative: dueDateRelative,
-      order: (lastTask?.order ?? 0) + 1,
-      assigned_to: 'COUPLE',
-    },
+  const task = await createTask({
+    wedding_id: ctx.weddingId,
+    section_id: section.id,
+    title,
+    description: description ?? null,
+    due_date: absoluteDate,
+    due_date_relative: dueDateRelative ?? null,
+    assigned_to: 'COUPLE',
+    status: 'TODO',
+    completed: false,
+    order: (lastTask?.order ?? 0) + 1,
   });
 
   return {
@@ -841,45 +845,30 @@ export async function handleRecordInvoicePayment(
   args: { invoiceId: string; amount: number; paymentDate: string; method?: string; reference?: string },
 ) {
   if (!ctx.plannerId) return { error: 'No planner context available' };
-  const { invoiceId, amount, paymentDate, method = 'BANK_TRANSFER', reference } = args;
+  const { invoiceId, amount, paymentDate, method, reference } = args;
 
-  const invoice = await prisma.invoice.findFirst({
-    where: { id: invoiceId, planner_id: ctx.plannerId },
-    select: { id: true, invoice_number: true, total: true, amount_paid: true, status: true, currency: true },
-  });
-  if (!invoice) return { error: `Invoice ${invoiceId} not found` };
-  if (invoice.status === 'CANCELLED') return { error: 'Cannot record payment on a cancelled invoice' };
+  try {
+    const result = await recordInvoicePayment(ctx.plannerId, invoiceId, {
+      amount,
+      paymentDate: new Date(paymentDate),
+      method: method as 'CASH' | 'BANK_TRANSFER' | 'PAYPAL' | 'BIZUM' | 'REVOLUT' | 'OTHER' | undefined,
+      reference: reference ?? null,
+    });
 
-  const newPaid = Number(invoice.amount_paid) + amount;
-  const total = Number(invoice.total);
-  const newStatus = newPaid >= total ? 'PAID' : newPaid > 0 ? 'PARTIAL' : invoice.status;
-
-  await prisma.$transaction([
-    prisma.invoicePayment.create({
-      data: {
-        invoice_id: invoiceId,
-        amount,
-        currency: invoice.currency,
-        payment_date: new Date(paymentDate),
-        method: method as 'CASH' | 'BANK_TRANSFER' | 'PAYPAL' | 'BIZUM' | 'REVOLUT' | 'OTHER',
-        reference: reference ?? null,
-      },
-    }),
-    prisma.invoice.update({
-      where: { id: invoiceId },
-      data: { amount_paid: newPaid, status: newStatus as 'PAID' | 'PARTIAL' | 'ISSUED' | 'OVERDUE' },
-    }),
-  ]);
-
-  return {
-    status: 'success',
-    message: `Payment of ${amount} ${invoice.currency} recorded on invoice ${invoice.invoice_number}.`,
-    invoiceNumber: invoice.invoice_number,
-    amountRecorded: amount,
-    totalPaid: Math.round(newPaid * 100) / 100,
-    outstanding: Math.round((total - newPaid) * 100) / 100,
-    newInvoiceStatus: newStatus,
-  };
+    const { updatedInvoice, totalPaid, invoiceTotal, newStatus } = result;
+    return {
+      status: 'success',
+      message: `Payment of ${amount} ${updatedInvoice.currency} recorded on invoice ${updatedInvoice.invoice_number}.`,
+      invoiceNumber: updatedInvoice.invoice_number,
+      amountRecorded: amount,
+      totalPaid: Math.round(totalPaid * 100) / 100,
+      outstanding: Math.round((invoiceTotal - totalPaid) * 100) / 100,
+      newInvoiceStatus: newStatus,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { error: msg };
+  }
 }
 
 // ── Dispatcher ────────────────────────────────────────────────────────────────

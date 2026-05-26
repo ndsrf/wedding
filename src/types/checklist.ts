@@ -92,6 +92,7 @@ export interface ChecklistTaskData {
   description: string | null;
   assigned_to: TaskAssignment;
   due_date: Date | null;
+  due_date_relative?: string | null;
   status: TaskStatus;
   completed: boolean;
   order: number;
