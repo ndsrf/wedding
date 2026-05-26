@@ -389,7 +389,7 @@ export async function handleAddReminder(
     due_date: absoluteDate,
     due_date_relative: dueDateRelative ?? null,
     assigned_to: 'COUPLE',
-    status: 'TODO',
+    status: 'PENDING',
     completed: false,
     order: (lastTask?.order ?? 0) + 1,
   });
