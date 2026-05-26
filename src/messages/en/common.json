@@ -208,6 +208,10 @@
         "menuTasting": {
           "title": "Menu Management & Tasting",
           "description": "Create tasting menus, invite participants via WhatsApp or email, collect ratings, and select the final wedding menu from tasted dishes."
+        },
+        "weddingSchedule": {
+          "title": "Wedding Day Timeline",
+          "description": "Build minute-by-minute schedules for the big day. Coordinate vendors, blocks, and stages with precision and export a PDF itinerary for your team."
         }
       }
     },
@@ -3308,7 +3312,17 @@
         "title": "Tasting Experience",
         "content": "Receive a personalised tasting link via WhatsApp, email, or SMS. Rate each dish from 1 to 10 stars, add tasting notes, and upload photos. View all other participants’ ratings and the average scores per dish. Ratings auto-save in real time—no login required."
       },
-      "goTo": "Go to"
+      "goTo": "Go to",
+      "schedule": {
+        "title": "Wedding Schedule",
+        "path": "/admin/schedule",
+        "content": "Build a detailed minute-by-minute timeline for your wedding day. Organize blocks (preparation, ceremony, reception) and stages with customizable durations, providers, and notes. Supports parallel tracks and exports a PDF itinerary for vendors."
+      },
+      "scheduleTemplate": {
+        "title": "Schedule Template",
+        "path": "/planner/schedule-template",
+        "content": "Define your reusable default schedule structure with blocks and stages. Apply it to any wedding in one click and adjust the start time to auto-calculate all stage times across sequential and parallel tracks."
+      }
     },
     "personas": {
       "select": "Select your profile",

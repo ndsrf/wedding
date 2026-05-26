@@ -188,6 +188,10 @@
         "menuTasting": {
           "title": "Gestion du Menu et Dégustation",
           "description": "Créez des menus de dégustation, invitez des participants via WhatsApp ou e-mail, collectez des évaluations et sélectionnez le menu final du mariage parmi les plats goûtés."
+        },
+        "weddingSchedule": {
+          "title": "Planification du Jour J",
+          "description": "Créez des plannings détaillés minute par minute pour le grand jour. Coordonnez prestataires, blocs et étapes avec précision et exportez un PDF récapitulatif pour votre équipe."
         }
       }
     },
@@ -3209,7 +3213,17 @@
         "title": "Expérience de Dégustation",
         "content": "Recevez un lien personnalisé par WhatsApp, e-mail ou SMS. Notez chaque plat de 1 à 10 étoiles, ajoutez des notes de dégustation et uploadez des photos. Consultez les évaluations de tous les participants et les scores moyens par plat. Les notes s’enregistrent automatiquement—aucune connexion requise."
       },
-      "goTo": "Aller à"
+      "goTo": "Aller à",
+      "schedule": {
+        "title": "Planning du Mariage",
+        "path": "/admin/schedule",
+        "content": "Créez un planning détaillé minute par minute pour votre jour de mariage. Organisez des blocs (préparatifs, cérémonie, réception) et des étapes avec des durées, prestataires et notes personnalisables. Supporte les pistes parallèles et exporte un PDF pour les prestataires."
+      },
+      "scheduleTemplate": {
+        "title": "Modèle de Planning",
+        "path": "/planner/schedule-template",
+        "content": "Définissez votre structure de planning réutilisable avec des blocs et étapes prédéfinis. Appliquez-la à n'importe quel mariage en un clic et ajustez l'heure de début pour calculer automatiquement tous les horaires sur les pistes séquentielles et parallèles."
+      }
     },
     "personas": {
       "select": "Choisissez votre profil",

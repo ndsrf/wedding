@@ -188,6 +188,10 @@
         "menuTasting": {
           "title": "Gestione Menu e Degustazione",
           "description": "Crea menu di degustazione, invita partecipanti via WhatsApp o email, raccogli valutazioni e seleziona il menu finale del matrimonio tra i piatti degustati."
+        },
+        "weddingSchedule": {
+          "title": "Programma del Giorno del Matrimonio",
+          "description": "Crea programmi dettagliati minuto per minuto per il grande giorno. Coordina fornitori, blocchi e fasi con precisione ed esporta un PDF riepilogativo per il tuo team."
         }
       }
     },
@@ -3209,7 +3213,17 @@
         "title": "Esperienza di Degustazione",
         "content": "Ricevi un link personalizzato via WhatsApp, email o SMS. Valuta ogni piatto da 1 a 10 stelle, aggiungi note di degustazione e carica foto. Visualizza le valutazioni di tutti gli altri partecipanti e i punteggi medi per piatto. Le valutazioni si salvano in tempo reale—nessun login richiesto."
       },
-      "goTo": "Vai a"
+      "goTo": "Vai a",
+      "schedule": {
+        "title": "Programma del Matrimonio",
+        "path": "/admin/schedule",
+        "content": "Crea un programma dettagliato minuto per minuto per il tuo giorno del matrimonio. Organizza blocchi (preparativi, cerimonia, ricevimento) e fasi con durate, fornitori e note personalizzabili. Supporta tracce parallele ed esporta un PDF per i fornitori."
+      },
+      "scheduleTemplate": {
+        "title": "Modello di Programma",
+        "path": "/planner/schedule-template",
+        "content": "Definisci la tua struttura di programma riutilizzabile con blocchi e fasi predefinite. Applicala a qualsiasi matrimonio con un clic e regola l'ora di inizio per calcolare automaticamente tutti gli orari su tracce sequenziali e parallele."
+      }
     },
     "personas": {
       "select": "Seleziona il tuo profilo",
