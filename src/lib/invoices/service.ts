@@ -35,22 +35,31 @@ export interface RecordInvoicePaymentResult {
 /**
  * Record a payment against an invoice and update its status.
  *
- * Re-fetches all existing payments inside the transaction to compute an accurate
- * running total (avoids race conditions from concurrent writes).
+ * Uses an atomic INCREMENT on amount_paid (translates to
+ * `UPDATE … SET amount_paid = amount_paid + ?`) so concurrent payments for
+ * the same invoice cannot overwrite each other's write. The returned
+ * amount_paid is then used to derive the new status in the same transaction.
  *
- * @throws Error if the invoice is not found for this planner, or is cancelled.
+ * @throws Error if the invoice is not found for this planner, is cancelled,
+ *   or if paymentDate is not a valid Date.
  */
 export async function recordInvoicePayment(
   plannerId: string,
   invoiceId: string,
   input: RecordInvoicePaymentInput,
 ): Promise<RecordInvoicePaymentResult> {
+  if (isNaN(input.paymentDate.getTime())) {
+    throw new Error('Invalid payment date');
+  }
+
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId, planner_id: plannerId },
   });
 
   if (!invoice) throw new Error(`Invoice ${invoiceId} not found`);
   if (invoice.status === 'CANCELLED') throw new Error('Cannot record payment on a cancelled invoice');
+
+  const invoiceTotal = Number(invoice.total);
 
   return prisma.$transaction(async (tx) => {
     const payment = await tx.invoicePayment.create({
@@ -65,21 +74,23 @@ export async function recordInvoicePayment(
       },
     });
 
-    // Re-query all payments for an accurate total
-    const allPayments = await tx.invoicePayment.findMany({ where: { invoice_id: invoiceId } });
-    const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const invoiceTotal = Number(invoice.total);
+    // Atomic increment — avoids the lost-update race between concurrent payments.
+    // The returned amount_paid is the definitive new total for this transaction.
+    const { amount_paid } = await tx.invoice.update({
+      where: { id: invoiceId },
+      data: { amount_paid: { increment: input.amount } },
+      select: { amount_paid: true },
+    });
+    const totalPaid = Number(amount_paid);
 
-    let newStatus: Invoice['status'] = invoice.status;
-    if (totalPaid >= invoiceTotal) {
-      newStatus = 'PAID';
-    } else if (totalPaid > 0) {
-      newStatus = 'PARTIAL';
-    }
+    const newStatus: Invoice['status'] =
+      totalPaid >= invoiceTotal ? 'PAID'
+      : totalPaid > 0 ? 'PARTIAL'
+      : invoice.status;
 
     const updatedInvoice = await tx.invoice.update({
       where: { id: invoiceId },
-      data: { amount_paid: totalPaid, status: newStatus },
+      data: { status: newStatus },
       include: {
         payments: { orderBy: { payment_date: 'desc' } },
         line_items: true,

@@ -369,7 +369,9 @@ export async function handleAddReminder(
 
   let absoluteDate: Date | null = null;
   if (dueDate) {
-    absoluteDate = new Date(dueDate);
+    const parsed = new Date(dueDate);
+    if (isNaN(parsed.getTime())) return { error: `Invalid due date: "${dueDate}". Use YYYY-MM-DD format.` };
+    absoluteDate = parsed;
   } else if (dueDateRelative && wedding.wedding_date) {
     try {
       absoluteDate = convertRelativeDateToAbsolute(dueDateRelative as RelativeDateFormat, wedding.wedding_date);
@@ -847,10 +849,15 @@ export async function handleRecordInvoicePayment(
   if (!ctx.plannerId) return { error: 'No planner context available' };
   const { invoiceId, amount, paymentDate, method, reference } = args;
 
+  const parsedDate = new Date(paymentDate);
+  if (isNaN(parsedDate.getTime())) {
+    return { error: `Invalid payment date: "${paymentDate}". Use YYYY-MM-DD format.` };
+  }
+
   try {
     const result = await recordInvoicePayment(ctx.plannerId, invoiceId, {
       amount,
-      paymentDate: new Date(paymentDate),
+      paymentDate: parsedDate,
       method: method as 'CASH' | 'BANK_TRANSFER' | 'PAYPAL' | 'BIZUM' | 'REVOLUT' | 'OTHER' | undefined,
       reference: reference ?? null,
     });
