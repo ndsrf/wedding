@@ -66,6 +66,36 @@ function parseReferences(raw: string): { body: string; references: Array<{ label
   return { body, references };
 }
 
+function renderMarkdownBody(body: string) {
+  // Handles **bold** and [text](url) inline patterns; whitespace-pre-wrap on the
+  // container preserves newlines inside plain text spans.
+  const parts = body.split(/(\*\*[^*\n]+\*\*|\[[^\]\n]+\]\([^)\n]+\))/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+          return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
+        }
+        const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (linkMatch) {
+          return (
+            <a
+              key={i}
+              href={linkMatch[2]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-rose-600 underline decoration-rose-300 underline-offset-2 hover:text-rose-700 transition-colors"
+            >
+              {linkMatch[1]}
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 function AssistantMessage({ content, t }: { content: string; t: (key: string) => string }) {
   const { text, links } = parseMessageContent(content);
   const { body, references } = parseReferences(text);
@@ -73,7 +103,7 @@ function AssistantMessage({ content, t }: { content: string; t: (key: string) =>
   return (
     <div className="flex flex-col gap-1.5 max-w-[85%]">
       <div className="bg-gray-50 text-gray-700 rounded-xl rounded-bl-none px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap">
-        {body}
+        {renderMarkdownBody(body)}
       </div>
       {references.length > 0 && (
         <div className="bg-gray-50 rounded-xl rounded-tl-none px-3 py-2 border-t border-gray-200">
