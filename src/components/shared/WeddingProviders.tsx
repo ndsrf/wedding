@@ -189,8 +189,14 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
         contract_url: editForm.contract_url,
       }),
     });
-    if (res.ok) { fetchData(); setEditingId(null); setEditForm({}); }
-    else {
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data) {
+        setProviders(prev => prev.map(p => p.id === id ? data.data : p));
+      }
+      setEditingId(null);
+      setEditForm({});
+    } else {
       const ed = await res.json().catch(() => ({}));
       alert(Array.isArray(ed.error)
         ? ed.error.map((e: { path: string[]; message: string }) => `${e.path.join('.')}: ${e.message}`).join('\n')
@@ -201,7 +207,9 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const handleDelete = async (id: string) => {
     if (!confirm(t('confirmDeleteProviderFromWedding'))) return;
     const res = await fetch(`/api/weddings/${weddingId}/providers/${id}`, { method: 'DELETE' });
-    if (res.ok) fetchData();
+    if (res.ok) {
+      setProviders(prev => prev.filter(p => p.id !== id));
+    }
   };
 
   // ── file upload ───────────────────────────────────────────────────────────
@@ -241,7 +249,15 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
       }),
     });
     if (res.ok) {
-      fetchData(); setPaymentProviderId(null);
+      const data = await res.json();
+      if (data.data) {
+        setProviders(prev => prev.map(wp =>
+          wp.id === providerId
+            ? { ...wp, payments: [...wp.payments, data.data] }
+            : wp
+        ));
+      }
+      setPaymentProviderId(null);
       setPaymentAmount(''); setPaymentNotes(''); setPaymentDocumentUrl('');
     }
   };
@@ -249,7 +265,12 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const handleDeletePayment = async (id: string) => {
     if (!confirm(t('confirmDeletePayment'))) return;
     const res = await fetch(`/api/weddings/${weddingId}/payments/${id}`, { method: 'DELETE' });
-    if (res.ok) fetchData();
+    if (res.ok) {
+      setProviders(prev => prev.map(wp => ({
+        ...wp,
+        payments: wp.payments.filter(p => p.id !== id),
+      })));
+    }
   };
 
   // ── helpers ───────────────────────────────────────────────────────────────
