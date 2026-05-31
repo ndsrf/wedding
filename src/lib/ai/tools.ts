@@ -624,35 +624,37 @@ export function buildTools(ctx: ToolContext): ToolSet {
         try {
           const weddings = await prisma.wedding.findMany({
             where: { planner_id: ctx.plannerId },
-            select: {
-              id: true,
-              couple_names: true,
-              wedding_date: true,
-              _count: { select: { families: true } },
-            },
+            select: { id: true, couple_names: true, wedding_date: true },
             orderBy: { wedding_date: 'asc' },
           });
 
-          // For each wedding compute RSVP completion
-          const results = await Promise.all(
-            weddings.map(async (w) => {
-              const families = await prisma.family.findMany({
-                where: { wedding_id: w.id },
-                include: { members: { select: { attending: true } } },
-              });
-              const total = families.length;
-              const submitted = families.filter((f) => f.members.some((m) => m.attending !== null)).length;
-              return {
-                id: w.id,
-                coupleNames: w.couple_names,
-                weddingDate: w.wedding_date.toISOString().split('T')[0],
-                totalFamilies: total,
-                rsvpSubmitted: submitted,
-                rsvpPending: total - submitted,
-                completionPct: total > 0 ? Math.round((submitted / total) * 100) : 0,
-              };
-            }),
-          );
+          const weddingIds = weddings.map((w) => w.id);
+          const allFamilies = await prisma.family.findMany({
+            where: { wedding_id: { in: weddingIds } },
+            include: { members: { select: { wedding_id: true, attending: true } } },
+          });
+
+          const familiesByWedding = new Map<string, typeof allFamilies>();
+          for (const f of allFamilies) {
+            const list = familiesByWedding.get(f.wedding_id) ?? [];
+            list.push(f);
+            familiesByWedding.set(f.wedding_id, list);
+          }
+
+          const results = weddings.map((w) => {
+            const families = familiesByWedding.get(w.id) ?? [];
+            const total = families.length;
+            const submitted = families.filter((f) => f.members.some((m) => m.attending !== null)).length;
+            return {
+              id: w.id,
+              coupleNames: w.couple_names,
+              weddingDate: w.wedding_date.toISOString().split('T')[0],
+              totalFamilies: total,
+              rsvpSubmitted: submitted,
+              rsvpPending: total - submitted,
+              completionPct: total > 0 ? Math.round((submitted / total) * 100) : 0,
+            };
+          });
 
           return results;
         } catch (err) {

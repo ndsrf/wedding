@@ -35,7 +35,7 @@ if (!BASE_URL || !API_KEY) {
 // ── HTTP Client ────────────────────────────────────────────────────────────────
 
 async function apiGet(path: string, params?: Record<string, string>): Promise<unknown> {
-  const url = new URL(`${BASE_URL}${path}`);
+  const url = new URL(path, BASE_URL + '/');
   if (params) {
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   }
@@ -50,7 +50,8 @@ async function apiGet(path: string, params?: Record<string, string>): Promise<un
 }
 
 async function apiPut(path: string, body: unknown): Promise<unknown> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const url = new URL(path, BASE_URL + '/').toString();
+  const res = await fetch(url, {
     method: 'PUT',
     headers: {
       Authorization: `Bearer ${API_KEY}`,
@@ -66,7 +67,8 @@ async function apiPut(path: string, body: unknown): Promise<unknown> {
 }
 
 async function apiPost(path: string, body: unknown): Promise<unknown> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const url = new URL(path, BASE_URL + '/').toString();
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${API_KEY}`,

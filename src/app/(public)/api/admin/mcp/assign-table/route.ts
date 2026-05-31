@@ -22,9 +22,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No wedding context' }, { status: 403 });
     }
 
-    const { familyName, tableNumber, memberNames } = await request.json() as AssignTableBody;
-    if (!familyName || !tableNumber) {
-      return NextResponse.json({ error: 'familyName and tableNumber are required' }, { status: 400 });
+    const body = (await request.json()) as AssignTableBody | null;
+    if (!body) {
+      return NextResponse.json({ error: 'Request body is required' }, { status: 400 });
+    }
+    const { familyName, memberNames } = body;
+    const tableNumber = Number.isInteger(body.tableNumber)
+      ? body.tableNumber
+      : parseInt(String(body.tableNumber ?? ''), 10);
+    if (!familyName || !Number.isInteger(tableNumber) || tableNumber <= 0) {
+      return NextResponse.json({ error: 'familyName and tableNumber (positive integer) are required' }, { status: 400 });
     }
 
     const families = await prisma.family.findMany({
