@@ -3,10 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "constraints": {
-    "npm": "^11.0.0"
-  },
   "automerge": true,
-  "automergeType": "pr", 
+  "automergeType": "pr",
   "deleteMergedBranches": true
 }
