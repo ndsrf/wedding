@@ -5,7 +5,7 @@
  * Auth: Bearer API key (wedding_admin role)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { requireApiKeyAuth } from '@/lib/auth/api-key';
 import { handleMcpError } from '@/lib/auth/mcp-error';
 import {
