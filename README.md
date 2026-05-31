@@ -1748,6 +1748,59 @@ Then configure Claude Desktop:
 
 ---
 
+### Using Nupci MCP with Claude Code
+
+Claude Code (the CLI) picks up MCP servers from a `.mcp.json` file at the repo root or via the `claude mcp add` command.
+
+**Option A — one-time CLI registration (local to your machine)**
+
+```bash
+# Build the server first
+cd mcp-server && npm install && npm run build && cd ..
+
+# Register it with Claude Code
+claude mcp add --transport stdio \
+  --env NUPCI_URL=https://your-domain.com \
+  --env NUPCI_API_KEY=npci_your_key_here \
+  nupci -- node "$(pwd)/mcp-server/dist/index.js"
+```
+
+Verify it's connected:
+
+```bash
+claude mcp list
+```
+
+**Option B — `.mcp.json` at the repo root (shared with the team)**
+
+Commit a `.mcp.json` file so every developer automatically gets the server. Keep secrets out of git by referencing environment variables:
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CLAUDE_PROJECT_DIR}/mcp-server/dist/index.js"],
+      "env": {
+        "NUPCI_URL": "${NUPCI_URL}",
+        "NUPCI_API_KEY": "${NUPCI_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+Each developer sets `NUPCI_URL` and `NUPCI_API_KEY` in their shell profile or `.env.local` (not committed). Claude Code expands `${VAR}` at startup.
+
+Once connected, Claude Code has access to all Nupci tools and the `invitation://schema` resource. You can ask things like:
+
+> "Create a garden-romance invitation template for this wedding."
+> "How many guests are still pending RSVP?"
+> "Assign the López family to table 3."
+
+---
+
 ### Troubleshooting
 
 **Claude Desktop shows "not valid MCP server configurations"**
