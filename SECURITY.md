@@ -6,7 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
-Last updated: 2026-03-27
+Last updated: 2026-05-31
 
 ### Current Vulnerabilities
 
@@ -143,6 +143,44 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Application is not a high-traffic public image service
 - **Future Plan**: Upgrade to Next.js 16.x after evaluating breaking changes and compatibility with next-auth, next-intl, and other dependencies
 
+##### PostCSS - XSS via Unescaped </style>
+- **Package**: postcss < 8.5.10 (via next@15.1.6)
+- **CVE**: [GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93)
+- **Status**: Fix available but requires breaking change (downgrading to next@9.3.3 is not viable)
+- **Usage**: CSS processing in Next.js build step
+- **Risk Assessment**:
+  - Moderate severity, affects CSS stringify output
+  - Vulnerability requires malicious CSS content with unescaped `</style>` tags
+  - CSS in this application is generated from trusted sources only:
+    - Tailwind CSS configuration (not user-controlled)
+    - Next.js internal CSS generation
+    - No dynamic CSS generation from user input
+  - Impact is limited to build-time CSS processing, not runtime application code
+- **Mitigation**:
+  - All CSS sources are trusted and non-user-controlled
+  - Next.js 15.x has many security improvements over older versions
+  - Fixing this would require downgrading to Next.js 9.x (introduces many older, more severe vulnerabilities)
+- **Future Plan**: Will be resolved when Next.js 16+ provides a fix without breaking changes
+
+##### uuid - Missing Buffer Bounds Check
+- **Package**: uuid < 11.1.1 (via exceljs@4.4.0)
+- **CVE**: [GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq)
+- **Status**: Fix available but requires breaking change (downgrading exceljs to 3.4.0)
+- **Usage**: Excel import/export for authenticated admins
+- **Risk Assessment**:
+  - Moderate severity, affects uuid v3/v5/v6 hash functions when `buf` parameter is provided
+  - Vulnerability only triggered in specific edge cases (custom buffer usage)
+  - Used by exceljs for Excel file generation/parsing:
+    - Only accessible to authenticated wedding admins
+    - Requires explicit user action (file upload/download)
+    - No untrusted input in the Excel processing pipeline
+  - Risk of exploitation is very low due to specific conditions and limited exposure
+- **Mitigation**:
+  - Excel functionality restricted to authenticated administrators
+  - File uploads have size restrictions
+  - Downgrading exceljs would introduce other compatibility issues
+- **Future Plan**: Update to uuid@11.1.1+ when it's stable and all dependents support it
+
 ##### undici - Unbounded Decompression Chain
 - **Package**: undici < 6.23.0 (via @vercel/blob@0.27.3)
 - **CVE**: [GHSA-g9mf-h72j-4rw9](https://github.com/advisories/GHSA-g9mf-h72j-4rw9)
@@ -162,6 +200,19 @@ This document tracks known security vulnerabilities that have been assessed and 
 - **Future Plan**: Upgrade to @vercel/blob@2.x when stable and breaking changes are assessed
 
 ### Recently Fixed
+
+#### 2026-05-31
+- Ran `npm audit fix` to resolve multiple vulnerabilities across the dependency tree:
+  - **@protobufjs/utf8** ≤1.1.0 (MODERATE): Overlong UTF-8 decoding - Fixed
+  - **@xmldom/xmldom** ≤0.8.12 (HIGH): Multiple XML injection vulnerabilities - Fixed
+  - **axios** 1.0.0-1.15.2 (HIGH): Multiple prototype pollution and SSRF vulnerabilities - Fixed
+  - **brace-expansion** 5.0.2-5.0.5 (MODERATE): DoS via numeric range - Fixed
+  - **fast-uri** ≤3.1.1 (HIGH): Path traversal and host confusion - Fixed
+  - **hono** ≤4.12.17 (MODERATE): Multiple vulnerabilities - Fixed
+  - **icu-minify** ≤4.9.1 (MODERATE): DoS via unsanitized select key - Fixed
+  - **next** 9.3.4-16.3.0 (HIGH): Multiple vulnerabilities - Fixed
+  - **next-intl** ≤4.9.1 (MODERATE): Prototype pollution with precompile - Fixed
+  - Two remaining moderate vulnerabilities accepted with documented risk (postcss, uuid)
 
 #### 2026-03-13
 - **flatted < 3.4.0** (HIGH): Unbounded recursion DoS in parse() revive phase
