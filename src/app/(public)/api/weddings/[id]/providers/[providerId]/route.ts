@@ -51,8 +51,8 @@ export async function PUT(
         social_media: validated.social_media || null,
         total_price: validated.total_price,
         budgeted_price: validated.budgeted_price,
-        contract_url: validated.contract_url || null,
-        notes: validated.notes || null,
+        contract_url: validated.contract_url === undefined ? undefined : (validated.contract_url || null),
+        notes: validated.notes === undefined ? undefined : (validated.notes || null),
       },
       include: {
         category: true,
