@@ -81,6 +81,11 @@ async function apiPost(path: string, body: unknown): Promise<unknown> {
   return res.json();
 }
 
+// Fallback for tools handled server-side via the unified /api/mcp endpoint
+async function callTool(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
+  return apiPost('/api/mcp', { tool, args });
+}
+
 // ── Tool Definitions ───────────────────────────────────────────────────────────
 
 const ADMIN_TOOLS = [
@@ -173,6 +178,18 @@ const ADMIN_TOOLS = [
     },
   },
   {
+    name: 'get_guests_by_label',
+    description:
+      'Get the count of individual people belonging to families tagged with a specific label. Label matching is case-insensitive.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        labelName: { type: 'string', description: 'The label name to filter by (case-insensitive)' },
+      },
+      required: ['labelName'],
+    },
+  },
+  {
     name: 'get_wedding_invoices',
     description: 'Get a summary of invoices and payments for this wedding.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
@@ -181,6 +198,36 @@ const ADMIN_TOOLS = [
     name: 'get_wedding_providers',
     description: 'Get the list of service providers (vendors) assigned to this wedding with payment status.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_wedding_itinerary',
+    description:
+      'Get the wedding itinerary: ceremony venue, reception hall, and other event locations with addresses and times.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_wedding_schedule',
+    description:
+      'Get the full wedding day schedule with blocks and stages including calculated start/end times and assigned providers.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_tasting_menu',
+    description:
+      'Get the tasting menu(s) for the wedding: rounds, sections, dishes, selection status, and tasting date.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'get_tasting_scores',
+    description:
+      'Get tasting scores submitted by participants for each dish, including per-dish averages and notes.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        roundNumber: { type: 'number', description: 'Tasting round to retrieve (omit for all rounds)' },
+      },
+      required: [],
+    },
   },
   {
     name: 'list_invitation_templates',
@@ -279,6 +326,76 @@ const PLANNER_TOOLS = [
       'Get a list of all weddings managed by this planner with dates, guest counts, and RSVP completion.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
   },
+  {
+    name: 'list_quotes',
+    description:
+      'List all quotes with status, couple names, and totals. Filter by status (DRAFT, SENT, ACCEPTED, REJECTED, EXPIRED) or search by name.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED'], description: 'Filter by quote status' },
+        search: { type: 'string', description: 'Partial match against couple or customer name' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'get_quote_detail',
+    description: 'Get the full breakdown of a specific quote including all line items.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        quoteId: { type: 'string', description: 'The quote ID to look up' },
+      },
+      required: ['quoteId'],
+    },
+  },
+  {
+    name: 'list_contracts',
+    description:
+      'List all contracts with status and signing information. Filter by status (DRAFT, SHARED, SIGNING, SIGNED, CANCELLED) or search by title/customer.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'SHARED', 'SIGNING', 'SIGNED', 'CANCELLED'], description: 'Filter by contract status' },
+        search: { type: 'string', description: 'Partial match against contract title or customer name' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'list_invoices',
+    description:
+      'List all invoices with amounts and outstanding balances. Filter by status (DRAFT, ISSUED, PARTIAL, PAID, OVERDUE, CANCELLED) or search by customer/invoice number.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'ISSUED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'], description: 'Filter by invoice status' },
+        search: { type: 'string', description: 'Partial match against customer name or invoice number' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'record_invoice_payment',
+    description:
+      'Record a payment received against an invoice. Updates amount_paid and invoice status automatically.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        invoiceId: { type: 'string', description: 'The invoice ID' },
+        amount: { type: 'number', description: 'Payment amount in the invoice currency' },
+        paymentDate: { type: 'string', description: 'Payment date in YYYY-MM-DD format' },
+        method: {
+          type: 'string',
+          enum: ['CASH', 'BANK_TRANSFER', 'PAYPAL', 'BIZUM', 'REVOLUT', 'OTHER'],
+          description: 'Payment method (default: BANK_TRANSFER)',
+        },
+        reference: { type: 'string', description: 'Reference number or transaction ID (optional)' },
+      },
+      required: ['invoiceId', 'amount', 'paymentDate'],
+    },
+  },
 ];
 
 // Expose all tools — the backend enforces role-based access per API key
@@ -340,7 +457,7 @@ async function handleTool(name: string, args: Record<string, unknown>): Promise<
       return apiGet('/api/planner/mcp/weddings');
 
     default:
-      throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
+      return callTool(name, args);
   }
 }
 
