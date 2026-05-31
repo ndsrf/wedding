@@ -5,14 +5,10 @@
  * Exposes the Nupci wedding management platform as MCP tools for use
  * with Claude Desktop or any MCP-compatible client.
  *
- * All tool calls are forwarded to the unified POST /api/mcp endpoint on
- * the Nupci server — business logic lives there, not here. Adding a new
- * tool only requires updating tool-handlers.ts on the server side and
- * adding a tool definition below.
- *
  * Environment variables:
- *   NUPCI_URL    - Base URL of your Nupci instance (e.g. https://your-domain.com)
+ *   NUPCI_URL   - Base URL of your Nupci instance (e.g. https://your-domain.com)
  *   NUPCI_API_KEY - API key (generated from the platform settings)
+ *   NUPCI_ROLE  - "wedding_admin" (default) or "planner"
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -38,14 +34,13 @@ if (!BASE_URL || !API_KEY) {
 
 // ── HTTP Client ────────────────────────────────────────────────────────────────
 
-async function callTool(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
-  const res = await fetch(`${BASE_URL}/api/mcp`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ tool, args }),
+async function apiGet(path: string, params?: Record<string, string>): Promise<unknown> {
+  const url = new URL(path, BASE_URL + '/');
+  if (params) {
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  }
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${API_KEY}` },
   });
   if (!res.ok) {
     const text = await res.text();
@@ -54,31 +49,59 @@ async function callTool(tool: string, args: Record<string, unknown> = {}): Promi
   return res.json();
 }
 
+async function apiPut(path: string, body: unknown): Promise<unknown> {
+  const url = new URL(path, BASE_URL + '/').toString();
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new McpError(ErrorCode.InternalError, `API ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
+async function apiPost(path: string, body: unknown): Promise<unknown> {
+  const url = new URL(path, BASE_URL + '/').toString();
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new McpError(ErrorCode.InternalError, `API ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
+// Fallback for tools handled server-side via the unified /api/mcp endpoint
+async function callTool(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
+  return apiPost('/api/mcp', { tool, args });
+}
+
 // ── Tool Definitions ───────────────────────────────────────────────────────────
 
 const ADMIN_TOOLS = [
   {
     name: 'get_guest_list',
-    description: 'Get a summary of the wedding guest list including family names, contact info, and RSVP status.',
+    description:
+      'Get a summary of the wedding guest list including family names, contact info, and RSVP status.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
   },
   {
     name: 'get_rsvp_status',
     description:
-      'Get aggregate RSVP statistics: total families, total people, submitted RSVPs, pending, and completion percentage.',
+      'Get aggregate RSVP statistics: total families, submitted RSVPs, pending, and completion percentage.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
-  },
-  {
-    name: 'get_guests_by_label',
-    description:
-      'Get the count of individual people belonging to families tagged with a specific label. Label matching is case-insensitive.',
-    inputSchema: {
-      type: 'object' as const,
-      properties: {
-        labelName: { type: 'string', description: 'The label name to filter by (case-insensitive)' },
-      },
-      required: ['labelName'],
-    },
   },
   {
     name: 'update_family_rsvp',
@@ -108,7 +131,8 @@ const ADMIN_TOOLS = [
   },
   {
     name: 'assign_family_to_table',
-    description: 'Assign the attending members of a family to a seating table. Clears any previous assignment first.',
+    description:
+      'Assign the attending members of a family to a seating table. Clears any previous assignment first.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -117,7 +141,7 @@ const ADMIN_TOOLS = [
         memberNames: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Specific member names to assign (omit to assign all attending members)',
+          description: 'Specific member names to assign (optional; omit to assign all attending members)',
         },
       },
       required: ['familyName', 'tableNumber'],
@@ -147,9 +171,24 @@ const ADMIN_TOOLS = [
         title: { type: 'string', description: 'The reminder title' },
         description: { type: 'string', description: 'Additional details (optional)' },
         dueDate: { type: 'string', description: 'Absolute due date in YYYY-MM-DD format (optional)' },
-        dueDateRelative: { type: 'string', description: 'Relative due date, e.g. "WEDDING_DATE-60" (optional)' },
+        dueDateRelative: {
+          type: 'string',
+          description: 'Relative due date, e.g. "WEDDING_DATE-60" for 2 months before (optional)',
+        },
       },
       required: ['title'],
+    },
+  },
+  {
+    name: 'get_guests_by_label',
+    description:
+      'Get the count of individual people belonging to families tagged with a specific label. Label matching is case-insensitive.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        labelName: { type: 'string', description: 'The label name to filter by (case-insensitive)' },
+      },
+      required: ['labelName'],
     },
   },
   {
@@ -192,12 +231,101 @@ const ADMIN_TOOLS = [
       required: [],
     },
   },
+  {
+    name: 'list_invitation_templates',
+    description:
+      'List all invitation templates for this wedding. Returns user-created templates and system seed templates. ' +
+      'Read the invitation://schema resource first to understand the TemplateDesign format.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'create_invitation_template',
+    description:
+      'Create a new invitation template from a TemplateDesign JSON. ' +
+      'Read invitation://schema first to generate a valid design. ' +
+      'Text blocks require multilingual content for all 5 languages (ES, EN, FR, IT, DE).',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        name: { type: 'string', description: 'Template name (e.g. "Garden Romance Invitation")' },
+        design: {
+          type: 'object',
+          description: 'TemplateDesign JSON object with globalStyle and blocks array. See invitation://schema.',
+        },
+      },
+      required: ['name', 'design'],
+    },
+  },
+  {
+    name: 'update_invitation_template',
+    description: 'Update an existing invitation template name and/or design.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        templateId: { type: 'string', description: 'ID of the template to update' },
+        name: { type: 'string', description: 'New template name (optional)' },
+        design: { type: 'object', description: 'Updated TemplateDesign JSON (optional)' },
+      },
+      required: ['templateId'],
+    },
+  },
+  {
+    name: 'get_wedding_design_system',
+    description:
+      'Get the wedding design system (color palette, fonts, style) used to keep all documents visually consistent. ' +
+      'Returns null if no design system has been set yet.',
+    inputSchema: { type: 'object' as const, properties: {}, required: [] },
+  },
+  {
+    name: 'set_wedding_design_system',
+    description:
+      'Save the wedding design system (color palette, fonts, style, motifs). ' +
+      'Use this after generating a design with Claude Design to persist the visual identity. ' +
+      'The same design system should be used for invitations, menus, and seating charts.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        designSystem: {
+          type: 'object',
+          description: 'WeddingDesignSystem object',
+          properties: {
+            palette: {
+              type: 'object',
+              properties: {
+                primary: { type: 'string', description: 'Hex color, e.g. "#8B7355"' },
+                secondary: { type: 'string' },
+                accent: { type: 'string' },
+                background: { type: 'string' },
+                text: { type: 'string' },
+              },
+              required: ['primary', 'secondary', 'accent', 'background', 'text'],
+            },
+            fonts: {
+              type: 'object',
+              properties: {
+                heading: { type: 'string', description: 'Font family name, must be one of the available fonts' },
+                body: { type: 'string' },
+                accent: { type: 'string' },
+              },
+              required: ['heading', 'body'],
+            },
+            style: { type: 'string', description: 'Style descriptor, e.g. "rustic-botanical", "modern-elegant"' },
+            motifs: { type: 'array', items: { type: 'string' }, description: 'Visual motifs, e.g. ["floral", "botanical"]' },
+            backgroundImageUrl: { type: 'string', description: 'URL of a background image or pattern (optional)' },
+          },
+          required: ['palette', 'fonts', 'style'],
+        },
+      },
+      required: ['designSystem'],
+    },
+  },
 ];
 
 const PLANNER_TOOLS = [
   {
     name: 'get_planner_weddings',
-    description: 'Get a list of all weddings managed by this planner with dates, guest counts, and RSVP completion.',
+    description:
+      'Get a list of all weddings managed by this planner with dates, guest counts, and RSVP completion.',
     inputSchema: { type: 'object' as const, properties: {}, required: [] },
   },
   {
@@ -272,32 +400,339 @@ const PLANNER_TOOLS = [
   },
 ];
 
-// Role exposed by the API key governs which tools are meaningful, but we
-// advertise all of them — the server enforces access via the key's role.
+// Expose all tools — the backend enforces role-based access per API key
 const ALL_TOOLS = [...PLANNER_TOOLS, ...ADMIN_TOOLS];
 
-// ── Server ─────────────────────────────────────────────────────────────────────
+// ── Tool Handlers ──────────────────────────────────────────────────────────────
 
-const server = new Server(
-  { name: 'nupci', version: '1.1.0' },
-  { capabilities: { tools: {}, resources: {} } },
-);
+async function handleTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+  switch (name) {
+    // ── Wedding Admin Tools ──────────────────────────────────────────────────
+    case 'get_guest_list':
+      return apiGet('/api/admin/mcp/guests');
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: ALL_TOOLS }));
+    case 'get_rsvp_status':
+      return apiGet('/api/admin/mcp/rsvp-status');
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args = {} } = request.params;
-  try {
-    const result = await callTool(name, args as Record<string, unknown>);
-    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
-  } catch (error) {
-    if (error instanceof McpError) throw error;
-    const msg = error instanceof Error ? error.message : String(error);
-    throw new McpError(ErrorCode.InternalError, msg);
+    case 'update_family_rsvp':
+      return apiPost('/api/admin/mcp/update-rsvp', args);
+
+    case 'assign_family_to_table':
+      return apiPost('/api/admin/mcp/assign-table', args);
+
+    case 'suggest_tables_for_family': {
+      const params: Record<string, string> = { familyName: String(args.familyName) };
+      if (args.topN) params.topN = String(args.topN);
+      return apiGet('/api/admin/mcp/suggest-tables', params);
+    }
+
+    case 'add_reminder':
+      return apiPost('/api/admin/mcp/reminders', args);
+
+    case 'get_wedding_invoices':
+      return apiGet('/api/admin/mcp/invoices');
+
+    case 'get_wedding_providers':
+      return apiGet('/api/admin/mcp/providers');
+
+    // ── Invitation Template Tools ────────────────────────────────────────────
+    case 'list_invitation_templates':
+      return apiGet('/api/admin/mcp/invitation-templates');
+
+    case 'create_invitation_template':
+      return apiPost('/api/admin/mcp/invitation-templates', args);
+
+    case 'update_invitation_template': {
+      const { templateId, ...rest } = args;
+      return apiPut(`/api/admin/mcp/invitation-templates/${String(templateId)}`, rest);
+    }
+
+    // ── Wedding Design System Tools ──────────────────────────────────────────
+    case 'get_wedding_design_system':
+      return apiGet('/api/admin/mcp/design-system');
+
+    case 'set_wedding_design_system':
+      return apiPut('/api/admin/mcp/design-system', args);
+
+    // ── Planner Tools ────────────────────────────────────────────────────────
+    case 'get_planner_weddings':
+      return apiGet('/api/planner/mcp/weddings');
+
+    default:
+      return callTool(name, args);
   }
-});
+}
 
 // ── Resources ──────────────────────────────────────────────────────────────────
+
+const INVITATION_SCHEMA_URI = 'invitation://schema';
+
+const INVITATION_SCHEMA_DOCS = `
+# Nupci Invitation Template — Design Schema Reference
+
+Use this reference to generate valid \`TemplateDesign\` JSON when calling \`create_invitation_template\`.
+
+## Top-Level Structure
+
+\`\`\`json
+{
+  "globalStyle": {
+    "backgroundColor": "#FDFBF7",
+    "backgroundImage": "/themes/garden-birds/botanical-pattern.svg",
+    "paperBackgroundImage": "https://..."
+  },
+  "blocks": [ /* array of TemplateBlock */ ]
+}
+\`\`\`
+
+- \`backgroundColor\`: hex color for the canvas background
+- \`backgroundImage\`: optional URL to a tiling SVG/PNG pattern (use a system theme path or omit)
+- \`paperBackgroundImage\`: optional URL to a user-uploaded paper texture
+
+---
+
+## Block Types
+
+Each block needs a unique \`id\` (generate a UUID v4) and a \`type\`.
+
+### TextBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "text",
+  "content": {
+    "ES": "Texto en español",
+    "EN": "Text in English",
+    "FR": "Texte en français",
+    "IT": "Testo in italiano",
+    "DE": "Text auf Deutsch"
+  },
+  "style": {
+    "fontFamily": "Crimson Text, serif",
+    "fontSize": "2rem",
+    "color": "#2C2416",
+    "textAlign": "center",
+    "fontStyle": "italic",
+    "fontWeight": "normal",
+    "textDecoration": "none"
+  }
+}
+\`\`\`
+
+**Important:** \`content\` MUST include all 5 languages: ES, EN, FR, IT, DE.
+Template variables available: \`{{couple_names}}\`, \`{{wedding_date}}\`
+
+### ImageBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "image",
+  "src": "https://...",
+  "alt": "Wedding photo",
+  "alignment": "center",
+  "zoom": 100
+}
+\`\`\`
+
+- \`alignment\`: "left" | "center" | "right"
+- \`zoom\`: 10–200 (percentage)
+
+### SpacerBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "spacer", "height": "2rem" }
+\`\`\`
+
+Use to add vertical space between blocks. Height accepts any CSS value (rem, px, em).
+
+### DividerBlock (visual separator)
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "embed",
+  "html": "<div style=\\"width:80%;margin:0 auto;border-top:1px solid #D4AF37;\\"></div>",
+  "height": "1px"
+}
+\`\`\`
+
+### EmbedBlock (HTML/SVG for decorative elements)
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "embed",
+  "html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 400 80\\">...</svg>",
+  "height": "80px"
+}
+\`\`\`
+
+Use \`EmbedBlock\` for: ornamental borders, floral SVG dividers, decorative frames, gradient bands,
+custom typography effects, or any rich HTML/CSS/SVG from Claude Design.
+The HTML is rendered as-is inside the invitation canvas.
+
+### LocationBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "location" }
+\`\`\`
+
+Renders the wedding venue map and address automatically from the wedding data. No extra fields needed.
+
+### CountdownBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "countdown" }
+\`\`\`
+
+Shows a live countdown to the wedding date. Optionally add \`style\` with fontFamily, fontSize, color.
+
+### AddToCalendarBlock
+
+\`\`\`json
+{ "id": "uuid", "type": "add-to-calendar" }
+\`\`\`
+
+Adds a calendar button. No configuration needed.
+
+### ButtonBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "button",
+  "text": { "ES": "RSVP", "EN": "RSVP", "FR": "RSVP", "IT": "RSVP", "DE": "RSVP" },
+  "url": "https://...",
+  "style": {
+    "buttonColor": "#8B7355",
+    "textColor": "#FFFFFF",
+    "fontFamily": "Lora, serif",
+    "alignment": "center"
+  }
+}
+\`\`\`
+
+### GalleryBlock
+
+\`\`\`json
+{
+  "id": "uuid",
+  "type": "gallery",
+  "columns": 2,
+  "showCaptions": false,
+  "showUploadButton": true,
+  "autoPlayMs": 0
+}
+\`\`\`
+
+---
+
+## Available Fonts
+
+Choose from these font families (all pre-loaded by the platform):
+
+**Elegant Serif** (recommended for headings):
+Crimson Text, Cormorant Garamond, Lora, EB Garamond, Libre Baskerville
+
+**Script & Cursive** (recommended for couple names):
+Alex Brush, Great Vibes, Dancing Script, Parisienne, Sacramento, Allura, Tangerine
+
+**Modern Sans-Serif**:
+Inter, Poppins, Montserrat
+
+Always use the full CSS font stack: \`"Great Vibes, cursive"\`, \`"Crimson Text, serif"\`, \`"Inter, sans-serif"\`
+
+---
+
+## System Theme Palettes
+
+Use these as reference for color harmony:
+
+| Theme | primary | accent | background | text |
+|-------|---------|--------|-----------|------|
+| classic-elegance | #8B7355 | #D4AF37 | #FDFBF7 | #2C2416 |
+| garden-romance | #7C9473 | #E8A5A5 | #F9FBF7 | #2C3E2A |
+| modern-minimal | #2D3748 | #4299E1 | #FFFFFF | #1A202C |
+| rustic-charm | #8B4513 | #CD853F | #FFF8F0 | #3E2723 |
+| beach-breeze | #0891B2 | #F59E0B | #F0FDFA | #164E63 |
+| garden-birds | #6B8E6F | #E8B86D | #FAF9F5 | #3A4F3C |
+
+---
+
+## Example: Minimal Elegant Invitation
+
+\`\`\`json
+{
+  "globalStyle": {
+    "backgroundColor": "#FDFBF7"
+  },
+  "blocks": [
+    {
+      "id": "b1",
+      "type": "spacer",
+      "height": "2rem"
+    },
+    {
+      "id": "b2",
+      "type": "text",
+      "content": {
+        "ES": "Nos vamos a casar",
+        "EN": "We Are Getting Married",
+        "FR": "Nous allons nous marier",
+        "IT": "Ci sposiamo",
+        "DE": "Wir heiraten"
+      },
+      "style": {
+        "fontFamily": "Cormorant Garamond, serif",
+        "fontSize": "1.1rem",
+        "color": "#5C5347",
+        "textAlign": "center",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "id": "b3",
+      "type": "text",
+      "content": {
+        "ES": "{{couple_names}}",
+        "EN": "{{couple_names}}",
+        "FR": "{{couple_names}}",
+        "IT": "{{couple_names}}",
+        "DE": "{{couple_names}}"
+      },
+      "style": {
+        "fontFamily": "Great Vibes, cursive",
+        "fontSize": "3.5rem",
+        "color": "#8B7355",
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "b4",
+      "type": "text",
+      "content": {
+        "ES": "{{wedding_date}}",
+        "EN": "{{wedding_date}}",
+        "FR": "{{wedding_date}}",
+        "IT": "{{wedding_date}}",
+        "DE": "{{wedding_date}}"
+      },
+      "style": {
+        "fontFamily": "Lora, serif",
+        "fontSize": "1.2rem",
+        "color": "#5C5347",
+        "textAlign": "center"
+      }
+    },
+    { "id": "b5", "type": "countdown" },
+    { "id": "b6", "type": "location" },
+    { "id": "b7", "type": "add-to-calendar" }
+  ]
+}
+\`\`\`
+`.trim();
 
 const PLATFORM_DOCS_URI = 'platform://docs';
 
@@ -305,95 +740,91 @@ const PLATFORM_DOCS_SUMMARY = `
 # Nupci Wedding Management Platform — Quick Reference
 
 ## Roles
-- **Wedding Admin (Couple)**: Manages guests, RSVPs, seating, invitations, checklist, schedule, itinerary, tasting, and payments for their specific wedding.
-- **Wedding Planner**: Manages multiple weddings, CRM, quotes, contracts, invoices, providers, and templates.
-
-## Available Tools by Role
-
-### Wedding Admin tools
-| Tool | Description |
-|------|-------------|
-| get_guest_list | All families with members, contact info, and RSVP status |
-| get_rsvp_status | Aggregate counts: total families/people, attending, pending |
-| get_guests_by_label | Count people whose family has a specific label (case-insensitive) |
-| update_family_rsvp | Set attending true/false per family or per individual member |
-| assign_family_to_table | Seat a family's attending members at a numbered table |
-| suggest_tables_for_family | Rank tables by free seats, shared-admin guests, age similarity |
-| add_reminder | Add a checklist task (absolute or relative date, e.g. WEDDING_DATE-60) |
-| get_wedding_invoices | Invoices and payment status for the wedding |
-| get_wedding_providers | Service providers assigned to the wedding with payment info |
-| get_wedding_itinerary | Venue locations with types, addresses, and Google Maps links |
-| get_wedding_schedule | Full day-of timeline: blocks, stages, start/end times, providers |
-| get_tasting_menu | All tasting rounds, sections, and dishes with selection status |
-| get_tasting_scores | Per-dish scores, averages, and participant notes |
-
-### Wedding Planner tools (in addition to the above)
-| Tool | Description |
-|------|-------------|
-| get_planner_weddings | All weddings managed by this planner |
-| list_quotes | All quotes with status and totals; filter by status or search by name |
-| get_quote_detail | Full line-item breakdown of a specific quote |
-| list_contracts | All contracts with signing status; filter by status or search |
-| list_invoices | All invoices across clients; filter by status or search |
-| record_invoice_payment | Record a payment against an invoice; status auto-updates |
+- **Wedding Admin (Couple)**: Manages guests, RSVPs, seating, invitations, checklist, providers, and payments for their specific wedding.
+- **Wedding Planner**: Manages multiple weddings, CRM, quotes, contracts, invoices, and templates.
 
 ## Guest Management
 - Guests are organised as **Families** (a family unit may have multiple members).
-- Each member has a name, type (adult/child/infant), age, and RSVP status.
-- Families have a preferred channel (WhatsApp, Email, SMS), language (EN, ES, FR, IT, DE), and optional labels.
+- Each member has a name, type (adult/child/infant), age, and RSVP status (attending / not attending / pending).
+- Families have a preferred channel (WhatsApp, Email, SMS) and language (EN, ES, FR, IT, DE).
 
 ## RSVP Workflow
-1. Planner or admin sends an invitation with a magic link via WhatsApp/Email/SMS.
-2. Guest opens the link (no account needed) and confirms/declines attendance per family member.
+1. Planner or admin sends invitation with a magic link via WhatsApp/Email/SMS.
+2. Guest opens the link (no account needed) and confirms/declines attendance for each family member.
+3. Optionally answers dietary, transport, and custom questions.
 
 ## Seating
-- Tables are numbered with a fixed capacity.
-- suggest_tables_for_family ranks by: free seats → most shared-admin guests → closest average age.
+- Tables are numbered and have a fixed capacity.
+- Attending members can be assigned to specific tables.
+- The \`suggest_tables_for_family\` tool ranks tables by: enough free seats → most shared-admin guests → closest average age.
 
-## Wedding Schedule
-- Day-of timeline organised as **blocks** (e.g. Preparation, Ceremony, Reception) containing **stages**.
-- Stages run sequentially within a block (parallel tracks also supported).
-- Each stage has a calculated start/end time and an optional assigned provider.
-- Use get_wedding_schedule to answer "what time does X start?" or "who is the photographer during the ceremony?"
+## Checklist & Reminders
+- Reminders are checklist tasks in the "Reminders" section.
+- Due dates can be absolute (YYYY-MM-DD) or relative (WEDDING_DATE±days).
 
-## Itinerary
-- Key venue locations with types: CEREMONY, EVENT, PRE_EVENT, POST_EVENT.
-- Each location has a name, address, and optional Google Maps link.
-- Use get_wedding_itinerary for venue names, addresses, and event times.
-
-## Tasting
-- Tasting menus are structured as: Menu → Rounds → Sections → Dishes.
-- Participants score dishes 1–5 and can leave notes.
-- is_selected on a dish marks the final menu choice.
-- Use get_tasting_menu for menu content; get_tasting_scores for ratings and feedback.
-
-## Quotes, Contracts & Invoices
-- **Quotes**: lifecycle DRAFT → SENT → ACCEPTED (or REJECTED/EXPIRED). Linked to a customer; can convert to a wedding.
-- **Contracts**: lifecycle DRAFT → SHARED → SIGNING → SIGNED (or CANCELLED). Digital signature via DocuSeal.
-- **Invoices**: track total, amount_paid, and outstanding balance. Statuses: DRAFT, ISSUED, PARTIAL, PAID, OVERDUE, CANCELLED. Use record_invoice_payment to log a received payment — status updates automatically.
-- Payment methods: CASH, BANK_TRANSFER, PAYPAL, BIZUM, REVOLUT, OTHER (default: BANK_TRANSFER).
+## Invoices & Providers
+- Invoices are linked to the wedding via quotes or contracts.
+- Providers (vendors) can be assigned to a wedding with agreed amounts and payment tracking.
 
 ## Pages
 - Wedding Admin panel: /admin
 - Planner dashboard: /planner
 `.trim();
 
+// ── Server ─────────────────────────────────────────────────────────────────────
+
+const server = new Server(
+  { name: 'nupci', version: '1.0.0' },
+  { capabilities: { tools: {}, resources: {} } },
+);
+
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: ALL_TOOLS,
+}));
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: args = {} } = request.params;
+  try {
+    const result = await handleTool(name, args as Record<string, unknown>);
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+    };
+  } catch (error) {
+    if (error instanceof McpError) throw error;
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new McpError(ErrorCode.InternalError, msg);
+  }
+});
+
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-  resources: [{
-    uri: PLATFORM_DOCS_URI,
-    name: 'Nupci Platform Documentation',
-    description: 'Quick reference for the Nupci wedding management platform features and workflows.',
-    mimeType: 'text/markdown',
-  }],
+  resources: [
+    {
+      uri: PLATFORM_DOCS_URI,
+      name: 'Nupci Platform Documentation',
+      description: 'Quick reference for the Nupci wedding management platform features and workflows.',
+      mimeType: 'text/markdown',
+    },
+    {
+      uri: INVITATION_SCHEMA_URI,
+      name: 'Invitation Template Schema',
+      description: 'Complete reference for generating TemplateDesign JSON: block types, fonts, theme palettes, and examples.',
+      mimeType: 'text/markdown',
+    },
+  ],
 }));
 
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  if (request.params.uri !== PLATFORM_DOCS_URI) {
-    throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${request.params.uri}`);
+  if (request.params.uri === PLATFORM_DOCS_URI) {
+    return {
+      contents: [{ uri: PLATFORM_DOCS_URI, mimeType: 'text/markdown', text: PLATFORM_DOCS_SUMMARY }],
+    };
   }
-  return {
-    contents: [{ uri: PLATFORM_DOCS_URI, mimeType: 'text/markdown', text: PLATFORM_DOCS_SUMMARY }],
-  };
+  if (request.params.uri === INVITATION_SCHEMA_URI) {
+    return {
+      contents: [{ uri: INVITATION_SCHEMA_URI, mimeType: 'text/markdown', text: INVITATION_SCHEMA_DOCS }],
+    };
+  }
+  throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${request.params.uri}`);
 });
 
 // ── Start ──────────────────────────────────────────────────────────────────────
@@ -401,7 +832,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`Nupci MCP server v1.1.0 running (url: ${BASE_URL})\n`);
+  process.stderr.write(`Nupci MCP server running (url: ${BASE_URL})\n`);
 }
 
 main().catch((err) => {

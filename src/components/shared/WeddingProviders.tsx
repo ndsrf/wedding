@@ -189,14 +189,8 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
         contract_url: editForm.contract_url,
       }),
     });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.data) {
-        setProviders(prev => prev.map(p => p.id === id ? data.data : p));
-      }
-      setEditingId(null);
-      setEditForm({});
-    } else {
+    if (res.ok) { fetchData(); setEditingId(null); setEditForm({}); }
+    else {
       const ed = await res.json().catch(() => ({}));
       alert(Array.isArray(ed.error)
         ? ed.error.map((e: { path: string[]; message: string }) => `${e.path.join('.')}: ${e.message}`).join('\n')
@@ -207,9 +201,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const handleDelete = async (id: string) => {
     if (!confirm(t('confirmDeleteProviderFromWedding'))) return;
     const res = await fetch(`/api/weddings/${weddingId}/providers/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setProviders(prev => prev.filter(p => p.id !== id));
-    }
+    if (res.ok) fetchData();
   };
 
   // ── file upload ───────────────────────────────────────────────────────────
@@ -249,15 +241,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
       }),
     });
     if (res.ok) {
-      const data = await res.json();
-      if (data.data) {
-        setProviders(prev => prev.map(wp =>
-          wp.id === providerId
-            ? { ...wp, payments: [...wp.payments, data.data] }
-            : wp
-        ));
-      }
-      setPaymentProviderId(null);
+      fetchData(); setPaymentProviderId(null);
       setPaymentAmount(''); setPaymentNotes(''); setPaymentDocumentUrl('');
     }
   };
@@ -265,12 +249,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
   const handleDeletePayment = async (id: string) => {
     if (!confirm(t('confirmDeletePayment'))) return;
     const res = await fetch(`/api/weddings/${weddingId}/payments/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setProviders(prev => prev.map(wp => ({
-        ...wp,
-        payments: wp.payments.filter(p => p.id !== id),
-      })));
-    }
+    if (res.ok) fetchData();
   };
 
   // ── helpers ───────────────────────────────────────────────────────────────
@@ -460,21 +439,25 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
 
                   {/* Financial summary bar */}
                   <div className="border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 divide-x divide-gray-100">
-                    <div className="px-3 py-2 text-center">
-                      <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">{t('budgetedPrice')}</p>
-                      <p className="text-sm font-semibold text-gray-700">
-                        {wp.budgeted_price ? `${Number(wp.budgeted_price).toLocaleString()} €` : '—'}
-                        {wp.budgeted_price && wp.category.price_type === 'PER_PERSON' && (
-                          <span className="text-[10px] text-gray-400 ml-0.5">/{t('perPersonShort')}</span>
-                        )}
-                      </p>
-                    </div>
-                    <div className="px-3 py-2 text-center">
-                      <p className="text-[10px] text-indigo-500 uppercase font-medium mb-0.5">{t('projectedTotal')}</p>
-                      <p className="text-sm font-semibold text-indigo-600">
-                        {projected ? `${projected.toLocaleString()} €` : '—'}
-                      </p>
-                    </div>
+                    {!isPlanner && (
+                      <div className="px-3 py-2 text-center">
+                        <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">{t('budgetedPrice')}</p>
+                        <p className="text-sm font-semibold text-gray-700">
+                          {wp.budgeted_price ? `${Number(wp.budgeted_price).toLocaleString()} €` : '—'}
+                          {wp.budgeted_price && wp.category.price_type === 'PER_PERSON' && (
+                            <span className="text-[10px] text-gray-400 ml-0.5">/{t('perPersonShort')}</span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                    {!isPlanner && (
+                      <div className="px-3 py-2 text-center">
+                        <p className="text-[10px] text-indigo-500 uppercase font-medium mb-0.5">{t('projectedTotal')}</p>
+                        <p className="text-sm font-semibold text-indigo-600">
+                          {projected ? `${projected.toLocaleString()} €` : '—'}
+                        </p>
+                      </div>
+                    )}
                     <div className="px-3 py-2 text-center">
                       <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">
                         {t('totalPrice')}
@@ -594,10 +577,12 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <Field label={`${t('budgetedPrice')}${wp.category.price_type === 'PER_PERSON' ? ` (/${t('perPersonShort')})` : ''}`}>
-                      <Input type="number" value={editForm.budgeted_price ?? ''}
-                        onChange={(e: IE) => setEditForm({ ...editForm, budgeted_price: e.target.value ? Number(e.target.value) : null })} />
-                    </Field>
+                    {!isPlanner && (
+                      <Field label={`${t('budgetedPrice')}${wp.category.price_type === 'PER_PERSON' ? ` (/${t('perPersonShort')})` : ''}`}>
+                        <Input type="number" value={editForm.budgeted_price ?? ''}
+                          onChange={(e: IE) => setEditForm({ ...editForm, budgeted_price: e.target.value ? Number(e.target.value) : null })} />
+                      </Field>
+                    )}
                     <Field label={`${t('totalPrice')}${wp.category.price_type === 'PER_PERSON' ? ` (/${t('perPersonShort')})` : ''}`}>
                       <Input type="number" value={editForm.total_price ?? ''}
                         onChange={(e: IE) => setEditForm({ ...editForm, total_price: e.target.value ? Number(e.target.value) : null })} />
@@ -697,10 +682,12 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
       {/* ── Summary totals ── */}
       {providers.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Card className="p-4 text-center border-indigo-200 bg-indigo-50">
-            <p className="text-[11px] text-indigo-600 font-medium uppercase mb-1">{t('totalProjected')}</p>
-            <p className="text-lg font-bold text-indigo-800">{totalBudgeted.toLocaleString()} €</p>
-          </Card>
+          {!isPlanner && (
+            <Card className="p-4 text-center border-indigo-200 bg-indigo-50">
+              <p className="text-[11px] text-indigo-600 font-medium uppercase mb-1">{t('totalProjected')}</p>
+              <p className="text-lg font-bold text-indigo-800">{totalBudgeted.toLocaleString()} €</p>
+            </Card>
+          )}
           <Card className="p-4 text-center border-gray-200 bg-gray-50">
             <p className="text-[11px] text-gray-500 font-medium uppercase mb-1">{t('totalReal')}</p>
             <p className="text-lg font-bold text-gray-800">{totalReal.toLocaleString()} €</p>
@@ -723,7 +710,7 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
           {providers.flatMap((wp: WeddingProvider) =>
             wp.payments.map((p: Payment) => ({
               ...p,
-              providerName: wp.name || wp.provider?.name || wp.category.name,
+              providerName: wp.provider?.name || wp.name || wp.category.name,
             }))
           )
             .sort((a: Payment, b: Payment) => new Date(b.date).getTime() - new Date(a.date).getTime())

@@ -7,6 +7,7 @@ import { isValidLanguage } from '@/lib/i18n/config';
 import { notFound } from 'next/navigation';
 import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
+import AMPLink from '@/components/AMPLink';
 import LandingFeatureCard from '@/components/LandingFeatureCard';
 import { ArcadeEmbed } from '@/components/ArcadeEmbed';
 import VideoHero from '@/components/guest/VideoHero';
@@ -108,13 +109,6 @@ const LANDING_FEATURES: Array<{
     iconGradient: 'from-orange-500 to-red-500',
     iconPaths: ['M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'],
   },
-  {
-    key: 'weddingSchedule',
-    bg: 'from-teal-50 to-cyan-50',
-    border: 'border-teal-100',
-    iconGradient: 'from-teal-500 to-cyan-500',
-    iconPaths: ['M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-  },
 ];
 
 const commercialName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME || 'Nupci';
@@ -140,15 +134,18 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: '' });
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nupci.com';
+
   return (
     <>
-<div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
+      <AMPLink ampUrl={`${baseUrl}/${locale}/amp`} />
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center">
-              <Image src="/images/nupci.webp" alt={commercialName} width={228} height={128} sizes="228px" className="h-16 w-auto" priority />
+              <Image src="/images/nupci.webp" alt={commercialName} width={668} height={374} className="h-12 w-auto" />
             </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-700 hover:text-rose-600 transition-colors">

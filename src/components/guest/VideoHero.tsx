@@ -1,5 +1,7 @@
-import VideoBackground from './VideoBackground';
-import TrialSignupButton from '@/components/TrialSignupButton';
+'use client';
+
+import { useState, useEffect } from 'react';
+import TrialSignupModal from '@/components/TrialSignupModal';
 
 interface VideoHeroProps {
   title: string;
@@ -9,6 +11,12 @@ interface VideoHeroProps {
   locale: string;
 }
 
+const CDN = process.env.NEXT_PUBLIC_CDN_STORAGE ?? '';
+const VIDEOS = [
+  `${CDN}/background2.mp4`,
+  `${CDN}/background1.mp4`,
+];
+
 export default function VideoHero({
   title,
   subtitle,
@@ -16,9 +24,41 @@ export default function VideoHero({
   ctaSecondary,
   locale,
 }: VideoHeroProps) {
+  const [currentVideo, setCurrentVideo] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Alternar entre los dos vídeos cada 15 segundos para dar tiempo a verlos
+    const timer = setInterval(() => {
+      setCurrentVideo((prev) => (prev === 0 ? 1 : 0));
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section className="relative h-[90vh] md:h-screen w-full overflow-hidden flex items-center justify-center">
-      <VideoBackground />
+      {/* Background Videos */}
+      <div className="absolute inset-0 z-0">
+        {VIDEOS.map((src, index) => (
+          <div
+            key={src}
+            className={`absolute inset-0 h-full w-full transition-opacity duration-[2000ms] ease-in-out ${
+              currentVideo === index ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="h-full w-full object-cover"
+            >
+              <source src={src.replace('.mp4', '.webm')} type="video/webm" />
+              <source src={src} type="video/mp4" />
+            </video>
+          </div>
+        ))}
+      </div>
 
       {/* Overlay - Color corporativo #eabec3 con 30% opacidad */}
       <div
@@ -40,15 +80,16 @@ export default function VideoHero({
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <TrialSignupButton
-              locale={locale}
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
               className="w-full sm:w-auto px-10 py-4 bg-white text-rose-600 rounded-full text-lg font-bold shadow-2xl hover:scale-105 transition-all duration-300 hover:bg-gray-50 flex items-center justify-center"
             >
               {ctaPrimary}
               <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-            </TrialSignupButton>
+            </button>
 
             <a
               href="#features"
@@ -71,6 +112,14 @@ export default function VideoHero({
           </svg>
         </a>
       </div>
+
+      {isModalOpen && (
+        <TrialSignupModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          locale={locale}
+        />
+      )}
     </section>
   );
 }

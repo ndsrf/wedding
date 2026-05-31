@@ -37,7 +37,6 @@ interface FamilyExportData {
   channel: Channel | null;
   invitedByAdmin: string;
   referenceCode: string;
-  labels: string;
   rsvpStatus: string;
   attendingCount: number;
   notAttendingCount: number;
@@ -80,9 +79,6 @@ async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
             created_at: 'desc',
           },
           take: 1,
-        },
-        labels: {
-          include: { label: true },
         },
       },
       orderBy: {
@@ -127,7 +123,6 @@ async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
       channel: family.channel_preference,
       invitedByAdmin: family.invited_by_admin_id ? (adminMap.get(family.invited_by_admin_id) || '') : '',
       referenceCode: family.reference_code || '',
-      labels: family.labels ? family.labels.map((la) => la.label.name).join(', ') : '',
       rsvpStatus,
       attendingCount: attendingMembers.length,
       notAttendingCount: notAttendingMembers.length,
@@ -156,12 +151,11 @@ async function fetchGuestData(wedding_id: string): Promise<FamilyExportData[]> {
 /**
  * Export guest data to Excel or CSV format
  *
- * Unified column format (87 columns total):
+ * Unified column format (86 columns total):
  *   Cols  0-7:  Family info (Family Name, Contact Person, Email, Phone, WhatsApp, Language, Channel, Invited By)
- *   Col   8:    Labels (comma-separated label names)
- *   Cols  9-38: Member 1-10 basic info — Name, Type, Age (3 cols × 10 members)
- *   Cols 39-46: Extra family info — Reference Code, RSVP Status, Total Members, Attending, Not Attending, Pending, Payment Status, Payment Amount
- *   Cols 47-86: Member 1-10 extra info — Attending, Dietary, Accessibility, Added By Guest (4 cols × 10 members)
+ *   Cols  8-37: Member 1-10 basic info — Name, Type, Age (3 cols × 10 members)
+ *   Cols 38-45: Extra family info — Reference Code, RSVP Status, Total Members, Attending, Not Attending, Pending, Payment Status, Payment Amount
+ *   Cols 46-85: Member 1-10 extra info — Attending, Dietary, Accessibility, Added By Guest (4 cols × 10 members)
  *
  * This format matches the import template exactly so exported files can be re-imported.
  *
@@ -192,16 +186,14 @@ export async function exportGuestData(
     'Language',
     'Channel',
     'Invited By',
-    // Col 8: Labels
-    'Labels',
   ];
 
-  // Cols 9-38: Member basic info (3 cols × 10 members)
+  // Cols 8-37: Member basic info (3 cols × 10 members)
   for (let i = 1; i <= 10; i++) {
     headers.push(`Member ${i} Name`, `Member ${i} Type`, `Member ${i} Age`);
   }
 
-  // Cols 39-46: Extra family summary
+  // Cols 38-45: Extra family summary
   headers.push(
     'Reference Code',
     'RSVP Status',
@@ -213,7 +205,7 @@ export async function exportGuestData(
     'Payment Amount'
   );
 
-  // Cols 47-86: Member extra info (4 cols × 10 members)
+  // Cols 46-85: Member extra info (4 cols × 10 members)
   for (let i = 1; i <= 10; i++) {
     headers.push(
       `Member ${i} Attending`,
@@ -237,11 +229,9 @@ export async function exportGuestData(
       family.language,
       family.channel || '',
       family.invitedByAdmin,
-      // Col 8: Labels
-      family.labels,
     ];
 
-    // Cols 9-38: Member basic info (3 cols × 10 members)
+    // Cols 8-37: Member basic info (3 cols × 10 members)
     for (let i = 0; i < 10; i++) {
       const member = family.members[i];
       if (member) {
@@ -251,7 +241,7 @@ export async function exportGuestData(
       }
     }
 
-    // Cols 39-46: Extra family summary
+    // Cols 38-45: Extra family summary
     row.push(
       family.referenceCode,
       family.rsvpStatus,
@@ -263,7 +253,7 @@ export async function exportGuestData(
       family.paymentAmount
     );
 
-    // Cols 47-86: Member extra info (4 cols × 10 members)
+    // Cols 46-85: Member extra info (4 cols × 10 members)
     for (let i = 0; i < 10; i++) {
       const member = family.members[i];
       if (member) {
@@ -295,7 +285,6 @@ export async function exportGuestData(
     { wch: 10 }, // Language
     { wch: 12 }, // Channel
     { wch: 20 }, // Invited By
-    { wch: 25 }, // Labels
   ];
 
   // Member basic info widths (3 cols × 10)

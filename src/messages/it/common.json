@@ -188,10 +188,6 @@
         "menuTasting": {
           "title": "Gestione Menu e Degustazione",
           "description": "Crea menu di degustazione, invita partecipanti via WhatsApp o email, raccogli valutazioni e seleziona il menu finale del matrimonio tra i piatti degustati."
-        },
-        "weddingSchedule": {
-          "title": "Programma del Giorno del Matrimonio",
-          "description": "Crea programmi dettagliati minuto per minuto per il grande giorno. Coordina fornitori, blocchi e fasi con precisione ed esporta un PDF riepilogativo per il tuo team."
         }
       }
     },
@@ -266,7 +262,6 @@
       "company": "Azienda",
       "support": "Supporto",
       "about": "Chi Siamo",
-      "careers": "Carriere",
       "contact": "Contatto",
       "privacy": "Privacy Policy",
       "help": "Centro Assistenza",
@@ -307,75 +302,6 @@
       "title": "Errore di invio",
       "message": "Si è verificato un errore durante l'invio del messaggio. Riprova.",
       "retry": "Riprova"
-    }
-  },
-  "careers": {
-    "title": "Work at {commercialName}",
-    "subtitle": "We aren't looking for employees, but for technical founders and restless minds who want to dominate their craft.",
-    "howWeWork": {
-      "title": "The High-Velocity Model",
-      "description": "At {commercialName}, we have refined our continuous delivery model into a \"High-Trust, High-Velocity\" machine. We don't believe in traditional sprints that fragment time; we prefer managing flow through Kanban and Linear so that moving an idea to production 100 times a week feels like second nature.",
-      "sections": [
-        {
-          "title": "1. Refinement & Review Cycle",
-          "content": "We treat refinement as a controlled flow. When the Linear MCP extracts a feature, we create an asynchronous specification. Before touching a single line of code, the team applies the \"Grill\" protocol: we stress-test the logic, look for edge cases, and validate architectural fit against our steering documents. Only when the product makes sense do we start building."
-        },
-        {
-          "title": "2. Quality as an Asset, Not a Brake",
-          "content": "Our testing layer is our most valuable asset. We use Playwright to automate the \"Golden Path.\" If the CI detects a failure, the deployment is blocked. But we don't just trust robots; every feature generates a unique demo deployment on Vercel for a manual \"feel\" inspection before the final merge."
-        },
-        {
-          "title": "3. Design & Continuous Observability",
-          "content": "We eliminate design debt using Claude Design to maintain visual consistency across our Next.js components. Once in production, we operate without fear: we use Statsig for feature flags and HyperDX to monitor logs and traces in real-time. If something fails, we toggle it off in seconds without needing rollbacks."
-        }
-      ]
-    },
-    "culture": {
-      "title": "Culture and Values",
-      "description": "If you are looking for a company to hide behind a bureaucratic process, {commercialName} is not for you. We look for people with higher-than-average risk tolerance, who prefer being employee #3 instead of #11,000.",
-      "sections": [
-        {
-          "title": "Autonomy and Expression",
-          "content": "We want people who love their work and feel proud of what they accomplish. Here you have freedom to manage your schedule and absolute decision-making power over your area. We don't measure hours in the office; we measure the quality and impact of what you deliver."
-        },
-        {
-          "title": "Voluntary Communication",
-          "content": "We practice proactive communication. We don't wait for anyone to ask what we are doing. We don't \"disappear\" when the day ends if something is critical; we are an elite team that supports each other through ups and downs. If you deliver, the company will always back you up."
-        },
-        {
-          "title": "Zero Bureaucracy",
-          "content": "We invest time in automation, systems, and documentation so you can focus on solving difficult and ambiguous problems. We believe in individual responsibility and confronting our failures to learn from them."
-        }
-      ]
-    },
-    "compensation": {
-      "title": "Compensation and Benefits",
-      "description": "We want the best, so we pay top-of-market salaries. We believe a high salary is the most efficient way to value your work.",
-      "content": "In addition to a competitive salary, we offer comprehensive health, dental, and vision insurance managed through top-tier partners. We don't have a quantified paid time off policy; we trust your judgment to coordinate with the team and take the time you need when you need it."
-    },
-    "development": {
-      "title": "Career Development",
-      "content": "We don't believe in formal career development programs that are often ineffective. Instead, we offer real opportunities to develop competencies in new areas based on the company's growth. If you want to try something new and it aligns with our needs, the door is open."
-    },
-    "positions": {
-      "title": "Open Positions",
-      "requirements": "Profile Requirements",
-      "softwareEngineer": {
-        "title": "Software Engineer (Generalist)",
-        "location": "Remote / Hybrid",
-        "description": "We are looking for someone who can navigate our entire technical stack. Someone who can optimize a Prisma query, polish the UX of a complex form with React, or adjust the CI/CD pipeline. We want engineers who understand the product, not just the code.",
-        "requirements": [
-          "Solid experience in modern web application development and systems architecture",
-          "Ability to work asynchronously and autonomously",
-          "Problem-solver mindset over code-writer mindset",
-          "Experience with observability and automated testing tools"
-        ]
-      }
-    },
-    "cta": {
-      "title": "Are you ready for the challenge?",
-      "button": "Apply via Contact Form",
-      "description": "If the idea of working in a high-performance team where your impact is visible every day motivates you, send us a message detailing your journey and why you fit our philosophy."
     }
   },
   "metadata": {
@@ -494,8 +420,6 @@
       "createWeddingSubtitle": "Imposta un nuovo evento matrimonio",
       "checklistTemplate": "Modello di Lista di Controllo",
       "checklistTemplateSubtitle": "Gestisci i modelli di attività per i tuoi matrimoni",
-      "scheduleTemplate": "Modello di Programma",
-      "scheduleTemplateSubtitle": "Blocchi e fasi predefiniti per i tuoi matrimoni",
       "providers": "Fornitori",
       "providersSubtitle": "Gestisci la tua libreria di fornitori",
       "templates": "Modelli Predefiniti",
@@ -771,9 +695,7 @@
         "business": "WhatsApp Business",
         "businessDesc": "Inviare i messaggi direttamente tramite l'API WhatsApp Business (Twilio).",
         "links": "Link WhatsApp",
-        "linksDesc": "Aprire un link wa.me in una nuova scheda del browser per ogni ospite invece di inviare automaticamente.",
-        "manual": "WhatsApp Manuale",
-        "manualDesc": "Copia il testo dell'invito o del promemoria negli appunti quando si fa clic sul pulsante di invio, in modo da poterlo incollare manualmente in WhatsApp."
+        "linksDesc": "Aprire un link wa.me in una nuova scheda del browser per ogni ospite invece di inviare automaticamente."
       },
       "buttons": {
         "saving": "Salvataggio in corso...",
@@ -800,8 +722,7 @@
       "confirmRestore": "Ripristinare questo matrimonio? Gli amministratori recupereranno l'accesso.",
       "restoreSuccess": "Matrimonio ripristinato con successo",
       "itinerary": {
-        "title": "Itinerario Ufficiale",
-        "readOnlyMessage": "Queste informazioni possono essere modificate solo dal tuo wedding planner.",
+        "title": "Itinerario",
         "viewOnMaps": "Visualizza su Google Maps →",
         "addStop": "Aggiungi tappa",
         "noItems": "Nessun elemento dell'itinerario ancora.",
@@ -1498,16 +1419,14 @@
       "importGuestsSubtitle": "Carica file Excel",
       "templates": "Modelli di Messaggi",
       "templatesSubtitle": "Gestisci inviti e promemoria",
-      "schedule": "Programma",
-      "scheduleSubtitle": "Programma dettagliato del giorno del matrimonio",
       "rsvpProgress": "Progresso RSVP",
       "daysUntilWedding": "giorni al matrimonio",
       "responded": "risposto",
       "complete": "completo",
       "seatingPlan": "Piano dei Posti",
       "seatingPlanSubtitle": "Assegna gli ospiti ai tavoli",
-      "providers": "Fornitori e Spese",
-      "providersSubtitle": "Gestire fornitori e spese",
+      "providers": "Fornitori e Regali",
+      "providersSubtitle": "Gestire fornitori e regali",
       "invitationsAndTemplates": "Inviti e Modelli",
       "invitationBuilder": "Creatore di Inviti",
       "invitationBuilderSubtitle": "Progetta il tuo invito matrimoniale",
@@ -1718,7 +1637,6 @@
       "selected": "selezionati",
       "copyInvLink": "Copia link di invito",
       "copyWhatsAppText": "Copia testo invito WhatsApp",
-      "whatsappTextCopied": "Messaggio WhatsApp copiato negli appunti",
       "table": {
         "family": "Famiglia",
         "members": "Membri",
@@ -1772,8 +1690,7 @@
         "unpaid": "Nessun Regalo",
         "received": "Ricevuto",
         "searchPlaceholder": "Nome o email...",
-        "clearAll": "Cancella filtri",
-        "invertLabel": "Inverti"
+        "clearAll": "Cancella filtri"
       },
       "form": {
         "addTitle": "Aggiungi Famiglia Ospiti",
@@ -1793,12 +1710,6 @@
       },
       "importSuccess": "Lista ospiti importata con successo",
       "importError": "Errore di importazione. Controlla il file.",
-      "labels": {
-        "title": "Etichette",
-        "addLabel": "Aggiungi etichetta",
-        "createNew": "Crea nuova etichetta",
-        "noLabels": "Nessuna etichetta"
-      },
       "bulkActions": "Azioni di massa",
       "selectAll": "Seleziona tutti",
       "selectPage": "Seleziona pagina",
@@ -1820,10 +1731,7 @@
         "setAllNotAttending": "Segna tutti i membri come non partecipanti",
         "attendanceNote": "Questo aggiornerà tutti i membri della famiglia degli ospiti selezionati",
         "noChanges": "Seleziona almeno una proprietà da aggiornare",
-        "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo",
-        "addLabel": "Aggiungi etichetta",
-        "removeLabel": "Rimuovi etichetta",
-        "labelConflict": "L'etichetta da aggiungere e rimuovere sono uguali; entrambe verranno ignorate"
+        "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo"
       }
     },
     "notifications": {
@@ -3213,17 +3121,7 @@
         "title": "Esperienza di Degustazione",
         "content": "Ricevi un link personalizzato via WhatsApp, email o SMS. Valuta ogni piatto da 1 a 10 stelle, aggiungi note di degustazione e carica foto. Visualizza le valutazioni di tutti gli altri partecipanti e i punteggi medi per piatto. Le valutazioni si salvano in tempo reale—nessun login richiesto."
       },
-      "goTo": "Vai a",
-      "schedule": {
-        "title": "Programma del Matrimonio",
-        "path": "/admin/schedule",
-        "content": "Crea un programma dettagliato minuto per minuto per il tuo giorno del matrimonio. Organizza blocchi (preparativi, cerimonia, ricevimento) e fasi con durate, fornitori e note personalizzabili. Supporta tracce parallele ed esporta un PDF per i fornitori."
-      },
-      "scheduleTemplate": {
-        "title": "Modello di Programma",
-        "path": "/planner/schedule-template",
-        "content": "Definisci la tua struttura di programma riutilizzabile con blocchi e fasi predefinite. Applicala a qualsiasi matrimonio con un clic e regola l'ora di inizio per calcolare automaticamente tutti gli orari su tracce sequenziali e parallele."
-      }
+      "goTo": "Vai a"
     },
     "personas": {
       "select": "Seleziona il tuo profilo",
@@ -3375,7 +3273,7 @@
       "description": "Clicca il pulsante Modifica per aggiornare i dettagli principali di questo matrimonio: data, luogo, nomi della coppia, dress code e altro ancora."
     },
     "itinerary": {
-      "title": "Programma Ufficiale del Matrimonio",
+      "title": "Programma del Matrimonio",
       "description": "Qui puoi vedere il programma completo della giornata del matrimonio con tutti gli eventi e le loro location. Modificalo per aggiungere cerimonie, ricevimenti e altri eventi."
     },
     "guestList": {
@@ -3425,58 +3323,5 @@
       "close": "Chiudi"
     },
     "helpLabel": "Aiuto"
-  },
-  "weatherWidget": {
-    "title": "Luce e meteo",
-    "sunrise": "Alba",
-    "sunset": "Tramonto",
-    "civilDawn": "Crepuscolo mattutino",
-    "civilDusk": "Crepuscolo serale",
-    "dayLength": "Durata del giorno",
-    "hours": "h",
-    "minutes": "min",
-    "moonPhase": "Fase lunare",
-    "illumination": "Illuminazione",
-    "historicalWeather": "Meteo storico",
-    "avgTemp": "Temperatura",
-    "precipitation": "Precipitazioni",
-    "referenceYear": "Dati dell'anno {year}",
-    "loading": "Caricamento...",
-    "error": "Impossibile caricare i dati meteo",
-    "noLocation": "Configura la sede principale per vedere il meteo",
-    "expand": "Vedere luce e meteo",
-    "collapse": "Comprimi",
-    "lightZones": {
-      "night": "Notte",
-      "dawn": "Alba",
-      "day": "Giorno",
-      "goldenHour": "Ora d'oro",
-      "dusk": "Tramonto"
-    },
-    "stageAt": "{time} — {pct}% della giornata",
-    "moonPhases": {
-      "newMoon": "Luna nuova",
-      "waxingCrescent": "Luna crescente",
-      "firstQuarter": "Primo quarto",
-      "waxingGibbous": "Gibbosa crescente",
-      "fullMoon": "Luna piena",
-      "waningGibbous": "Gibbosa calante",
-      "lastQuarter": "Ultimo quarto",
-      "waningCrescent": "Luna calante"
-    },
-    "conditions": {
-      "sunny": "Sereno",
-      "partlyCloudy": "Parzialmente nuvoloso",
-      "cloudy": "Nuvoloso",
-      "drizzle": "Pioggerella",
-      "rainy": "Pioggia",
-      "stormy": "Temporale",
-      "snowy": "Neve",
-      "foggy": "Nebbia"
-    },
-    "solarNoon": "Mezzogiorno solare",
-    "light": "luce",
-    "unitCelsius": "°C",
-    "unitMm": "mm"
   }
 }

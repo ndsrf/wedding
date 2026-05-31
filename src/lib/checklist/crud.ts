@@ -112,11 +112,10 @@ export async function createTask(
       description: data.description,
       assigned_to: data.assigned_to,
       due_date: data.due_date,
-      due_date_relative: data.due_date_relative ?? null,
       status: data.status,
       completed: data.completed,
       order: data.order,
-      template_id: null,
+      template_id: null, // Wedding tasks have null template_id
     },
   });
 

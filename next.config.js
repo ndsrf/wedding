@@ -25,11 +25,9 @@ const nextConfig = {
     // Automatically optimize imports from these packages
     optimizePackageImports: ['lucide-react', 'xlsx', 'zod'],
     instrumentationHook: true,
-    // Inline critical CSS and defer the rest to eliminate render-blocking stylesheet
-    optimizeCss: true,
   },
   // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
-  serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas', 'twilio', '@prisma/vector-client'],
+  serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas', 'twilio'],
   // Optional: Ignore OpenTelemetry warnings in webpack
   webpack: (config, { isServer }) => {
     if (isServer) {
@@ -88,7 +86,7 @@ const nextConfig = {
       "img-src 'self' data: blob: https: https://demo.arcade.software https://*.vimeo.com https://*.vimeocdn.com https://*.vercel-storage.com https://image.crisp.chat https://storage.crisp.chat",
       "connect-src 'self' https: wss://api.liveblocks.io wss://client.relay.crisp.chat https://demo.arcade.software https://*.vimeo.com https://*.vercel-storage.com https://client.crisp.chat https://storage.crisp.chat",
       "media-src 'self' https://*.vercel-storage.com https://cdn.nupci.com",
-      "frame-src 'self' https://accounts.google.com https://www.facebook.com https://www.google.com https://maps.google.com https://demo.arcade.software https://player.vimeo.com https://vimeo.com",
+      "frame-src 'self' https://accounts.google.com https://www.facebook.com https://www.google.com https://demo.arcade.software https://player.vimeo.com https://vimeo.com",
       "frame-ancestors 'self'",
       "form-action 'self' https://accounts.google.com https://www.facebook.com",
       "base-uri 'self'",

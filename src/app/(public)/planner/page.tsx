@@ -383,23 +383,6 @@ export default async function PlannerDashboardPage() {
             </Link>
 
             <Link
-              href="/planner/schedule-template"
-              prefetch={false}
-              className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-violet-200 hover:bg-violet-50/30 transition-all"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center group-hover:bg-violet-100 transition-colors">
-                <svg className="h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">Plantilla Cronograma</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Bloques y etapas por defecto para tus bodas</p>
-              </div>
-            </Link>
-
-            <Link
               href="/planner/providers"
               prefetch={false}
               className="group flex items-center gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-orange-200 hover:bg-orange-50/30 transition-all"

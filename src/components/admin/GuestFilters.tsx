@@ -2,14 +2,13 @@
  * Guest Filters Component
  *
  * Filter controls for the guest list
- * Supports RSVP status, attendance, channel, payment status, and label filters
+ * Supports RSVP status, attendance, channel, and payment status filters
  */
 
 'use client';
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import type { GuestLabel } from '@/types/models';
 
 interface GuestFiltersProps {
   filters: {
@@ -18,24 +17,18 @@ interface GuestFiltersProps {
     channel?: string;
     payment_status?: string;
     invited_by_admin_id?: string;
-    label_id?: string;
-    label_id_invert?: boolean;
     search?: string;
   };
   admins: Array<{ id: string; name: string; email: string }>;
-  labels?: GuestLabel[];
   onFilterChange: (filters: GuestFiltersProps['filters']) => void;
 }
 
-export function GuestFilters({ filters, admins, labels = [], onFilterChange }: GuestFiltersProps) {
+export function GuestFilters({ filters, admins, onFilterChange }: GuestFiltersProps) {
   const t = useTranslations();
   const [isExpanded, setIsExpanded] = React.useState(false);
 
-  // Check if any filter is active (treat label_id_invert:true as active)
-  const hasActiveFilters =
-    Object.entries(filters).some(([k, v]) =>
-      k === 'label_id_invert' ? v === true : v !== undefined && v !== ''
-    );
+  // Check if any filter is active
+  const hasActiveFilters = Object.values(filters).some(v => v !== undefined && v !== '');
 
   // Auto-expand if filters are active
   React.useEffect(() => {
@@ -76,7 +69,7 @@ export function GuestFilters({ filters, admins, labels = [], onFilterChange }: G
 
       {/* Filters Content */}
       <div className={`${isExpanded ? 'block' : 'hidden'} lg:block p-4`}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
           {/* Search */}
           <div>
             <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
@@ -182,39 +175,6 @@ export function GuestFilters({ filters, admins, labels = [], onFilterChange }: G
               ))}
             </select>
           </div>
-
-          {/* Label + invert checkbox */}
-          {labels.length > 0 && (
-            <div>
-              <label htmlFor="label_id" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('admin.guests.labels.title')}
-              </label>
-              <select
-                id="label_id"
-                value={filters.label_id || ''}
-                onChange={(e) => handleChange('label_id', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
-              >
-                <option value="">{t('admin.guests.filters.all')}</option>
-                {labels.map((label) => (
-                  <option key={label.id} value={label.id}>
-                    {label.name}
-                  </option>
-                ))}
-              </select>
-              <label className="mt-1.5 flex items-center gap-1.5 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={filters.label_id_invert === true}
-                  onChange={(e) =>
-                    onFilterChange({ ...filters, label_id_invert: e.target.checked || undefined })
-                  }
-                  className="h-3.5 w-3.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                />
-                <span className="text-xs text-gray-600">{t('admin.guests.filters.invertLabel')}</span>
-              </label>
-            </div>
-          )}
         </div>
 
         {/* Clear Filters Button */}

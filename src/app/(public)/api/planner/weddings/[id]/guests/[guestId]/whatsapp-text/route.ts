@@ -15,7 +15,7 @@ interface RouteParams {
   params: Promise<{ id: string; guestId: string }>;
 }
 
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(_request: NextRequest, context: RouteParams) {
   try {
     const user = await requireRole('planner');
     if (!user.planner_id) {
@@ -25,8 +25,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
     const { id: weddingId, guestId } = await context.params;
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
-    const skipSaveTheDate = request.nextUrl.searchParams.get('skipSaveTheDate') === 'true';
-    return getGuestWhatsAppTextHandler(guestId, weddingId, skipSaveTheDate);
+    return getGuestWhatsAppTextHandler(guestId, weddingId);
   } catch (error) {
     return handleGuestApiError(error, { operation: 'fetch whatsapp text' });
   }

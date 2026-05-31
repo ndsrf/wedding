@@ -15,14 +15,12 @@ import {
   TaskAssignment,
   PriceType,
   WeddingStatus,
-  WhatsAppMode,
   MemberType,
   TastingMenuStatus,
   LocationType,
   QuoteStatus,
   ContractStatus,
   AuthProvider,
-  Channel,
   PrismaClient,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -290,8 +288,6 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       short_url_initials: 'AL' + Math.floor(Math.random() * 1000),
       status: WeddingStatus.ACTIVE,
       planned_guests: 150,
-      whatsapp_mode: WhatsAppMode.MANUAL,
-      save_the_date_enabled: true,
     },
   });
 
@@ -353,45 +349,6 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
     }
   }
 
-  // Add sample AI disruption-alert tasks (simulating what the AI generates on real weddings)
-  const firstSection = await client.checklistSection.findFirst({
-    where: { wedding_id: wedding.id, template_id: null },
-    orderBy: { order: 'asc' },
-    select: { id: true },
-  });
-  // Compute max order in the section so AI tasks are appended without collisions.
-  const maxOrderRow = await client.checklistTask.aggregate({
-    where: { wedding_id: wedding.id, template_id: null, section_id: firstSection?.id ?? null },
-    _max: { order: true },
-  });
-  let nextOrder = (maxOrderRow._max.order ?? -1) + 1;
-  const aiAlerts = [
-    {
-      title: '[AI] Alta demanda en temporada de bodas',
-      description: 'Septiembre es temporada alta. Reserva transporte y catering con antelación para evitar subidas de precio.',
-    },
-    {
-      title: '[AI] Calor extremo en verano',
-      description: 'Las temperaturas pueden superar 35 °C. Prevé zonas de sombra, bebidas frías y ventilación para los invitados.',
-    },
-    {
-      title: '[AI] Festivos locales en la zona',
-      description: 'Verifica que no haya fiestas patronales cercanas que puedan afectar al tráfico o la disponibilidad de proveedores.',
-    },
-  ];
-  for (const alert of aiAlerts) {
-    await client.checklistTask.create({
-      data: {
-        wedding_id: wedding.id,
-        section_id: firstSection?.id ?? null,
-        title: alert.title,
-        description: alert.description,
-        assigned_to: TaskAssignment.COUPLE,
-        order: nextOrder++,
-      },
-    });
-  }
-
   // Set due date for planner contract task
   const plannerTask = await client.checklistTask.findFirst({
     where: { wedding_id: wedding.id, title: 'Firmar contrato con Wedding Planner' },
@@ -443,7 +400,6 @@ export async function seedPlannerDemoData(client: PrismaClient, plannerId: strin
       data: {
         wedding_id: wedding.id,
         name: generateFamilyGroupName(familyName),
-        channel_preference: Channel.WHATSAPP,
         members: { create: [{ name: `${member1Name.first} ${member1Name.last}`, type: MemberType.ADULT }] },
       },
     });

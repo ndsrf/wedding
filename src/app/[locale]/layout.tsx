@@ -25,6 +25,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('title'),
     description: t('description'),
+    // Performance optimizations
+    other: {
+      // Preconnect to external domains for faster resource loading
+      'link': [
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+        { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' },
+      ].map(l => `<${l.href}>; rel="${l.rel}"${l.crossOrigin ? `; crossorigin` : ''}`).join(', '),
+    },
   };
 }
 
@@ -62,9 +71,10 @@ export default async function RootLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        {/* Speed up CDN video connections */}
-        <link rel="preconnect" href="https://cdn.nupci.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://cdn.nupci.com" />
+        {/* Resource hints for external resources */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
       </head>
       <body>
         <HyperDXProvider />

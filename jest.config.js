@@ -12,6 +12,9 @@ const customJestConfig = {
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     '^@/(.*)$': '<rootDir>/src/$1',
+    // isomorphic-dompurify pulls in jsdom → @exodus/bytes (ESM-only), which
+    // Jest's CJS runner can't process. Use a pass-through shim for unit tests.
+    '^isomorphic-dompurify$': '<rootDir>/__mocks__/isomorphic-dompurify.js',
   },
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',

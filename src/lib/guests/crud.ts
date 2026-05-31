@@ -129,30 +129,17 @@ export async function createFamily(
           added_by_guest: false,
         })),
       });
-    }
 
-    // Assign labels if provided
-    if (validatedInput.label_ids && validatedInput.label_ids.length > 0) {
-      await tx.familyLabelAssignment.createMany({
-        data: validatedInput.label_ids.map((label_id) => ({
-          family_id: newFamily.id,
-          label_id,
-        })),
-        skipDuplicates: true,
+      // Fetch family with members
+      const familyWithMembers = await tx.family.findUnique({
+        where: { id: newFamily.id },
+        include: { members: true },
       });
+
+      return familyWithMembers!;
     }
 
-    // Fetch family with members and labels
-    const familyWithMembers = await tx.family.findUnique({
-      where: { id: newFamily.id },
-      include: {
-        members: true,
-        labels: { include: { label: true } },
-      },
-    });
-
-    const { labels: rawLabels, ...rest } = familyWithMembers!;
-    return { ...rest, labels: rawLabels ? rawLabels.map((la) => la.label) : [] };
+    return newFamily;
   });
 
   // Log audit event
@@ -168,11 +155,11 @@ export async function createFamily(
     },
   });
 
-  return family as FamilyWithMembers;
+  return family;
 }
 
 /**
- * Get family with all members and labels
+ * Get family with all members
  */
 export async function getFamilyWithMembers(
   family_id: string,
@@ -187,16 +174,10 @@ export async function getFamilyWithMembers(
       members: {
         orderBy: { created_at: 'asc' },
       },
-      labels: {
-        include: { label: true },
-      },
     },
   });
 
-  if (!family) return null;
-
-  const { labels: rawLabels, ...rest } = family;
-  return { ...rest, labels: rawLabels ? rawLabels.map((la) => la.label) : [] } as FamilyWithMembers;
+  return family;
 }
 
 /**
@@ -318,32 +299,17 @@ export async function updateFamily(
       }
     }
 
-    // Replace labels if label_ids provided
-    if (validatedInput.label_ids !== undefined) {
-      await tx.familyLabelAssignment.deleteMany({ where: { family_id } });
-      if (validatedInput.label_ids.length > 0) {
-        await tx.familyLabelAssignment.createMany({
-          data: validatedInput.label_ids.map((label_id) => ({ family_id, label_id })),
-          skipDuplicates: true,
-        });
-      }
-    }
-
-    // Fetch updated family with members and labels
+    // Fetch updated family with members
     const familyWithMembers = await tx.family.findUnique({
       where: { id: family_id },
       include: {
         members: {
           orderBy: { created_at: 'asc' },
         },
-        labels: {
-          include: { label: true },
-        },
       },
     });
 
-    const { labels: rawLabels, ...rest } = familyWithMembers!;
-    return { ...rest, labels: rawLabels ? rawLabels.map((la) => la.label) : [] };
+    return familyWithMembers!;
   });
 
   // Log audit event
@@ -359,7 +325,7 @@ export async function updateFamily(
     },
   });
 
-  return family as FamilyWithMembers;
+  return family;
 }
 
 /**

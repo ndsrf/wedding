@@ -14,7 +14,7 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(_request: NextRequest, context: RouteParams) {
   try {
     const user = await requireRole('wedding_admin');
     if (!user.wedding_id) {
@@ -22,8 +22,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
       return NextResponse.json(body, { status: 403 });
     }
     const { id: familyId } = await context.params;
-    const skipSaveTheDate = request.nextUrl.searchParams.get('skipSaveTheDate') === 'true';
-    return getGuestWhatsAppTextHandler(familyId, user.wedding_id, skipSaveTheDate);
+    return getGuestWhatsAppTextHandler(familyId, user.wedding_id);
   } catch (error) {
     return handleGuestApiError(error, { operation: 'fetch whatsapp text' });
   }

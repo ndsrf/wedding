@@ -29,7 +29,6 @@ export interface AttendeeData {
   language: string;
   channel: string | null;
   invitedByAdmin: string;
-  labels: string;
   attending: string;
   dietaryRestrictions: string;
   accessibilityNeeds: string;
@@ -88,9 +87,6 @@ export async function fetchAttendeeList(wedding_id: string): Promise<AttendeeDat
         preferred_language: true,
         channel_preference: true,
         invited_by_admin_id: true,
-        labels: {
-          include: { label: true },
-        },
         members: {
           select: {
             id: true,
@@ -132,8 +128,6 @@ export async function fetchAttendeeList(wedding_id: string): Promise<AttendeeDat
       ? adminMap.get(family.invited_by_admin_id) || ''
       : '';
 
-    const familyLabels = family.labels.map((la) => la.label.name).join(', ');
-
     for (const member of family.members) {
       attendees.push({
         familyName: family.name,
@@ -146,7 +140,6 @@ export async function fetchAttendeeList(wedding_id: string): Promise<AttendeeDat
         language: family.preferred_language,
         channel: family.channel_preference,
         invitedByAdmin: invitedBy,
-        labels: familyLabels,
         attending: member.attending === null ? 'Pending' : member.attending ? 'Yes' : 'No',
         dietaryRestrictions: member.dietary_restrictions || '',
         accessibilityNeeds: member.accessibility_needs || '',
@@ -354,14 +347,14 @@ export async function exportAttendeeList(
   const attendees = await fetchAttendeeList(wedding_id);
   const rows: (string | number)[][] = [[
     'Family Name', 'Guest Name', 'Type', 'Age', 'Email', 'Phone', 'WhatsApp',
-    'Language', 'Channel', 'Invited By', 'Labels', 'Attending', 'Dietary Restrictions',
+    'Language', 'Channel', 'Invited By', 'Attending', 'Dietary Restrictions',
     'Accessibility Needs', 'Table', 'Added By Guest'
   ]];
 
   attendees.forEach(a => {
     rows.push([
       a.familyName, a.memberName, a.type, a.age || '', a.email, a.phone, a.whatsapp,
-      a.language, a.channel || '', a.invitedByAdmin, a.labels, a.attending, a.dietaryRestrictions,
+      a.language, a.channel || '', a.invitedByAdmin, a.attending, a.dietaryRestrictions,
       a.accessibilityNeeds, a.tableName, a.addedByGuest ? 'Yes' : 'No'
     ]);
   });

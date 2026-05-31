@@ -105,15 +105,14 @@ function PlannerWeddingsContent() {
         throw new Error(errorData.error?.message || t('planner.weddings.createError'));
       }
 
-      // Refresh weddings list
+      // Refresh weddings list and bust Next.js router cache so /planner
+      // dashboard also re-renders with fresh stats on next visit.
       await fetchWeddings();
+      router.refresh();
 
-      // Close form and navigate away first, then bust the router cache.
-      // Calling router.refresh() before router.push() can cause the refresh
-      // response for the old ?action=create URL to race with the navigation.
+      // Close form
       setShowForm(false);
       router.push('/planner/weddings');
-      router.refresh();
     } catch (err) {
       console.error('Error creating wedding:', err);
       throw err;

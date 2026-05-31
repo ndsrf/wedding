@@ -102,6 +102,17 @@ const sampleDesign: TemplateDesign = {
       autoPlayMs: 4000,
       style: { borderRadius: '0.75rem' },
     },
+    {
+      id: 'sp-1',
+      type: 'spacer',
+      height: '3rem',
+    },
+    {
+      id: 'em-1',
+      type: 'embed',
+      html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 40"><line x1="40" y1="20" x2="360" y2="20" stroke="#D4AF37" stroke-width="1"/></svg>',
+      height: '40px',
+    },
   ],
 };
 
@@ -279,6 +290,40 @@ describe('migrateBlock', () => {
     });
   });
 
+  describe('spacer block', () => {
+    it('migrates a spacer block preserving height', () => {
+      const raw = { _version: 1, id: 'sp-1', type: 'spacer', height: '3rem' };
+      const migrated = migrateBlock(raw) as any;
+      expect(migrated.type).toBe('spacer');
+      expect(migrated.height).toBe('3rem');
+      expect(migrated._version).toBeUndefined();
+    });
+
+    it('fills missing height with default', () => {
+      const raw = { type: 'spacer', id: 'sp-2' };
+      const migrated = migrateBlock(raw) as any;
+      expect(migrated.height).toBe('2rem');
+    });
+  });
+
+  describe('embed block', () => {
+    it('migrates an embed block preserving html and height', () => {
+      const raw = { _version: 1, id: 'em-1', type: 'embed', html: '<svg></svg>', height: '80px' };
+      const migrated = migrateBlock(raw) as any;
+      expect(migrated.type).toBe('embed');
+      expect(migrated.html).toBe('<svg></svg>');
+      expect(migrated.height).toBe('80px');
+      expect(migrated._version).toBeUndefined();
+    });
+
+    it('fills missing html with empty string', () => {
+      const raw = { type: 'embed', id: 'em-2' };
+      const migrated = migrateBlock(raw) as any;
+      expect(migrated.html).toBe('');
+      expect(migrated.height).toBeUndefined();
+    });
+  });
+
   describe('unknown future block type', () => {
     it('passes through an unknown block type without crashing', () => {
       const raw = { type: 'future-block-type', id: 'future-1', someField: 'value' };
@@ -337,7 +382,10 @@ describe('extractImageRefs', () => {
 
 describe('BLOCK_VERSIONS', () => {
   it('defines a version for every known block type', () => {
-    const knownTypes = ['text', 'image', 'location', 'countdown', 'add-to-calendar', 'button', 'gallery'];
+    const knownTypes = [
+      'text', 'image', 'location', 'countdown', 'add-to-calendar',
+      'button', 'gallery', 'spacer', 'embed',
+    ];
     for (const type of knownTypes) {
       expect(BLOCK_VERSIONS[type as keyof typeof BLOCK_VERSIONS]).toBeGreaterThanOrEqual(1);
     }

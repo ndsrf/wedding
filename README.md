@@ -1294,18 +1294,6 @@ The vector schema is defined in `prisma/vector/schema.prisma` (separate from the
 - `src/lib/db/vector-prisma.ts` — Singleton client; exports `isVectorEnabled()` and `vectorPrisma`
 - `src/lib/db/migrationManager.ts` — Calls `prisma db push --schema=prisma/vector/schema.prisma` on startup when enabled
 
-#### Troubleshooting
-
-**Module not found: Can't resolve '@prisma/vector-client'**
-
-This error occurs when the secondary Prisma client for the vector database has not been generated yet. To fix it, run:
-
-```bash
-npx prisma generate --schema=prisma/vector/schema.prisma
-```
-
-Note: If you have `VECTOR_DATABASE_URL` set in your `.env`, this command will use it. If not, you may need to provide it temporarily to satisfy Prisma's validation: `VECTOR_DATABASE_URL=postgresql://tmp npx prisma generate --schema=prisma/vector/schema.prisma`.
-
 ### Google Photos Integration
 
 Each wedding can optionally be linked to a Google Photos album. The app uploads photos directly to the album whenever guests share images (via the invitation gallery upload or WhatsApp). Blob storage is used only as a temporary staging area — once a photo is safely in Google Photos the blob copy is deleted.
@@ -1760,6 +1748,59 @@ Then configure Claude Desktop:
 
 ---
 
+### Using Nupci MCP with Claude Code
+
+Claude Code (the CLI) picks up MCP servers from a `.mcp.json` file at the repo root or via the `claude mcp add` command.
+
+**Option A — one-time CLI registration (local to your machine)**
+
+```bash
+# Build the server first
+cd mcp-server && npm install && npm run build && cd ..
+
+# Register it with Claude Code
+claude mcp add --transport stdio \
+  --env NUPCI_URL=https://your-domain.com \
+  --env NUPCI_API_KEY=npci_your_key_here \
+  nupci -- node "$(pwd)/mcp-server/dist/index.js"
+```
+
+Verify it's connected:
+
+```bash
+claude mcp list
+```
+
+**Option B — `.mcp.json` at the repo root (shared with the team)**
+
+Commit a `.mcp.json` file so every developer automatically gets the server. Keep secrets out of git by referencing environment variables:
+
+```json
+{
+  "mcpServers": {
+    "nupci": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CLAUDE_PROJECT_DIR}/mcp-server/dist/index.js"],
+      "env": {
+        "NUPCI_URL": "${NUPCI_URL}",
+        "NUPCI_API_KEY": "${NUPCI_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+Each developer sets `NUPCI_URL` and `NUPCI_API_KEY` in their shell profile or `.env.local` (not committed). Claude Code expands `${VAR}` at startup.
+
+Once connected, Claude Code has access to all Nupci tools and the `invitation://schema` resource. You can ask things like:
+
+> "Create a garden-romance invitation template for this wedding."
+> "How many guests are still pending RSVP?"
+> "Assign the López family to table 3."
+
+---
+
 ### Troubleshooting
 
 **Claude Desktop shows "not valid MCP server configurations"**
@@ -1814,42 +1855,6 @@ curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_rsvp_status","arguments":{}}}'
 ```
 
-**Windows: `spawn npx ENOENT` — npx not found**
-
-Claude Desktop on Windows doesn't inherit your full PATH, so `npx` may not be found even if Node.js is installed. Use the full absolute path to `npx.cmd` instead.
-
-First, find the path by running this in a Command Prompt:
-
-```
-where npx
-```
-
-Then use that path as the `command`. If the path contains spaces (e.g. `C:\Program Files\nodejs\`), either use the user-scoped path (no spaces) or the Windows 8.3 short path:
-
-```json
-{
-  "mcpServers": {
-    "nupci": {
-      "command": "C:\\Users\\YOUR_USERNAME\\AppData\\Roaming\\npm\\npx.cmd",
-      "args": ["mcp-remote", "https://your-domain.com/mcp", "--header", "Authorization: Bearer npci_your_key_here"]
-    }
-  }
-}
-```
-
-If Node.js is under `C:\Program Files\nodejs\`, use the 8.3 short path to avoid the space:
-
-```json
-{
-  "mcpServers": {
-    "nupci": {
-      "command": "C:\\PROGRA~1\\nodejs\\npx.cmd",
-      "args": ["mcp-remote", "https://your-domain.com/mcp", "--header", "Authorization: Bearer npci_your_key_here"]
-    }
-  }
-}
-```
-
 **401 Unauthorized**
 
 - The key may have expired (30-day TTL). Regenerate it from the account page.
@@ -1859,6 +1864,64 @@ If Node.js is under `C:\Program Files\nodejs\`, use the 8.3 short path to avoid 
 
 - Tools that require a wedding context (e.g. `get_guest_list`) will fail with a planner-role key unless the planner's key has a `wedding_id` set. Use a wedding-admin key for wedding-specific operations.
 - A planner key is needed for `get_planner_weddings`.
+
+---
+
+### Creating spectacular RSVP pages with Claude Design
+
+Claude Design (available at claude.ai) lets you have a conversation with Claude to generate a complete visual design — colour palette, typography, decorative SVG motifs, and sample HTML layouts — all tailored to a wedding's aesthetic. You can then import that design directly into the Nupci invitation builder via MCP.
+
+#### Workflow
+
+1. **Generate a design system** — in Claude Desktop (with the Nupci MCP connected), tell Claude the wedding's style:
+
+   > "Generate a romantic garden wedding design system for Sofia & Marco. Colours should be dusty rose and sage green with gold accents. Use flowing script fonts and botanical motifs."
+
+   Claude calls `set_wedding_design_system` to persist the palette, fonts, style notes, and motifs to the wedding record.
+
+2. **Generate the invitation** — ask Claude to build the invitation page using that design system:
+
+   > "Now create a full invitation template using the design system you just saved. Include a decorative SVG header, the couple names in a large script font, the date and venue, a countdown timer, and an RSVP button."
+
+   Claude reads the `invitation://schema` resource to understand the `TemplateDesign` format, then calls `create_invitation_template` with a complete JSON design. It can use `embed` blocks to include bespoke SVG artwork or decorative HTML sections that aren't possible with the standard block types.
+
+3. **Refine in the visual editor** — the template appears immediately in the invitation builder at `/admin/invitation-builder`. Use the editor to fine-tune fonts, colours, and block order.
+
+#### Available MCP tools for invitations
+
+| Tool | Description |
+|------|-------------|
+| `list_invitation_templates` | List all saved invitation templates for this wedding |
+| `create_invitation_template` | Create a new template from a `TemplateDesign` JSON |
+| `update_invitation_template` | Update an existing template's name or design |
+| `get_wedding_design_system` | Retrieve the saved design system |
+| `set_wedding_design_system` | Save a new design system (palette, fonts, style, motifs) |
+
+#### The `embed` block — importing HTML/SVG from external tools
+
+The `embed` block renders arbitrary HTML, SVG, or inline CSS directly in the invitation canvas. This is the key primitive for importing spectacular designs generated by Claude Design, Canva exports, or any other design tool that outputs HTML/SVG:
+
+```json
+{
+  "id": "header-artwork",
+  "type": "embed",
+  "html": "<svg viewBox='0 0 800 200'><!-- botanical SVG header --></svg>",
+  "height": "200px"
+}
+```
+
+> **Security note**: Script tags and event handlers are automatically stripped before the embed is shown to guests (server-side sanitization via DOMPurify). Use embeds for decorative SVG/HTML only — interactive JavaScript is not supported.
+
+#### The `invitation://schema` MCP resource
+
+Claude automatically reads this resource when you ask it to create an invitation. It contains the full `TemplateDesign` JSON schema including all block types, supported fonts, theme colour palettes, and a working example. You can also read it yourself:
+
+```bash
+# Read the schema resource
+curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"invitation://schema"}}'
+```
 
 ---
 
@@ -1877,6 +1940,12 @@ The MCP server calls these endpoints on the platform. All require auth via `Auth
 | `GET` | `/api/admin/mcp/invoices` | Invoices |
 | `GET` | `/api/admin/mcp/providers` | Providers |
 | `GET` | `/api/planner/mcp/weddings` | Planner's weddings |
+| `GET` | `/api/admin/mcp/invitation-templates` | List invitation templates |
+| `POST` | `/api/admin/mcp/invitation-templates` | Create invitation template |
+| `GET` | `/api/admin/mcp/invitation-templates/:id` | Get a specific template |
+| `PUT` | `/api/admin/mcp/invitation-templates/:id` | Update a template |
+| `GET` | `/api/admin/mcp/design-system` | Get wedding design system |
+| `PUT` | `/api/admin/mcp/design-system` | Save wedding design system |
 
 ---
 

@@ -207,10 +207,6 @@
         "menuTasting": {
           "title": "Gestión del Menú y Prueba",
           "description": "Crea menús de degustación, invita a participantes por WhatsApp o email, recoge valoraciones y selecciona el menú final de boda a partir de los platos degustados."
-        },
-        "weddingSchedule": {
-          "title": "Cronograma del Día de la Boda",
-          "description": "Crea cronogramas detallados minuto a minuto para el gran día. Coordina proveedores, bloques y etapas con precisión y exporta un dossier PDF para tu equipo."
         }
       }
     },
@@ -285,7 +281,6 @@
       "company": "Empresa",
       "support": "Soporte",
       "about": "Acerca de",
-      "careers": "Trabaja con nosotros",
       "contact": "Contacto",
       "privacy": "Política de Privacidad",
       "help": "Centro de Ayuda",
@@ -326,75 +321,6 @@
       "title": "Error al enviar",
       "message": "Ha ocurrido un error al enviar tu mensaje. Por favor, inténtalo de nuevo.",
       "retry": "Reintentar"
-    }
-  },
-  "careers": {
-    "title": "Trabaja en {commercialName}",
-    "subtitle": "No estamos buscando empleados, sino fundadores técnicos y mentes inquietas que quieran dominar su oficio.",
-    "howWeWork": {
-      "title": "El Modelo de Alta Velocidad",
-      "description": "En {commercialName}, hemos perfeccionado nuestro modelo de entrega continua en una máquina de \"Alta Confianza y Alta Velocidad\". No creemos en los sprints tradicionales que fragmentan el tiempo; preferimos gestionar el flujo mediante Kanban y Linear para que mover una idea a producción 100 veces por semana sea algo natural.",
-      "sections": [
-        {
-          "title": "1. Ciclo de Refinamiento y Revisión",
-          "content": "Tratamos el refinamiento como un flujo controlado. Cuando el Linear MCP extrae una funcionalidad, creamos una especificación asíncrona. Antes de tocar una sola línea de código, el equipo aplica el protocolo \"Grill\": estresamos la lógica, buscamos casos de borde y validamos el ajuste arquitectónico contra nuestros documentos de dirección. Solo cuando el producto tiene sentido, empezamos a construir."
-        },
-        {
-          "title": "2. Calidad como Activo, no como Freno",
-          "content": "Nuestra capa de pruebas es nuestro activo más valioso. Utilizamos Playwright para automatizar el \"Camino Dorado\" (Golden Path). Si el CI detecta un fallo, el despliegue se bloquea. Pero no solo confiamos en los robots; cada funcionalidad genera un despliegue de demostración único en Vercel para una inspección manual de \"sensaciones\" antes del merge final."
-        },
-        {
-          "title": "3. Diseño y Observabilidad Continua",
-          "content": "Eliminamos la deuda de diseño usando Claude Design para mantener la consistencia visual en nuestros componentes de Next.js. Una vez en producción, operamos sin miedo: usamos Statsig para feature flags y HyperDX para monitorizar logs y trazas en tiempo real. Si algo falla, lo apagamos en segundos sin necesidad de rollbacks."
-        }
-      ]
-    },
-    "culture": {
-      "title": "Cultura y Valores",
-      "description": "Si buscas una empresa donde esconderte tras un proceso burocrático, {commercialName} no es para ti. Buscamos personas con una tolerancia al riesgo superior a la media, que prefieran ser el empleado #3 antes que el #11.000.",
-      "sections": [
-        {
-          "title": "Autonomía y Expresión",
-          "content": "Queremos personas que amen su trabajo y se sientan orgullosas de lo que logran. Aquí tienes libertad para gestionar tu horario y capacidad de decisión absoluta sobre tu área. No medimos las horas en la oficina; medimos la calidad y el impacto de lo que entregas."
-        },
-        {
-          "title": "Comunicación Voluntaria",
-          "content": "Practicamos la comunicación proactiva. No esperamos a que nadie nos pregunte qué estamos haciendo. No nos \"desaparecemos\" cuando termina la jornada si hay algo crítico; somos un equipo de élite que se apoya en las buenas y en las malas. Si tú cumples, la empresa te respaldará siempre."
-        },
-        {
-          "title": "Cero Burocracia",
-          "content": "Invertimos tiempo en automatización, sistemas y documentación para que puedas centrarte en resolver problemas difíciles y ambiguos. Creemos en la responsabilidad individual y en confrontar nuestros fallos para aprender de ellos."
-        }
-      ]
-    },
-    "compensation": {
-      "title": "Compensación y Beneficios",
-      "description": "Queremos a los mejores, por eso pagamos salarios en la parte superior del mercado. Creemos que un salario alto es la forma más eficiente de valorar tu trabajo.",
-      "content": "Además de un salario competitivo, ofrecemos seguro médico completo, dental y visión gestionado a través de socios de primer nivel. No tenemos una política de vacaciones cuantificada; confiamos en tu criterio para coordinarte con el equipo y tomarte el tiempo que necesites cuando lo necesites."
-    },
-    "development": {
-      "title": "Desarrollo de Carrera",
-      "content": "No creemos en los programas formales de desarrollo de carrera que suelen ser ineficaces. En su lugar, ofrecemos oportunidades reales para desarrollar competencias en nuevas áreas según el crecimiento de la empresa. Si quieres probar algo nuevo y encaja con nuestras necesidades, la puerta está abierta."
-    },
-    "positions": {
-      "title": "Posiciones Abiertas",
-      "requirements": "Requisitos del Perfil",
-      "softwareEngineer": {
-        "title": "Software Engineer (Generalist)",
-        "location": "Remoto / Híbrido",
-        "description": "Buscamos a alguien que pueda navegar por todo nuestro stack técnico. Alguien que pueda optimizar una consulta en Prisma, pulir la UX de un formulario complejo con React o ajustar el pipeline de CI/CD. Queremos ingenieros que entiendan el producto, no solo el código.",
-        "requirements": [
-          "Sólida experiencia en el desarrollo de aplicaciones web modernas y arquitectura de sistemas",
-          "Capacidad para trabajar de forma asíncrona y autónoma",
-          "Mentalidad de 'solucionador de problemas' por encima de 'escritor de código'",
-          "Experiencia con herramientas de observabilidad y testing automatizado"
-        ]
-      }
-    },
-    "cta": {
-      "title": "¿Estás listo para el reto?",
-      "button": "Aplicar a través de Contacto",
-      "description": "Si te motiva la idea de trabajar en un equipo de alto rendimiento donde tu impacto es visible cada día, envíanos un mensaje detallando tu trayectoria y por qué encajas con nuestra filosofía."
     }
   },
   "metadata": {
@@ -520,8 +446,6 @@
       "createWeddingSubtitle": "Configurar un nuevo evento de boda",
       "checklistTemplate": "Plantilla de Lista de Tareas",
       "checklistTemplateSubtitle": "Gestionar plantillas de tareas para tus bodas",
-      "scheduleTemplate": "Plantilla Cronograma",
-      "scheduleTemplateSubtitle": "Bloques y etapas por defecto para tus bodas",
       "providers": "Proveedores",
       "providersSubtitle": "Administra tu biblioteca de proveedores",
       "templates": "Plantillas Predeterminadas",
@@ -797,9 +721,7 @@
         "business": "WhatsApp Business",
         "businessDesc": "Enviar mensajes directamente a través de la API de WhatsApp Business (Twilio).",
         "links": "enlaces de WhatsApp",
-        "linksDesc": "Abrir un enlace wa.me en una nueva pestaña del navegador para cada invitado en lugar de enviar automáticamente.",
-        "manual": "WhatsApp Manual",
-        "manualDesc": "Copia el texto de la invitación o recordatorio al portapapeles al pulsar el botón de envío, para que puedas pegarlo manualmente en WhatsApp."
+        "linksDesc": "Abrir un enlace wa.me en una nueva pestaña del navegador para cada invitado en lugar de enviar automáticamente."
       },
       "buttons": {
         "saving": "Guardando...",
@@ -826,8 +748,7 @@
       "confirmRestore": "¿Restaurar esta boda? Los administradores recuperarán el acceso.",
       "restoreSuccess": "Boda restaurada exitosamente",
       "itinerary": {
-        "title": "Itinerario Oficial",
-        "readOnlyMessage": "Esta información solo puede ser modificada por tu wedding planner.",
+        "title": "Itinerario",
         "viewOnMaps": "Ver en Google Maps →",
         "addStop": "Añadir parada",
         "noItems": "Aún no hay elementos en el itinerario.",
@@ -1530,16 +1451,14 @@
       "templatesSubtitle": "Gestionar invitaciones y recordatorios",
       "checklist": "Lista de Tareas",
       "checklistSubtitle": "Seguimiento de tareas y progreso",
-      "schedule": "Cronograma",
-      "scheduleSubtitle": "Horario detallado del día de boda",
       "rsvpProgress": "Progreso de RSVP",
       "daysUntilWedding": "días hasta la boda",
       "responded": "respondieron",
       "complete": "completo",
       "seatingPlan": "Plan de Asientos",
       "seatingPlanSubtitle": "Asignar invitados a mesas",
-      "providers": "Proveedores y Gastos",
-      "providersSubtitle": "Gestionar proveedores y gastos",
+      "providers": "Proveedores y Regalos",
+      "providersSubtitle": "Gestionar proveedores y regalos",
       "invitationsAndTemplates": "Invitaciones y Plantillas",
       "invitationBuilder": "Constructor de Invitaciones",
       "invitationBuilderSubtitle": "Diseña tu invitación de boda",
@@ -2059,7 +1978,6 @@
       "selected": "seleccionados",
       "copyInvLink": "Copiar enlace de invitación",
       "copyWhatsAppText": "Copiar texto de invitación WhatsApp",
-      "whatsappTextCopied": "Mensaje de WhatsApp copiado al portapapeles",
       "table": {
         "family": "Familia",
         "members": "Miembros",
@@ -2113,17 +2031,10 @@
         "unpaid": "No Regalado",
         "received": "Recibido",
         "searchPlaceholder": "Nombre o email...",
-        "clearAll": "Limpiar filtros",
-        "invertLabel": "Invertir"
+        "clearAll": "Limpiar filtros"
       },
       "importSuccess": "Lista de invitados importada exitosamente",
       "importError": "Error de importación. Por favor, revisa el archivo.",
-      "labels": {
-        "title": "Etiquetas",
-        "addLabel": "Añadir etiqueta",
-        "createNew": "Crear nueva etiqueta",
-        "noLabels": "No hay etiquetas"
-      },
       "form": {
         "addTitle": "Añadir Familia de Invitados",
         "editTitle": "Editar Familia de Invitados",
@@ -2161,10 +2072,7 @@
         "setAllNotAttending": "Marcar todos los miembros como no asistentes",
         "attendanceNote": "Esto actualizará todos los miembros familiares de los invitados seleccionados",
         "noChanges": "Por favor selecciona al menos una propiedad para actualizar",
-        "updateSuccess": "{count} {count, plural, one {invitado actualizado} other {invitados actualizados}} exitosamente",
-        "addLabel": "Añadir etiqueta",
-        "removeLabel": "Quitar etiqueta",
-        "labelConflict": "La etiqueta de añadir y quitar son iguales; se ignorarán ambas"
+        "updateSuccess": "{count} {count, plural, one {invitado actualizado} other {invitados actualizados}} exitosamente"
       }
     },
     "notifications": {
@@ -2877,7 +2785,7 @@
       "location": "Ubicación: {location}"
     },
     "rsvp": {
-      "title": "Confirmación",
+      "title": "RSVP",
       "instructions": "Por favor selecciona quién de tu familia asistirá a la boda.",
       "attend": "Asistir",
       "attending": "Asistiendo",
@@ -2888,9 +2796,9 @@
       "dietaryPlaceholder": "Ej. vegetariano, alergias, etc.",
       "accessibilityPlaceholder": "Ej. silla de ruedas, necesidades especiales, etc.",
       "submit": "Confirmar Asistencia",
-      "submitted": "¡Gracias por tu Confirmación!",
+      "submitted": "¡Gracias por tu RSVP!",
       "confirmationMessage": "Hemos recibido tu confirmación. ¡Esperamos verte en la boda!",
-      "cutoffPassed": "La fecha límite de Confirmación ha pasado. Por favor contacta a los wedding planners.",
+      "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los wedding planners.",
       "additionalQuestions": "Preguntas Adicionales",
       "defaultTransportationQuestion": "¿Necesitarás transporte al lugar del evento?",
       "emptyConfirmation": "Estás confirmando que nadie de tu grupo asistirá, ¿es eso lo que quieres confirmar? De lo contrario, cancela y selecciona a los que asistirán de tu grupo"
@@ -2933,8 +2841,8 @@
       "updated": "Idioma actualizado"
     },
     "edit": {
-      "title": "Editar Confirmación",
-      "canEdit": "Puedes editar tu Confirmación hasta el {date}."
+      "title": "Editar RSVP",
+      "canEdit": "Puedes editar tu RSVP hasta el {date}."
     },
     "footer": {
       "contactCouple": "Si tienes alguna pregunta, por favor contacta a la pareja."
@@ -3288,17 +3196,7 @@
         "title": "Experiencia de Degustación",
         "content": "Recibe un enlace personalizado por WhatsApp, email o SMS. Puntuúa cada plato del 1 al 10, añade notas y sube fotos. Consulta las valoraciones del resto de participantes y las puntuaciones medias por plato. Las valoraciones se guardan automáticamente, sin necesidad de cuenta."
       },
-      "goTo": "Ir a",
-      "schedule": {
-        "title": "Cronograma de la Boda",
-        "path": "/admin/schedule",
-        "content": "Crea un cronograma detallado minuto a minuto para el día de tu boda. Organiza bloques (preparativos, ceremonia, banquete) y etapas con duraciones personalizables, proveedores y notas. Admite bloques paralelos y exporta un dossier PDF para los proveedores."
-      },
-      "scheduleTemplate": {
-        "title": "Plantilla de Cronograma",
-        "path": "/planner/schedule-template",
-        "content": "Define tu estructura de cronograma reutilizable con bloques y etapas predefinidas. Aplícala a cualquier boda con un clic y ajusta la hora de inicio para calcular automáticamente todos los tiempos en bloques secuenciales y paralelos."
-      }
+      "goTo": "Ir a"
     },
     "personas": {
       "select": "Selecciona tu perfil",
@@ -3450,7 +3348,7 @@
       "description": "Pulsa el botón Editar para actualizar los datos principales de esta boda: fecha, lugar, nombres de la pareja, código de vestimenta y más."
     },
     "itinerary": {
-      "title": "Itinerario Oficial de la Boda",
+      "title": "Itinerario de la Boda",
       "description": "Aquí puedes ver el itinerario completo del día de la boda con todos los eventos y sus ubicaciones. Edítalo para añadir ceremonias, recepciones y otros eventos."
     },
     "guestList": {
@@ -3500,58 +3398,5 @@
       "close": "Cerrar"
     },
     "helpLabel": "Ayuda"
-  },
-  "weatherWidget": {
-    "title": "Luz y clima",
-    "sunrise": "Amanecer",
-    "sunset": "Atardecer",
-    "civilDawn": "Crepúsculo matutino",
-    "civilDusk": "Crepúsculo vespertino",
-    "dayLength": "Duración del día",
-    "hours": "h",
-    "minutes": "min",
-    "moonPhase": "Fase lunar",
-    "illumination": "Iluminación",
-    "historicalWeather": "Clima histórico",
-    "avgTemp": "Temperatura",
-    "precipitation": "Precipitación",
-    "referenceYear": "Datos del año {year}",
-    "loading": "Cargando datos...",
-    "error": "No se pudieron obtener los datos",
-    "noLocation": "Configura la ubicación principal del evento para ver el clima",
-    "expand": "Ver luz y clima del día",
-    "collapse": "Ocultar",
-    "lightZones": {
-      "night": "Noche",
-      "dawn": "Amanecer",
-      "day": "Día",
-      "goldenHour": "Hora dorada",
-      "dusk": "Atardecer"
-    },
-    "stageAt": "{time} — {pct}% del día",
-    "moonPhases": {
-      "newMoon": "Luna nueva",
-      "waxingCrescent": "Luna creciente",
-      "firstQuarter": "Cuarto creciente",
-      "waxingGibbous": "Gibosa creciente",
-      "fullMoon": "Luna llena",
-      "waningGibbous": "Gibosa menguante",
-      "lastQuarter": "Cuarto menguante",
-      "waningCrescent": "Luna menguante"
-    },
-    "conditions": {
-      "sunny": "Despejado",
-      "partlyCloudy": "Parcialmente nublado",
-      "cloudy": "Nublado",
-      "drizzle": "Llovizna",
-      "rainy": "Lluvia",
-      "stormy": "Tormenta",
-      "snowy": "Nieve",
-      "foggy": "Niebla"
-    },
-    "solarNoon": "Mediodía solar",
-    "light": "luz",
-    "unitCelsius": "°C",
-    "unitMm": "mm"
   }
 }

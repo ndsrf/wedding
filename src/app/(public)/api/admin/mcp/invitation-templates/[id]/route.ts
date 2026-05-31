@@ -1,0 +1,56 @@
+/**
+ * MCP — Invitation Template by ID (get + update)
+ * GET /api/admin/mcp/invitation-templates/[id]
+ * PUT /api/admin/mcp/invitation-templates/[id]
+ * Auth: Bearer API key (wedding_admin role)
+ */
+
+import { NextRequest } from 'next/server';
+import { requireApiKeyAuth } from '@/lib/auth/api-key';
+import { handleMcpError } from '@/lib/auth/mcp-error';
+import {
+  getInvitationTemplateHandler,
+  updateInvitationTemplateHandler,
+  handleInvitationTemplateApiError,
+} from '@/lib/invitation-template/api-handlers';
+
+async function withAuth(request: NextRequest) {
+  const ctx = await requireApiKeyAuth(request, 'wedding_admin');
+  if (!ctx.wedding_id) throw new Error('FORBIDDEN: No wedding context');
+  return ctx.wedding_id;
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const weddingId = await withAuth(request);
+    const { id } = await params;
+    return getInvitationTemplateHandler(weddingId, id);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : '';
+    if (msg.startsWith('UNAUTHORIZED') || msg.startsWith('FORBIDDEN')) {
+      return handleMcpError(error, 'invitation-templates/[id]:GET');
+    }
+    return handleInvitationTemplateApiError(error);
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const weddingId = await withAuth(request);
+    const { id } = await params;
+    const body = await request.json();
+    return updateInvitationTemplateHandler(weddingId, id, body);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : '';
+    if (msg.startsWith('UNAUTHORIZED') || msg.startsWith('FORBIDDEN')) {
+      return handleMcpError(error, 'invitation-templates/[id]:PUT');
+    }
+    return handleInvitationTemplateApiError(error);
+  }
+}

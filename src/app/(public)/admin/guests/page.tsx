@@ -25,7 +25,6 @@ export default function GuestsPage() {
       apiPaths={{
         apiBase: '/api/admin',
         guests: '/api/admin/guests',
-        labels: '/api/admin/guests/labels',
         guestAdditions: '/api/admin/guest-additions',
         wedding: '/api/admin/wedding',
         admins: '/api/admin/admins',

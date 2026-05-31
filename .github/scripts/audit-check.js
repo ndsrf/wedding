@@ -27,12 +27,6 @@ const ACCEPTED_GHSAS = [
   // next.js - MODERATE severity
   'GHSA-3x4c-7xq6-9pq8', // Unbounded next/image disk cache growth (fix requires Next.js 16.x major upgrade)
 
-  // postcss (bundled in next) - MODERATE severity
-  // XSS via Unescaped </style> in CSS Stringify Output. Requires Next.js 16.x major upgrade.
-  // Risk context: postcss is a build-time tool, not runtime code. The vulnerability affects
-  // malicious CSS input during build, not production app execution.
-  'GHSA-qx2v-qp2m-jg93',
-
   // lodash - MODERATE severity
   'GHSA-xxjr-mmjv-4gpg', // Prototype Pollution
 
@@ -62,10 +56,6 @@ const ACCEPTED_GHSAS = [
   // No patched handlebars version is available for the 4.x branch.
   // Zero production risk: handlebars is never loaded in the Next.js application bundle.
   'GHSA-2qvq-rjwj-gvw9', // Prototype Pollution Leading to XSS through Partial Template Injection
-
-  // uuid - MODERATE severity (transitive dependencies: exceljs, resend/svix)
-  // Affected paths: exceljs@4.4.0 → uuid, resend@6.0.0 → svix@^1.6.0 → uuid
-  'GHSA-w5hq-g745-h8pq', // Missing buffer bounds check in v3/v5/v6 when buf is provided
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];

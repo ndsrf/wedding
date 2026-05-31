@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import type { Language, Channel, GuestLabel } from '@/types/models';
+import type { Language, Channel } from '@/types/models';
 
 interface Admin {
   id: string;
@@ -21,7 +21,6 @@ interface BulkEditModalProps {
   onClose: () => void;
   selectedCount: number;
   admins: Admin[];
-  labels?: GuestLabel[];
   onSave: (updates: BulkEditUpdates) => Promise<void>;
 }
 
@@ -32,8 +31,6 @@ export interface BulkEditUpdates {
   set_all_attending?: boolean;
   set_all_not_attending?: boolean;
   rsvp_status?: 'pending' | 'submitted';
-  add_label_id?: string;
-  remove_label_id?: string;
 }
 
 export function BulkEditModal({
@@ -41,7 +38,6 @@ export function BulkEditModal({
   onClose,
   selectedCount,
   admins,
-  labels = [],
   onSave,
 }: BulkEditModalProps) {
   const t = useTranslations();
@@ -50,8 +46,6 @@ export function BulkEditModal({
   const [invitedBy, setInvitedBy] = useState<string | 'none' | ''>('');
   const [attendance, setAttendance] = useState<'attending' | 'not_attending' | ''>('');
   const [rsvpStatus, setRsvpStatus] = useState<'pending' | 'submitted' | ''>('');
-  const [addLabelId, setAddLabelId] = useState('');
-  const [removeLabelId, setRemoveLabelId] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,13 +72,6 @@ export function BulkEditModal({
     if (rsvpStatus) {
       updates.rsvp_status = rsvpStatus as 'pending' | 'submitted';
     }
-    // If add and remove are the same label, skip both (no-op)
-    if (addLabelId && removeLabelId && addLabelId === removeLabelId) {
-      // intentionally skip both
-    } else {
-      if (addLabelId) updates.add_label_id = addLabelId;
-      if (removeLabelId) updates.remove_label_id = removeLabelId;
-    }
 
     // Check if at least one field is selected
     if (Object.keys(updates).length === 0) {
@@ -102,8 +89,6 @@ export function BulkEditModal({
       setInvitedBy('');
       setAttendance('');
       setRsvpStatus('');
-      setAddLabelId('');
-      setRemoveLabelId('');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
@@ -119,8 +104,6 @@ export function BulkEditModal({
       setInvitedBy('');
       setAttendance('');
       setRsvpStatus('');
-      setAddLabelId('');
-      setRemoveLabelId('');
       setError(null);
       onClose();
     }
@@ -246,48 +229,6 @@ export function BulkEditModal({
                     {t('admin.guests.bulkEdit.attendanceNote')}
                   </p>
                 </div>
-
-                {/* Labels — add and remove in one row */}
-                {labels.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('admin.guests.labels.title')}
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="block text-xs text-gray-500 mb-1">{t('admin.guests.bulkEdit.addLabel')}</span>
-                        <select
-                          value={addLabelId}
-                          onChange={(e) => setAddLabelId(e.target.value)}
-                          disabled={saving}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
-                        >
-                          <option value="">{t('admin.guests.bulkEdit.noChange')}</option>
-                          {labels.map((l) => (
-                            <option key={l.id} value={l.id}>{l.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <span className="block text-xs text-gray-500 mb-1">{t('admin.guests.bulkEdit.removeLabel')}</span>
-                        <select
-                          value={removeLabelId}
-                          onChange={(e) => setRemoveLabelId(e.target.value)}
-                          disabled={saving}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
-                        >
-                          <option value="">{t('admin.guests.bulkEdit.noChange')}</option>
-                          {labels.map((l) => (
-                            <option key={l.id} value={l.id}>{l.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    {addLabelId && removeLabelId && addLabelId === removeLabelId && (
-                      <p className="mt-1 text-xs text-amber-600">{t('admin.guests.bulkEdit.labelConflict')}</p>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -111,14 +111,7 @@ const listGuestsQuerySchema = z.object({
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
   payment_status: z.enum(['PENDING', 'RECEIVED', 'CONFIRMED']).optional(),
   invited_by_admin_id: z.string().uuid().optional(),
-  label_id: z.string().uuid().optional(),
-  label_id_invert: z.coerce.boolean().default(false),
   search: z.string().optional(),
-});
-
-const createLabelSchema = z.object({
-  name: z.string().min(1, 'Label name is required').max(50),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex color').nullable().optional(),
 });
 
 const bulkDeleteSchema = z.object({
@@ -134,8 +127,6 @@ const bulkUpdateSchema = z.object({
     set_all_attending: z.boolean().optional(),
     set_all_not_attending: z.boolean().optional(),
     rsvp_status: z.enum(['pending', 'submitted']).optional(),
-    add_label_id: z.string().uuid().optional(),
-    remove_label_id: z.string().uuid().optional(),
   }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }
@@ -217,12 +208,10 @@ export async function listGuestsHandler(
       channel: searchParams.get('channel') || undefined,
       payment_status: searchParams.get('payment_status') || undefined,
       invited_by_admin_id: searchParams.get('invited_by_admin_id') || undefined,
-      label_id: searchParams.get('label_id') || undefined,
-      label_id_invert: searchParams.get('label_id_invert') || false,
       search: searchParams.get('search') || undefined,
     });
 
-    const { page, limit, ids_only, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search } = queryParams;
+    const { page, limit, ids_only, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search } = queryParams;
 
     const whereClause: Prisma.FamilyWhereInput = { wedding_id: weddingId };
 
@@ -234,13 +223,6 @@ export async function listGuestsHandler(
     }
     if (channel) whereClause.channel_preference = channel;
     if (invited_by_admin_id) whereClause.invited_by_admin_id = invited_by_admin_id;
-    if (label_id_invert) {
-      // Invert: if a label is selected return families that DON'T have it;
-      // if no label is selected ("all") invert means families with NO labels.
-      whereClause.labels = label_id ? { none: { label_id } } : { none: {} };
-    } else if (label_id) {
-      whereClause.labels = { some: { label_id } };
-    }
 
     if (rsvp_status === 'submitted') {
       whereClause.members = { some: { attending: { not: null } } };
@@ -265,7 +247,7 @@ export async function listGuestsHandler(
 
     // ---- ids_only mode: return just selectable family IDs (no RSVP submitted) ----
     if (ids_only) {
-      const filterKey = buildGuestCacheParamsKey({ rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search });
+      const filterKey = buildGuestCacheParamsKey({ rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search });
       const cacheKey = CACHE_KEYS.guestIds(weddingId, filterKey);
 
       const cached = await getCached<{ ids: string[]; total: number }>(cacheKey);
@@ -300,7 +282,7 @@ export async function listGuestsHandler(
 
     // ---- normal paginated list ----
     const skip = (page - 1) * limit;
-    const pageKey = buildGuestCacheParamsKey({ page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search });
+    const pageKey = buildGuestCacheParamsKey({ page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, search });
     const cacheKey = CACHE_KEYS.guestList(weddingId, pageKey);
 
     const cachedList = await getCached<ListGuestsResponse['data']>(cacheKey);
@@ -323,9 +305,6 @@ export async function listGuestsHandler(
             where: { event_type: 'INVITATION_SENT' },
             select: { id: true },
             take: 1,
-          },
-          labels: {
-            include: { label: true },
           },
         },
       }),
@@ -367,7 +346,6 @@ export async function listGuestsHandler(
         extra_info_2_value: family.extra_info_2_value,
         extra_info_3_value: family.extra_info_3_value,
         members: family.members,
-        labels: family.labels.map((la) => la.label),
         rsvp_status: hasRsvp ? 'submitted' : 'pending',
         attending_count: attendingMembers.length,
         total_members: family.members.length,
@@ -579,18 +557,6 @@ export async function bulkUpdateGuestsHandler(
       }
     }
 
-    // Verify label IDs belong to this wedding if provided
-    for (const labelId of [updates.add_label_id, updates.remove_label_id].filter(Boolean) as string[]) {
-      const label = await prisma.guestLabel.findFirst({ where: { id: labelId, wedding_id: weddingId } });
-      if (!label) {
-        const res: APIResponse = {
-          success: false,
-          error: { code: API_ERROR_CODES.NOT_FOUND, message: `Label ${labelId} not found` },
-        };
-        return NextResponse.json(res, { status: 404 });
-      }
-    }
-
     const result = await prisma.$transaction(async (tx) => {
       let updatedFamilies = 0;
       let updatedMembers = 0;
@@ -621,21 +587,6 @@ export async function bulkUpdateGuestsHandler(
           where: { family_id: { in: family_ids } },
           data: { attending: updates.set_all_attending ? true : updates.set_all_not_attending ? false : null },
         })).count;
-      }
-
-      // Add label: skip families that already have it via skipDuplicates
-      if (updates.add_label_id) {
-        await tx.familyLabelAssignment.createMany({
-          data: family_ids.map((family_id) => ({ family_id, label_id: updates.add_label_id! })),
-          skipDuplicates: true,
-        });
-      }
-
-      // Remove label: delete assignments that exist
-      if (updates.remove_label_id) {
-        await tx.familyLabelAssignment.deleteMany({
-          where: { label_id: updates.remove_label_id, family_id: { in: family_ids } },
-        });
       }
 
       return { updatedFamilies, updatedMembers };
@@ -1116,7 +1067,6 @@ const WHATSAPP_FALLBACK_MESSAGES: Record<string, {
 export async function getGuestWhatsAppTextHandler(
   familyId: string,
   weddingId: string,
-  skipSaveTheDate = false,
 ): Promise<NextResponse> {
   try {
     const family = await prisma.family.findUnique({
@@ -1165,11 +1115,9 @@ export async function getGuestWhatsAppTextHandler(
     const hasRsvp = family.members.some(m => m.attending !== null);
     const wedding = family.wedding!;
 
-    // Determine template type with the same priority as button visibility.
-    // skipSaveTheDate bypasses SAVE_THE_DATE so the invite/reminder bell button
-    // always returns INVITATION or REMINDER even when save-the-date is pending.
+    // Determine template type with the same priority as button visibility
     let templateType: 'SAVE_THE_DATE' | 'INVITATION' | 'REMINDER' | 'CONFIRMATION';
-    if (!skipSaveTheDate && wedding.save_the_date_enabled && !family.save_the_date_sent && !invitationSent) {
+    if (wedding.save_the_date_enabled && !family.save_the_date_sent && !invitationSent) {
       templateType = 'SAVE_THE_DATE';
     } else if (hasRsvp) {
       templateType = 'CONFIRMATION';
@@ -1226,85 +1174,58 @@ export async function getGuestWhatsAppTextHandler(
   }
 }
 
-// ============================================================================
-// GUEST LABELS
-// ============================================================================
+// ── Guest Label Handlers ───────────────────────────────────────────────────────
 
-/**
- * GET …/guests/labels  — List all labels for a wedding
- */
-export async function listLabelsHandler(weddingId: string): Promise<NextResponse> {
-  try {
-    const labels = await prisma.guestLabel.findMany({
-      where: { wedding_id: weddingId },
-      orderBy: { name: 'asc' },
-    });
-    const response: APIResponse = { success: true, data: labels };
-    return NextResponse.json(response, { status: 200 });
-  } catch (error) {
-    return handleGuestApiError(error, { operation: 'list labels' });
-  }
+export async function listLabelsHandler(weddingId: string) {
+  const labels = await prisma.guestLabel.findMany({
+    where: { wedding_id: weddingId },
+    orderBy: { name: 'asc' },
+  });
+  const response: APIResponse = { success: true, data: labels };
+  return NextResponse.json(response);
 }
 
-/**
- * POST …/guests/labels  — Create a new label for a wedding
- */
-export async function createLabelHandler(weddingId: string, body: unknown): Promise<NextResponse> {
-  try {
-    const { name, color } = createLabelSchema.parse(body);
-    const label = await prisma.guestLabel.create({
-      data: { wedding_id: weddingId, name, color: color ?? null },
-    });
-    await invalidateStatsForWedding(weddingId);
-    const response: APIResponse = { success: true, data: label };
-    return NextResponse.json(response, { status: 201 });
-  } catch (error) {
-    return handleGuestApiError(error, { operation: 'create label' });
+export async function createLabelHandler(weddingId: string, body: unknown) {
+  const { name, color } = (body ?? {}) as { name?: string; color?: string };
+  if (!name?.trim()) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'name is required' } };
+    return NextResponse.json(response, { status: 400 });
   }
+  const label = await prisma.guestLabel.create({
+    data: { wedding_id: weddingId, name: name.trim(), color: color ?? null },
+  });
+  const response: APIResponse = { success: true, data: label };
+  return NextResponse.json(response, { status: 201 });
 }
 
-/**
- * PATCH …/guests/labels/:id  — Update a label
- */
-export async function updateLabelHandler(
-  labelId: string,
-  weddingId: string,
-  body: unknown,
-): Promise<NextResponse> {
-  try {
-    const { name, color } = createLabelSchema.parse(body);
-    const existing = await prisma.guestLabel.findFirst({ where: { id: labelId, wedding_id: weddingId } });
-    if (!existing) {
-      const res: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Label not found' } };
-      return NextResponse.json(res, { status: 404 });
-    }
-    const label = await prisma.guestLabel.update({
-      where: { id: labelId },
-      data: { name, color: color ?? null },
-    });
-    await invalidateStatsForWedding(weddingId);
-    const response: APIResponse = { success: true, data: label };
-    return NextResponse.json(response, { status: 200 });
-  } catch (error) {
-    return handleGuestApiError(error, { operation: 'update label' });
+export async function updateLabelHandler(id: string, weddingId: string, body: unknown) {
+  const { name, color } = (body ?? {}) as { name?: string; color?: string };
+  if (name !== undefined && !name.trim()) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'name cannot be empty' } };
+    return NextResponse.json(response, { status: 400 });
   }
+  const label = await prisma.guestLabel.updateMany({
+    where: { id, wedding_id: weddingId },
+    data: {
+      ...(name !== undefined && { name: name.trim() }),
+      ...(color !== undefined && { color }),
+    },
+  });
+  if (label.count === 0) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Label not found' } };
+    return NextResponse.json(response, { status: 404 });
+  }
+  const updated = await prisma.guestLabel.findFirst({ where: { id, wedding_id: weddingId } });
+  const response: APIResponse = { success: true, data: updated };
+  return NextResponse.json(response);
 }
 
-/**
- * DELETE …/guests/labels/:id  — Delete a label
- */
-export async function deleteLabelHandler(labelId: string, weddingId: string): Promise<NextResponse> {
-  try {
-    const existing = await prisma.guestLabel.findFirst({ where: { id: labelId, wedding_id: weddingId } });
-    if (!existing) {
-      const res: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Label not found' } };
-      return NextResponse.json(res, { status: 404 });
-    }
-    await prisma.guestLabel.delete({ where: { id: labelId } });
-    await invalidateStatsForWedding(weddingId);
-    const response: APIResponse = { success: true, data: { deleted: true } };
-    return NextResponse.json(response, { status: 200 });
-  } catch (error) {
-    return handleGuestApiError(error, { operation: 'delete label' });
+export async function deleteLabelHandler(id: string, weddingId: string) {
+  const deleted = await prisma.guestLabel.deleteMany({ where: { id, wedding_id: weddingId } });
+  if (deleted.count === 0) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Label not found' } };
+    return NextResponse.json(response, { status: 404 });
   }
+  const response: APIResponse = { success: true, data: null };
+  return NextResponse.json(response);
 }

@@ -21,7 +21,7 @@ import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
 import { ReminderModal } from '@/components/admin/ReminderModal';
 import { GuestTimelineModal } from '@/components/admin/GuestTimelineModal';
 import { BulkEditModal, type BulkEditUpdates } from '@/components/admin/BulkEditModal';
-import type { FamilyWithMembers, GiftStatus, Language, Channel, GuestLabel } from '@/types/models';
+import type { FamilyWithMembers, GiftStatus, Language, Channel } from '@/types/models';
 import type { FamilyMemberFormData } from '@/components/admin/FamilyMemberForm';
 import { CheckmarkIcon, XMarkIcon } from '@/components/shared/NavIcons';
 
@@ -65,14 +65,11 @@ interface Filters {
   channel?: string;
   payment_status?: string;
   invited_by_admin_id?: string;
-  label_id?: string;
-  label_id_invert?: boolean;
   search?: string;
 }
 
 interface WeddingQuestionConfig {
   save_the_date_enabled: boolean;
-  whatsapp_mode: 'BUSINESS' | 'LINKS' | 'MANUAL';
   transportation_question_enabled: boolean;
   transportation_question_text: string | null;
   extra_question_1_enabled: boolean;
@@ -107,8 +104,6 @@ export interface GuestApiPaths {
   apiBase: string;
   /** Guest CRUD  (GET list, POST create, PATCH :id, DELETE :id) */
   guests: string;
-  /** Guest labels CRUD */
-  labels?: string;
   /** Guest-additions review endpoint */
   guestAdditions: string;
   /** Wedding config (question flags, gift IBAN, short code) */
@@ -148,8 +143,6 @@ function buildFilterParams(filters: Filters): URLSearchParams {
   if (filters.channel) params.set('channel', filters.channel);
   if (filters.payment_status) params.set('payment_status', filters.payment_status);
   if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
-  if (filters.label_id) params.set('label_id', filters.label_id);
-  if (filters.label_id_invert) params.set('label_id_invert', 'true');
   if (filters.search) params.set('search', filters.search);
   return params;
 }
@@ -184,7 +177,6 @@ export function GuestsPageContent({
   const [weddingShortCode, setWeddingShortCode] = useState<string | null>(null);
   const [copiedGeneralLink, setCopiedGeneralLink] = useState(false);
   const [admins, setAdmins] = useState<Array<{ id: string; name: string; email: string }>>([]);
-  const [labels, setLabels] = useState<GuestLabel[]>([]);
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -211,9 +203,6 @@ export function GuestsPageContent({
   const [selectedTimelineFamilyName, setSelectedTimelineFamilyName] = useState<string | null>(null);
 
   const [isExtraActionsExpanded, setIsExtraActionsExpanded] = useState(false);
-  // Guest IDs with an in-flight MANUAL-mode clipboard copy (prevents double-clicks)
-  const [manualCopyingIds, setManualCopyingIds] = useState<Set<string>>(new Set());
-
   // Bulk reminder state
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const selectedGuestIdsRef = useRef(selectedGuestIds);
@@ -283,7 +272,6 @@ export function GuestsPageContent({
       if (data.success) {
         setWeddingConfig({
           save_the_date_enabled: data.data.save_the_date_enabled || false,
-          whatsapp_mode: data.data.whatsapp_mode || 'BUSINESS',
           transportation_question_enabled: data.data.transportation_question_enabled,
           transportation_question_text: data.data.transportation_question_text,
           extra_question_1_enabled: data.data.extra_question_1_enabled,
@@ -319,32 +307,6 @@ export function GuestsPageContent({
     }
   }, [apiPaths.admins]);
 
-  const fetchLabels = useCallback(async () => {
-    if (!apiPaths.labels) return;
-    try {
-      const response = await fetch(apiPaths.labels);
-      const data = await response.json();
-      if (data.success) {
-        setLabels(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching labels:', error);
-    }
-  }, [apiPaths.labels]);
-
-  const handleCreateLabel = useCallback(async (name: string): Promise<GuestLabel> => {
-    if (!apiPaths.labels) throw new Error('Labels endpoint not configured');
-    const response = await fetch(apiPaths.labels, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    });
-    const data = await response.json();
-    if (!data.success) throw new Error(data.error?.message || 'Failed to create label');
-    setLabels((prev) => [...prev, data.data]);
-    return data.data as GuestLabel;
-  }, [apiPaths.labels]);
-
   const handleFilterChange = useCallback((newFilters: Filters) => {
     setFilters(newFilters);
     setPage(1);
@@ -367,7 +329,6 @@ export function GuestsPageContent({
   useEffect(() => { fetchGuestAdditions(); }, [fetchGuestAdditions]);
   useEffect(() => { fetchWeddingConfig(); }, [fetchWeddingConfig]);
   useEffect(() => { fetchAdmins(); }, [fetchAdmins]);
-  useEffect(() => { fetchLabels(); }, [fetchLabels]);
 
   // -------------------------------------------------------------------------
   // EXPORT / IMPORT
@@ -478,11 +439,8 @@ export function GuestsPageContent({
     return data.data.path as string;
   };
 
-  const handleCopyWhatsAppText = async (guestId: string, skipSaveTheDate = false): Promise<string> => {
-    const url = skipSaveTheDate
-      ? `${apiPaths.guests}/${guestId}/whatsapp-text?skipSaveTheDate=true`
-      : `${apiPaths.guests}/${guestId}/whatsapp-text`;
-    const response = await fetch(url);
+  const handleCopyWhatsAppText = async (guestId: string): Promise<string> => {
+    const response = await fetch(`${apiPaths.guests}/${guestId}/whatsapp-text`);
     const data = await response.json();
     if (!data.success) throw new Error('Failed to fetch WhatsApp text');
     return data.data.text as string;
@@ -526,28 +484,8 @@ export function GuestsPageContent({
   // REMINDERS
   // -------------------------------------------------------------------------
 
-  const handleSendReminder = async (guestId: string) => {
+  const handleSendReminder = (guestId: string) => {
     const guest = guests.find((g) => g.id === guestId);
-    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
-      const channelPref = guest?.channel_preference ?? null;
-      if (channelPref === 'WHATSAPP' || channelPref === null) {
-        if (manualCopyingIds.has(guestId)) return;
-        setManualCopyingIds(prev => new Set(prev).add(guestId));
-        try {
-          // skipSaveTheDate=true so the bell button always returns INVITATION/REMINDER,
-          // not SAVE_THE_DATE even when save-the-date is enabled but not yet sent.
-          const text = await handleCopyWhatsAppText(guestId, true);
-          await navigator.clipboard.writeText(text);
-          showNotification('success', t('admin.guests.whatsappTextCopied'));
-        } catch {
-          showNotification('error', t('common.errors.generic'));
-        } finally {
-          setManualCopyingIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
-        }
-        return;
-      }
-      // EMAIL or SMS guests fall through to the normal reminder modal
-    }
     if (guest) {
       setReminderFamily({
         id: guest.id,
@@ -568,25 +506,6 @@ export function GuestsPageContent({
 
   const handleSendSaveTheDate = async (guestId: string) => {
     const guest = guests.find((g) => g.id === guestId);
-    if (weddingConfig?.whatsapp_mode === 'MANUAL') {
-      const channelPref = guest?.channel_preference ?? null;
-      if (channelPref === 'WHATSAPP' || channelPref === null) {
-        if (manualCopyingIds.has(guestId)) return;
-        setManualCopyingIds(prev => new Set(prev).add(guestId));
-        try {
-          // No skipSaveTheDate — the calendar button should copy SAVE_THE_DATE text.
-          const text = await handleCopyWhatsAppText(guestId);
-          await navigator.clipboard.writeText(text);
-          showNotification('success', t('admin.guests.whatsappTextCopied'));
-        } catch {
-          showNotification('error', t('common.errors.generic'));
-        } finally {
-          setManualCopyingIds(prev => { const s = new Set(prev); s.delete(guestId); return s; });
-        }
-        return;
-      }
-      // EMAIL or SMS guests fall through to the normal save-the-date modal
-    }
     if (guest) {
       setReminderFamily({
         id: guest.id,
@@ -1047,7 +966,7 @@ export function GuestsPageContent({
         {activeTab === 'guests' ? (
           <>
             {/* Filters */}
-            <GuestFilters filters={filters} admins={admins} labels={labels} onFilterChange={handleFilterChange} />
+            <GuestFilters filters={filters} admins={admins} onFilterChange={handleFilterChange} />
 
             {/* Bulk Actions Section */}
             {!isReadOnly && (
@@ -1196,7 +1115,7 @@ export function GuestsPageContent({
               onSendSaveTheDate={weddingConfig?.save_the_date_enabled ? handleSendSaveTheDate : undefined}
               onViewTimeline={handleViewTimeline}
               onCopyInvLink={handleCopyInvLink}
-              sendingGuestIds={manualCopyingIds}
+              onCopyWhatsAppText={handleCopyWhatsAppText}
               showCheckboxes={!isReadOnly}
               selectedGuestIds={selectedGuestIds}
               onSelectGuest={handleSelectGuest}
@@ -1274,8 +1193,6 @@ export function GuestsPageContent({
         isOpen={isFormModalOpen}
         mode={formMode}
         admins={admins}
-        labels={labels}
-        onCreateLabel={apiPaths.labels ? handleCreateLabel : undefined}
         initialData={
           selectedGuest
             ? {
@@ -1287,7 +1204,6 @@ export function GuestsPageContent({
                 preferred_language: selectedGuest.preferred_language,
                 invited_by_admin_id: selectedGuest.invited_by_admin_id || null,
                 private_notes: selectedGuest.private_notes || null,
-                label_ids: (selectedGuest.labels || []).map((l) => l.id),
                 members: selectedGuest.members.map((m) => ({
                   id: m.id,
                   name: m.name,
@@ -1374,7 +1290,6 @@ export function GuestsPageContent({
         onClose={() => setIsBulkEditModalOpen(false)}
         selectedCount={selectedGuestIds.length}
         admins={admins}
-        labels={labels}
         onSave={handleBulkEdit}
       />
 

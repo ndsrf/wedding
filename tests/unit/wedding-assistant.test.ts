@@ -107,6 +107,7 @@ const baseWedding = {
   contract_id: null,
   planned_guests: null,
   planned_gift_per_person: null,
+  design_system: null,
 };
 
 const baseFamily = {

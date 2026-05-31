@@ -1,9 +1,12 @@
-import type { 
-  TemplateDesign, 
-  TemplateBlock, 
-  SupportedLanguage, 
-  TextBlock, 
-  ImageBlock
+import DOMPurify from 'isomorphic-dompurify';
+import type {
+  TemplateDesign,
+  TemplateBlock,
+  SupportedLanguage,
+  TextBlock,
+  ImageBlock,
+  SpacerBlock,
+  EmbedBlock,
 } from '@/types/invitation-template';
 
 /**
@@ -19,7 +22,7 @@ export function preRenderTemplate(
   for (const lang of languages) {
     result[lang] = {};
     for (const block of design.blocks) {
-      if (block.type === 'text' || block.type === 'image') {
+      if (block.type === 'text' || block.type === 'image' || block.type === 'spacer' || block.type === 'embed') {
         result[lang][block.id] = renderBlockToHTML(block, lang);
       }
     }
@@ -38,7 +41,7 @@ function renderBlockToHTML(
   if (block.type === 'text') {
     const textBlock = block as TextBlock;
     const textContent = textBlock.content[language] || textBlock.content['EN'] || '';
-    
+
     // Minify HTML to avoid whitespace issues with pre-line
     return `<div style="position:relative;font-family:${textBlock.style.fontFamily};font-size:${textBlock.style.fontSize};color:${textBlock.style.color};text-align:${textBlock.style.textAlign};white-space:pre-line;padding:0 1rem;margin:0;">${textBlock.style.backgroundImage ? `<div style="position:absolute;inset:0;z-index:-10;background-image:url(${textBlock.style.backgroundImage});background-size:cover;background-position:center;background-repeat:no-repeat;"></div>` : ''}${textContent}</div>`;
   }
@@ -47,7 +50,7 @@ function renderBlockToHTML(
     const imageBlock = block as ImageBlock;
     const alignment = imageBlock.alignment || 'center';
     const zoom = imageBlock.zoom || 100;
-    const alignmentStyle = 
+    const alignmentStyle =
       alignment === 'left' ? 'text-align:left;' :
       alignment === 'right' ? 'text-align:right;' :
       'text-align:center;';
@@ -55,6 +58,17 @@ function renderBlockToHTML(
     return `<div style="${alignmentStyle}margin:0;line-height:0;"><img src="${imageBlock.src}" alt="${imageBlock.alt || ''}" style="width:${zoom}%;height:auto;border-radius:0.5rem;display:inline-block;vertical-align:middle;margin:0;" /></div>`;
   }
 
+  if (block.type === 'spacer') {
+    const spacerBlock = block as SpacerBlock;
+    return `<div style="height:${spacerBlock.height};display:block;" aria-hidden="true"></div>`;
+  }
+
+  if (block.type === 'embed') {
+    const embedBlock = block as EmbedBlock;
+    const heightStyle = embedBlock.height ? `min-height:${embedBlock.height};` : '';
+    const safeHtml = DOMPurify.sanitize(embedBlock.html);
+    return `<div class="embed-block" style="${heightStyle}width:100%;overflow:hidden;">${safeHtml}</div>`;
+  }
+
   return '';
 }
-

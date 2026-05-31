@@ -124,6 +124,10 @@ export default async function GuestRSVPPage({ params, searchParams }: Props) {
 
   return (
     <>
+      {/* Performance: Preconnect to font domains */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      
       <NextIntlClientProvider locale={familyLang} messages={messages}>
         <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
