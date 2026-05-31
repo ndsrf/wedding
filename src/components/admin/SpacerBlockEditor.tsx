@@ -11,7 +11,9 @@ interface SpacerBlockEditorProps {
 const PRESET_HEIGHTS = ['0.5rem', '1rem', '2rem', '3rem', '4rem', '6rem', '8rem'];
 
 export function SpacerBlockEditor({ block, onUpdate, canvasMode }: SpacerBlockEditorProps) {
-  const currentPx = parseFloat(block.height) * (block.height.endsWith('rem') ? 16 : 1);
+  const height = block.height ?? '';
+  const rawValue = parseFloat(height) || 0;
+  const currentPx = rawValue * (height.endsWith('rem') ? 16 : 1);
 
   if (canvasMode) {
     return (

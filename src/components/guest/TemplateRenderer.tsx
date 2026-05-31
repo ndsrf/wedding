@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useEffect } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import Image from 'next/image';
 import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType, GalleryBlock as GalleryBlockType, SpacerBlock as SpacerBlockType, EmbedBlock as EmbedBlockType } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
@@ -295,11 +296,12 @@ function TemplateBlock({
 
   if (block.type === 'embed') {
     const embedBlock = block as EmbedBlockType;
+    const safeHtml = DOMPurify.sanitize(embedBlock.html);
     return (
       <div
         className="embed-block w-full overflow-hidden"
         style={embedBlock.height ? { minHeight: embedBlock.height } : undefined}
-        dangerouslySetInnerHTML={{ __html: embedBlock.html }}
+        dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
     );
   }

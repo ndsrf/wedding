@@ -1,3 +1,4 @@
+import DOMPurify from 'isomorphic-dompurify';
 import type {
   TemplateDesign,
   TemplateBlock,
@@ -40,7 +41,7 @@ function renderBlockToHTML(
   if (block.type === 'text') {
     const textBlock = block as TextBlock;
     const textContent = textBlock.content[language] || textBlock.content['EN'] || '';
-    
+
     // Minify HTML to avoid whitespace issues with pre-line
     return `<div style="position:relative;font-family:${textBlock.style.fontFamily};font-size:${textBlock.style.fontSize};color:${textBlock.style.color};text-align:${textBlock.style.textAlign};white-space:pre-line;padding:0 1rem;margin:0;">${textBlock.style.backgroundImage ? `<div style="position:absolute;inset:0;z-index:-10;background-image:url(${textBlock.style.backgroundImage});background-size:cover;background-position:center;background-repeat:no-repeat;"></div>` : ''}${textContent}</div>`;
   }
@@ -49,7 +50,7 @@ function renderBlockToHTML(
     const imageBlock = block as ImageBlock;
     const alignment = imageBlock.alignment || 'center';
     const zoom = imageBlock.zoom || 100;
-    const alignmentStyle = 
+    const alignmentStyle =
       alignment === 'left' ? 'text-align:left;' :
       alignment === 'right' ? 'text-align:right;' :
       'text-align:center;';
@@ -65,9 +66,9 @@ function renderBlockToHTML(
   if (block.type === 'embed') {
     const embedBlock = block as EmbedBlock;
     const heightStyle = embedBlock.height ? `min-height:${embedBlock.height};` : '';
-    return `<div class="embed-block" style="${heightStyle}width:100%;overflow:hidden;">${embedBlock.html}</div>`;
+    const safeHtml = DOMPurify.sanitize(embedBlock.html);
+    return `<div class="embed-block" style="${heightStyle}width:100%;overflow:hidden;">${safeHtml}</div>`;
   }
 
   return '';
 }
-

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireApiKeyAuth } from '@/lib/auth/api-key';
+import { handleMcpError } from '@/lib/auth/mcp-error';
 import {
   getInvitationTemplateHandler,
   updateInvitationTemplateHandler,
@@ -29,8 +30,9 @@ export async function GET(
     return getInvitationTemplateHandler(weddingId, id);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : '';
-    if (msg.includes('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (msg.includes('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (msg.startsWith('UNAUTHORIZED') || msg.startsWith('FORBIDDEN')) {
+      return handleMcpError(error, 'invitation-templates/[id]:GET');
+    }
     return handleInvitationTemplateApiError(error);
   }
 }
@@ -46,8 +48,9 @@ export async function PUT(
     return updateInvitationTemplateHandler(weddingId, id, body);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : '';
-    if (msg.includes('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (msg.includes('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (msg.startsWith('UNAUTHORIZED') || msg.startsWith('FORBIDDEN')) {
+      return handleMcpError(error, 'invitation-templates/[id]:PUT');
+    }
     return handleInvitationTemplateApiError(error);
   }
 }

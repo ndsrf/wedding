@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import type { EmbedBlock } from '@/types/invitation-template';
 
 interface EmbedBlockEditorProps {
@@ -11,12 +12,13 @@ interface EmbedBlockEditorProps {
 
 export function EmbedBlockEditor({ block, onUpdate, canvasMode }: EmbedBlockEditorProps) {
   const [showRaw, setShowRaw] = useState(false);
+  const safeHtml = useMemo(() => DOMPurify.sanitize(block.html), [block.html]);
 
   const preview = (
     <div
       className="w-full overflow-hidden rounded border border-gray-200 bg-white"
       style={block.height ? { minHeight: block.height } : undefined}
-      dangerouslySetInnerHTML={{ __html: block.html }}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 
@@ -31,6 +33,7 @@ export function EmbedBlockEditor({ block, onUpdate, canvasMode }: EmbedBlockEdit
         className="w-full p-2 border border-gray-300 rounded text-xs font-mono focus:outline-none focus:border-blue-500 resize-y"
         spellCheck={false}
       />
+      <p className="text-xs text-gray-500">Scripts are stripped before display. Use for decorative HTML/SVG only.</p>
       <label className="block text-sm font-medium text-gray-700 mt-2">Reserved height (optional)</label>
       <input
         type="text"
@@ -71,7 +74,7 @@ export function EmbedBlockEditor({ block, onUpdate, canvasMode }: EmbedBlockEdit
       </p>
       {block.html && (
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Preview</label>
+          <label className="block text-sm font-medium mb-2">Preview (sanitized)</label>
           {preview}
         </div>
       )}

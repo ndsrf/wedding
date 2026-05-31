@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireApiKeyAuth } from '@/lib/auth/api-key';
+import { handleMcpError } from '@/lib/auth/mcp-error';
 import { prisma } from '@/lib/db/prisma';
 import type { WeddingDesignSystem } from '@/types/wedding-design-system';
 import type { Prisma } from '@prisma/client';
@@ -25,12 +26,8 @@ export async function GET(request: NextRequest) {
       select: { design_system: true },
     });
     return NextResponse.json({ designSystem: wedding?.design_system ?? null });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : '';
-    if (msg.includes('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (msg.includes('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    console.error('[MCP] design-system GET error:', error);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  } catch (error) {
+    return handleMcpError(error, 'design-system:GET');
   }
 }
 
@@ -57,11 +54,7 @@ export async function PUT(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, designSystem: ds });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : '';
-    if (msg.includes('UNAUTHORIZED')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (msg.includes('FORBIDDEN')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    console.error('[MCP] design-system PUT error:', error);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  } catch (error) {
+    return handleMcpError(error, 'design-system:PUT');
   }
 }
