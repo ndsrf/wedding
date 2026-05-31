@@ -3,7 +3,15 @@
   "extends": [
     "config:recommended"
   ],
-  "automerge": true,
-  "automergeType": "pr",
+  "constraints": {
+    "npm": "^11.0.0"
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ],
   "deleteMergedBranches": true
 }
