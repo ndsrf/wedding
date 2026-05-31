@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(weddingProviders.map((wp) => {
       const totalPaid = wp.payments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const agreedAmount = wp.total_price ? Number(wp.total_price) : null;
+      const agreedAmount = (wp.total_price !== null && wp.total_price !== undefined) ? Number(wp.total_price) : null;
       return {
         providerName: wp.provider?.name || wp.name || 'Unknown',
         category: wp.category.name,
