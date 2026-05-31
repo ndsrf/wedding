@@ -52,10 +52,14 @@ export async function POST(request: NextRequest) {
         data: { wedding_id: ctx.wedding_id, name: localizedSectionName, order: (lastSection?.order ?? 0) + 1 },
       });
     }
-
     let absoluteDate: Date | null = null;
     if (dueDate) {
       absoluteDate = new Date(dueDate);
+      if (isNaN(absoluteDate.getTime())) {
+        return NextResponse.json({ error: 'Invalid dueDate format' }, { status: 400 });
+      }
+    } else if (dueDateRelative && wedding.wedding_date) {
+
     } else if (dueDateRelative && wedding.wedding_date) {
       try {
         absoluteDate = convertRelativeDateToAbsolute(dueDateRelative as RelativeDateFormat, wedding.wedding_date);
