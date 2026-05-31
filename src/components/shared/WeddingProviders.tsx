@@ -460,25 +460,21 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
 
                   {/* Financial summary bar */}
                   <div className="border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 divide-x divide-gray-100">
-                    {!isPlanner && (
-                      <div className="px-3 py-2 text-center">
-                        <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">{t('budgetedPrice')}</p>
-                        <p className="text-sm font-semibold text-gray-700">
-                          {wp.budgeted_price ? `${Number(wp.budgeted_price).toLocaleString()} €` : '—'}
-                          {wp.budgeted_price && wp.category.price_type === 'PER_PERSON' && (
-                            <span className="text-[10px] text-gray-400 ml-0.5">/{t('perPersonShort')}</span>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                    {!isPlanner && (
-                      <div className="px-3 py-2 text-center">
-                        <p className="text-[10px] text-indigo-500 uppercase font-medium mb-0.5">{t('projectedTotal')}</p>
-                        <p className="text-sm font-semibold text-indigo-600">
-                          {projected ? `${projected.toLocaleString()} €` : '—'}
-                        </p>
-                      </div>
-                    )}
+                    <div className="px-3 py-2 text-center">
+                      <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">{t('budgetedPrice')}</p>
+                      <p className="text-sm font-semibold text-gray-700">
+                        {wp.budgeted_price ? `${Number(wp.budgeted_price).toLocaleString()} €` : '—'}
+                        {wp.budgeted_price && wp.category.price_type === 'PER_PERSON' && (
+                          <span className="text-[10px] text-gray-400 ml-0.5">/{t('perPersonShort')}</span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="px-3 py-2 text-center">
+                      <p className="text-[10px] text-indigo-500 uppercase font-medium mb-0.5">{t('projectedTotal')}</p>
+                      <p className="text-sm font-semibold text-indigo-600">
+                        {projected ? `${projected.toLocaleString()} €` : '—'}
+                      </p>
+                    </div>
                     <div className="px-3 py-2 text-center">
                       <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">
                         {t('totalPrice')}
@@ -598,12 +594,10 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {!isPlanner && (
-                      <Field label={`${t('budgetedPrice')}${wp.category.price_type === 'PER_PERSON' ? ` (/${t('perPersonShort')})` : ''}`}>
-                        <Input type="number" value={editForm.budgeted_price ?? ''}
-                          onChange={(e: IE) => setEditForm({ ...editForm, budgeted_price: e.target.value ? Number(e.target.value) : null })} />
-                      </Field>
-                    )}
+                    <Field label={`${t('budgetedPrice')}${wp.category.price_type === 'PER_PERSON' ? ` (/${t('perPersonShort')})` : ''}`}>
+                      <Input type="number" value={editForm.budgeted_price ?? ''}
+                        onChange={(e: IE) => setEditForm({ ...editForm, budgeted_price: e.target.value ? Number(e.target.value) : null })} />
+                    </Field>
                     <Field label={`${t('totalPrice')}${wp.category.price_type === 'PER_PERSON' ? ` (/${t('perPersonShort')})` : ''}`}>
                       <Input type="number" value={editForm.total_price ?? ''}
                         onChange={(e: IE) => setEditForm({ ...editForm, total_price: e.target.value ? Number(e.target.value) : null })} />
@@ -703,12 +697,10 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
       {/* ── Summary totals ── */}
       {providers.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {!isPlanner && (
-            <Card className="p-4 text-center border-indigo-200 bg-indigo-50">
-              <p className="text-[11px] text-indigo-600 font-medium uppercase mb-1">{t('totalProjected')}</p>
-              <p className="text-lg font-bold text-indigo-800">{totalBudgeted.toLocaleString()} €</p>
-            </Card>
-          )}
+          <Card className="p-4 text-center border-indigo-200 bg-indigo-50">
+            <p className="text-[11px] text-indigo-600 font-medium uppercase mb-1">{t('totalProjected')}</p>
+            <p className="text-lg font-bold text-indigo-800">{totalBudgeted.toLocaleString()} €</p>
+          </Card>
           <Card className="p-4 text-center border-gray-200 bg-gray-50">
             <p className="text-[11px] text-gray-500 font-medium uppercase mb-1">{t('totalReal')}</p>
             <p className="text-lg font-bold text-gray-800">{totalReal.toLocaleString()} €</p>
