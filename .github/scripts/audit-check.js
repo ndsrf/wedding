@@ -56,6 +56,20 @@ const ACCEPTED_GHSAS = [
   // No patched handlebars version is available for the 4.x branch.
   // Zero production risk: handlebars is never loaded in the Next.js application bundle.
   'GHSA-2qvq-rjwj-gvw9', // Prototype Pollution Leading to XSS through Partial Template Injection
+
+  // postcss - MODERATE severity
+  // Vulnerability in Next.js bundled version (via next@15.1.6)
+  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
+  // CSS is generated from trusted sources only (Tailwind CSS config, not user input)
+  // Risk: Requires malicious CSS content to be processed; Next.js 15.x is more secure overall
+  'GHSA-qx2v-qp2m-jg93', // XSS via Unescaped </style> in CSS Stringify Output
+
+  // uuid - MODERATE severity
+  // Dependency of exceljs (Excel import/export for admins)
+  // Fix available but requires breaking change: downgrading exceljs to 3.4.0
+  // Vulnerability only affects edge case: missing buffer bounds check when buf is provided
+  // Risk: Low impact because (1) only authenticated admins use Excel upload (2) vulnerability requires specific conditions
+  'GHSA-w5hq-g745-h8pq', // Missing buffer bounds check in v3/v5/v6 when buf is provided
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];
