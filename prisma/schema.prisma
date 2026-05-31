@@ -52,6 +52,7 @@ model WeddingPlanner {
   created_by          String
   last_login_at       DateTime?
   checklist_template  ChecklistTemplate?
+  schedule_template   ScheduleTemplate?
   themes              Theme[]
   weddings            Wedding[]
   provider_categories ProviderCategory[]
@@ -226,6 +227,9 @@ model Wedding {
   alert_rules                     AlertRule[]        @relation("WeddingAlertRules")
   alerts                          Alert[]            @relation("WeddingAlerts")
   families                        Family[]
+  guest_labels                    GuestLabel[]
+  schedule                        WeddingSchedule?
+  schedule_blocks                 ScheduleBlock[]
   message_templates               MessageTemplate[]
   invitation_templates            InvitationTemplate[]
   notifications                   Notification[]
@@ -420,6 +424,7 @@ model Family {
   wedding                 Wedding         @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
   members                 FamilyMember[]
   gifts                   Gift[]
+  labels                  FamilyLabelAssignment[]
   notifications           Notification[]
   tracking_events         TrackingEvent[]
 
@@ -700,12 +705,86 @@ model WeddingProvider {
   category        ProviderCategory @relation(fields: [category_id], references: [id], onDelete: Restrict)
   provider        Provider? @relation(fields: [provider_id], references: [id], onDelete: Restrict)
   payments        Payment[]
+  schedule_stages ScheduleStage[]
 
   @@unique([wedding_id, category_id, provider_id])
   @@index([wedding_id])
   @@index([category_id])
   @@index([provider_id])
   @@map("wedding_providers")
+}
+
+// -----------------------------------------------------------------------------
+// WEDDING SCHEDULE — day-of timeline with blocks and stages
+// -----------------------------------------------------------------------------
+
+model ScheduleTemplate {
+  id         String          @id @default(uuid())
+  planner_id String          @unique
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+
+  planner WeddingPlanner @relation(fields: [planner_id], references: [id], onDelete: Cascade)
+  blocks  ScheduleBlock[]
+
+  @@index([planner_id])
+  @@map("schedule_templates")
+}
+
+model ScheduleBlock {
+  id             String    @id @default(uuid())
+  template_id    String?
+  wedding_id     String?
+  name           String
+  order          Int
+  color          String?   @default("#6366f1")
+  offset_minutes Int?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  template ScheduleTemplate? @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  wedding  Wedding?           @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  stages   ScheduleStage[]
+
+  @@index([template_id])
+  @@index([wedding_id])
+  @@index([order])
+  @@map("schedule_blocks")
+}
+
+model ScheduleStage {
+  id                  String    @id @default(uuid())
+  block_id            String
+  name                String
+  duration_minutes    Int
+  order               Int
+  notes               String?   @db.Text
+  visible_to_couple   Boolean   @default(true)
+  wedding_provider_id String?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  block            ScheduleBlock   @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  wedding_provider WeddingProvider? @relation(fields: [wedding_provider_id], references: [id], onDelete: SetNull)
+
+  @@index([block_id])
+  @@index([order])
+  @@index([wedding_provider_id])
+  @@map("schedule_stages")
+}
+
+model WeddingSchedule {
+  id         String   @id @default(uuid())
+  wedding_id String   @unique
+  start_time String
+  notes      String?  @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  wedding Wedding @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+
+  @@index([wedding_id])
+  @@map("wedding_schedules")
 }
 
 model Payment {
@@ -1484,4 +1563,36 @@ model WeddingApiKey {
   expires_at   DateTime?
 
   @@map("wedding_api_keys")
+}
+
+// -----------------------------------------------------------------------------
+// GUEST LABELS — tag families for segmentation (e.g. "Bride side", "Work")
+// -----------------------------------------------------------------------------
+
+model GuestLabel {
+  id         String                  @id @default(uuid())
+  wedding_id String
+  name       String
+  color      String?
+  created_at DateTime                @default(now())
+
+  wedding  Wedding                @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  families FamilyLabelAssignment[]
+
+  @@unique([wedding_id, name])
+  @@index([wedding_id])
+  @@map("guest_labels")
+}
+
+model FamilyLabelAssignment {
+  family_id String
+  label_id  String
+
+  family Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  label  GuestLabel @relation(fields: [label_id], references: [id], onDelete: Cascade)
+
+  @@id([family_id, label_id])
+  @@index([family_id])
+  @@index([label_id])
+  @@map("family_label_assignments")
 }

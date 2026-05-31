@@ -24,10 +24,10 @@ export async function GET(request: NextRequest) {
     const weddingIds = weddings.map((w) => w.id);
     const allFamilies = await prisma.family.findMany({
       where: { wedding_id: { in: weddingIds } },
-      include: { members: { select: { wedding_id: true, attending: true } } },
+      select: { id: true, wedding_id: true, members: { select: { attending: true } } },
     });
 
-    const familiesByWedding = new Map<string, typeof allFamilies>();
+    const familiesByWedding = new Map<string, (typeof allFamilies)[number][]>();
     for (const f of allFamilies) {
       const list = familiesByWedding.get(f.wedding_id) ?? [];
       list.push(f);

@@ -1173,3 +1173,59 @@ export async function getGuestWhatsAppTextHandler(
     return handleGuestApiError(error, { operation: 'fetch whatsapp text' });
   }
 }
+
+// ── Guest Label Handlers ───────────────────────────────────────────────────────
+
+export async function listLabelsHandler(weddingId: string) {
+  const labels = await prisma.guestLabel.findMany({
+    where: { wedding_id: weddingId },
+    orderBy: { name: 'asc' },
+  });
+  const response: APIResponse = { success: true, data: labels };
+  return NextResponse.json(response);
+}
+
+export async function createLabelHandler(weddingId: string, body: unknown) {
+  const { name, color } = (body ?? {}) as { name?: string; color?: string };
+  if (!name?.trim()) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'name is required' } };
+    return NextResponse.json(response, { status: 400 });
+  }
+  const label = await prisma.guestLabel.create({
+    data: { wedding_id: weddingId, name: name.trim(), color: color ?? null },
+  });
+  const response: APIResponse = { success: true, data: label };
+  return NextResponse.json(response, { status: 201 });
+}
+
+export async function updateLabelHandler(id: string, weddingId: string, body: unknown) {
+  const { name, color } = (body ?? {}) as { name?: string; color?: string };
+  if (name !== undefined && !name.trim()) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'name cannot be empty' } };
+    return NextResponse.json(response, { status: 400 });
+  }
+  const label = await prisma.guestLabel.updateMany({
+    where: { id, wedding_id: weddingId },
+    data: {
+      ...(name !== undefined && { name: name.trim() }),
+      ...(color !== undefined && { color }),
+    },
+  });
+  if (label.count === 0) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Label not found' } };
+    return NextResponse.json(response, { status: 404 });
+  }
+  const updated = await prisma.guestLabel.findFirst({ where: { id, wedding_id: weddingId } });
+  const response: APIResponse = { success: true, data: updated };
+  return NextResponse.json(response);
+}
+
+export async function deleteLabelHandler(id: string, weddingId: string) {
+  const deleted = await prisma.guestLabel.deleteMany({ where: { id, wedding_id: weddingId } });
+  if (deleted.count === 0) {
+    const response: APIResponse = { success: false, error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Label not found' } };
+    return NextResponse.json(response, { status: 404 });
+  }
+  const response: APIResponse = { success: true, data: null };
+  return NextResponse.json(response);
+}

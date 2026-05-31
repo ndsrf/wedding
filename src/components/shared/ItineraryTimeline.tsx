@@ -14,6 +14,7 @@ export interface ItineraryStepItem {
 
 interface ItineraryTimelineProps {
   items: ItineraryStepItem[];
+  showReadOnlyToast?: boolean;
 }
 
 export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
