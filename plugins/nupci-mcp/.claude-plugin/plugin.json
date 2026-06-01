@@ -1,0 +1,11 @@
+{
+  "name": "nupci-mcp",
+  "displayName": "Nupci Wedding Management",
+  "description": "Connect Claude to the Nupci platform via MCP. Manage guests, RSVPs, seating, tasting menus, itinerary, invoices, providers, invitation templates, and more.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Nupci"
+  },
+  "homepage": "https://nupci.com",
+  "mcpServers": ".mcp.json"
+}

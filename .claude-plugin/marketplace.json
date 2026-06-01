@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "nupci",
+  "description": "Nupci wedding management platform plugins for Claude",
+  "owner": {
+    "name": "Nupci",
+    "email": "nupci@junk.ndsrf.com"
+  },
+  "plugins": [
+    {
+      "name": "nupci-mcp",
+      "displayName": "Nupci Wedding Management",
+      "description": "Connect Claude to the Nupci platform: manage guests, RSVPs, seating, invoices, providers, tasting menus, itinerary, invitation templates, and more.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nupci"
+      },
+      "homepage": "https://nupci.com",
+      "category": "productivity",
+      "tags": ["wedding", "rsvp", "guests", "seating", "invoices", "mcp"],
+      "source": "./plugins/nupci-mcp"
+    }
+  ]
+}
