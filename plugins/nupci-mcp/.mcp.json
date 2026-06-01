@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "nupci": {
+      "type": "http",
+      "url": "https://nupci.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${NUPCI_API_KEY}"
+      }
+    }
+  }
+}

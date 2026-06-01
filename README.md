@@ -1652,17 +1652,39 @@ The platform exposes a [Model Context Protocol](https://modelcontextprotocol.io)
 
 ### What it can do
 
+**Wedding Admin tools** (use a wedding-admin API key):
+
 | Tool | Description |
 |------|-------------|
 | `get_guest_list` | List all guest families with RSVP status |
 | `get_rsvp_status` | Aggregate RSVP stats (totals, completion %) |
+| `get_guests_by_label` | Count guests belonging to families with a specific label |
 | `update_family_rsvp` | Update attendance for a family or specific members |
 | `assign_family_to_table` | Assign attending members to a seating table |
 | `suggest_tables_for_family` | Rank best tables for a family to sit at |
 | `add_reminder` | Add a task/reminder to the wedding checklist |
 | `get_wedding_invoices` | List invoices and payment balances |
 | `get_wedding_providers` | List vendors with agreed amounts and payments |
-| `get_planner_weddings` | *(Planner role only)* List all managed weddings |
+| `get_wedding_itinerary` | Get venue addresses and event locations with times |
+| `get_wedding_schedule` | Full wedding day schedule with stages and assigned providers |
+| `get_tasting_menu` | Tasting menu rounds, dishes, and selection status |
+| `get_tasting_scores` | Per-dish tasting scores, averages, and notes |
+| `list_invitation_templates` | List all saved invitation templates |
+| `create_invitation_template` | Create a new template from a TemplateDesign JSON |
+| `update_invitation_template` | Update an existing template's name or design |
+| `get_wedding_design_system` | Retrieve the saved design system (palette, fonts, style) |
+| `set_wedding_design_system` | Save a new design system for visual consistency |
+
+**Planner tools** (use a planner API key):
+
+| Tool | Description |
+|------|-------------|
+| `get_planner_weddings` | List all managed weddings with dates and RSVP completion |
+| `list_quotes` | List quotes with status filter and search |
+| `get_quote_detail` | Full quote breakdown with line items |
+| `list_contracts` | List contracts with status filter and search |
+| `list_invoices` | List invoices with status filter and search |
+| `record_invoice_payment` | Record a payment against an invoice |
 
 It also exposes a `platform://docs` resource with a quick-reference guide to the platform.
 
@@ -1673,6 +1695,29 @@ It also exposes a `platform://docs` resource with a quick-reference guide to the
 Log in to the platform and go to **My Account** (`/admin/account` for couples, `/planner/account` for planners). Scroll to the **AI Integration (MCP)** section and click **Generate API key**.
 
 The raw key is shown **once** — copy it before navigating away. The key expires after 30 days; regenerate it at any time from the same page.
+
+---
+
+### Step 1b — Add as a Claude marketplace (Claude Code & Claude.ai web)
+
+The easiest way to add the Nupci MCP to Claude Code or Claude.ai web is to add this repository as a plugin marketplace.
+
+**Claude Code (CLI or web at claude.ai/code):**
+
+```bash
+/plugin marketplace add ndsrf/wedding
+/plugin install nupci-mcp@nupci
+```
+
+Then set your API key in your shell profile:
+
+```bash
+export NUPCI_API_KEY=npci_your_key_here
+```
+
+**Claude.ai web (Settings → Connectors → Add marketplace):**
+
+Enter `ndsrf/wedding` as the repository. Once added, install the `nupci-mcp` plugin and set your API key when prompted.
 
 ---
 
