@@ -1446,7 +1446,8 @@
       "nupcibot_greeting": "Ciao! Sono NupciBot, il tuo assistente matrimoniale. Come posso aiutarti?",
       "nupcibot_helpConfigure": "Aiutami a configurare il mio matrimonio",
       "tastingMenu": "Menu di Degustazione",
-      "finanzas": "Conto Economico"
+      "finanzas": "Conto Economico",
+      "schedule": "Programma"
     },
     "reports": {
       "title": "Report",

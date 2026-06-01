@@ -1476,7 +1476,8 @@
       "nupcibot_greeting": "¡Hola! Soy NupciBot, tu asistente de bodas. ¿En qué te puedo ayudar?",
       "nupcibot_helpConfigure": "Ayúdame a configurar mi boda",
       "foodAndDrinks": "Comida y Bebida",
-      "finanzas": "Cuenta de Resultados"
+      "finanzas": "Cuenta de Resultados",
+      "schedule": "Cronograma"
     },
     "wizard": {
       "title": "Asistente de Configuración de Boda",

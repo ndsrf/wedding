@@ -27,6 +27,7 @@ import {
   DocumentTextIcon,
   CurrencyIcon,
   SeatingIcon,
+  CalendarIcon,
 } from '@/components/shared/NavIcons';
 import type { AuthenticatedUser } from '@/types/api';
 
@@ -454,6 +455,11 @@ export default async function AdminDashboardPage() {
                   href: '/admin/notas',
                   label: t('notes.title'),
                   icon: <PencilEditIcon className="h-3 w-3" />,
+                },
+                {
+                  href: '/admin/schedule',
+                  label: t('admin.dashboard.schedule'),
+                  icon: <CalendarIcon className="h-3 w-3" />,
                 },
               ]}
             />

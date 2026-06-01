@@ -1446,7 +1446,8 @@
       "nupcibot_greeting": "Hallo! Ich bin NupciBot, Ihr Hochzeitsassistent. Wie kann ich Ihnen helfen?",
       "nupcibot_helpConfigure": "Helfen Sie mir, meine Hochzeit zu konfigurieren",
       "tastingMenu": "Verkostungsmenü",
-      "finanzas": "Gewinn- und Verlustrechnung"
+      "finanzas": "Gewinn- und Verlustrechnung",
+      "schedule": "Zeitplan"
     },
     "reports": {
       "title": "Berichte",
