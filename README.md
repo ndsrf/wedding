@@ -1646,9 +1646,9 @@ Data is stored in Docker volumes:
 
 This persists across container restarts and updates.
 
-## MCP Server (Claude Desktop Integration)
+## MCP Server
 
-The platform exposes a [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants like Claude Desktop direct access to the platform's wedding management tools — the same capabilities as NupciBot, but as structured MCP tools you can invoke from any MCP-compatible client.
+The platform exposes a [Model Context Protocol](https://modelcontextprotocol.io) server at `https://nupci.com/mcp` that gives AI assistants direct access to the wedding management platform — the same capabilities as NupciBot, but as structured MCP tools you can invoke from Claude Desktop, Claude.ai web, Claude Code, or any MCP-compatible client.
 
 ### What it can do
 
@@ -1686,7 +1686,7 @@ The platform exposes a [Model Context Protocol](https://modelcontextprotocol.io)
 | `list_invoices` | List invoices with status filter and search |
 | `record_invoice_payment` | Record a payment against an invoice |
 
-It also exposes a `platform://docs` resource with a quick-reference guide to the platform.
+It also exposes two MCP resources: `platform://docs` (platform quick-reference) and `invitation://schema` (full TemplateDesign JSON schema).
 
 ---
 
@@ -1694,13 +1694,25 @@ It also exposes a `platform://docs` resource with a quick-reference guide to the
 
 Log in to the platform and go to **My Account** (`/admin/account` for couples, `/planner/account` for planners). Scroll to the **AI Integration (MCP)** section and click **Generate API key**.
 
-The raw key is shown **once** — copy it before navigating away. The key expires after 30 days; regenerate it at any time from the same page.
+The raw key is shown **once** — copy it before navigating away. The key expires after 30 days; regenerate it at any time from the same page. The role (wedding admin or planner) is determined automatically from the key.
 
 ---
 
-### Step 1b — Add as a Claude marketplace (Claude Code & Claude.ai web)
+### Step 2 — Connect to Claude
 
-The easiest way to add the Nupci MCP to Claude Code or Claude.ai web is to add this repository as a plugin marketplace.
+Choose the client you want to use:
+
+#### Claude.ai web & Claude Code web (recommended — easiest setup)
+
+This repository includes a Claude plugin marketplace. Add it once and install the plugin in a few commands — no config files to edit manually.
+
+**Claude.ai web** — go to `claude.ai/customize/connectors`, click **Add marketplace**, and enter:
+
+```
+ndsrf/wedding
+```
+
+Then install the `nupci-mcp` plugin and set your API key when prompted.
 
 **Claude Code (CLI or web at claude.ai/code):**
 
@@ -1709,19 +1721,17 @@ The easiest way to add the Nupci MCP to Claude Code or Claude.ai web is to add t
 /plugin install nupci-mcp@nupci
 ```
 
-Then set your API key in your shell profile:
+Then export your API key so the plugin can use it:
 
 ```bash
 export NUPCI_API_KEY=npci_your_key_here
 ```
 
-**Claude.ai web (Settings → Connectors → Add marketplace):**
-
-Enter `ndsrf/wedding` as the repository. Once added, install the `nupci-mcp` plugin and set your API key when prompted.
+Add that export to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.) to make it permanent.
 
 ---
 
-### Step 2 — Configure Claude Desktop
+#### Claude Desktop (Windows / macOS)
 
 Claude Desktop connects to remote MCP servers via [`mcp-remote`](https://www.npmjs.com/package/mcp-remote), a lightweight proxy that bridges HTTP/SSE to stdio. No installation needed — `npx` fetches it automatically.
 
@@ -1730,7 +1740,7 @@ Edit your Claude Desktop configuration file:
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-Add the `nupci` server entry, replacing `npci_your_key_here` with the key you copied:
+Add the `nupci` entry, replacing `npci_your_key_here` with your key:
 
 ```json
 {
@@ -1739,7 +1749,7 @@ Add the `nupci` server entry, replacing `npci_your_key_here` with the key you co
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://your-domain.com/mcp",
+        "https://nupci.com/mcp",
         "--header",
         "Authorization: Bearer npci_your_key_here"
       ]
@@ -1748,17 +1758,19 @@ Add the `nupci` server entry, replacing `npci_your_key_here` with the key you co
 }
 ```
 
-The role (wedding admin or planner) is determined automatically from the API key. The account page shows a ready-to-paste config snippet with your key already filled in.
-
----
-
-### Step 3 — Restart Claude Desktop
-
-Restart the app. You should see the Nupci tools available in the tool picker. Try asking:
+Restart Claude Desktop. You should see the Nupci tools available in the tool picker. Try asking:
 
 > "How many guests have RSVP'd so far?"
 > "Assign the García family to table 5."
 > "Add a reminder to confirm the florist 2 weeks before the wedding."
+
+The account page shows a ready-to-paste config snippet with your key already filled in.
+
+---
+
+#### Other HTTP MCP clients
+
+Point any MCP-compatible client at `https://nupci.com/mcp` with the header `Authorization: Bearer npci_your_key_here`. The endpoint supports both SSE transport and stateless JSON-RPC POST.
 
 ---
 
@@ -1781,7 +1793,7 @@ Then configure Claude Desktop:
       "command": "node",
       "args": ["/absolute/path/to/mcp-server/dist/index.js"],
       "env": {
-        "NUPCI_URL": "https://your-domain.com",
+        "NUPCI_URL": "https://nupci.com",
         "NUPCI_API_KEY": "npci_your_key_here"
       }
     }
@@ -1789,100 +1801,23 @@ Then configure Claude Desktop:
 }
 ```
 
-**Other HTTP MCP clients** (not Claude Desktop): point them at `https://your-domain.com/mcp` with `Authorization: Bearer npci_your_key_here`. The endpoint supports both SSE transport and stateless JSON-RPC POST.
-
----
-
-### Using Nupci MCP with Claude Code
-
-Claude Code (the CLI) picks up MCP servers from a `.mcp.json` file at the repo root or via the `claude mcp add` command.
-
-**Option A — one-time CLI registration (local to your machine)**
-
-```bash
-# Build the server first
-cd mcp-server && npm install && npm run build && cd ..
-
-# Register it with Claude Code
-claude mcp add --transport stdio \
-  --env NUPCI_URL=https://your-domain.com \
-  --env NUPCI_API_KEY=npci_your_key_here \
-  nupci -- node "$(pwd)/mcp-server/dist/index.js"
-```
-
-Verify it's connected:
-
-```bash
-claude mcp list
-```
-
-**Option B — `.mcp.json` at the repo root (shared with the team)**
-
-Commit a `.mcp.json` file so every developer automatically gets the server. Keep secrets out of git by referencing environment variables:
-
-```json
-{
-  "mcpServers": {
-    "nupci": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["${CLAUDE_PROJECT_DIR}/mcp-server/dist/index.js"],
-      "env": {
-        "NUPCI_URL": "${NUPCI_URL}",
-        "NUPCI_API_KEY": "${NUPCI_API_KEY}"
-      }
-    }
-  }
-}
-```
-
-Each developer sets `NUPCI_URL` and `NUPCI_API_KEY` in their shell profile or `.env.local` (not committed). Claude Code expands `${VAR}` at startup.
-
-Once connected, Claude Code has access to all Nupci tools and the `invitation://schema` resource. You can ask things like:
-
-> "Create a garden-romance invitation template for this wedding."
-> "How many guests are still pending RSVP?"
-> "Assign the López family to table 3."
-
 ---
 
 ### Troubleshooting
 
 **Claude Desktop shows "not valid MCP server configurations"**
 
-Claude Desktop does not support a bare `url` field for remote servers — it only accepts `command`-based stdio entries. Use `mcp-remote` as the bridge:
-
-```json
-{
-  "mcpServers": {
-    "nupci": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://your-domain.com/mcp",
-        "--header",
-        "Authorization: Bearer npci_your_key_here"
-      ]
-    }
-  }
-}
-```
+Claude Desktop does not support a bare `url` field for remote servers — it only accepts `command`-based stdio entries. Use `mcp-remote` as the bridge (see configuration above).
 
 **Verifying connectivity with curl**
 
 The endpoint responds to a plain GET with diagnostic JSON — use it to confirm your key works:
 
 ```bash
-curl "https://your-domain.com/mcp?api_key=npci_your_key_here"
+curl -H "Authorization: Bearer npci_your_key_here" https://nupci.com/mcp
 ```
 
 A valid key returns the server info and your role. An invalid or expired key returns a 401.
-
-You can also pass the key as a header if you prefer:
-
-```bash
-curl -H "Authorization: Bearer npci_your_key_here" https://your-domain.com/mcp
-```
 
 **Sending MCP requests manually (curl)**
 
@@ -1890,12 +1825,14 @@ All JSON-RPC calls must be POST with `Content-Type: application/json`:
 
 ```bash
 # List available tools
-curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
+curl -X POST "https://nupci.com/mcp" \
+  -H "Authorization: Bearer npci_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 
 # Call a tool
-curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
+curl -X POST "https://nupci.com/mcp" \
+  -H "Authorization: Bearer npci_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_rsvp_status","arguments":{}}}'
 ```
@@ -1903,44 +1840,34 @@ curl -X POST "https://your-domain.com/mcp?api_key=npci_your_key_here" \
 **401 Unauthorized**
 
 - The key may have expired (30-day TTL). Regenerate it from the account page.
-- Make sure the key is URL-encoded in the query string (the `npci_` format should not need encoding, but avoid trailing spaces).
+- Avoid trailing spaces when copying the key.
 
 **Tool returns an error**
 
-- Tools that require a wedding context (e.g. `get_guest_list`) will fail with a planner-role key unless the planner's key has a `wedding_id` set. Use a wedding-admin key for wedding-specific operations.
-- A planner key is needed for `get_planner_weddings`.
+- Tools that require a wedding context (e.g. `get_guest_list`) will fail with a planner-role key. Use a wedding-admin key for wedding-specific operations.
+- A planner key is needed for `get_planner_weddings` and the Quotes/Contracts/Invoices tools.
 
 ---
 
-### Creating spectacular RSVP pages with Claude Design
+### Creating spectacular RSVP pages with Claude
 
-Claude Design (available at claude.ai) lets you have a conversation with Claude to generate a complete visual design — colour palette, typography, decorative SVG motifs, and sample HTML layouts — all tailored to a wedding's aesthetic. You can then import that design directly into the Nupci invitation builder via MCP.
+With the Nupci MCP connected, you can ask Claude to generate a complete visual design — colour palette, typography, decorative SVG motifs, and full invitation layout — and import it directly into the Nupci invitation builder.
 
 #### Workflow
 
-1. **Generate a design system** — in Claude Desktop (with the Nupci MCP connected), tell Claude the wedding's style:
+1. **Generate a design system** — tell Claude the wedding's style:
 
    > "Generate a romantic garden wedding design system for Sofia & Marco. Colours should be dusty rose and sage green with gold accents. Use flowing script fonts and botanical motifs."
 
    Claude calls `set_wedding_design_system` to persist the palette, fonts, style notes, and motifs to the wedding record.
 
-2. **Generate the invitation** — ask Claude to build the invitation page using that design system:
+2. **Generate the invitation** — ask Claude to build the invitation page:
 
    > "Now create a full invitation template using the design system you just saved. Include a decorative SVG header, the couple names in a large script font, the date and venue, a countdown timer, and an RSVP button."
 
-   Claude reads the `invitation://schema` resource to understand the `TemplateDesign` format, then calls `create_invitation_template` with a complete JSON design. It can use `embed` blocks to include bespoke SVG artwork or decorative HTML sections that aren't possible with the standard block types.
+   Claude reads the `invitation://schema` resource to understand the `TemplateDesign` format, then calls `create_invitation_template` with a complete JSON design. It can use `embed` blocks to include bespoke SVG artwork or decorative HTML sections.
 
 3. **Refine in the visual editor** — the template appears immediately in the invitation builder at `/admin/invitation-builder`. Use the editor to fine-tune fonts, colours, and block order.
-
-#### Available MCP tools for invitations
-
-| Tool | Description |
-|------|-------------|
-| `list_invitation_templates` | List all saved invitation templates for this wedding |
-| `create_invitation_template` | Create a new template from a `TemplateDesign` JSON |
-| `update_invitation_template` | Update an existing template's name or design |
-| `get_wedding_design_system` | Retrieve the saved design system |
-| `set_wedding_design_system` | Save a new design system (palette, fonts, style, motifs) |
 
 #### The `embed` block — importing HTML/SVG from external tools
 
