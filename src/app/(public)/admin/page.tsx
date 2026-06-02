@@ -435,8 +435,8 @@ export default async function AdminDashboardPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-gray-900">Cronograma</h3>
-                <p className="text-sm text-gray-500 mt-0.5">Horario detallado de tu día de boda con tiempos exactos</p>
+                <h3 className="text-base font-bold text-gray-900">{t('admin.dashboard.schedule')}</h3>
+                <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.scheduleSubtitle')}</p>
               </div>
               <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-violet-400 transition-colors flex-shrink-0" />
             </Link>

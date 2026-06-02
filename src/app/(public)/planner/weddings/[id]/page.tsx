@@ -353,8 +353,8 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-gray-900">Cronograma</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Horario detallado con todas las etapas del día</p>
+                <h3 className="text-sm font-bold text-gray-900">{t('admin.dashboard.schedule')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.scheduleSubtitle')}</p>
               </div>
               <svg className="h-5 w-5 text-gray-300 group-hover:text-violet-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
