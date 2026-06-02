@@ -340,6 +340,28 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
             </Link>
           </div>
 
+          {/* Cronograma — planner full view */}
+          <div className="mb-3">
+            <Link
+              href={`/planner/weddings/${weddingId}/schedule`}
+              className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-violet-100 shadow-sm p-5 hover:shadow-md hover:border-violet-300 hover:bg-violet-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md shadow-violet-100 group-hover:shadow-violet-200 transition-shadow">
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-gray-900">{t('admin.dashboard.schedule')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.scheduleSubtitle')}</p>
+              </div>
+              <svg className="h-5 w-5 text-gray-300 group-hover:text-violet-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
           {/* Secondary Actions */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {/* Tasks & Finances — grouped */}

@@ -944,6 +944,7 @@ enum PaymentMethod {
 enum WhatsAppMode {
   BUSINESS
   LINKS
+  MANUAL
 }
 
 enum LocationType {

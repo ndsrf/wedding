@@ -1480,7 +1480,9 @@
       "nupcibot_greeting": "Hi! I'm NupciBot, your wedding assistant. How can I help you?",
       "nupcibot_helpConfigure": "Help me configure my wedding",
       "foodAndDrinks": "Food & Drinks",
-      "finanzas": "P&L Statement"
+      "finanzas": "P&L Statement",
+      "schedule": "Schedule",
+      "scheduleSubtitle": "Detailed schedule for your wedding day"
     },
     "wizard": {
       "title": "Wedding Setup Wizard",

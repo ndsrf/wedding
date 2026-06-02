@@ -1,0 +1,6 @@
+{
+  "name": "@exodus/bytes",
+  "version": "1.15.0",
+  "main": "index.js",
+  "license": "MIT"
+}

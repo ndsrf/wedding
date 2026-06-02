@@ -1446,7 +1446,9 @@
       "nupcibot_greeting": "Bonjour ! Je suis NupciBot, votre assistant mariage. Comment puis-je vous aider ?",
       "nupcibot_helpConfigure": "Aidez-moi à configurer mon mariage",
       "tastingMenu": "Menu de Dégustation",
-      "finanzas": "Compte de Résultats"
+      "finanzas": "Compte de Résultats",
+      "schedule": "Programme",
+      "scheduleSubtitle": "Programme détaillé de votre journée de mariage"
     },
     "reports": {
       "title": "Rapports",
