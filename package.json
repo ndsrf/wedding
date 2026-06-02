@@ -43,7 +43,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@google/genai": "^1.44.0",
-    "@hyperdx/browser": "^0.22.0",
+    "@hyperdx/browser": "^0.24.0",
     "@liveblocks/client": "^3.15.3",
     "@liveblocks/node": "^3.15.3",
     "@liveblocks/react": "^3.15.3",
