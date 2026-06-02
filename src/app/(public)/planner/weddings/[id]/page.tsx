@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { cacheCoupleName } from '@/hooks/useCoupleNames';
-import { X, Calendar } from 'lucide-react';
+import { X, Calendar, CalendarDays } from 'lucide-react';
 import { AdminInviteForm } from '@/components/planner/AdminInviteForm';
 import { WeddingDemoTutorial } from '@/components/shared/WeddingDemoTutorial';
 import { ItineraryTimeline } from '@/components/shared/ItineraryTimeline';
@@ -313,8 +313,8 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('planner.weddings.quickActions')}</h2>
 
-          {/* Primary: Guest Management */}
-          <div className="mb-4">
+          {/* Primary: Guest Management + Schedule */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <Link
               href={`/planner/weddings/${weddingId}/guests`}
               data-tutorial="wedding-guest-list"
@@ -335,6 +335,22 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                 <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.guestListSubtitle')}</p>
               </div>
               <svg className="h-5 w-5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+
+            <Link
+              href={`/planner/weddings/${weddingId}/schedule`}
+              className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-teal-100 shadow-sm p-6 hover:shadow-md hover:border-teal-300 hover:bg-teal-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-md shadow-teal-200 group-hover:shadow-teal-300 transition-shadow">
+                <CalendarDays className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-gray-900">{t('admin.dashboard.schedule')}</h3>
+                <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.scheduleSubtitle')}</p>
+              </div>
+              <svg className="h-5 w-5 text-gray-300 group-hover:text-teal-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
