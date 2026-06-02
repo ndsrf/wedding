@@ -379,8 +379,8 @@ export default async function AdminDashboardPage() {
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.dashboard.manageWedding')}</h2>
 
-          {/* Primary Actions: Guest Management + Configure Wedding */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          {/* Primary Actions: Guest Management + Configure Wedding + Schedule */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             {/* Guest Management - most important, featured */}
             <Link
               href="/admin/guests"
@@ -420,6 +420,22 @@ export default async function AdminDashboardPage() {
               </div>
               <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" />
             </Link>
+
+            {/* Schedule / Cronograma - prominent */}
+            <Link
+              href="/admin/schedule"
+              prefetch={false}
+              className="group flex items-center gap-5 bg-white rounded-2xl border-2 border-teal-100 shadow-sm p-6 hover:shadow-md hover:border-teal-300 hover:bg-teal-50/30 transition-all"
+            >
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-md shadow-teal-200 group-hover:shadow-teal-300 transition-shadow">
+                <CalendarIcon className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-gray-900">{t('admin.dashboard.schedule')}</h3>
+                <p className="text-sm text-gray-500 mt-0.5">{t('admin.dashboard.scheduleSubtitle')}</p>
+              </div>
+              <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-teal-400 transition-colors flex-shrink-0" />
+            </Link>
           </div>
 
           {/* Secondary Actions */}
@@ -455,11 +471,6 @@ export default async function AdminDashboardPage() {
                   href: '/admin/notas',
                   label: t('notes.title'),
                   icon: <PencilEditIcon className="h-3 w-3" />,
-                },
-                {
-                  href: '/admin/schedule',
-                  label: t('admin.dashboard.schedule'),
-                  icon: <CalendarIcon className="h-3 w-3" />,
                 },
               ]}
             />

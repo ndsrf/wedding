@@ -1447,7 +1447,8 @@
       "nupcibot_helpConfigure": "Aidez-moi à configurer mon mariage",
       "tastingMenu": "Menu de Dégustation",
       "finanzas": "Compte de Résultats",
-      "schedule": "Programme"
+      "schedule": "Programme",
+      "scheduleSubtitle": "Programme de la journée"
     },
     "reports": {
       "title": "Rapports",

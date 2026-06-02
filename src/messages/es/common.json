@@ -1477,7 +1477,8 @@
       "nupcibot_helpConfigure": "Ayúdame a configurar mi boda",
       "foodAndDrinks": "Comida y Bebida",
       "finanzas": "Cuenta de Resultados",
-      "schedule": "Cronograma"
+      "schedule": "Cronograma",
+      "scheduleSubtitle": "Itinerario del día"
     },
     "wizard": {
       "title": "Asistente de Configuración de Boda",

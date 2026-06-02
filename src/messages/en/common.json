@@ -1481,7 +1481,8 @@
       "nupcibot_helpConfigure": "Help me configure my wedding",
       "foodAndDrinks": "Food & Drinks",
       "finanzas": "P&L Statement",
-      "schedule": "Schedule"
+      "schedule": "Schedule",
+      "scheduleSubtitle": "Day-of itinerary"
     },
     "wizard": {
       "title": "Wedding Setup Wizard",
