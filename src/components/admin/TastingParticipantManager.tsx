@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 
 export interface TastingParticipant {
   id: string;
+  menu_id: string;
   name: string;
   email: string | null;
   phone: string | null;
