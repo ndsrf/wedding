@@ -2570,7 +2570,8 @@
       "pdf": {
         "tastingReport": "Rapport de Dégustation",
         "weddingMenu": "Menu de Mariage",
-        "error": "Erreur lors de la génération du PDF"
+        "error": "Erreur lors de la génération du PDF",
+        "viewResults": "Voir les résultats"
       },
       "rounds": {
         "selectRound": "Tour :",

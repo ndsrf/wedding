@@ -6,11 +6,31 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
+import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
 import { uploadFile, deleteFile } from '@/lib/storage';
 import { computeEffectiveStatus } from '@/lib/tasting/status';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB — reject before reading into memory
+const MAX_DIMENSION = 1200;
+const TARGET_MAX_BYTES = 150 * 1024;
+
+async function compressImage(inputBuffer: Buffer): Promise<Buffer> {
+  for (const quality of [80, 65, 50, 40]) {
+    const result = await sharp(inputBuffer)
+      .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
+      .flatten({ background: '#ffffff' })
+      .jpeg({ quality })
+      .toBuffer();
+    if (result.length <= TARGET_MAX_BYTES) return result;
+  }
+  return sharp(inputBuffer)
+    .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
+    .flatten({ background: '#ffffff' })
+    .jpeg({ quality: 40 })
+    .toBuffer();
+}
 type Params = { params: Promise<{ token: string }> };
 
 export async function POST(request: NextRequest, { params }: Params) {
@@ -41,6 +61,10 @@ export async function POST(request: NextRequest, { params }: Params) {
     return NextResponse.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid image type' } }, { status: 400 });
   }
 
+  if (file.size > MAX_FILE_SIZE) {
+    return NextResponse.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'File too large (max 20 MB)' } }, { status: 413 });
+  }
+
   // Verify dish belongs to this participant's menu
   const dish = await prisma.tastingDish.findFirst({
     where: { id: dishId, section: { menu_id: participant.menu_id } },
@@ -58,20 +82,25 @@ export async function POST(request: NextRequest, { params }: Params) {
     await deleteFile(existing.image_url).catch(() => {});
   }
 
-  const ext = file.type.split('/')[1] || 'jpg';
-  const filename = `${Date.now()}-${randomUUID().split('-')[0]}.${ext}`;
-  const filepath = `uploads/weddings/${participant.menu.wedding_id}/tasting/scores/${participant.id}/${dishId}/${filename}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
+  try {
+    const rawBuffer = Buffer.from(await file.arrayBuffer());
+    const compressed = await compressImage(rawBuffer);
 
-  const { url } = await uploadFile(filepath, buffer, { contentType: file.type });
+    const filename = `${Date.now()}-${randomUUID().split('-')[0]}.jpg`;
+    const filepath = `uploads/weddings/${participant.menu.wedding_id}/tasting/scores/${participant.id}/${dishId}/${filename}`;
 
-  const score = await prisma.tastingScore.upsert({
-    where: { participant_id_dish_id: { participant_id: participant.id, dish_id: dishId } },
-    create: { participant_id: participant.id, dish_id: dishId, score: 0, image_url: url },
-    update: { image_url: url },
-  });
+    const { url } = await uploadFile(filepath, compressed, { contentType: 'image/jpeg' });
 
-  return NextResponse.json({ success: true, data: score });
+    const score = await prisma.tastingScore.upsert({
+      where: { participant_id_dish_id: { participant_id: participant.id, dish_id: dishId } },
+      create: { participant_id: participant.id, dish_id: dishId, score: 0, image_url: url },
+      update: { image_url: url },
+    });
+
+    return NextResponse.json({ success: true, data: score });
+  } catch {
+    return NextResponse.json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to process or upload image' } }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: NextRequest, { params }: Params) {

@@ -105,6 +105,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface PageProps {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ view?: string }>;
 }
 
 // ─── Star component ───────────────────────────────────────────────────────────
@@ -711,14 +712,13 @@ function AverageScoresTab({ data, searchQuery }: { data: TastingData; searchQuer
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-export default function TastingPage({ params }: PageProps) {
-  const { token } = use(params);
+function TastingPageInner({ token, resultsOnly }: { token: string; resultsOnly: boolean }) {
   const t = useTranslations('guest.tasting');
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<TastingData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>('my');
+  const [activeTab, setActiveTab] = useState<Tab>(resultsOnly ? 'all' : 'my');
 
   const fetchData = useCallback(async () => {
     try {
@@ -804,7 +804,7 @@ export default function TastingPage({ params }: PageProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'my', label: t('tabs.myScores') },
+    ...(!resultsOnly ? [{ id: 'my' as Tab, label: t('tabs.myScores') }] : []),
     { id: 'all', label: t('tabs.allScores') },
     { id: 'avg', label: t('tabs.averages') },
   ];
@@ -920,4 +920,10 @@ export default function TastingPage({ params }: PageProps) {
       <Footer />
     </div>
   );
+}
+
+export default function TastingPage({ params, searchParams }: PageProps) {
+  const { token } = use(params);
+  const { view } = use(searchParams);
+  return <TastingPageInner token={token} resultsOnly={view === 'results'} />;
 }
