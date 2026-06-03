@@ -2648,7 +2648,8 @@
       "pdf": {
         "tastingReport": "Tasting Report",
         "weddingMenu": "Wedding Menu",
-        "error": "Failed to generate PDF"
+        "error": "Failed to generate PDF",
+        "viewResults": "View results"
       },
       "rounds": {
         "selectRound": "Round:",

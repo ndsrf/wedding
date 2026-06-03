@@ -2570,7 +2570,8 @@
       "pdf": {
         "tastingReport": "Degustationsbericht",
         "weddingMenu": "Hochzeitsmenü",
-        "error": "PDF-Generierung fehlgeschlagen"
+        "error": "PDF-Generierung fehlgeschlagen",
+        "viewResults": "Ergebnisse anzeigen"
       },
       "rounds": {
         "selectRound": "Runde:",

@@ -6,11 +6,30 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
+import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
 import { uploadFile, deleteFile } from '@/lib/storage';
 import { computeEffectiveStatus } from '@/lib/tasting/status';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_DIMENSION = 1200;
+const TARGET_MAX_BYTES = 150 * 1024;
+
+async function compressImage(inputBuffer: Buffer): Promise<Buffer> {
+  for (const quality of [80, 65, 50, 40]) {
+    const result = await sharp(inputBuffer)
+      .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
+      .flatten({ background: '#ffffff' })
+      .jpeg({ quality })
+      .toBuffer();
+    if (result.length <= TARGET_MAX_BYTES) return result;
+  }
+  return sharp(inputBuffer)
+    .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
+    .flatten({ background: '#ffffff' })
+    .jpeg({ quality: 40 })
+    .toBuffer();
+}
 type Params = { params: Promise<{ token: string }> };
 
 export async function POST(request: NextRequest, { params }: Params) {
@@ -58,12 +77,13 @@ export async function POST(request: NextRequest, { params }: Params) {
     await deleteFile(existing.image_url).catch(() => {});
   }
 
-  const ext = file.type.split('/')[1] || 'jpg';
-  const filename = `${Date.now()}-${randomUUID().split('-')[0]}.${ext}`;
-  const filepath = `uploads/weddings/${participant.menu.wedding_id}/tasting/scores/${participant.id}/${dishId}/${filename}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const rawBuffer = Buffer.from(await file.arrayBuffer());
+  const compressed = await compressImage(rawBuffer);
 
-  const { url } = await uploadFile(filepath, buffer, { contentType: file.type });
+  const filename = `${Date.now()}-${randomUUID().split('-')[0]}.jpg`;
+  const filepath = `uploads/weddings/${participant.menu.wedding_id}/tasting/scores/${participant.id}/${dishId}/${filename}`;
+
+  const { url } = await uploadFile(filepath, compressed, { contentType: 'image/jpeg' });
 
   const score = await prisma.tastingScore.upsert({
     where: { participant_id_dish_id: { participant_id: participant.id, dish_id: dishId } },
