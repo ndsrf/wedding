@@ -78,7 +78,7 @@
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
     "ioredis": "^5.10.0",
-    "isomorphic-dompurify": "2.20.0",
+    "isomorphic-dompurify": "2.36.0",
     "lucide-react": "^1.0.0",
     "mammoth": "^1.11.0",
     "mime": "^4.1.0",
