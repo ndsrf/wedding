@@ -47,6 +47,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/careers" className="hover:text-white transition-colors">
+                  {t('landing.footer.careers')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/news" className="hover:text-white transition-colors">
                   {t('news.title')}
                 </Link>
