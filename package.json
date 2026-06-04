@@ -140,11 +140,11 @@
     "@babel/runtime": ">=7.26.10",
     "@opentelemetry/resources": "^2.0.0",
     "hono": "^4.12.7",
-    "https-proxy-agent": "5.0.1",
+    "https-proxy-agent": "9.0.0",
     "follow-redirects": "^1.16.0",
     "protobufjs": ">=7.5.5",
     "twilio": {
-      "https-proxy-agent": "^5.0.0"
+      "https-proxy-agent": "^9.0.0"
     },
     "serialize-javascript": "^7.0.4",
     "test-exclude": "^8.0.0"
