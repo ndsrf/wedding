@@ -78,7 +78,7 @@
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
     "ioredis": "^5.10.0",
-    "isomorphic-dompurify": "3.16.0",
+    "isomorphic-dompurify": "2.20.0",
     "lucide-react": "^1.0.0",
     "mammoth": "^1.11.0",
     "mime": "^4.1.0",
@@ -134,18 +134,15 @@
     "typescript": "^5.7.3"
   },
   "overrides": {
-    "jsdom": "^29.0.0",
+    "jsdom": "^26.0.0",
     "@hono/node-server": ">=1.19.13",
     "effect": "^3.20.0",
     "@babel/runtime": ">=7.26.10",
     "@opentelemetry/resources": "^2.0.0",
     "hono": "^4.12.7",
-    "https-proxy-agent": "9.0.0",
+    "https-proxy-agent": "^5.0.0",
     "follow-redirects": "^1.16.0",
     "protobufjs": ">=7.5.5",
-    "twilio": {
-      "https-proxy-agent": "^9.0.0"
-    },
     "serialize-javascript": "^7.0.4",
     "test-exclude": "^8.0.0"
   }
