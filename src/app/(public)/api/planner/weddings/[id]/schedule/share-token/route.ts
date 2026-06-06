@@ -32,16 +32,15 @@ export async function POST(_req: Request, { params }: Params) {
 
   if (!token) {
     const newToken = randomUUID();
-    try {
-      // Conditional update: only succeeds if the token is still null.
-      // If a concurrent request already set it, Prisma throws P2025
-      // (record not found) and we fall through to re-fetch.
-      await prisma.wedding.update({
-        where: { id: weddingId, planner_schedule_token: null },
-        data: { planner_schedule_token: newToken },
-      });
+    // updateMany accepts null in where; count=0 means a concurrent request
+    // already set the token, so we fall through to re-fetch.
+    const { count } = await prisma.wedding.updateMany({
+      where: { id: weddingId, planner_schedule_token: null },
+      data: { planner_schedule_token: newToken },
+    });
+    if (count > 0) {
       token = newToken;
-    } catch {
+    } else {
       const refetched = await prisma.wedding.findUnique({
         where: { id: weddingId },
         select: { planner_schedule_token: true },
