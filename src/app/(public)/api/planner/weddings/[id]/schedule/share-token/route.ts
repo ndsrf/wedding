@@ -28,13 +28,30 @@ export async function POST(_req: Request, { params }: Params) {
     select: { planner_schedule_token: true },
   });
 
-  let token = wedding?.planner_schedule_token;
+  let token = wedding?.planner_schedule_token ?? null;
+
   if (!token) {
-    token = randomUUID();
-    await prisma.wedding.update({
-      where: { id: weddingId },
-      data: { planner_schedule_token: token },
-    });
+    const newToken = randomUUID();
+    try {
+      // Conditional update: only succeeds if the token is still null.
+      // If a concurrent request already set it, Prisma throws P2025
+      // (record not found) and we fall through to re-fetch.
+      await prisma.wedding.update({
+        where: { id: weddingId, planner_schedule_token: null },
+        data: { planner_schedule_token: newToken },
+      });
+      token = newToken;
+    } catch {
+      const refetched = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        select: { planner_schedule_token: true },
+      });
+      token = refetched?.planner_schedule_token ?? null;
+    }
+  }
+
+  if (!token) {
+    return NextResponse.json({ error: 'Failed to generate share token' }, { status: 500 });
   }
 
   return NextResponse.json({ data: { token } });

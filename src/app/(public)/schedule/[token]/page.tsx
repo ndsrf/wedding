@@ -2,11 +2,16 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { prisma } from '@/lib/db/prisma';
 import { SchedulePageContent } from '@/components/shared/SchedulePageContent';
+import { formatDateByLanguage } from '@/lib/date-formatter';
+import { getLanguageFromRequest } from '@/lib/i18n/server';
 
 type Props = { params: Promise<{ token: string }> };
 
+const TOKEN_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function generateMetadata({ params }: Props) {
   const { token } = await params;
+  if (!token || !TOKEN_RE.test(token)) return { title: 'Cronograma' };
   const wedding = await prisma.wedding.findFirst({
     where: { OR: [{ admin_schedule_token: token }, { planner_schedule_token: token }] },
     select: { couple_names: true },
@@ -16,6 +21,10 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function PublicSchedulePage({ params }: Props) {
   const { token } = await params;
+
+  // Reject empty/malformed tokens before querying — an empty token in OR: [{}, {}]
+  // would match any wedding and leak data.
+  if (!token || !TOKEN_RE.test(token)) notFound();
 
   const wedding = await prisma.wedding.findFirst({
     where: {
@@ -37,13 +46,9 @@ export default async function PublicSchedulePage({ params }: Props) {
 
   const isPlanner = wedding.planner_schedule_token === token;
 
+  const language = await getLanguageFromRequest();
   const weddingDate = wedding.wedding_date
-    ? new Date(wedding.wedding_date).toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
+    ? formatDateByLanguage(wedding.wedding_date, language)
     : undefined;
 
   return (
@@ -60,7 +65,6 @@ export default async function PublicSchedulePage({ params }: Props) {
         <header className="bg-white border-b border-gray-100 shadow-sm">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex items-center gap-4">
-              {/* Planner logo */}
               {wedding.planner.logo_url ? (
                 <Image
                   src={wedding.planner.logo_url}
