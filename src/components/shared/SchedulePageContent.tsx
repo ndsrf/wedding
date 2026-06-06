@@ -59,6 +59,7 @@ export interface SchedulePageContentProps {
   coupleNames?: string;
   weddingDate?: string;
   itineraryItems?: ItineraryStepItem[];
+  readOnly?: boolean;
 }
 
 // ── Sun badge (shown inline on each stage row) ────────────────────────────────
@@ -138,6 +139,7 @@ function SortableStageRow({
   onProviderChange,
   onUpdate,
   onDelete,
+  readOnly = false,
 }: {
   stage: ScheduleStageWithTime;
   blockColor: string;
@@ -147,6 +149,7 @@ function SortableStageRow({
   onProviderChange?: (stageId: string, providerId: string | null) => void;
   onUpdate: (stageId: string, updates: Record<string, unknown>) => void;
   onDelete: (stageId: string) => void;
+  readOnly?: boolean;
 }) {
   const {
     attributes,
@@ -179,7 +182,7 @@ function SortableStageRow({
     setLocalNotes(stage.notes ?? '');
   }
 
-  const canAssign = viewMode === 'planner' && !!onProviderChange;
+  const canAssign = !readOnly && viewMode === 'planner' && !!onProviderChange;
   const plannerOnly = !stage.visible_to_couple;
 
   const saveName = () => {
@@ -218,7 +221,7 @@ function SortableStageRow({
       }`}
     >
       {/* Drag handle */}
-      <DragHandle listeners={listeners} attributes={attributes} />
+      {!readOnly && <DragHandle listeners={listeners} attributes={attributes} />}
 
       {/* Time */}
       <div className="flex-shrink-0 w-12 text-right pt-0.5">
@@ -233,7 +236,7 @@ function SortableStageRow({
 
       {/* Name + notes */}
       <div className="flex-1 min-w-0">
-        {editName ? (
+        {!readOnly && editName ? (
           <input
             autoFocus
             className="w-full text-sm font-medium text-gray-800 bg-transparent border-b border-rose-300 focus:outline-none pb-0.5"
@@ -247,15 +250,15 @@ function SortableStageRow({
           />
         ) : (
           <p
-            className="text-sm font-medium text-gray-800 cursor-text hover:text-rose-600 transition-colors"
-            onClick={() => setEditName(true)}
+            className={`text-sm font-medium text-gray-800 ${readOnly ? '' : 'cursor-text hover:text-rose-600 transition-colors'}`}
+            onClick={readOnly ? undefined : () => setEditName(true)}
           >
             {stage.name}
           </p>
         )}
 
         {/* Notes row */}
-        {editNotes ? (
+        {!readOnly && editNotes ? (
           <input
             autoFocus
             className="w-full text-xs text-gray-500 bg-transparent border-b border-gray-200 focus:outline-none mt-1 pb-0.5"
@@ -268,18 +271,21 @@ function SortableStageRow({
               if (e.key === 'Escape') { setLocalNotes(stage.notes ?? ''); setEditNotes(false); }
             }}
           />
-        ) : (
+        ) : stage.notes ? (
           <p
-            className={`text-xs mt-0.5 cursor-text transition-colors ${
-              stage.notes
-                ? 'text-gray-400 hover:text-gray-600'
-                : 'text-gray-200 group-hover:text-gray-400'
-            }`}
+            className={`text-xs mt-0.5 text-gray-400 ${readOnly ? '' : 'cursor-text hover:text-gray-600 transition-colors'}`}
+            onClick={readOnly ? undefined : () => setEditNotes(true)}
+          >
+            {stage.notes}
+          </p>
+        ) : !readOnly ? (
+          <p
+            className="text-xs mt-0.5 cursor-text transition-colors text-gray-200 group-hover:text-gray-400"
             onClick={() => setEditNotes(true)}
           >
-            {stage.notes || '+ nota'}
+            + nota
           </p>
-        )}
+        ) : null}
       </div>
 
       {/* Light zone badge */}
@@ -288,7 +294,7 @@ function SortableStageRow({
       )}
 
       {/* Duration */}
-      {editDuration ? (
+      {!readOnly && editDuration ? (
         <input
           autoFocus
           type="number"
@@ -305,8 +311,8 @@ function SortableStageRow({
         />
       ) : (
         <span
-          className="text-xs text-gray-500 flex-shrink-0 cursor-text hover:text-rose-500 transition-colors pt-0.5"
-          onClick={() => setEditDuration(true)}
+          className={`text-xs text-gray-500 flex-shrink-0 pt-0.5 ${readOnly ? '' : 'cursor-text hover:text-rose-500 transition-colors'}`}
+          onClick={readOnly ? undefined : () => setEditDuration(true)}
           title="Duración en minutos"
         >
           {durationLabel(stage.duration_minutes)}
@@ -369,16 +375,18 @@ function SortableStageRow({
       )}
 
       {/* Delete stage */}
-      <button
-        type="button"
-        onClick={() => onDelete(stage.id)}
-        className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 transition-colors"
-        title="Eliminar paso"
-      >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={() => onDelete(stage.id)}
+          className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 transition-colors"
+          title="Eliminar paso"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
@@ -435,6 +443,7 @@ function SortableBlockSection({
   onUpdateBlock,
   onDeleteBlock,
   onAddStage,
+  readOnly = false,
 }: {
   block: ScheduleBlockWithTimes;
   viewMode: 'planner' | 'couple';
@@ -447,6 +456,7 @@ function SortableBlockSection({
   onUpdateBlock: (blockId: string, updates: Record<string, unknown>) => void;
   onDeleteBlock: (blockId: string) => void;
   onAddStage: (blockId: string, name: string, durationMinutes: number) => void;
+  readOnly?: boolean;
 }) {
   const {
     attributes,
@@ -511,12 +521,12 @@ function SortableBlockSection({
     <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-30' : ''}>
       {/* Block header */}
       <div className="group flex items-center gap-2 mb-2">
-        <DragHandle listeners={listeners} attributes={attributes} />
+        {!readOnly && <DragHandle listeners={listeners} attributes={attributes} />}
         <div
           className="w-3 h-3 rounded-full flex-shrink-0"
           style={{ backgroundColor: block.color ?? '#6366f1' }}
         />
-        {editName ? (
+        {!readOnly && editName ? (
           <input
             autoFocus
             className="flex-1 text-sm font-bold text-gray-700 uppercase tracking-wide bg-transparent border-b border-rose-300 focus:outline-none"
@@ -530,27 +540,29 @@ function SortableBlockSection({
           />
         ) : (
           <h3
-            className="flex-1 text-sm font-bold text-gray-700 uppercase tracking-wide cursor-text hover:text-rose-600 transition-colors"
-            onClick={() => setEditName(true)}
+            className={`flex-1 text-sm font-bold text-gray-700 uppercase tracking-wide ${readOnly ? '' : 'cursor-text hover:text-rose-600 transition-colors'}`}
+            onClick={readOnly ? undefined : () => setEditName(true)}
           >
             {block.name}
           </h3>
         )}
         <span className="text-xs text-gray-500">{block.block_start_time} – {block.block_end_time}</span>
-        <button
-          type="button"
-          onClick={() => onDeleteBlock(block.id)}
-          className="p-1 text-gray-200 hover:text-red-400 transition-colors"
-          title="Eliminar sección"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={() => onDeleteBlock(block.id)}
+            className="p-1 text-gray-200 hover:text-red-400 transition-colors"
+            title="Eliminar sección"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
-      {/* Offset (start time) row — planner view only */}
-      {viewMode === 'planner' && (
+      {/* Offset (start time) row — planner view only, not in read-only */}
+      {!readOnly && viewMode === 'planner' && (
         <div className="pl-8 mb-2">
           {editOffset ? (
             <div className="flex items-center gap-2">
@@ -612,13 +624,14 @@ function SortableBlockSection({
               onProviderChange={onProviderChange}
               onUpdate={onUpdateStage}
               onDelete={onDeleteStage}
+              readOnly={readOnly}
             />
           ))}
         </div>
       </SortableContext>
 
       {/* Add stage row */}
-      {viewMode === 'planner' && (
+      {!readOnly && viewMode === 'planner' && (
         <div className="pl-5 pt-1">
           {showAdd ? (
             <div className="flex items-center gap-2 py-1">
@@ -682,6 +695,7 @@ export function SchedulePageContent({
   coupleNames,
   weddingDate,
   itineraryItems,
+  readOnly = false,
 }: SchedulePageContentProps) {
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
   const [startTime, setStartTime] = useState('08:00');
@@ -704,10 +718,9 @@ export function SchedulePageContent({
 
   const dragOriginBlockId = useRef<string | null>(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
+  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { delay: 200, tolerance: 8 } });
+  const keyboardSensor = useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates });
+  const sensors = useSensors(...(readOnly ? [] : [pointerSensor, keyboardSensor]));
 
   // ── Fetch schedule ──────────────────────────────────────────────────────────
 
@@ -1239,19 +1252,23 @@ export function SchedulePageContent({
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Hora inicio</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => handleStartTimeChange(e.target.value)}
-                className="px-3 py-2 text-sm font-bold text-gray-800 border border-gray-200 rounded-xl focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-200"
-              />
+              {readOnly ? (
+                <span className="px-3 py-2 text-sm font-bold text-gray-800">{startTime}</span>
+              ) : (
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => handleStartTimeChange(e.target.value)}
+                  className="px-3 py-2 text-sm font-bold text-gray-800 border border-gray-200 rounded-xl focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-200"
+                />
+              )}
               {saving && <span className="text-xs text-gray-500">Guardando...</span>}
             </div>
 
             <div className="flex-1" />
 
-            {/* View toggle (planner only) */}
-            {isPlanner && (
+            {/* View toggle (planner only, not in read-only) */}
+            {!readOnly && isPlanner && (
               <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
                 <button
                   type="button"
@@ -1278,41 +1295,43 @@ export function SchedulePageContent({
               </div>
             )}
 
-            {/* Export PDF */}
-            <div className="relative" ref={pdfMenuRef}>
-              <button
-                type="button"
-                disabled={exportingPdf}
-                onClick={() => !exportingPdf && setShowPdfMenu((v) => !v)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm disabled:opacity-50"
-              >
-                <svg className="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                {exportingPdf ? 'Exportando...' : 'Exportar PDF'}
-              </button>
-              {showPdfMenu && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden z-20 min-w-[160px]">
-                  <button
-                    type="button"
-                    onClick={() => exportPdf('couple')}
-                    className="w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 text-left flex items-center gap-2"
-                  >
-                    <span className="text-base">💑</span> Vista novios
-                  </button>
-                  {isPlanner && (
+            {/* Export PDF — hidden in read-only */}
+            {!readOnly && (
+              <div className="relative" ref={pdfMenuRef}>
+                <button
+                  type="button"
+                  disabled={exportingPdf}
+                  onClick={() => !exportingPdf && setShowPdfMenu((v) => !v)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm disabled:opacity-50"
+                >
+                  <svg className="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {exportingPdf ? 'Exportando...' : 'Exportar PDF'}
+                </button>
+                {showPdfMenu && (
+                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden z-20 min-w-[160px]">
                     <button
                       type="button"
-                      onClick={() => exportPdf('planner')}
-                      className="w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 text-left flex items-center gap-2 border-t border-gray-50"
+                      onClick={() => exportPdf('couple')}
+                      className="w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 text-left flex items-center gap-2"
                     >
-                      <span className="text-base">📋</span> Vista planner
+                      <span className="text-base">💑</span> Vista novios
                     </button>
-                  )}
-                </div>
-              )}
-            </div>
+                    {isPlanner && (
+                      <button
+                        type="button"
+                        onClick={() => exportPdf('planner')}
+                        className="w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 text-left flex items-center gap-2 border-t border-gray-50"
+                      >
+                        <span className="text-base">📋</span> Vista planner
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Couple names / wedding date */}
@@ -1338,7 +1357,7 @@ export function SchedulePageContent({
             onDragEnd={onDragEnd}
           >
             {/* Trash drop zone — must be inside DndContext to register as a droppable */}
-            <TrashDropZone visible={activeDragId !== null} />
+            {!readOnly && <TrashDropZone visible={activeDragId !== null} />}
             <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
               <div className="relative">
                 <div className="absolute left-[4.5rem] top-0 bottom-0 w-px bg-gray-100 pointer-events-none" />
@@ -1357,6 +1376,7 @@ export function SchedulePageContent({
                       onUpdateBlock={handleUpdateBlock}
                       onDeleteBlock={handleDeleteBlock}
                       onAddStage={handleAddStage}
+                      readOnly={readOnly}
                     />
                   ))}
                 </div>
@@ -1386,29 +1406,31 @@ export function SchedulePageContent({
             </DragOverlay>
           </DndContext>
 
-          {/* Add block / regenerate */}
-          <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={handleAddBlock}
-              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-violet-500 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Añadir sección
-            </button>
-            {isPlanner && (
+          {/* Add block / regenerate — hidden in read-only */}
+          {!readOnly && (
+            <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
               <button
                 type="button"
-                onClick={applyTemplate}
-                disabled={applying}
-                className="text-xs text-gray-500 hover:text-rose-500 transition-colors disabled:opacity-50"
+                onClick={handleAddBlock}
+                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-violet-500 transition-colors"
               >
-                Regenerar desde plantilla
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Añadir sección
               </button>
-            )}
-          </div>
+              {isPlanner && (
+                <button
+                  type="button"
+                  onClick={applyTemplate}
+                  disabled={applying}
+                  className="text-xs text-gray-500 hover:text-rose-500 transition-colors disabled:opacity-50"
+                >
+                  Regenerar desde plantilla
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>
