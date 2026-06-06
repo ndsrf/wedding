@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { SchedulePageContent } from '@/components/shared/SchedulePageContent';
+import { ShareScheduleButton } from '@/components/shared/ShareScheduleButton';
 import type { ItineraryStepItem } from '@/components/shared/ItineraryTimeline';
 import PrivateHeader from '@/components/PrivateHeader';
 import { formatDateByLanguage } from '@/lib/date-formatter';
@@ -95,12 +96,13 @@ export default async function AdminSchedulePage() {
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h1 className="text-xl font-bold text-gray-900">Cronograma de Boda</h1>
                   {weddingDateStr && (
                     <p className="text-sm text-gray-500 mt-0.5">{weddingDateStr}</p>
                   )}
                 </div>
+                <ShareScheduleButton shareTokenApiUrl="/api/admin/schedule/share-token" />
               </div>
             </div>
           </div>

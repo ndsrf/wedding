@@ -216,6 +216,8 @@ model Wedding {
   wizard_completed_at             DateTime?
   wizard_skipped                  Boolean            @default(false)
   layout_elements                 Json?              // Store canvas lines, text, etc.
+  admin_schedule_token            String?            @unique
+  planner_schedule_token          String?            @unique
   // Google Photos integration
   google_photos_share_url         String?            // Album share link pasted by admin (for guests to add photos directly)
   google_photos_album_id          String?            // Album ID for OAuth-based programmatic upload
