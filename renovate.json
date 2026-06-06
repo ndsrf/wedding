@@ -6,5 +6,12 @@
   "constraints": {
     "npm": "^11.0.0"
   },
-  "automerge": true
+  "automerge": true,
+  "packageRules": [
+    {
+      "matchPackageNames": ["isomorphic-dompurify", "jsdom", "https-proxy-agent"],
+      "enabled": false,
+      "description": "Pinned: jsdom>=27 and isomorphic-dompurify>=3 pull in ESM-only deps that fail with ERR_REQUIRE_ESM on Vercel Lambda (Node 20.x < 20.19). https-proxy-agent>=7 is also ESM-only. Re-enable once Vercel upgrades Lambda to Node >=20.19."
+    }
+  ]
 }
