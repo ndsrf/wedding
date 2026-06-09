@@ -108,6 +108,8 @@ const baseWedding = {
   planned_guests: null,
   planned_gift_per_person: null,
   design_system: null,
+  admin_schedule_token: null,
+  planner_schedule_token: null,
 };
 
 const baseFamily = {
