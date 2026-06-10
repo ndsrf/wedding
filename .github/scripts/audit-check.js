@@ -70,6 +70,14 @@ const ACCEPTED_GHSAS = [
   // Vulnerability only affects edge case: missing buffer bounds check when buf is provided
   // Risk: Low impact because (1) only authenticated admins use Excel upload (2) vulnerability requires specific conditions
   'GHSA-w5hq-g745-h8pq', // Missing buffer bounds check in v3/v5/v6 when buf is provided
+
+  // ws - MODERATE severity
+  // Transitive dependency via @google/genai and openai (WebSocket library)
+  // Vulnerability: Uninitialized memory disclosure (GHSA-58qx-3vcg-4xpx)
+  // Affected versions: 8.0.0 - 8.20.0
+  // Current version: 8.21.0 (patched)
+  // Risk: Already using patched version; documented for future reference if version constraints change
+  'GHSA-58qx-3vcg-4xpx', // Uninitialized memory disclosure
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];

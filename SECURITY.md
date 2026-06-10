@@ -199,6 +199,23 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Rate limiting and file size restrictions in place
 - **Future Plan**: Upgrade to @vercel/blob@2.x when stable and breaking changes are assessed
 
+##### ws - Uninitialized Memory Disclosure
+- **Package**: ws < 8.21.0 (via @google/genai@2.0.0 and openai@6.22.0)
+- **CVE**: [GHSA-58qx-3vcg-4xpx](https://github.com/advisories/GHSA-58qx-3vcg-4xpx)
+- **Status**: Fix available - current version (8.21.0) is patched
+- **Usage**: WebSocket client library for AI SDK integrations (Google GenAI and OpenAI)
+- **Risk Assessment**:
+  - Moderate severity, affects WebSocket message handling
+  - Vulnerability: Uninitialized memory disclosure in WebSocket frame processing
+  - Current project uses patched version (8.21.0, outside vulnerable range 8.0.0-8.20.0)
+  - No active exploitation risk in current configuration
+  - Documented for future reference if dependency constraints change
+- **Mitigation**:
+  - Keep ws dependency at ≥8.21.0
+  - Monitor @google/genai and openai for updates
+  - Both AI SDKs actively maintained and will receive security updates
+- **Future Plan**: Monitor for any security advisories from AI SDK maintainers
+
 ### Recently Fixed
 
 #### 2026-05-31
