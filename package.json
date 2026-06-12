@@ -97,7 +97,7 @@
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "resend": "^6.0.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.0",
     "twilio": "^6.0.0",
     "winston": "^3.18.0",
     "xlsx": "^0.18.5",
