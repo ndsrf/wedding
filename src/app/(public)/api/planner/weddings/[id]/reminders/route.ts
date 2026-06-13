@@ -27,7 +27,7 @@ import type { Channel } from '@prisma/client';
 import { formatDateByLanguage } from '@/lib/date-formatter';
 import { buildWhatsAppLink } from '@/lib/notifications/whatsapp-links';
 import { getShortUrlPath } from '@/lib/short-url';
-import { toAbsoluteUrl } from '@/lib/images/processor';
+import { toAbsoluteUrl } from '@/lib/images/url-utils';
 
 // Validation schema for send reminders request
 const sendRemindersSchema = z.object({
