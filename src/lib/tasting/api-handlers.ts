@@ -18,7 +18,7 @@ import { getTemplateForSending } from '@/lib/templates/crud';
 import { sendDynamicEmail } from '@/lib/email/resend';
 import { sendDynamicMessage, MessageType } from '@/lib/sms/twilio';
 import { buildWhatsAppLink } from '@/lib/notifications/whatsapp-links';
-import { toAbsoluteUrl } from '@/lib/images/processor';
+import { toAbsoluteUrl } from '@/lib/images/url-utils';
 import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 import { ResourceType } from '@prisma/client';
 import { getTranslations } from 'next-intl/server';

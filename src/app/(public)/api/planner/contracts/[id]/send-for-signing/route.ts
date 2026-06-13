@@ -5,7 +5,7 @@ import { requireRole } from '@/lib/auth/middleware';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ContractPDF } from '@/lib/pdf/contract-pdf';
 import { createDocuSealSubmission } from '@/lib/signing/docuseal';
-import { toAbsoluteUrl } from '@/lib/images/processor';
+import { toAbsoluteUrl } from '@/lib/images/url-utils';
 import { getTranslations, getLanguageFromRequest } from '@/lib/i18n/server';
 import { isValidLanguage } from '@/lib/i18n/config';
 import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
