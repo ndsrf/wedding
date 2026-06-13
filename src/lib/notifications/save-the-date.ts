@@ -18,7 +18,7 @@ import type { Channel } from "@prisma/client";
 import { formatDateByLanguage } from "@/lib/date-formatter";
 import { buildWhatsAppLink } from "@/lib/notifications/whatsapp-links";
 import { getShortUrlPath } from "@/lib/short-url";
-import { toAbsoluteUrl } from "@/lib/images/processor";
+import { toAbsoluteUrl } from "@/lib/images/url-utils";
 
 export interface SendSaveTheDateOptions {
   family_id: string;

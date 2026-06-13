@@ -15,7 +15,7 @@ import { sendDynamicMessage, MessageType } from "@/lib/sms/twilio";
 import type { Language as I18nLanguage } from "@/lib/i18n/config";
 import type { Channel } from "@prisma/client";
 import { formatDateByLanguage } from "@/lib/date-formatter";
-import { toAbsoluteUrl } from "@/lib/images/processor";
+import { toAbsoluteUrl } from "@/lib/images/url-utils";
 
 export interface SendConfirmationOptions {
   family_id: string;
