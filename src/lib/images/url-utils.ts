@@ -5,8 +5,8 @@
 
 /**
  * Converts a relative or absolute URL to an absolute URL
- * If the URL is already absolute (starts with http:// or https://), returns it as-is
- * Otherwise, prepends the base URL
+ * If the URL is already absolute (starts with http://, https://, or //), returns it as-is
+ * Otherwise, prepends the base URL with proper slash normalization
  *
  * @param url - The URL to convert (can be relative or absolute)
  * @param baseUrl - The base URL to prepend if the URL is relative (default: process.env.APP_URL || 'http://localhost:3000')
@@ -18,11 +18,20 @@ export function toAbsoluteUrl(url: string | null | undefined, baseUrl?: string):
   }
 
   // If the URL is already absolute, return it as-is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
     return url;
   }
 
-  // Otherwise, prepend the base URL
+  // Otherwise, prepend the base URL with proper slash handling
   const base = baseUrl || process.env.APP_URL || 'http://localhost:3000';
-  return `${base}${url}`;
+  const baseEndsWithSlash = base.endsWith('/');
+  const urlStartsWithSlash = url.startsWith('/');
+
+  if (baseEndsWithSlash && urlStartsWithSlash) {
+    return base.slice(0, -1) + url;
+  } else if (!baseEndsWithSlash && !urlStartsWithSlash) {
+    return base + '/' + url;
+  }
+
+  return base + url;
 }
