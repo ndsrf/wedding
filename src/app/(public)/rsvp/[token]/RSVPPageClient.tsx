@@ -91,13 +91,15 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           language={templateLanguage}
           weddingId={wedding.id}
           iban={wedding.gift_iban ?? undefined}
+          isTransparent={true}
         />
       ) : (
         <div className="max-w-4xl mx-auto px-4 pt-8">
           <div 
             className="rounded-lg shadow-md p-6"
             style={{ 
-              backgroundColor: invStyle?.backgroundColor ?? '#ffffff',
+              backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'aa' : 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(4px)',
               color: invStyle?.textColor ?? '#111827',
               fontFamily: invStyle?.fontFamily ?? undefined
             }}
@@ -131,7 +133,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
               <div 
                 className="mt-4 p-4 rounded-lg"
                 style={{ 
-                  backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '22' : '#eff6ff',
+                  backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '44' : 'rgba(239, 246, 255, 0.4)',
                   borderLeft: `4px solid ${invStyle?.rsvpButtonColor ?? '#2563eb'}`
                 }}
               >
@@ -179,7 +181,21 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
   );
 
   return (
-    <div className="min-h-screen" style={{ background: isGardenBirds ? theme.config.colors.background : '#f9fafb' }}>
+    <div 
+      className="min-h-screen" 
+      style={{ 
+        ...(isGardenBirds 
+          ? { background: theme.config.colors.background } 
+          : { 
+              backgroundColor: invStyle?.backgroundColor ?? '#f9fafb',
+              ...(invStyle?.backgroundImage
+                ? (invStyle.backgroundSize ?? 'cover') === 'tile'
+                  ? { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left', backgroundAttachment: 'fixed' }
+                  : { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', backgroundAttachment: 'fixed' }
+                : {})
+            })
+      }}
+    >
       {/* Apply theme CSS */}
       <style jsx global>{`
         :root {
@@ -224,12 +240,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           <div
             className="shadow-sm"
             style={{
-              backgroundColor: invStyle?.backgroundColor ?? '#ffffff',
-              ...(invStyle?.backgroundImage
-                ? (invStyle.backgroundSize ?? 'cover') === 'tile'
-                  ? { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left' }
-                  : { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }
-                : {}),
+              backgroundColor: 'transparent',
               borderBottom: `1px solid ${invStyle?.textColor ? invStyle.textColor + '33' : '#e5e7eb'}`,
               fontFamily: invStyle?.fontFamily ?? undefined,
             }}

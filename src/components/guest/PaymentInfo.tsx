@@ -30,22 +30,24 @@ export default function PaymentInfo({ token, paymentMode, invStyle }: PaymentInf
   const ff = invStyle?.fontFamily;
   const borderCol = tc + '33';
 
-  const containerBgStyle: React.CSSProperties = invStyle?.backgroundImage
-    ? (invStyle.backgroundSize ?? 'cover') === 'tile'
-      ? { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left' }
-      : { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }
-    : { backgroundColor: invStyle?.backgroundColor ?? '#ffffff' };
-
   const sectionBg: React.CSSProperties = {
-    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'cc' : '#eff6ff', // default bg-blue-50
+    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '66' : 'rgba(255, 255, 255, 0.4)',
     borderRadius: '0.5rem',
+    border: `1px solid ${borderCol}`,
   };
 
   const inputStyle: React.CSSProperties = {
     borderColor: borderCol,
     color: tc,
     fontFamily: ff,
-    backgroundColor: invStyle?.backgroundColor ? 'transparent' : '#f9fafb',
+    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '44' : 'rgba(255, 255, 255, 0.3)',
+  };
+
+  const containerStyle: React.CSSProperties = {
+    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'aa' : 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(4px)',
+    color: tc,
+    fontFamily: ff,
   };
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function PaymentInfo({ token, paymentMode, invStyle }: PaymentInf
     return (
       <div 
         className="rounded-lg shadow-md p-6"
-        style={{ ...containerBgStyle, color: tc, fontFamily: ff }}
+        style={containerStyle}
       >
         <p className="text-lg" style={{ color: tc + 'cc' }}>{t('common.loading')}</p>
       </div>
@@ -116,7 +118,7 @@ export default function PaymentInfo({ token, paymentMode, invStyle }: PaymentInf
   return (
     <div 
       className="rounded-lg shadow-md p-6"
-      style={{ ...containerBgStyle, color: tc, fontFamily: ff }}
+      style={containerStyle}
     >
       <h3 className="text-2xl font-bold mb-4" style={{ color: tc }}>
         {t('guest.payment.title')}
@@ -137,8 +139,8 @@ export default function PaymentInfo({ token, paymentMode, invStyle }: PaymentInf
         <div 
           className="mb-6 p-4 border-2 rounded-lg"
           style={{ 
-            backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'cc' : '#f0fdf4',
-            borderColor: invStyle?.backgroundColor ? borderCol : '#4ade80'
+            backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '66' : 'rgba(255, 255, 255, 0.4)',
+            borderColor: borderCol
           }}
         >
           <div className="flex items-center justify-between">
@@ -225,4 +227,3 @@ export default function PaymentInfo({ token, paymentMode, invStyle }: PaymentInf
     </div>
   );
 }
-

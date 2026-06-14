@@ -36,22 +36,21 @@ export default function ConfirmationMessage({
   const ff = invStyle?.fontFamily;
   const borderCol = tc + '33';
 
-  const containerBgStyle: React.CSSProperties = invStyle?.backgroundImage
-    ? (invStyle.backgroundSize ?? 'cover') === 'tile'
-      ? { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left' }
-      : { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }
-    : { backgroundColor: invStyle?.backgroundColor ?? '#ffffff' };
-
   const sectionBg: React.CSSProperties = {
-    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'cc' : '#f0fdf4', // default bg-green-50
-    borderColor: invStyle?.backgroundColor ? borderCol : '#4ade80', // default border-green-400
+    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '66' : 'rgba(255, 255, 255, 0.4)',
+    borderColor: borderCol,
     borderRadius: '0.5rem',
   };
 
   return (
     <div 
       className="rounded-lg shadow-md p-6"
-      style={{ ...containerBgStyle, color: tc, fontFamily: ff }}
+      style={{ 
+        backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'aa' : 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(4px)',
+        color: tc, 
+        fontFamily: ff 
+      }}
     >
       {/* Success Icon */}
       <div className="text-center mb-6">

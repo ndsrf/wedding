@@ -62,7 +62,8 @@ export default function FamilyMemberCard({
       className="border-2 rounded-lg p-5"
       style={{
         borderColor: borderCol,
-        backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'cc' : '#ffffff',
+        backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '66' : 'rgba(255, 255, 255, 0.4)',
+        backdropFilter: 'blur(2px)',
         fontFamily: invStyle?.fontFamily,
       }}
     >

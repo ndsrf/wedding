@@ -105,15 +105,16 @@ export default function RSVPForm({
   const borderCol = tc + '33';
 
   const sectionBg: React.CSSProperties = {
-    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'cc' : '#f9fafb',
+    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '88' : 'rgba(255, 255, 255, 0.5)',
     borderRadius: '0.5rem',
+    border: `1px solid ${borderCol}`,
   };
 
   const inputStyle: React.CSSProperties = {
     borderColor: borderCol,
     color: tc,
     fontFamily: ff,
-    backgroundColor: 'transparent',
+    backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '44' : 'rgba(255, 255, 255, 0.3)',
   };
 
   const yesSelected: React.CSSProperties = { backgroundColor: bc, color: '#ffffff' };
@@ -243,17 +244,16 @@ export default function RSVPForm({
 
   const attendingCount = members.filter((m) => m.attending).length;
 
-  const formBgStyle: React.CSSProperties = invStyle?.backgroundImage
-    ? (invStyle.backgroundSize ?? 'cover') === 'tile'
-      ? { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left' }
-      : { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }
-    : { backgroundColor: invStyle?.backgroundColor ?? '#ffffff' };
-
   return (
     <form
       onSubmit={handleSubmit}
       className="rounded-lg shadow-md p-6"
-      style={{ ...formBgStyle, color: tc, fontFamily: ff }}
+      style={{ 
+        backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'aa' : 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(4px)',
+        color: tc, 
+        fontFamily: ff 
+      }}
     >
       <h3 className="text-2xl font-bold mb-4" style={{ color: tc }}>
         {t('guest.rsvp.title')}

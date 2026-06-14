@@ -39,6 +39,7 @@ interface TemplateRendererProps {
   language: SupportedLanguage;
   weddingId?: string;
   iban?: string;
+  isTransparent?: boolean;
 }
 
 const FONT_NAMES = [
@@ -75,6 +76,7 @@ export default function TemplateRenderer({
   language,
   weddingId,
   iban,
+  isTransparent = false,
 }: TemplateRendererProps) {
   const templateDesign = useMemo(() => {
     if (!design || typeof design !== 'object') return null;
@@ -130,12 +132,12 @@ export default function TemplateRenderer({
     <div
       className="w-full relative"
       style={{
-        backgroundColor: templateDesign.globalStyle.backgroundColor,
+        backgroundColor: isTransparent ? 'transparent' : templateDesign.globalStyle.backgroundColor,
         ...(templateDesign.globalStyle.fontFamily ? { fontFamily: templateDesign.globalStyle.fontFamily } : {}),
       }}
     >
       {/* Paper Background Image (user-uploaded) */}
-      {templateDesign.globalStyle.paperBackgroundImage && (
+      {templateDesign.globalStyle.paperBackgroundImage && !isTransparent && (
         <div
           className="absolute inset-0 pointer-events-none"
           style={
