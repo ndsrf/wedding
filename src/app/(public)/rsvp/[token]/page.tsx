@@ -19,7 +19,6 @@ import { getTranslations as getI18n } from '@/lib/i18n/server';
 import { Language } from '@/lib/i18n/config';
 import RSVPPageClient from './RSVPPageClient';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
-import { Metadata } from 'next';
 
 // ============================================================================
 // ISR Configuration
@@ -65,24 +64,6 @@ interface Props {
   searchParams: Promise<{ channel?: string }>;
 }
 
-/**
- * Generate dynamic metadata for the RSVP page
- */
-export async function generateMetadata({ params }: { params: Props['params'] }): Promise<Metadata> {
-  const { token } = await params;
-  const result = await getRSVPPageData(token, null, true); // skip tracking for metadata
-
-  if (!result.success || !result.data) {
-    return { title: 'Wedding RSVP' };
-  }
-
-  const { wedding } = result.data;
-  return {
-    title: `${wedding.couple_names} - Wedding RSVP`,
-    description: `Join us for our wedding on ${new Date(wedding.wedding_date).toLocaleDateString()}.`,
-  };
-}
-
 export default async function GuestRSVPPage({ params, searchParams }: Props) {
   const { token } = await params;
   const { channel } = await searchParams;
@@ -124,10 +105,6 @@ export default async function GuestRSVPPage({ params, searchParams }: Props) {
 
   return (
     <>
-      {/* Performance: Preconnect to font domains */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      
       <NextIntlClientProvider locale={familyLang} messages={messages}>
         <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">

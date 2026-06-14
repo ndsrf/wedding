@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import RSVPForm from '@/components/guest/RSVPForm';
 import PaymentInfo from '@/components/guest/PaymentInfo';
@@ -14,7 +14,6 @@ import LanguageSelector from '@/components/guest/LanguageSelector';
 import ConfirmationMessage from '@/components/guest/ConfirmationMessage';
 import { EnvelopeReveal } from '@/components/guest/EnvelopeReveal';
 import TemplateRenderer from '@/components/guest/TemplateRenderer';
-import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { GuestRSVPPageData } from '@/types/api';
 import type { SupportedLanguage } from '@/types/invitation-template';
 
@@ -30,12 +29,6 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
 
   const [data, setData] = useState<GuestRSVPPageData>(initialData);
   const [rsvpSubmitted, setRsvpSubmitted] = useState(initialData.has_submitted_rsvp);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Set loading to false once the component is mounted and hydrated
-    setIsLoading(false);
-  }, []);
 
   async function handleRSVPSuccess() {
     setRsvpSubmitted(true);
@@ -83,19 +76,6 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
 
   // Map preferred_language to SupportedLanguage
   const templateLanguage = (family.preferred_language.toUpperCase()) as SupportedLanguage;
-
-  // Content to be wrapped in envelope or displayed normally
-  // Show loading spinner while component is initializing
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="text-center">
-          <WeddingSpinner size="lg" className="mx-auto mb-4" />
-          <p className="text-gray-600 text-lg">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   const mainContent = (
     <>
