@@ -1,3 +1,5 @@
+import sharp from 'sharp';
+
 export const ALLOWED_ASPECT_RATIOS = {
   SQUARE: { ratio: 1, label: '1:1', width: 1000, height: 1000 },
   WIDE: { ratio: 16 / 9, label: '16:9', width: 1600, height: 900 },
@@ -147,9 +149,3 @@ export function getFileExtension(mimeType: string): string {
   };
   return extensions[mimeType.toLowerCase()] || 'png';
 }
-
-mage/gif': 'gif',
-  };
-  return extensions[mimeType.toLowerCase()] || 'png';
-}
-
