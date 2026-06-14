@@ -2791,8 +2791,8 @@
     "rsvp": {
       "title": "Confirmación",
       "instructions": "Por favor selecciona quién de tu grupo asistirá a la boda.",
-      "attend": "Asistir",
-      "attending": "Asistiendo",
+      "attend": "Asistiré",
+      "attending": "Asistiré",
       "notAttending": "No Asistirá",
       "attendingSummary": "{count, plural, =0 {Nadie asistirá} one {1 persona asistirá} other {# personas asistirán}}",
       "dietaryRestrictions": "Restricciones Alimenticias",

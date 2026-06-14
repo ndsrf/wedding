@@ -98,7 +98,7 @@ export async function register() {
           const contentHash = createHash('md5').update(doc.text).digest('hex');
 
           // Always try to fetch to check existence and metadata
-          const rows = await vectorPrisma.$queryRawUnsafe<{ metadata: any }>(
+          const rows = await vectorPrisma.$queryRawUnsafe<{ metadata: { contentHash?: string; role?: string } }>(
             `SELECT metadata FROM document_chunks WHERE "sourceName" = $1 LIMIT 1`,
             doc.source,
           );

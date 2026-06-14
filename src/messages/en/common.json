@@ -2807,8 +2807,8 @@
     "rsvp": {
       "title": "RSVP",
       "instructions": "Please select who from your group will attend the wedding.",
-      "attend": "Attend",
-      "attending": "Attending",
+      "attend": "I'll attend",
+      "attending": "I'll attend",
       "notAttending": "Will Not Attend",
       "attendingSummary": "{count, plural, =0 {No one attending} one {1 person attending} other {# people attending}}",
       "dietaryRestrictions": "Dietary Restrictions",

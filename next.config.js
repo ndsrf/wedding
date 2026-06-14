@@ -24,7 +24,6 @@ const nextConfig = {
     },
     // Automatically optimize imports from these packages
     optimizePackageImports: ['lucide-react', 'xlsx', 'zod'],
-    instrumentationHook: true,
   },
   // Exclude packages from server-side bundling to avoid ESM/CJS conflicts
   serverExternalPackages: ['@exodus/bytes', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas', 'twilio', 'sharp'],

@@ -59,6 +59,7 @@ export const BLOCK_VERSIONS: Record<TemplateBlock['type'], number> = {
   embed: 1,
   'image-map': 1,
   panel: 2,
+  gift: 1,
 } as const;
 
 /** Current format version for the .nupcinv manifest */

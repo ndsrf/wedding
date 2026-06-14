@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import type { GiftBlock as GiftBlockType, SupportedLanguage } from '@/types/invitation-template';
+import type { GiftBlock as GiftBlockType } from '@/types/invitation-template';
 
 interface GiftBlockProps {
   block: GiftBlockType;
-  language: SupportedLanguage;
   iban?: string;
 }
 

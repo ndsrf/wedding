@@ -24,6 +24,7 @@ interface FamilyMemberCardProps {
   attending: boolean;
   dietaryRestrictions: string;
   accessibilityNeeds: string;
+  dietaryRestrictionsEnabled: boolean;
   onAttendingChange: (attending: boolean) => void;
   onDietaryChange: (value: string) => void;
   onAccessibilityChange: (value: string) => void;
@@ -35,6 +36,7 @@ export default function FamilyMemberCard({
   attending,
   dietaryRestrictions,
   accessibilityNeeds,
+  dietaryRestrictionsEnabled,
   onAttendingChange,
   onDietaryChange,
   onAccessibilityChange,
@@ -95,8 +97,8 @@ export default function FamilyMemberCard({
         </label>
       </div>
 
-      {/* Dietary Restrictions (only if attending) */}
-      {attending && (
+      {/* Dietary Restrictions (only if attending and enabled) */}
+      {attending && dietaryRestrictionsEnabled && (
         <div className="space-y-4">
           <div>
             <label className="block text-base font-semibold mb-2" style={{ color: tc }}>

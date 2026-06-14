@@ -2717,8 +2717,8 @@
     "rsvp": {
       "title": "RSVP",
       "instructions": "Veuillez sélectionner qui de votre groupe assistera au mariage.",
-      "attend": "Assister",
-      "attending": "Présent",
+      "attend": "Je serai présent(e)",
+      "attending": "Je serai présent(e)",
       "notAttending": "Ne Sera Pas Présent",
       "attendingSummary": "{count, plural, =0 {Personne ne sera présent} one {1 personne sera présente} other {# personnes seront présentes}}",
       "dietaryRestrictions": "Restrictions Alimentaires",

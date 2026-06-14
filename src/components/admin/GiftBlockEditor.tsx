@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import type { GiftBlock } from '@/types/invitation-template';
 
 interface GiftBlockEditorProps {

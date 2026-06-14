@@ -2717,8 +2717,8 @@
     "rsvp": {
       "title": "RSVP",
       "instructions": "Bitte wählen Sie aus, wer aus Ihrer Gruppe an der Hochzeit teilnehmen wird.",
-      "attend": "Teilnehmen",
-      "attending": "Teilnehmend",
+      "attend": "Ich werde teilnehmen",
+      "attending": "Ich werde teilnehmen",
       "notAttending": "Wird nicht teilnehmen",
       "attendingSummary": "{count, plural, =0 {Niemand nimmt teil} one {1 Person nimmt teil} other {# Personen nehmen teil}}",
       "dietaryRestrictions": "Diätetische Einschränkungen",

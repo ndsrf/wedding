@@ -60,7 +60,7 @@ export default function RSVPForm({
   const [members, setMembers] = useState<MemberUpdate[]>(
     family.members.map((m) => ({
       id: m.id,
-      attending: m.attending ?? true,
+      attending: m.attending ?? false,
       dietary_restrictions: m.dietary_restrictions || '',
       accessibility_needs: m.accessibility_needs || '',
     }))
@@ -281,6 +281,7 @@ export default function RSVPForm({
               attending={memberUpdate.attending}
               dietaryRestrictions={memberUpdate.dietary_restrictions || ''}
               accessibilityNeeds={memberUpdate.accessibility_needs || ''}
+              dietaryRestrictionsEnabled={wedding.dietary_restrictions_enabled}
               onAttendingChange={(attending: boolean) =>
                 handleMemberChange(member.id, 'attending', attending)
               }
