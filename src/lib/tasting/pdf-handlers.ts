@@ -8,7 +8,6 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import path from 'path';
 import { readFile, access } from 'fs/promises';
-import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
 import { TastingReportPDF, type TastingReportLabels } from '@/lib/pdf/tasting-report-pdf';
 import { TastingMenuPDF } from '@/lib/pdf/tasting-menu-pdf';
@@ -55,6 +54,7 @@ async function resolveImageForPdf(url: string, maxPx = 1200): Promise<string | n
 
     if (!rawBuf.length) return null;
 
+    const sharp = (await import('sharp')).default;
     const resized = await sharp(rawBuf)
       .resize(maxPx, maxPx, { fit: 'inside', withoutEnlargement: true })
       .flatten({ background: '#ffffff' })

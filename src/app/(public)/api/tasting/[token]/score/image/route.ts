@@ -6,7 +6,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
 import { uploadFile, deleteFile } from '@/lib/storage';
 import { computeEffectiveStatus } from '@/lib/tasting/status';
@@ -17,6 +16,7 @@ const MAX_DIMENSION = 1200;
 const TARGET_MAX_BYTES = 150 * 1024;
 
 async function compressImage(inputBuffer: Buffer): Promise<Buffer> {
+  const sharp = (await import('sharp')).default;
   for (const quality of [80, 65, 50, 40]) {
     const result = await sharp(inputBuffer)
       .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })

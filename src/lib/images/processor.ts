@@ -1,5 +1,3 @@
-import sharp from 'sharp';
-
 export const ALLOWED_ASPECT_RATIOS = {
   SQUARE: { ratio: 1, label: '1:1', width: 1000, height: 1000 },
   WIDE: { ratio: 16 / 9, label: '16:9', width: 1600, height: 900 },
@@ -50,6 +48,8 @@ export async function processTemplateImage(
   maxWidth: number = 2000
 ): Promise<ImageProcessingResult> {
   try {
+    const sharp = (await import('sharp')).default;
+
     // Load the image with sharp
     const image = sharp(fileBuffer);
     const metadata = await image.metadata();

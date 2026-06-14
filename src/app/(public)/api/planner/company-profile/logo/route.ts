@@ -3,7 +3,6 @@ import { requireRole } from '@/lib/auth/middleware';
 import { isValidImageType } from '@/lib/images/processor';
 import { uploadFile } from '@/lib/storage';
 import { prisma } from '@/lib/db/prisma';
-import sharp from 'sharp';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +28,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    const sharp = (await import('sharp')).default;
     // Resize logo to max 800px wide and convert to PNG
     const processedBuffer = await sharp(buffer)
       .resize(800, null, { fit: 'inside', withoutEnlargement: true })
