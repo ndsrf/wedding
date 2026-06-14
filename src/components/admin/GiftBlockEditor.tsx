@@ -38,8 +38,6 @@ export function GiftBlockEditor({
   block,
   onUpdate,
 }: GiftBlockEditorProps) {
-  const t = useTranslations('admin.invitationBuilder');
-
   const handleStyleChange = (updates: Partial<GiftBlock['style']>) => {
     onUpdate(block.id, {
       style: { ...block.style, ...updates },

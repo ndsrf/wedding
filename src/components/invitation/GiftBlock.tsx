@@ -10,7 +10,7 @@ interface GiftBlockProps {
   iban?: string;
 }
 
-export function GiftBlock({ block, language, iban }: GiftBlockProps) {
+export function GiftBlock({ block, iban }: GiftBlockProps) {
   const t = useTranslations('common.buttons');
   const [copied, setCopied] = useState(false);
 

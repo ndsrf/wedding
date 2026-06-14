@@ -1013,7 +1013,6 @@ export function InvitationTemplateEditor({
                   {block.type === 'gift' && (
                     <GiftBlock
                       block={block as GiftBlockType}
-                      language={activeLanguage}
                       iban={weddingData.gift_iban ?? undefined}
                     />
                   )}

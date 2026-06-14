@@ -383,7 +383,6 @@ function TemplateBlock({
     return (
       <GiftBlock
         block={giftBlock}
-        language={language}
         iban={iban}
       />
     );
