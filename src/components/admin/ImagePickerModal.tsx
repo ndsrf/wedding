@@ -75,6 +75,8 @@ export function ImagePickerModal({
       const { url } = await res.json();
       setImages((prev) => [...prev, { url, filename: file.name }]);
       setError(null);
+      // Auto-select the uploaded image (routes through aspect-ratio check if needed)
+      handleSelectImage(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {

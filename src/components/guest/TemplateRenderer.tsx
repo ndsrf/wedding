@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import DOMPurify from 'isomorphic-dompurify';
 import Image from 'next/image';
-import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType, GalleryBlock as GalleryBlockType, SpacerBlock as SpacerBlockType, EmbedBlock as EmbedBlockType } from '@/types/invitation-template';
+import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType, GalleryBlock as GalleryBlockType, SpacerBlock as SpacerBlockType, EmbedBlock as EmbedBlockType, ImageMapBlock as ImageMapBlockType, PanelBlock as PanelBlockType } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
 import { ButtonBlock } from '@/components/invitation/ButtonBlock';
 import { GalleryBlock } from '@/components/invitation/GalleryBlock';
+import { ImageMapBlock } from '@/components/invitation/ImageMapBlock';
+import { PanelModal } from '@/components/invitation/PanelBlock';
 import { loadFont } from '@/lib/fonts';
 
 interface TemplateRendererProps {
@@ -61,11 +63,26 @@ export default function TemplateRenderer({
     return design as TemplateDesign;
   }, [design]);
 
-  // Find first image block index for priority loading
+  // Find first image-like block index for priority loading
   const firstImageIndex = useMemo(() => {
     if (!templateDesign?.blocks) return -1;
-    return templateDesign.blocks.findIndex((block) => block.type === 'image');
+    return templateDesign.blocks.findIndex((block) => block.type === 'image' || block.type === 'image-map');
   }, [templateDesign]);
+
+  // Panel open state
+  const [openPanelId, setOpenPanelId] = useState<string | null>(null);
+
+  const handleOpenPanel = useCallback((panelId: string) => {
+    setOpenPanelId(panelId);
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setOpenPanelId(null);
+  }, []);
+
+  const handleScrollToRsvp = useCallback(() => {
+    document.getElementById('rsvp-form')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   // Load all fonts when component mounts
   useEffect(() => {
@@ -86,27 +103,29 @@ export default function TemplateRenderer({
   // Use pre-rendered blocks if available for this language
   const staticBlocks = preRenderedHtml ? (preRenderedHtml[language] || preRenderedHtml['EN']) as unknown as Record<string, string> : null;
 
+  // Find the active panel block
+  const activePanelBlock = openPanelId
+    ? (templateDesign.blocks.find((b) => b.type === 'panel' && b.id === openPanelId) as PanelBlockType | undefined)
+    : undefined;
+
   return (
     <div
       className="w-full relative"
       style={{
         backgroundColor: templateDesign.globalStyle.backgroundColor,
+        ...(templateDesign.globalStyle.fontFamily ? { fontFamily: templateDesign.globalStyle.fontFamily } : {}),
       }}
     >
       {/* Paper Background Image (user-uploaded) */}
       {templateDesign.globalStyle.paperBackgroundImage && (
-        <div className="absolute inset-0 pointer-events-none">
-          <Image
-            src={templateDesign.globalStyle.paperBackgroundImage}
-            alt=""
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-            quality={90}
-            unoptimized
-          />
-        </div>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={
+            (templateDesign.globalStyle.paperBackgroundSize ?? 'cover') === 'tile'
+              ? { backgroundImage: `url(${templateDesign.globalStyle.paperBackgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left' }
+              : { backgroundImage: `url(${templateDesign.globalStyle.paperBackgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }
+          }
+        />
       )}
 
       {/* Theme Background Image */}
@@ -128,15 +147,18 @@ export default function TemplateRenderer({
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto">
         {templateDesign.blocks.map((block, index) => {
+          // Panel blocks are not rendered in the flow — they appear as modals
+          if (block.type === 'panel') return null;
+
           // If we have pre-rendered HTML for this specific block, use it for instant paint
           const blockHtml = staticBlocks?.[block.id];
 
           if (blockHtml && (block.type === 'text' || block.type === 'image' || block.type === 'spacer' || block.type === 'embed')) {
             return (
               <React.Fragment key={block.id}>
-                <div 
+                <div
                   style={{ margin: 0, padding: 0 }}
-                  dangerouslySetInnerHTML={{ __html: blockHtml }} 
+                  dangerouslySetInnerHTML={{ __html: blockHtml }}
                 />
               </React.Fragment>
             );
@@ -154,10 +176,21 @@ export default function TemplateRenderer({
               language={language}
               isPriorityImage={index === firstImageIndex}
               weddingId={weddingId}
+              onOpenPanel={handleOpenPanel}
+              onScrollToRsvp={handleScrollToRsvp}
             />
           );
         })}
       </div>
+
+      {/* Panel modal overlay */}
+      {activePanelBlock && (
+        <PanelModal
+          block={activePanelBlock}
+          language={language}
+          onClose={handleClosePanel}
+        />
+      )}
     </div>
   );
 }
@@ -171,6 +204,8 @@ interface TemplateBlockProps {
   language: SupportedLanguage;
   isPriorityImage?: boolean;
   weddingId?: string;
+  onOpenPanel: (panelId: string) => void;
+  onScrollToRsvp: () => void;
 }
 
 function TemplateBlock({
@@ -182,6 +217,8 @@ function TemplateBlock({
   language,
   isPriorityImage = false,
   weddingId,
+  onOpenPanel,
+  onScrollToRsvp,
 }: TemplateBlockProps) {
   if (block.type === 'text') {
     const textBlock = block as TextBlock;
@@ -319,6 +356,22 @@ function TemplateBlock({
       />
     );
   }
+
+  if (block.type === 'image-map') {
+    const imageMapBlock = block as ImageMapBlockType;
+    return (
+      <ImageMapBlock
+        block={imageMapBlock}
+        language={language}
+        onOpenPanel={onOpenPanel}
+        onScrollToRsvp={onScrollToRsvp}
+        isPriority={isPriorityImage}
+      />
+    );
+  }
+
+  // panel blocks are rendered as modals at the TemplateRenderer level, not inline
+  if (block.type === 'panel') return null;
 
   return null;
 }

@@ -14,6 +14,8 @@ import type {
   GalleryBlock as GalleryBlockType,
   SpacerBlock as SpacerBlockType,
   EmbedBlock as EmbedBlockType,
+  ImageMapBlock as ImageMapBlockType,
+  PanelBlock as PanelBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
@@ -24,6 +26,8 @@ import { ButtonBlockEditor } from './ButtonBlockEditor';
 import { GalleryBlockEditor } from './GalleryBlockEditor';
 import { SpacerBlockEditor } from './SpacerBlockEditor';
 import { EmbedBlockEditor } from './EmbedBlockEditor';
+import { ImageMapBlockEditor } from './ImageMapBlockEditor';
+import { PanelBlockEditor } from './PanelBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
@@ -87,6 +91,8 @@ export function InvitationTemplateEditor({
   const isSelectedBlockGallery = selectedBlock?.type === 'gallery';
   const isSelectedBlockSpacer = selectedBlock?.type === 'spacer';
   const isSelectedBlockEmbed = selectedBlock?.type === 'embed';
+  const isSelectedBlockImageMap = selectedBlock?.type === 'image-map';
+  const isSelectedBlockPanel = selectedBlock?.type === 'panel';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -164,6 +170,28 @@ export function InvitationTemplateEditor({
         newBlock = { id: crypto.randomUUID(), type: 'spacer', height: '2rem' };
       } else if (type === 'embed') {
         newBlock = { id: crypto.randomUUID(), type: 'embed', html: '' };
+      } else if (type === 'image-map') {
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'image-map',
+          src: '',
+          alt: '',
+          hotspots: [],
+        };
+      } else if (type === 'panel') {
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'panel',
+          title: { ES: '', EN: '', FR: '', IT: '', DE: '' },
+          content: { ES: '', EN: '', FR: '', IT: '', DE: '' },
+          style: {
+            backgroundColor: '#5C1A1A',
+            textColor: '#F5ECD7',
+            borderColor: '#C4976A',
+            borderStyle: 'frame',
+            fontFamily: 'Georgia, serif',
+          },
+        };
       } else {
         return;
       }
@@ -282,6 +310,24 @@ export function InvitationTemplateEditor({
     }));
   }, []);
 
+  const handleUpdateImageMapBlock = useCallback((blockId: string, updates: Partial<ImageMapBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'image-map' ? ({ ...b, ...updates } as ImageMapBlockType) : b
+      ),
+    }));
+  }, []);
+
+  const handleUpdatePanelBlock = useCallback((blockId: string, updates: Partial<PanelBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'panel' ? ({ ...b, ...updates } as PanelBlockType) : b
+      ),
+    }));
+  }, []);
+
   // Handle open image modal
   const handleOpenImageModal = useCallback((blockId: string) => {
     setImageModalBlockId(blockId);
@@ -291,11 +337,24 @@ export function InvitationTemplateEditor({
   // Handle select image from modal
   const handleSelectImage = useCallback((url: string) => {
     if (imageModalBlockId) {
-      handleUpdateImageBlock(imageModalBlockId, { src: url });
+      const targetBlock = design.blocks.find((b) => b.id === imageModalBlockId);
+      if (targetBlock?.type === 'image-map') {
+        const existingSrc = (targetBlock as ImageMapBlockType).src;
+        const currentSrc = typeof existingSrc === 'string'
+          ? url
+          : { ...(existingSrc as Record<string, string>), [activeLanguage]: url } as import('@/types/invitation-template').LocalizedContent;
+        handleUpdateImageMapBlock(imageModalBlockId, { src: currentSrc });
+      } else if (targetBlock?.type === 'panel') {
+        handleUpdatePanelBlock(imageModalBlockId, {
+          style: { ...(targetBlock as PanelBlockType).style, backgroundImage: url },
+        });
+      } else {
+        handleUpdateImageBlock(imageModalBlockId, { src: url });
+      }
     }
     setIsImageModalOpen(false);
     setImageModalBlockId(null);
-  }, [imageModalBlockId, handleUpdateImageBlock]);
+  }, [imageModalBlockId, activeLanguage, design.blocks, handleUpdateImageBlock, handleUpdateImageMapBlock, handleUpdatePanelBlock]);
 
   // Handle select paper background image
   const handleSelectPaperBackground = useCallback((url: string) => {
@@ -354,6 +413,15 @@ export function InvitationTemplateEditor({
   const hasCountdown = design.blocks.some((b) => b.type === 'countdown');
   const hasAddToCalendar = design.blocks.some((b) => b.type === 'add-to-calendar');
   const hasGallery = design.blocks.some((b) => b.type === 'gallery');
+
+  // Compute available panels for hotspot configuration
+  const availablePanels = useMemo(
+    () =>
+      design.blocks
+        .filter((b): b is PanelBlockType => b.type === 'panel')
+        .map((b) => ({ id: b.id, title: b.title['EN'] || b.title['ES'] || b.id })),
+    [design.blocks]
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -421,6 +489,18 @@ export function InvitationTemplateEditor({
             >
               + Embed HTML
             </button>
+            <button
+              onClick={() => handleAddBlock('image-map')}
+              className="w-full px-4 py-2 border border-purple-300 rounded hover:bg-purple-50 transition text-purple-700 font-medium"
+            >
+              + Image Map (with Hotspots)
+            </button>
+            <button
+              onClick={() => handleAddBlock('panel')}
+              className="w-full px-4 py-2 border border-purple-300 rounded hover:bg-purple-50 transition text-purple-700 font-medium"
+            >
+              + Panel (modal content)
+            </button>
           </div>
         </div>
 
@@ -478,44 +558,40 @@ export function InvitationTemplateEditor({
           />
         )}
 
-        {/* Canvas Settings */}
+        {isSelectedBlockImageMap && selectedBlock && selectedBlock.type === 'image-map' && (
+          <ImageMapBlockEditor
+            block={selectedBlock}
+            activeLanguage={activeLanguage}
+            onLanguageChange={setActiveLanguage}
+            onUpdate={handleUpdateImageMapBlock}
+            onOpenImageModal={handleOpenImageModal}
+            availablePanels={availablePanels}
+          />
+        )}
+
+        {isSelectedBlockPanel && selectedBlock && selectedBlock.type === 'panel' && (
+          <PanelBlockEditor
+            block={selectedBlock}
+            activeLanguage={activeLanguage}
+            onLanguageChange={setActiveLanguage}
+            onUpdate={handleUpdatePanelBlock}
+            onOpenImageModal={handleOpenImageModal}
+          />
+        )}
+
+        {/* Invitation Style */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">{t('canvasSettings')}</h3>
+          <h3 className="text-lg font-semibold mb-4">Invitation Style</h3>
           <div className="space-y-4">
+            {/* Background Image */}
             <div>
-              <label className="block text-sm font-medium mb-2">{t('backgroundColor')}</label>
-              <input
-                type="color"
-                value={design.globalStyle.backgroundColor}
-                onChange={(e) =>
-                  setDesign((prev) => ({
-                    ...prev,
-                    globalStyle: {
-                      ...prev.globalStyle,
-                      backgroundColor: e.target.value,
-                    },
-                  }))
-                }
-                className="w-full h-10 rounded cursor-pointer"
-              />
-            </div>
-            {design.globalStyle.backgroundImage && (
-              <div>
-                <label className="block text-sm font-medium mb-2">{t('backgroundImage')}</label>
-                <p className="text-sm text-gray-600 truncate">
-                  {design.globalStyle.backgroundImage}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">(from theme - read-only)</p>
-              </div>
-            )}
-            <div>
-              <label className="block text-sm font-medium mb-2">{t('paperBackground')}</label>
+              <label className="block text-sm font-medium mb-1">Background Image</label>
               {design.globalStyle.paperBackgroundImage ? (
                 <div className="space-y-2">
                   <div className="relative w-full h-24 bg-gray-100 rounded overflow-hidden">
                     <Image
                       src={design.globalStyle.paperBackgroundImage}
-                      alt="Paper background"
+                      alt="Background"
                       fill
                       className="object-cover"
                       unoptimized
@@ -532,8 +608,29 @@ export function InvitationTemplateEditor({
                       onClick={handleRemovePaperBackground}
                       className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
                     >
-                      {t('remove')}
+                      Remove
                     </button>
+                  </div>
+                  {/* Cover / Tile selector */}
+                  <div className="flex rounded overflow-hidden border border-gray-300 text-sm">
+                    {(['cover', 'tile'] as const).map((mode) => (
+                      <button
+                        key={mode}
+                        onClick={() =>
+                          setDesign((prev) => ({
+                            ...prev,
+                            globalStyle: { ...prev.globalStyle, paperBackgroundSize: mode },
+                          }))
+                        }
+                        className={`flex-1 py-1.5 capitalize transition ${
+                          (design.globalStyle.paperBackgroundSize ?? 'cover') === mode
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {mode === 'cover' ? 'Cover (expand)' : 'Tile (repeat)'}
+                      </button>
+                    ))}
                   </div>
                 </div>
               ) : (
@@ -541,13 +638,79 @@ export function InvitationTemplateEditor({
                   onClick={() => setIsPaperBackgroundModalOpen(true)}
                   className="w-full px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition text-sm"
                 >
-                  + {t('addPaperBackground')}
+                  + Choose Image
                 </button>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Upload an image to use as the canvas background
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Applied to the page and header area.</p>
             </div>
+
+            {/* Colors row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium mb-1">Background Color</label>
+                <input
+                  type="color"
+                  value={design.globalStyle.backgroundColor}
+                  onChange={(e) =>
+                    setDesign((prev) => ({ ...prev, globalStyle: { ...prev.globalStyle, backgroundColor: e.target.value } }))
+                  }
+                  className="w-full h-9 rounded cursor-pointer border border-gray-200"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">Text Color</label>
+                <input
+                  type="color"
+                  value={design.globalStyle.textColor ?? '#111827'}
+                  onChange={(e) =>
+                    setDesign((prev) => ({ ...prev, globalStyle: { ...prev.globalStyle, textColor: e.target.value } }))
+                  }
+                  className="w-full h-9 rounded cursor-pointer border border-gray-200"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">RSVP Button</label>
+                <input
+                  type="color"
+                  value={design.globalStyle.rsvpButtonColor ?? '#16a34a'}
+                  onChange={(e) =>
+                    setDesign((prev) => ({ ...prev, globalStyle: { ...prev.globalStyle, rsvpButtonColor: e.target.value } }))
+                  }
+                  className="w-full h-9 rounded cursor-pointer border border-gray-200"
+                />
+              </div>
+            </div>
+
+            {/* Font */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Font</label>
+              <select
+                value={design.globalStyle.fontFamily ?? ''}
+                onChange={(e) =>
+                  setDesign((prev) => ({ ...prev, globalStyle: { ...prev.globalStyle, fontFamily: e.target.value || undefined } }))
+                }
+                className="w-full p-2 border border-gray-300 rounded text-sm"
+              >
+                <option value="">— Default (system font) —</option>
+                <option value="Cormorant Garamond, serif">Cormorant Garamond</option>
+                <option value="Crimson Text, serif">Crimson Text</option>
+                <option value="EB Garamond, serif">EB Garamond</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Great Vibes, cursive">Great Vibes</option>
+                <option value="Inter, sans-serif">Inter</option>
+                <option value="Libre Baskerville, serif">Libre Baskerville</option>
+                <option value="Lora, serif">Lora</option>
+                <option value="Montserrat, sans-serif">Montserrat</option>
+                <option value="Playfair Display, serif">Playfair Display</option>
+              </select>
+            </div>
+
+            {design.globalStyle.backgroundImage && (
+              <div>
+                <label className="block text-xs font-medium mb-1 text-gray-500">Theme Pattern (read-only)</label>
+                <p className="text-xs text-gray-400 truncate">{design.globalStyle.backgroundImage}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -573,18 +736,20 @@ export function InvitationTemplateEditor({
       <div className="lg:col-span-2">
         <div
           className="rounded-lg shadow overflow-hidden min-h-[600px] relative"
-          style={{ backgroundColor: design.globalStyle.backgroundColor }}
+          style={{
+            backgroundColor: design.globalStyle.backgroundColor,
+            ...(design.globalStyle.fontFamily ? { fontFamily: design.globalStyle.fontFamily } : {}),
+          }}
         >
           {/* Paper Background Image (user-uploaded) */}
           {design.globalStyle.paperBackgroundImage && (
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage: `url(${design.globalStyle.paperBackgroundImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
+              style={
+                (design.globalStyle.paperBackgroundSize ?? 'cover') === 'tile'
+                  ? { backgroundImage: `url(${design.globalStyle.paperBackgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left' }
+                  : { backgroundImage: `url(${design.globalStyle.paperBackgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }
+              }
             />
           )}
 
@@ -599,8 +764,23 @@ export function InvitationTemplateEditor({
             />
           )}
 
+          {/* Header preview strip */}
+          <div
+            className="relative z-10 px-4 py-2 flex justify-between items-center border-b"
+            style={{
+              borderColor: design.globalStyle.textColor ? design.globalStyle.textColor + '33' : '#e5e7eb',
+            }}
+          >
+            <span className="text-sm font-semibold" style={{ color: design.globalStyle.textColor ?? '#111827' }}>
+              {weddingData.couple_names}
+            </span>
+            <span className="text-xs px-2 py-0.5 rounded border" style={{ color: design.globalStyle.textColor ?? '#6b7280', borderColor: design.globalStyle.textColor ? design.globalStyle.textColor + '55' : '#d1d5db' }}>
+              🌐 Language
+            </span>
+          </div>
+
           {/* Canvas Content */}
-          <div className="relative z-10 pt-10">
+          <div className="relative z-10">
             {design.blocks.length === 0 ? (
               <div className="flex items-center justify-center h-[600px] text-gray-400">
                 <p>No blocks added yet. Add a block from the sidebar.</p>
@@ -751,6 +931,26 @@ export function InvitationTemplateEditor({
                       dangerouslySetInnerHTML={{ __html: (block as EmbedBlockType).html }}
                     />
                   ) : null}
+
+                  {block.type === 'image-map' && (
+                    <ImageMapBlockEditor
+                      block={block as ImageMapBlockType}
+                      activeLanguage={activeLanguage}
+                      onLanguageChange={setActiveLanguage}
+                      onUpdate={handleUpdateImageMapBlock}
+                      onOpenImageModal={handleOpenImageModal}
+                      availablePanels={availablePanels}
+                    />
+                  )}
+
+                  {block.type === 'panel' && (
+                    <div className="p-4 bg-purple-50 border border-dashed border-purple-300 rounded text-center">
+                      <p className="text-sm text-purple-700 font-medium">
+                        📋 Panel: &ldquo;{(block as PanelBlockType).title['EN'] || (block as PanelBlockType).title['ES'] || 'Untitled'}&rdquo;
+                      </p>
+                      <p className="text-xs text-purple-500 mt-1">Hidden in invitation — opens as modal when triggered</p>
+                    </div>
+                  )}
                 </div>
               ))
             )}

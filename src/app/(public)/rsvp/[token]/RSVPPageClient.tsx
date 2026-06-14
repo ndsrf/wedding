@@ -56,6 +56,31 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
   const isGardenBirds = theme.name === 'Garden Birds';
   const hasTemplate = !!invitation_template;
 
+  // Extract invitation style settings from the template design.
+  // paperBackgroundImage is the user-uploaded background; map it to backgroundImage for InvStyle consumers.
+  const invStyle = (() => {
+    if (!invitation_template?.design) return undefined;
+    const gs = (invitation_template.design as {
+      globalStyle?: {
+        backgroundColor?: string;
+        paperBackgroundImage?: string;
+        paperBackgroundSize?: 'cover' | 'tile';
+        textColor?: string;
+        fontFamily?: string;
+        rsvpButtonColor?: string;
+      };
+    }).globalStyle;
+    if (!gs) return undefined;
+    return {
+      backgroundColor: gs.backgroundColor,
+      backgroundImage: gs.paperBackgroundImage,
+      backgroundSize: gs.paperBackgroundSize,
+      textColor: gs.textColor,
+      fontFamily: gs.fontFamily,
+      rsvpButtonColor: gs.rsvpButtonColor,
+    };
+  })();
+
   // Map preferred_language to SupportedLanguage
   const templateLanguage = (family.preferred_language.toUpperCase()) as SupportedLanguage;
 
@@ -121,23 +146,26 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
         </div>
       )}
 
-      {/* RSVP Form or Confirmation */}
-      {rsvpSubmitted ? (
-        <ConfirmationMessage
-          familyName={family.name}
-          canEdit={!rsvp_cutoff_passed}
-          cutoffDate={wedding.rsvp_cutoff_date}
-          onEdit={() => setRsvpSubmitted(false)}
-        />
-      ) : (
-        <RSVPForm
-          token={token}
-          family={family}
-          wedding={wedding}
-          rsvpCutoffPassed={rsvp_cutoff_passed}
-          onSuccess={handleRSVPSuccess}
-        />
-      )}
+      {/* RSVP Form or Confirmation — id="rsvp-form" allows scroll-to-rsvp hotspot */}
+      <div id="rsvp-form">
+        {rsvpSubmitted ? (
+          <ConfirmationMessage
+            familyName={family.name}
+            canEdit={!rsvp_cutoff_passed}
+            cutoffDate={wedding.rsvp_cutoff_date}
+            onEdit={() => setRsvpSubmitted(false)}
+          />
+        ) : (
+          <RSVPForm
+            token={token}
+            family={family}
+            wedding={wedding}
+            rsvpCutoffPassed={rsvp_cutoff_passed}
+            onSuccess={handleRSVPSuccess}
+            invStyle={invStyle}
+          />
+        )}
+      </div>
 
       {/* Payment Information */}
       {rsvpSubmitted && (
@@ -190,9 +218,24 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
         // Standard template layout
         <>
           {/* Header */}
-          <div className="bg-white shadow-sm border-b border-gray-200">
+          <div
+            className="shadow-sm"
+            style={{
+              backgroundColor: invStyle?.backgroundColor ?? '#ffffff',
+              ...(invStyle?.backgroundImage
+                ? (invStyle.backgroundSize ?? 'cover') === 'tile'
+                  ? { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'auto', backgroundRepeat: 'repeat', backgroundPosition: 'top left' }
+                  : { backgroundImage: `url(${invStyle.backgroundImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }
+                : {}),
+              borderBottom: `1px solid ${invStyle?.textColor ? invStyle.textColor + '33' : '#e5e7eb'}`,
+              fontFamily: invStyle?.fontFamily ?? undefined,
+            }}
+          >
             <div className="max-w-4xl mx-auto px-4 py-1 flex justify-between items-center">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1
+                className="text-xl font-bold"
+                style={{ color: invStyle?.textColor ?? '#111827' }}
+              >
                 {wedding.couple_names}
               </h1>
               <LanguageSelector

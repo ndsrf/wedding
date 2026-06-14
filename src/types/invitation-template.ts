@@ -13,6 +13,10 @@ export interface TemplateDesignGlobalStyle {
   backgroundColor: string; // from theme.colors.background
   backgroundImage?: string; // from theme.images?.background (e.g. '/themes/garden-birds/botanical-pattern.svg')
   paperBackgroundImage?: string; // user-uploaded paper background image (e.g. '/uploads/invitation-images/paper-bg.jpg')
+  paperBackgroundSize?: 'cover' | 'tile'; // how to render the background image (default: 'cover')
+  textColor?: string;       // header / page text color
+  fontFamily?: string;      // global font applied to the page wrapper
+  rsvpButtonColor?: string; // submit button color in the RSVP form
 }
 
 // ============================================================================
@@ -108,6 +112,52 @@ export interface ButtonBlock {
   };
 }
 
+// ============================================================================
+// IMAGE MAP BLOCK
+// ============================================================================
+
+export interface ImageMapHotspot {
+  id: string;
+  top: number;    // percentage 0–100 of image height
+  left: number;   // percentage 0–100 of image width
+  width: number;  // percentage 0–100 of image width
+  height: number; // percentage 0–100 of image height
+  action: 'open-panel' | 'scroll-to-rsvp' | 'url';
+  panelId?: string;          // when action = 'open-panel'
+  url?: string;              // when action = 'url'
+  label?: LocalizedContent;  // optional visible text overlay (empty = invisible zone)
+}
+
+export interface ImageMapBlock {
+  id: string;
+  type: 'image-map';
+  /** Single image URL or per-language URLs. If string, same image for all languages. */
+  src: string | LocalizedContent;
+  alt: string;
+  hotspots: ImageMapHotspot[];
+}
+
+// ============================================================================
+// PANEL BLOCK
+// ============================================================================
+
+export interface PanelBlock {
+  id: string;
+  type: 'panel';
+  title: LocalizedContent;
+  content: LocalizedContent; // supports HTML
+  style: {
+    backgroundColor: string;
+    backgroundImage?: string;
+    backgroundSize?: 'cover' | 'tile';
+    textColor: string;
+    borderColor: string;
+    /** 'frame' = ornate SVG decorative border; 'simple' = plain border */
+    borderStyle: 'frame' | 'simple';
+    fontFamily: string;
+  };
+}
+
 export interface GalleryBlock {
   id: string;
   type: 'gallery';
@@ -134,7 +184,7 @@ export interface EmbedBlock {
   height?: string; // Optional reserved height for pre-render placeholder
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock;
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

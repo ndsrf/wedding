@@ -31,6 +31,11 @@ import type {
   GalleryBlock,
   SpacerBlock,
   EmbedBlock,
+  ImageMapBlock,
+  ImageMapHotspot,
+  PanelBlock,
+  LocalizedContent,
+  SupportedLanguage,
 } from '@/types/invitation-template';
 
 // ============================================================================
@@ -52,6 +57,8 @@ export const BLOCK_VERSIONS: Record<TemplateBlock['type'], number> = {
   gallery: 1,
   spacer: 1,
   embed: 1,
+  'image-map': 1,
+  panel: 2,
 } as const;
 
 /** Current format version for the .nupcinv manifest */
@@ -229,6 +236,53 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
       };
     }
 
+    case 'image-map': {
+      const b = block as Partial<ImageMapBlock>;
+      const hotspots: ImageMapHotspot[] = Array.isArray(b.hotspots)
+        ? (b.hotspots as ImageMapHotspot[]).map((h) => ({
+            id: h.id ?? randomUUID(),
+            top: h.top ?? 0,
+            left: h.left ?? 0,
+            width: h.width ?? 20,
+            height: h.height ?? 10,
+            action: h.action ?? 'url',
+            panelId: h.panelId,
+            url: h.url,
+            label: h.label,
+          }))
+        : [];
+      return {
+        id: b.id ?? randomUUID(),
+        type: 'image-map',
+        src: b.src ?? '',
+        alt: b.alt ?? '',
+        hotspots,
+      };
+    }
+
+    case 'panel': {
+      const b = block as Partial<PanelBlock>;
+      const LANGS: SupportedLanguage[] = ['ES', 'EN', 'FR', 'IT', 'DE'];
+      const emptyLocalized: LocalizedContent = { ES: '', EN: '', FR: '', IT: '', DE: '' };
+      return {
+        id: b.id ?? randomUUID(),
+        type: 'panel',
+        title: b.title ?? { ...emptyLocalized },
+        content: b.content ?? { ...emptyLocalized },
+        style: {
+          backgroundColor: b.style?.backgroundColor ?? '#5C1A1A',
+          ...(b.style?.backgroundImage ? { backgroundImage: b.style.backgroundImage } : {}),
+          ...(b.style?.backgroundSize ? { backgroundSize: b.style.backgroundSize } : {}),
+          textColor: b.style?.textColor ?? '#F5ECD7',
+          borderColor: b.style?.borderColor ?? '#C4976A',
+          borderStyle: b.style?.borderStyle ?? 'frame',
+          fontFamily: b.style?.fontFamily ?? 'Georgia, serif',
+        },
+      };
+      // suppress unused variable warning
+      void LANGS;
+    }
+
     default: {
       // Unknown block type from a future version of the app — pass through as-is
       // so an old app doesn't crash when it encounters a block it doesn't know.
@@ -261,6 +315,19 @@ export function extractImageRefs(design: TemplateDesign): string[] {
       refs.add(block.src);
     }
     if (block.type === 'text' && block.style.backgroundImage) {
+      refs.add(block.style.backgroundImage);
+    }
+    if (block.type === 'image-map' && block.src) {
+      if (typeof block.src === 'string') {
+        refs.add(block.src);
+      } else {
+        // LocalizedContent — collect all unique URLs
+        for (const url of Object.values(block.src)) {
+          if (url) refs.add(url);
+        }
+      }
+    }
+    if (block.type === 'panel' && block.style.backgroundImage) {
       refs.add(block.style.backgroundImage);
     }
   }
@@ -350,6 +417,26 @@ export async function exportInvitationTemplate(
     }
 
     if (block.type === 'text' && block.style.backgroundImage) {
+      return {
+        ...block,
+        style: {
+          ...block.style,
+          backgroundImage: imageMap[block.style.backgroundImage] ?? block.style.backgroundImage,
+        },
+        _version: version,
+      };
+    }
+
+    if (block.type === 'image-map') {
+      const remappedSrc = typeof block.src === 'string'
+        ? (imageMap[block.src] ?? block.src)
+        : Object.fromEntries(
+            Object.entries(block.src).map(([lang, url]) => [lang, imageMap[url] ?? url])
+          ) as LocalizedContent;
+      return { ...block, src: remappedSrc, _version: version };
+    }
+
+    if (block.type === 'panel' && block.style.backgroundImage) {
       return {
         ...block,
         style: {
@@ -508,6 +595,23 @@ export async function importInvitationTemplate(
       block.src = finalImageMap[block.src] ?? block.src;
     }
     if (block.type === 'text' && block.style.backgroundImage) {
+      block.style = {
+        ...block.style,
+        backgroundImage: finalImageMap[block.style.backgroundImage] ?? block.style.backgroundImage,
+      };
+    }
+
+    if (block.type === 'image-map') {
+      if (typeof block.src === 'string') {
+        block.src = finalImageMap[block.src] ?? block.src;
+      } else {
+        block.src = Object.fromEntries(
+          Object.entries(block.src).map(([lang, url]) => [lang, finalImageMap[url] ?? url])
+        ) as LocalizedContent;
+      }
+    }
+
+    if (block.type === 'panel' && block.style.backgroundImage) {
       block.style = {
         ...block.style,
         backgroundImage: finalImageMap[block.style.backgroundImage] ?? block.style.backgroundImage,
