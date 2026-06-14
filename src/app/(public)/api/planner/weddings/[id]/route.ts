@@ -443,11 +443,13 @@ export async function PATCH(
       }
     }
 
-    // If theme changed, re-render all invitation templates and invalidate caches
+    // Re-render templates and bust ISR pages if theme changed
     if (validatedData.theme_id !== undefined && validatedData.theme_id !== existingWedding.theme_id) {
       await reRenderWeddingTemplates(weddingId);
       invalidateWeddingPageCache(weddingId);
-      void revalidateWeddingRSVPPages(weddingId);
+      await revalidateWeddingRSVPPages(weddingId);
+    } else {
+      invalidateWeddingPageCache(weddingId);
     }
 
     // Invalidate all caches that include wedding config fields

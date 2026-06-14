@@ -322,10 +322,10 @@ export async function PATCH(
     if (themeChanged) {
       await reRenderWeddingTemplates(weddingId);
       invalidateWeddingPageCache(weddingId);
-      void revalidateWeddingRSVPPages(weddingId);
+      await revalidateWeddingRSVPPages(weddingId);
     } else if (weddingDayThemeChanged) {
       invalidateWeddingPageCache(weddingId);
-      void revalidateWeddingRSVPPages(weddingId);
+      await revalidateWeddingRSVPPages(weddingId);
     } else {
       invalidateWeddingPageCache(weddingId);
     }

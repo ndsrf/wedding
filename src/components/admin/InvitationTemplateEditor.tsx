@@ -16,6 +16,7 @@ import type {
   EmbedBlock as EmbedBlockType,
   ImageMapBlock as ImageMapBlockType,
   PanelBlock as PanelBlockType,
+  GiftBlock as GiftBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
@@ -28,11 +29,13 @@ import { SpacerBlockEditor } from './SpacerBlockEditor';
 import { EmbedBlockEditor } from './EmbedBlockEditor';
 import { ImageMapBlockEditor } from './ImageMapBlockEditor';
 import { PanelBlockEditor } from './PanelBlockEditor';
+import { GiftBlockEditor } from './GiftBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
 import { ButtonBlock } from '@/components/invitation/ButtonBlock';
 import { GalleryBlock } from '@/components/invitation/GalleryBlock';
+import { GiftBlock } from '@/components/invitation/GiftBlock';
 import { ImagePickerModal } from './ImagePickerModal';
 
 interface InvitationTemplateEditorProps {
@@ -47,6 +50,7 @@ interface InvitationTemplateEditorProps {
     wedding_date: Date;
     wedding_time: string;
     location: string;
+    gift_iban?: string | null;
   };
   onSave: (design: TemplateDesign) => Promise<void>;
   apiBase?: string;
@@ -94,6 +98,7 @@ export function InvitationTemplateEditor({
   const isSelectedBlockEmbed = selectedBlock?.type === 'embed';
   const isSelectedBlockImageMap = selectedBlock?.type === 'image-map';
   const isSelectedBlockPanel = selectedBlock?.type === 'panel';
+  const isSelectedBlockGift = selectedBlock?.type === 'gift';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -191,6 +196,21 @@ export function InvitationTemplateEditor({
             borderColor: '#C4976A',
             borderStyle: 'frame',
             fontFamily: 'Georgia, serif',
+          },
+        };
+      } else if (type === 'gift') {
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'gift',
+          style: {
+            backgroundColor: 'transparent',
+            textColor: '#111827',
+            borderColor: '#E5E7EB',
+            buttonColor: '#2563EB',
+            buttonTextColor: '#FFFFFF',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '0.75rem',
+            alignment: 'center',
           },
         };
       } else {
@@ -410,7 +430,10 @@ export function InvitationTemplateEditor({
       // Store preview data in sessionStorage
       const previewData = {
         design,
-        weddingData,
+        weddingData: {
+          ...weddingData,
+          gift_iban: weddingData.gift_iban ?? undefined,
+        },
         language: activeLanguage.toLowerCase(),
       };
       sessionStorage.setItem('invitation-preview-data', JSON.stringify(previewData));
@@ -516,6 +539,12 @@ export function InvitationTemplateEditor({
             >
               + Panel (modal content)
             </button>
+            <button
+              onClick={() => handleAddBlock('gift')}
+              className="w-full px-4 py-2 border border-amber-300 rounded hover:bg-amber-50 transition text-amber-700 font-medium"
+            >
+              + Gift (IBAN)
+            </button>
           </div>
         </div>
 
@@ -591,6 +620,20 @@ export function InvitationTemplateEditor({
             onLanguageChange={setActiveLanguage}
             onUpdate={handleUpdatePanelBlock}
             onOpenImageModal={handleOpenImageModal}
+          />
+        )}
+
+        {isSelectedBlockGift && selectedBlock && selectedBlock.type === 'gift' && (
+          <GiftBlockEditor
+            block={selectedBlock as GiftBlockType}
+            onUpdate={(id, updates) => {
+              setDesign((prev) => ({
+                ...prev,
+                blocks: prev.blocks.map((b) =>
+                  b.id === id && b.type === 'gift' ? ({ ...b, ...updates } as GiftBlockType) : b
+                ),
+              }));
+            }}
           />
         )}
 
@@ -965,6 +1008,14 @@ export function InvitationTemplateEditor({
                       </p>
                       <p className="text-xs text-purple-500 mt-1">Hidden in invitation — opens as modal when triggered</p>
                     </div>
+                  )}
+
+                  {block.type === 'gift' && (
+                    <GiftBlock
+                      block={block as GiftBlockType}
+                      language={activeLanguage}
+                      iban={weddingData.gift_iban ?? undefined}
+                    />
                   )}
                 </div>
               ))

@@ -34,6 +34,7 @@ interface PreviewData {
     wedding_date: Date | string;
     wedding_time: string;
     location: string;
+    gift_iban?: string;
   };
   language: string;
 }
@@ -134,6 +135,7 @@ export function InvitationBuilderPreviewContent() {
         coupleNames={weddingData.couple_names}
         language={activeLanguage}
         weddingId={weddingData.id}
+        iban={weddingData.gift_iban}
       />
     </div>
   );

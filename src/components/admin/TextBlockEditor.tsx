@@ -32,7 +32,7 @@ const FONT_FAMILIES = [
   'Tangerine, cursive',
 ];
 
-const FONT_SIZES = ['0.875rem', '1rem', '1.25rem', '1.5rem', '2rem', '2.5rem', '3rem'];
+const FONT_SIZES = ['0.625rem', '0.75rem', '0.875rem', '1rem', '1.25rem', '1.5rem', '2rem', '2.5rem', '3rem'];
 
 interface TextBlockEditorProps {
   block: TextBlock;

@@ -370,7 +370,7 @@ export async function PATCH(request: NextRequest) {
     // Fetch current wedding to check for changes
     const currentWedding = await prisma.wedding.findUnique({
       where: { id: user.wedding_id },
-      select: { theme_id: true, wedding_day_theme_id: true, couple_names: true, planner_id: true },
+      select: { theme_id: true, wedding_day_theme_id: true, invitation_template_id: true, couple_names: true, planner_id: true },
     });
 
     if (!currentWedding) {
@@ -506,18 +506,21 @@ export async function PATCH(request: NextRequest) {
       data: updateData,
     });
 
-    // If theme changed, re-render all invitation templates and invalidate caches
+    // Determine what changed to decide which caches to bust
     const themeChanged = validatedData.theme_id !== undefined && validatedData.theme_id !== currentWedding.theme_id;
     const weddingDayThemeChanged = validatedData.wedding_day_theme_id !== undefined && validatedData.wedding_day_theme_id !== currentWedding.wedding_day_theme_id;
+    const templateChanged = validatedData.invitation_template_id !== undefined && validatedData.invitation_template_id !== currentWedding.invitation_template_id;
+
     if (themeChanged) {
       await reRenderWeddingTemplates(user.wedding_id);
-      invalidateWeddingPageCache(user.wedding_id);
-      void revalidateWeddingRSVPPages(user.wedding_id);
-    } else if (weddingDayThemeChanged) {
-      invalidateWeddingPageCache(user.wedding_id);
-      void revalidateWeddingRSVPPages(user.wedding_id);
-    } else {
-      invalidateWeddingPageCache(user.wedding_id);
+    }
+
+    // Always clear the server-side in-memory cache
+    invalidateWeddingPageCache(user.wedding_id);
+
+    // Bust ISR page cache whenever anything visible to guests changes
+    if (themeChanged || weddingDayThemeChanged || templateChanged) {
+      await revalidateWeddingRSVPPages(user.wedding_id);
     }
 
     // Invalidate caches so the next page/API load fetches fresh data

@@ -90,50 +90,68 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           coupleNames={wedding.couple_names}
           language={templateLanguage}
           weddingId={wedding.id}
+          iban={wedding.gift_iban ?? undefined}
         />
       ) : (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            {t('guest.welcome.title', { familyName: family.name })} 👋
-          </h2>
-          <p className="text-xl text-gray-600 mb-4">
-            {t('guest.welcome.subtitle')}
-          </p>
-          <div className="space-y-2 text-lg text-gray-700">
-            <p>
-              <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
+        <div className="max-w-4xl mx-auto px-4 pt-8">
+          <div 
+            className="rounded-lg shadow-md p-6"
+            style={{ 
+              backgroundColor: invStyle?.backgroundColor ?? '#ffffff',
+              color: invStyle?.textColor ?? '#111827',
+              fontFamily: invStyle?.fontFamily ?? undefined
+            }}
+          >
+            <h2 className="text-3xl font-bold mb-2" style={{ color: invStyle?.textColor ?? '#111827' }}>
+              {t('guest.welcome.title', { familyName: family.name })} 👋
+            </h2>
+            <p className="text-xl mb-4" style={{ color: invStyle?.textColor ? invStyle.textColor + 'cc' : '#4b5563' }}>
+              {t('guest.welcome.subtitle')}
             </p>
-            <p>
-              <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString(locale) })}</strong>
-            </p>
-            <p>
-              <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
-            </p>
-            <p>
-              <strong>{t('guest.welcome.location', { location: wedding.location ?? '' })}</strong>
-            </p>
-            {wedding.dress_code && (
+            <div className="space-y-2 text-lg">
               <p>
-                <strong>{t('guest.welcome.dressCode')}</strong> {wedding.dress_code}
+                <strong>{t('master.weddings.coupleName')}:</strong> {wedding.couple_names}
               </p>
+              <p>
+                <strong>{t('guest.welcome.date', { date: new Date(wedding.wedding_date).toLocaleDateString(locale) })}</strong>
+              </p>
+              <p>
+                <strong>{t('guest.welcome.time', { time: wedding.wedding_time })}</strong>
+              </p>
+              <p>
+                <strong>{t('guest.welcome.location', { location: wedding.location ?? '' })}</strong>
+              </p>
+              {wedding.dress_code && (
+                <p>
+                  <strong>{t('guest.welcome.dressCode')}</strong> {wedding.dress_code}
+                </p>
+              )}
+            </div>
+            {wedding.additional_info && (
+              <div 
+                className="mt-4 p-4 rounded-lg"
+                style={{ 
+                  backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + '22' : '#eff6ff',
+                  borderLeft: `4px solid ${invStyle?.rsvpButtonColor ?? '#2563eb'}`
+                }}
+              >
+                <p className="text-lg">{wedding.additional_info}</p>
+              </div>
             )}
           </div>
-          {wedding.additional_info && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-lg text-gray-700">{wedding.additional_info}</p>
-            </div>
-          )}
         </div>
       )}
 
       {/* RSVP Form or Confirmation — id="rsvp-form" allows scroll-to-rsvp hotspot */}
-      <div id="rsvp-form">
+      <div id="rsvp-form" className="max-w-4xl mx-auto px-4 mt-8">
         {rsvpSubmitted ? (
           <ConfirmationMessage
             familyName={family.name}
             canEdit={!rsvp_cutoff_passed}
             cutoffDate={wedding.rsvp_cutoff_date}
             onEdit={() => setRsvpSubmitted(false)}
+            invStyle={invStyle}
+            attendingCount={family.members.filter(m => m.attending).length}
           />
         ) : (
           <RSVPForm
@@ -149,10 +167,13 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
 
       {/* Payment Information */}
       {rsvpSubmitted && (
-        <PaymentInfo
-          token={token}
-          paymentMode={data.wedding.payment_tracking_mode || 'MANUAL'}
-        />
+        <div className="max-w-4xl mx-auto px-4 mt-8">
+          <PaymentInfo
+            token={token}
+            paymentMode={data.wedding.payment_tracking_mode || 'MANUAL'}
+            invStyle={invStyle}
+          />
+        </div>
       )}
     </>
   );
@@ -190,6 +211,8 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
               token={token}
               currentLanguage={family.preferred_language}
               onLanguageChange={() => window.location.reload()}
+              textColor={invStyle?.textColor}
+              fontFamily={invStyle?.fontFamily}
             />
           </div>
           {mainContent}
@@ -222,12 +245,14 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
                 token={token}
                 currentLanguage={family.preferred_language}
                 onLanguageChange={() => window.location.reload()}
+                textColor={invStyle?.textColor}
+                fontFamily={invStyle?.fontFamily}
               />
             </div>
           </div>
 
           {/* Main Content */}
-          <div>
+          <div className="pb-8">
             {mainContent}
           </div>
 

@@ -180,6 +180,21 @@ export interface SpacerBlock {
   height: string; // CSS value, e.g. '2rem', '40px'
 }
 
+export interface GiftBlock {
+  id: string;
+  type: 'gift';
+  style: {
+    backgroundColor: string;
+    textColor: string;
+    borderColor: string;
+    buttonColor: string;
+    buttonTextColor: string;
+    fontFamily: string;
+    fontSize: string;
+    alignment?: 'left' | 'center' | 'right';
+  };
+}
+
 export interface EmbedBlock {
   id: string;
   type: 'embed';
@@ -187,7 +202,7 @@ export interface EmbedBlock {
   height?: string; // Optional reserved height for pre-render placeholder
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock;
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

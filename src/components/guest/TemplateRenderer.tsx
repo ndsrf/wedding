@@ -3,13 +3,29 @@
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import DOMPurify from 'isomorphic-dompurify';
 import Image from 'next/image';
-import type { TemplateBlock, TemplateDesign, SupportedLanguage, TextBlock, ImageBlock, LocationBlock as LocationBlockType, CountdownBlock as CountdownBlockType, ButtonBlock as ButtonBlockType, GalleryBlock as GalleryBlockType, SpacerBlock as SpacerBlockType, EmbedBlock as EmbedBlockType, ImageMapBlock as ImageMapBlockType, PanelBlock as PanelBlockType } from '@/types/invitation-template';
+import type { 
+  TemplateBlock, 
+  TemplateDesign, 
+  SupportedLanguage, 
+  TextBlock, 
+  ImageBlock, 
+  LocationBlock as LocationBlockType, 
+  CountdownBlock as CountdownBlockType, 
+  ButtonBlock as ButtonBlockType, 
+  GalleryBlock as GalleryBlockType, 
+  SpacerBlock as SpacerBlockType, 
+  EmbedBlock as EmbedBlockType, 
+  ImageMapBlock as ImageMapBlockType, 
+  PanelBlock as PanelBlockType,
+  GiftBlock as GiftBlockType
+} from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
 import { ButtonBlock } from '@/components/invitation/ButtonBlock';
 import { GalleryBlock } from '@/components/invitation/GalleryBlock';
 import { ImageMapBlock } from '@/components/invitation/ImageMapBlock';
+import { GiftBlock } from '@/components/invitation/GiftBlock';
 import { PanelModal } from '@/components/invitation/PanelBlock';
 import { loadFont } from '@/lib/fonts';
 
@@ -22,6 +38,7 @@ interface TemplateRendererProps {
   coupleNames: string;
   language: SupportedLanguage;
   weddingId?: string;
+  iban?: string;
 }
 
 const FONT_NAMES = [
@@ -57,6 +74,7 @@ export default function TemplateRenderer({
   coupleNames,
   language,
   weddingId,
+  iban,
 }: TemplateRendererProps) {
   const templateDesign = useMemo(() => {
     if (!design || typeof design !== 'object') return null;
@@ -176,6 +194,7 @@ export default function TemplateRenderer({
               language={language}
               isPriorityImage={index === firstImageIndex}
               weddingId={weddingId}
+              iban={iban}
               onOpenPanel={handleOpenPanel}
               onScrollToRsvp={handleScrollToRsvp}
             />
@@ -204,6 +223,7 @@ interface TemplateBlockProps {
   language: SupportedLanguage;
   isPriorityImage?: boolean;
   weddingId?: string;
+  iban?: string;
   onOpenPanel: (panelId: string) => void;
   onScrollToRsvp: () => void;
 }
@@ -217,6 +237,7 @@ function TemplateBlock({
   language,
   isPriorityImage = false,
   weddingId,
+  iban,
   onOpenPanel,
   onScrollToRsvp,
 }: TemplateBlockProps) {
@@ -353,6 +374,17 @@ function TemplateBlock({
         showUploadButton={galleryBlock.showUploadButton ?? true}
         autoPlayMs={galleryBlock.autoPlayMs ?? 4000}
         style={galleryBlock.style}
+      />
+    );
+  }
+
+  if (block.type === 'gift') {
+    const giftBlock = block as GiftBlockType;
+    return (
+      <GiftBlock
+        block={giftBlock}
+        language={language}
+        iban={iban}
       />
     );
   }

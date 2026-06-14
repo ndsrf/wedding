@@ -91,7 +91,7 @@ export async function createInvitationTemplateHandler(
   });
 
   invalidateWeddingPageCache(weddingId);
-  void revalidateWeddingRSVPPages(weddingId);
+  await revalidateWeddingRSVPPages(weddingId);
 
   return NextResponse.json(template, { status: 201 });
 }
@@ -185,7 +185,7 @@ export async function updateInvitationTemplateHandler(
   });
 
   invalidateWeddingPageCache(weddingId);
-  void revalidateWeddingRSVPPages(weddingId);
+  await revalidateWeddingRSVPPages(weddingId);
 
   return NextResponse.json(updated);
 }
@@ -214,7 +214,7 @@ export async function deleteInvitationTemplateHandler(
   await prisma.invitationTemplate.delete({ where: { id: templateId } });
 
   invalidateWeddingPageCache(weddingId);
-  void revalidateWeddingRSVPPages(weddingId);
+  await revalidateWeddingRSVPPages(weddingId);
 
   return NextResponse.json({ success: true }, { status: 200 });
 }
@@ -252,7 +252,7 @@ export async function duplicateInvitationTemplateHandler(
   });
 
   invalidateWeddingPageCache(weddingId);
-  void revalidateWeddingRSVPPages(weddingId);
+  await revalidateWeddingRSVPPages(weddingId);
 
   return NextResponse.json(duplicate, { status: 201 });
 }
@@ -378,7 +378,7 @@ export async function importInvitationTemplateHandler(
   });
 
   invalidateWeddingPageCache(weddingId);
-  void revalidateWeddingRSVPPages(weddingId);
+  await revalidateWeddingRSVPPages(weddingId);
 
   return NextResponse.json({ template, warnings }, { status: 201 });
 }

@@ -2789,7 +2789,7 @@
       "location": "Ubicación: {location}"
     },
     "rsvp": {
-      "title": "RSVP",
+      "title": "Confirmación",
       "instructions": "Por favor selecciona quién de tu grupo asistirá a la boda.",
       "attend": "Asistir",
       "attending": "Asistiendo",
@@ -2802,6 +2802,7 @@
       "submit": "Confirmar Asistencia",
       "submitted": "¡Gracias por tu RSVP!",
       "confirmationMessage": "Hemos recibido tu confirmación. ¡Esperamos verte en la boda!",
+      "confirmationMessageEmpty": "Hemos recibido tu confirmación.",
       "cutoffPassed": "La fecha límite de RSVP ha pasado. Por favor contacta a los wedding planners.",
       "additionalQuestions": "Preguntas Adicionales",
       "defaultTransportationQuestion": "¿Necesitarás transporte al lugar del evento?",
