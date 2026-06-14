@@ -121,10 +121,12 @@ export interface ImageMapHotspot {
   top: number;    // percentage 0–100 of image height
   left: number;   // percentage 0–100 of image width
   width: number;  // percentage 0–100 of image width
-  height: number; // percentage 0–100 of image height
-  action: 'open-panel' | 'scroll-to-rsvp' | 'url';
+  height: number; // percentage 0–100 of height
+  action: 'open-panel' | 'scroll-to-rsvp' | 'url' | 'switch-image';
   panelId?: string;          // when action = 'open-panel'
   url?: string;              // when action = 'url'
+  targetImage?: string;      // when action = 'switch-image'
+  transition?: 'none' | 'fade'; // transition effect for switch-image
   label?: LocalizedContent;  // optional visible text overlay (empty = invisible zone)
 }
 

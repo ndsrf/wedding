@@ -16,7 +16,7 @@ interface ImageMapBlockEditorProps {
   activeLanguage: SupportedLanguage;
   onLanguageChange: (lang: SupportedLanguage) => void;
   onUpdate: (blockId: string, updates: Partial<ImageMapBlock>) => void;
-  onOpenImageModal: (blockId: string) => void;
+  onOpenImageModal: (blockId: string, hotspotId?: string) => void;
   availablePanels: AvailablePanel[];
 }
 
@@ -210,6 +210,8 @@ export function ImageMapBlockEditor({
                     ? `Panel: ${availablePanels.find(p => p.id === hotspot.panelId)?.title || hotspot.panelId || '?'}`
                     : hotspot.action === 'scroll-to-rsvp'
                     ? 'Scroll → RSVP'
+                    : hotspot.action === 'switch-image'
+                    ? 'Switch Image'
                     : hotspot.url || 'URL'}
                 </span>
               </div>
@@ -242,8 +244,45 @@ export function ImageMapBlockEditor({
               <option value="open-panel">Open Panel</option>
               <option value="scroll-to-rsvp">Scroll to RSVP</option>
               <option value="url">Open URL</option>
+              <option value="switch-image">Switch Image</option>
             </select>
           </div>
+
+          {/* Switch Image picker */}
+          {selectedHotspot.action === 'switch-image' && (
+            <div className="mb-3">
+              <label className="block text-xs font-medium mb-1">Target Image</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={selectedHotspot.targetImage ?? ''}
+                  onChange={(e) => updateHotspot(selectedHotspot.id, { targetImage: e.target.value })}
+                  className="flex-1 p-2 border border-gray-300 rounded text-xs"
+                  placeholder="Image URL..."
+                />
+                <button
+                  onClick={() => onOpenImageModal(block.id, selectedHotspot.id)}
+                  className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition"
+                >
+                  Choose
+                </button>
+              </div>
+            </div>
+          )}
+
+          {selectedHotspot.action === 'switch-image' && (
+            <div className="mb-3">
+              <label className="block text-xs font-medium mb-1">Transition</label>
+              <select
+                value={selectedHotspot.transition ?? 'none'}
+                onChange={(e) => updateHotspot(selectedHotspot.id, { transition: e.target.value as ImageMapHotspot['transition'] })}
+                className="w-full p-2 border border-gray-300 rounded text-xs"
+              >
+                <option value="none">Direct (No effect)</option>
+                <option value="fade">Fade</option>
+              </select>
+            </div>
+          )}
 
           {/* Panel selector */}
           {selectedHotspot.action === 'open-panel' && (
@@ -313,7 +352,7 @@ export function ImageMapBlockEditor({
                   selectedHotspotId === h.id ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                #{i + 1} — {h.action === 'open-panel' ? `Panel: ${availablePanels.find(p => p.id === h.panelId)?.title || '?'}` : h.action === 'scroll-to-rsvp' ? 'Scroll to RSVP' : h.url || 'URL'}
+                #{i + 1} — {h.action === 'open-panel' ? `Panel: ${availablePanels.find(p => p.id === h.panelId)?.title || '?'}` : h.action === 'scroll-to-rsvp' ? 'Scroll to RSVP' : h.action === 'switch-image' ? 'Switch Image' : h.url || 'URL'}
               </button>
             ))}
           </div>

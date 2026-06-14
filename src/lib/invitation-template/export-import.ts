@@ -248,6 +248,8 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
             action: h.action ?? 'url',
             panelId: h.panelId,
             url: h.url,
+            targetImage: h.targetImage,
+            transition: h.transition,
             label: h.label,
           }))
         : [];
@@ -324,6 +326,12 @@ export function extractImageRefs(design: TemplateDesign): string[] {
         // LocalizedContent — collect all unique URLs
         for (const url of Object.values(block.src)) {
           if (url) refs.add(url);
+        }
+      }
+      // Collect targetImages from hotspots
+      for (const hotspot of block.hotspots) {
+        if (hotspot.action === 'switch-image' && hotspot.targetImage) {
+          refs.add(hotspot.targetImage);
         }
       }
     }
@@ -433,7 +441,15 @@ export async function exportInvitationTemplate(
         : Object.fromEntries(
             Object.entries(block.src).map(([lang, url]) => [lang, imageMap[url] ?? url])
           ) as LocalizedContent;
-      return { ...block, src: remappedSrc, _version: version };
+      
+      const remappedHotspots = block.hotspots.map(h => {
+        if (h.action === 'switch-image' && h.targetImage) {
+          return { ...h, targetImage: imageMap[h.targetImage] ?? h.targetImage };
+        }
+        return h;
+      });
+
+      return { ...block, src: remappedSrc, hotspots: remappedHotspots, _version: version };
     }
 
     if (block.type === 'panel' && block.style.backgroundImage) {

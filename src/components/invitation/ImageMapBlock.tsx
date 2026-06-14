@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import type { ImageMapBlock as ImageMapBlockType, ImageMapHotspot, SupportedLanguage } from '@/types/invitation-template';
 
@@ -12,11 +13,22 @@ interface ImageMapBlockProps {
 }
 
 export function ImageMapBlock({ block, language, onOpenPanel, onScrollToRsvp, isPriority = false }: ImageMapBlockProps) {
-  const src = typeof block.src === 'string'
+  const baseSrc = typeof block.src === 'string'
     ? block.src
     : (block.src[language] || block.src['EN'] || Object.values(block.src).find(Boolean) || '');
 
-  if (!src) return null;
+  const [currentSrc, setCurrentSrc] = useState(baseSrc);
+  const [nextSrc, setNextSrc] = useState<string | null>(null);
+  const [isFading, setIsFading] = useState(false);
+
+  // Update currentSrc if block.src changes (e.g. in editor)
+  useEffect(() => {
+    setCurrentSrc(baseSrc);
+    setNextSrc(null);
+    setIsFading(false);
+  }, [baseSrc]);
+
+  if (!currentSrc) return null;
 
   function handleHotspot(hotspot: ImageMapHotspot) {
     if (hotspot.action === 'open-panel' && hotspot.panelId) {
@@ -25,13 +37,31 @@ export function ImageMapBlock({ block, language, onOpenPanel, onScrollToRsvp, is
       onScrollToRsvp();
     } else if (hotspot.action === 'url' && hotspot.url) {
       window.open(hotspot.url, '_blank', 'noopener,noreferrer');
+    } else if (hotspot.action === 'switch-image' && hotspot.targetImage) {
+      const targetImage = hotspot.targetImage;
+      if (hotspot.transition === 'fade') {
+        setNextSrc(targetImage);
+        // Small delay to allow DOM to render the next image with opacity 0
+        setTimeout(() => {
+          setIsFading(true);
+        }, 20);
+
+        // After transition duration, swap currentSrc and clean up
+        setTimeout(() => {
+          setCurrentSrc(targetImage);
+          setNextSrc(null);
+          setIsFading(false);
+        }, 520);
+      } else {
+        setCurrentSrc(targetImage);
+      }
     }
   }
 
   return (
     <div className="relative w-full">
       <Image
-        src={src}
+        src={currentSrc}
         alt={block.alt}
         width={0}
         height={0}
@@ -41,6 +71,26 @@ export function ImageMapBlock({ block, language, onOpenPanel, onScrollToRsvp, is
         priority={isPriority}
         unoptimized
       />
+
+      {/* Transitioning image overlay */}
+      {nextSrc && (
+        <div 
+          className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${isFading ? 'opacity-100' : 'opacity-0'}`}
+          style={{ transitionProperty: 'opacity' }}
+        >
+          <Image
+            src={nextSrc}
+            alt={block.alt}
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="w-full h-auto block"
+            style={{ width: '100%', height: 'auto' }}
+            unoptimized
+          />
+        </div>
+      )}
+
       {block.hotspots.map((hotspot) => {
         const label = hotspot.label
           ? (hotspot.label[language] || hotspot.label['EN'] || '')

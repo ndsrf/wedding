@@ -25,7 +25,7 @@ interface PanelBlockEditorProps {
   activeLanguage: SupportedLanguage;
   onLanguageChange: (lang: SupportedLanguage) => void;
   onUpdate: (blockId: string, updates: Partial<PanelBlock>) => void;
-  onOpenImageModal: (blockId: string) => void;
+  onOpenImageModal: (blockId: string, hotspotId?: string) => void;
 }
 
 export function PanelBlockEditor({ block, activeLanguage, onLanguageChange, onUpdate, onOpenImageModal }: PanelBlockEditorProps) {

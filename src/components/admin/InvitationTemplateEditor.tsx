@@ -75,6 +75,7 @@ export function InvitationTemplateEditor({
   const [activeLanguage, setActiveLanguage] = useState<SupportedLanguage>('EN');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [imageModalBlockId, setImageModalBlockId] = useState<string | null>(null);
+  const [imageModalHotspotId, setImageModalHotspotId] = useState<string | null>(null);
   const [isPaperBackgroundModalOpen, setIsPaperBackgroundModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -329,8 +330,9 @@ export function InvitationTemplateEditor({
   }, []);
 
   // Handle open image modal
-  const handleOpenImageModal = useCallback((blockId: string) => {
+  const handleOpenImageModal = useCallback((blockId: string, hotspotId?: string) => {
     setImageModalBlockId(blockId);
+    setImageModalHotspotId(hotspotId || null);
     setIsImageModalOpen(true);
   }, []);
 
@@ -338,23 +340,36 @@ export function InvitationTemplateEditor({
   const handleSelectImage = useCallback((url: string) => {
     if (imageModalBlockId) {
       const targetBlock = design.blocks.find((b) => b.id === imageModalBlockId);
-      if (targetBlock?.type === 'image-map') {
-        const existingSrc = (targetBlock as ImageMapBlockType).src;
-        const currentSrc = typeof existingSrc === 'string'
-          ? url
-          : { ...(existingSrc as Record<string, string>), [activeLanguage]: url } as import('@/types/invitation-template').LocalizedContent;
-        handleUpdateImageMapBlock(imageModalBlockId, { src: currentSrc });
-      } else if (targetBlock?.type === 'panel') {
-        handleUpdatePanelBlock(imageModalBlockId, {
-          style: { ...(targetBlock as PanelBlockType).style, backgroundImage: url },
-        });
+      
+      if (imageModalHotspotId) {
+        // Update a specific hotspot's targetImage
+        if (targetBlock?.type === 'image-map') {
+          const updatedHotspots = targetBlock.hotspots.map((h) =>
+            h.id === imageModalHotspotId ? { ...h, targetImage: url } : h
+          );
+          handleUpdateImageMapBlock(imageModalBlockId, { hotspots: updatedHotspots });
+        }
       } else {
-        handleUpdateImageBlock(imageModalBlockId, { src: url });
+        // Normal block image update
+        if (targetBlock?.type === 'image-map') {
+          const existingSrc = (targetBlock as ImageMapBlockType).src;
+          const currentSrc = typeof existingSrc === 'string'
+            ? url
+            : { ...(existingSrc as Record<string, string>), [activeLanguage]: url } as import('@/types/invitation-template').LocalizedContent;
+          handleUpdateImageMapBlock(imageModalBlockId, { src: currentSrc });
+        } else if (targetBlock?.type === 'panel') {
+          handleUpdatePanelBlock(imageModalBlockId, {
+            style: { ...(targetBlock as PanelBlockType).style, backgroundImage: url },
+          });
+        } else {
+          handleUpdateImageBlock(imageModalBlockId, { src: url });
+        }
       }
     }
     setIsImageModalOpen(false);
     setImageModalBlockId(null);
-  }, [imageModalBlockId, activeLanguage, design.blocks, handleUpdateImageBlock, handleUpdateImageMapBlock, handleUpdatePanelBlock]);
+    setImageModalHotspotId(null);
+  }, [imageModalBlockId, imageModalHotspotId, activeLanguage, design.blocks, handleUpdateImageBlock, handleUpdateImageMapBlock, handleUpdatePanelBlock]);
 
   // Handle select paper background image
   const handleSelectPaperBackground = useCallback((url: string) => {
