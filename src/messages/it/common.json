@@ -2715,7 +2715,7 @@
     },
     "rsvp": {
       "title": "RSVP",
-      "instructions": "Seleziona chi della tua famiglia parteciperà al matrimonio.",
+      "instructions": "Seleziona chi del tuo gruppo parteciperà al matrimonio.",
       "attend": "Partecipare",
       "attending": "Partecipando",
       "notAttending": "Non Parteciperà",

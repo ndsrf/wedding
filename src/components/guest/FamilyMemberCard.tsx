@@ -46,11 +46,6 @@ export default function FamilyMemberCard({
   const bc = invStyle?.rsvpButtonColor ?? '#16a34a';
   const borderCol = tc + '33';
 
-  const getMemberTypeLabel = (type: string) => {
-    const key = type.toLowerCase() as 'adult' | 'child' | 'infant';
-    return t(`guest.members.types.${key}`);
-  };
-
   const inputStyle = {
     borderColor: borderCol,
     color: tc,
@@ -72,8 +67,6 @@ export default function FamilyMemberCard({
         <div className="flex-1">
           <h4 className="text-xl font-bold" style={{ color: tc }}>{member.name}</h4>
           <p className="text-base" style={{ color: tc + 'bb' }}>
-            {getMemberTypeLabel(member.type)}
-            {member.age && ` • ${t('guest.members.yearsOld', { count: member.age })}`}
             {member.added_by_guest && (
               <span
                 className="ml-2 text-sm px-2 py-1 rounded"

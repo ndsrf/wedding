@@ -2806,7 +2806,7 @@
     },
     "rsvp": {
       "title": "RSVP",
-      "instructions": "Please select who from your family will attend the wedding.",
+      "instructions": "Please select who from your group will attend the wedding.",
       "attend": "Attend",
       "attending": "Attending",
       "notAttending": "Will Not Attend",
