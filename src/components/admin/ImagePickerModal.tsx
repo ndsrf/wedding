@@ -204,7 +204,7 @@ export function ImagePickerModal({
                       unoptimized
                     />
                   </div>
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center">
                     <p className="text-white opacity-0 group-hover:opacity-100 transition font-medium">
                       Select
                     </p>
