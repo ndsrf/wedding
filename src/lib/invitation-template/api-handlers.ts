@@ -21,6 +21,7 @@ import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { exportInvitationTemplate, importInvitationTemplate } from '@/lib/invitation-template/export-import';
 import { uploadFile, isUsingBlobStorage } from '@/lib/storage';
+import { processTemplateImage, isValidImageType } from '@/lib/images/processor';
 import { list } from '@vercel/blob';
 import { Prisma } from '@prisma/client';
 import type { TemplateDesign } from '@/types/invitation-template';
@@ -433,8 +434,6 @@ export async function uploadInvitationImageHandler(
   if (!file) {
     return NextResponse.json({ error: 'No file provided' }, { status: 400 });
   }
-
-  const { processTemplateImage, isValidImageType } = await import('@/lib/images/processor');
 
   if (!isValidImageType(file.type)) {
     return NextResponse.json(
