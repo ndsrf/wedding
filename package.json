@@ -97,15 +97,14 @@
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "resend": "^6.0.0",
-    "sharp": "0.33.5",
+    "sharp": "0.34.5",
+    "@img/sharp-linux-x64": "0.34.5",
+    "@img/sharp-libvips-linux-x64": "1.2.4",
     "twilio": "^6.0.0",
     "winston": "^3.18.0",
     "xlsx": "^0.18.5",
     "y-protocols": "^1.0.7",
     "zod": "^4.3.6"
-  },
-  "optionalDependencies": {
-    "@img/sharp-linux-x64": "0.33.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.0",
@@ -137,7 +136,6 @@
     "typescript": "^5.7.3"
   },
   "overrides": {
-    "sharp": "0.33.5",
     "jsdom": "^26.0.0",
     "@hono/node-server": ">=1.19.13",
     "effect": "^3.20.0",
