@@ -259,6 +259,7 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
         src: b.src ?? '',
         alt: b.alt ?? '',
         hotspots,
+        fullScreen: b.fullScreen,
       };
     }
 

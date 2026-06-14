@@ -157,6 +157,20 @@ export function ImageMapBlockEditor({
         />
       </div>
 
+      {/* Full screen setting */}
+      <div className="mb-4 flex items-center gap-2">
+        <input
+          type="checkbox"
+          id={`fullScreen-${block.id}`}
+          checked={!!block.fullScreen}
+          onChange={(e) => onUpdate(block.id, { fullScreen: e.target.checked })}
+          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label htmlFor={`fullScreen-${block.id}`} className="text-sm font-medium cursor-pointer">
+          Full screen (fit mobile screen height)
+        </label>
+      </div>
+
       {/* Visual hotspot editor */}
       {currentSrc && (
         <div className="mb-4">

@@ -137,6 +137,7 @@ export interface ImageMapBlock {
   src: string | LocalizedContent;
   alt: string;
   hotspots: ImageMapHotspot[];
+  fullScreen?: boolean;
 }
 
 // ============================================================================

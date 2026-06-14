@@ -19,7 +19,13 @@ export function UniversalNupciBot() {
   // 1. Determine variant based on pathname or user role
   const isPlannerPath = pathname?.startsWith('/planner');
   const isAdminPath = pathname?.startsWith('/admin');
+  const isRSVPPath = pathname?.startsWith('/rsvp');
   const userRole = session?.user?.role;
+  
+  // If we are on the RSVP page, don't show the bot
+  if (isRSVPPath) {
+    return null;
+  }
   
   // If not in a dashboard and not logged in, don't show the bot
   if (!isPlannerPath && !isAdminPath && !userRole) {
