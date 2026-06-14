@@ -48,8 +48,6 @@ export async function processTemplateImage(
   maxWidth: number = 2000
 ): Promise<ImageProcessingResult> {
   try {
-    const sharp = (await import('sharp')).default;
-
     // Load the image with sharp
     const image = sharp(fileBuffer);
     const metadata = await image.metadata();
@@ -146,6 +144,11 @@ export function getFileExtension(mimeType: string): string {
     'image/png': 'png',
     'image/webp': 'webp',
     'image/gif': 'gif',
+  };
+  return extensions[mimeType.toLowerCase()] || 'png';
+}
+
+mage/gif': 'gif',
   };
   return extensions[mimeType.toLowerCase()] || 'png';
 }

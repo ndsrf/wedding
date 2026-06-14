@@ -140,6 +140,7 @@
     "features": {
       "title": "Tout Ce Dont Vous Avez Besoin Pour Organiser Des Mariages Parfaits",
       "subtitle": "Des outils puissants conçus pour les organisateurs professionnels",
+      "seeMore": "En savoir plus",
       "items": {
         "guestManagement": {
           "title": "Gestion des Invités",
