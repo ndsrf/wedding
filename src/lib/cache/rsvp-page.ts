@@ -38,22 +38,51 @@ export interface CachedWeddingPageData {
     default_language: Language;
     payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
+    show_iban_on_rsvp: boolean;
     transportation_question_enabled: boolean;
-    transportation_question_text: string | null;
+    transportation_question_text: Record<string, string> | null;
     dietary_restrictions_enabled: boolean;
     accessibility_needs_enabled: boolean;
     extra_question_1_enabled: boolean;
-    extra_question_1_text: string | null;
+    extra_question_1_text: Record<string, string> | null;
     extra_question_2_enabled: boolean;
-    extra_question_2_text: string | null;
+    extra_question_2_text: Record<string, string> | null;
     extra_question_3_enabled: boolean;
-    extra_question_3_text: string | null;
+    extra_question_3_text: Record<string, string> | null;
     extra_info_1_enabled: boolean;
-    extra_info_1_label: string | null;
+    extra_info_1_label: Record<string, string> | null;
     extra_info_2_enabled: boolean;
-    extra_info_2_label: string | null;
+    extra_info_2_label: Record<string, string> | null;
     extra_info_3_enabled: boolean;
-    extra_info_3_label: string | null;
+    extra_info_3_label: Record<string, string> | null;
+    // Per-family dropdown
+    family_dropdown_question_1_enabled: boolean;
+    family_dropdown_question_1_label: Record<string, string> | null;
+    family_dropdown_question_1_options: Record<string, string[]> | null;
+    // Per-guest yes/no questions
+    guest_yn_question_1_enabled: boolean;
+    guest_yn_question_1_text: Record<string, string> | null;
+    guest_yn_question_2_enabled: boolean;
+    guest_yn_question_2_text: Record<string, string> | null;
+    guest_yn_question_3_enabled: boolean;
+    guest_yn_question_3_text: Record<string, string> | null;
+    // Per-guest dropdown questions
+    guest_dropdown_question_1_enabled: boolean;
+    guest_dropdown_question_1_label: Record<string, string> | null;
+    guest_dropdown_question_1_options: Record<string, string[]> | null;
+    guest_dropdown_question_2_enabled: boolean;
+    guest_dropdown_question_2_label: Record<string, string> | null;
+    guest_dropdown_question_2_options: Record<string, string[]> | null;
+    guest_dropdown_question_3_enabled: boolean;
+    guest_dropdown_question_3_label: Record<string, string> | null;
+    guest_dropdown_question_3_options: Record<string, string[]> | null;
+    // Per-guest text input questions
+    guest_text_question_1_enabled: boolean;
+    guest_text_question_1_label: Record<string, string> | null;
+    guest_text_question_2_enabled: boolean;
+    guest_text_question_2_label: Record<string, string> | null;
+    guest_text_question_3_enabled: boolean;
+    guest_text_question_3_label: Record<string, string> | null;
   };
   theme: {
     id: string;

@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
-import type { APIResponse, ListGuestAdditionsResponse } from '@/types/api';
+import type { GuestAddition, APIResponse, ListGuestAdditionsResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 
 /**
@@ -159,7 +159,7 @@ export async function GET(
 
     const response: ListGuestAdditionsResponse = {
       success: true,
-      data: guestAdditions,
+      data: guestAdditions as unknown as GuestAddition[],
       meta: {
         feature_enabled: true,
         total_additions: guestAdditions.length,

@@ -21,14 +21,16 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
   const [formData, setFormData] = useState({
     payment_tracking_mode: wedding.payment_tracking_mode || 'MANUAL',
     gift_iban: wedding.gift_iban || '',
+    show_iban_on_rsvp: wedding.show_iban_on_rsvp ?? true,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     });
   };
 
@@ -113,6 +115,21 @@ export function PaymentGiftsStep({ wedding, onNext, onBack }: PaymentGiftsStepPr
           <p className="mt-1 text-sm text-gray-500">
             {t('bankAccountHelp')}
           </p>
+        </div>
+
+        {/* Show IBAN on RSVP */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="show_iban_on_rsvp"
+            name="show_iban_on_rsvp"
+            checked={formData.show_iban_on_rsvp}
+            onChange={handleChange}
+            className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
+          />
+          <label htmlFor="show_iban_on_rsvp" className="ml-2 block text-sm text-gray-700 cursor-pointer">
+            {t('showIbanOnRsvp')}
+          </label>
         </div>
 
         {/* Payment Tracking Info */}

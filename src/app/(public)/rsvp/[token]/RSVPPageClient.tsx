@@ -168,7 +168,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
       </div>
 
       {/* Payment Information */}
-      {rsvpSubmitted && (
+      {rsvpSubmitted && wedding.show_iban_on_rsvp && (
         <div className="max-w-4xl mx-auto px-4 mt-8">
           <PaymentInfo
             token={token}

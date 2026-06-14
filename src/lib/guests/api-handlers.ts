@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
+import type { FamilyWithMembers } from '@/types/models';
 import type { APIResponse, ListGuestsResponse, UpdateGuestResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 import type { Prisma } from '@prisma/client';
@@ -355,7 +356,7 @@ export async function listGuestsHandler(
     });
 
     const listData: ListGuestsResponse['data'] = {
-      items: familiesWithStatus,
+      items: familiesWithStatus as unknown as FamilyWithMembers[],
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
     await setCached(cacheKey, listData, CACHE_TTL.GUEST_LIST);

@@ -9,6 +9,15 @@ import { prisma } from '@/lib/db/prisma';
 import type { ExportFormat } from '@/lib/excel/export';
 
 // ============================================================================
+// HELPERS
+// ============================================================================
+
+function resolveLabel(json: unknown, locale = 'en'): string {
+  const map = json as Record<string, string> | null;
+  return map?.[locale] || map?.['en'] || map?.['es'] || '';
+}
+
+// ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
@@ -16,6 +25,12 @@ export interface ExportResult {
   buffer: Buffer;
   filename: string;
   mimeType: string;
+}
+
+export interface AttendeeColumnDef {
+  key: string;
+  header: string;
+  isBool?: boolean;
 }
 
 export interface AttendeeData {
@@ -34,6 +49,25 @@ export interface AttendeeData {
   accessibilityNeeds: string;
   tableName: string;
   addedByGuest: boolean;
+  // Family-level question answers
+  transportation_answer: boolean | null;
+  extra_question_1_answer: boolean | null;
+  extra_question_2_answer: boolean | null;
+  extra_question_3_answer: boolean | null;
+  extra_info_1_value: string | null;
+  extra_info_2_value: string | null;
+  extra_info_3_value: string | null;
+  family_dropdown_question_1_answer: string | null;
+  // Per-guest question answers
+  guest_yn_question_1_answer: boolean | null;
+  guest_yn_question_2_answer: boolean | null;
+  guest_yn_question_3_answer: boolean | null;
+  guest_dropdown_question_1_answer: string | null;
+  guest_dropdown_question_2_answer: string | null;
+  guest_dropdown_question_3_answer: string | null;
+  guest_text_question_1_answer: string | null;
+  guest_text_question_2_answer: string | null;
+  guest_text_question_3_answer: string | null;
 }
 
 export interface GuestsPerAdminData {
@@ -87,6 +121,14 @@ export async function fetchAttendeeList(wedding_id: string): Promise<AttendeeDat
         preferred_language: true,
         channel_preference: true,
         invited_by_admin_id: true,
+        transportation_answer: true,
+        extra_question_1_answer: true,
+        extra_question_2_answer: true,
+        extra_question_3_answer: true,
+        extra_info_1_value: true,
+        extra_info_2_value: true,
+        extra_info_3_value: true,
+        family_dropdown_question_1_answer: true,
         members: {
           select: {
             id: true,
@@ -98,6 +140,15 @@ export async function fetchAttendeeList(wedding_id: string): Promise<AttendeeDat
             accessibility_needs: true,
             added_by_guest: true,
             table_id: true,
+            guest_yn_question_1_answer: true,
+            guest_yn_question_2_answer: true,
+            guest_yn_question_3_answer: true,
+            guest_dropdown_question_1_answer: true,
+            guest_dropdown_question_2_answer: true,
+            guest_dropdown_question_3_answer: true,
+            guest_text_question_1_answer: true,
+            guest_text_question_2_answer: true,
+            guest_text_question_3_answer: true,
           },
           orderBy: {
             created_at: 'asc',
@@ -145,10 +196,123 @@ export async function fetchAttendeeList(wedding_id: string): Promise<AttendeeDat
         accessibilityNeeds: member.accessibility_needs || '',
         tableName: member.table_id ? tableMap.get(member.table_id) || '' : '',
         addedByGuest: member.added_by_guest,
+        transportation_answer: family.transportation_answer,
+        extra_question_1_answer: family.extra_question_1_answer,
+        extra_question_2_answer: family.extra_question_2_answer,
+        extra_question_3_answer: family.extra_question_3_answer,
+        extra_info_1_value: family.extra_info_1_value,
+        extra_info_2_value: family.extra_info_2_value,
+        extra_info_3_value: family.extra_info_3_value,
+        family_dropdown_question_1_answer: family.family_dropdown_question_1_answer,
+        guest_yn_question_1_answer: member.guest_yn_question_1_answer,
+        guest_yn_question_2_answer: member.guest_yn_question_2_answer,
+        guest_yn_question_3_answer: member.guest_yn_question_3_answer,
+        guest_dropdown_question_1_answer: member.guest_dropdown_question_1_answer,
+        guest_dropdown_question_2_answer: member.guest_dropdown_question_2_answer,
+        guest_dropdown_question_3_answer: member.guest_dropdown_question_3_answer,
+        guest_text_question_1_answer: member.guest_text_question_1_answer,
+        guest_text_question_2_answer: member.guest_text_question_2_answer,
+        guest_text_question_3_answer: member.guest_text_question_3_answer,
       });
     }
   }
   return attendees;
+}
+
+/**
+ * Returns the ordered column definitions for the attendee list (static + enabled questions)
+ */
+export async function fetchAttendeeColumnDefs(wedding_id: string): Promise<AttendeeColumnDef[]> {
+  const cols: AttendeeColumnDef[] = [
+    { key: 'familyName', header: 'Family Name' },
+    { key: 'memberName', header: 'Guest Name' },
+    { key: 'type', header: 'Type' },
+    { key: 'age', header: 'Age' },
+    { key: 'email', header: 'Email' },
+    { key: 'phone', header: 'Phone' },
+    { key: 'whatsapp', header: 'WhatsApp' },
+    { key: 'language', header: 'Language' },
+    { key: 'channel', header: 'Channel' },
+    { key: 'invitedByAdmin', header: 'Invited By' },
+    { key: 'attending', header: 'Attending' },
+    { key: 'dietaryRestrictions', header: 'Dietary Restrictions' },
+    { key: 'accessibilityNeeds', header: 'Accessibility Needs' },
+    { key: 'tableName', header: 'Table' },
+    { key: 'addedByGuest', header: 'Added By Guest', isBool: true },
+  ];
+
+  const wedding = await prisma.wedding.findUnique({
+    where: { id: wedding_id },
+    select: {
+      dietary_restrictions_enabled: true,
+      accessibility_needs_enabled: true,
+      transportation_question_enabled: true, transportation_question_text: true,
+      extra_question_1_enabled: true, extra_question_1_text: true,
+      extra_question_2_enabled: true, extra_question_2_text: true,
+      extra_question_3_enabled: true, extra_question_3_text: true,
+      extra_info_1_enabled: true, extra_info_1_label: true,
+      extra_info_2_enabled: true, extra_info_2_label: true,
+      extra_info_3_enabled: true, extra_info_3_label: true,
+      family_dropdown_question_1_enabled: true, family_dropdown_question_1_label: true,
+      guest_yn_question_1_enabled: true, guest_yn_question_1_text: true,
+      guest_yn_question_2_enabled: true, guest_yn_question_2_text: true,
+      guest_yn_question_3_enabled: true, guest_yn_question_3_text: true,
+      guest_dropdown_question_1_enabled: true, guest_dropdown_question_1_label: true,
+      guest_dropdown_question_2_enabled: true, guest_dropdown_question_2_label: true,
+      guest_dropdown_question_3_enabled: true, guest_dropdown_question_3_label: true,
+      guest_text_question_1_enabled: true, guest_text_question_1_label: true,
+      guest_text_question_2_enabled: true, guest_text_question_2_label: true,
+      guest_text_question_3_enabled: true, guest_text_question_3_label: true,
+    },
+  });
+
+  if (!wedding) return cols;
+
+  if (!wedding.dietary_restrictions_enabled) {
+    const idx = cols.findIndex(c => c.key === 'dietaryRestrictions');
+    if (idx !== -1) cols.splice(idx, 1);
+  }
+  if (!wedding.accessibility_needs_enabled) {
+    const idx = cols.findIndex(c => c.key === 'accessibilityNeeds');
+    if (idx !== -1) cols.splice(idx, 1);
+  }
+
+  if (wedding.transportation_question_enabled)
+    cols.push({ key: 'transportation_answer', header: resolveLabel(wedding.transportation_question_text) || 'Transportation', isBool: true });
+  if (wedding.extra_question_1_enabled)
+    cols.push({ key: 'extra_question_1_answer', header: resolveLabel(wedding.extra_question_1_text) || 'Question 1', isBool: true });
+  if (wedding.extra_question_2_enabled)
+    cols.push({ key: 'extra_question_2_answer', header: resolveLabel(wedding.extra_question_2_text) || 'Question 2', isBool: true });
+  if (wedding.extra_question_3_enabled)
+    cols.push({ key: 'extra_question_3_answer', header: resolveLabel(wedding.extra_question_3_text) || 'Question 3', isBool: true });
+  if (wedding.extra_info_1_enabled)
+    cols.push({ key: 'extra_info_1_value', header: resolveLabel(wedding.extra_info_1_label) || 'Info 1' });
+  if (wedding.extra_info_2_enabled)
+    cols.push({ key: 'extra_info_2_value', header: resolveLabel(wedding.extra_info_2_label) || 'Info 2' });
+  if (wedding.extra_info_3_enabled)
+    cols.push({ key: 'extra_info_3_value', header: resolveLabel(wedding.extra_info_3_label) || 'Info 3' });
+  if (wedding.family_dropdown_question_1_enabled)
+    cols.push({ key: 'family_dropdown_question_1_answer', header: resolveLabel(wedding.family_dropdown_question_1_label) || 'Family Dropdown' });
+  if (wedding.guest_yn_question_1_enabled)
+    cols.push({ key: 'guest_yn_question_1_answer', header: resolveLabel(wedding.guest_yn_question_1_text) || 'Guest Q1', isBool: true });
+  if (wedding.guest_yn_question_2_enabled)
+    cols.push({ key: 'guest_yn_question_2_answer', header: resolveLabel(wedding.guest_yn_question_2_text) || 'Guest Q2', isBool: true });
+  if (wedding.guest_yn_question_3_enabled)
+    cols.push({ key: 'guest_yn_question_3_answer', header: resolveLabel(wedding.guest_yn_question_3_text) || 'Guest Q3', isBool: true });
+  if (wedding.guest_dropdown_question_1_enabled)
+    cols.push({ key: 'guest_dropdown_question_1_answer', header: resolveLabel(wedding.guest_dropdown_question_1_label) || 'Guest Dropdown 1' });
+  if (wedding.guest_dropdown_question_2_enabled)
+    cols.push({ key: 'guest_dropdown_question_2_answer', header: resolveLabel(wedding.guest_dropdown_question_2_label) || 'Guest Dropdown 2' });
+  if (wedding.guest_dropdown_question_3_enabled)
+    cols.push({ key: 'guest_dropdown_question_3_answer', header: resolveLabel(wedding.guest_dropdown_question_3_label) || 'Guest Dropdown 3' });
+  if (wedding.guest_text_question_1_enabled)
+    cols.push({ key: 'guest_text_question_1_answer', header: resolveLabel(wedding.guest_text_question_1_label) || 'Guest Text 1' });
+  if (wedding.guest_text_question_2_enabled)
+    cols.push({ key: 'guest_text_question_2_answer', header: resolveLabel(wedding.guest_text_question_2_label) || 'Guest Text 2' });
+  if (wedding.guest_text_question_3_enabled)
+    cols.push({ key: 'guest_text_question_3_answer', header: resolveLabel(wedding.guest_text_question_3_label) || 'Guest Text 3' });
+
+  return cols;
 }
 
 /**
@@ -344,18 +508,87 @@ export async function exportAttendeeList(
   wedding_id: string,
   format: ExportFormat = 'xlsx'
 ): Promise<ExportResult> {
-  const attendees = await fetchAttendeeList(wedding_id);
-  const rows: (string | number)[][] = [[
+  const [attendees, wedding] = await Promise.all([
+    fetchAttendeeList(wedding_id),
+    prisma.wedding.findUnique({
+      where: { id: wedding_id },
+      select: {
+        transportation_question_enabled: true, transportation_question_text: true,
+        extra_question_1_enabled: true, extra_question_1_text: true,
+        extra_question_2_enabled: true, extra_question_2_text: true,
+        extra_question_3_enabled: true, extra_question_3_text: true,
+        extra_info_1_enabled: true, extra_info_1_label: true,
+        extra_info_2_enabled: true, extra_info_2_label: true,
+        extra_info_3_enabled: true, extra_info_3_label: true,
+        family_dropdown_question_1_enabled: true, family_dropdown_question_1_label: true,
+        guest_yn_question_1_enabled: true, guest_yn_question_1_text: true,
+        guest_yn_question_2_enabled: true, guest_yn_question_2_text: true,
+        guest_yn_question_3_enabled: true, guest_yn_question_3_text: true,
+        guest_dropdown_question_1_enabled: true, guest_dropdown_question_1_label: true,
+        guest_dropdown_question_2_enabled: true, guest_dropdown_question_2_label: true,
+        guest_dropdown_question_3_enabled: true, guest_dropdown_question_3_label: true,
+        guest_text_question_1_enabled: true, guest_text_question_1_label: true,
+        guest_text_question_2_enabled: true, guest_text_question_2_label: true,
+        guest_text_question_3_enabled: true, guest_text_question_3_label: true,
+      },
+    }),
+  ]);
+
+  const header: string[] = [
     'Family Name', 'Guest Name', 'Type', 'Age', 'Email', 'Phone', 'WhatsApp',
     'Language', 'Channel', 'Invited By', 'Attending', 'Dietary Restrictions',
     'Accessibility Needs', 'Table', 'Added By Guest'
-  ]];
+  ];
+
+  type AnswerGetter = (a: AttendeeData) => string | number;
+  const dynamicColumns: { header: string; getValue: AnswerGetter }[] = [];
+
+  if (wedding) {
+    const boolVal = (v: boolean | null) => v === null ? '' : v ? 'Yes' : 'No';
+    if (wedding.transportation_question_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.transportation_question_text) || 'Transportation', getValue: a => boolVal(a.transportation_answer) });
+    if (wedding.extra_question_1_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.extra_question_1_text) || 'Question 1', getValue: a => boolVal(a.extra_question_1_answer) });
+    if (wedding.extra_question_2_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.extra_question_2_text) || 'Question 2', getValue: a => boolVal(a.extra_question_2_answer) });
+    if (wedding.extra_question_3_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.extra_question_3_text) || 'Question 3', getValue: a => boolVal(a.extra_question_3_answer) });
+    if (wedding.extra_info_1_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.extra_info_1_label) || 'Info 1', getValue: a => a.extra_info_1_value || '' });
+    if (wedding.extra_info_2_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.extra_info_2_label) || 'Info 2', getValue: a => a.extra_info_2_value || '' });
+    if (wedding.extra_info_3_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.extra_info_3_label) || 'Info 3', getValue: a => a.extra_info_3_value || '' });
+    if (wedding.family_dropdown_question_1_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.family_dropdown_question_1_label) || 'Family Dropdown', getValue: a => a.family_dropdown_question_1_answer || '' });
+    if (wedding.guest_yn_question_1_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_yn_question_1_text) || 'Guest Q1', getValue: a => boolVal(a.guest_yn_question_1_answer) });
+    if (wedding.guest_yn_question_2_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_yn_question_2_text) || 'Guest Q2', getValue: a => boolVal(a.guest_yn_question_2_answer) });
+    if (wedding.guest_yn_question_3_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_yn_question_3_text) || 'Guest Q3', getValue: a => boolVal(a.guest_yn_question_3_answer) });
+    if (wedding.guest_dropdown_question_1_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_dropdown_question_1_label) || 'Guest Dropdown 1', getValue: a => a.guest_dropdown_question_1_answer || '' });
+    if (wedding.guest_dropdown_question_2_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_dropdown_question_2_label) || 'Guest Dropdown 2', getValue: a => a.guest_dropdown_question_2_answer || '' });
+    if (wedding.guest_dropdown_question_3_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_dropdown_question_3_label) || 'Guest Dropdown 3', getValue: a => a.guest_dropdown_question_3_answer || '' });
+    if (wedding.guest_text_question_1_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_text_question_1_label) || 'Guest Text 1', getValue: a => a.guest_text_question_1_answer || '' });
+    if (wedding.guest_text_question_2_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_text_question_2_label) || 'Guest Text 2', getValue: a => a.guest_text_question_2_answer || '' });
+    if (wedding.guest_text_question_3_enabled)
+      dynamicColumns.push({ header: resolveLabel(wedding.guest_text_question_3_label) || 'Guest Text 3', getValue: a => a.guest_text_question_3_answer || '' });
+  }
+
+  const rows: (string | number)[][] = [[...header, ...dynamicColumns.map(c => c.header)]];
 
   attendees.forEach(a => {
     rows.push([
       a.familyName, a.memberName, a.type, a.age || '', a.email, a.phone, a.whatsapp,
       a.language, a.channel || '', a.invitedByAdmin, a.attending, a.dietaryRestrictions,
-      a.accessibilityNeeds, a.tableName, a.addedByGuest ? 'Yes' : 'No'
+      a.accessibilityNeeds, a.tableName, a.addedByGuest ? 'Yes' : 'No',
+      ...dynamicColumns.map(c => c.getValue(a)),
     ]);
   });
 

@@ -15,6 +15,7 @@ import { PaymentMode } from '@prisma/client';
 interface BasicSettingsFormData {
   payment_tracking_mode: PaymentMode;
   gift_iban: string;
+  show_iban_on_rsvp: boolean;
   theme_id: string;
   wedding_day_theme_id: string;
   wedding_day_invitation_template_id: string;
@@ -52,6 +53,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
   const [formData, setFormData] = useState<BasicSettingsFormData>({
     payment_tracking_mode: wedding.payment_tracking_mode,
     gift_iban: wedding.gift_iban || '',
+    show_iban_on_rsvp: wedding.show_iban_on_rsvp ?? true,
     theme_id: wedding.theme_id || '',
     wedding_day_theme_id: (wedding as unknown as { wedding_day_theme_id?: string }).wedding_day_theme_id || '',
     wedding_day_invitation_template_id: (wedding as unknown as { wedding_day_invitation_template_id?: string }).wedding_day_invitation_template_id || '',
@@ -61,20 +63,20 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
     additional_info: wedding.additional_info || '',
     save_the_date_enabled: wedding.save_the_date_enabled || false,
     transportation_question_enabled: wedding.transportation_question_enabled,
-    transportation_question_text: wedding.transportation_question_text || '',
+    transportation_question_text: (wedding.transportation_question_text as Record<string, string> | null)?.['en'] || '',
     dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
     extra_question_1_enabled: wedding.extra_question_1_enabled,
-    extra_question_1_text: wedding.extra_question_1_text || '',
+    extra_question_1_text: (wedding.extra_question_1_text as Record<string, string> | null)?.['en'] || '',
     extra_question_2_enabled: wedding.extra_question_2_enabled,
-    extra_question_2_text: wedding.extra_question_2_text || '',
+    extra_question_2_text: (wedding.extra_question_2_text as Record<string, string> | null)?.['en'] || '',
     extra_question_3_enabled: wedding.extra_question_3_enabled,
-    extra_question_3_text: wedding.extra_question_3_text || '',
+    extra_question_3_text: (wedding.extra_question_3_text as Record<string, string> | null)?.['en'] || '',
     extra_info_1_enabled: wedding.extra_info_1_enabled,
-    extra_info_1_label: wedding.extra_info_1_label || '',
+    extra_info_1_label: (wedding.extra_info_1_label as Record<string, string> | null)?.['en'] || '',
     extra_info_2_enabled: wedding.extra_info_2_enabled,
-    extra_info_2_label: wedding.extra_info_2_label || '',
+    extra_info_2_label: (wedding.extra_info_2_label as Record<string, string> | null)?.['en'] || '',
     extra_info_3_enabled: wedding.extra_info_3_enabled,
-    extra_info_3_label: wedding.extra_info_3_label || '',
+    extra_info_3_label: (wedding.extra_info_3_label as Record<string, string> | null)?.['en'] || '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,6 +91,7 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
       const updateData: UpdateWeddingConfigRequest & { invitation_template_id?: string | null; wedding_day_theme_id?: string | null; wedding_day_invitation_template_id?: string | null } = {
         payment_tracking_mode: formData.payment_tracking_mode,
         gift_iban: formData.gift_iban || null,
+        show_iban_on_rsvp: formData.show_iban_on_rsvp,
         theme_id: formData.theme_id || null,
         wedding_day_theme_id: formData.wedding_day_theme_id || null,
         wedding_day_invitation_template_id: formData.wedding_day_invitation_template_id || null,
@@ -99,32 +102,32 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
         save_the_date_enabled: formData.save_the_date_enabled,
         transportation_question_enabled: formData.transportation_question_enabled,
         transportation_question_text: formData.transportation_question_enabled
-          ? formData.transportation_question_text || null
+          ? (formData.transportation_question_text ? { en: formData.transportation_question_text } as Record<string, string> : null)
           : null,
         dietary_restrictions_enabled: formData.dietary_restrictions_enabled,
         extra_question_1_enabled: formData.extra_question_1_enabled,
         extra_question_1_text: formData.extra_question_1_enabled
-          ? formData.extra_question_1_text || null
+          ? (formData.extra_question_1_text ? { en: formData.extra_question_1_text } as Record<string, string> : null)
           : null,
         extra_question_2_enabled: formData.extra_question_2_enabled,
         extra_question_2_text: formData.extra_question_2_enabled
-          ? formData.extra_question_2_text || null
+          ? (formData.extra_question_2_text ? { en: formData.extra_question_2_text } as Record<string, string> : null)
           : null,
         extra_question_3_enabled: formData.extra_question_3_enabled,
         extra_question_3_text: formData.extra_question_3_enabled
-          ? formData.extra_question_3_text || null
+          ? (formData.extra_question_3_text ? { en: formData.extra_question_3_text } as Record<string, string> : null)
           : null,
         extra_info_1_enabled: formData.extra_info_1_enabled,
         extra_info_1_label: formData.extra_info_1_enabled
-          ? formData.extra_info_1_label || null
+          ? (formData.extra_info_1_label ? { en: formData.extra_info_1_label } as Record<string, string> : null)
           : null,
         extra_info_2_enabled: formData.extra_info_2_enabled,
         extra_info_2_label: formData.extra_info_2_enabled
-          ? formData.extra_info_2_label || null
+          ? (formData.extra_info_2_label ? { en: formData.extra_info_2_label } as Record<string, string> : null)
           : null,
         extra_info_3_enabled: formData.extra_info_3_enabled,
         extra_info_3_label: formData.extra_info_3_enabled
-          ? formData.extra_info_3_label || null
+          ? (formData.extra_info_3_label ? { en: formData.extra_info_3_label } as Record<string, string> : null)
           : null,
       };
 
@@ -253,14 +256,25 @@ export function BasicSettingsForm({ wedding, themes, onSubmit, onCancel }: Basic
           <label htmlFor="gift_iban" className="block text-sm font-medium text-gray-700 mb-1">
             {t('giftIban')}
           </label>
-          <input
-            id="gift_iban"
-            type="text"
-            value={formData.gift_iban}
-            onChange={(e) => handleChange('gift_iban', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-            placeholder={t('giftIbanPlaceholder')}
-          />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <input
+              id="gift_iban"
+              type="text"
+              value={formData.gift_iban}
+              onChange={(e) => handleChange('gift_iban', e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+              placeholder={t('giftIbanPlaceholder')}
+            />
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.show_iban_on_rsvp}
+                onChange={(e) => handleChange('show_iban_on_rsvp', e.target.checked)}
+                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-700">{t('showIbanOnRsvp')}</span>
+            </label>
+          </div>
           <p className="mt-1 text-sm text-gray-500">
             {t('giftIbanDesc')}
           </p>

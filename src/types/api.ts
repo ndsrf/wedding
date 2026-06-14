@@ -327,6 +327,7 @@ export interface UpdateWeddingConfigRequest {
   rsvp_cutoff_date?: string; // ISO date string
   payment_tracking_mode?: PaymentMode;
   gift_iban?: string | null;
+  show_iban_on_rsvp?: boolean;
   theme_id?: string | null;
   wedding_day_theme_id?: string | null;
   wedding_day_invitation_template_id?: string | null;
@@ -337,7 +338,7 @@ export interface UpdateWeddingConfigRequest {
 
   // RSVP Configuration - Transportation question
   transportation_question_enabled?: boolean;
-  transportation_question_text?: string | null;
+  transportation_question_text?: Record<string, string> | null;
 
   // RSVP Configuration - Dietary restrictions
   dietary_restrictions_enabled?: boolean;
@@ -346,21 +347,53 @@ export interface UpdateWeddingConfigRequest {
   // Messaging Configuration - Save the Date
   save_the_date_enabled?: boolean;
 
-  // RSVP Configuration - Extra Yes/No questions (up to 3)
+  // RSVP Configuration - Per-family Yes/No questions (up to 3)
   extra_question_1_enabled?: boolean;
-  extra_question_1_text?: string | null;
+  extra_question_1_text?: Record<string, string> | null;
   extra_question_2_enabled?: boolean;
-  extra_question_2_text?: string | null;
+  extra_question_2_text?: Record<string, string> | null;
   extra_question_3_enabled?: boolean;
-  extra_question_3_text?: string | null;
+  extra_question_3_text?: Record<string, string> | null;
 
-  // RSVP Configuration - Extra mandatory info fields (up to 3)
+  // RSVP Configuration - Per-family mandatory info fields (up to 3)
   extra_info_1_enabled?: boolean;
-  extra_info_1_label?: string | null;
+  extra_info_1_label?: Record<string, string> | null;
   extra_info_2_enabled?: boolean;
-  extra_info_2_label?: string | null;
+  extra_info_2_label?: Record<string, string> | null;
   extra_info_3_enabled?: boolean;
-  extra_info_3_label?: string | null;
+  extra_info_3_label?: Record<string, string> | null;
+
+  // RSVP Configuration - Per-family dropdown question
+  family_dropdown_question_1_enabled?: boolean;
+  family_dropdown_question_1_label?: Record<string, string> | null;
+  family_dropdown_question_1_options?: Record<string, string[]> | null;
+
+  // RSVP Configuration - Per-guest Yes/No questions (up to 3)
+  guest_yn_question_1_enabled?: boolean;
+  guest_yn_question_1_text?: Record<string, string> | null;
+  guest_yn_question_2_enabled?: boolean;
+  guest_yn_question_2_text?: Record<string, string> | null;
+  guest_yn_question_3_enabled?: boolean;
+  guest_yn_question_3_text?: Record<string, string> | null;
+
+  // RSVP Configuration - Per-guest Dropdown questions (up to 3)
+  guest_dropdown_question_1_enabled?: boolean;
+  guest_dropdown_question_1_label?: Record<string, string> | null;
+  guest_dropdown_question_1_options?: Record<string, string[]> | null;
+  guest_dropdown_question_2_enabled?: boolean;
+  guest_dropdown_question_2_label?: Record<string, string> | null;
+  guest_dropdown_question_2_options?: Record<string, string[]> | null;
+  guest_dropdown_question_3_enabled?: boolean;
+  guest_dropdown_question_3_label?: Record<string, string> | null;
+  guest_dropdown_question_3_options?: Record<string, string[]> | null;
+
+  // RSVP Configuration - Per-guest Text input questions (up to 3)
+  guest_text_question_1_enabled?: boolean;
+  guest_text_question_1_label?: Record<string, string> | null;
+  guest_text_question_2_enabled?: boolean;
+  guest_text_question_2_label?: Record<string, string> | null;
+  guest_text_question_3_enabled?: boolean;
+  guest_text_question_3_label?: Record<string, string> | null;
 }
 
 export type UpdateWeddingConfigResponse = APIResponse<Wedding>;
@@ -562,30 +595,63 @@ export interface GuestRSVPPageData {
     default_language: Language;
     payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
+    show_iban_on_rsvp: boolean;
 
     // RSVP Configuration - Transportation question
     transportation_question_enabled: boolean;
-    transportation_question_text: string | null;
+    transportation_question_text: Record<string, string> | null;
 
     // RSVP Configuration - Dietary restrictions
     dietary_restrictions_enabled: boolean;
     accessibility_needs_enabled: boolean;
 
-    // RSVP Configuration - Extra Yes/No questions (up to 3)
+    // RSVP Configuration - Per-family Yes/No questions (up to 3)
     extra_question_1_enabled: boolean;
-    extra_question_1_text: string | null;
+    extra_question_1_text: Record<string, string> | null;
     extra_question_2_enabled: boolean;
-    extra_question_2_text: string | null;
+    extra_question_2_text: Record<string, string> | null;
     extra_question_3_enabled: boolean;
-    extra_question_3_text: string | null;
+    extra_question_3_text: Record<string, string> | null;
 
-    // RSVP Configuration - Extra mandatory info fields (up to 3)
+    // RSVP Configuration - Per-family mandatory info fields (up to 3)
     extra_info_1_enabled: boolean;
-    extra_info_1_label: string | null;
+    extra_info_1_label: Record<string, string> | null;
     extra_info_2_enabled: boolean;
-    extra_info_2_label: string | null;
+    extra_info_2_label: Record<string, string> | null;
     extra_info_3_enabled: boolean;
-    extra_info_3_label: string | null;
+    extra_info_3_label: Record<string, string> | null;
+
+    // RSVP Configuration - Per-family dropdown question
+    family_dropdown_question_1_enabled: boolean;
+    family_dropdown_question_1_label: Record<string, string> | null;
+    family_dropdown_question_1_options: Record<string, string[]> | null;
+
+    // RSVP Configuration - Per-guest Yes/No questions (up to 3)
+    guest_yn_question_1_enabled: boolean;
+    guest_yn_question_1_text: Record<string, string> | null;
+    guest_yn_question_2_enabled: boolean;
+    guest_yn_question_2_text: Record<string, string> | null;
+    guest_yn_question_3_enabled: boolean;
+    guest_yn_question_3_text: Record<string, string> | null;
+
+    // RSVP Configuration - Per-guest Dropdown questions (up to 3)
+    guest_dropdown_question_1_enabled: boolean;
+    guest_dropdown_question_1_label: Record<string, string> | null;
+    guest_dropdown_question_1_options: Record<string, string[]> | null;
+    guest_dropdown_question_2_enabled: boolean;
+    guest_dropdown_question_2_label: Record<string, string> | null;
+    guest_dropdown_question_2_options: Record<string, string[]> | null;
+    guest_dropdown_question_3_enabled: boolean;
+    guest_dropdown_question_3_label: Record<string, string> | null;
+    guest_dropdown_question_3_options: Record<string, string[]> | null;
+
+    // RSVP Configuration - Per-guest Text input questions (up to 3)
+    guest_text_question_1_enabled: boolean;
+    guest_text_question_1_label: Record<string, string> | null;
+    guest_text_question_2_enabled: boolean;
+    guest_text_question_2_label: Record<string, string> | null;
+    guest_text_question_3_enabled: boolean;
+    guest_text_question_3_label: Record<string, string> | null;
   };
   theme: Theme;
   invitation_template?: {
@@ -607,6 +673,16 @@ export interface SubmitRSVPRequest {
     attending: boolean;
     dietary_restrictions?: string;
     accessibility_needs?: string;
+    // Per-guest question answers
+    guest_yn_question_1_answer?: boolean | null;
+    guest_yn_question_2_answer?: boolean | null;
+    guest_yn_question_3_answer?: boolean | null;
+    guest_dropdown_question_1_answer?: string;
+    guest_dropdown_question_2_answer?: string;
+    guest_dropdown_question_3_answer?: string;
+    guest_text_question_1_answer?: string;
+    guest_text_question_2_answer?: string;
+    guest_text_question_3_answer?: string;
   }>;
   // RSVP Question Answers (family-level)
   transportation_answer?: boolean;
@@ -616,6 +692,7 @@ export interface SubmitRSVPRequest {
   extra_info_1_value?: string;
   extra_info_2_value?: string;
   extra_info_3_value?: string;
+  family_dropdown_question_1_answer?: string;
 }
 
 export interface SubmitRSVPResult {

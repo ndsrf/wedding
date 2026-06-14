@@ -81,7 +81,7 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
   // ── Standard report state ────────────────────────────────────────────────
   const [downloading, setDownloading] = useState<string | null>(null);
   const [viewing, setViewing] = useState<ReportType | null>(null);
-  const [reportData, setReportData] = useState<unknown[] | null>(null);
+  const [reportData, setReportData] = useState<unknown>(null);
   const [loadingData, setLoadingData] = useState(false);
 
   // ── Natural-language query state ─────────────────────────────────────────
@@ -279,31 +279,41 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
     if (!reportData || !viewing) return null;
 
     switch (viewing) {
-      case 'attendees':
+      case 'attendees': {
+        const payload = reportData as { columns: { key: string; header: string; isBool?: boolean }[]; data: Record<string, unknown>[] };
+        if (!payload?.columns || !payload?.data) return null;
+        const formatCell = (val: unknown, isBool?: boolean) => {
+          if (val === null || val === undefined) return '';
+          if (isBool) return val ? 'Yes' : 'No';
+          return String(val);
+        };
         return (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.guests.familyName')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.guests.table.members')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.guests.table.rsvp')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.seating.config.tableName')}</th>
+                  {payload.columns.map(col => (
+                    <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                      {col.header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {(reportData as Array<Record<string, unknown>>).map((item, idx) => (
-                  <tr key={idx}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{String(item.familyName ?? '')}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(item.memberName ?? '')} ({String(item.type ?? '')})</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(item.attending ?? '')}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(item.tableName ?? '') || '-'}</td>
+                {payload.data.map((row, idx) => (
+                  <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    {payload.columns.map(col => (
+                      <td key={col.key} className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        {formatCell(row[col.key], col.isBool) || '-'}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         );
+      }
       case 'guests-per-admin':
         return (
           <div className="overflow-x-auto">
@@ -317,7 +327,7 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {(reportData as Array<Record<string, unknown>>).map((item, idx) => (
+                {(reportData as Array<Record<string, unknown>>).map((item: Record<string, unknown>, idx: number) => (
                   <tr key={idx}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{String(item.adminName ?? '')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(item.totalGuests ?? '')}</td>
@@ -342,7 +352,7 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {(reportData as Array<Record<string, unknown>>).map((item, idx) => (
+                {(reportData as Array<Record<string, unknown>>).map((item: Record<string, unknown>, idx: number) => (
                   <tr key={idx}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{String(item.tableName ?? '')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(item.guestName ?? '')}</td>
@@ -369,7 +379,7 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {(reportData as Array<Record<string, unknown>>).map((item, idx) => (
+                {(reportData as Array<Record<string, unknown>>).map((item: Record<string, unknown>, idx: number) => (
                   <tr key={idx}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(item.groupType ?? '')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{String(item.groupName ?? '')}</td>

@@ -36,6 +36,7 @@ const ALLOWED_TABLES = new Set([
   'tables',
   'wedding_admins',
   'gifts',
+  'weddings',
   // checklist
   'checklist_sections',
   'checklist_tasks',
@@ -72,14 +73,32 @@ Your ONLY job is to produce safe SELECT queries based on the user's natural-lang
 id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, email TEXT, phone TEXT,
 whatsapp_number TEXT, preferred_language TEXT (ES/EN/FR/IT/DE),
 channel_preference TEXT (WHATSAPP/EMAIL/SMS), invited_by_admin_id TEXT FK→wedding_admins,
+transportation_answer BOOLEAN, extra_question_1_answer BOOLEAN, extra_question_2_answer BOOLEAN,
+extra_question_3_answer BOOLEAN, extra_info_1_value TEXT, extra_info_2_value TEXT, extra_info_3_value TEXT,
+family_dropdown_question_1_answer TEXT,
 created_at TIMESTAMP
 
 ### family_members
 id TEXT PK, family_id TEXT FK→families, name TEXT,
 type TEXT (ADULT/CHILD/INFANT), attending BOOLEAN (true=yes, false=no, null=pending),
 age INTEGER, dietary_restrictions TEXT, accessibility_needs TEXT,
-table_id TEXT FK→tables, added_by_guest BOOLEAN, created_at TIMESTAMP
+table_id TEXT FK→tables, added_by_guest BOOLEAN,
+guest_yn_question_1_answer BOOLEAN, guest_yn_question_2_answer BOOLEAN, guest_yn_question_3_answer BOOLEAN,
+guest_dropdown_question_1_answer TEXT, guest_dropdown_question_2_answer TEXT, guest_dropdown_question_3_answer TEXT,
+guest_text_question_1_answer TEXT, guest_text_question_2_answer TEXT, guest_text_question_3_answer TEXT,
+created_at TIMESTAMP
 **NOTE: No direct wedding_id — MUST JOIN with families to scope by wedding.**
+
+### weddings
+id TEXT PK, couple_names TEXT, wedding_date TIMESTAMP, wedding_country TEXT,
+extra_question_1_text JSONB (multilang label, e.g. extra_question_1_text->>'en'),
+extra_question_2_text JSONB, extra_question_3_text JSONB,
+extra_info_1_label JSONB, extra_info_2_label JSONB, extra_info_3_label JSONB,
+transportation_question_text JSONB, family_dropdown_question_1_label JSONB,
+guest_yn_question_1_text JSONB, guest_yn_question_2_text JSONB, guest_yn_question_3_text JSONB,
+guest_dropdown_question_1_label JSONB, guest_dropdown_question_2_label JSONB, guest_dropdown_question_3_label JSONB,
+guest_text_question_1_label JSONB, guest_text_question_2_label JSONB, guest_text_question_3_label JSONB
+**NOTE: Join when you need human-readable question labels. Use ->>''en'' to extract English text from JSONB.**
 
 ### tables
 id TEXT PK, wedding_id TEXT (**ALWAYS filter this with $1**), name TEXT, number INTEGER,

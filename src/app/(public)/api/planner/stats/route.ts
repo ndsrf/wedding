@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import type { Wedding, Location } from '@/types/models';
 import type { APIResponse, PlannerStatsResponse, PlannerStats } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 
@@ -82,7 +83,7 @@ export async function GET(_request: NextRequest) {
       wedding_count,
       total_guests: row.total_guests,
       rsvp_completion_percentage,
-      upcoming_weddings,
+      upcoming_weddings: upcoming_weddings as unknown as (Wedding & { main_event_location: Pick<Location, 'name'> | null })[],
     };
 
     await setCached(cacheKey, stats, CACHE_TTL.WEDDING_STATS);

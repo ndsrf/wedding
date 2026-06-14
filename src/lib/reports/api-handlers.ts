@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
 import {
   fetchAttendeeList,
+  fetchAttendeeColumnDefs,
   exportAttendeeList,
   fetchGuestsPerAdmin,
   exportGuestsPerAdmin,
@@ -53,8 +54,11 @@ export async function attendeesReportHandler(
 ): Promise<NextResponse> {
   const format = getFormat(req);
   if (!format || format === 'json') {
-    const data = await fetchAttendeeList(weddingId);
-    return NextResponse.json(data);
+    const [data, columns] = await Promise.all([
+      fetchAttendeeList(weddingId),
+      fetchAttendeeColumnDefs(weddingId),
+    ]);
+    return NextResponse.json({ columns, data });
   }
   const result = await exportAttendeeList(weddingId, format as ExportFormat);
   return fileResponse(result.buffer, result.mimeType, result.filename);

@@ -181,25 +181,55 @@ model Wedding {
   created_by                      String
   updated_at                      DateTime           @updatedAt
   updated_by                      String?
-  transportation_question_enabled Boolean            @default(false)
-  transportation_question_text    String?
-  dietary_restrictions_enabled    Boolean            @default(false)
-  accessibility_needs_enabled     Boolean            @default(false)
-  save_the_date_enabled           Boolean            @default(false)
-  whatsapp_mode                   WhatsAppMode       @default(BUSINESS)
-  short_url_initials              String?            @unique
-  extra_question_1_enabled        Boolean            @default(false)
-  extra_question_1_text           String?
-  extra_question_2_enabled        Boolean            @default(false)
-  extra_question_2_text           String?
-  extra_question_3_enabled        Boolean            @default(false)
-  extra_question_3_text           String?
-  extra_info_1_enabled            Boolean            @default(false)
-  extra_info_1_label              String?
-  extra_info_2_enabled            Boolean            @default(false)
-  extra_info_2_label              String?
-  extra_info_3_enabled            Boolean            @default(false)
-  extra_info_3_label              String?
+  transportation_question_enabled       Boolean  @default(false)
+  transportation_question_text          Json?
+  dietary_restrictions_enabled          Boolean  @default(false)
+  accessibility_needs_enabled           Boolean  @default(false)
+  save_the_date_enabled                 Boolean  @default(false)
+  whatsapp_mode                         WhatsAppMode @default(BUSINESS)
+  short_url_initials                    String?  @unique
+  // Per-family Yes/No questions (up to 3)
+  extra_question_1_enabled              Boolean  @default(false)
+  extra_question_1_text                 Json?
+  extra_question_2_enabled              Boolean  @default(false)
+  extra_question_2_text                 Json?
+  extra_question_3_enabled              Boolean  @default(false)
+  extra_question_3_text                 Json?
+  // Per-family mandatory info fields (up to 3)
+  extra_info_1_enabled                  Boolean  @default(false)
+  extra_info_1_label                    Json?
+  extra_info_2_enabled                  Boolean  @default(false)
+  extra_info_2_label                    Json?
+  extra_info_3_enabled                  Boolean  @default(false)
+  extra_info_3_label                    Json?
+  // Per-family dropdown question (1)
+  family_dropdown_question_1_enabled    Boolean  @default(false)
+  family_dropdown_question_1_label      Json?
+  family_dropdown_question_1_options    Json?
+  // Per-guest Yes/No questions (up to 3)
+  guest_yn_question_1_enabled           Boolean  @default(false)
+  guest_yn_question_1_text              Json?
+  guest_yn_question_2_enabled           Boolean  @default(false)
+  guest_yn_question_2_text              Json?
+  guest_yn_question_3_enabled           Boolean  @default(false)
+  guest_yn_question_3_text              Json?
+  // Per-guest Dropdown questions (up to 3)
+  guest_dropdown_question_1_enabled     Boolean  @default(false)
+  guest_dropdown_question_1_label       Json?
+  guest_dropdown_question_1_options     Json?
+  guest_dropdown_question_2_enabled     Boolean  @default(false)
+  guest_dropdown_question_2_label       Json?
+  guest_dropdown_question_2_options     Json?
+  guest_dropdown_question_3_enabled     Boolean  @default(false)
+  guest_dropdown_question_3_label       Json?
+  guest_dropdown_question_3_options     Json?
+  // Per-guest Text input questions (up to 3)
+  guest_text_question_1_enabled         Boolean  @default(false)
+  guest_text_question_1_label           Json?
+  guest_text_question_2_enabled         Boolean  @default(false)
+  guest_text_question_2_label           Json?
+  guest_text_question_3_enabled         Boolean  @default(false)
+  guest_text_question_3_label           Json?
   deleted_at                      DateTime?
   deleted_by                      String?
   license_deleted                 Boolean            @default(false)  // Deleted due to license downgrade; cannot be restored
@@ -207,6 +237,7 @@ model Wedding {
   disabled_by                     String?
   is_disabled                     Boolean            @default(false)
   gift_iban                       String?
+  show_iban_on_rsvp               Boolean            @default(true)
   planned_guests                  Int?
   planned_gift_per_person         Decimal?           @db.Decimal(10, 2)
   couple_table_id                 String?
@@ -417,13 +448,14 @@ model Family {
   private_notes           String?         @db.Text
   save_the_date_sent      DateTime?
   created_at              DateTime        @default(now())
-  extra_info_1_value      String?
-  extra_info_2_value      String?
-  extra_info_3_value      String?
-  extra_question_1_answer Boolean?
-  extra_question_2_answer Boolean?
-  extra_question_3_answer Boolean?
-  transportation_answer   Boolean?
+  extra_info_1_value                    String?
+  extra_info_2_value                    String?
+  extra_info_3_value                    String?
+  extra_question_1_answer               Boolean?
+  extra_question_2_answer               Boolean?
+  extra_question_3_answer               Boolean?
+  transportation_answer                 Boolean?
+  family_dropdown_question_1_answer     String?
   wedding                 Wedding         @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
   members                 FamilyMember[]
   gifts                   Gift[]
@@ -449,9 +481,19 @@ model FamilyMember {
   type                 MemberType
   attending            Boolean?
   age                  Int?
-  dietary_restrictions String?
-  accessibility_needs  String?
-  added_by_guest       Boolean    @default(false)
+  dietary_restrictions              String?
+  accessibility_needs               String?
+  added_by_guest                    Boolean  @default(false)
+  // Per-guest question answers
+  guest_yn_question_1_answer        Boolean?
+  guest_yn_question_2_answer        Boolean?
+  guest_yn_question_3_answer        Boolean?
+  guest_dropdown_question_1_answer  String?
+  guest_dropdown_question_2_answer  String?
+  guest_dropdown_question_3_answer  String?
+  guest_text_question_1_answer      String?
+  guest_text_question_2_answer      String?
+  guest_text_question_3_answer      String?
   table_id             String?
   seat_index           Int?       // Position within the table
   seating_group        String?

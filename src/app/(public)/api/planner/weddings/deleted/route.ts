@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
+import type { WeddingWithStats } from '@/types/models';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -137,7 +138,7 @@ export async function GET(request: NextRequest) {
     const response: ListPlannerWeddingsResponse = {
       success: true,
       data: {
-        items: weddingsWithStats,
+        items: weddingsWithStats as unknown as WeddingWithStats[],
         pagination: {
           page,
           limit,

@@ -17,6 +17,7 @@ import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 import type { PlannerStats } from '@/types/api';
 import type { AuthenticatedUser } from '@/types/api';
+import type { Wedding, Location } from '@/types/models';
 
 /**
  * Get planner statistics directly from database, with Redis caching.
@@ -98,7 +99,7 @@ async function getStats(user: AuthenticatedUser): Promise<PlannerStats | null> {
       wedding_count,
       total_guests: row.total_guests,
       rsvp_completion_percentage,
-      upcoming_weddings,
+      upcoming_weddings: upcoming_weddings as unknown as (Wedding & { main_event_location: Pick<Location, 'name'> | null })[],
     };
 
     // Populate cache so repeated loads within the TTL window skip the DB

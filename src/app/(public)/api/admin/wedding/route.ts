@@ -16,7 +16,7 @@ import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { toInitials } from '@/lib/wedding-utils';
 import type { ThemeConfig } from '@/types/theme';
-import type { Theme } from '@/types/models';
+import type { Theme, Wedding } from '@/types/models';
 import type {
   APIResponse,
   GetWeddingDetailsResponse,
@@ -35,6 +35,7 @@ const updateWeddingConfigSchema = z.object({
   rsvp_cutoff_date: z.string().datetime().optional(),
   payment_tracking_mode: z.enum(['AUTOMATED', 'MANUAL']).optional(),
   gift_iban: z.string().nullable().optional(),
+  show_iban_on_rsvp: z.boolean().optional(),
   planned_guests: z.number().int().positive().nullable().optional(),
   planned_gift_per_person: z.number().positive().nullable().optional(),
   theme_id: z.string().nullable().optional(),
@@ -49,27 +50,59 @@ const updateWeddingConfigSchema = z.object({
 
   // RSVP Configuration - Transportation question
   transportation_question_enabled: z.boolean().optional(),
-  transportation_question_text: z.string().nullable().optional(),
+  transportation_question_text: z.record(z.string(), z.string()).nullable().optional(),
 
-  // RSVP Configuration - Dietary restrictions
+  // RSVP Configuration - Dietary / Accessibility
   dietary_restrictions_enabled: z.boolean().optional(),
   accessibility_needs_enabled: z.boolean().optional(),
 
-  // RSVP Configuration - Extra Yes/No questions (up to 3)
+  // RSVP Configuration - Per-family Yes/No questions (up to 3)
   extra_question_1_enabled: z.boolean().optional(),
-  extra_question_1_text: z.string().nullable().optional(),
+  extra_question_1_text: z.record(z.string(), z.string()).nullable().optional(),
   extra_question_2_enabled: z.boolean().optional(),
-  extra_question_2_text: z.string().nullable().optional(),
+  extra_question_2_text: z.record(z.string(), z.string()).nullable().optional(),
   extra_question_3_enabled: z.boolean().optional(),
-  extra_question_3_text: z.string().nullable().optional(),
+  extra_question_3_text: z.record(z.string(), z.string()).nullable().optional(),
 
-  // RSVP Configuration - Extra mandatory info fields (up to 3)
+  // RSVP Configuration - Per-family mandatory info fields (up to 3)
   extra_info_1_enabled: z.boolean().optional(),
-  extra_info_1_label: z.string().nullable().optional(),
+  extra_info_1_label: z.record(z.string(), z.string()).nullable().optional(),
   extra_info_2_enabled: z.boolean().optional(),
-  extra_info_2_label: z.string().nullable().optional(),
+  extra_info_2_label: z.record(z.string(), z.string()).nullable().optional(),
   extra_info_3_enabled: z.boolean().optional(),
-  extra_info_3_label: z.string().nullable().optional(),
+  extra_info_3_label: z.record(z.string(), z.string()).nullable().optional(),
+
+  // RSVP Configuration - Per-family dropdown question
+  family_dropdown_question_1_enabled: z.boolean().optional(),
+  family_dropdown_question_1_label: z.record(z.string(), z.string()).nullable().optional(),
+  family_dropdown_question_1_options: z.record(z.string(), z.array(z.string())).nullable().optional(),
+
+  // RSVP Configuration - Per-guest Yes/No questions (up to 3)
+  guest_yn_question_1_enabled: z.boolean().optional(),
+  guest_yn_question_1_text: z.record(z.string(), z.string()).nullable().optional(),
+  guest_yn_question_2_enabled: z.boolean().optional(),
+  guest_yn_question_2_text: z.record(z.string(), z.string()).nullable().optional(),
+  guest_yn_question_3_enabled: z.boolean().optional(),
+  guest_yn_question_3_text: z.record(z.string(), z.string()).nullable().optional(),
+
+  // RSVP Configuration - Per-guest Dropdown questions (up to 3)
+  guest_dropdown_question_1_enabled: z.boolean().optional(),
+  guest_dropdown_question_1_label: z.record(z.string(), z.string()).nullable().optional(),
+  guest_dropdown_question_1_options: z.record(z.string(), z.array(z.string())).nullable().optional(),
+  guest_dropdown_question_2_enabled: z.boolean().optional(),
+  guest_dropdown_question_2_label: z.record(z.string(), z.string()).nullable().optional(),
+  guest_dropdown_question_2_options: z.record(z.string(), z.array(z.string())).nullable().optional(),
+  guest_dropdown_question_3_enabled: z.boolean().optional(),
+  guest_dropdown_question_3_label: z.record(z.string(), z.string()).nullable().optional(),
+  guest_dropdown_question_3_options: z.record(z.string(), z.array(z.string())).nullable().optional(),
+
+  // RSVP Configuration - Per-guest Text input questions (up to 3)
+  guest_text_question_1_enabled: z.boolean().optional(),
+  guest_text_question_1_label: z.record(z.string(), z.string()).nullable().optional(),
+  guest_text_question_2_enabled: z.boolean().optional(),
+  guest_text_question_2_label: z.record(z.string(), z.string()).nullable().optional(),
+  guest_text_question_3_enabled: z.boolean().optional(),
+  guest_text_question_3_label: z.record(z.string(), z.string()).nullable().optional(),
 });
 
 /**
@@ -280,6 +313,30 @@ export async function GET() {
       extra_info_2_label: wedding.extra_info_2_label,
       extra_info_3_enabled: wedding.extra_info_3_enabled,
       extra_info_3_label: wedding.extra_info_3_label,
+      family_dropdown_question_1_enabled: wedding.family_dropdown_question_1_enabled,
+      family_dropdown_question_1_label: wedding.family_dropdown_question_1_label,
+      family_dropdown_question_1_options: wedding.family_dropdown_question_1_options,
+      guest_yn_question_1_enabled: wedding.guest_yn_question_1_enabled,
+      guest_yn_question_1_text: wedding.guest_yn_question_1_text,
+      guest_yn_question_2_enabled: wedding.guest_yn_question_2_enabled,
+      guest_yn_question_2_text: wedding.guest_yn_question_2_text,
+      guest_yn_question_3_enabled: wedding.guest_yn_question_3_enabled,
+      guest_yn_question_3_text: wedding.guest_yn_question_3_text,
+      guest_dropdown_question_1_enabled: wedding.guest_dropdown_question_1_enabled,
+      guest_dropdown_question_1_label: wedding.guest_dropdown_question_1_label,
+      guest_dropdown_question_1_options: wedding.guest_dropdown_question_1_options,
+      guest_dropdown_question_2_enabled: wedding.guest_dropdown_question_2_enabled,
+      guest_dropdown_question_2_label: wedding.guest_dropdown_question_2_label,
+      guest_dropdown_question_2_options: wedding.guest_dropdown_question_2_options,
+      guest_dropdown_question_3_enabled: wedding.guest_dropdown_question_3_enabled,
+      guest_dropdown_question_3_label: wedding.guest_dropdown_question_3_label,
+      guest_dropdown_question_3_options: wedding.guest_dropdown_question_3_options,
+      guest_text_question_1_enabled: wedding.guest_text_question_1_enabled,
+      guest_text_question_1_label: wedding.guest_text_question_1_label,
+      guest_text_question_2_enabled: wedding.guest_text_question_2_enabled,
+      guest_text_question_2_label: wedding.guest_text_question_2_label,
+      guest_text_question_3_enabled: wedding.guest_text_question_3_enabled,
+      guest_text_question_3_label: wedding.guest_text_question_3_label,
       // Stats
       guest_count: totalGuests,
       rsvp_count: rsvpCount,
@@ -300,7 +357,7 @@ export async function GET() {
 
     const response: GetWeddingDetailsResponse = {
       success: true,
-      data: weddingDetails,
+      data: weddingDetails as unknown as GetWeddingDetailsResponse['data'],
     };
 
     return NextResponse.json(response, {
@@ -415,6 +472,9 @@ export async function PATCH(request: NextRequest) {
     if (validatedData.gift_iban !== undefined) {
       updateData.gift_iban = validatedData.gift_iban;
     }
+    if (validatedData.show_iban_on_rsvp !== undefined) {
+      updateData.show_iban_on_rsvp = validatedData.show_iban_on_rsvp;
+    }
     if (validatedData.planned_guests !== undefined) {
       updateData.planned_guests = validatedData.planned_guests;
     }
@@ -505,6 +565,26 @@ export async function PATCH(request: NextRequest) {
       updateData.extra_info_3_label = validatedData.extra_info_3_label;
     }
 
+    // Per-family dropdown
+    for (const key of ['family_dropdown_question_1_enabled', 'family_dropdown_question_1_label', 'family_dropdown_question_1_options'] as const) {
+      if (validatedData[key] !== undefined) (updateData as Record<string, unknown>)[key] = validatedData[key];
+    }
+
+    // Per-guest Yes/No questions
+    for (const key of ['guest_yn_question_1_enabled', 'guest_yn_question_1_text', 'guest_yn_question_2_enabled', 'guest_yn_question_2_text', 'guest_yn_question_3_enabled', 'guest_yn_question_3_text'] as const) {
+      if (validatedData[key] !== undefined) (updateData as Record<string, unknown>)[key] = validatedData[key];
+    }
+
+    // Per-guest Dropdown questions
+    for (const key of ['guest_dropdown_question_1_enabled', 'guest_dropdown_question_1_label', 'guest_dropdown_question_1_options', 'guest_dropdown_question_2_enabled', 'guest_dropdown_question_2_label', 'guest_dropdown_question_2_options', 'guest_dropdown_question_3_enabled', 'guest_dropdown_question_3_label', 'guest_dropdown_question_3_options'] as const) {
+      if (validatedData[key] !== undefined) (updateData as Record<string, unknown>)[key] = validatedData[key];
+    }
+
+    // Per-guest Text questions
+    for (const key of ['guest_text_question_1_enabled', 'guest_text_question_1_label', 'guest_text_question_2_enabled', 'guest_text_question_2_label', 'guest_text_question_3_enabled', 'guest_text_question_3_label'] as const) {
+      if (validatedData[key] !== undefined) (updateData as Record<string, unknown>)[key] = validatedData[key];
+    }
+
     // Update wedding
     const wedding = await prisma.wedding.update({
       where: { id: user.wedding_id },
@@ -549,7 +629,7 @@ export async function PATCH(request: NextRequest) {
 
     const response: UpdateWeddingConfigResponse = {
       success: true,
-      data: wedding,
+      data: wedding as unknown as Wedding,
     };
 
     return NextResponse.json(response, { status: 200 });

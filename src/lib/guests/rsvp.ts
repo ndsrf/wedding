@@ -10,7 +10,7 @@ import { getWeddingDisplayLocation } from '@/lib/wedding-utils';
 import { cache } from 'react';
 import { validateMagicLinkLite } from '@/lib/auth/magic-link';
 import { trackLinkOpened } from '@/lib/tracking/events';
-import { getWeddingPageCache, setWeddingPageCache } from '@/lib/cache/rsvp-page';
+import { getWeddingPageCache, setWeddingPageCache, type CachedWeddingPageData } from '@/lib/cache/rsvp-page';
 import { isWeddingDay } from '@/lib/date-formatter';
 import type { GuestRSVPPageData } from '@/types/api';
 import type { Channel } from '@prisma/client';
@@ -173,6 +173,7 @@ export const getRSVPPageData = cache(async (
           default_language: wedding.default_language,
           payment_tracking_mode: wedding.payment_tracking_mode,
           gift_iban: wedding.gift_iban,
+          show_iban_on_rsvp: wedding.show_iban_on_rsvp,
           transportation_question_enabled: wedding.transportation_question_enabled,
           transportation_question_text: wedding.transportation_question_text,
           dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
@@ -189,7 +190,31 @@ export const getRSVPPageData = cache(async (
           extra_info_2_label: wedding.extra_info_2_label,
           extra_info_3_enabled: wedding.extra_info_3_enabled,
           extra_info_3_label: wedding.extra_info_3_label,
-        },
+          family_dropdown_question_1_enabled: wedding.family_dropdown_question_1_enabled,
+          family_dropdown_question_1_label: wedding.family_dropdown_question_1_label,
+          family_dropdown_question_1_options: wedding.family_dropdown_question_1_options,
+          guest_yn_question_1_enabled: wedding.guest_yn_question_1_enabled,
+          guest_yn_question_1_text: wedding.guest_yn_question_1_text,
+          guest_yn_question_2_enabled: wedding.guest_yn_question_2_enabled,
+          guest_yn_question_2_text: wedding.guest_yn_question_2_text,
+          guest_yn_question_3_enabled: wedding.guest_yn_question_3_enabled,
+          guest_yn_question_3_text: wedding.guest_yn_question_3_text,
+          guest_dropdown_question_1_enabled: wedding.guest_dropdown_question_1_enabled,
+          guest_dropdown_question_1_label: wedding.guest_dropdown_question_1_label,
+          guest_dropdown_question_1_options: wedding.guest_dropdown_question_1_options,
+          guest_dropdown_question_2_enabled: wedding.guest_dropdown_question_2_enabled,
+          guest_dropdown_question_2_label: wedding.guest_dropdown_question_2_label,
+          guest_dropdown_question_2_options: wedding.guest_dropdown_question_2_options,
+          guest_dropdown_question_3_enabled: wedding.guest_dropdown_question_3_enabled,
+          guest_dropdown_question_3_label: wedding.guest_dropdown_question_3_label,
+          guest_dropdown_question_3_options: wedding.guest_dropdown_question_3_options,
+          guest_text_question_1_enabled: wedding.guest_text_question_1_enabled,
+          guest_text_question_1_label: wedding.guest_text_question_1_label,
+          guest_text_question_2_enabled: wedding.guest_text_question_2_enabled,
+          guest_text_question_2_label: wedding.guest_text_question_2_label,
+          guest_text_question_3_enabled: wedding.guest_text_question_3_enabled,
+          guest_text_question_3_label: wedding.guest_text_question_3_label,
+        } as unknown as CachedWeddingPageData['wedding'],
         theme: themeData,
         ...(invitationTemplate && { 
           invitation_template: {
@@ -201,7 +226,7 @@ export const getRSVPPageData = cache(async (
         }),
       };
 
-      setWeddingPageCache(weddingId, cachedData);
+      setWeddingPageCache(weddingId, cachedData as CachedWeddingPageData);
     }
 
     // 3. Tracking (Fire-and-forget)

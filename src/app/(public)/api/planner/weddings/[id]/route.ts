@@ -14,6 +14,7 @@ import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { invalidateWeddingPageCache } from '@/lib/cache/rsvp-page';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { toInitials } from '@/lib/wedding-utils';
+import type { Wedding, WeddingWithStats } from '@/types/models';
 import type {
   APIResponse,
   GetWeddingResponse,
@@ -233,7 +234,7 @@ export async function GET(
 
     const response: GetWeddingResponse = {
       success: true,
-      data: weddingWithStats,
+      data: weddingWithStats as unknown as WeddingWithStats,
     };
 
     return NextResponse.json(response, {
@@ -472,7 +473,7 @@ export async function PATCH(
 
     const response: UpdateWeddingResponse = {
       success: true,
-      data: wedding,
+      data: wedding as unknown as Wedding,
     };
 
     return NextResponse.json(response, { status: 200 });

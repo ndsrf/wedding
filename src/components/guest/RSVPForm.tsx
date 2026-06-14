@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import FamilyMemberCard, { type InvStyle } from './FamilyMemberCard';
+import FamilyMemberCard, { type InvStyle, type GuestQuestionConfig } from './FamilyMemberCard';
 import type { FamilyWithMembers } from '@/types/models';
 
 interface RSVPFormProps {
@@ -20,21 +20,49 @@ interface RSVPFormProps {
     rsvp_cutoff_date: string;
     // RSVP Question Configuration
     transportation_question_enabled: boolean;
-    transportation_question_text: string | null;
+    transportation_question_text: Record<string, string> | null;
     dietary_restrictions_enabled: boolean;
     accessibility_needs_enabled: boolean;
     extra_question_1_enabled: boolean;
-    extra_question_1_text: string | null;
+    extra_question_1_text: Record<string, string> | null;
     extra_question_2_enabled: boolean;
-    extra_question_2_text: string | null;
+    extra_question_2_text: Record<string, string> | null;
     extra_question_3_enabled: boolean;
-    extra_question_3_text: string | null;
+    extra_question_3_text: Record<string, string> | null;
     extra_info_1_enabled: boolean;
-    extra_info_1_label: string | null;
+    extra_info_1_label: Record<string, string> | null;
     extra_info_2_enabled: boolean;
-    extra_info_2_label: string | null;
+    extra_info_2_label: Record<string, string> | null;
     extra_info_3_enabled: boolean;
-    extra_info_3_label: string | null;
+    extra_info_3_label: Record<string, string> | null;
+    // Per-family dropdown
+    family_dropdown_question_1_enabled: boolean;
+    family_dropdown_question_1_label: Record<string, string> | null;
+    family_dropdown_question_1_options: Record<string, string[]> | null;
+    // Per-guest Yes/No questions
+    guest_yn_question_1_enabled: boolean;
+    guest_yn_question_1_text: Record<string, string> | null;
+    guest_yn_question_2_enabled: boolean;
+    guest_yn_question_2_text: Record<string, string> | null;
+    guest_yn_question_3_enabled: boolean;
+    guest_yn_question_3_text: Record<string, string> | null;
+    // Per-guest Dropdown questions
+    guest_dropdown_question_1_enabled: boolean;
+    guest_dropdown_question_1_label: Record<string, string> | null;
+    guest_dropdown_question_1_options: Record<string, string[]> | null;
+    guest_dropdown_question_2_enabled: boolean;
+    guest_dropdown_question_2_label: Record<string, string> | null;
+    guest_dropdown_question_2_options: Record<string, string[]> | null;
+    guest_dropdown_question_3_enabled: boolean;
+    guest_dropdown_question_3_label: Record<string, string> | null;
+    guest_dropdown_question_3_options: Record<string, string[]> | null;
+    // Per-guest Text questions
+    guest_text_question_1_enabled: boolean;
+    guest_text_question_1_label: Record<string, string> | null;
+    guest_text_question_2_enabled: boolean;
+    guest_text_question_2_label: Record<string, string> | null;
+    guest_text_question_3_enabled: boolean;
+    guest_text_question_3_label: Record<string, string> | null;
   };
   rsvpCutoffPassed: boolean;
   onSuccess: () => void;
@@ -46,6 +74,27 @@ interface MemberUpdate {
   attending: boolean;
   dietary_restrictions?: string;
   accessibility_needs?: string;
+  guest_yn_question_1_answer?: boolean | null;
+  guest_yn_question_2_answer?: boolean | null;
+  guest_yn_question_3_answer?: boolean | null;
+  guest_dropdown_question_1_answer?: string;
+  guest_dropdown_question_2_answer?: string;
+  guest_dropdown_question_3_answer?: string;
+  guest_text_question_1_answer?: string;
+  guest_text_question_2_answer?: string;
+  guest_text_question_3_answer?: string;
+}
+
+function resolveLabel(map: Record<string, string> | null, locale: string): string {
+  return map?.[locale] || map?.['en'] || map?.['es'] || '';
+}
+
+function resolveOptions(map: Record<string, string[]> | null, locale: string): string[] {
+  return map?.[locale] || map?.['en'] || map?.['es'] || [];
+}
+function parseOption(raw: string): { label: string; value: string } {
+  const idx = raw.indexOf('||');
+  return idx === -1 ? { label: raw, value: raw } : { label: raw.slice(0, idx), value: raw.slice(idx + 2) };
 }
 
 export default function RSVPForm({
@@ -64,6 +113,15 @@ export default function RSVPForm({
       attending: m.attending ?? false,
       dietary_restrictions: m.dietary_restrictions || '',
       accessibility_needs: m.accessibility_needs || '',
+      guest_yn_question_1_answer: m.guest_yn_question_1_answer ?? null,
+      guest_yn_question_2_answer: m.guest_yn_question_2_answer ?? null,
+      guest_yn_question_3_answer: m.guest_yn_question_3_answer ?? null,
+      guest_dropdown_question_1_answer: m.guest_dropdown_question_1_answer || '',
+      guest_dropdown_question_2_answer: m.guest_dropdown_question_2_answer || '',
+      guest_dropdown_question_3_answer: m.guest_dropdown_question_3_answer || '',
+      guest_text_question_1_answer: m.guest_text_question_1_answer || '',
+      guest_text_question_2_answer: m.guest_text_question_2_answer || '',
+      guest_text_question_3_answer: m.guest_text_question_3_answer || '',
     }))
   );
   const [submitting, setSubmitting] = useState(false);
@@ -97,10 +155,13 @@ export default function RSVPForm({
   const [extraInfo3Value, setExtraInfo3Value] = useState<string>(
     family.extra_info_3_value ?? ''
   );
+  const [familyDropdown1Answer, setFamilyDropdown1Answer] = useState<string>(
+    family.family_dropdown_question_1_answer ?? ''
+  );
 
   // Style helpers derived from invStyle
-  const tc = invStyle?.textColor ?? '#111827';       // text color
-  const bc = invStyle?.rsvpButtonColor ?? '#16a34a'; // button / accent color
+  const tc = invStyle?.textColor ?? '#111827';
+  const bc = invStyle?.rsvpButtonColor ?? '#16a34a';
   const ff = invStyle?.fontFamily;
   const borderCol = tc + '33';
 
@@ -125,7 +186,7 @@ export default function RSVPForm({
   function handleMemberChange(
     id: string,
     field: keyof MemberUpdate,
-    value: boolean | string
+    value: boolean | string | null
   ) {
     setMembers((prev) =>
       prev.map((m) =>
@@ -134,7 +195,19 @@ export default function RSVPForm({
               ...m,
               [field]: value,
               ...(field === 'attending' && !value
-                ? { dietary_restrictions: '', accessibility_needs: '' }
+                ? {
+                    dietary_restrictions: '',
+                    accessibility_needs: '',
+                    guest_yn_question_1_answer: null,
+                    guest_yn_question_2_answer: null,
+                    guest_yn_question_3_answer: null,
+                    guest_dropdown_question_1_answer: '',
+                    guest_dropdown_question_2_answer: '',
+                    guest_dropdown_question_3_answer: '',
+                    guest_text_question_1_answer: '',
+                    guest_text_question_2_answer: '',
+                    guest_text_question_3_answer: '',
+                  }
                 : {}),
             }
           : m
@@ -173,6 +246,15 @@ export default function RSVPForm({
           attending: true,
           dietary_restrictions: '',
           accessibility_needs: '',
+          guest_yn_question_1_answer: null,
+          guest_yn_question_2_answer: null,
+          guest_yn_question_3_answer: null,
+          guest_dropdown_question_1_answer: '',
+          guest_dropdown_question_2_answer: '',
+          guest_dropdown_question_3_answer: '',
+          guest_text_question_1_answer: '',
+          guest_text_question_2_answer: '',
+          guest_text_question_3_answer: '',
         },
       ]);
 
@@ -210,6 +292,7 @@ export default function RSVPForm({
           extra_info_1_value: extraInfo1Value || null,
           extra_info_2_value: extraInfo2Value || null,
           extra_info_3_value: extraInfo3Value || null,
+          family_dropdown_question_1_answer: familyDropdown1Answer || null,
         }),
       });
 
@@ -244,15 +327,53 @@ export default function RSVPForm({
 
   const attendingCount = members.filter((m) => m.attending).length;
 
+  // Resolved labels for per-guest questions (locale-aware)
+  const guestQuestions: GuestQuestionConfig = {
+    guest_yn_question_1_enabled: wedding.guest_yn_question_1_enabled,
+    guest_yn_question_1_text: resolveLabel(wedding.guest_yn_question_1_text, locale),
+    guest_yn_question_2_enabled: wedding.guest_yn_question_2_enabled,
+    guest_yn_question_2_text: resolveLabel(wedding.guest_yn_question_2_text, locale),
+    guest_yn_question_3_enabled: wedding.guest_yn_question_3_enabled,
+    guest_yn_question_3_text: resolveLabel(wedding.guest_yn_question_3_text, locale),
+    guest_dropdown_question_1_enabled: wedding.guest_dropdown_question_1_enabled,
+    guest_dropdown_question_1_label: resolveLabel(wedding.guest_dropdown_question_1_label, locale),
+    guest_dropdown_question_1_options: resolveOptions(wedding.guest_dropdown_question_1_options, locale),
+    guest_dropdown_question_2_enabled: wedding.guest_dropdown_question_2_enabled,
+    guest_dropdown_question_2_label: resolveLabel(wedding.guest_dropdown_question_2_label, locale),
+    guest_dropdown_question_2_options: resolveOptions(wedding.guest_dropdown_question_2_options, locale),
+    guest_dropdown_question_3_enabled: wedding.guest_dropdown_question_3_enabled,
+    guest_dropdown_question_3_label: resolveLabel(wedding.guest_dropdown_question_3_label, locale),
+    guest_dropdown_question_3_options: resolveOptions(wedding.guest_dropdown_question_3_options, locale),
+    guest_text_question_1_enabled: wedding.guest_text_question_1_enabled,
+    guest_text_question_1_label: resolveLabel(wedding.guest_text_question_1_label, locale),
+    guest_text_question_2_enabled: wedding.guest_text_question_2_enabled,
+    guest_text_question_2_label: resolveLabel(wedding.guest_text_question_2_label, locale),
+    guest_text_question_3_enabled: wedding.guest_text_question_3_enabled,
+    guest_text_question_3_label: resolveLabel(wedding.guest_text_question_3_label, locale),
+  };
+
+  const hasFamilyQuestions =
+    wedding.transportation_question_enabled ||
+    wedding.extra_question_1_enabled ||
+    wedding.extra_question_2_enabled ||
+    wedding.extra_question_3_enabled ||
+    wedding.extra_info_1_enabled ||
+    wedding.extra_info_2_enabled ||
+    wedding.extra_info_3_enabled ||
+    wedding.family_dropdown_question_1_enabled;
+
+  const familyDropdown1Options = resolveOptions(wedding.family_dropdown_question_1_options, locale);
+  const familyDropdown1Label = resolveLabel(wedding.family_dropdown_question_1_label, locale);
+
   return (
     <form
       onSubmit={handleSubmit}
       className="rounded-lg shadow-md p-6"
-      style={{ 
+      style={{
         backgroundColor: invStyle?.backgroundColor ? invStyle.backgroundColor + 'aa' : 'rgba(255, 255, 255, 0.7)',
         backdropFilter: 'blur(4px)',
-        color: tc, 
-        fontFamily: ff 
+        color: tc,
+        fontFamily: ff
       }}
     >
       <h3 className="text-2xl font-bold mb-4" style={{ color: tc }}>
@@ -284,6 +405,16 @@ export default function RSVPForm({
               accessibilityNeeds={memberUpdate.accessibility_needs || ''}
               dietaryRestrictionsEnabled={wedding.dietary_restrictions_enabled}
               accessibilityNeedsEnabled={wedding.accessibility_needs_enabled}
+              guestQuestions={guestQuestions}
+              guest_yn_question_1_answer={memberUpdate.guest_yn_question_1_answer ?? null}
+              guest_yn_question_2_answer={memberUpdate.guest_yn_question_2_answer ?? null}
+              guest_yn_question_3_answer={memberUpdate.guest_yn_question_3_answer ?? null}
+              guest_dropdown_question_1_answer={memberUpdate.guest_dropdown_question_1_answer || ''}
+              guest_dropdown_question_2_answer={memberUpdate.guest_dropdown_question_2_answer || ''}
+              guest_dropdown_question_3_answer={memberUpdate.guest_dropdown_question_3_answer || ''}
+              guest_text_question_1_answer={memberUpdate.guest_text_question_1_answer || ''}
+              guest_text_question_2_answer={memberUpdate.guest_text_question_2_answer || ''}
+              guest_text_question_3_answer={memberUpdate.guest_text_question_3_answer || ''}
               onAttendingChange={(attending: boolean) =>
                 handleMemberChange(member.id, 'attending', attending)
               }
@@ -292,6 +423,15 @@ export default function RSVPForm({
               }
               onAccessibilityChange={(value: string) =>
                 handleMemberChange(member.id, 'accessibility_needs', value)
+              }
+              onGuestYnChange={(field, value) =>
+                handleMemberChange(member.id, field, value)
+              }
+              onGuestDropdownChange={(field, value) =>
+                handleMemberChange(member.id, field, value)
+              }
+              onGuestTextChange={(field, value) =>
+                handleMemberChange(member.id, field, value)
               }
               invStyle={invStyle}
             />
@@ -371,14 +511,8 @@ export default function RSVPForm({
         </div>
       )}
 
-      {/* RSVP Questions Section */}
-      {(wedding.transportation_question_enabled ||
-        wedding.extra_question_1_enabled ||
-        wedding.extra_question_2_enabled ||
-        wedding.extra_question_3_enabled ||
-        wedding.extra_info_1_enabled ||
-        wedding.extra_info_2_enabled ||
-        wedding.extra_info_3_enabled) && (
+      {/* Family-Level RSVP Questions Section */}
+      {hasFamilyQuestions && (
         <div className="mb-2 p-4 space-y-4" style={sectionBg}>
           <h4 className="text-xl font-bold" style={{ color: tc }}>
             {t('guest.rsvp.additionalQuestions')}
@@ -388,23 +522,17 @@ export default function RSVPForm({
           {wedding.transportation_question_enabled && (
             <div className="space-y-2">
               <p className="text-lg" style={{ color: tc }}>
-                {wedding.transportation_question_text || t('guest.rsvp.defaultTransportationQuestion')}
+                {resolveLabel(wedding.transportation_question_text, locale) || t('guest.rsvp.defaultTransportationQuestion')}
               </p>
               <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setTransportationAnswer(true)}
+                <button type="button" onClick={() => setTransportationAnswer(true)}
                   className="flex-1 py-3 px-6 rounded-lg text-lg font-semibold border-2 transition-colors"
-                  style={transportationAnswer === true ? yesSelected : yesUnselected}
-                >
+                  style={transportationAnswer === true ? yesSelected : yesUnselected}>
                   {t('common.yes')}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setTransportationAnswer(false)}
+                <button type="button" onClick={() => setTransportationAnswer(false)}
                   className="flex-1 py-3 px-6 rounded-lg text-lg font-semibold border-2 transition-colors"
-                  style={transportationAnswer === false ? noSelected : noUnselected}
-                >
+                  style={transportationAnswer === false ? noSelected : noUnselected}>
                   {t('common.no')}
                 </button>
               </div>
@@ -414,7 +542,7 @@ export default function RSVPForm({
           {/* Extra Yes/No Question 1 */}
           {wedding.extra_question_1_enabled && wedding.extra_question_1_text && (
             <div className="space-y-2">
-              <p className="text-lg" style={{ color: tc }}>{wedding.extra_question_1_text}</p>
+              <p className="text-lg" style={{ color: tc }}>{resolveLabel(wedding.extra_question_1_text, locale)}</p>
               <div className="flex gap-4">
                 <button type="button" onClick={() => setExtraQuestion1Answer(true)}
                   className="flex-1 py-3 px-6 rounded-lg text-lg font-semibold border-2 transition-colors"
@@ -433,7 +561,7 @@ export default function RSVPForm({
           {/* Extra Yes/No Question 2 */}
           {wedding.extra_question_2_enabled && wedding.extra_question_2_text && (
             <div className="space-y-2">
-              <p className="text-lg" style={{ color: tc }}>{wedding.extra_question_2_text}</p>
+              <p className="text-lg" style={{ color: tc }}>{resolveLabel(wedding.extra_question_2_text, locale)}</p>
               <div className="flex gap-4">
                 <button type="button" onClick={() => setExtraQuestion2Answer(true)}
                   className="flex-1 py-3 px-6 rounded-lg text-lg font-semibold border-2 transition-colors"
@@ -452,7 +580,7 @@ export default function RSVPForm({
           {/* Extra Yes/No Question 3 */}
           {wedding.extra_question_3_enabled && wedding.extra_question_3_text && (
             <div className="space-y-2">
-              <p className="text-lg" style={{ color: tc }}>{wedding.extra_question_3_text}</p>
+              <p className="text-lg" style={{ color: tc }}>{resolveLabel(wedding.extra_question_3_text, locale)}</p>
               <div className="flex gap-4">
                 <button type="button" onClick={() => setExtraQuestion3Answer(true)}
                   className="flex-1 py-3 px-6 rounded-lg text-lg font-semibold border-2 transition-colors"
@@ -471,7 +599,7 @@ export default function RSVPForm({
           {/* Extra Info Field 1 */}
           {wedding.extra_info_1_enabled && wedding.extra_info_1_label && (
             <div className="space-y-2">
-              <label className="text-lg block" style={{ color: tc }}>{wedding.extra_info_1_label}</label>
+              <label className="text-lg block" style={{ color: tc }}>{resolveLabel(wedding.extra_info_1_label, locale)}</label>
               <input type="text" value={extraInfo1Value}
                 onChange={(e) => setExtraInfo1Value(e.target.value)}
                 className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
@@ -482,7 +610,7 @@ export default function RSVPForm({
           {/* Extra Info Field 2 */}
           {wedding.extra_info_2_enabled && wedding.extra_info_2_label && (
             <div className="space-y-2">
-              <label className="text-lg block" style={{ color: tc }}>{wedding.extra_info_2_label}</label>
+              <label className="text-lg block" style={{ color: tc }}>{resolveLabel(wedding.extra_info_2_label, locale)}</label>
               <input type="text" value={extraInfo2Value}
                 onChange={(e) => setExtraInfo2Value(e.target.value)}
                 className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
@@ -493,11 +621,24 @@ export default function RSVPForm({
           {/* Extra Info Field 3 */}
           {wedding.extra_info_3_enabled && wedding.extra_info_3_label && (
             <div className="space-y-2">
-              <label className="text-lg block" style={{ color: tc }}>{wedding.extra_info_3_label}</label>
+              <label className="text-lg block" style={{ color: tc }}>{resolveLabel(wedding.extra_info_3_label, locale)}</label>
               <input type="text" value={extraInfo3Value}
                 onChange={(e) => setExtraInfo3Value(e.target.value)}
                 className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
                 style={inputStyle} />
+            </div>
+          )}
+
+          {/* Family Dropdown Question */}
+          {wedding.family_dropdown_question_1_enabled && familyDropdown1Label && familyDropdown1Options.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-lg block" style={{ color: tc }}>{familyDropdown1Label}</label>
+              <select value={familyDropdown1Answer} onChange={(e) => setFamilyDropdown1Answer(e.target.value)}
+                className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
+                style={inputStyle}>
+                <option value="">—</option>
+                {familyDropdown1Options.map((raw) => { const { label, value } = parseOption(raw); return <option key={value} value={value}>{label}</option>; })}
+              </select>
             </div>
           )}
         </div>

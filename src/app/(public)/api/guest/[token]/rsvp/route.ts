@@ -88,6 +88,33 @@ export async function POST(
           accessibility_needs: memberUpdate.attending
             ? memberUpdate.accessibility_needs || null
             : null,
+          guest_yn_question_1_answer: memberUpdate.attending
+            ? memberUpdate.guest_yn_question_1_answer ?? null
+            : null,
+          guest_yn_question_2_answer: memberUpdate.attending
+            ? memberUpdate.guest_yn_question_2_answer ?? null
+            : null,
+          guest_yn_question_3_answer: memberUpdate.attending
+            ? memberUpdate.guest_yn_question_3_answer ?? null
+            : null,
+          guest_dropdown_question_1_answer: memberUpdate.attending
+            ? memberUpdate.guest_dropdown_question_1_answer || null
+            : null,
+          guest_dropdown_question_2_answer: memberUpdate.attending
+            ? memberUpdate.guest_dropdown_question_2_answer || null
+            : null,
+          guest_dropdown_question_3_answer: memberUpdate.attending
+            ? memberUpdate.guest_dropdown_question_3_answer || null
+            : null,
+          guest_text_question_1_answer: memberUpdate.attending
+            ? memberUpdate.guest_text_question_1_answer || null
+            : null,
+          guest_text_question_2_answer: memberUpdate.attending
+            ? memberUpdate.guest_text_question_2_answer || null
+            : null,
+          guest_text_question_3_answer: memberUpdate.attending
+            ? memberUpdate.guest_text_question_3_answer || null
+            : null,
         },
       });
     });
@@ -105,6 +132,7 @@ export async function POST(
         extra_info_1_value: body.extra_info_1_value ?? null,
         extra_info_2_value: body.extra_info_2_value ?? null,
         extra_info_3_value: body.extra_info_3_value ?? null,
+        family_dropdown_question_1_answer: body.family_dropdown_question_1_answer || null,
       },
     });
 

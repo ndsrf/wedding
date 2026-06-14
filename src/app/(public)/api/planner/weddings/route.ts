@@ -14,6 +14,7 @@ import { seedWeddingTemplatesFromPlanner } from '@/lib/templates/planner-seed';
 import { copyTemplateToWedding } from '@/lib/checklist/template';
 import { ensureWeddingInitials } from '@/lib/short-url';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
+import type { Wedding, WeddingWithStats } from '@/types/models';
 import type {
   APIResponse,
   ListPlannerWeddingsResponse,
@@ -205,7 +206,7 @@ export async function GET(request: NextRequest) {
     });
 
     const payload: WeddingsListPayload = {
-      items: weddingsWithStats,
+      items: weddingsWithStats as unknown as WeddingWithStats[],
       pagination: {
         page,
         limit,
@@ -454,7 +455,7 @@ export async function POST(request: NextRequest) {
 
     const response: CreateWeddingResponse = {
       success: true,
-      data: wedding,
+      data: wedding as unknown as Wedding,
     };
 
     return NextResponse.json(response, { status: 201 });

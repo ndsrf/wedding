@@ -150,6 +150,7 @@ export interface Wedding {
   additional_info: string | null;
   payment_tracking_mode: PaymentMode;
   gift_iban: string | null;
+  show_iban_on_rsvp: boolean;
   allow_guest_additions: boolean;
   default_language: Language;
   wedding_country: string;
@@ -166,7 +167,7 @@ export interface Wedding {
 
   // RSVP Configuration - Transportation question
   transportation_question_enabled: boolean;
-  transportation_question_text: string | null;
+  transportation_question_text: Record<string, string> | null;
 
   // RSVP Configuration - Dietary restrictions
   dietary_restrictions_enabled: boolean;
@@ -181,21 +182,53 @@ export interface Wedding {
   // Wedding Code for Short URLs
   short_url_initials: string | null;
 
-  // RSVP Configuration - Extra Yes/No questions (up to 3)
+  // RSVP Configuration - Per-family Yes/No questions (up to 3)
   extra_question_1_enabled: boolean;
-  extra_question_1_text: string | null;
+  extra_question_1_text: Record<string, string> | null;
   extra_question_2_enabled: boolean;
-  extra_question_2_text: string | null;
+  extra_question_2_text: Record<string, string> | null;
   extra_question_3_enabled: boolean;
-  extra_question_3_text: string | null;
+  extra_question_3_text: Record<string, string> | null;
 
-  // RSVP Configuration - Extra mandatory info fields (up to 3)
+  // RSVP Configuration - Per-family mandatory info fields (up to 3)
   extra_info_1_enabled: boolean;
-  extra_info_1_label: string | null;
+  extra_info_1_label: Record<string, string> | null;
   extra_info_2_enabled: boolean;
-  extra_info_2_label: string | null;
+  extra_info_2_label: Record<string, string> | null;
   extra_info_3_enabled: boolean;
-  extra_info_3_label: string | null;
+  extra_info_3_label: Record<string, string> | null;
+
+  // RSVP Configuration - Per-family dropdown question
+  family_dropdown_question_1_enabled: boolean;
+  family_dropdown_question_1_label: Record<string, string> | null;
+  family_dropdown_question_1_options: Record<string, string[]> | null;
+
+  // RSVP Configuration - Per-guest Yes/No questions (up to 3)
+  guest_yn_question_1_enabled: boolean;
+  guest_yn_question_1_text: Record<string, string> | null;
+  guest_yn_question_2_enabled: boolean;
+  guest_yn_question_2_text: Record<string, string> | null;
+  guest_yn_question_3_enabled: boolean;
+  guest_yn_question_3_text: Record<string, string> | null;
+
+  // RSVP Configuration - Per-guest Dropdown questions (up to 3)
+  guest_dropdown_question_1_enabled: boolean;
+  guest_dropdown_question_1_label: Record<string, string> | null;
+  guest_dropdown_question_1_options: Record<string, string[]> | null;
+  guest_dropdown_question_2_enabled: boolean;
+  guest_dropdown_question_2_label: Record<string, string> | null;
+  guest_dropdown_question_2_options: Record<string, string[]> | null;
+  guest_dropdown_question_3_enabled: boolean;
+  guest_dropdown_question_3_label: Record<string, string> | null;
+  guest_dropdown_question_3_options: Record<string, string[]> | null;
+
+  // RSVP Configuration - Per-guest Text input questions (up to 3)
+  guest_text_question_1_enabled: boolean;
+  guest_text_question_1_label: Record<string, string> | null;
+  guest_text_question_2_enabled: boolean;
+  guest_text_question_2_label: Record<string, string> | null;
+  guest_text_question_3_enabled: boolean;
+  guest_text_question_3_label: Record<string, string> | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   layout_elements?: any | null; // JSON value for canvas elements
 
@@ -248,6 +281,7 @@ export interface Family {
   extra_info_1_value: string | null;
   extra_info_2_value: string | null;
   extra_info_3_value: string | null;
+  family_dropdown_question_1_answer: string | null;
 }
 
 export interface FamilyMember {
@@ -264,6 +298,16 @@ export interface FamilyMember {
   seat_index?: number | null;
   seating_group: string | null;
   created_at: Date;
+  // Per-guest question answers
+  guest_yn_question_1_answer: boolean | null;
+  guest_yn_question_2_answer: boolean | null;
+  guest_yn_question_3_answer: boolean | null;
+  guest_dropdown_question_1_answer: string | null;
+  guest_dropdown_question_2_answer: string | null;
+  guest_dropdown_question_3_answer: string | null;
+  guest_text_question_1_answer: string | null;
+  guest_text_question_2_answer: string | null;
+  guest_text_question_3_answer: string | null;
 }
 
 export interface Table {
