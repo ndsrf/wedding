@@ -22,6 +22,7 @@ interface RsvpSettingsFormData {
   transportation_question_enabled: boolean;
   transportation_question_text: string;
   dietary_restrictions_enabled: boolean;
+  accessibility_needs_enabled: boolean;
   extra_question_1_enabled: boolean;
   extra_question_1_text: string;
   extra_question_2_enabled: boolean;
@@ -40,9 +41,10 @@ interface RsvpSettingsFormProps {
   wedding: Wedding;
   onSubmit: (data: UpdateWeddingConfigRequest) => Promise<void>;
   onCancel: () => void;
+  deleteCacheUrl: string;
 }
 
-export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFormProps) {
+export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }: RsvpSettingsFormProps) {
   const t = useTranslations('admin.configure.form');
   const [formData, setFormData] = useState<RsvpSettingsFormData>({
     payment_tracking_mode: wedding.payment_tracking_mode,
@@ -54,6 +56,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
     transportation_question_enabled: wedding.transportation_question_enabled,
     transportation_question_text: wedding.transportation_question_text || '',
     dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
+    accessibility_needs_enabled: wedding.accessibility_needs_enabled,
     extra_question_1_enabled: wedding.extra_question_1_enabled,
     extra_question_1_text: wedding.extra_question_1_text || '',
     extra_question_2_enabled: wedding.extra_question_2_enabled,
@@ -71,6 +74,8 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isDeletingCache, setIsDeletingCache] = useState(false);
+  const [cacheDeleteStatus, setCacheDeleteStatus] = useState<'success' | 'error' | null>(null);
 
   const invitationUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/w/${wedding.short_url_initials}`
@@ -105,6 +110,7 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
           ? formData.transportation_question_text || null
           : null,
         dietary_restrictions_enabled: formData.dietary_restrictions_enabled,
+        accessibility_needs_enabled: formData.accessibility_needs_enabled,
         extra_question_1_enabled: formData.extra_question_1_enabled,
         extra_question_1_text: formData.extra_question_1_enabled
           ? formData.extra_question_1_text || null
@@ -137,6 +143,20 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
       setError(t('submitError'));
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteCache = async () => {
+    setIsDeletingCache(true);
+    setCacheDeleteStatus(null);
+    try {
+      const res = await fetch(deleteCacheUrl, { method: 'DELETE' });
+      setCacheDeleteStatus(res.ok ? 'success' : 'error');
+    } catch {
+      setCacheDeleteStatus('error');
+    } finally {
+      setIsDeletingCache(false);
+      setTimeout(() => setCacheDeleteStatus(null), 3000);
     }
   };
 
@@ -242,6 +262,24 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
           </label>
           <p className="mt-1 ml-6 text-sm text-gray-500">
             {t('dietaryDesc')}
+          </p>
+        </div>
+
+        {/* Accessibility Needs */}
+        <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={formData.accessibility_needs_enabled}
+              onChange={(e) => handleChange('accessibility_needs_enabled', e.target.checked)}
+              className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+            />
+            <span className="ml-2 text-sm font-medium text-gray-700">
+              {t('accessibilityNeeds')}
+            </span>
+          </label>
+          <p className="mt-1 ml-6 text-sm text-gray-500">
+            {t('accessibilityNeedsDesc')}
           </p>
         </div>
       </div>
@@ -415,22 +453,40 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel }: RsvpSettingsFo
       </div>
 
       {/* Form Actions */}
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {t('cancel')}
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? t('saving') : t('save')}
-        </button>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={handleDeleteCache}
+            disabled={isDeletingCache}
+            className="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDeletingCache ? t('deletingCache') : t('deleteCache')}
+          </button>
+          {cacheDeleteStatus === 'success' && (
+            <span className="text-sm text-green-600">{t('deleteCacheSuccess')}</span>
+          )}
+          {cacheDeleteStatus === 'error' && (
+            <span className="text-sm text-red-600">{t('deleteCacheError')}</span>
+          )}
+        </div>
+        <div className="flex space-x-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? t('saving') : t('save')}
+          </button>
+        </div>
       </div>
     </form>
   );

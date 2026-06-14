@@ -1941,6 +1941,8 @@
         "transportationPlaceholder": "ex. Avez-vous besoin d'un transport de l'hôtel au lieu de réception ?",
         "dietary": "Ajouter une question sur les restrictions alimentaires au RSVP",
         "dietaryDesc": "Les invités pourront choisir parmi : Aucune restriction, Végétarien, Végétalien, Sans gluten, Autre, et spécifier des allergies.",
+        "accessibilityNeeds": "Ajouter une question sur les besoins d'accessibilité au RSVP",
+        "accessibilityNeedsDesc": "Les invités pourront décrire leurs besoins d'accessibilité tels que l'accès en fauteuil roulant, des besoins spéciaux, etc.",
         "extraQuestions": "Questions Supplémentaires Oui/Non (jusqu'à 3)",
         "enableQuestion": "Activer la question supplémentaire {number}",
         "questionPlaceholder": "Entrez votre question Oui/Non...",
@@ -1952,7 +1954,11 @@
         "cancel": "Annuler",
         "save": "Enregistrer la Configuration",
         "saving": "Enregistrement...",
-        "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer."
+        "submitError": "Échec de l'enregistrement de la configuration. Veuillez réessayer.",
+        "deleteCache": "Vider le cache",
+        "deletingCache": "Suppression…",
+        "deleteCacheSuccess": "Cache vidé avec succès",
+        "deleteCacheError": "Échec du vidage du cache. Veuillez réessayer."
       },
       "dangerZone": {
         "title": "Zone de danger",

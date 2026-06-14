@@ -1941,6 +1941,8 @@
         "transportationPlaceholder": "es. Hai bisogno di trasporto dall'hotel al luogo dell'evento?",
         "dietary": "Aggiungi domanda sulle restrizioni alimentari all'RSVP",
         "dietaryDesc": "Gli ospiti potranno selezionare tra: Nessuna restrizione, Vegetariano, Vegano, Senza glutine, Altro, e specificare allergie.",
+        "accessibilityNeeds": "Aggiungi domanda sui bisogni di accessibilità all'RSVP",
+        "accessibilityNeedsDesc": "Gli ospiti potranno descrivere eventuali esigenze di accessibilità come accesso in sedia a rotelle, bisogni speciali, ecc.",
         "extraQuestions": "Domande Extra Sì/No (fino a 3)",
         "enableQuestion": "Abilita domanda extra {number}",
         "questionPlaceholder": "Inserisci la tua domanda Sì/No...",
@@ -1952,7 +1954,11 @@
         "cancel": "Annulla",
         "save": "Salva Configurazione",
         "saving": "Salvataggio...",
-        "submitError": "Impossibile salvare la configurazione. Riprova."
+        "submitError": "Impossibile salvare la configurazione. Riprova.",
+        "deleteCache": "Elimina Cache",
+        "deletingCache": "Eliminazione…",
+        "deleteCacheSuccess": "Cache eliminata con successo",
+        "deleteCacheError": "Impossibile eliminare la cache. Riprova."
       },
       "dangerZone": {
         "title": "Zona pericolosa",

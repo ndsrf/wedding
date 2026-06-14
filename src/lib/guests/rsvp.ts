@@ -176,6 +176,7 @@ export const getRSVPPageData = cache(async (
           transportation_question_enabled: wedding.transportation_question_enabled,
           transportation_question_text: wedding.transportation_question_text,
           dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
+          accessibility_needs_enabled: wedding.accessibility_needs_enabled,
           extra_question_1_enabled: wedding.extra_question_1_enabled,
           extra_question_1_text: wedding.extra_question_1_text,
           extra_question_2_enabled: wedding.extra_question_2_enabled,

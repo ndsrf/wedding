@@ -29,6 +29,7 @@ export default function PlannerConfigurePage() {
       apiPaths={{
         weddingApi: `${plannerBase}/configure`,
         deleteAllGuests: `${plannerBase}/guests/delete-all`,
+        deleteCacheRsvp: `${plannerBase}/cache/rsvp`,
       }}
       backUrl={`/planner/weddings/${weddingId}`}
       header={

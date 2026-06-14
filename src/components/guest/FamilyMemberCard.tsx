@@ -25,6 +25,7 @@ interface FamilyMemberCardProps {
   dietaryRestrictions: string;
   accessibilityNeeds: string;
   dietaryRestrictionsEnabled: boolean;
+  accessibilityNeedsEnabled: boolean;
   onAttendingChange: (attending: boolean) => void;
   onDietaryChange: (value: string) => void;
   onAccessibilityChange: (value: string) => void;
@@ -37,6 +38,7 @@ export default function FamilyMemberCard({
   dietaryRestrictions,
   accessibilityNeeds,
   dietaryRestrictionsEnabled,
+  accessibilityNeedsEnabled,
   onAttendingChange,
   onDietaryChange,
   onAccessibilityChange,
@@ -97,36 +99,40 @@ export default function FamilyMemberCard({
         </label>
       </div>
 
-      {/* Dietary Restrictions (only if attending and enabled) */}
-      {attending && dietaryRestrictionsEnabled && (
+      {/* Dietary Restrictions and Accessibility (only if attending and enabled) */}
+      {attending && (dietaryRestrictionsEnabled || accessibilityNeedsEnabled) && (
         <div className="space-y-4">
-          <div>
-            <label className="block text-base font-semibold mb-2" style={{ color: tc }}>
-              {t('guest.rsvp.dietaryRestrictions')} ({t('common.optional', { defaultValue: 'optional' })})
-            </label>
-            <input
-              type="text"
-              value={dietaryRestrictions}
-              onChange={(e) => onDietaryChange(e.target.value)}
-              placeholder={t('guest.rsvp.dietaryPlaceholder')}
-              className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
-              style={inputStyle}
-            />
-          </div>
+          {dietaryRestrictionsEnabled && (
+            <div>
+              <label className="block text-base font-semibold mb-2" style={{ color: tc }}>
+                {t('guest.rsvp.dietaryRestrictions')} ({t('common.optional', { defaultValue: 'optional' })})
+              </label>
+              <input
+                type="text"
+                value={dietaryRestrictions}
+                onChange={(e) => onDietaryChange(e.target.value)}
+                placeholder={t('guest.rsvp.dietaryPlaceholder')}
+                className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
+                style={inputStyle}
+              />
+            </div>
+          )}
 
-          <div>
-            <label className="block text-base font-semibold mb-2" style={{ color: tc }}>
-              {t('guest.rsvp.accessibilityNeeds')} ({t('common.optional', { defaultValue: 'optional' })})
-            </label>
-            <input
-              type="text"
-              value={accessibilityNeeds}
-              onChange={(e) => onAccessibilityChange(e.target.value)}
-              placeholder={t('guest.rsvp.accessibilityPlaceholder')}
-              className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
-              style={inputStyle}
-            />
-          </div>
+          {accessibilityNeedsEnabled && (
+            <div>
+              <label className="block text-base font-semibold mb-2" style={{ color: tc }}>
+                {t('guest.rsvp.accessibilityNeeds')} ({t('common.optional', { defaultValue: 'optional' })})
+              </label>
+              <input
+                type="text"
+                value={accessibilityNeeds}
+                onChange={(e) => onAccessibilityChange(e.target.value)}
+                placeholder={t('guest.rsvp.accessibilityPlaceholder')}
+                className="w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none"
+                style={inputStyle}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1941,6 +1941,8 @@
         "transportationPlaceholder": "z.B. Benötigen Sie einen Transport vom Hotel zum Veranstaltungsort?",
         "dietary": "Frage zu diätetischen Einschränkungen zur RSVP hinzufügen",
         "dietaryDesc": "Gäste können auswählen aus: Keine Einschränkungen, Vegetarisch, Vegan, Glutenfrei, Sonstiges und Allergien angeben.",
+        "accessibilityNeeds": "Frage zu Barrierefreiheitsbedürfnissen zur RSVP hinzufügen",
+        "accessibilityNeedsDesc": "Gäste können ihre Barrierefreiheitsbedürfnisse beschreiben, z.B. Rollstuhlzugang, besondere Bedürfnisse usw.",
         "extraQuestions": "Zusätzliche Ja/Nein-Fragen (bis zu 3)",
         "enableQuestion": "Zusatzfrage {number} aktivieren",
         "questionPlaceholder": "Geben Sie Ihre Ja/Nein-Frage ein...",
@@ -1952,7 +1954,11 @@
         "cancel": "Abbrechen",
         "save": "Konfiguration speichern",
         "saving": "Speichern...",
-        "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut."
+        "submitError": "Fehler beim Speichern der Konfiguration. Bitte versuchen Sie es erneut.",
+        "deleteCache": "Cache löschen",
+        "deletingCache": "Wird gelöscht…",
+        "deleteCacheSuccess": "Cache erfolgreich gelöscht",
+        "deleteCacheError": "Cache konnte nicht gelöscht werden. Bitte erneut versuchen."
       },
       "dangerZone": {
         "title": "Gefahrenzone",

@@ -22,6 +22,8 @@ export interface ConfigureApiPaths {
   weddingApi: string;
   /** DELETE endpoint to wipe all guest families */
   deleteAllGuests: string;
+  /** DELETE endpoint to clear the RSVP page cache */
+  deleteCacheRsvp: string;
 }
 
 export interface ConfigurePageContentProps {
@@ -187,6 +189,7 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
             themes={wedding.available_themes}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
+            deleteCacheRsvpUrl={apiPaths.deleteCacheRsvp}
           />
         </Suspense>
 

@@ -184,6 +184,7 @@ model Wedding {
   transportation_question_enabled Boolean            @default(false)
   transportation_question_text    String?
   dietary_restrictions_enabled    Boolean            @default(false)
+  accessibility_needs_enabled     Boolean            @default(false)
   save_the_date_enabled           Boolean            @default(false)
   whatsapp_mode                   WhatsAppMode       @default(BUSINESS)
   short_url_initials              String?            @unique

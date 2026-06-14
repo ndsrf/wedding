@@ -22,6 +22,7 @@ interface RSVPFormProps {
     transportation_question_enabled: boolean;
     transportation_question_text: string | null;
     dietary_restrictions_enabled: boolean;
+    accessibility_needs_enabled: boolean;
     extra_question_1_enabled: boolean;
     extra_question_1_text: string | null;
     extra_question_2_enabled: boolean;
@@ -282,6 +283,7 @@ export default function RSVPForm({
               dietaryRestrictions={memberUpdate.dietary_restrictions || ''}
               accessibilityNeeds={memberUpdate.accessibility_needs || ''}
               dietaryRestrictionsEnabled={wedding.dietary_restrictions_enabled}
+              accessibilityNeedsEnabled={wedding.accessibility_needs_enabled}
               onAttendingChange={(attending: boolean) =>
                 handleMemberChange(member.id, 'attending', attending)
               }

@@ -199,6 +199,7 @@ export async function GET(
       transportation_question_enabled: wedding.transportation_question_enabled,
       transportation_question_text: wedding.transportation_question_text,
       dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
+      accessibility_needs_enabled: wedding.accessibility_needs_enabled,
       save_the_date_enabled: wedding.save_the_date_enabled,
       whatsapp_mode: wedding.whatsapp_mode,
       extra_question_1_enabled: wedding.extra_question_1_enabled,

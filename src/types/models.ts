@@ -170,6 +170,7 @@ export interface Wedding {
 
   // RSVP Configuration - Dietary restrictions
   dietary_restrictions_enabled: boolean;
+  accessibility_needs_enabled: boolean;
 
   // Messaging Configuration - Save the Date
   save_the_date_enabled: boolean;

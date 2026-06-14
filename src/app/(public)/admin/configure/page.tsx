@@ -25,6 +25,7 @@ export default function ConfigureWeddingPage() {
       apiPaths={{
         weddingApi: '/api/admin/wedding',
         deleteAllGuests: '/api/admin/guests/delete-all',
+        deleteCacheRsvp: '/api/admin/cache/rsvp',
       }}
       backUrl="/admin"
       header={

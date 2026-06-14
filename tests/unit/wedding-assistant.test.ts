@@ -69,6 +69,7 @@ const baseWedding = {
   transportation_question_enabled: false,
   transportation_question_text: null,
   dietary_restrictions_enabled: true,
+  accessibility_needs_enabled: false,
   save_the_date_enabled: false,
   whatsapp_mode: 'BUSINESS' as const,
   short_url_initials: null,

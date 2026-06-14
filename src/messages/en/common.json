@@ -2298,6 +2298,8 @@
         "transportationPlaceholder": "e.g., Do you need transportation from the hotel to the venue?",
         "dietary": "Add dietary restrictions question to RSVP",
         "dietaryDesc": "Guests will be able to select from: No restrictions, Vegetarian, Vegan, Gluten-free, Other, and specify allergies.",
+        "accessibilityNeeds": "Add accessibility needs question to RSVP",
+        "accessibilityNeedsDesc": "Guests will be able to describe any accessibility requirements such as wheelchair access, special needs, etc.",
         "extraQuestions": "Extra Yes/No Questions (up to 3)",
         "enableQuestion": "Enable extra question {number}",
         "questionPlaceholder": "Enter your Yes/No question...",
@@ -2312,7 +2314,11 @@
         "submitError": "Failed to save configuration. Please try again.",
         "invitationUrl": "General Invitation URL",
         "copyUrl": "Copy to Clipboard",
-        "copySuccess": "URL copied!"
+        "copySuccess": "URL copied!",
+        "deleteCache": "Delete Cache",
+        "deletingCache": "Clearing…",
+        "deleteCacheSuccess": "Cache cleared successfully",
+        "deleteCacheError": "Failed to clear cache. Please try again."
       },
       "dangerZone": {
         "title": "Danger Zone",

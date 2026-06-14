@@ -2283,6 +2283,8 @@
         "transportationPlaceholder": "ej. ¿Necesitas transporte desde el hotel al lugar del evento?",
         "dietary": "Añadir pregunta de restricciones alimenticias al RSVP",
         "dietaryDesc": "Los invitados podrán seleccionar entre: Sin restricciones, Vegetariano, Vegano, Sin gluten, Otro, y especificar alergias.",
+        "accessibilityNeeds": "Añadir pregunta de necesidades de accesibilidad al RSVP",
+        "accessibilityNeedsDesc": "Los invitados podrán describir cualquier requisito de accesibilidad como silla de ruedas, necesidades especiales, etc.",
         "extraQuestions": "Preguntas Extra de Sí/No (hasta 3)",
         "enableQuestion": "Habilitar pregunta extra {number}",
         "questionPlaceholder": "Introduce tu pregunta de Sí/No...",
@@ -2297,7 +2299,11 @@
         "submitError": "Error al guardar la configuración. Por favor inténtalo de nuevo.",
         "invitationUrl": "URL General de Invitación",
         "copyUrl": "Copiar al Portapapeles",
-        "copySuccess": "¡URL copiada!"
+        "copySuccess": "¡URL copiada!",
+        "deleteCache": "Eliminar Caché",
+        "deletingCache": "Borrando…",
+        "deleteCacheSuccess": "Caché eliminada con éxito",
+        "deleteCacheError": "Error al eliminar la caché. Por favor, inténtalo de nuevo."
       },
       "dangerZone": {
         "title": "Zona de Peligro",

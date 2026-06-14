@@ -41,6 +41,7 @@ export interface CachedWeddingPageData {
     transportation_question_enabled: boolean;
     transportation_question_text: string | null;
     dietary_restrictions_enabled: boolean;
+    accessibility_needs_enabled: boolean;
     extra_question_1_enabled: boolean;
     extra_question_1_text: string | null;
     extra_question_2_enabled: boolean;
