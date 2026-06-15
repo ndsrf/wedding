@@ -13,7 +13,9 @@
 import { notFound } from 'next/navigation';
 import RedirectWithSpinner from './RedirectWithSpinner';
 
-export const revalidate  = 86400; // 24 h CDN edge cache for the spinner HTML
+// Edge runtime: zero cold start, spinner HTML reaches the browser in milliseconds.
+// Safe because this page does no DB access or Node.js-only imports.
+export const runtime    = 'edge';
 export const dynamicParams = true;
 
 // Initials: 1-3 uppercase ASCII letters followed by 1-4 alphanumeric chars
