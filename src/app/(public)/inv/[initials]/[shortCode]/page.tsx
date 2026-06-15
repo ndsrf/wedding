@@ -2,76 +2,35 @@
  * Short URL redirect page
  * /inv/{INITIALS}/{SHORT_CODE}  →  /rsvp/{magic_token}[?query…]
  *
- * Resolves the short URL against the database and shows a loading spinner
- * before redirecting to the RSVP page. Any query-string parameters
- * (e.g. ?channel=sms) are forwarded to the destination so that
- * channel-attribution tracking is preserved.
+ * The server only validates the URL format and renders the spinner immediately —
+ * no database access happens here.  Token resolution is done client-side via
+ * /api/inv/[initials]/[code] so the spinner appears as fast as possible.
  *
- * Returns 404 (via notFound()) when the initials/code pair does not exist.
- *
- * Performance:
- * - Short URL resolution is served from an in-memory cache (see lib/short-url.ts)
- * - ISR (export const revalidate) caches the rendered page at the CDN edge
- *   on Vercel, eliminating cold-start latency for repeat visitors.
- * - The TTL is controlled by SHORT_URL_CACHE_TTL_HOURS (default 24 h).
+ * ISR caches the spinner HTML at the CDN edge for 24 h, so repeat visitors
+ * get the spinner in ~50 ms from edge without hitting the origin at all.
  */
 
 import { notFound } from 'next/navigation';
-import { resolveShortUrl } from '@/lib/short-url';
 import RedirectWithSpinner from './RedirectWithSpinner';
 
-// ============================================================================
-// ISR Configuration
-// Short URL → magic token mappings are effectively permanent, so we can cache
-// aggressively.  On Vercel this page is served from the CDN edge after the
-// first visit, eliminating any cold-start DB round-trip for repeat visitors.
-//
-// Next.js requires a static literal here (read at build time by the analyser).
-// Set this to match your SHORT_URL_CACHE_TTL_HOURS value × 3600.
-// Runtime-configurable knobs:
-//   • SHORT_URL_CACHE_TTL_HOURS – server in-memory cache TTL (lib/short-url.ts)
-//   • Cache-Control headers      – set per-platform in next.config.js
-// ============================================================================
-export const revalidate = 86400; // 24 hours – keep in sync with SHORT_URL_CACHE_TTL_HOURS
+export const revalidate  = 86400; // 24 h CDN edge cache for the spinner HTML
 export const dynamicParams = true;
 
 // Initials: 1-3 uppercase ASCII letters followed by 1-4 alphanumeric chars
-// (ensureWeddingInitials produces e.g. "LJaB"; seed produces e.g. "AL684")
 const INITIALS_RE = /^[A-Z]{1,3}[a-zA-Z0-9]{1,4}$/;
-// Short code: 5-6 base-62 characters (generateShortCode uses len=5, fallback len=6)
+// Short code: 5-6 base-62 characters
 const CODE_RE     = /^[a-zA-Z0-9]{5,6}$/;
 
 interface Props {
-  params:      Promise<{ initials: string; shortCode: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<{ initials: string; shortCode: string }>;
 }
 
-export default async function ShortUrlPage({ params, searchParams }: Props) {
+export default async function ShortUrlPage({ params }: Props) {
   const { initials, shortCode } = await params;
 
-  // ── format gate ──────────────────────────────────────────────────────────
   if (!INITIALS_RE.test(initials) || !CODE_RE.test(shortCode)) {
     notFound();
   }
 
-  // ── DB look-up ───────────────────────────────────────────────────────────
-  const magicToken = await resolveShortUrl(initials, shortCode);
-  if (!magicToken) {
-    notFound();
-  }
-
-  // ── forward query params (channel tracking, etc.) ───────────────────────
-  const query = await searchParams;
-  const qs    = new URLSearchParams();
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) {
-      const values = Array.isArray(value) ? value : [value];
-      for (const v of values) qs.append(key, v);
-    }
-  }
-
-  const qsSuffix = qs.toString();
-  const destinationUrl = `/rsvp/${magicToken}${qsSuffix ? `?${qsSuffix}` : ''}`;
-
-  return <RedirectWithSpinner destinationUrl={destinationUrl} initials={initials} />;
+  return <RedirectWithSpinner initials={initials} shortCode={shortCode} />;
 }

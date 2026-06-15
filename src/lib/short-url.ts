@@ -16,6 +16,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { getCached, setCached, invalidateCache } from '@/lib/cache/redis';
 
 // ---------------------------------------------------------------------------
 // Short URL resolution cache
@@ -27,8 +28,9 @@ import { prisma } from '@/lib/db/prisma';
 // TTL is driven by SHORT_URL_CACHE_TTL_HOURS (default 24 h).
 // Changing the env var requires a process restart to take effect.
 
-const SHORT_URL_CACHE_TTL_MS =
-  (Number(process.env.SHORT_URL_CACHE_TTL_HOURS) || 24) * 3_600_000;
+const SHORT_URL_CACHE_TTL_HOURS = Number(process.env.SHORT_URL_CACHE_TTL_HOURS) || 24;
+const SHORT_URL_CACHE_TTL_MS   = SHORT_URL_CACHE_TTL_HOURS * 3_600_000;
+const SHORT_URL_REDIS_TTL_S    = SHORT_URL_CACHE_TTL_HOURS * 3600;
 
 interface ShortUrlCacheEntry {
   token: string | null;
@@ -39,6 +41,10 @@ const shortUrlCache = new Map<string, ShortUrlCacheEntry>();
 
 function getShortUrlCacheKey(initials: string, code: string): string {
   return `${initials}:${code}`;
+}
+
+function getRedisKey(initials: string, code: string): string {
+  return `inv:${initials}:${code}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -259,13 +265,20 @@ export async function resolveShortUrl(initials: string, code: string): Promise<s
   const cacheKey = getShortUrlCacheKey(initials, code);
   const now = Date.now();
 
-  // Cache hit
+  // 1. In-memory cache (fastest — same process)
   const cached = shortUrlCache.get(cacheKey);
   if (cached && now - cached.cached_at < SHORT_URL_CACHE_TTL_MS) {
     return cached.token;
   }
 
-  // Cache miss – hit the DB
+  // 2. Redis cache (shared across serverless instances)
+  const redisToken = await getCached<string>(getRedisKey(initials, code));
+  if (redisToken !== null) {
+    shortUrlCache.set(cacheKey, { token: redisToken, cached_at: now });
+    return redisToken;
+  }
+
+  // 3. DB fallback
   const family = await prisma.family.findFirst({
     where: {
       short_url_code: code,
@@ -276,6 +289,10 @@ export async function resolveShortUrl(initials: string, code: string): Promise<s
 
   const token = family?.magic_token ?? null;
   shortUrlCache.set(cacheKey, { token, cached_at: now });
+  if (token) {
+    // Only cache found tokens; null (invalid links) fall through to DB each time
+    await setCached(getRedisKey(initials, code), token, SHORT_URL_REDIS_TTL_S);
+  }
 
   return token;
 }
@@ -286,6 +303,8 @@ export async function resolveShortUrl(initials: string, code: string): Promise<s
  */
 export function invalidateShortUrlCache(initials: string, code: string): void {
   shortUrlCache.delete(getShortUrlCacheKey(initials, code));
+  // Fire-and-forget Redis invalidation; non-fatal if Redis is down
+  invalidateCache(getRedisKey(initials, code)).catch(() => {});
 }
 
 /**
