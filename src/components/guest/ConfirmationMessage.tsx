@@ -74,7 +74,7 @@ export default function ConfirmationMessage({
           </svg>
         </div>
         <h3 className="text-3xl font-bold mb-2" style={{ color: tc }}>
-          {t('guest.rsvp.submitted')} {familyName} 🎉
+          {t('guest.rsvp.submitted', { name: familyName })}
         </h3>
       </div>
 

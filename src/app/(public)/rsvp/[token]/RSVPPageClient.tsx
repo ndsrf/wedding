@@ -246,12 +246,17 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
             }}
           >
             <div className="max-w-4xl mx-auto px-4 py-1 flex justify-between items-center">
-              <h1
-                className="text-xl font-bold"
+              <a 
+                href="#"
+                className="text-xl font-bold hover:opacity-80 transition-opacity"
                 style={{ color: invStyle?.textColor ?? '#111827' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.reload();
+                }}
               >
                 {wedding.couple_names}
-              </h1>
+              </a>
               <LanguageSelector
                 token={token}
                 currentLanguage={family.preferred_language}

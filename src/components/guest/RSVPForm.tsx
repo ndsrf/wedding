@@ -380,7 +380,7 @@ export default function RSVPForm({
         {t('guest.rsvp.title')}
       </h3>
       <p className="text-lg mb-2" style={{ color: tc + 'cc' }}>
-        {t('guest.rsvp.instructions')}
+        {t('guest.rsvp.instructions', { name: family.name })}
       </p>
 
       {/* Error Message */}
