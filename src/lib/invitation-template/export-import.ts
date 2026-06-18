@@ -57,6 +57,7 @@ export const BLOCK_VERSIONS: Record<TemplateBlock['type'], number> = {
   gallery: 1,
   spacer: 1,
   embed: 1,
+  iframe: 1,
   'image-map': 1,
   panel: 2,
   gift: 1,
