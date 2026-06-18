@@ -202,7 +202,15 @@ export interface EmbedBlock {
   height?: string; // Optional reserved height for pre-render placeholder
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock;
+export interface IframeBlock {
+  id: string;
+  type: 'iframe';
+  url: string;        // HTTPS URL of external page (e.g. Lovable app)
+  height: string;     // CSS height, e.g. '600px', '80vh'
+  scrolling?: boolean;
+}
+
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock | IframeBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

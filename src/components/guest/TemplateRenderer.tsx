@@ -3,21 +3,22 @@
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import DOMPurify from 'isomorphic-dompurify';
 import Image from 'next/image';
-import type { 
-  TemplateBlock, 
-  TemplateDesign, 
-  SupportedLanguage, 
-  TextBlock, 
-  ImageBlock, 
-  LocationBlock as LocationBlockType, 
-  CountdownBlock as CountdownBlockType, 
-  ButtonBlock as ButtonBlockType, 
-  GalleryBlock as GalleryBlockType, 
-  SpacerBlock as SpacerBlockType, 
-  EmbedBlock as EmbedBlockType, 
-  ImageMapBlock as ImageMapBlockType, 
+import type {
+  TemplateBlock,
+  TemplateDesign,
+  SupportedLanguage,
+  TextBlock,
+  ImageBlock,
+  LocationBlock as LocationBlockType,
+  CountdownBlock as CountdownBlockType,
+  ButtonBlock as ButtonBlockType,
+  GalleryBlock as GalleryBlockType,
+  SpacerBlock as SpacerBlockType,
+  EmbedBlock as EmbedBlockType,
+  ImageMapBlock as ImageMapBlockType,
   PanelBlock as PanelBlockType,
-  GiftBlock as GiftBlockType
+  GiftBlock as GiftBlockType,
+  IframeBlock as IframeBlockType,
 } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
@@ -399,6 +400,22 @@ function TemplateBlock({
         onOpenPanel={onOpenPanel}
         onScrollToRsvp={onScrollToRsvp}
         isPriority={isPriorityImage}
+      />
+    );
+  }
+
+  if (block.type === 'iframe') {
+    const iframeBlock = block as IframeBlockType;
+    if (!iframeBlock.url || !iframeBlock.url.startsWith('https://')) return null;
+    return (
+      <iframe
+        src={iframeBlock.url}
+        style={{ width: '100%', height: iframeBlock.height, border: 'none', display: 'block' }}
+        scrolling={iframeBlock.scrolling ? 'yes' : 'no'}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        referrerPolicy="no-referrer"
+        loading="lazy"
+        title="Embedded invitation"
       />
     );
   }

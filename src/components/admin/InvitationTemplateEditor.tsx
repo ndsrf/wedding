@@ -17,6 +17,7 @@ import type {
   ImageMapBlock as ImageMapBlockType,
   PanelBlock as PanelBlockType,
   GiftBlock as GiftBlockType,
+  IframeBlock as IframeBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
@@ -27,6 +28,7 @@ import { ButtonBlockEditor } from './ButtonBlockEditor';
 import { GalleryBlockEditor } from './GalleryBlockEditor';
 import { SpacerBlockEditor } from './SpacerBlockEditor';
 import { EmbedBlockEditor } from './EmbedBlockEditor';
+import { IframeBlockEditor } from './IframeBlockEditor';
 import { ImageMapBlockEditor } from './ImageMapBlockEditor';
 import { PanelBlockEditor } from './PanelBlockEditor';
 import { GiftBlockEditor } from './GiftBlockEditor';
@@ -99,6 +101,7 @@ export function InvitationTemplateEditor({
   const isSelectedBlockImageMap = selectedBlock?.type === 'image-map';
   const isSelectedBlockPanel = selectedBlock?.type === 'panel';
   const isSelectedBlockGift = selectedBlock?.type === 'gift';
+  const isSelectedBlockIframe = selectedBlock?.type === 'iframe';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -176,6 +179,8 @@ export function InvitationTemplateEditor({
         newBlock = { id: crypto.randomUUID(), type: 'spacer', height: '2rem' };
       } else if (type === 'embed') {
         newBlock = { id: crypto.randomUUID(), type: 'embed', html: '' };
+      } else if (type === 'iframe') {
+        newBlock = { id: crypto.randomUUID(), type: 'iframe', url: '', height: '600px', scrolling: false };
       } else if (type === 'image-map') {
         newBlock = {
           id: crypto.randomUUID(),
@@ -327,6 +332,15 @@ export function InvitationTemplateEditor({
       ...prev,
       blocks: prev.blocks.map((b) =>
         b.id === blockId && b.type === 'embed' ? ({ ...b, ...updates } as EmbedBlockType) : b
+      ),
+    }));
+  }, []);
+
+  const handleUpdateIframeBlock = useCallback((blockId: string, updates: Partial<IframeBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'iframe' ? ({ ...b, ...updates } as IframeBlockType) : b
       ),
     }));
   }, []);
@@ -528,6 +542,12 @@ export function InvitationTemplateEditor({
               + Embed HTML
             </button>
             <button
+              onClick={() => handleAddBlock('iframe')}
+              className="w-full px-4 py-2 border border-blue-300 rounded hover:bg-blue-50 transition text-blue-700 font-medium"
+            >
+              + Lovable / Iframe
+            </button>
+            <button
               onClick={() => handleAddBlock('image-map')}
               className="w-full px-4 py-2 border border-purple-300 rounded hover:bg-purple-50 transition text-purple-700 font-medium"
             >
@@ -599,6 +619,13 @@ export function InvitationTemplateEditor({
           <EmbedBlockEditor
             block={selectedBlock}
             onUpdate={handleUpdateEmbedBlock}
+          />
+        )}
+
+        {isSelectedBlockIframe && selectedBlock && selectedBlock.type === 'iframe' && (
+          <IframeBlockEditor
+            block={selectedBlock as IframeBlockType}
+            onUpdate={handleUpdateIframeBlock}
           />
         )}
 
@@ -989,6 +1016,14 @@ export function InvitationTemplateEditor({
                       dangerouslySetInnerHTML={{ __html: (block as EmbedBlockType).html }}
                     />
                   ) : null}
+
+                  {block.type === 'iframe' && (
+                    <IframeBlockEditor
+                      block={block as IframeBlockType}
+                      onUpdate={handleUpdateIframeBlock}
+                      canvasMode
+                    />
+                  )}
 
                   {block.type === 'image-map' && (
                     <ImageMapBlockEditor
