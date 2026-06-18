@@ -412,8 +412,6 @@ function TemplateBlock({
         src={iframeBlock.url}
         style={{ width: '100%', height: iframeBlock.height, border: 'none', display: 'block' }}
         scrolling={iframeBlock.scrolling ? 'yes' : 'no'}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-        referrerPolicy="no-referrer"
         loading="lazy"
         title="Embedded invitation"
       />
