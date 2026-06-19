@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import type { IframeBlock } from '@/types/invitation-template';
 
 interface IframeBlockEditorProps {
@@ -21,7 +20,6 @@ function isValidHttpsUrl(value: string) {
 }
 
 export function IframeBlockEditor({ block, onUpdate, canvasMode }: IframeBlockEditorProps) {
-  const [showPreview, setShowPreview] = useState(false);
   const urlValid = isValidHttpsUrl(block.url);
 
   const urlField = (
@@ -82,9 +80,9 @@ export function IframeBlockEditor({ block, onUpdate, canvasMode }: IframeBlockEd
         </label>
       </div>
 
-      <p className="text-xs text-gray-500">
-        If the page doesn&apos;t load, it may have iframe restrictions. Lovable-published apps work by default.
-      </p>
+      <div className="rounded bg-blue-50 border border-blue-200 p-3 text-xs text-blue-700">
+        La preview en el editor no está disponible porque el sitio externo bloquea los iframes en el navegador. En la página del invitado se verá correctamente (Nupci usa un proxy para evitar este bloqueo).
+      </div>
     </div>
   );
 
@@ -93,43 +91,21 @@ export function IframeBlockEditor({ block, onUpdate, canvasMode }: IframeBlockEd
       <div className="p-4 space-y-3">
         {block.url && urlValid ? (
           <>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500 truncate max-w-[70%]">{block.url}</p>
-              <button
-                onClick={() => setShowPreview(!showPreview)}
-                className="text-xs text-blue-600 underline shrink-0"
-              >
-                {showPreview ? 'Hide preview' : 'Show preview'}
-              </button>
+            <div
+              className="w-full rounded border border-dashed border-blue-300 bg-blue-50 flex flex-col items-center justify-center gap-1 text-blue-600 text-sm"
+              style={{ height: block.height }}
+            >
+              <span>🔗 Lovable / iframe</span>
+              <span className="text-xs text-blue-400">{block.url}</span>
+              <span className="text-xs text-blue-400">{block.height}</span>
             </div>
-            {showPreview && (
-              <iframe
-                src={block.url}
-                style={{ width: '100%', height: block.height, border: '1px solid #e5e7eb', borderRadius: '0.375rem' }}
-                scrolling={block.scrolling ? 'yes' : 'no'}
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                referrerPolicy="no-referrer"
-                loading="lazy"
-              />
-            )}
-            {!showPreview && (
-              <div
-                className="w-full rounded border border-dashed border-blue-300 bg-blue-50 flex items-center justify-center text-blue-600 text-sm"
-                style={{ height: block.height }}
-              >
-                🔗 Lovable / iframe — {block.height}
-              </div>
-            )}
+            <details className="text-xs">
+              <summary className="text-blue-600 cursor-pointer">Edit settings</summary>
+              <div className="mt-2">{urlField}</div>
+            </details>
           </>
         ) : (
           urlField
-        )}
-        {block.url && <button onClick={() => setShowPreview(false)} className="hidden">{/* reset */}</button>}
-        {block.url && urlValid && (
-          <details className="text-xs">
-            <summary className="text-blue-600 cursor-pointer">Edit settings</summary>
-            <div className="mt-2">{urlField}</div>
-          </details>
         )}
       </div>
     );
@@ -144,26 +120,12 @@ export function IframeBlockEditor({ block, onUpdate, canvasMode }: IframeBlockEd
       </p>
 
       {block.url && urlValid && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium">Preview</label>
-            <button
-              onClick={() => setShowPreview(!showPreview)}
-              className="text-xs text-blue-600 underline"
-            >
-              {showPreview ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          {showPreview && (
-            <iframe
-              src={block.url}
-              style={{ width: '100%', height: block.height, border: '1px solid #e5e7eb', borderRadius: '0.375rem' }}
-              scrolling={block.scrolling ? 'yes' : 'no'}
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-              referrerPolicy="no-referrer"
-              loading="lazy"
-            />
-          )}
+        <div
+          className="mb-4 w-full rounded border border-dashed border-blue-300 bg-blue-50 flex flex-col items-center justify-center gap-1 text-blue-600 text-sm"
+          style={{ height: '120px' }}
+        >
+          <span>🔗 {block.url}</span>
+          <span className="text-xs text-blue-400">{block.height} — visible to guests</span>
         </div>
       )}
 

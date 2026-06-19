@@ -92,6 +92,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           weddingId={wedding.id}
           iban={wedding.gift_iban ?? undefined}
           isTransparent={true}
+          guestToken={token}
         />
       ) : (
         <div className="max-w-4xl mx-auto px-4 pt-8">

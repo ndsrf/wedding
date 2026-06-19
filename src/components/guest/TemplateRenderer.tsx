@@ -41,6 +41,7 @@ interface TemplateRendererProps {
   weddingId?: string;
   iban?: string;
   isTransparent?: boolean;
+  guestToken?: string; // When provided, iframe blocks are proxied through Nupci to bypass X-Frame-Options
 }
 
 const FONT_NAMES = [
@@ -78,6 +79,7 @@ export default function TemplateRenderer({
   weddingId,
   iban,
   isTransparent = false,
+  guestToken,
 }: TemplateRendererProps) {
   const templateDesign = useMemo(() => {
     if (!design || typeof design !== 'object') return null;
@@ -198,6 +200,7 @@ export default function TemplateRenderer({
               isPriorityImage={index === firstImageIndex}
               weddingId={weddingId}
               iban={iban}
+              guestToken={guestToken}
               onOpenPanel={handleOpenPanel}
               onScrollToRsvp={handleScrollToRsvp}
             />
@@ -227,6 +230,7 @@ interface TemplateBlockProps {
   isPriorityImage?: boolean;
   weddingId?: string;
   iban?: string;
+  guestToken?: string;
   onOpenPanel: (panelId: string) => void;
   onScrollToRsvp: () => void;
 }
@@ -241,6 +245,7 @@ function TemplateBlock({
   isPriorityImage = false,
   weddingId,
   iban,
+  guestToken,
   onOpenPanel,
   onScrollToRsvp,
 }: TemplateBlockProps) {
@@ -407,9 +412,14 @@ function TemplateBlock({
   if (block.type === 'iframe') {
     const iframeBlock = block as IframeBlockType;
     if (!iframeBlock.url || !iframeBlock.url.startsWith('https://')) return null;
+    // Use the server-side proxy when a guest token is available so that
+    // X-Frame-Options on external sites (e.g. Lovable) doesn't block the iframe.
+    const iframeSrc = guestToken
+      ? `/api/guest/${guestToken}/iframe-proxy?url=${encodeURIComponent(iframeBlock.url)}`
+      : iframeBlock.url;
     return (
       <iframe
-        src={iframeBlock.url}
+        src={iframeSrc}
         style={{ width: '100%', height: iframeBlock.height, border: 'none', display: 'block' }}
         scrolling={iframeBlock.scrolling ? 'yes' : 'no'}
         loading="lazy"
