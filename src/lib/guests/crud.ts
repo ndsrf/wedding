@@ -173,7 +173,7 @@ export async function createFamily(
     });
 
     const { labels: rawLabels, ...rest } = familyWithMembers!;
-    return { ...rest, labels: rawLabels.map((la) => la.label) };
+    return { ...rest, labels: (rawLabels || []).map((la) => la.label) };
   });
 
   // Log audit event
@@ -217,7 +217,7 @@ export async function getFamilyWithMembers(
   if (!family) return null;
 
   const { labels: rawLabels, ...rest } = family;
-  return { ...rest, labels: rawLabels.map((la) => la.label) } as FamilyWithMembers;
+  return { ...rest, labels: (rawLabels || []).map((la) => la.label) } as FamilyWithMembers;
 }
 
 /**
@@ -393,7 +393,7 @@ export async function updateFamily(
     });
 
     const { labels: rawLabels, ...rest } = familyWithMembers!;
-    return { ...rest, labels: rawLabels.map((la) => la.label) };
+    return { ...rest, labels: (rawLabels || []).map((la) => la.label) };
   });
 
   // Log audit event

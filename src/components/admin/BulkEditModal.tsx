@@ -273,7 +273,7 @@ export function BulkEditModal({
                         <span className="block text-xs text-gray-500 mb-1">{t('admin.guests.bulkEdit.removeLabel')}</span>
                         <select
                           value={removeLabelId}
-                          onChange={(e) => setNewLabelId ? setRemoveLabelId(e.target.value) : undefined}
+                          onChange={(e) => setRemoveLabelId(e.target.value)}
                           disabled={saving}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm disabled:opacity-50 text-gray-900"
                         >
