@@ -195,7 +195,6 @@ test.describe('API Tests - Wedding Configuration Endpoints', () => {
 
   test('GET /api/admin/wedding - should return 401 for unauthenticated requests', async ({ browser }) => {
     // Create context without authentication
-    // @ts-expect-error - intentional type bypass for test
     const unauthContext = await browser.newContext();
     const page = await unauthContext.newPage();
 
