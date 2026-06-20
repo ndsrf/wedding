@@ -118,7 +118,7 @@ test.describe('API Tests - Wedding Configuration Endpoints', () => {
     // Toggle transportation question
     const updateData = {
       transportation_question_enabled: !currentTransportationEnabled,
-      transportation_question_text: 'Do you need transportation to the venue?',
+      transportation_question_text: { en: 'Do you need transportation to the venue?' },
     };
 
     const patchResponse = await page.request.patch('/api/admin/wedding', {
@@ -195,6 +195,7 @@ test.describe('API Tests - Wedding Configuration Endpoints', () => {
 
   test('GET /api/admin/wedding - should return 401 for unauthenticated requests', async ({ browser }) => {
     // Create context without authentication
+    // @ts-ignore
     const unauthContext = await browser.newContext();
     const page = await unauthContext.newPage();
 
@@ -217,9 +218,9 @@ test.describe('API Tests - Wedding Configuration Endpoints', () => {
     // Enable and set extra question
     const updateData = {
       extra_question_1_enabled: true,
-      extra_question_1_text: 'Will you attend the welcome dinner?',
+      extra_question_1_text: { en: 'Will you attend the welcome dinner?' },
       extra_info_1_enabled: true,
-      extra_info_1_label: 'Hotel Name',
+      extra_info_1_label: { en: 'Hotel Name' },
     };
 
     const response = await page.request.patch('/api/admin/wedding', {
@@ -231,9 +232,9 @@ test.describe('API Tests - Wedding Configuration Endpoints', () => {
     const data = await response.json();
     expect(data.success).toBeTruthy();
     expect(data.data.extra_question_1_enabled).toBe(true);
-    expect(data.data.extra_question_1_text).toBe('Will you attend the welcome dinner?');
+    expect(data.data.extra_question_1_text).toEqual({ en: 'Will you attend the welcome dinner?' });
     expect(data.data.extra_info_1_enabled).toBe(true);
-    expect(data.data.extra_info_1_label).toBe('Hotel Name');
+    expect(data.data.extra_info_1_label).toEqual({ en: 'Hotel Name' });
 
     await page.close();
   });

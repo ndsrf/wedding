@@ -225,10 +225,10 @@ describe('Integration Tests - Wedding Configuration API', () => {
     it('should update RSVP configuration', async () => {
       const updateData = {
         transportation_question_enabled: true,
-        transportation_question_text: 'Do you need a ride?',
+        transportation_question_text: { en: 'Do you need a ride?' },
         dietary_restrictions_enabled: true,
         extra_question_1_enabled: true,
-        extra_question_1_text: 'Will you attend the rehearsal dinner?',
+        extra_question_1_text: { en: 'Will you attend the rehearsal dinner?' },
       };
 
       const request = new NextRequest('http://localhost:3000/api/admin/wedding', {
@@ -245,9 +245,9 @@ describe('Integration Tests - Wedding Configuration API', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.transportation_question_enabled).toBe(true);
-      expect(data.data.transportation_question_text).toBe('Do you need a ride?');
+      expect(data.data.transportation_question_text).toEqual({ en: 'Do you need a ride?' });
       expect(data.data.extra_question_1_enabled).toBe(true);
-      expect(data.data.extra_question_1_text).toBe('Will you attend the rehearsal dinner?');
+      expect(data.data.extra_question_1_text).toEqual({ en: 'Will you attend the rehearsal dinner?' });
 
       // Verify in database
       const weddingInDb = await prisma.wedding.findUnique({
@@ -260,9 +260,9 @@ describe('Integration Tests - Wedding Configuration API', () => {
     it('should update extra info fields configuration', async () => {
       const updateData = {
         extra_info_1_enabled: true,
-        extra_info_1_label: 'Hotel Name',
+        extra_info_1_label: { en: 'Hotel Name' },
         extra_info_2_enabled: true,
-        extra_info_2_label: 'Flight Number',
+        extra_info_2_label: { en: 'Flight Number' },
       };
 
       const request = new NextRequest('http://localhost:3000/api/admin/wedding', {
@@ -279,9 +279,9 @@ describe('Integration Tests - Wedding Configuration API', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.extra_info_1_enabled).toBe(true);
-      expect(data.data.extra_info_1_label).toBe('Hotel Name');
+      expect(data.data.extra_info_1_label).toEqual({ en: 'Hotel Name' });
       expect(data.data.extra_info_2_enabled).toBe(true);
-      expect(data.data.extra_info_2_label).toBe('Flight Number');
+      expect(data.data.extra_info_2_label).toEqual({ en: 'Flight Number' });
     });
 
     it('should return validation error for invalid data', async () => {
