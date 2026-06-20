@@ -70,6 +70,21 @@ const ACCEPTED_GHSAS = [
   // Vulnerability only affects edge case: missing buffer bounds check when buf is provided
   // Risk: Low impact because (1) only authenticated admins use Excel upload (2) vulnerability requires specific conditions
   'GHSA-w5hq-g745-h8pq', // Missing buffer bounds check in v3/v5/v6 when buf is provided
+
+  // @opentelemetry/core - MODERATE severity
+  // Dependency of @hyperdx/browser (observability/telemetry)
+  // No fix available; chain: @hyperdx/browser → @hyperdx/otel-web → @opentelemetry/exporter-trace-otlp-http → @opentelemetry/core
+  // Vulnerability: unbounded memory allocation in W3C Baggage propagation (DoS vector)
+  // Risk: Low in practice; requires malicious W3C Baggage headers; not critical path for wedding app
+  'GHSA-8988-4f7v-96qf', // Unbounded memory allocation in W3C Baggage propagation
+
+  // js-yaml - MODERATE severity
+  // Dependency chain: jest (dev) → babel-plugin-istanbul → @istanbuljs/load-nyc-config → js-yaml
+  // Also: gray-matter → js-yaml
+  // Fix available but requires breaking change: downgrading gray-matter to 2.0.1
+  // Vulnerability: quadratic-complexity DoS via repeated aliases in merge keys
+  // Risk: Zero production risk; only affects build/test toolchain; never loaded at runtime
+  'GHSA-h67p-54hq-rp68', // Quadratic-complexity DoS in merge key handling via repeated aliases
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];
