@@ -35,6 +35,7 @@ export default function GuestsPage() {
         admins: `${plannerBase}/admins`,
         reminders: `${plannerBase}/reminders`,
         saveTheDate: `${plannerBase}/save-the-date`,
+        labels: `${plannerBase}/guests/labels`,
       }}
       isReadOnly={false}
       guestAdditionsOptional

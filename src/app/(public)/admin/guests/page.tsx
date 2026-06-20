@@ -30,6 +30,7 @@ export default function GuestsPage() {
         admins: '/api/admin/admins',
         reminders: '/api/admin/reminders',
         saveTheDate: '/api/admin/save-the-date',
+        labels: '/api/admin/guests/labels',
       }}
       isReadOnly={isReadOnly}
       header={

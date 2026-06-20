@@ -68,6 +68,7 @@ export const createFamilySchema = z.object({
   invited_by_admin_id: z.string().uuid().nullable().optional(),
   private_notes: z.string().nullable().optional(),
   members: z.array(createMemberSchema).default([]),
+  label_ids: z.array(z.string().uuid()).optional(),
   family_dropdown_question_1_answer: z.string().nullable().optional(),
 });
 
@@ -82,6 +83,7 @@ export const updateFamilySchema = z.object({
   invited_by_admin_id: z.string().uuid().nullable().optional(),
   private_notes: z.string().nullable().optional(),
   members: z.array(updateMemberSchema).optional(),
+  label_ids: z.array(z.string().uuid()).optional(),
   // RSVP Question Answers
   transportation_answer: z.boolean().nullable().optional(),
   extra_question_1_answer: z.boolean().nullable().optional(),
