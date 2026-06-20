@@ -68,5 +68,8 @@ public/uploads/
 playwright-report/
 playwright/.auth/
 test-results/
+
+# Other
 v0-page.zip
 everly-clone.zip:Zone.Identifier
+.claude/worktrees/

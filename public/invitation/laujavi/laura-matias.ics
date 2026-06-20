@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Laura y Matias//Boda 2026//ES
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:boda-laura-matias-2026@everly
+DTSTAMP:20260101T000000Z
+DTSTART:20260725T163000Z
+DTEND:20260726T020000Z
+SUMMARY:Boda Laura & Matías
+DESCRIPTION:¡Nos casamos! Os esperamos para celebrarlo en el Pazo de Villarés.
+LOCATION:Pazo de Villarés, Galicia
+END:VEVENT
+END:VCALENDAR
