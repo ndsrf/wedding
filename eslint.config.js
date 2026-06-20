@@ -70,4 +70,10 @@ module.exports = [
       'no-undef': 'off',
     },
   },
+  {
+    files: ['tests/**/*.{ts,tsx}', '**/*.{test,spec}.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 ];
