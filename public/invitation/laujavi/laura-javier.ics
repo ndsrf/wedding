@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Laura y Javier//Boda 2026//ES
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:boda-laura-javier-2026@everly
+DTSTAMP:20260101T000000Z
+DTSTART:20261219T120000Z
+DTEND:20261220T000000Z
+SUMMARY:Boda Laura & Javier
+DESCRIPTION:¡Nos casamos! Os esperamos para celebrarlo en el Palacio Monte Miramar.
+LOCATION:Palacio Monte Miramar, Málaga
+END:VEVENT
+END:VCALENDAR

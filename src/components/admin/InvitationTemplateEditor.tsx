@@ -223,7 +223,7 @@ export function InvitationTemplateEditor({
         newBlock = {
           id: crypto.randomUUID(),
           type: 'minisite',
-          folderName: '',
+          folderNames: { ES: '', EN: '', FR: '', IT: '', DE: '' },
         };
       } else {
         return;
@@ -669,6 +669,8 @@ export function InvitationTemplateEditor({
         {isSelectedBlockMinisite && selectedBlock && selectedBlock.type === 'minisite' && (
           <MinisiteBlockEditor
             block={selectedBlock as MinisiteBlockType}
+            activeLanguage={activeLanguage}
+            onLanguageChange={setActiveLanguage}
             onUpdate={handleUpdateMinisiteBlock}
           />
         )}
@@ -1055,7 +1057,12 @@ export function InvitationTemplateEditor({
 
                   {block.type === 'minisite' && (
                     <MinisiteBlock
-                      folderName={(block as MinisiteBlockType).folderName}
+                      folderName={
+                        (block as MinisiteBlockType).folderNames?.[activeLanguage] ||
+                        (block as MinisiteBlockType).folderNames?.['EN'] ||
+                        (block as MinisiteBlockType).folderNames?.['ES'] ||
+                        ''
+                      }
                     />
                   )}
                 </div>

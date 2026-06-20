@@ -407,7 +407,12 @@ function TemplateBlock({
 
   if (block.type === 'minisite') {
     const minisiteBlock = block as MinisiteBlockType;
-    return <MinisiteBlock folderName={minisiteBlock.folderName} />;
+    const folderName = 
+      minisiteBlock.folderNames?.[language] ||
+      minisiteBlock.folderNames?.['EN'] ||
+      minisiteBlock.folderNames?.['ES'] ||
+      '';
+    return <MinisiteBlock folderName={folderName} />;
   }
 
   // panel blocks are rendered as modals at the TemplateRenderer level, not inline

@@ -325,18 +325,33 @@ describe('migrateBlock', () => {
   });
 
   describe('minisite block', () => {
-    it('migrates a minisite block preserving folderName', () => {
-      const raw = { _version: 1, id: 'mini-1', type: 'minisite', folderName: 'laujavi' };
+    it('migrates a minisite block preserving folderNames', () => {
+      const raw = {
+        _version: 1,
+        id: 'mini-1',
+        type: 'minisite',
+        folderNames: { ES: 'laujavi', EN: 'laujavi_en', FR: '', IT: '', DE: '' },
+      };
       const migrated = migrateBlock(raw) as any;
       expect(migrated.type).toBe('minisite');
-      expect(migrated.folderName).toBe('laujavi');
+      expect(migrated.folderNames.ES).toBe('laujavi');
+      expect(migrated.folderNames.EN).toBe('laujavi_en');
       expect(migrated._version).toBeUndefined();
     });
 
-    it('fills missing folderName with empty string', () => {
+    it('migrates old single folderName field to localized folderNames for backwards compatibility', () => {
+      const raw = { _version: 1, id: 'mini-1', type: 'minisite', folderName: 'laujavi' };
+      const migrated = migrateBlock(raw) as any;
+      expect(migrated.type).toBe('minisite');
+      expect(migrated.folderNames.ES).toBe('laujavi');
+      expect(migrated.folderNames.EN).toBe('laujavi');
+      expect(migrated.folderNames.DE).toBe('laujavi');
+    });
+
+    it('fills missing folderNames with empty localized object', () => {
       const raw = { type: 'minisite', id: 'mini-2' };
       const migrated = migrateBlock(raw) as any;
-      expect(migrated.folderName).toBe('');
+      expect(migrated.folderNames).toEqual({ ES: '', EN: '', FR: '', IT: '', DE: '' });
     });
   });
 

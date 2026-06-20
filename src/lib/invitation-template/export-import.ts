@@ -240,11 +240,22 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
     }
 
     case 'minisite': {
-      const b = block as Partial<MinisiteBlock>;
+      const b = block as Partial<MinisiteBlock> & { folderName?: string };
+      const defaultFolderNames = { ES: '', EN: '', FR: '', IT: '', DE: '' };
+      let folderNames = b.folderNames ?? { ...defaultFolderNames };
+      if (b.folderName && !b.folderNames) {
+        folderNames = {
+          ES: b.folderName,
+          EN: b.folderName,
+          FR: b.folderName,
+          IT: b.folderName,
+          DE: b.folderName,
+        };
+      }
       return {
         id: b.id ?? randomUUID(),
         type: 'minisite',
-        folderName: b.folderName ?? '',
+        folderNames,
       };
     }
 

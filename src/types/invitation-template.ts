@@ -205,7 +205,7 @@ export interface EmbedBlock {
 export interface MinisiteBlock {
   id: string;
   type: 'minisite';
-  folderName: string;
+  folderNames: LocalizedContent;
 }
 
 export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock | MinisiteBlock;
