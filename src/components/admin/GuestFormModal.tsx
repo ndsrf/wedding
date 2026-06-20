@@ -497,8 +497,8 @@ export function GuestFormModal({
               </p>
             </div>
 
-            {/* RSVP Question Answers - Only show in edit mode when questions are configured */}
-            {mode === 'edit' && weddingConfig && (
+            {/* RSVP Question Answers - Show in both add and edit modes when questions are configured */}
+            {weddingConfig && (
               weddingConfig.transportation_question_enabled ||
               weddingConfig.extra_question_1_enabled ||
               weddingConfig.extra_question_2_enabled ||
