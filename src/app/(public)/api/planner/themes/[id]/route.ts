@@ -258,7 +258,7 @@ export async function PATCH(
 
       for (const wedding of affectedWeddings) {
         await reRenderWeddingTemplates(wedding.id);
-        invalidateWeddingPageCache(wedding.id);
+        await invalidateWeddingPageCache(wedding.id);
         await revalidateWeddingRSVPPages(wedding.id);
       }
     }

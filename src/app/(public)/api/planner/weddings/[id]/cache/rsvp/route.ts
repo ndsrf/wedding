@@ -32,7 +32,7 @@ export async function DELETE(
   const denied = await validatePlannerAccess(user.planner_id, weddingId);
   if (denied) return denied;
 
-  invalidateWeddingPageCache(weddingId);
+  await invalidateWeddingPageCache(weddingId);
   await revalidateWeddingRSVPPages(weddingId);
 
   const response: APIResponse = { success: true };

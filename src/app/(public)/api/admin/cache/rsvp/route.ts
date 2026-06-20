@@ -23,7 +23,7 @@ export async function DELETE(): Promise<NextResponse> {
     return NextResponse.json(response, { status: 403 });
   }
 
-  invalidateWeddingPageCache(user.wedding_id);
+  await invalidateWeddingPageCache(user.wedding_id);
   await revalidateWeddingRSVPPages(user.wedding_id);
 
   const response: APIResponse = { success: true };

@@ -383,17 +383,11 @@ export async function PATCH(
     const wedding = await prisma.wedding.update({ where: { id: weddingId }, data: updateData });
 
     const themeChanged = validatedData.theme_id !== undefined && validatedData.theme_id !== currentWedding.theme_id;
-    const weddingDayThemeChanged = validatedData.wedding_day_theme_id !== undefined && validatedData.wedding_day_theme_id !== currentWedding.wedding_day_theme_id;
     if (themeChanged) {
       await reRenderWeddingTemplates(weddingId);
-      invalidateWeddingPageCache(weddingId);
-      await revalidateWeddingRSVPPages(weddingId);
-    } else if (weddingDayThemeChanged) {
-      invalidateWeddingPageCache(weddingId);
-      await revalidateWeddingRSVPPages(weddingId);
-    } else {
-      invalidateWeddingPageCache(weddingId);
     }
+    await invalidateWeddingPageCache(weddingId);
+    await revalidateWeddingRSVPPages(weddingId);
 
     await Promise.all([
       invalidateCache(CACHE_KEYS.adminWedding(weddingId)),

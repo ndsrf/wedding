@@ -41,6 +41,14 @@ export async function revalidateWeddingRSVPPages(weddingId: string): Promise<voi
       }
     }
 
+    // Also revalidate the dynamic path layout/page patterns as a safety net
+    try {
+      revalidatePath('/rsvp/[token]', 'page');
+      revalidatePath('/rsvp/[token]', 'layout');
+    } catch (e) {
+      console.warn('[Revalidation] Failed pattern revalidation:', e);
+    }
+
     console.log(`[Revalidation] Successfully revalidated ${revalidatedCount} RSVP pages for wedding ${weddingId}`);
   } catch (error) {
     console.error(`[Revalidation] Failed to revalidate RSVP pages for wedding ${weddingId}:`, error);
@@ -56,6 +64,12 @@ export async function revalidateWeddingRSVPPages(weddingId: string): Promise<voi
 export function revalidateRSVPPage(token: string): void {
   try {
     revalidatePath(`/rsvp/${token}`);
+    try {
+      revalidatePath('/rsvp/[token]', 'page');
+      revalidatePath('/rsvp/[token]', 'layout');
+    } catch {
+      // Ignored
+    }
     console.log(`[Revalidation] Successfully revalidated RSVP page for token ${token}`);
   } catch (error) {
     console.error(`[Revalidation] Failed to revalidate RSVP page for token ${token}:`, error);

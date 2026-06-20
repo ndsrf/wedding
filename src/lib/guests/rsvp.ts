@@ -78,7 +78,7 @@ export const getRSVPPageData = cache(async (
     const { family, weddingId } = validation;
 
     // 2. Per-wedding cache
-    let cachedData = getWeddingPageCache(weddingId);
+    let cachedData = await getWeddingPageCache(weddingId);
 
     if (!cachedData) {
       // Cache miss – fetch the full wedding row (with theme) and the active
@@ -226,7 +226,7 @@ export const getRSVPPageData = cache(async (
         }),
       };
 
-      setWeddingPageCache(weddingId, cachedData as CachedWeddingPageData);
+      await setWeddingPageCache(weddingId, cachedData as CachedWeddingPageData);
     }
 
     // 3. Tracking (Fire-and-forget)

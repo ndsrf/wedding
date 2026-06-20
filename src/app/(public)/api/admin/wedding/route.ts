@@ -591,22 +591,16 @@ export async function PATCH(request: NextRequest) {
       data: updateData,
     });
 
-    // Determine what changed to decide which caches to bust
+    // Determine if theme changed to re-render templates
     const themeChanged = validatedData.theme_id !== undefined && validatedData.theme_id !== currentWedding.theme_id;
-    const weddingDayThemeChanged = validatedData.wedding_day_theme_id !== undefined && validatedData.wedding_day_theme_id !== currentWedding.wedding_day_theme_id;
-    const templateChanged = validatedData.invitation_template_id !== undefined && validatedData.invitation_template_id !== currentWedding.invitation_template_id;
 
     if (themeChanged) {
       await reRenderWeddingTemplates(user.wedding_id);
     }
 
-    // Always clear the server-side in-memory cache
-    invalidateWeddingPageCache(user.wedding_id);
-
-    // Bust ISR page cache whenever anything visible to guests changes
-    if (themeChanged || weddingDayThemeChanged || templateChanged) {
-      await revalidateWeddingRSVPPages(user.wedding_id);
-    }
+    // Always clear the server-side cache and bust ISR page caches on config update
+    await invalidateWeddingPageCache(user.wedding_id);
+    await revalidateWeddingRSVPPages(user.wedding_id);
 
     // Invalidate caches so the next page/API load fetches fresh data
     await Promise.all([

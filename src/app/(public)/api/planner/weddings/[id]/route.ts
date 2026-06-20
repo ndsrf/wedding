@@ -469,14 +469,13 @@ export async function PATCH(
       }
     }
 
-    // Re-render templates and bust ISR pages if theme changed
+    // Re-render templates if theme changed
     if (validatedData.theme_id !== undefined && validatedData.theme_id !== existingWedding.theme_id) {
       await reRenderWeddingTemplates(weddingId);
-      invalidateWeddingPageCache(weddingId);
-      await revalidateWeddingRSVPPages(weddingId);
-    } else {
-      invalidateWeddingPageCache(weddingId);
     }
+    // Always clear cache and bust ISR pages on wedding update
+    await invalidateWeddingPageCache(weddingId);
+    await revalidateWeddingRSVPPages(weddingId);
 
     // Invalidate all caches that include wedding config fields
     await Promise.all([

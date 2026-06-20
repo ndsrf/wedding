@@ -108,23 +108,35 @@ interface CacheEntry {
 // CACHE
 // ============================================================================
 
+import { getCached, setCached, invalidateCache, getClient } from './redis';
+
 /**
  * Safety-net TTL driven by RSVP_CACHE_TTL_HOURS env var (default 1 h).
  * Parsed once at module load; changing the env var requires a restart.
  */
 const CACHE_TTL_MS = (Number(process.env.RSVP_CACHE_TTL_HOURS) || 1) * 3_600_000;
+const CACHE_TTL_SECONDS = (Number(process.env.RSVP_CACHE_TTL_HOURS) || 1) * 3600;
 
-const cache = new Map<string, CacheEntry>();
+const localCache = new Map<string, CacheEntry>();
 
 /**
  * Return cached per-wedding data for the given wedding, or null if missing / expired.
  */
-export function getWeddingPageCache(weddingId: string): CachedWeddingPageData | null {
-  const entry = cache.get(weddingId);
+export async function getWeddingPageCache(weddingId: string): Promise<CachedWeddingPageData | null> {
+  if (getClient()) {
+    try {
+      const data = await getCached<CachedWeddingPageData>(`wedding:rsvp:page:${weddingId}`);
+      if (data) return data;
+    } catch (err) {
+      console.warn('[RSVP Cache] Failed to get from Redis:', err);
+    }
+  }
+
+  const entry = localCache.get(weddingId);
   if (!entry) return null;
 
   if (Date.now() - entry.cached_at.getTime() > CACHE_TTL_MS) {
-    cache.delete(weddingId);
+    localCache.delete(weddingId);
     return null;
   }
 
@@ -134,8 +146,17 @@ export function getWeddingPageCache(weddingId: string): CachedWeddingPageData | 
 /**
  * Store per-wedding data in the cache.
  */
-export function setWeddingPageCache(weddingId: string, data: CachedWeddingPageData): void {
-  cache.set(weddingId, { data, cached_at: new Date() });
+export async function setWeddingPageCache(weddingId: string, data: CachedWeddingPageData): Promise<void> {
+  if (getClient()) {
+    try {
+      await setCached(`wedding:rsvp:page:${weddingId}`, data, CACHE_TTL_SECONDS);
+      return;
+    } catch (err) {
+      console.warn('[RSVP Cache] Failed to set to Redis:', err);
+    }
+  }
+
+  localCache.set(weddingId, { data, cached_at: new Date() });
 }
 
 /**
@@ -143,6 +164,14 @@ export function setWeddingPageCache(weddingId: string, data: CachedWeddingPageDa
  * creates, updates, or deletes an invitation template, or updates wedding
  * settings (theme, active template, config fields, etc.).
  */
-export function invalidateWeddingPageCache(weddingId: string): void {
-  cache.delete(weddingId);
+export async function invalidateWeddingPageCache(weddingId: string): Promise<void> {
+  if (getClient()) {
+    try {
+      await invalidateCache(`wedding:rsvp:page:${weddingId}`);
+    } catch (err) {
+      console.warn('[RSVP Cache] Failed to invalidate in Redis:', err);
+    }
+  }
+
+  localCache.delete(weddingId);
 }
