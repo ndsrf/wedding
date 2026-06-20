@@ -22,6 +22,16 @@ export const createMemberSchema = z.object({
   age: z.number().int().min(0).max(150).nullable().optional(),
   dietary_restrictions: z.string().nullable().optional(),
   accessibility_needs: z.string().nullable().optional(),
+  // Guest-level RSVP answers
+  guest_yn_question_1_answer: z.boolean().nullable().optional(),
+  guest_yn_question_2_answer: z.boolean().nullable().optional(),
+  guest_yn_question_3_answer: z.boolean().nullable().optional(),
+  guest_dropdown_question_1_answer: z.string().nullable().optional(),
+  guest_dropdown_question_2_answer: z.string().nullable().optional(),
+  guest_dropdown_question_3_answer: z.string().nullable().optional(),
+  guest_text_question_1_answer: z.string().nullable().optional(),
+  guest_text_question_2_answer: z.string().nullable().optional(),
+  guest_text_question_3_answer: z.string().nullable().optional(),
 });
 
 // Update member input schema
@@ -34,6 +44,16 @@ export const updateMemberSchema = z.object({
   dietary_restrictions: z.string().nullable().optional(),
   accessibility_needs: z.string().nullable().optional(),
   _delete: z.boolean().optional(), // If true, delete this member
+  // Guest-level RSVP answers
+  guest_yn_question_1_answer: z.boolean().nullable().optional(),
+  guest_yn_question_2_answer: z.boolean().nullable().optional(),
+  guest_yn_question_3_answer: z.boolean().nullable().optional(),
+  guest_dropdown_question_1_answer: z.string().nullable().optional(),
+  guest_dropdown_question_2_answer: z.string().nullable().optional(),
+  guest_dropdown_question_3_answer: z.string().nullable().optional(),
+  guest_text_question_1_answer: z.string().nullable().optional(),
+  guest_text_question_2_answer: z.string().nullable().optional(),
+  guest_text_question_3_answer: z.string().nullable().optional(),
 });
 
 // Create family input schema
@@ -48,6 +68,7 @@ export const createFamilySchema = z.object({
   invited_by_admin_id: z.string().uuid().nullable().optional(),
   private_notes: z.string().nullable().optional(),
   members: z.array(createMemberSchema).default([]),
+  family_dropdown_question_1_answer: z.string().nullable().optional(),
 });
 
 // Update family input schema
@@ -69,6 +90,7 @@ export const updateFamilySchema = z.object({
   extra_info_1_value: z.string().nullable().optional(),
   extra_info_2_value: z.string().nullable().optional(),
   extra_info_3_value: z.string().nullable().optional(),
+  family_dropdown_question_1_answer: z.string().nullable().optional(),
 });
 
 // Export types

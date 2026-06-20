@@ -127,6 +127,15 @@ export async function createFamily(
           dietary_restrictions: member.dietary_restrictions || null,
           accessibility_needs: member.accessibility_needs || null,
           added_by_guest: false,
+          guest_yn_question_1_answer: member.guest_yn_question_1_answer || null,
+          guest_yn_question_2_answer: member.guest_yn_question_2_answer || null,
+          guest_yn_question_3_answer: member.guest_yn_question_3_answer || null,
+          guest_dropdown_question_1_answer: member.guest_dropdown_question_1_answer || null,
+          guest_dropdown_question_2_answer: member.guest_dropdown_question_2_answer || null,
+          guest_dropdown_question_3_answer: member.guest_dropdown_question_3_answer || null,
+          guest_text_question_1_answer: member.guest_text_question_1_answer || null,
+          guest_text_question_2_answer: member.guest_text_question_2_answer || null,
+          guest_text_question_3_answer: member.guest_text_question_3_answer || null,
         })),
       });
 
@@ -252,6 +261,8 @@ export async function updateFamily(
       familyUpdateData.extra_info_2_value = validatedInput.extra_info_2_value;
     if (validatedInput.extra_info_3_value !== undefined)
       familyUpdateData.extra_info_3_value = validatedInput.extra_info_3_value;
+    if (validatedInput.family_dropdown_question_1_answer !== undefined)
+      familyUpdateData.family_dropdown_question_1_answer = validatedInput.family_dropdown_question_1_answer;
 
     await tx.family.update({
       where: { id: family_id },
@@ -277,6 +288,24 @@ export async function updateFamily(
             memberUpdateData.dietary_restrictions = memberInput.dietary_restrictions;
           if (memberInput.accessibility_needs !== undefined)
             memberUpdateData.accessibility_needs = memberInput.accessibility_needs;
+          if (memberInput.guest_yn_question_1_answer !== undefined)
+            memberUpdateData.guest_yn_question_1_answer = memberInput.guest_yn_question_1_answer;
+          if (memberInput.guest_yn_question_2_answer !== undefined)
+            memberUpdateData.guest_yn_question_2_answer = memberInput.guest_yn_question_2_answer;
+          if (memberInput.guest_yn_question_3_answer !== undefined)
+            memberUpdateData.guest_yn_question_3_answer = memberInput.guest_yn_question_3_answer;
+          if (memberInput.guest_dropdown_question_1_answer !== undefined)
+            memberUpdateData.guest_dropdown_question_1_answer = memberInput.guest_dropdown_question_1_answer;
+          if (memberInput.guest_dropdown_question_2_answer !== undefined)
+            memberUpdateData.guest_dropdown_question_2_answer = memberInput.guest_dropdown_question_2_answer;
+          if (memberInput.guest_dropdown_question_3_answer !== undefined)
+            memberUpdateData.guest_dropdown_question_3_answer = memberInput.guest_dropdown_question_3_answer;
+          if (memberInput.guest_text_question_1_answer !== undefined)
+            memberUpdateData.guest_text_question_1_answer = memberInput.guest_text_question_1_answer;
+          if (memberInput.guest_text_question_2_answer !== undefined)
+            memberUpdateData.guest_text_question_2_answer = memberInput.guest_text_question_2_answer;
+          if (memberInput.guest_text_question_3_answer !== undefined)
+            memberUpdateData.guest_text_question_3_answer = memberInput.guest_text_question_3_answer;
 
           await tx.familyMember.update({
             where: { id: memberInput.id },
@@ -293,6 +322,15 @@ export async function updateFamily(
               dietary_restrictions: memberInput.dietary_restrictions || null,
               accessibility_needs: memberInput.accessibility_needs || null,
               added_by_guest: false,
+              guest_yn_question_1_answer: memberInput.guest_yn_question_1_answer || null,
+              guest_yn_question_2_answer: memberInput.guest_yn_question_2_answer || null,
+              guest_yn_question_3_answer: memberInput.guest_yn_question_3_answer || null,
+              guest_dropdown_question_1_answer: memberInput.guest_dropdown_question_1_answer || null,
+              guest_dropdown_question_2_answer: memberInput.guest_dropdown_question_2_answer || null,
+              guest_dropdown_question_3_answer: memberInput.guest_dropdown_question_3_answer || null,
+              guest_text_question_1_answer: memberInput.guest_text_question_1_answer || null,
+              guest_text_question_2_answer: memberInput.guest_text_question_2_answer || null,
+              guest_text_question_3_answer: memberInput.guest_text_question_3_answer || null,
             },
           });
         }

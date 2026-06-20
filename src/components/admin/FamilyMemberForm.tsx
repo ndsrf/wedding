@@ -6,8 +6,8 @@
 
 'use client';
 
-import React from 'react';
-import { useTranslations } from 'next-intl';
+import React, { useState, useEffect } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import type { MemberType } from '@/types/models';
 
 export interface FamilyMemberFormData {
@@ -19,15 +19,58 @@ export interface FamilyMemberFormData {
   dietary_restrictions?: string | null;
   accessibility_needs?: string | null;
   _delete?: boolean;
+  guest_yn_question_1_answer?: boolean | null;
+  guest_yn_question_2_answer?: boolean | null;
+  guest_yn_question_3_answer?: boolean | null;
+  guest_dropdown_question_1_answer?: string | null;
+  guest_dropdown_question_2_answer?: string | null;
+  guest_dropdown_question_3_answer?: string | null;
+  guest_text_question_1_answer?: string | null;
+  guest_text_question_2_answer?: string | null;
+  guest_text_question_3_answer?: string | null;
 }
 
 interface FamilyMemberFormProps {
   members: FamilyMemberFormData[];
   onChange: (members: FamilyMemberFormData[]) => void;
+  weddingConfig?: any;
 }
 
-export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
+function resolveLabel(map: Record<string, string> | null | any, locale: string): string {
+  if (!map) return '';
+  if (typeof map === 'string') return map;
+  return map?.[locale] || map?.['en'] || map?.['es'] || '';
+}
+
+function resolveOptions(map: Record<string, string[]> | null | any, locale: string): string[] {
+  if (!map) return [];
+  return map?.[locale] || map?.['en'] || map?.['es'] || [];
+}
+
+function parseOption(raw: string): { label: string; value: string } {
+  const idx = raw.indexOf('||');
+  return idx === -1 ? { label: raw, value: raw } : { label: raw.slice(0, idx), value: raw.slice(idx + 2) };
+}
+
+export function FamilyMemberForm({ members, onChange, weddingConfig }: FamilyMemberFormProps) {
   const t = useTranslations();
+  const locale = useLocale();
+  const [expandedGuests, setExpandedGuests] = useState<Record<number, boolean>>({});
+
+  // Initialize expanded state for members who have already answered the RSVP
+  useEffect(() => {
+    const initial: Record<number, boolean> = {};
+    members.forEach((m, idx) => {
+      if (m.attending !== null && m.attending !== undefined) {
+        initial[idx] = true;
+      }
+    });
+    setExpandedGuests((prev) => ({ ...initial, ...prev }));
+  }, [members]);
+
+  const toggleGuestExpanded = (index: number) => {
+    setExpandedGuests((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
 
   const addMember = () => {
     onChange([
@@ -125,9 +168,9 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               {/* Name */}
-              <div>
+              <div className="md:col-span-2">
                 <label htmlFor={`member-name-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
                   {t('guest.members.name')} <span className="text-red-500">*</span>
                 </label>
@@ -142,7 +185,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
               </div>
 
               {/* Type */}
-              <div>
+              <div className="md:col-span-1">
                 <label htmlFor={`member-type-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
                   {t('guest.members.type')} <span className="text-red-500">*</span>
                 </label>
@@ -160,7 +203,7 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
               </div>
 
               {/* Age */}
-              <div>
+              <div className="md:col-span-1">
                 <label htmlFor={`member-age-${index}`} className="block text-sm font-medium text-gray-700 mb-1">{t('guest.members.age')}</label>
                 <input
                   id={`member-age-${index}`}
@@ -174,39 +217,277 @@ export function FamilyMemberForm({ members, onChange }: FamilyMemberFormProps) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
                 />
               </div>
-
-              {/* Dietary Restrictions */}
-              <div>
-                <label htmlFor={`member-dietary-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('guest.rsvp.dietaryRestrictions')}
-                </label>
-                <input
-                  id={`member-dietary-${index}`}
-                  type="text"
-                  value={member.dietary_restrictions || ''}
-                  onChange={(e) =>
-                    updateMember(index, 'dietary_restrictions', e.target.value || null)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                  placeholder={t('guest.rsvp.dietaryPlaceholder')}
-                />
-              </div>
             </div>
 
-            {/* Accessibility Needs */}
-            <div>
-              <label htmlFor={`member-accessibility-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                {t('guest.rsvp.accessibilityNeeds')}
-              </label>
-              <input
-                id={`member-accessibility-${index}`}
-                type="text"
-                value={member.accessibility_needs || ''}
-                onChange={(e) => updateMember(index, 'accessibility_needs', e.target.value || null)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                placeholder={t('guest.rsvp.accessibilityPlaceholder')}
-              />
-            </div>
+            {/* Guest RSVP Questions (Collapsable) */}
+            {(() => {
+              const hasGuestQuestions = weddingConfig && (
+                weddingConfig.dietary_restrictions_enabled ||
+                weddingConfig.accessibility_needs_enabled ||
+                weddingConfig.guest_yn_question_1_enabled ||
+                weddingConfig.guest_yn_question_2_enabled ||
+                weddingConfig.guest_yn_question_3_enabled ||
+                weddingConfig.guest_dropdown_question_1_enabled ||
+                weddingConfig.guest_dropdown_question_2_enabled ||
+                weddingConfig.guest_dropdown_question_3_enabled ||
+                weddingConfig.guest_text_question_1_enabled ||
+                weddingConfig.guest_text_question_2_enabled ||
+                weddingConfig.guest_text_question_3_enabled
+              );
+
+              if (!hasGuestQuestions) return null;
+
+              const isExpanded = expandedGuests[index] || false;
+
+              return (
+                <div className="border-t border-gray-200 pt-3 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleGuestExpanded(index)}
+                    className="w-full flex items-center justify-between text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
+                  >
+                    <span>{t('admin.guests.form.rsvpAnswers')}</span>
+                    <svg
+                      className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="mt-3 space-y-3 pl-1">
+                      {/* Dietary Restrictions */}
+                      {weddingConfig.dietary_restrictions_enabled && (
+                        <div>
+                          <label htmlFor={`member-dietary-${index}`} className="block text-xs font-medium text-gray-600 mb-1">
+                            {t('guest.rsvp.dietaryRestrictions')}
+                          </label>
+                          <input
+                            id={`member-dietary-${index}`}
+                            type="text"
+                            value={member.dietary_restrictions || ''}
+                            onChange={(e) =>
+                              updateMember(index, 'dietary_restrictions', e.target.value || null)
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                            placeholder={t('guest.rsvp.dietaryPlaceholder')}
+                          />
+                        </div>
+                      )}
+
+                      {/* Accessibility Needs */}
+                      {weddingConfig.accessibility_needs_enabled && (
+                        <div>
+                          <label htmlFor={`member-accessibility-${index}`} className="block text-xs font-medium text-gray-600 mb-1">
+                            {t('guest.rsvp.accessibilityNeeds')}
+                          </label>
+                          <input
+                            id={`member-accessibility-${index}`}
+                            type="text"
+                            value={member.accessibility_needs || ''}
+                            onChange={(e) => updateMember(index, 'accessibility_needs', e.target.value || null)}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                            placeholder={t('guest.rsvp.accessibilityPlaceholder')}
+                          />
+                        </div>
+                      )}
+
+                      {/* Guest YN 1 */}
+                      {weddingConfig.guest_yn_question_1_enabled && weddingConfig.guest_yn_question_1_text && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_yn_question_1_text, locale)}
+                          </label>
+                          <select
+                            value={member.guest_yn_question_1_answer === null ? '' : member.guest_yn_question_1_answer ? 'yes' : 'no'}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_yn_question_1_answer', e.target.value === '' ? null : e.target.value === 'yes')
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          >
+                            <option value="">-</option>
+                            <option value="yes">{t('common.yes')}</option>
+                            <option value="no">{t('common.no')}</option>
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Guest YN 2 */}
+                      {weddingConfig.guest_yn_question_2_enabled && weddingConfig.guest_yn_question_2_text && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_yn_question_2_text, locale)}
+                          </label>
+                          <select
+                            value={member.guest_yn_question_2_answer === null ? '' : member.guest_yn_question_2_answer ? 'yes' : 'no'}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_yn_question_2_answer', e.target.value === '' ? null : e.target.value === 'yes')
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          >
+                            <option value="">-</option>
+                            <option value="yes">{t('common.yes')}</option>
+                            <option value="no">{t('common.no')}</option>
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Guest YN 3 */}
+                      {weddingConfig.guest_yn_question_3_enabled && weddingConfig.guest_yn_question_3_text && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_yn_question_3_text, locale)}
+                          </label>
+                          <select
+                            value={member.guest_yn_question_3_answer === null ? '' : member.guest_yn_question_3_answer ? 'yes' : 'no'}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_yn_question_3_answer', e.target.value === '' ? null : e.target.value === 'yes')
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          >
+                            <option value="">-</option>
+                            <option value="yes">{t('common.yes')}</option>
+                            <option value="no">{t('common.no')}</option>
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Guest Dropdown 1 */}
+                      {weddingConfig.guest_dropdown_question_1_enabled && weddingConfig.guest_dropdown_question_1_label && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_dropdown_question_1_label, locale)}
+                          </label>
+                          <select
+                            value={member.guest_dropdown_question_1_answer || ''}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_dropdown_question_1_answer', e.target.value || null)
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          >
+                            <option value="">-</option>
+                            {resolveOptions(weddingConfig.guest_dropdown_question_1_options, locale).map((opt, i) => {
+                              const parsed = parseOption(opt);
+                              return (
+                                <option key={i} value={parsed.value}>
+                                  {parsed.label}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Guest Dropdown 2 */}
+                      {weddingConfig.guest_dropdown_question_2_enabled && weddingConfig.guest_dropdown_question_2_label && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_dropdown_question_2_label, locale)}
+                          </label>
+                          <select
+                            value={member.guest_dropdown_question_2_answer || ''}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_dropdown_question_2_answer', e.target.value || null)
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          >
+                            <option value="">-</option>
+                            {resolveOptions(weddingConfig.guest_dropdown_question_2_options, locale).map((opt, i) => {
+                              const parsed = parseOption(opt);
+                              return (
+                                <option key={i} value={parsed.value}>
+                                  {parsed.label}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Guest Dropdown 3 */}
+                      {weddingConfig.guest_dropdown_question_3_enabled && weddingConfig.guest_dropdown_question_3_label && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_dropdown_question_3_label, locale)}
+                          </label>
+                          <select
+                            value={member.guest_dropdown_question_3_answer || ''}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_dropdown_question_3_answer', e.target.value || null)
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          >
+                            <option value="">-</option>
+                            {resolveOptions(weddingConfig.guest_dropdown_question_3_options, locale).map((opt, i) => {
+                              const parsed = parseOption(opt);
+                              return (
+                                <option key={i} value={parsed.value}>
+                                  {parsed.label}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Guest Text 1 */}
+                      {weddingConfig.guest_text_question_1_enabled && weddingConfig.guest_text_question_1_label && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_text_question_1_label, locale)}
+                          </label>
+                          <input
+                            type="text"
+                            value={member.guest_text_question_1_answer || ''}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_text_question_1_answer', e.target.value || null)
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          />
+                        </div>
+                      )}
+
+                      {/* Guest Text 2 */}
+                      {weddingConfig.guest_text_question_2_enabled && weddingConfig.guest_text_question_2_label && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_text_question_2_label, locale)}
+                          </label>
+                          <input
+                            type="text"
+                            value={member.guest_text_question_2_answer || ''}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_text_question_2_answer', e.target.value || null)
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          />
+                        </div>
+                      )}
+
+                      {/* Guest Text 3 */}
+                      {weddingConfig.guest_text_question_3_enabled && weddingConfig.guest_text_question_3_label && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {resolveLabel(weddingConfig.guest_text_question_3_label, locale)}
+                          </label>
+                          <input
+                            type="text"
+                            value={member.guest_text_question_3_answer || ''}
+                            onChange={(e) =>
+                              updateMember(index, 'guest_text_question_3_answer', e.target.value || null)
+                            }
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         );
       })}

@@ -71,19 +71,45 @@ interface Filters {
 interface WeddingQuestionConfig {
   save_the_date_enabled: boolean;
   transportation_question_enabled: boolean;
-  transportation_question_text: string | null;
+  dietary_restrictions_enabled: boolean;
+  accessibility_needs_enabled: boolean;
+  transportation_question_text: any;
   extra_question_1_enabled: boolean;
-  extra_question_1_text: string | null;
+  extra_question_1_text: any;
   extra_question_2_enabled: boolean;
-  extra_question_2_text: string | null;
+  extra_question_2_text: any;
   extra_question_3_enabled: boolean;
-  extra_question_3_text: string | null;
+  extra_question_3_text: any;
   extra_info_1_enabled: boolean;
-  extra_info_1_label: string | null;
+  extra_info_1_label: any;
   extra_info_2_enabled: boolean;
-  extra_info_2_label: string | null;
+  extra_info_2_label: any;
   extra_info_3_enabled: boolean;
-  extra_info_3_label: string | null;
+  extra_info_3_label: any;
+  family_dropdown_question_1_enabled: boolean;
+  family_dropdown_question_1_label: any;
+  family_dropdown_question_1_options: any;
+  guest_yn_question_1_enabled: boolean;
+  guest_yn_question_1_text: any;
+  guest_yn_question_2_enabled: boolean;
+  guest_yn_question_2_text: any;
+  guest_yn_question_3_enabled: boolean;
+  guest_yn_question_3_text: any;
+  guest_dropdown_question_1_enabled: boolean;
+  guest_dropdown_question_1_label: any;
+  guest_dropdown_question_1_options: any;
+  guest_dropdown_question_2_enabled: boolean;
+  guest_dropdown_question_2_label: any;
+  guest_dropdown_question_2_options: any;
+  guest_dropdown_question_3_enabled: boolean;
+  guest_dropdown_question_3_label: any;
+  guest_dropdown_question_3_options: any;
+  guest_text_question_1_enabled: boolean;
+  guest_text_question_1_label: any;
+  guest_text_question_2_enabled: boolean;
+  guest_text_question_2_label: any;
+  guest_text_question_3_enabled: boolean;
+  guest_text_question_3_label: any;
 }
 
 // ============================================================================
@@ -273,6 +299,8 @@ export function GuestsPageContent({
         setWeddingConfig({
           save_the_date_enabled: data.data.save_the_date_enabled || false,
           transportation_question_enabled: data.data.transportation_question_enabled,
+          dietary_restrictions_enabled: data.data.dietary_restrictions_enabled,
+          accessibility_needs_enabled: data.data.accessibility_needs_enabled,
           transportation_question_text: data.data.transportation_question_text,
           extra_question_1_enabled: data.data.extra_question_1_enabled,
           extra_question_1_text: data.data.extra_question_1_text,
@@ -286,6 +314,30 @@ export function GuestsPageContent({
           extra_info_2_label: data.data.extra_info_2_label,
           extra_info_3_enabled: data.data.extra_info_3_enabled,
           extra_info_3_label: data.data.extra_info_3_label,
+          family_dropdown_question_1_enabled: data.data.family_dropdown_question_1_enabled,
+          family_dropdown_question_1_label: data.data.family_dropdown_question_1_label,
+          family_dropdown_question_1_options: data.data.family_dropdown_question_1_options,
+          guest_yn_question_1_enabled: data.data.guest_yn_question_1_enabled,
+          guest_yn_question_1_text: data.data.guest_yn_question_1_text,
+          guest_yn_question_2_enabled: data.data.guest_yn_question_2_enabled,
+          guest_yn_question_2_text: data.data.guest_yn_question_2_text,
+          guest_yn_question_3_enabled: data.data.guest_yn_question_3_enabled,
+          guest_yn_question_3_text: data.data.guest_yn_question_3_text,
+          guest_dropdown_question_1_enabled: data.data.guest_dropdown_question_1_enabled,
+          guest_dropdown_question_1_label: data.data.guest_dropdown_question_1_label,
+          guest_dropdown_question_1_options: data.data.guest_dropdown_question_1_options,
+          guest_dropdown_question_2_enabled: data.data.guest_dropdown_question_2_enabled,
+          guest_dropdown_question_2_label: data.data.guest_dropdown_question_2_label,
+          guest_dropdown_question_2_options: data.data.guest_dropdown_question_2_options,
+          guest_dropdown_question_3_enabled: data.data.guest_dropdown_question_3_enabled,
+          guest_dropdown_question_3_label: data.data.guest_dropdown_question_3_label,
+          guest_dropdown_question_3_options: data.data.guest_dropdown_question_3_options,
+          guest_text_question_1_enabled: data.data.guest_text_question_1_enabled,
+          guest_text_question_1_label: data.data.guest_text_question_1_label,
+          guest_text_question_2_enabled: data.data.guest_text_question_2_enabled,
+          guest_text_question_2_label: data.data.guest_text_question_2_label,
+          guest_text_question_3_enabled: data.data.guest_text_question_3_enabled,
+          guest_text_question_3_label: data.data.guest_text_question_3_label,
         });
         setWeddingGiftIban(data.data.gift_iban || null);
         setWeddingShortCode(data.data.short_url_initials || null);
@@ -1212,6 +1264,15 @@ export function GuestsPageContent({
                   attending: m.attending,
                   dietary_restrictions: m.dietary_restrictions,
                   accessibility_needs: m.accessibility_needs,
+                  guest_yn_question_1_answer: m.guest_yn_question_1_answer,
+                  guest_yn_question_2_answer: m.guest_yn_question_2_answer,
+                  guest_yn_question_3_answer: m.guest_yn_question_3_answer,
+                  guest_dropdown_question_1_answer: m.guest_dropdown_question_1_answer,
+                  guest_dropdown_question_2_answer: m.guest_dropdown_question_2_answer,
+                  guest_dropdown_question_3_answer: m.guest_dropdown_question_3_answer,
+                  guest_text_question_1_answer: m.guest_text_question_1_answer,
+                  guest_text_question_2_answer: m.guest_text_question_2_answer,
+                  guest_text_question_3_answer: m.guest_text_question_3_answer,
                 })),
                 transportation_answer: selectedGuest.transportation_answer,
                 extra_question_1_answer: selectedGuest.extra_question_1_answer,
@@ -1220,6 +1281,7 @@ export function GuestsPageContent({
                 extra_info_1_value: selectedGuest.extra_info_1_value,
                 extra_info_2_value: selectedGuest.extra_info_2_value,
                 extra_info_3_value: selectedGuest.extra_info_3_value,
+                family_dropdown_question_1_answer: selectedGuest.family_dropdown_question_1_answer,
               }
             : undefined
         }

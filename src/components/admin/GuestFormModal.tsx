@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { FamilyMemberForm, type FamilyMemberFormData } from './FamilyMemberForm';
 import type { Language, Channel } from '@/types/models';
 
@@ -31,21 +31,69 @@ interface GuestFormData {
   extra_info_3_value?: string | null;
 }
 
+interface GuestFormData {
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  whatsapp_number?: string | null;
+  channel_preference?: Channel | null;
+  preferred_language: Language;
+  invited_by_admin_id?: string | null;
+  private_notes?: string | null;
+  members: FamilyMemberFormData[];
+  // RSVP Question Answers
+  transportation_answer?: boolean | null;
+  extra_question_1_answer?: boolean | null;
+  extra_question_2_answer?: boolean | null;
+  extra_question_3_answer?: boolean | null;
+  extra_info_1_value?: string | null;
+  extra_info_2_value?: string | null;
+  extra_info_3_value?: string | null;
+  family_dropdown_question_1_answer?: string | null;
+}
+
 interface WeddingQuestionConfig {
+  save_the_date_enabled: boolean;
   transportation_question_enabled: boolean;
-  transportation_question_text: string | null;
+  dietary_restrictions_enabled: boolean;
+  accessibility_needs_enabled: boolean;
+  transportation_question_text: any;
   extra_question_1_enabled: boolean;
-  extra_question_1_text: string | null;
+  extra_question_1_text: any;
   extra_question_2_enabled: boolean;
-  extra_question_2_text: string | null;
+  extra_question_2_text: any;
   extra_question_3_enabled: boolean;
-  extra_question_3_text: string | null;
+  extra_question_3_text: any;
   extra_info_1_enabled: boolean;
-  extra_info_1_label: string | null;
+  extra_info_1_label: any;
   extra_info_2_enabled: boolean;
-  extra_info_2_label: string | null;
+  extra_info_2_label: any;
   extra_info_3_enabled: boolean;
-  extra_info_3_label: string | null;
+  extra_info_3_label: any;
+  family_dropdown_question_1_enabled: boolean;
+  family_dropdown_question_1_label: any;
+  family_dropdown_question_1_options: any;
+  guest_yn_question_1_enabled: boolean;
+  guest_yn_question_1_text: any;
+  guest_yn_question_2_enabled: boolean;
+  guest_yn_question_2_text: any;
+  guest_yn_question_3_enabled: boolean;
+  guest_yn_question_3_text: any;
+  guest_dropdown_question_1_enabled: boolean;
+  guest_dropdown_question_1_label: any;
+  guest_dropdown_question_1_options: any;
+  guest_dropdown_question_2_enabled: boolean;
+  guest_dropdown_question_2_label: any;
+  guest_dropdown_question_2_options: any;
+  guest_dropdown_question_3_enabled: boolean;
+  guest_dropdown_question_3_label: any;
+  guest_dropdown_question_3_options: any;
+  guest_text_question_1_enabled: boolean;
+  guest_text_question_1_label: any;
+  guest_text_question_2_enabled: boolean;
+  guest_text_question_2_label: any;
+  guest_text_question_3_enabled: boolean;
+  guest_text_question_3_label: any;
 }
 
 interface GuestFormModalProps {
@@ -76,7 +124,24 @@ const defaultFormData: GuestFormData = {
   extra_info_1_value: null,
   extra_info_2_value: null,
   extra_info_3_value: null,
+  family_dropdown_question_1_answer: null,
 };
+
+function resolveLabel(map: Record<string, string> | null | any, locale: string): string {
+  if (!map) return '';
+  if (typeof map === 'string') return map;
+  return map?.[locale] || map?.['en'] || map?.['es'] || '';
+}
+
+function resolveOptions(map: Record<string, string[]> | null | any, locale: string): string[] {
+  if (!map) return [];
+  return map?.[locale] || map?.['en'] || map?.['es'] || [];
+}
+
+function parseOption(raw: string): { label: string; value: string } {
+  const idx = raw.indexOf('||');
+  return idx === -1 ? { label: raw, value: raw } : { label: raw.slice(0, idx), value: raw.slice(idx + 2) };
+}
 
 export function GuestFormModal({
   isOpen,
@@ -88,7 +153,9 @@ export function GuestFormModal({
   onCancel,
 }: GuestFormModalProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const [formData, setFormData] = useState<GuestFormData>(defaultFormData);
+  const [isFamilyRsvpExpanded, setIsFamilyRsvpExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -102,6 +169,10 @@ export function GuestFormModal({
       } else {
         setFormData(data);
       }
+
+      // Determine if RSVP is not pending (i.e. answered by at least one member)
+      const answered = mode === 'edit' && data.members && data.members.some((m) => m.attending !== null && m.attending !== undefined);
+      setIsFamilyRsvpExpanded(answered);
       setError(null);
     }
   }, [isOpen, initialData, mode, admins]);
@@ -328,156 +399,200 @@ export function GuestFormModal({
               weddingConfig.extra_question_3_enabled ||
               weddingConfig.extra_info_1_enabled ||
               weddingConfig.extra_info_2_enabled ||
-              weddingConfig.extra_info_3_enabled
+              weddingConfig.extra_info_3_enabled ||
+              weddingConfig.family_dropdown_question_1_enabled
             ) && (
               <div className="border-t border-gray-200 pt-4">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">
-                  {t('admin.guests.form.rsvpAnswers')}
-                </h3>
-                <div className="space-y-3">
-                  {/* Transportation Question */}
-                  {weddingConfig.transportation_question_enabled && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {weddingConfig.transportation_question_text || t('guest.rsvp.defaultTransportationQuestion')}
-                      </label>
-                      <select
-                        value={formData.transportation_answer === null ? '' : formData.transportation_answer ? 'yes' : 'no'}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            transportation_answer: e.target.value === '' ? null : e.target.value === 'yes',
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                      >
-                        <option value="">-</option>
-                        <option value="yes">{t('common.yes')}</option>
-                        <option value="no">{t('common.no')}</option>
-                      </select>
-                    </div>
-                  )}
+                <button
+                  type="button"
+                  onClick={() => setIsFamilyRsvpExpanded(!isFamilyRsvpExpanded)}
+                  className="w-full flex items-center justify-between text-sm font-medium text-gray-900 mb-3 bg-gray-50 p-2 rounded hover:bg-gray-100 transition-colors"
+                >
+                  <span>{t('admin.guests.form.rsvpAnswers')}</span>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform ${isFamilyRsvpExpanded ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isFamilyRsvpExpanded && (
+                  <div className="space-y-3 p-1">
+                    {/* Transportation Question */}
+                    {weddingConfig.transportation_question_enabled && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.transportation_question_text, locale) || t('guest.rsvp.defaultTransportationQuestion')}
+                        </label>
+                        <select
+                          value={formData.transportation_answer === null ? '' : formData.transportation_answer ? 'yes' : 'no'}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              transportation_answer: e.target.value === '' ? null : e.target.value === 'yes',
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        >
+                          <option value="">-</option>
+                          <option value="yes">{t('common.yes')}</option>
+                          <option value="no">{t('common.no')}</option>
+                        </select>
+                      </div>
+                    )}
 
-                  {/* Extra Question 1 */}
-                  {weddingConfig.extra_question_1_enabled && weddingConfig.extra_question_1_text && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {weddingConfig.extra_question_1_text}
-                      </label>
-                      <select
-                        value={formData.extra_question_1_answer === null ? '' : formData.extra_question_1_answer ? 'yes' : 'no'}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            extra_question_1_answer: e.target.value === '' ? null : e.target.value === 'yes',
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                      >
-                        <option value="">-</option>
-                        <option value="yes">{t('common.yes')}</option>
-                        <option value="no">{t('common.no')}</option>
-                      </select>
-                    </div>
-                  )}
+                    {/* Extra Question 1 */}
+                    {weddingConfig.extra_question_1_enabled && weddingConfig.extra_question_1_text && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.extra_question_1_text, locale)}
+                        </label>
+                        <select
+                          value={formData.extra_question_1_answer === null ? '' : formData.extra_question_1_answer ? 'yes' : 'no'}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              extra_question_1_answer: e.target.value === '' ? null : e.target.value === 'yes',
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        >
+                          <option value="">-</option>
+                          <option value="yes">{t('common.yes')}</option>
+                          <option value="no">{t('common.no')}</option>
+                        </select>
+                      </div>
+                    )}
 
-                  {/* Extra Question 2 */}
-                  {weddingConfig.extra_question_2_enabled && weddingConfig.extra_question_2_text && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {weddingConfig.extra_question_2_text}
-                      </label>
-                      <select
-                        value={formData.extra_question_2_answer === null ? '' : formData.extra_question_2_answer ? 'yes' : 'no'}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            extra_question_2_answer: e.target.value === '' ? null : e.target.value === 'yes',
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                      >
-                        <option value="">-</option>
-                        <option value="yes">{t('common.yes')}</option>
-                        <option value="no">{t('common.no')}</option>
-                      </select>
-                    </div>
-                  )}
+                    {/* Extra Question 2 */}
+                    {weddingConfig.extra_question_2_enabled && weddingConfig.extra_question_2_text && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.extra_question_2_text, locale)}
+                        </label>
+                        <select
+                          value={formData.extra_question_2_answer === null ? '' : formData.extra_question_2_answer ? 'yes' : 'no'}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              extra_question_2_answer: e.target.value === '' ? null : e.target.value === 'yes',
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        >
+                          <option value="">-</option>
+                          <option value="yes">{t('common.yes')}</option>
+                          <option value="no">{t('common.no')}</option>
+                        </select>
+                      </div>
+                    )}
 
-                  {/* Extra Question 3 */}
-                  {weddingConfig.extra_question_3_enabled && weddingConfig.extra_question_3_text && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {weddingConfig.extra_question_3_text}
-                      </label>
-                      <select
-                        value={formData.extra_question_3_answer === null ? '' : formData.extra_question_3_answer ? 'yes' : 'no'}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            extra_question_3_answer: e.target.value === '' ? null : e.target.value === 'yes',
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                      >
-                        <option value="">-</option>
-                        <option value="yes">{t('common.yes')}</option>
-                        <option value="no">{t('common.no')}</option>
-                      </select>
-                    </div>
-                  )}
+                    {/* Extra Question 3 */}
+                    {weddingConfig.extra_question_3_enabled && weddingConfig.extra_question_3_text && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.extra_question_3_text, locale)}
+                        </label>
+                        <select
+                          value={formData.extra_question_3_answer === null ? '' : formData.extra_question_3_answer ? 'yes' : 'no'}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              extra_question_3_answer: e.target.value === '' ? null : e.target.value === 'yes',
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        >
+                          <option value="">-</option>
+                          <option value="yes">{t('common.yes')}</option>
+                          <option value="no">{t('common.no')}</option>
+                        </select>
+                      </div>
+                    )}
 
-                  {/* Extra Info 1 */}
-                  {weddingConfig.extra_info_1_enabled && weddingConfig.extra_info_1_label && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {weddingConfig.extra_info_1_label}
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.extra_info_1_value || ''}
-                        onChange={(e) =>
-                          setFormData({ ...formData, extra_info_1_value: e.target.value || null })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                      />
-                    </div>
-                  )}
+                    {/* Family Dropdown Question 1 */}
+                    {weddingConfig.family_dropdown_question_1_enabled && weddingConfig.family_dropdown_question_1_label && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.family_dropdown_question_1_label, locale)}
+                        </label>
+                        <select
+                          value={formData.family_dropdown_question_1_answer || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              family_dropdown_question_1_answer: e.target.value || null,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        >
+                          <option value="">-</option>
+                          {resolveOptions(weddingConfig.family_dropdown_question_1_options, locale).map((opt, i) => {
+                            const parsed = parseOption(opt);
+                            return (
+                              <option key={i} value={parsed.value}>
+                                {parsed.label}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    )}
 
-                  {/* Extra Info 2 */}
-                  {weddingConfig.extra_info_2_enabled && weddingConfig.extra_info_2_label && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {weddingConfig.extra_info_2_label}
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.extra_info_2_value || ''}
-                        onChange={(e) =>
-                          setFormData({ ...formData, extra_info_2_value: e.target.value || null })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                      />
-                    </div>
-                  )}
+                    {/* Extra Info 1 */}
+                    {weddingConfig.extra_info_1_enabled && weddingConfig.extra_info_1_label && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.extra_info_1_label, locale)}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.extra_info_1_value || ''}
+                          onChange={(e) =>
+                            setFormData({ ...formData, extra_info_1_value: e.target.value || null })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        />
+                      </div>
+                    )}
 
-                  {/* Extra Info 3 */}
-                  {weddingConfig.extra_info_3_enabled && weddingConfig.extra_info_3_label && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {weddingConfig.extra_info_3_label}
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.extra_info_3_value || ''}
-                        onChange={(e) =>
-                          setFormData({ ...formData, extra_info_3_value: e.target.value || null })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
-                      />
-                    </div>
-                  )}
-                </div>
+                    {/* Extra Info 2 */}
+                    {weddingConfig.extra_info_2_enabled && weddingConfig.extra_info_2_label && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.extra_info_2_label, locale)}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.extra_info_2_value || ''}
+                          onChange={(e) =>
+                            setFormData({ ...formData, extra_info_2_value: e.target.value || null })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        />
+                      </div>
+                    )}
+
+                    {/* Extra Info 3 */}
+                    {weddingConfig.extra_info_3_enabled && weddingConfig.extra_info_3_label && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {resolveLabel(weddingConfig.extra_info_3_label, locale)}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.extra_info_3_value || ''}
+                          onChange={(e) =>
+                            setFormData({ ...formData, extra_info_3_value: e.target.value || null })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-900"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -486,6 +601,7 @@ export function GuestFormModal({
               <FamilyMemberForm
                 members={formData.members}
                 onChange={(members) => setFormData({ ...formData, members })}
+                weddingConfig={weddingConfig}
               />
             </div>
           </div>
