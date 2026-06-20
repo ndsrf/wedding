@@ -17,7 +17,8 @@ import type {
   EmbedBlock as EmbedBlockType, 
   ImageMapBlock as ImageMapBlockType, 
   PanelBlock as PanelBlockType,
-  GiftBlock as GiftBlockType
+  GiftBlock as GiftBlockType,
+  MinisiteBlock as MinisiteBlockType
 } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
@@ -27,6 +28,7 @@ import { GalleryBlock } from '@/components/invitation/GalleryBlock';
 import { ImageMapBlock } from '@/components/invitation/ImageMapBlock';
 import { GiftBlock } from '@/components/invitation/GiftBlock';
 import { PanelModal } from '@/components/invitation/PanelBlock';
+import { MinisiteBlock } from '@/components/invitation/MinisiteBlock';
 import { loadFont } from '@/lib/fonts';
 
 interface TemplateRendererProps {
@@ -401,6 +403,11 @@ function TemplateBlock({
         isPriority={isPriorityImage}
       />
     );
+  }
+
+  if (block.type === 'minisite') {
+    const minisiteBlock = block as MinisiteBlockType;
+    return <MinisiteBlock folderName={minisiteBlock.folderName} />;
   }
 
   // panel blocks are rendered as modals at the TemplateRenderer level, not inline

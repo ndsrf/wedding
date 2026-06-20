@@ -202,7 +202,13 @@ export interface EmbedBlock {
   height?: string; // Optional reserved height for pre-render placeholder
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock;
+export interface MinisiteBlock {
+  id: string;
+  type: 'minisite';
+  folderName: string;
+}
+
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock | MinisiteBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

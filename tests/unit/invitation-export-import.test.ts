@@ -324,6 +324,22 @@ describe('migrateBlock', () => {
     });
   });
 
+  describe('minisite block', () => {
+    it('migrates a minisite block preserving folderName', () => {
+      const raw = { _version: 1, id: 'mini-1', type: 'minisite', folderName: 'laujavi' };
+      const migrated = migrateBlock(raw) as any;
+      expect(migrated.type).toBe('minisite');
+      expect(migrated.folderName).toBe('laujavi');
+      expect(migrated._version).toBeUndefined();
+    });
+
+    it('fills missing folderName with empty string', () => {
+      const raw = { type: 'minisite', id: 'mini-2' };
+      const migrated = migrateBlock(raw) as any;
+      expect(migrated.folderName).toBe('');
+    });
+  });
+
   describe('unknown future block type', () => {
     it('passes through an unknown block type without crashing', () => {
       const raw = { type: 'future-block-type', id: 'future-1', someField: 'value' };

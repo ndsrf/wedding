@@ -17,6 +17,7 @@ import type {
   ImageMapBlock as ImageMapBlockType,
   PanelBlock as PanelBlockType,
   GiftBlock as GiftBlockType,
+  MinisiteBlock as MinisiteBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
@@ -30,12 +31,14 @@ import { EmbedBlockEditor } from './EmbedBlockEditor';
 import { ImageMapBlockEditor } from './ImageMapBlockEditor';
 import { PanelBlockEditor } from './PanelBlockEditor';
 import { GiftBlockEditor } from './GiftBlockEditor';
+import { MinisiteBlockEditor } from './MinisiteBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
 import { ButtonBlock } from '@/components/invitation/ButtonBlock';
 import { GalleryBlock } from '@/components/invitation/GalleryBlock';
 import { GiftBlock } from '@/components/invitation/GiftBlock';
+import { MinisiteBlock } from '@/components/invitation/MinisiteBlock';
 import { ImagePickerModal } from './ImagePickerModal';
 
 interface InvitationTemplateEditorProps {
@@ -99,6 +102,7 @@ export function InvitationTemplateEditor({
   const isSelectedBlockImageMap = selectedBlock?.type === 'image-map';
   const isSelectedBlockPanel = selectedBlock?.type === 'panel';
   const isSelectedBlockGift = selectedBlock?.type === 'gift';
+  const isSelectedBlockMinisite = selectedBlock?.type === 'minisite';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -213,6 +217,14 @@ export function InvitationTemplateEditor({
             alignment: 'center',
           },
         };
+      } else if (type === 'minisite') {
+        const hasMinisite = design.blocks.some((b) => b.type === 'minisite');
+        if (hasMinisite) return;
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'minisite',
+          folderName: '',
+        };
       } else {
         return;
       }
@@ -223,7 +235,7 @@ export function InvitationTemplateEditor({
       }));
       setSelectedBlockId(newBlock.id);
     },
-    [design.globalStyle.backgroundColor]
+    [design.globalStyle.backgroundColor, design.blocks]
   );
 
   // Handle delete block
@@ -340,6 +352,15 @@ export function InvitationTemplateEditor({
     }));
   }, []);
 
+  const handleUpdateMinisiteBlock = useCallback((blockId: string, updates: Partial<MinisiteBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'minisite' ? ({ ...b, ...updates } as MinisiteBlockType) : b
+      ),
+    }));
+  }, []);
+
   const handleUpdatePanelBlock = useCallback((blockId: string, updates: Partial<PanelBlockType>) => {
     setDesign((prev) => ({
       ...prev,
@@ -451,6 +472,7 @@ export function InvitationTemplateEditor({
   const hasCountdown = design.blocks.some((b) => b.type === 'countdown');
   const hasAddToCalendar = design.blocks.some((b) => b.type === 'add-to-calendar');
   const hasGallery = design.blocks.some((b) => b.type === 'gallery');
+  const hasMinisite = design.blocks.some((b) => b.type === 'minisite');
 
   // Compute available panels for hotspot configuration
   const availablePanels = useMemo(
@@ -545,6 +567,13 @@ export function InvitationTemplateEditor({
             >
               + Gift (IBAN)
             </button>
+            <button
+              onClick={() => handleAddBlock('minisite')}
+              disabled={hasMinisite}
+              className="w-full px-4 py-2 border border-emerald-300 rounded hover:bg-emerald-50 transition text-emerald-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              + {t('blockMinisite')}
+            </button>
           </div>
         </div>
 
@@ -634,6 +663,13 @@ export function InvitationTemplateEditor({
                 ),
               }));
             }}
+          />
+        )}
+
+        {isSelectedBlockMinisite && selectedBlock && selectedBlock.type === 'minisite' && (
+          <MinisiteBlockEditor
+            block={selectedBlock as MinisiteBlockType}
+            onUpdate={handleUpdateMinisiteBlock}
           />
         )}
 
@@ -1014,6 +1050,12 @@ export function InvitationTemplateEditor({
                     <GiftBlock
                       block={block as GiftBlockType}
                       iban={weddingData.gift_iban ?? undefined}
+                    />
+                  )}
+
+                  {block.type === 'minisite' && (
+                    <MinisiteBlock
+                      folderName={(block as MinisiteBlockType).folderName}
                     />
                   )}
                 </div>

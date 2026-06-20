@@ -36,6 +36,7 @@ import type {
   PanelBlock,
   LocalizedContent,
   SupportedLanguage,
+  MinisiteBlock,
 } from '@/types/invitation-template';
 
 // ============================================================================
@@ -60,6 +61,7 @@ export const BLOCK_VERSIONS: Record<TemplateBlock['type'], number> = {
   'image-map': 1,
   panel: 2,
   gift: 1,
+  minisite: 1,
 } as const;
 
 /** Current format version for the .nupcinv manifest */
@@ -234,6 +236,15 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
         type: 'embed',
         html: b.html ?? '',
         height: b.height,
+      };
+    }
+
+    case 'minisite': {
+      const b = block as Partial<MinisiteBlock>;
+      return {
+        id: b.id ?? randomUUID(),
+        type: 'minisite',
+        folderName: b.folderName ?? '',
       };
     }
 
