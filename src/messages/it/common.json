@@ -3344,6 +3344,57 @@
       "description": "Questo è il tour completo! Hai domande o hai bisogno di aiuto? Clicca sul pulsante \"Aiuto\" in basso a destra per chattare con il team di Nupci in tempo reale."
     }
   },
+  "weatherWidget": {
+    "title": "Meteo e Luce Naturale",
+    "loading": "Caricamento dati meteo…",
+    "noLocation": "Nessuna posizione impostata per questo matrimonio",
+    "error": "Impossibile caricare i dati meteo",
+    "expand": "Espandi",
+    "collapse": "Riduci",
+    "hours": "h",
+    "minutes": "m",
+    "dayLength": "durata del giorno",
+    "light": "luce",
+    "sunrise": "Alba",
+    "sunset": "Tramonto",
+    "civilDawn": "Alba Civile",
+    "civilDusk": "Crepuscolo Civile",
+    "solarNoon": "Mezzogiorno Solare",
+    "unitCelsius": "°C",
+    "unitMm": "mm",
+    "avgTemp": "Temperatura Media",
+    "precipitation": "Precipitazioni",
+    "illumination": "illuminazione",
+    "historicalWeather": "Meteo Storico",
+    "referenceYear": "Anno di riferimento: {year}",
+    "moonPhases": {
+      "newMoon": "Luna Nuova",
+      "waxingCrescent": "Luna Crescente",
+      "firstQuarter": "Primo Quarto",
+      "waxingGibbous": "Gibbosa Crescente",
+      "fullMoon": "Luna Piena",
+      "waningGibbous": "Gibbosa Calante",
+      "lastQuarter": "Ultimo Quarto",
+      "waningCrescent": "Luna Calante"
+    },
+    "conditions": {
+      "sunny": "Soleggiato",
+      "partlyCloudy": "Parzialmente Nuvoloso",
+      "cloudy": "Nuvoloso",
+      "drizzle": "Pioggerella",
+      "rainy": "Piovoso",
+      "stormy": "Tempestoso",
+      "snowy": "Nevoso",
+      "foggy": "Nebbioso"
+    },
+    "lightZones": {
+      "night": "Notte",
+      "dawn": "Alba",
+      "day": "Giorno",
+      "goldenHour": "Ora Dorata",
+      "dusk": "Crepuscolo"
+    }
+  },
   "trialBanner": {
     "message": "Sei in modalità di prova con un matrimonio di dimostrazione.",
     "learnMore": "Scopri di più",
