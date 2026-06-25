@@ -3344,6 +3344,57 @@
       "description": "C'est la fin de la visite ! Vous avez des questions ou besoin d'aide ? Cliquez sur le bouton \"Aide\" en bas à droite pour discuter avec l'équipe Nupci en temps réel."
     }
   },
+  "weatherWidget": {
+    "title": "Météo et Lumière Naturelle",
+    "loading": "Chargement des données météorologiques…",
+    "noLocation": "Aucun lieu défini pour ce mariage",
+    "error": "Impossible de charger les données météorologiques",
+    "expand": "Développer",
+    "collapse": "Réduire",
+    "hours": "h",
+    "minutes": "m",
+    "dayLength": "durée du jour",
+    "light": "lumière",
+    "sunrise": "Lever du Soleil",
+    "sunset": "Coucher du Soleil",
+    "civilDawn": "Aube Civile",
+    "civilDusk": "Crépuscule Civil",
+    "solarNoon": "Midi Solaire",
+    "unitCelsius": "°C",
+    "unitMm": "mm",
+    "avgTemp": "Température Moyenne",
+    "precipitation": "Précipitations",
+    "illumination": "illumination",
+    "historicalWeather": "Météo Historique",
+    "referenceYear": "Année de référence : {year}",
+    "moonPhases": {
+      "newMoon": "Nouvelle Lune",
+      "waxingCrescent": "Lune Croissante",
+      "firstQuarter": "Premier Croissant",
+      "waxingGibbous": "Gibbeuse Croissante",
+      "fullMoon": "Pleine Lune",
+      "waningGibbous": "Gibbeuse Décroissante",
+      "lastQuarter": "Dernier Croissant",
+      "waningCrescent": "Lune Décroissante"
+    },
+    "conditions": {
+      "sunny": "Ensoleillé",
+      "partlyCloudy": "Partiellement Nuageux",
+      "cloudy": "Nuageux",
+      "drizzle": "Bruine",
+      "rainy": "Pluvieux",
+      "stormy": "Orageux",
+      "snowy": "Enneigé",
+      "foggy": "Brumeux"
+    },
+    "lightZones": {
+      "night": "Nuit",
+      "dawn": "Aube",
+      "day": "Jour",
+      "goldenHour": "Heure Dorée",
+      "dusk": "Crépuscule"
+    }
+  },
   "trialBanner": {
     "message": "Vous êtes en mode essai avec un mariage de démonstration.",
     "learnMore": "En savoir plus",

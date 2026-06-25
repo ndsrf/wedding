@@ -3344,6 +3344,57 @@
       "description": "Das war die vollständige Tour! Haben Sie Fragen oder benötigen Sie Hilfe? Klicken Sie auf die Schaltfläche \"Hilfe\" unten rechts, um in Echtzeit mit dem Nupci-Team zu chatten."
     }
   },
+  "weatherWidget": {
+    "title": "Wetter und Tageslicht",
+    "loading": "Wetterdaten werden geladen…",
+    "noLocation": "Kein Ort für diese Hochzeit festgelegt",
+    "error": "Wetterdaten konnten nicht geladen werden",
+    "expand": "Erweitern",
+    "collapse": "Einklappen",
+    "hours": "h",
+    "minutes": "m",
+    "dayLength": "Tageslänge",
+    "light": "Licht",
+    "sunrise": "Sonnenaufgang",
+    "sunset": "Sonnenuntergang",
+    "civilDawn": "Bürgerliche Morgenröte",
+    "civilDusk": "Bürgerliche Dämmerung",
+    "solarNoon": "Sonnenmittag",
+    "unitCelsius": "°C",
+    "unitMm": "mm",
+    "avgTemp": "Durchschnittstemperatur",
+    "precipitation": "Niederschlag",
+    "illumination": "Beleuchtung",
+    "historicalWeather": "Historisches Wetter",
+    "referenceYear": "Referenzjahr: {year}",
+    "moonPhases": {
+      "newMoon": "Neumond",
+      "waxingCrescent": "Zunehmende Sichel",
+      "firstQuarter": "Erstes Viertel",
+      "waxingGibbous": "Zunehmend Gibbous",
+      "fullMoon": "Vollmond",
+      "waningGibbous": "Abnehmend Gibbous",
+      "lastQuarter": "Letztes Viertel",
+      "waningCrescent": "Abnehmende Sichel"
+    },
+    "conditions": {
+      "sunny": "Sonnig",
+      "partlyCloudy": "Teilweise Bewölkt",
+      "cloudy": "Bewölkt",
+      "drizzle": "Nieselregen",
+      "rainy": "Regnerisch",
+      "stormy": "Stürmisch",
+      "snowy": "Schneereich",
+      "foggy": "Neblig"
+    },
+    "lightZones": {
+      "night": "Nacht",
+      "dawn": "Morgenröte",
+      "day": "Tag",
+      "goldenHour": "Goldene Stunde",
+      "dusk": "Dämmerung"
+    }
+  },
   "trialBanner": {
     "message": "Sie befinden sich im Testmodus mit einer Demo-Hochzeit.",
     "learnMore": "Mehr erfahren",
