@@ -3444,6 +3444,57 @@
       "description": "That's the full tour! Have questions or need help? Click the \"Help\" button in the bottom-right to chat with the Nupci team in real-time."
     }
   },
+  "weatherWidget": {
+    "title": "Weather & Daylight",
+    "loading": "Loading weather data…",
+    "noLocation": "No location set for this wedding",
+    "error": "Unable to load weather data",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "hours": "h",
+    "minutes": "m",
+    "dayLength": "day length",
+    "light": "light",
+    "sunrise": "Sunrise",
+    "sunset": "Sunset",
+    "civilDawn": "Civil Dawn",
+    "civilDusk": "Civil Dusk",
+    "solarNoon": "Solar Noon",
+    "unitCelsius": "°C",
+    "unitMm": "mm",
+    "avgTemp": "Average Temperature",
+    "precipitation": "Precipitation",
+    "illumination": "illumination",
+    "historicalWeather": "Historical Weather",
+    "referenceYear": "Reference year: {year}",
+    "moonPhases": {
+      "newMoon": "New Moon",
+      "waxingCrescent": "Waxing Crescent",
+      "firstQuarter": "First Quarter",
+      "waxingGibbous": "Waxing Gibbous",
+      "fullMoon": "Full Moon",
+      "waningGibbous": "Waning Gibbous",
+      "lastQuarter": "Last Quarter",
+      "waningCrescent": "Waning Crescent"
+    },
+    "conditions": {
+      "sunny": "Sunny",
+      "partlyCloudy": "Partly Cloudy",
+      "cloudy": "Cloudy",
+      "drizzle": "Drizzle",
+      "rainy": "Rainy",
+      "stormy": "Stormy",
+      "snowy": "Snowy",
+      "foggy": "Foggy"
+    },
+    "lightZones": {
+      "night": "Night",
+      "dawn": "Dawn",
+      "day": "Day",
+      "goldenHour": "Golden Hour",
+      "dusk": "Dusk"
+    }
+  },
   "trialBanner": {
     "message": "You are in trial mode with a test wedding.",
     "learnMore": "Learn more",

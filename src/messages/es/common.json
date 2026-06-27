@@ -3422,6 +3422,57 @@
       "description": "¡Eso es todo el tour! ¿Tienes preguntas o necesitas ayuda? Haz clic en el botón de \"Ayuda\" en la esquina inferior derecha para chatear con el equipo de Nupci en tiempo real."
     }
   },
+  "weatherWidget": {
+    "title": "Clima y Luz Natural",
+    "loading": "Cargando datos del clima…",
+    "noLocation": "No hay ubicación establecida para esta boda",
+    "error": "No se pueden cargar los datos del clima",
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "hours": "h",
+    "minutes": "m",
+    "dayLength": "duración del día",
+    "light": "luz",
+    "sunrise": "Salida del Sol",
+    "sunset": "Puesta del Sol",
+    "civilDawn": "Amanecer Civil",
+    "civilDusk": "Anochecer Civil",
+    "solarNoon": "Mediodía Solar",
+    "unitCelsius": "°C",
+    "unitMm": "mm",
+    "avgTemp": "Temperatura Promedio",
+    "precipitation": "Precipitación",
+    "illumination": "iluminación",
+    "historicalWeather": "Clima Histórico",
+    "referenceYear": "Año de referencia: {year}",
+    "moonPhases": {
+      "newMoon": "Luna Nueva",
+      "waxingCrescent": "Cuarto Creciente",
+      "firstQuarter": "Cuarto Creciente",
+      "waxingGibbous": "Gibosa Creciente",
+      "fullMoon": "Luna Llena",
+      "waningGibbous": "Gibosa Menguante",
+      "lastQuarter": "Cuarto Menguante",
+      "waningCrescent": "Cuarto Menguante"
+    },
+    "conditions": {
+      "sunny": "Soleado",
+      "partlyCloudy": "Parcialmente Nublado",
+      "cloudy": "Nublado",
+      "drizzle": "Llovizna",
+      "rainy": "Lluvioso",
+      "stormy": "Tormentoso",
+      "snowy": "Nevado",
+      "foggy": "Neblinoso"
+    },
+    "lightZones": {
+      "night": "Noche",
+      "dawn": "Amanecer",
+      "day": "Día",
+      "goldenHour": "Hora Dorada",
+      "dusk": "Anochecer"
+    }
+  },
   "trialBanner": {
     "message": "Estás en modo de prueba con una boda de demostración.",
     "learnMore": "Más información",
