@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveShortUrl } from '@/lib/short-url';
 import { prisma } from '@/lib/db/prisma';
+import { toAbsoluteUrl } from '@/lib/images/url-utils';
 
 const INITIALS_RE = /^[A-Z]{1,3}[a-zA-Z0-9]{1,4}$/;
 const CODE_RE     = /^[a-zA-Z0-9]{5,6}$/;
@@ -39,8 +40,7 @@ export async function GET(
       },
     });
     const imageUrl = family?.wedding?.message_templates?.[0]?.image_url ?? null;
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
-    const ogImageUrl = imageUrl ? `${appUrl}${imageUrl}` : null;
+    const ogImageUrl = toAbsoluteUrl(imageUrl) ?? null;
     // Cache for 1 hour — the invitation image almost never changes.
     return NextResponse.json({ token, og_image_url: ogImageUrl }, {
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
