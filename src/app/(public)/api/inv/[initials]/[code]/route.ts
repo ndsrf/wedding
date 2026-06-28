@@ -29,6 +29,7 @@ export async function GET(
       select: {
         wedding: {
           select: {
+            couple_names: true,
             message_templates: {
               where: { image_url: { not: null }, type: 'INVITATION' },
               select: { image_url: true },
@@ -41,8 +42,9 @@ export async function GET(
     });
     const imageUrl = family?.wedding?.message_templates?.[0]?.image_url ?? null;
     const ogImageUrl = toAbsoluteUrl(imageUrl) ?? null;
+    const coupleNames = family?.wedding?.couple_names ?? null;
     // Cache for 1 hour — the invitation image almost never changes.
-    return NextResponse.json({ token, og_image_url: ogImageUrl }, {
+    return NextResponse.json({ token, og_image_url: ogImageUrl, og_title: coupleNames }, {
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
     });
   }

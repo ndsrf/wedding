@@ -28,13 +28,13 @@ function escapeAttr(s: string): string {
 
 // Pure-CSS replica of WeddingSpinner (lg variant) + rose gradient background.
 // Kept inline so the page renders with zero external requests.
-const HTML = (initials: string, code: string, ogImage?: string) => `<!DOCTYPE html>
+const HTML = (initials: string, code: string, ogImage?: string, ogTitle?: string) => `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${ogImage ? '' : 'Loading…'}</title>${ogImage ? `
-  <meta property="og:title" content="">
+  <title>${ogTitle ?? 'Loading…'}</title>${ogImage ? `
+  <meta property="og:title" content="${escapeAttr(ogTitle ?? '')}">
   <meta property="og:image" content="${escapeAttr(ogImage)}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="${escapeAttr(ogImage)}">` : ''}
@@ -96,9 +96,10 @@ export async function GET(
     return new Response('Not found', { status: 404 });
   }
 
-  // For social media crawlers, fetch the OG image URL so the preview renders.
+  // For social media crawlers, fetch the OG image URL and couple name so the preview renders.
   // Regular users get the spinner immediately without any extra round-trip.
   let ogImage: string | undefined;
+  let ogTitle: string | undefined;
   const ua = req.headers.get('user-agent') ?? '';
   if (CRAWLER_RE.test(ua)) {
     try {
@@ -109,15 +110,16 @@ export async function GET(
       // 3-second timeout so a slow DB call never stalls the crawler indefinitely.
       const res = await fetch(apiUrl.toString(), { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
-        const data = await res.json() as { og_image_url?: string };
+        const data = await res.json() as { og_image_url?: string; og_title?: string };
         ogImage = data.og_image_url ?? undefined;
+        ogTitle = data.og_title ?? undefined;
       }
     } catch {
       // OG image is best-effort — don't block the response
     }
   }
 
-  return new Response(HTML(initials, shortCode, ogImage), {
+  return new Response(HTML(initials, shortCode, ogImage, ogTitle), {
     headers: { 'content-type': 'text/html; charset=utf-8' },
   });
 }
