@@ -18,7 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
-import { generateWeddingReply, type InvitationTemplateContext, type LocationContext, type MenuContext } from '@/lib/ai/wedding-assistant';
+import { generateWeddingReply, type InvitationTemplateContext, type LocationContext, type MenuContext, type ItineraryItemContext } from '@/lib/ai/wedding-assistant';
 import { generateNupciBotReply } from '@/lib/ai/nupcibot';
 import { generateRagReply } from '@/lib/ai/rag-chat';
 import { isVectorEnabled } from '@/lib/db/vector-prisma';
@@ -376,7 +376,20 @@ export async function POST(request: NextRequest) {
           },
         },
         members: {
-          select: { id: true, name: true, attending: true },
+          select: {
+            id: true,
+            name: true,
+            attending: true,
+            guest_yn_question_1_answer: true,
+            guest_yn_question_2_answer: true,
+            guest_yn_question_3_answer: true,
+            guest_dropdown_question_1_answer: true,
+            guest_dropdown_question_2_answer: true,
+            guest_dropdown_question_3_answer: true,
+            guest_text_question_1_answer: true,
+            guest_text_question_2_answer: true,
+            guest_text_question_3_answer: true,
+          },
         },
       },
     });
@@ -499,6 +512,32 @@ export async function POST(request: NextRequest) {
       console.warn('[TWILIO_INBOUND] Failed to fetch tasting menu, proceeding without it:', err);
     }
 
+    // --- Fetch wedding itinerary -----------------------------------------
+    let itineraryContext: ItineraryItemContext[] | null = null;
+    try {
+      const items = await prisma.itineraryItem.findMany({
+        where: { wedding_id: family.wedding_id },
+        orderBy: { order: 'asc' },
+        include: {
+          location: {
+            select: { name: true, address: true, google_maps_url: true },
+          },
+        },
+      });
+      if (items.length > 0) {
+        itineraryContext = items.map(item => ({
+          item_type: item.item_type,
+          date_time: item.date_time,
+          location_name: item.location.name,
+          location_address: item.location.address,
+          location_google_maps_url: item.location.google_maps_url,
+          notes: item.notes,
+        }));
+      }
+    } catch (err) {
+      console.warn('[TWILIO_INBOUND] Failed to fetch itinerary, proceeding without it:', err);
+    }
+
     const aiReply = await generateWeddingReply(
       body,
       family.wedding,
@@ -506,13 +545,21 @@ export async function POST(request: NextRequest) {
         name: family.name,
         magic_token: family.magic_token,
         preferred_language: family.preferred_language,
+        extra_question_1_answer: family.extra_question_1_answer,
+        extra_question_2_answer: family.extra_question_2_answer,
+        extra_question_3_answer: family.extra_question_3_answer,
+        extra_info_1_value: family.extra_info_1_value,
+        extra_info_2_value: family.extra_info_2_value,
+        extra_info_3_value: family.extra_info_3_value,
+        family_dropdown_question_1_answer: family.family_dropdown_question_1_answer,
         members: family.members,
       },
       language,
       shortRsvpUrl,
       invitationTemplate,
       family.wedding.main_event_location as LocationContext | null,
-      menuContext
+      menuContext,
+      itineraryContext
     );
 
     if (!aiReply) {

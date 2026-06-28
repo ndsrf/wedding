@@ -16,15 +16,25 @@ import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
 import { ResourceType, Language } from '@prisma/client';
 import type { Wedding, Family, FamilyMember } from '@prisma/client';
-import type { TemplateDesign, SupportedLanguage } from '@/types/invitation-template';
+import type { TemplateDesign, SupportedLanguage, TemplateBlock } from '@/types/invitation-template';
 import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export interface FamilyContext extends Pick<Family, 'name' | 'magic_token' | 'preferred_language'> {
-  members: Pick<FamilyMember, 'name' | 'attending'>[];
+export interface FamilyContext extends Pick<Family,
+  'name' | 'magic_token' | 'preferred_language' |
+  'extra_question_1_answer' | 'extra_question_2_answer' | 'extra_question_3_answer' |
+  'extra_info_1_value' | 'extra_info_2_value' | 'extra_info_3_value' |
+  'family_dropdown_question_1_answer'
+> {
+  members: Pick<FamilyMember,
+    'name' | 'attending' |
+    'guest_yn_question_1_answer' | 'guest_yn_question_2_answer' | 'guest_yn_question_3_answer' |
+    'guest_dropdown_question_1_answer' | 'guest_dropdown_question_2_answer' | 'guest_dropdown_question_3_answer' |
+    'guest_text_question_1_answer' | 'guest_text_question_2_answer' | 'guest_text_question_3_answer'
+  >[];
 }
 
 export interface InvitationTemplateContext {
@@ -52,6 +62,15 @@ export interface MenuContext {
   sections: MenuSectionContext[];
 }
 
+export interface ItineraryItemContext {
+  item_type: string; // CEREMONY | EVENT | PRE_EVENT | POST_EVENT
+  date_time: Date;
+  location_name: string;
+  location_address?: string | null;
+  location_google_maps_url?: string | null;
+  notes?: string | null;
+}
+
 // ============================================================================
 // LANGUAGE SUPPORT
 // ============================================================================
@@ -77,6 +96,16 @@ const CONTACT_COUPLE_SUFFIX: Record<string, string> = {
 // PROMPT BUILDER
 // ============================================================================
 
+function getLocalizedText(json: unknown, lang: string): string | null {
+  if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
+  const record = json as Record<string, string>;
+  return (record[lang] || record['EN']) ?? null;
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function formatDate(date: Date, locale = 'en-GB'): string {
   return new Date(date).toLocaleDateString(locale, {
     weekday: 'long',
@@ -95,13 +124,23 @@ function extractInvitationText(design: TemplateDesign, language: string): string
   const lang = language as SupportedLanguage;
   const texts: string[] = [];
 
-  for (const block of design.blocks) {
+  for (const block of design.blocks as TemplateBlock[]) {
     if (block.type === 'text') {
       const text = (block.content[lang] || block.content['EN'])?.trim();
       if (text) texts.push(text);
     } else if (block.type === 'button') {
       const text = (block.text[lang] || block.text['EN'])?.trim();
       if (text) texts.push(text);
+    } else if (block.type === 'panel') {
+      const title = (block.title[lang] || block.title['EN'])?.trim();
+      const rawContent = (block.content[lang] || block.content['EN'])?.trim();
+      const content = rawContent ? stripHtml(rawContent) : '';
+      if (title && content) texts.push(`${title}: ${content}`);
+      else if (title) texts.push(title);
+      else if (content) texts.push(content);
+    } else if (block.type === 'minisite') {
+      const name = (block.folderNames[lang] || block.folderNames['EN'])?.trim();
+      if (name) texts.push(`[Wedding info minisite: "${name}"]`);
     }
   }
 
@@ -116,7 +155,8 @@ function buildSystemPrompt(
   rsvpUrl?: string | null,
   invitationTemplate?: InvitationTemplateContext | null,
   location?: LocationContext | null,
-  menu?: MenuContext | null
+  menu?: MenuContext | null,
+  itinerary?: ItineraryItemContext[] | null
 ): string {
   const lang = language in LANGUAGE_NAMES ? language : 'EN';
   const languageName = LANGUAGE_NAMES[lang];
@@ -166,15 +206,59 @@ function buildSystemPrompt(
     prompt += `- Guests may bring additional family members (specify when RSVPing).\n`;
   }
 
-  // Extra questions configured for this wedding
-  if (wedding.extra_question_1_enabled && wedding.extra_question_1_text) {
-    prompt += `- ${wedding.extra_question_1_text}\n`;
+  // Family-level yes/no questions
+  for (let i = 1; i <= 3; i++) {
+    const w = wedding as unknown as Record<string, unknown>;
+    if (w[`extra_question_${i}_enabled`]) {
+      const text = getLocalizedText(w[`extra_question_${i}_text`], lang);
+      if (text) prompt += `- RSVP yes/no question (family): ${text}\n`;
+    }
   }
-  if (wedding.extra_question_2_enabled && wedding.extra_question_2_text) {
-    prompt += `- ${wedding.extra_question_2_text}\n`;
+
+  // Family-level text info fields
+  for (let i = 1; i <= 3; i++) {
+    const w = wedding as unknown as Record<string, unknown>;
+    if (w[`extra_info_${i}_enabled`]) {
+      const label = getLocalizedText(w[`extra_info_${i}_label`], lang);
+      if (label) prompt += `- RSVP text field (family): ${label}\n`;
+    }
   }
-  if (wedding.extra_question_3_enabled && wedding.extra_question_3_text) {
-    prompt += `- ${wedding.extra_question_3_text}\n`;
+
+  // Family-level dropdown
+  if (wedding.family_dropdown_question_1_enabled) {
+    const label = getLocalizedText(wedding.family_dropdown_question_1_label, lang);
+    const options = (wedding.family_dropdown_question_1_options as Record<string, string[]> | null);
+    const optList = options?.[lang] ?? options?.['EN'];
+    if (label) prompt += `- RSVP dropdown (family): ${label}${optList ? ` (options: ${optList.join(', ')})` : ''}\n`;
+  }
+
+  // Per-guest yes/no questions
+  for (let i = 1; i <= 3; i++) {
+    const w = wedding as unknown as Record<string, unknown>;
+    if (w[`guest_yn_question_${i}_enabled`]) {
+      const text = getLocalizedText(w[`guest_yn_question_${i}_text`], lang);
+      if (text) prompt += `- RSVP yes/no question (per guest): ${text}\n`;
+    }
+  }
+
+  // Per-guest dropdown questions
+  for (let i = 1; i <= 3; i++) {
+    const w = wedding as unknown as Record<string, unknown>;
+    if (w[`guest_dropdown_question_${i}_enabled`]) {
+      const label = getLocalizedText(w[`guest_dropdown_question_${i}_label`], lang);
+      const options = w[`guest_dropdown_question_${i}_options`] as Record<string, string[]> | null;
+      const optList = options?.[lang] ?? options?.['EN'];
+      if (label) prompt += `- RSVP dropdown (per guest): ${label}${optList ? ` (options: ${optList.join(', ')})` : ''}\n`;
+    }
+  }
+
+  // Per-guest text questions
+  for (let i = 1; i <= 3; i++) {
+    const w = wedding as unknown as Record<string, unknown>;
+    if (w[`guest_text_question_${i}_enabled`]) {
+      const label = getLocalizedText(w[`guest_text_question_${i}_label`], lang);
+      if (label) prompt += `- RSVP text field (per guest): ${label}\n`;
+    }
   }
 
   if (family) {
@@ -196,6 +280,66 @@ function buildSystemPrompt(
     }
     if (pending.length > 0) {
       prompt += `- Pending RSVP (${pending.length}): ${pending.map(m => m.name).join(', ')}\n`;
+    }
+
+    // Family-level question answers
+    const w = wedding as unknown as Record<string, unknown>;
+    const f = family as unknown as Record<string, unknown>;
+    for (let i = 1; i <= 3; i++) {
+      if (w[`extra_question_${i}_enabled`]) {
+        const label = getLocalizedText(w[`extra_question_${i}_text`], lang);
+        const answer = f[`extra_question_${i}_answer`];
+        if (label && answer !== null && answer !== undefined) {
+          prompt += `- ${label}: ${answer === true ? 'Yes' : 'No'}\n`;
+        }
+      }
+      if (w[`extra_info_${i}_enabled`]) {
+        const label = getLocalizedText(w[`extra_info_${i}_label`], lang);
+        const value = f[`extra_info_${i}_value`];
+        if (label && value) prompt += `- ${label}: ${value}\n`;
+      }
+    }
+    if (wedding.family_dropdown_question_1_enabled) {
+      const label = getLocalizedText(wedding.family_dropdown_question_1_label, lang);
+      if (label && family.family_dropdown_question_1_answer) {
+        prompt += `- ${label}: ${family.family_dropdown_question_1_answer}\n`;
+      }
+    }
+
+    // Per-guest question answers
+    const hasGuestQuestions = [1, 2, 3].some(i =>
+      w[`guest_yn_question_${i}_enabled`] ||
+      w[`guest_dropdown_question_${i}_enabled`] ||
+      w[`guest_text_question_${i}_enabled`]
+    );
+    if (hasGuestQuestions) {
+      prompt += `\n### Guest answers to RSVP questions\n`;
+      for (const member of family.members) {
+        const answers: string[] = [];
+        const m = member as unknown as Record<string, unknown>;
+        for (let i = 1; i <= 3; i++) {
+          if (w[`guest_yn_question_${i}_enabled`]) {
+            const label = getLocalizedText(w[`guest_yn_question_${i}_text`], lang);
+            const ans = m[`guest_yn_question_${i}_answer`];
+            if (label && ans !== null && ans !== undefined) {
+              answers.push(`${label}: ${ans === true ? 'Yes' : 'No'}`);
+            }
+          }
+          if (w[`guest_dropdown_question_${i}_enabled`]) {
+            const label = getLocalizedText(w[`guest_dropdown_question_${i}_label`], lang);
+            const ans = m[`guest_dropdown_question_${i}_answer`];
+            if (label && ans) answers.push(`${label}: ${ans}`);
+          }
+          if (w[`guest_text_question_${i}_enabled`]) {
+            const label = getLocalizedText(w[`guest_text_question_${i}_label`], lang);
+            const ans = m[`guest_text_question_${i}_answer`];
+            if (label && ans) answers.push(`${label}: ${ans}`);
+          }
+        }
+        if (answers.length > 0) {
+          prompt += `- ${member.name}: ${answers.join('; ')}\n`;
+        }
+      }
     }
   }
 
@@ -225,6 +369,26 @@ function buildSystemPrompt(
           prompt += `\n`;
         }
       }
+    }
+  }
+
+  if (itinerary && itinerary.length > 0) {
+    prompt += `\n## Wedding Itinerary\n`;
+    const TYPE_LABELS: Record<string, string> = {
+      CEREMONY: 'Ceremony',
+      EVENT: 'Event',
+      PRE_EVENT: 'Pre-event',
+      POST_EVENT: 'Post-event',
+    };
+    for (const item of itinerary) {
+      const typeLabel = TYPE_LABELS[item.item_type] ?? item.item_type;
+      const dt = formatDate(item.date_time);
+      const time = new Date(item.date_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      prompt += `- [${typeLabel}] ${dt} at ${time} — ${item.location_name}`;
+      if (item.location_address) prompt += `, ${item.location_address}`;
+      if (item.location_google_maps_url) prompt += ` | Maps: ${item.location_google_maps_url}`;
+      if (item.notes) prompt += ` | Notes: ${item.notes}`;
+      prompt += `\n`;
     }
   }
 
@@ -314,7 +478,8 @@ export async function generateWeddingReply(
   rsvpUrl?: string | null,
   invitationTemplate?: InvitationTemplateContext | null,
   location?: LocationContext | null,
-  menu?: MenuContext | null
+  menu?: MenuContext | null,
+  itinerary?: ItineraryItemContext[] | null
 ): Promise<string | null> {
   // Check AI Standard limit
   const result = await checkResourceLimit({
@@ -335,7 +500,7 @@ export async function generateWeddingReply(
   }
 
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location, menu);
+  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location, menu, itinerary);
 
   // Determine provider: explicit env var → fallback to whichever key is present
   const provider =

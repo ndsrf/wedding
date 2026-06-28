@@ -142,9 +142,40 @@ const baseFamily = {
   name: 'The Smith Family',
   magic_token: 'token-abc123',
   preferred_language: 'EN' as const,
+  extra_question_1_answer: null,
+  extra_question_2_answer: null,
+  extra_question_3_answer: null,
+  extra_info_1_value: null,
+  extra_info_2_value: null,
+  extra_info_3_value: null,
+  family_dropdown_question_1_answer: null,
   members: [
-    { name: 'John Smith', attending: true },
-    { name: 'Jane Smith', attending: null },
+    {
+      name: 'John Smith',
+      attending: true,
+      guest_yn_question_1_answer: null,
+      guest_yn_question_2_answer: null,
+      guest_yn_question_3_answer: null,
+      guest_dropdown_question_1_answer: null,
+      guest_dropdown_question_2_answer: null,
+      guest_dropdown_question_3_answer: null,
+      guest_text_question_1_answer: null,
+      guest_text_question_2_answer: null,
+      guest_text_question_3_answer: null,
+    },
+    {
+      name: 'Jane Smith',
+      attending: null,
+      guest_yn_question_1_answer: null,
+      guest_yn_question_2_answer: null,
+      guest_yn_question_3_answer: null,
+      guest_dropdown_question_1_answer: null,
+      guest_dropdown_question_2_answer: null,
+      guest_dropdown_question_3_answer: null,
+      guest_text_question_1_answer: null,
+      guest_text_question_2_answer: null,
+      guest_text_question_3_answer: null,
+    },
   ],
 };
 
@@ -463,7 +494,7 @@ describe('generateWeddingReply', () => {
       const wedding = {
         ...baseWedding,
         extra_question_1_enabled: true,
-        extra_question_1_text: 'Will you need a parking space?',
+        extra_question_1_text: { EN: 'Will you need a parking space?', ES: '¿Necesitas aparcamiento?' },
       };
       await generateWeddingReply('Parking?', wedding, baseFamily, 'EN');
       expect(captureSystemPrompt()).toContain('Will you need a parking space?');
