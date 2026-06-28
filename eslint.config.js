@@ -7,6 +7,8 @@ module.exports = [
     ignores: [
       'node_modules',
       '.next',
+      '.claude',
+      'public',
       'out',
       'dist',
       'build',

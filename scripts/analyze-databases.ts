@@ -313,6 +313,7 @@ async function analyzeWeddings(client: PrismaClient) {
     // Providers
     console.log(`\n  PROVIDERS (${wedding.providers.length}):`);
     for (const provider of wedding.providers) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const providerName = provider.name || (provider as any).provider?.name || 'Custom';
       console.log(`    ${provider.category.name}: ${providerName}`);
       console.log(`      Total Price: ${provider.total_price || 'N/A'}`);

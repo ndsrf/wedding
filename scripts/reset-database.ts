@@ -20,6 +20,7 @@ if (!connectionString) {
 }
 
 const pool = new Pool({ connectionString });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const adapter = new PrismaPg(pool as any);
 
 const prismaClientOptions: Prisma.PrismaClientOptions = {
@@ -87,9 +88,9 @@ async function resetDatabase() {
       try {
         await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE;`);
         console.log(`  ✓ Truncated ${tablename}`);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Skip tables that can't be truncated (e.g., protected system tables)
-        console.log(`  ⚠️ Could not truncate ${tablename}: ${error.message}`);
+        console.log(`  ⚠️ Could not truncate ${tablename}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 

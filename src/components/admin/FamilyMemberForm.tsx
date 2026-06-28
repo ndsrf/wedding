@@ -30,21 +30,50 @@ export interface FamilyMemberFormData {
   guest_text_question_3_answer?: string | null;
 }
 
+type LocalizedText = Record<string, string> | string | null;
+type LocalizedOptions = Record<string, string[]> | null;
+
+interface GuestMemberConfig {
+  dietary_restrictions_enabled: boolean;
+  accessibility_needs_enabled: boolean;
+  guest_yn_question_1_enabled: boolean;
+  guest_yn_question_1_text: LocalizedText;
+  guest_yn_question_2_enabled: boolean;
+  guest_yn_question_2_text: LocalizedText;
+  guest_yn_question_3_enabled: boolean;
+  guest_yn_question_3_text: LocalizedText;
+  guest_dropdown_question_1_enabled: boolean;
+  guest_dropdown_question_1_label: LocalizedText;
+  guest_dropdown_question_1_options: LocalizedOptions;
+  guest_dropdown_question_2_enabled: boolean;
+  guest_dropdown_question_2_label: LocalizedText;
+  guest_dropdown_question_2_options: LocalizedOptions;
+  guest_dropdown_question_3_enabled: boolean;
+  guest_dropdown_question_3_label: LocalizedText;
+  guest_dropdown_question_3_options: LocalizedOptions;
+  guest_text_question_1_enabled: boolean;
+  guest_text_question_1_label: LocalizedText;
+  guest_text_question_2_enabled: boolean;
+  guest_text_question_2_label: LocalizedText;
+  guest_text_question_3_enabled: boolean;
+  guest_text_question_3_label: LocalizedText;
+}
+
 interface FamilyMemberFormProps {
   members: FamilyMemberFormData[];
   onChange: (members: FamilyMemberFormData[]) => void;
-  weddingConfig?: any;
+  weddingConfig?: GuestMemberConfig;
 }
 
-function resolveLabel(map: Record<string, string> | null | any, locale: string): string {
+function resolveLabel(map: LocalizedText, locale: string): string {
   if (!map) return '';
   if (typeof map === 'string') return map;
-  return map?.[locale] || map?.['en'] || map?.['es'] || '';
+  return map[locale] || map['en'] || map['es'] || '';
 }
 
-function resolveOptions(map: Record<string, string[]> | null | any, locale: string): string[] {
+function resolveOptions(map: LocalizedOptions, locale: string): string[] {
   if (!map) return [];
-  return map?.[locale] || map?.['en'] || map?.['es'] || [];
+  return map[locale] || map['en'] || map['es'] || [];
 }
 
 function parseOption(raw: string): { label: string; value: string } {

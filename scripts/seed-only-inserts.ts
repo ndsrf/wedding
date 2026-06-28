@@ -50,11 +50,12 @@ async function main() {
     console.log(`✓ Master templates: ${masterCount}`);
     console.log(`✓ Planner templates seeded: ${plannerCount}`);
 
-  } catch (error: any) {
-    console.error('Error executing seed:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Error executing seed:', message);
 
     // Check if it's a duplicate key error (already seeded)
-    if (error.message.includes('duplicate key') || error.message.includes('already exists')) {
+    if (message.includes('duplicate key') || message.includes('already exists')) {
       console.log('ℹ️  Templates may already be seeded. Checking...');
       const masterCount = await prisma.masterMessageTemplate.count();
       const plannerCount = await prisma.plannerMessageTemplate.count();

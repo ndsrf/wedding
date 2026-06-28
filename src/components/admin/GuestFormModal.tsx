@@ -53,48 +53,51 @@ interface GuestFormData {
   family_dropdown_question_1_answer?: string | null;
 }
 
-interface WeddingQuestionConfig {
+type LocalizedText = Record<string, string> | string | null;
+type LocalizedOptions = Record<string, string[]> | null;
+
+export interface WeddingQuestionConfig {
   save_the_date_enabled: boolean;
   transportation_question_enabled: boolean;
   dietary_restrictions_enabled: boolean;
   accessibility_needs_enabled: boolean;
-  transportation_question_text: any;
+  transportation_question_text: LocalizedText;
   extra_question_1_enabled: boolean;
-  extra_question_1_text: any;
+  extra_question_1_text: LocalizedText;
   extra_question_2_enabled: boolean;
-  extra_question_2_text: any;
+  extra_question_2_text: LocalizedText;
   extra_question_3_enabled: boolean;
-  extra_question_3_text: any;
+  extra_question_3_text: LocalizedText;
   extra_info_1_enabled: boolean;
-  extra_info_1_label: any;
+  extra_info_1_label: LocalizedText;
   extra_info_2_enabled: boolean;
-  extra_info_2_label: any;
+  extra_info_2_label: LocalizedText;
   extra_info_3_enabled: boolean;
-  extra_info_3_label: any;
+  extra_info_3_label: LocalizedText;
   family_dropdown_question_1_enabled: boolean;
-  family_dropdown_question_1_label: any;
-  family_dropdown_question_1_options: any;
+  family_dropdown_question_1_label: LocalizedText;
+  family_dropdown_question_1_options: LocalizedOptions;
   guest_yn_question_1_enabled: boolean;
-  guest_yn_question_1_text: any;
+  guest_yn_question_1_text: LocalizedText;
   guest_yn_question_2_enabled: boolean;
-  guest_yn_question_2_text: any;
+  guest_yn_question_2_text: LocalizedText;
   guest_yn_question_3_enabled: boolean;
-  guest_yn_question_3_text: any;
+  guest_yn_question_3_text: LocalizedText;
   guest_dropdown_question_1_enabled: boolean;
-  guest_dropdown_question_1_label: any;
-  guest_dropdown_question_1_options: any;
+  guest_dropdown_question_1_label: LocalizedText;
+  guest_dropdown_question_1_options: LocalizedOptions;
   guest_dropdown_question_2_enabled: boolean;
-  guest_dropdown_question_2_label: any;
-  guest_dropdown_question_2_options: any;
+  guest_dropdown_question_2_label: LocalizedText;
+  guest_dropdown_question_2_options: LocalizedOptions;
   guest_dropdown_question_3_enabled: boolean;
-  guest_dropdown_question_3_label: any;
-  guest_dropdown_question_3_options: any;
+  guest_dropdown_question_3_label: LocalizedText;
+  guest_dropdown_question_3_options: LocalizedOptions;
   guest_text_question_1_enabled: boolean;
-  guest_text_question_1_label: any;
+  guest_text_question_1_label: LocalizedText;
   guest_text_question_2_enabled: boolean;
-  guest_text_question_2_label: any;
+  guest_text_question_2_label: LocalizedText;
   guest_text_question_3_enabled: boolean;
-  guest_text_question_3_label: any;
+  guest_text_question_3_label: LocalizedText;
 }
 
 interface GuestFormModalProps {
@@ -131,15 +134,15 @@ const defaultFormData: GuestFormData = {
   family_dropdown_question_1_answer: null,
 };
 
-function resolveLabel(map: Record<string, string> | null | any, locale: string): string {
+function resolveLabel(map: LocalizedText, locale: string): string {
   if (!map) return '';
   if (typeof map === 'string') return map;
-  return map?.[locale] || map?.['en'] || map?.['es'] || '';
+  return map[locale] || map['en'] || map['es'] || '';
 }
 
-function resolveOptions(map: Record<string, string[]> | null | any, locale: string): string[] {
+function resolveOptions(map: LocalizedOptions, locale: string): string[] {
   if (!map) return [];
-  return map?.[locale] || map?.['en'] || map?.['es'] || [];
+  return map[locale] || map['en'] || map['es'] || [];
 }
 
 function parseOption(raw: string): { label: string; value: string } {

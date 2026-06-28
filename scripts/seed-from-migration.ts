@@ -29,8 +29,8 @@ async function main() {
     console.log(`✓ Master templates: ${masterCount}`);
     console.log(`✓ Planner templates: ${plannerCount}`);
 
-  } catch (error: any) {
-    console.error('Error executing migration:', error.message);
+  } catch (error: unknown) {
+    console.error('Error executing migration:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 }

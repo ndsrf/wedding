@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 import { GuestTable } from '@/components/admin/GuestTable';
 import { GuestFilters } from '@/components/admin/GuestFilters';
 import { GuestAdditionsReview } from '@/components/admin/GuestAdditionsReview';
-import { GuestFormModal } from '@/components/admin/GuestFormModal';
+import { GuestFormModal, type WeddingQuestionConfig } from '@/components/admin/GuestFormModal';
 import { GuestDeleteDialog } from '@/components/admin/GuestDeleteDialog';
 import { ReminderModal } from '@/components/admin/ReminderModal';
 import { GuestTimelineModal } from '@/components/admin/GuestTimelineModal';
@@ -68,50 +68,6 @@ interface Filters {
   label_id?: string;
   label_id_invert?: boolean;
   search?: string;
-}
-
-interface WeddingQuestionConfig {
-  save_the_date_enabled: boolean;
-  transportation_question_enabled: boolean;
-  dietary_restrictions_enabled: boolean;
-  accessibility_needs_enabled: boolean;
-  transportation_question_text: any;
-  extra_question_1_enabled: boolean;
-  extra_question_1_text: any;
-  extra_question_2_enabled: boolean;
-  extra_question_2_text: any;
-  extra_question_3_enabled: boolean;
-  extra_question_3_text: any;
-  extra_info_1_enabled: boolean;
-  extra_info_1_label: any;
-  extra_info_2_enabled: boolean;
-  extra_info_2_label: any;
-  extra_info_3_enabled: boolean;
-  extra_info_3_label: any;
-  family_dropdown_question_1_enabled: boolean;
-  family_dropdown_question_1_label: any;
-  family_dropdown_question_1_options: any;
-  guest_yn_question_1_enabled: boolean;
-  guest_yn_question_1_text: any;
-  guest_yn_question_2_enabled: boolean;
-  guest_yn_question_2_text: any;
-  guest_yn_question_3_enabled: boolean;
-  guest_yn_question_3_text: any;
-  guest_dropdown_question_1_enabled: boolean;
-  guest_dropdown_question_1_label: any;
-  guest_dropdown_question_1_options: any;
-  guest_dropdown_question_2_enabled: boolean;
-  guest_dropdown_question_2_label: any;
-  guest_dropdown_question_2_options: any;
-  guest_dropdown_question_3_enabled: boolean;
-  guest_dropdown_question_3_label: any;
-  guest_dropdown_question_3_options: any;
-  guest_text_question_1_enabled: boolean;
-  guest_text_question_1_label: any;
-  guest_text_question_2_enabled: boolean;
-  guest_text_question_2_label: any;
-  guest_text_question_3_enabled: boolean;
-  guest_text_question_3_label: any;
 }
 
 // ============================================================================

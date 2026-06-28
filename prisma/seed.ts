@@ -24,6 +24,7 @@ if (!connectionString) {
 }
 
 const pool = new Pool({ connectionString });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const adapter = new PrismaPg(pool as any);
 const prisma = new PrismaClient({ adapter });
 
