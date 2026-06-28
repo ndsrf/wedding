@@ -35,8 +35,6 @@ const HTML = (initials: string, code: string, ogImage?: string) => `<!DOCTYPE ht
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Loading…</title>${ogImage ? `
   <meta property="og:image" content="${escapeAttr(ogImage)}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="${escapeAttr(ogImage)}">` : ''}
   <style>
