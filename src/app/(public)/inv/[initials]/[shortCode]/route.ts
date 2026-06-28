@@ -33,7 +33,7 @@ const HTML = (initials: string, code: string, ogImage?: string) => `<!DOCTYPE ht
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Loading…</title>${ogImage ? `
+  <title>${ogImage ? '' : 'Loading…'}</title>${ogImage ? `
   <meta property="og:title" content="">
   <meta property="og:image" content="${escapeAttr(ogImage)}">
   <meta name="twitter:card" content="summary_large_image">
