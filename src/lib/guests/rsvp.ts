@@ -174,6 +174,8 @@ export const getRSVPPageData = cache(async (
           payment_tracking_mode: wedding.payment_tracking_mode,
           gift_iban: wedding.gift_iban,
           show_iban_on_rsvp: wedding.show_iban_on_rsvp,
+          show_nupcibot_whatsapp_link: wedding.show_nupcibot_whatsapp_link,
+          show_nupci_banner: wedding.show_nupci_banner,
           transportation_question_enabled: wedding.transportation_question_enabled,
           transportation_question_text: wedding.transportation_question_text,
           dietary_restrictions_enabled: wedding.dietary_restrictions_enabled,
@@ -251,6 +253,11 @@ export const getRSVPPageData = cache(async (
     );
 
     // 4. Assemble final response
+    const rawTwilioNumber = process.env.TWILIO_WHATSAPP_NUMBER || '';
+    const nupcibotWhatsappNumber = rawTwilioNumber
+      ? rawTwilioNumber.replace(/^whatsapp:\+?/, '')
+      : null;
+
     const responseData: GuestRSVPPageData = {
       family: {
         ...family,
@@ -264,6 +271,7 @@ export const getRSVPPageData = cache(async (
       ...(resolvedCache.invitation_template && { invitation_template: resolvedCache.invitation_template }),
       rsvp_cutoff_passed,
       has_submitted_rsvp,
+      nupcibot_whatsapp_number: nupcibotWhatsappNumber,
     };
 
     return {

@@ -1984,7 +1984,13 @@
         "deleteCache": "Vider le cache",
         "deletingCache": "Suppression…",
         "deleteCacheSuccess": "Cache vidé avec succès",
-        "deleteCacheError": "Échec du vidage du cache. Veuillez réessayer."
+        "deleteCacheError": "Échec du vidage du cache. Veuillez réessayer.",
+        "rsvpBranding": "Marque RSVP",
+        "rsvpBrandingDesc": "Contrôlez les éléments de marque optionnels affichés en bas de la page RSVP.",
+        "showNupcibotWhatsappLink": "Ajouter le lien vers l'assistant WhatsApp NupciBot",
+        "showNupcibotWhatsappLinkDesc": "Affiche un lien vers notre assistant WhatsApp en bas de la page RSVP (visible uniquement pour les familles avec un numéro WhatsApp enregistré).",
+        "showNupciBanner": "Afficher la bannière Nupci",
+        "showNupciBannerDesc": "Affiche 'Propulsé par Nupci' en bas de la page RSVP."
       },
       "dangerZone": {
         "title": "Zone de danger",
@@ -2809,7 +2815,10 @@
       "canEdit": "Vous pouvez modifier votre réponse jusqu'au {date}."
     },
     "footer": {
-      "contactCouple": "Si vous avez des questions, veuillez contacter le couple directement."
+      "contactCouple": "Si vous avez des questions, veuillez contacter le couple directement.",
+      "nupcibotText": "Pour les questions de dernière minute, vous pouvez aussi contacter",
+      "nupcibotCta": "NupciBot, notre assistant mariage",
+      "nupciBannerPrefix": "Propulsé par"
     },
     "gardenBirds": {
       "weAreGettingMarried": "Nous nous marions",

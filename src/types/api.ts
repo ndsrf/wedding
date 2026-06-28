@@ -394,6 +394,10 @@ export interface UpdateWeddingConfigRequest {
   guest_text_question_2_label?: Record<string, string> | null;
   guest_text_question_3_enabled?: boolean;
   guest_text_question_3_label?: Record<string, string> | null;
+
+  // RSVP Branding settings
+  show_nupcibot_whatsapp_link?: boolean;
+  show_nupci_banner?: boolean;
 }
 
 export type UpdateWeddingConfigResponse = APIResponse<Wedding>;
@@ -596,6 +600,8 @@ export interface GuestRSVPPageData {
     payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
     show_iban_on_rsvp: boolean;
+    show_nupcibot_whatsapp_link: boolean;
+    show_nupci_banner: boolean;
 
     // RSVP Configuration - Transportation question
     transportation_question_enabled: boolean;
@@ -662,6 +668,7 @@ export interface GuestRSVPPageData {
   };
   rsvp_cutoff_passed: boolean;
   has_submitted_rsvp: boolean;
+  nupcibot_whatsapp_number: string | null;
 }
 
 export type GetGuestRSVPPageResponse = APIResponse<GuestRSVPPageData>;

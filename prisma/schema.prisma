@@ -238,6 +238,8 @@ model Wedding {
   is_disabled                     Boolean            @default(false)
   gift_iban                       String?
   show_iban_on_rsvp               Boolean            @default(true)
+  show_nupcibot_whatsapp_link     Boolean            @default(true)
+  show_nupci_banner               Boolean            @default(true)
   planned_guests                  Int?
   planned_gift_per_person         Decimal?           @db.Decimal(10, 2)
   couple_table_id                 String?

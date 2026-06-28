@@ -37,6 +37,22 @@ export async function register() {
       console.error('[Server] ✗ Application initialization failed:', error);
     }
 
+    // Flush RSVP page caches and admin wedding caches so any stale Redis entries
+    // from before a schema-changing deploy are never served with missing fields.
+    try {
+      const { flushAllWeddingPageCaches } = await import('@/lib/cache/rsvp-page');
+      await flushAllWeddingPageCaches();
+    } catch (error) {
+      console.error('[RSVP Cache] Failed to flush on startup:', error);
+    }
+    try {
+      const { invalidateCachePattern } = await import('@/lib/cache/redis');
+      await invalidateCachePattern('wedding:admin:*');
+      console.log('[Admin Cache] ✓ All admin wedding cache entries flushed');
+    } catch (error) {
+      console.error('[Admin Cache] Failed to flush on startup:', error);
+    }
+
     // Alert processor — non-Vercel environments
     // On Vercel the cron job at /api/cron/alerts fires every minute.
     // On docker/standard/cloudflare we spin up an in-process scheduler instead.

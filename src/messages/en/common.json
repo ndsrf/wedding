@@ -2346,7 +2346,13 @@
         "deleteCache": "Delete Cache",
         "deletingCache": "Clearing…",
         "deleteCacheSuccess": "Cache cleared successfully",
-        "deleteCacheError": "Failed to clear cache. Please try again."
+        "deleteCacheError": "Failed to clear cache. Please try again.",
+        "rsvpBranding": "RSVP Branding",
+        "rsvpBrandingDesc": "Control optional branding elements shown at the bottom of the RSVP page.",
+        "showNupcibotWhatsappLink": "Add NupciBot WhatsApp assistant link",
+        "showNupcibotWhatsappLinkDesc": "Show a link to our WhatsApp assistant at the bottom of the RSVP page (only shown for families with a linked WhatsApp number).",
+        "showNupciBanner": "Show Nupci banner",
+        "showNupciBannerDesc": "Show 'Powered by Nupci' at the bottom of the RSVP page."
       },
       "dangerZone": {
         "title": "Danger Zone",
@@ -2901,7 +2907,10 @@
       "canEdit": "You can edit your RSVP until {date}."
     },
     "footer": {
-      "contactCouple": "If you have any questions, please contact the couple directly."
+      "contactCouple": "If you have any questions, please contact the couple directly.",
+      "nupcibotText": "For last minute questions, you can also reach out to",
+      "nupcibotCta": "NupciBot, our wedding assistant",
+      "nupciBannerPrefix": "Powered by"
     },
     "gardenBirds": {
       "weAreGettingMarried": "We Are Getting Married",

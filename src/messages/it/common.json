@@ -1984,7 +1984,13 @@
         "deleteCache": "Elimina Cache",
         "deletingCache": "Eliminazione…",
         "deleteCacheSuccess": "Cache eliminata con successo",
-        "deleteCacheError": "Impossibile eliminare la cache. Riprova."
+        "deleteCacheError": "Impossibile eliminare la cache. Riprova.",
+        "rsvpBranding": "Brand RSVP",
+        "rsvpBrandingDesc": "Controlla gli elementi di brand opzionali mostrati in fondo alla pagina RSVP.",
+        "showNupcibotWhatsappLink": "Aggiungi link all'assistente WhatsApp NupciBot",
+        "showNupcibotWhatsappLinkDesc": "Mostra un link al nostro assistente WhatsApp in fondo alla pagina RSVP (visibile solo per le famiglie con un numero WhatsApp registrato).",
+        "showNupciBanner": "Mostra il banner Nupci",
+        "showNupciBannerDesc": "Mostra 'Con la tecnologia di Nupci' in fondo alla pagina RSVP."
       },
       "dangerZone": {
         "title": "Zona pericolosa",
@@ -2809,7 +2815,10 @@
       "canEdit": "Puoi modificare il tuo RSVP fino al {date}."
     },
     "footer": {
-      "contactCouple": "Se hai domande, contatta direttamente la coppia."
+      "contactCouple": "Se hai domande, contatta direttamente la coppia.",
+      "nupcibotText": "Per domande dell'ultimo minuto, puoi anche contattare",
+      "nupcibotCta": "NupciBot, il nostro assistente di nozze",
+      "nupciBannerPrefix": "Con la tecnologia di"
     },
     "gardenBirds": {
       "weAreGettingMarried": "Ci sposiamo",

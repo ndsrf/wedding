@@ -151,6 +151,8 @@ export interface Wedding {
   payment_tracking_mode: PaymentMode;
   gift_iban: string | null;
   show_iban_on_rsvp: boolean;
+  show_nupcibot_whatsapp_link: boolean;
+  show_nupci_banner: boolean;
   allow_guest_additions: boolean;
   default_language: Language;
   wedding_country: string;

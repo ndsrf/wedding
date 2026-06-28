@@ -98,6 +98,9 @@ interface RsvpFormState {
   family_dropdown_question_1_enabled: boolean;
   family_dropdown_question_1_label: I18nField | null;
   family_dropdown_question_1_options: I18nOptions | null;
+  // Branding
+  show_nupcibot_whatsapp_link: boolean;
+  show_nupci_banner: boolean;
 }
 
 interface RsvpSettingsFormProps {
@@ -254,6 +257,8 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }
     family_dropdown_question_1_enabled: wedding.family_dropdown_question_1_enabled,
     family_dropdown_question_1_label: (wedding.family_dropdown_question_1_label as I18nField | null) ?? null,
     family_dropdown_question_1_options: (wedding.family_dropdown_question_1_options as I18nOptions | null) ?? null,
+    show_nupcibot_whatsapp_link: wedding.show_nupcibot_whatsapp_link ?? true,
+    show_nupci_banner: wedding.show_nupci_banner ?? true,
   });
 
   const set = <K extends keyof RsvpFormState>(key: K, val: RsvpFormState[K]) =>
@@ -346,6 +351,9 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }
         family_dropdown_question_1_enabled: f.family_dropdown_question_1_enabled,
         family_dropdown_question_1_label: f.family_dropdown_question_1_enabled ? f.family_dropdown_question_1_label : null,
         family_dropdown_question_1_options: f.family_dropdown_question_1_enabled ? cleanOpts(f.family_dropdown_question_1_options) : null,
+        // Branding
+        show_nupcibot_whatsapp_link: f.show_nupcibot_whatsapp_link,
+        show_nupci_banner: f.show_nupci_banner,
       });
     } catch (err) {
       console.error('Form submission error:', err);
@@ -602,6 +610,30 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }
               />
             </div>
           )}
+        </div>
+      </div>
+
+      {/* ── RSVP BRANDING ──────────────────────────────────────────────── */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-1">{t('rsvpBranding')}</h3>
+        <p className="text-sm text-gray-500 mb-6">{t('rsvpBrandingDesc')}</p>
+
+        <div className={`${cardCls} mb-4`}>
+          <label className="flex items-center">
+            <input type="checkbox" checked={f.show_nupcibot_whatsapp_link}
+              onChange={e => set('show_nupcibot_whatsapp_link', e.target.checked)} className={checkCls} />
+            <span className="ml-2 text-sm font-medium text-gray-700">{t('showNupcibotWhatsappLink')}</span>
+          </label>
+          <p className="mt-1 ml-6 text-xs text-gray-500">{t('showNupcibotWhatsappLinkDesc')}</p>
+        </div>
+
+        <div className={cardCls}>
+          <label className="flex items-center">
+            <input type="checkbox" checked={f.show_nupci_banner}
+              onChange={e => set('show_nupci_banner', e.target.checked)} className={checkCls} />
+            <span className="ml-2 text-sm font-medium text-gray-700">{t('showNupciBanner')}</span>
+          </label>
+          <p className="mt-1 ml-6 text-xs text-gray-500">{t('showNupciBannerDesc')}</p>
         </div>
       </div>
 

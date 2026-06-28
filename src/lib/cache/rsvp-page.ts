@@ -39,6 +39,8 @@ export interface CachedWeddingPageData {
     payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
     show_iban_on_rsvp: boolean;
+    show_nupcibot_whatsapp_link: boolean;
+    show_nupci_banner: boolean;
     transportation_question_enabled: boolean;
     transportation_question_text: Record<string, string> | null;
     dietary_restrictions_enabled: boolean;
@@ -108,7 +110,7 @@ interface CacheEntry {
 // CACHE
 // ============================================================================
 
-import { getCached, setCached, invalidateCache, getClient } from './redis';
+import { getCached, setCached, invalidateCache, invalidateCachePattern, getClient } from './redis';
 
 /**
  * Safety-net TTL driven by RSVP_CACHE_TTL_HOURS env var (default 1 h).
@@ -174,4 +176,22 @@ export async function invalidateWeddingPageCache(weddingId: string): Promise<voi
   }
 
   localCache.delete(weddingId);
+}
+
+/**
+ * Flush every RSVP page cache entry — both Redis and local.
+ * Call on startup after schema-changing deploys so stale cached shapes
+ * (missing new fields) are never served.
+ */
+export async function flushAllWeddingPageCaches(): Promise<void> {
+  if (getClient()) {
+    try {
+      await invalidateCachePattern('wedding:rsvp:page:*');
+    } catch (err) {
+      console.warn('[RSVP Cache] Failed to flush all entries in Redis:', err);
+    }
+  }
+
+  localCache.clear();
+  console.log('[RSVP Cache] ✓ All wedding page cache entries flushed');
 }

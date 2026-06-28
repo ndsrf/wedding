@@ -118,6 +118,8 @@ const baseWedding = {
   is_disabled: false,
   gift_iban: 'ES91 2100 0418 4502 0005 1332',
   show_iban_on_rsvp: true,
+  show_nupcibot_whatsapp_link: true,
+  show_nupci_banner: true,
   couple_table_id: null,
   main_event_location_id: null,
   wizard_completed: false,

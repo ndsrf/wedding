@@ -103,6 +103,10 @@ const updateWeddingConfigSchema = z.object({
   guest_text_question_2_label: z.record(z.string(), z.string()).nullable().optional(),
   guest_text_question_3_enabled: z.boolean().optional(),
   guest_text_question_3_label: z.record(z.string(), z.string()).nullable().optional(),
+
+  // RSVP Branding settings
+  show_nupcibot_whatsapp_link: z.boolean().optional(),
+  show_nupci_banner: z.boolean().optional(),
 });
 
 /**
@@ -278,6 +282,9 @@ export async function GET() {
       additional_info: wedding.additional_info,
       payment_tracking_mode: wedding.payment_tracking_mode,
       gift_iban: wedding.gift_iban,
+      show_iban_on_rsvp: wedding.show_iban_on_rsvp,
+      show_nupcibot_whatsapp_link: (wedding as unknown as { show_nupcibot_whatsapp_link: boolean }).show_nupcibot_whatsapp_link ?? true,
+      show_nupci_banner: (wedding as unknown as { show_nupci_banner: boolean }).show_nupci_banner ?? true,
       planned_guests: wedding.planned_guests,
       planned_gift_per_person: wedding.planned_gift_per_person ? Number(wedding.planned_gift_per_person) : null,
       allow_guest_additions: wedding.allow_guest_additions,
@@ -583,6 +590,14 @@ export async function PATCH(request: NextRequest) {
     // Per-guest Text questions
     for (const key of ['guest_text_question_1_enabled', 'guest_text_question_1_label', 'guest_text_question_2_enabled', 'guest_text_question_2_label', 'guest_text_question_3_enabled', 'guest_text_question_3_label'] as const) {
       if (validatedData[key] !== undefined) (updateData as Record<string, unknown>)[key] = validatedData[key];
+    }
+
+    // RSVP Branding settings
+    if (validatedData.show_nupcibot_whatsapp_link !== undefined) {
+      updateData.show_nupcibot_whatsapp_link = validatedData.show_nupcibot_whatsapp_link;
+    }
+    if (validatedData.show_nupci_banner !== undefined) {
+      updateData.show_nupci_banner = validatedData.show_nupci_banner;
     }
 
     // Update wedding

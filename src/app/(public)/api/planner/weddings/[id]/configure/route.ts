@@ -87,6 +87,9 @@ const updateWeddingConfigSchema = z.object({
   guest_text_question_2_label: z.record(z.string(), z.string()).nullable().optional(),
   guest_text_question_3_enabled: z.boolean().optional(),
   guest_text_question_3_label: z.record(z.string(), z.string()).nullable().optional(),
+  // RSVP Branding settings
+  show_nupcibot_whatsapp_link: z.boolean().optional(),
+  show_nupci_banner: z.boolean().optional(),
 });
 
 /**
@@ -214,6 +217,9 @@ export async function GET(
       additional_info: wedding.additional_info,
       payment_tracking_mode: wedding.payment_tracking_mode,
       gift_iban: wedding.gift_iban,
+      show_iban_on_rsvp: wedding.show_iban_on_rsvp,
+      show_nupcibot_whatsapp_link: (wedding as unknown as { show_nupcibot_whatsapp_link: boolean }).show_nupcibot_whatsapp_link ?? true,
+      show_nupci_banner: (wedding as unknown as { show_nupci_banner: boolean }).show_nupci_banner ?? true,
       planned_guests: wedding.planned_guests,
       planned_gift_per_person: wedding.planned_gift_per_person ? Number(wedding.planned_gift_per_person) : null,
       allow_guest_additions: wedding.allow_guest_additions,
@@ -371,6 +377,7 @@ export async function PATCH(
       'guest_text_question_1_enabled', 'guest_text_question_1_label',
       'guest_text_question_2_enabled', 'guest_text_question_2_label',
       'guest_text_question_3_enabled', 'guest_text_question_3_label',
+      'show_nupcibot_whatsapp_link', 'show_nupci_banner',
     ] as const;
 
     for (const field of fields) {
