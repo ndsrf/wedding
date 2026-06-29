@@ -61,6 +61,7 @@ interface Props {
   invoices: InvoiceData[];
   paymentSchedule: PaymentScheduleItem[];
   plannerPayment: PlannerPayment;
+  saveUrl?: string;
 }
 
 function formatCurrency(amount: number, currency = 'EUR') {
@@ -102,6 +103,7 @@ export default function AdminAccountClient({
   invoices,
   paymentSchedule,
   plannerPayment,
+  saveUrl = '/api/admin/me',
 }: Props) {
   const t = useTranslations('admin.account');
 
@@ -116,7 +118,7 @@ export default function AdminAccountClient({
     setSaved(false);
     setError(null);
     try {
-      const res = await fetch('/api/admin/me', {
+      const res = await fetch(saveUrl, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), phone: phone.trim() || null }),
