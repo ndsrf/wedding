@@ -2,49 +2,15 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import type { ContractData, QuoteData, InvoiceData, PaymentScheduleItem } from '@/lib/wedding-documents';
+
+export type { InvoiceData };
 
 interface AdminProfile {
   id: string;
   name: string;
   email: string;
   phone: string | null;
-}
-
-interface ContractData {
-  id: string;
-  title: string;
-  status: string;
-  pdf_url: string | null;
-  signed_pdf_url: string | null;
-  signed_at: string | null;
-}
-
-interface QuoteData {
-  id: string;
-  status: string;
-  total: number;
-  currency: string;
-}
-
-export interface InvoiceData {
-  id: string;
-  invoice_number: string;
-  type: string;
-  status: string;
-  total: number;
-  amount_paid: number;
-  pdf_url: string | null;
-  issued_at: string | null;
-  due_date: string | null;
-}
-
-interface PaymentScheduleItem {
-  id: string;
-  order: number;
-  description: string;
-  amount_type: string;
-  amount_value: number;
-  due_date: string | null;
 }
 
 interface PlannerPayment {
