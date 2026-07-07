@@ -567,7 +567,12 @@ export default function WeddingDetailPage({ params }: WeddingDetailPageProps) {
                       <span className="text-white text-sm font-semibold">{admin.name.charAt(0).toUpperCase()}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{admin.name}</p>
+                      <Link
+                        href={`/planner/weddings/${weddingId}/admins/${admin.id}`}
+                        className="text-sm font-medium text-gray-900 hover:text-rose-600 transition-colors truncate block"
+                      >
+                        {admin.name}
+                      </Link>
                       <p className="text-xs text-gray-500 truncate">{admin.email}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
