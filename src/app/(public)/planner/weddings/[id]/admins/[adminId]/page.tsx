@@ -15,9 +15,9 @@ import AdminAccountClient from '@/components/admin/AdminAccountClient';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; adminId: string }> }) {
   const { t } = await getTranslations();
-  const { adminId } = await params;
+  const { id: weddingId, adminId } = await params;
   const admin = await prisma.weddingAdmin.findFirst({
-    where: { id: adminId },
+    where: { id: adminId, wedding_id: weddingId },
     select: { name: true },
   });
   return { title: admin ? `Nupci - ${admin.name}` : `Nupci - ${t('admin.account.title')}` };
