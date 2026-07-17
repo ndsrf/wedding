@@ -2907,7 +2907,7 @@
       "canEdit": "You can edit your RSVP until {date}."
     },
     "footer": {
-      "contactCouple": "If you have any questions, please contact the couple directly.",
+      "contactCouple": "If you have any questions, please contact us.",
       "nupcibotText": "For last minute questions, you can also reach out to",
       "nupcibotCta": "NupciBot, our wedding assistant",
       "nupciBannerPrefix": "Powered by"

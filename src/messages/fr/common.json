@@ -2815,7 +2815,7 @@
       "canEdit": "Vous pouvez modifier votre réponse jusqu'au {date}."
     },
     "footer": {
-      "contactCouple": "Si vous avez des questions, veuillez contacter le couple directement.",
+      "contactCouple": "Si vous avez des questions, veuillez nous contacter directement.",
       "nupcibotText": "Pour les questions de dernière minute, vous pouvez aussi contacter",
       "nupcibotCta": "NupciBot, notre assistant mariage",
       "nupciBannerPrefix": "Propulsé par"

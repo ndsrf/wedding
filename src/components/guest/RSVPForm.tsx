@@ -379,10 +379,6 @@ export default function RSVPForm({
       <h3 className="text-2xl font-bold mb-4" style={{ color: tc }}>
         {t('guest.rsvp.title')}
       </h3>
-      <p className="text-lg mb-2" style={{ color: tc + 'cc' }}>
-        {t('guest.rsvp.instructions', { name: family.name })}
-      </p>
-
       {/* Error Message */}
       {error && (
         <div className="mb-6 p-4 border-2 border-red-400 rounded-lg" style={{ backgroundColor: '#fef2f2' }}>
