@@ -412,7 +412,7 @@ function TemplateBlock({
       minisiteBlock.folderNames?.['EN'] ||
       minisiteBlock.folderNames?.['ES'] ||
       '';
-    return <MinisiteBlock folderName={folderName} />;
+    return <MinisiteBlock folderName={folderName} language={language} />;
   }
 
   // panel blocks are rendered as modals at the TemplateRenderer level, not inline

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 interface MinisiteBlockProps {
   folderName: string;
+  language?: string;
 }
 
 /**
@@ -14,7 +15,7 @@ interface MinisiteBlockProps {
  *
  * @component
  */
-export function MinisiteBlock({ folderName }: MinisiteBlockProps) {
+export function MinisiteBlock({ folderName, language }: MinisiteBlockProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState<string>('700px'); // Reasonable height for gatekeeper
 
@@ -139,11 +140,13 @@ export function MinisiteBlock({ folderName }: MinisiteBlockProps) {
     );
   }
 
+  const iframeSrc = `/invitation/${folderName}/index.html${language ? `?lang=${language.toLowerCase()}` : ''}`;
+
   return (
     <div className="w-full relative overflow-hidden">
       <iframe
         ref={iframeRef}
-        src={`/invitation/${folderName}/index.html`}
+        src={iframeSrc}
         style={{
           width: '100%',
           height: height,

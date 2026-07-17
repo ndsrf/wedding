@@ -1063,6 +1063,7 @@ export function InvitationTemplateEditor({
                         (block as MinisiteBlockType).folderNames?.['ES'] ||
                         ''
                       }
+                      language={activeLanguage}
                     />
                   )}
                 </div>
