@@ -4,7 +4,7 @@
     "config:recommended"
   ],
   "constraints": {
-    "npm": "^11.0.0"
+    "npm": "^12.0.0"
   },
   "automerge": true,
   "packageRules": [
