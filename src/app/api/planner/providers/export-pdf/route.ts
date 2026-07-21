@@ -140,7 +140,8 @@ export async function POST(req: NextRequest) {
 
     const tableRows = providers.map((provider: any, index: number) => {
       const category = categories.find((c: any) => c.id === provider.category_id);
-      return React.createElement(View, { key: provider.id, style: [styles.tableRow, index % 2 === 1 && styles.tableRowAlt] },
+      const rowStyle = index % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : [styles.tableRow];
+      return React.createElement(View, { key: provider.id, style: rowStyle },
         React.createElement(View, { style: [styles.tableCell, { flex: 1.5 }] },
           React.createElement(Text, null, category?.name || '')
         ),

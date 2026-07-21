@@ -174,8 +174,9 @@ export async function POST(req: NextRequest) {
       const total = getRealTotal(wp);
       const projected = getProjected(wp);
       const pending = total - paid;
+      const rowStyle = index % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : [styles.tableRow];
 
-      return React.createElement(View, { key: wp.id, style: [styles.tableRow, index % 2 === 1 && styles.tableRowAlt] },
+      return React.createElement(View, { key: wp.id, style: rowStyle },
         React.createElement(View, { style: [styles.tableCell, { flex: 1.5 }] },
           React.createElement(Text, null, wp.category.name)
         ),
