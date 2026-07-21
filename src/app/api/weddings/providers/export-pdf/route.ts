@@ -289,7 +289,7 @@ export async function POST(req: NextRequest) {
 
     const buffer = await renderToBuffer(PDFDoc);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="wedding-providers-${new Date().toISOString().split('T')[0]}.pdf"`,
