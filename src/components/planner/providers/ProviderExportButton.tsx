@@ -54,7 +54,7 @@ export function ProviderExportButton({ categories, providers, onExport }: Provid
       const result = exportProvidersLibraryToExcel(categories, providers);
 
       // Create blob and download
-      const blob = new Blob([result.buffer], { type: result.mimeType });
+      const blob = new Blob([new Uint8Array(result.buffer)], { type: result.mimeType });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
