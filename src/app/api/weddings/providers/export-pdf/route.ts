@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { renderToBuffer } from '@react-pdf/renderer';
+import { renderToBuffer, Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
 import { getTranslations } from 'next-intl/server';
 import { getLocale } from 'next-intl/server';
 import React from 'react';
@@ -87,15 +87,6 @@ export async function POST(req: NextRequest) {
       totalReal += getRealTotal(wp);
       totalPaid += paid;
     }
-
-    const {
-      Document,
-      Page,
-      Text,
-      View,
-      StyleSheet,
-      Image: PDFImage,
-    } = require('@react-pdf/renderer');
 
     const styles = StyleSheet.create({
       page: {
