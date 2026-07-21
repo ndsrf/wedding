@@ -9,6 +9,7 @@ import {
   Plus, Trash2, FileText, DollarSign, Edit2, Check, X,
   ChevronDown, ChevronUp, Mail, Phone, Globe, AtSign,
 } from 'lucide-react';
+import { WeddingProviderExportButton } from './WeddingProviderExportButton';
 
 type PriceType = 'PER_PERSON' | 'GLOBAL';
 // Local helper type for input change events (avoids implicit any without React types in env)
@@ -306,11 +307,18 @@ export function WeddingProviders({ weddingId, isPlanner }: WeddingProvidersProps
       )}
 
       {/* ── Header + add button ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-xl font-semibold text-gray-800">{t('weddingProvidersTitle')}</h2>
-        <Button onClick={() => { setShowAddProvider(true); fetchCategories(); }}>
-          <Plus className="w-4 h-4 mr-2" />{t('addCategory')}
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <WeddingProviderExportButton
+            weddingProviders={providers}
+            weddingId={weddingId}
+            plannedGuests={typeof plannedGuests === 'number' ? plannedGuests : 0}
+          />
+          <Button onClick={() => { setShowAddProvider(true); fetchCategories(); }}>
+            <Plus className="w-4 h-4 mr-2" />{t('addCategory')}
+          </Button>
+        </div>
       </div>
 
       {/* ── Add provider form ── */}

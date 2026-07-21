@@ -874,7 +874,16 @@
       "applyToAllWeddingsSuccess": "{count} nouvelles entrées créées dans vos mariages.",
       "applyToAllWeddingsNothingNew": "Tous les mariages ont déjà toutes les catégories à jour.",
       "applyToAllWeddingsError": "Erreur lors de l'application des catégories aux mariages.",
-      "applying": "Application..."
+      "applying": "Application...",
+      "export": "Exporter",
+      "exportProviders": "Exporter les prestataires",
+      "exportAs": "Exporter en tant que",
+      "exportPdf": "PDF",
+      "exportExcel": "Excel",
+      "exportLibrary": "Exporter la bibliothèque",
+      "exportWeddingProviders": "Exporter les prestataires du mariage",
+      "generatedByNupci": "Généré par nupci",
+      "exporting": "Exportation..."
     },
     "quotesFinances": {
       "tabs": {

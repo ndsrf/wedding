@@ -874,7 +874,16 @@
       "applyToAllWeddingsSuccess": "{count} neue Einträge in Ihren Hochzeiten erstellt.",
       "applyToAllWeddingsNothingNew": "Alle Hochzeiten haben bereits alle Kategorien auf dem neuesten Stand.",
       "applyToAllWeddingsError": "Fehler beim Anwenden der Kategorien auf die Hochzeiten.",
-      "applying": "Wird angewendet..."
+      "applying": "Wird angewendet...",
+      "export": "Exportieren",
+      "exportProviders": "Anbieter exportieren",
+      "exportAs": "Exportieren unter",
+      "exportPdf": "PDF",
+      "exportExcel": "Excel",
+      "exportLibrary": "Bibliothek exportieren",
+      "exportWeddingProviders": "Hochzeitsdienstleister exportieren",
+      "generatedByNupci": "Generiert von nupci",
+      "exporting": "Wird exportiert..."
     },
     "quotesFinances": {
       "tabs": {
