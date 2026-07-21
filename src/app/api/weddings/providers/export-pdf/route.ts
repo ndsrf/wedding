@@ -9,6 +9,7 @@ import { getLocale } from 'next-intl/server';
 import React from 'react';
 import path from 'path';
 import { readFile, access } from 'fs/promises';
+import { prisma } from '@/lib/db/prisma';
 
 async function resolveImageForPdf(url: string, maxPx = 600): Promise<string | null> {
   try {
@@ -42,11 +43,21 @@ async function resolveImageForPdf(url: string, maxPx = 600): Promise<string | nu
 
 export async function POST(req: NextRequest) {
   try {
-    const { weddingProviders, plannedGuests } = await req.json();
+    const { weddingProviders, plannedGuests, weddingId } = await req.json();
     const locale = await getLocale() as 'es' | 'en' | 'fr' | 'it' | 'de';
     const t = await getTranslations({ locale, namespace: 'planner.providers' });
 
-    const logoUrl = await resolveImageForPdf('/images/nupci.png', 600);
+    // Fetch planner logo from database
+    let plannerLogoUrl: string | null = null;
+    if (weddingId) {
+      const wedding = await prisma.wedding.findUnique({
+        where: { id: weddingId },
+        select: { planner: { select: { logo_url: true } } },
+      });
+      plannerLogoUrl = wedding?.planner?.logo_url ?? null;
+    }
+
+    const logoUrl = plannerLogoUrl ? await resolveImageForPdf(plannerLogoUrl, 600) : null;
 
     const footerMessages: Record<'es' | 'en' | 'fr' | 'it' | 'de', string> = {
       es: 'Generado por nupci',
@@ -210,19 +221,19 @@ export async function POST(req: NextRequest) {
           ? React.createElement(View, { style: styles.header },
               React.createElement(PDFImage, { src: logoUrl, style: styles.logo }),
               React.createElement(View, { style: styles.headerContent },
-                React.createElement(Text, { style: styles.title }, t('exportWeddingProviders') || 'Wedding Providers'),
+                React.createElement(Text, { style: styles.title }, t('providers') || 'Providers'),
                 React.createElement(Text, { style: styles.subtitle }, new Date().toLocaleDateString()),
                 plannedGuests > 0 && React.createElement(Text, { style: styles.subtitle }, `${t('plannedGuests') || 'Planned Guests'}: ${plannedGuests}`)
               )
             )
           : React.createElement(View, { style: styles.header },
-              React.createElement(Text, { style: styles.title }, t('exportWeddingProviders') || 'Wedding Providers'),
+              React.createElement(Text, { style: styles.title }, t('providers') || 'Providers'),
               React.createElement(Text, { style: styles.subtitle }, new Date().toLocaleDateString()),
               plannedGuests > 0 && React.createElement(Text, { style: styles.subtitle }, `${t('plannedGuests') || 'Planned Guests'}: ${plannedGuests}`)
             ),
 
         React.createElement(View, { style: styles.section },
-          React.createElement(Text, { style: styles.sectionTitle }, t('exportWeddingProviders') || 'Wedding Providers'),
+          React.createElement(Text, { style: styles.sectionTitle }, t('providers') || 'Providers'),
 
           React.createElement(View, { style: { ...styles.section, marginBottom: 0 } },
             React.createElement(View, { style: [styles.tableRow, styles.tableHeader] },
