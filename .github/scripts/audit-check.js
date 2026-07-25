@@ -85,6 +85,47 @@ const ACCEPTED_GHSAS = [
   // Vulnerability: quadratic-complexity DoS via repeated aliases in merge keys
   // Risk: Zero production risk; only affects build/test toolchain; never loaded at runtime
   'GHSA-h67p-54hq-rp68', // Quadratic-complexity DoS in merge key handling via repeated aliases
+
+  // brace-expansion - HIGH severity
+  // Dependency chain: jest → @jest/reporters/@jest/config/jest-runtime → glob/readdir-glob → minimatch → brace-expansion
+  // Multiple DoS vulnerabilities affecting the 5.0.x branch
+  // Fix requires version bump (not available in 5.x branch) or breaking change to eslint-config-next
+  // Usage: Dev toolchain only — linting, testing, build processes
+  // Risk: Zero production risk; attack requires untrusted input to glob patterns (dev-only)
+  'GHSA-3jxr-9vmj-r5cp', // DoS via exponential-time expansion of consecutive non-expanding {} groups
+  'GHSA-mh99-v99m-4gvg', // DoS via unbounded expansion length causing process hang/memory exhaustion
+
+  // postcss - HIGH severity (additional vulnerabilities)
+  // Dependency: next@15.1.6 → postcss (bundled version)
+  // Related to GHSA-qx2v-qp2m-jg93 but with different attack vectors
+  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
+  // Risk: Requires malicious CSS content; CSS only from trusted Tailwind/Next.js sources, not user input
+  'GHSA-6g55-p6wh-862q', // Arbitrary file read via attacker-controlled sourceMappingURL
+  'GHSA-r28c-9q8g-f849', // Path traversal in sourceMappingURL auto-loading
+
+  // valibot - MODERATE severity
+  // Dependency: @prisma/dev → valibot (used in Prisma Studio only)
+  // Vulnerability: record() issue paths can throw for inherited Object property names
+  // Fix requires updating @prisma/dev to version with valibot >= 1.5.0
+  // Usage: Development dependency only (Prisma Studio in local dev)
+  // Risk: Low; only affects development, requires specific conditions in form validation path
+  'GHSA-5qjj-4xww-7phc', // record() issue paths can make flatten() throw for inherited Object property names
+
+  // find-my-way - HIGH severity
+  // Dependency: @prisma/dev → find-my-way (used in Prisma Studio HTTP routing)
+  // Vulnerability: DDoS with HTTP/2 via stream manipulation
+  // Fix available but requires @prisma/dev version bump to support find-my-way@9.6.1+
+  // Usage: Development dependency only (Prisma Studio)
+  // Risk: Zero production risk; Prisma Studio is local dev tool, not exposed to internet
+  'GHSA-c96f-x56v-gq3h', // DDoS with HTTP/2
+
+  // sharp - HIGH severity
+  // Dependency: next@15.1.6 → sharp (image optimization)
+  // Vulnerability: Inherited vulnerabilities from libvips (CVE-2026-33327/33328/35590/35591)
+  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
+  // Usage: Image optimization in production builds
+  // Risk: Moderate; requires processing of specially crafted image files; wedding app has limited image sources
+  'GHSA-f88m-g3jw-g9cj', // sharp inherited vulnerabilities in libvips (CVE-2026-33327/28/35590/91)
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];

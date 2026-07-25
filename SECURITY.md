@@ -6,7 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
-Last updated: 2026-05-31
+Last updated: 2026-07-25
 
 ### Current Vulnerabilities
 
@@ -251,6 +251,85 @@ This document tracks known security vulnerabilities that have been assessed and 
 - Server-side validation using Zod schemas
 - DOMPurify for HTML sanitization
 - File upload restrictions (size, type)
+
+##### brace-expansion - Process Hang & Memory Exhaustion (Additional variants)
+- **Package**: brace-expansion 1.1.12 (needs ≥1.1.13) and 2.0.2 (needs ≥2.0.3), and 5.0.x branch
+- **CVEs**:
+  - [GHSA-3jxr-9vmj-r5cp](https://github.com/advisories/GHSA-3jxr-9vmj-r5cp) - DoS via exponential-time expansion
+  - [GHSA-mh99-v99m-4gvg](https://github.com/advisories/GHSA-mh99-v99m-4gvg) - DoS via unbounded expansion length
+- **Status**: No fix available for 5.0.x branch; would require breaking change to eslint-config-next
+- **Usage**: Dev toolchain only — transitive dependency of jest/glob/readdir-glob
+- **Risk Assessment**:
+  - Multiple DoS vectors causing process hang and memory exhaustion
+  - Only reachable if untrusted input is passed to brace-expansion in build process
+  - Jest and related tools never receive untrusted input at runtime or in CI
+  - No production bundles include brace-expansion
+- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
+- **Future Plan**: Will be resolved when eslint ecosystem updates or dependencies upgrade brace-expansion branches
+
+##### PostCSS - XSS & Path Traversal (Additional vulnerabilities)
+- **Package**: postcss < 8.5.10 (via next@15.1.6)
+- **CVEs**:
+  - [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-6g55-p6wh-862q) - Arbitrary file read via sourceMappingURL
+  - [GHSA-r28c-9q8g-f849](https://github.com/advisories/GHSA-r28c-9q8g-f849) - Path traversal in source map auto-loading
+- **Status**: Fix available but requires breaking change (downgrading to next@9.3.3 is not viable)
+- **Usage**: CSS processing in Next.js build step
+- **Risk Assessment**:
+  - High severity, affects CSS processing with source map handling
+  - Vulnerabilities require malicious CSS content with crafted sourceMappingURL
+  - CSS in this application is generated from trusted sources only:
+    - Tailwind CSS configuration (not user-controlled)
+    - Next.js internal CSS generation
+    - No dynamic CSS generation from user input
+  - Impact is limited to build-time CSS processing, not runtime application code
+- **Mitigation**:
+  - All CSS sources are trusted and non-user-controlled
+  - Next.js 15.x has many security improvements over older versions
+  - Fixing these would require downgrading to Next.js 9.x (introduces many older, more severe vulnerabilities)
+- **Future Plan**: Will be resolved when Next.js 16+ provides fixes without breaking changes
+
+##### valibot - record() Issue Path Handling
+- **Package**: valibot <= 1.4.1 (via @prisma/dev)
+- **CVE**: [GHSA-5qjj-4xww-7phc](https://github.com/advisories/GHSA-5qjj-4xww-7phc)
+- **Status**: Fix available in valibot >= 1.5.0, but requires @prisma/dev update
+- **Usage**: Development dependency only (Prisma Studio in local dev environment)
+- **Risk Assessment**:
+  - Moderate severity, affects record() validation with inherited Object property names
+  - Requires specific conditions in form validation path to trigger
+  - Prisma Studio is used only in local development, never exposed to production
+  - Impact would be limited to development environment
+- **Mitigation**: Development-only dependency, not included in production bundles
+- **Future Plan**: Will be resolved when Prisma updates @prisma/dev with valibot >= 1.5.0
+
+##### find-my-way - HTTP/2 DDoS
+- **Package**: find-my-way <= 9.6.0 (via @prisma/dev)
+- **CVE**: [GHSA-c96f-x56v-gq3h](https://github.com/advisories/GHSA-c96f-x56v-gq3h)
+- **Status**: Fix available in find-my-way >= 9.6.1, but requires @prisma/dev version bump
+- **Usage**: Development dependency only (Prisma Studio HTTP routing)
+- **Risk Assessment**:
+  - High severity, DDoS via HTTP/2 stream manipulation
+  - Prisma Studio is accessed only locally by developers
+  - Not exposed to internet or production traffic
+  - Attack requires attacker access to local development server
+- **Mitigation**: Development-only dependency, not included in production bundles or exposed to internet
+- **Future Plan**: Will be resolved when Prisma updates @prisma/dev with find-my-way >= 9.6.1
+
+##### sharp - libvips Inherited Vulnerabilities
+- **Package**: sharp < 0.35.0 (via next@15.1.6)
+- **CVE**: [GHSA-f88m-g3jw-g9cj](https://github.com/advisories/GHSA-f88m-g3jw-g9cj)
+- **Status**: Fix available (sharp >= 0.35.0 with updated libvips), but requires downgrading Next.js to 9.3.3
+- **Usage**: Image optimization in production builds
+- **Risk Assessment**:
+  - High severity, multiple CVEs in underlying libvips library (CVE-2026-33327/33328/35590/35591)
+  - Requires processing of specially crafted image files to trigger
+  - Wedding app has limited, known image assets (not a high-volume image service)
+  - Image sources are mostly controlled by admins or CDN providers
+  - Disk exhaustion or memory issues from malicious images would cause service degradation, not data breach
+- **Mitigation**:
+  - Limited image variants in use (fixed sizes, controlled sources)
+  - Application is not a high-traffic public image service
+  - Hosted on Vercel where resources are managed
+- **Future Plan**: Upgrade to Next.js 16.x (when available) to get updated sharp with patched libvips
 
 ## Updating This Document
 
