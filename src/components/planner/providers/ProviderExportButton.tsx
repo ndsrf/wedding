@@ -47,6 +47,17 @@ export function ProviderExportButton({ categories, providers, onExport }: Provid
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const downloadFile = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleExportExcel = async () => {
     setIsExporting(true);
     try {
@@ -55,20 +66,14 @@ export function ProviderExportButton({ categories, providers, onExport }: Provid
 
       // Create blob and download
       const blob = new Blob([new Uint8Array(result.buffer)], { type: result.mimeType });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = result.filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      downloadFile(blob, result.filename);
 
       onExport?.('excel');
       setIsOpen(false);
     } catch (error) {
       console.error('Error exporting to Excel:', error);
-      alert('Error exporting to Excel');
+      const message = error instanceof Error ? error.message : 'Error exporting to Excel';
+      alert(message);
     } finally {
       setIsExporting(false);
     }
@@ -88,24 +93,21 @@ export function ProviderExportButton({ categories, providers, onExport }: Provid
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to generate PDF`);
       }
 
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `providers-library-${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      if (!blob.size) throw new Error('Empty PDF response');
+
+      downloadFile(blob, `providers-library-${new Date().toISOString().split('T')[0]}.pdf`);
 
       onExport?.('pdf');
       setIsOpen(false);
     } catch (error) {
       console.error('Error exporting to PDF:', error);
-      alert('Error exporting to PDF');
+      const message = error instanceof Error ? error.message : 'Error exporting to PDF';
+      alert(message);
     } finally {
       setIsExporting(false);
     }

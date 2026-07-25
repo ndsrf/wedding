@@ -13,17 +13,21 @@ import { prisma } from '@/lib/db/prisma';
 
 async function resolveImageForPdf(url: string, maxPx = 600): Promise<string | null> {
   try {
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB limit
     let rawBuf: Buffer;
 
     if (url.startsWith('http://') || url.startsWith('https://')) {
       const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
       if (!res.ok) return null;
-      rawBuf = Buffer.from(await res.arrayBuffer());
+      const arrayBuf = await res.arrayBuffer();
+      if (arrayBuf.byteLength > MAX_IMAGE_SIZE) return null;
+      rawBuf = Buffer.from(arrayBuf);
     } else {
       const rel = url.startsWith('/') ? url.slice(1) : url;
       const absPath = path.join(process.cwd(), 'public', rel);
       try { await access(absPath); } catch { return null; }
       rawBuf = await readFile(absPath);
+      if (rawBuf.length > MAX_IMAGE_SIZE) return null;
     }
 
     if (!rawBuf.length) return null;
@@ -43,7 +47,31 @@ async function resolveImageForPdf(url: string, maxPx = 600): Promise<string | nu
 
 export async function POST(req: NextRequest) {
   try {
-    const { weddingProviders, plannedGuests, weddingId } = await req.json();
+    const body = await req.json();
+    const { weddingProviders, plannedGuests, weddingId } = body;
+
+    // Input validation
+    if (!Array.isArray(weddingProviders)) {
+      return NextResponse.json(
+        { error: 'weddingProviders must be an array' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof plannedGuests !== 'number' || plannedGuests < 0) {
+      return NextResponse.json(
+        { error: 'plannedGuests must be a non-negative number' },
+        { status: 400 }
+      );
+    }
+
+    if (weddingId && typeof weddingId !== 'string') {
+      return NextResponse.json(
+        { error: 'weddingId must be a string' },
+        { status: 400 }
+      );
+    }
+
     const locale = await getLocale() as 'es' | 'en' | 'fr' | 'it' | 'de';
     const t = await getTranslations({ locale, namespace: 'planner.providers' });
 
@@ -91,8 +119,16 @@ export async function POST(req: NextRequest) {
       return wp.category.price_type === 'PER_PERSON' && plannedGuests ? r * plannedGuests : r;
     };
 
+    const localeMap: Record<'es' | 'en' | 'fr' | 'it' | 'de', string> = {
+      es: 'es-ES',
+      en: 'en-US',
+      fr: 'fr-FR',
+      it: 'it-IT',
+      de: 'de-DE',
+    };
+
     const formatCurrency = (value: number): string => {
-      return new Intl.NumberFormat(locale === 'es' ? 'es-ES' : 'en-US', {
+      return new Intl.NumberFormat(localeMap[locale], {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(value);
@@ -103,7 +139,7 @@ export async function POST(req: NextRequest) {
     let totalPaid = 0;
 
     for (const wp of weddingProviders) {
-      const paid = wp.payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
+      const paid = (Array.isArray(wp.payments) ? wp.payments : []).reduce((sum: number, p: any) => sum + Number(p.amount), 0);
       totalBudgeted += getProjected(wp);
       totalReal += getRealTotal(wp);
       totalPaid += paid;
@@ -191,7 +227,7 @@ export async function POST(req: NextRequest) {
     });
 
     const tableRows = weddingProviders.map((wp: any, index: number) => {
-      const paid = wp.payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
+      const paid = (Array.isArray(wp.payments) ? wp.payments : []).reduce((sum: number, p: any) => sum + Number(p.amount), 0);
       const total = getRealTotal(wp);
       const projected = getProjected(wp);
       const pending = total - paid;
@@ -232,13 +268,13 @@ export async function POST(req: NextRequest) {
               React.createElement(PDFImage, { src: logoUrl, style: styles.logo }),
               React.createElement(View, { style: styles.headerContent },
                 React.createElement(Text, { style: styles.title }, title),
-                React.createElement(Text, { style: styles.subtitle }, new Date().toLocaleDateString()),
+                React.createElement(Text, { style: styles.subtitle }, new Date().toLocaleDateString(localeMap[locale])),
                 plannedGuests > 0 && React.createElement(Text, { style: styles.subtitle }, `${t('plannedGuests') || 'Planned Guests'}: ${plannedGuests}`)
               )
             )
           : React.createElement(View, { style: styles.header },
               React.createElement(Text, { style: styles.title }, title),
-              React.createElement(Text, { style: styles.subtitle }, new Date().toLocaleDateString()),
+              React.createElement(Text, { style: styles.subtitle }, new Date().toLocaleDateString(localeMap[locale])),
               plannedGuests > 0 && React.createElement(Text, { style: styles.subtitle }, `${t('plannedGuests') || 'Planned Guests'}: ${plannedGuests}`)
             ),
 
@@ -310,10 +346,16 @@ export async function POST(req: NextRequest) {
 
     const buffer = await renderToBuffer(PDFDoc);
 
+    // Generate unique filename with timestamp
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toISOString().split('T')[1].split('.')[0].replace(/:/g, '');
+    const filename = `wedding-providers-${dateStr}-${timeStr}.pdf`;
+
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="wedding-providers-${new Date().toISOString().split('T')[0]}.pdf"`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
       },
     });
   } catch (error) {
