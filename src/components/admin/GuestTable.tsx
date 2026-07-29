@@ -181,10 +181,8 @@ export function GuestTable({
     }
   }, [onCopyWhatsAppText, copyingWaIds]);
 
-  // Only count guests who can be selected (not confirmed)
-  const selectableGuests = guests.filter(g => g.rsvp_status !== 'submitted');
-  const allSelectableSelected = selectableGuests.length > 0 &&
-    selectableGuests.every(g => selectedGuestIds.includes(g.id));
+  const allSelectableSelected = guests.length > 0 &&
+    guests.every(g => selectedGuestIds.includes(g.id));
 
   const toggleExpanded = (guestId: string) => {
     setExpandedGuestIds(prev =>
@@ -241,7 +239,7 @@ export function GuestTable({
                     checked={allSelectableSelected}
                     onChange={(e) => onSelectAll(e.target.checked)}
                     className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                    disabled={selectableGuests.length === 0}
+                    disabled={guests.length === 0}
                   />
                 </th>
               )}
@@ -272,23 +270,18 @@ export function GuestTable({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {guests.map((guest) => {
-              const isSelectable = guest.rsvp_status !== 'submitted';
               const isSelected = selectedGuestIds.includes(guest.id);
 
               return (
                 <tr key={guest.id} className="hover:bg-gray-50">
                   {showCheckboxes && onSelectGuest && (
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {isSelectable ? (
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => onSelectGuest(guest.id, e.target.checked)}
-                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                        />
-                      ) : (
-                        <span className="text-xs text-gray-400">-</span>
-                      )}
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => onSelectGuest(guest.id, e.target.checked)}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
                     </td>
                   )}
                   <td className="px-3 py-4 whitespace-nowrap">
@@ -438,7 +431,6 @@ export function GuestTable({
       {/* Mobile Card View */}
       <div className="md:hidden divide-y divide-gray-200">
         {guests.map((guest) => {
-          const isSelectable = guest.rsvp_status !== 'submitted';
           const isSelected = selectedGuestIds.includes(guest.id);
           const isExpanded = expandedGuestIds.includes(guest.id);
 
@@ -450,7 +442,7 @@ export function GuestTable({
                 onClick={() => toggleExpanded(guest.id)}
               >
                 {/* Checkbox */}
-                {showCheckboxes && onSelectGuest && isSelectable && (
+                {showCheckboxes && onSelectGuest && (
                   <div onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"

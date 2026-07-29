@@ -1745,7 +1745,9 @@
         "updateSuccess": "{count} {count, plural, one {invité mis à jour} other {invités mis à jour}} avec succès",
         "addLabel": "Ajouter une étiquette",
         "removeLabel": "Supprimer une étiquette",
-        "labelConflict": "L'étiquette à ajouter et à supprimer sont identiques ; les deux seront ignorées"
+        "labelConflict": "L'étiquette à ajouter et à supprimer sont identiques ; les deux seront ignorées",
+        "resetInvitationStatus": "Réinitialiser le statut d'invitation",
+        "resetInvitationStatusNote": "Efface l'historique d'invitation et de rappel des invités sélectionnés, afin que l'invitation puisse être renvoyée depuis le début au lieu d'apparaître comme un rappel. À utiliser si un envoi précédent a échoué."
       }
     },
     "notifications": {

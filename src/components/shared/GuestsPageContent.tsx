@@ -652,25 +652,20 @@ export function GuestsPageContent({
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      const selectableIds = guests
-        .filter(g => g.rsvp_status !== 'submitted')
-        .map(g => g.id);
-      setSelectedGuestIds(selectableIds);
+      setSelectedGuestIds(guests.map(g => g.id));
     } else {
       setSelectedGuestIds([]);
     }
   };
 
   const handleSelectAllCurrentPage = () => {
-    const currentPageSelectableIds = guests
-      .filter(g => g.rsvp_status !== 'submitted')
-      .map(g => g.id);
-    const allCurrentPageSelected = currentPageSelectableIds.length > 0 &&
-      currentPageSelectableIds.every(id => selectedGuestIds.includes(id));
+    const currentPageIds = guests.map(g => g.id);
+    const allCurrentPageSelected = currentPageIds.length > 0 &&
+      currentPageIds.every(id => selectedGuestIds.includes(id));
     if (allCurrentPageSelected) {
-      setSelectedGuestIds(prev => prev.filter(id => !currentPageSelectableIds.includes(id)));
+      setSelectedGuestIds(prev => prev.filter(id => !currentPageIds.includes(id)));
     } else {
-      setSelectedGuestIds(prev => Array.from(new Set([...prev, ...currentPageSelectableIds])));
+      setSelectedGuestIds(prev => Array.from(new Set([...prev, ...currentPageIds])));
     }
   };
 

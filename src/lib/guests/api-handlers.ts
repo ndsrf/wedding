@@ -132,6 +132,7 @@ const bulkUpdateSchema = z.object({
     rsvp_status: z.enum(['pending', 'submitted']).optional(),
     add_label_id: z.string().uuid().optional(),
     remove_label_id: z.string().uuid().optional(),
+    reset_invitation_status: z.boolean().optional(),
   }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }
@@ -632,6 +633,18 @@ export async function bulkUpdateGuestsHandler(
       if (updates.remove_label_id) {
         await tx.familyLabelAssignment.deleteMany({
           where: { label_id: updates.remove_label_id, family_id: { in: family_ids } },
+        });
+      }
+
+      // Reset invitation status: delete INVITATION_SENT/REMINDER_SENT tracking
+      // events so the guest list treats these families as never invited,
+      // re-enabling "Send Invitation" instead of "Send Reminder".
+      if (updates.reset_invitation_status) {
+        await tx.trackingEvent.deleteMany({
+          where: {
+            family_id: { in: family_ids },
+            event_type: { in: ['INVITATION_SENT', 'REMINDER_SENT'] },
+          },
         });
       }
 

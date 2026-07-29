@@ -1745,7 +1745,9 @@
         "updateSuccess": "{count} {count, plural, one {ospite aggiornato} other {ospiti aggiornati}} con successo",
         "addLabel": "Aggiungi etichetta",
         "removeLabel": "Rimuovi etichetta",
-        "labelConflict": "L'etichetta da aggiungere e rimuovere sono uguali; entrambe verranno ignorate"
+        "labelConflict": "L'etichetta da aggiungere e rimuovere sono uguali; entrambe verranno ignorate",
+        "resetInvitationStatus": "Reimposta stato invito",
+        "resetInvitationStatusNote": "Cancella la cronologia di invito e promemoria degli ospiti selezionati, così l'invito può essere inviato di nuovo da zero invece di comparire come promemoria. Usalo se un invio precedente non è riuscito."
       }
     },
     "notifications": {

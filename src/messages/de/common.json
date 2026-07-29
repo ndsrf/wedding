@@ -1745,7 +1745,9 @@
         "updateSuccess": "{count} {count, plural, one {Gast aktualisiert} other {Gäste aktualisiert}} erfolgreich",
         "addLabel": "Etikett hinzufügen",
         "removeLabel": "Etikett entfernen",
-        "labelConflict": "Hinzufügen- und Entfernen-Etikett sind identisch; beide werden ignoriert"
+        "labelConflict": "Hinzufügen- und Entfernen-Etikett sind identisch; beide werden ignoriert",
+        "resetInvitationStatus": "Einladungsstatus zurücksetzen",
+        "resetInvitationStatusNote": "Löscht den Einladungs- und Erinnerungsverlauf der ausgewählten Gäste, sodass die Einladung erneut von vorn gesendet werden kann, anstatt als Erinnerung angezeigt zu werden. Verwenden Sie dies, wenn ein vorheriger Versand fehlgeschlagen ist."
       }
     },
     "notifications": {

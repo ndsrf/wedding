@@ -2087,7 +2087,9 @@
         "updateSuccess": "{count} {count, plural, one {invitado actualizado} other {invitados actualizados}} exitosamente",
         "addLabel": "Añadir etiqueta",
         "removeLabel": "Quitar etiqueta",
-        "labelConflict": "La etiqueta de añadir y quitar son iguales; se ignorarán ambas"
+        "labelConflict": "La etiqueta de añadir y quitar son iguales; se ignorarán ambas",
+        "resetInvitationStatus": "Restablecer estado de invitación",
+        "resetInvitationStatusNote": "Borra el historial de invitación y recordatorio de los invitados seleccionados, para poder enviar la invitación de nuevo desde cero en lugar de mostrarse como un recordatorio. Úsalo si un envío anterior falló."
       }
     },
     "notifications": {

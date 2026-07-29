@@ -34,6 +34,7 @@ export interface BulkEditUpdates {
   rsvp_status?: 'pending' | 'submitted';
   add_label_id?: string;
   remove_label_id?: string;
+  reset_invitation_status?: boolean;
 }
 
 export function BulkEditModal({
@@ -52,6 +53,7 @@ export function BulkEditModal({
   const [rsvpStatus, setRsvpStatus] = useState<'pending' | 'submitted' | ''>('');
   const [addLabelId, setAddLabelId] = useState('');
   const [removeLabelId, setRemoveLabelId] = useState('');
+  const [resetInvitationStatus, setResetInvitationStatus] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,6 +89,10 @@ export function BulkEditModal({
       if (removeLabelId) updates.remove_label_id = removeLabelId;
     }
 
+    if (resetInvitationStatus) {
+      updates.reset_invitation_status = true;
+    }
+
     // Check if at least one field is selected
     if (Object.keys(updates).length === 0) {
       setError(t('admin.guests.bulkEdit.noChanges'));
@@ -105,6 +111,7 @@ export function BulkEditModal({
       setRsvpStatus('');
       setAddLabelId('');
       setRemoveLabelId('');
+      setResetInvitationStatus(false);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.errors.generic'));
@@ -122,6 +129,7 @@ export function BulkEditModal({
       setRsvpStatus('');
       setAddLabelId('');
       setRemoveLabelId('');
+      setResetInvitationStatus(false);
       setError(null);
       onClose();
     }
@@ -289,6 +297,26 @@ export function BulkEditModal({
                     )}
                   </div>
                 )}
+
+                {/* Reset invitation status */}
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
+                  <div className="flex items-start">
+                    <input
+                      id="reset-invitation-status"
+                      type="checkbox"
+                      checked={resetInvitationStatus}
+                      onChange={(e) => setResetInvitationStatus(e.target.checked)}
+                      disabled={saving}
+                      className="mt-0.5 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50"
+                    />
+                    <label htmlFor="reset-invitation-status" className="ml-2 block text-sm font-medium text-gray-700">
+                      {t('admin.guests.bulkEdit.resetInvitationStatus')}
+                    </label>
+                  </div>
+                  <p className="mt-1 ml-6 text-xs text-gray-500">
+                    {t('admin.guests.bulkEdit.resetInvitationStatusNote')}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -2090,7 +2090,9 @@
         "updateSuccess": "{count} {count, plural, one {guest updated} other {guests updated}} successfully",
         "addLabel": "Add label",
         "removeLabel": "Remove label",
-        "labelConflict": "Add and remove label are the same; both will be ignored"
+        "labelConflict": "Add and remove label are the same; both will be ignored",
+        "resetInvitationStatus": "Reset invitation status",
+        "resetInvitationStatusNote": "Clears the invitation and reminder history for the selected guests, so the invitation can be sent again from scratch instead of showing as a reminder. Use this if a previous send failed."
       }
     },
     "notifications": {
