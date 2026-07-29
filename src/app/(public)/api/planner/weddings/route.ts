@@ -53,7 +53,8 @@ const createWeddingSchema = z.object({
         return val.length > 0;
       },
       { message: 'Invalid theme ID' }
-    ),
+    )
+    .optional(),
   payment_tracking_mode: z.nativeEnum(PaymentMode),
   allow_guest_additions: z.boolean(),
   default_language: z.nativeEnum(Language),

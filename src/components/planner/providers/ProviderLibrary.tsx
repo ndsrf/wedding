@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Plus, Edit2, Trash2, Globe, Mail, Phone, RefreshCw } from 'lucide-react';
+import { ProviderExportButton } from './ProviderExportButton';
 
 type PriceType = 'PER_PERSON' | 'GLOBAL';
 
@@ -186,6 +187,10 @@ export function ProviderLibrary() {
       <div className="flex justify-between items-center flex-wrap gap-2">
         <h2 className="text-xl font-semibold text-gray-800">{t('title')}</h2>
         <div className="flex gap-2 flex-wrap">
+          <ProviderExportButton
+            categories={categories}
+            providers={providers}
+          />
           <Button
             variant="outline"
             size="sm"
