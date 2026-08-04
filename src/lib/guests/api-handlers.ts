@@ -111,6 +111,7 @@ const listGuestsQuerySchema = z.object({
   attendance: z.enum(['yes', 'no', 'partial']).optional(),
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
   payment_status: z.enum(['PENDING', 'RECEIVED', 'CONFIRMED']).optional(),
+  sent_status: z.enum(['not_sent', 'sent', 'reminder_sent']).optional(),
   invited_by_admin_id: z.string().uuid().optional(),
   label_id: z.string().uuid().optional(),
   label_id_invert: z.coerce.boolean().optional(),
@@ -213,13 +214,14 @@ export async function listGuestsHandler(
       attendance: searchParams.get('attendance') || undefined,
       channel: searchParams.get('channel') || undefined,
       payment_status: searchParams.get('payment_status') || undefined,
+      sent_status: searchParams.get('sent_status') || undefined,
       invited_by_admin_id: searchParams.get('invited_by_admin_id') || undefined,
       label_id: searchParams.get('label_id') || undefined,
       label_id_invert: searchParams.get('label_id_invert') || false,
       search: searchParams.get('search') || undefined,
     });
 
-    const { page, limit, ids_only, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search } = queryParams;
+    const { page, limit, ids_only, rsvp_status, attendance, channel, payment_status, sent_status, invited_by_admin_id, label_id, label_id_invert, search } = queryParams;
 
     const whereClause: Prisma.FamilyWhereInput = { wedding_id: weddingId };
 
@@ -246,24 +248,41 @@ export async function listGuestsHandler(
       whereClause.members = { every: { attending: null } };
     }
 
+    const andConditions: Prisma.FamilyWhereInput[] = [];
+
     if (attendance === 'yes') {
       whereClause.members = { some: { attending: true } };
     } else if (attendance === 'no') {
       whereClause.members = { some: { attending: false }, none: { attending: true } };
     } else if (attendance === 'partial') {
-      whereClause.AND = [
+      andConditions.push(
         { members: { some: { attending: true } } },
         { members: { some: { OR: [{ attending: false }, { attending: null }] } } },
-      ];
+      );
     }
 
     if (payment_status) {
       whereClause.gifts = { some: { status: payment_status } };
     }
 
+    if (sent_status === 'not_sent') {
+      whereClause.tracking_events = { none: { event_type: 'INVITATION_SENT' } };
+    } else if (sent_status === 'sent') {
+      andConditions.push(
+        { tracking_events: { some: { event_type: 'INVITATION_SENT' } } },
+        { tracking_events: { none: { event_type: 'REMINDER_SENT' } } },
+      );
+    } else if (sent_status === 'reminder_sent') {
+      whereClause.tracking_events = { some: { event_type: 'REMINDER_SENT' } };
+    }
+
+    if (andConditions.length > 0) {
+      whereClause.AND = andConditions;
+    }
+
     // ---- ids_only mode: return just selectable family IDs (no RSVP submitted) ----
     if (ids_only) {
-      const filterKey = buildGuestCacheParamsKey({ rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search });
+      const filterKey = buildGuestCacheParamsKey({ rsvp_status, attendance, channel, payment_status, sent_status, invited_by_admin_id, label_id, label_id_invert, search });
       const cacheKey = CACHE_KEYS.guestIds(weddingId, filterKey);
 
       const cached = await getCached<{ ids: string[]; total: number }>(cacheKey);
@@ -298,7 +317,7 @@ export async function listGuestsHandler(
 
     // ---- normal paginated list ----
     const skip = (page - 1) * limit;
-    const pageKey = buildGuestCacheParamsKey({ page, limit, rsvp_status, attendance, channel, payment_status, invited_by_admin_id, label_id, label_id_invert, search });
+    const pageKey = buildGuestCacheParamsKey({ page, limit, rsvp_status, attendance, channel, payment_status, sent_status, invited_by_admin_id, label_id, label_id_invert, search });
     const cacheKey = CACHE_KEYS.guestList(weddingId, pageKey);
 
     const cachedList = await getCached<ListGuestsResponse['data']>(cacheKey);

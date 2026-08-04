@@ -1687,6 +1687,7 @@
       "notAnswered": "Nicht Beantwortet",
       "channel": "Kanal",
       "paymentStatus": "Geschenkstatus",
+      "sentStatus": "Gesendet",
       "invitedBy": "Eingeladen von",
       "filters": {
         "all": "Alle",
@@ -1702,6 +1703,9 @@
         "paid": "Geschenk erhalten",
         "unpaid": "Kein Geschenk",
         "received": "Erhalten",
+        "notSent": "Nicht Gesendet",
+        "invitationSent": "Gesendet",
+        "reminderSent": "Erinnerung",
         "searchPlaceholder": "Name oder E-Mail...",
         "clearAll": "Filter löschen",
         "invertLabel": "Umkehren"

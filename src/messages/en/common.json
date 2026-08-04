@@ -2032,6 +2032,7 @@
       "notAnswered": "Not Answered",
       "channel": "Channel",
       "paymentStatus": "Gift Status",
+      "sentStatus": "Sent",
       "invitedBy": "Invited By",
       "filters": {
         "all": "All",
@@ -2047,6 +2048,9 @@
         "paid": "Gift Sent",
         "unpaid": "No Gift",
         "received": "Received",
+        "notSent": "Not Sent",
+        "invitationSent": "Sent",
+        "reminderSent": "Reminder",
         "searchPlaceholder": "Name or email...",
         "clearAll": "Clear all filters",
         "invertLabel": "Invert"
