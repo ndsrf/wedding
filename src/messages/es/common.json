@@ -2029,6 +2029,7 @@
       "notAnswered": "Sin Respuesta",
       "channel": "Canal",
       "paymentStatus": "Estado de Regalo",
+      "sentStatus": "Enviado",
       "invitedBy": "De parte de",
       "filters": {
         "all": "Todos",
@@ -2044,6 +2045,9 @@
         "paid": "Regalado",
         "unpaid": "No Regalado",
         "received": "Recibido",
+        "notSent": "No enviado",
+        "invitationSent": "Enviado",
+        "reminderSent": "Recordatorio",
         "searchPlaceholder": "Nombre o email...",
         "clearAll": "Limpiar filtros",
         "invertLabel": "Invertir"

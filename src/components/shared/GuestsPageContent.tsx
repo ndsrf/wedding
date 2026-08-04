@@ -64,6 +64,7 @@ interface Filters {
   attendance?: string;
   channel?: string;
   payment_status?: string;
+  sent_status?: string;
   invited_by_admin_id?: string;
   label_id?: string;
   label_id_invert?: boolean;
@@ -128,6 +129,7 @@ function buildFilterParams(filters: Filters): URLSearchParams {
   if (filters.attendance) params.set('attendance', filters.attendance);
   if (filters.channel) params.set('channel', filters.channel);
   if (filters.payment_status) params.set('payment_status', filters.payment_status);
+  if (filters.sent_status) params.set('sent_status', filters.sent_status);
   if (filters.invited_by_admin_id) params.set('invited_by_admin_id', filters.invited_by_admin_id);
   if (filters.label_id) params.set('label_id', filters.label_id);
   if (filters.label_id_invert) params.set('label_id_invert', 'true');
