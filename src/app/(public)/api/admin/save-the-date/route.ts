@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/middleware';
 import { sendSaveTheDateBulk } from '@/lib/notifications/save-the-date';
+import { invalidateStatsForWedding } from '@/lib/guests/api-handlers';
 import type { APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
 
@@ -147,6 +148,10 @@ export async function POST(request: NextRequest) {
       const family = eligibleFamilies.find((f) => f.id === wl.family_id);
       return { family_name: family?.name || wl.family_id, wa_link: wl.waLink };
     });
+
+    if (result.successful > 0) {
+      await invalidateStatsForWedding(user.wedding_id);
+    }
 
     const response: SendSaveTheDateResponse = {
       success: true,

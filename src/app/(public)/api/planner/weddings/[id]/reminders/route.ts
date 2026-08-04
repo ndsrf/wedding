@@ -20,6 +20,7 @@ import { sendDynamicMessage, MessageType } from '@/lib/sms/twilio';
 import { renderTemplate } from '@/lib/templates';
 import { getTemplateForSending } from '@/lib/templates/crud';
 import { sendInvitation } from '@/lib/notifications/invitation';
+import { invalidateStatsForWedding } from '@/lib/guests/api-handlers';
 import type { Language as I18nLanguage } from '@/lib/i18n/config';
 import type { APIResponse, SendRemindersResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
@@ -570,6 +571,10 @@ export async function POST(
           failedCount++;
         }
       }
+    }
+
+    if (sentCount > 0) {
+      await invalidateStatsForWedding(weddingId);
     }
 
     const response = {
