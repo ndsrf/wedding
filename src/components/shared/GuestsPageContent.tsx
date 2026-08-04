@@ -587,12 +587,12 @@ export function GuestsPageContent({
         if (data.data.sent_count > 0) {
           if (reminderMode === 'save_the_date') {
             showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
-            fetchGuests();
           } else if (reminderMode === 'invite') {
             showNotification('success', t('admin.reminders.sentInvite', { count: data.data.sent_count }));
           } else {
             showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
           }
+          fetchGuests();
         } else if (data.data.failed_count > 0) {
           showNotification('error', t('common.errors.generic'));
         }
@@ -629,6 +629,7 @@ export function GuestsPageContent({
         if (data.data.sent_count > 0) {
           showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
           setSelectedGuestIds([]);
+          fetchGuests();
         } else if (data.data.failed_count > 0) {
           showNotification('error', t('common.errors.generic'));
         }
