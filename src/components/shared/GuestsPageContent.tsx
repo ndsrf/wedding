@@ -184,7 +184,7 @@ export function GuestsPageContent({
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [reminderFamily, setReminderFamily] = useState<ReminderFamily | null>(null);
   const [reminderLoading, setReminderLoading] = useState(false);
-  const [reminderMode, setReminderMode] = useState<'reminder' | 'save_the_date'>('reminder');
+  const [reminderMode, setReminderMode] = useState<'reminder' | 'invite' | 'save_the_date'>('reminder');
 
   // Timeline modal state
   const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
@@ -535,7 +535,7 @@ export function GuestsPageContent({
         preferred_language: guest.preferred_language,
         channel_preference: guest.channel_preference,
       });
-      setReminderMode('reminder');
+      setReminderMode(guest.invitation_sent ? 'reminder' : 'invite');
       setIsReminderModalOpen(true);
     }
   };
@@ -588,6 +588,8 @@ export function GuestsPageContent({
           if (reminderMode === 'save_the_date') {
             showNotification('success', t('admin.saveTheDate.sent', { count: data.data.sent_count }));
             fetchGuests();
+          } else if (reminderMode === 'invite') {
+            showNotification('success', t('admin.reminders.sentInvite', { count: data.data.sent_count }));
           } else {
             showNotification('success', t('admin.reminders.sent', { count: data.data.sent_count }));
           }

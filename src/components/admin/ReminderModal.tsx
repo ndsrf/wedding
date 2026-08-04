@@ -26,7 +26,7 @@ interface ReminderModalProps {
   onSendReminders: (channel: Channel | 'PREFERRED', validFamilyIds?: string[]) => Promise<void>;
   loading?: boolean;
   weddingGiftIban?: string | null;
-  mode?: 'reminder' | 'save_the_date';
+  mode?: 'reminder' | 'invite' | 'save_the_date';
   apiBase?: string;
 }
 
@@ -85,7 +85,7 @@ export function ReminderModal({
   const handleSend = async () => {
     // Check if IBAN is empty and warning hasn't been shown yet
     // Only check IBAN for reminders/invites, not Save the Date (usually no gifts info yet)
-    if (mode === 'reminder' && !weddingGiftIban && !showIbanWarning) {
+    if ((mode === 'reminder' || mode === 'invite') && !weddingGiftIban && !showIbanWarning) {
       setShowIbanWarning(true);
       return;
     }
@@ -174,7 +174,11 @@ export function ReminderModal({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900">
-              {mode === 'save_the_date' ? t('admin.reminders.sendSaveTheDate') : t('admin.reminders.send')}
+              {mode === 'save_the_date'
+                ? t('admin.reminders.sendSaveTheDate')
+                : mode === 'invite'
+                ? t('admin.reminders.sendInvite')
+                : t('admin.reminders.send')}
             </h3>
             <button
               onClick={onClose}
@@ -197,14 +201,19 @@ export function ReminderModal({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">
-                {mode === 'save_the_date' 
+                {mode === 'save_the_date'
                   ? t('admin.saveTheDate.sent', { count: eligibleFamilies.length })
+                  : mode === 'invite'
+                  ? t('admin.reminders.sendInviteSuccess')
                   : t('admin.reminders.sendSuccess')
                 }
               </h3>
-              {mode === 'reminder' && (
+              {(mode === 'reminder' || mode === 'invite') && (
                 <p className="mt-1 text-sm text-gray-500">
-                  {t('admin.reminders.sendSuccessDesc', { count: eligibleFamilies.length })}
+                  {t(
+                    mode === 'invite' ? 'admin.reminders.sendInviteSuccessDesc' : 'admin.reminders.sendSuccessDesc',
+                    { count: eligibleFamilies.length }
+                  )}
                 </p>
               )}
             </div>
@@ -412,7 +421,12 @@ export function ReminderModal({
                   disabled={sending}
                   className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {sending ? t('admin.reminders.sending') : t('admin.reminders.sendAction', { count: eligibleFamilies.length })}
+                  {sending
+                    ? t('admin.reminders.sending')
+                    : t(
+                        mode === 'invite' ? 'admin.reminders.sendInviteAction' : 'admin.reminders.sendAction',
+                        { count: eligibleFamilies.length }
+                      )}
                 </button>
               </div>
             </>
