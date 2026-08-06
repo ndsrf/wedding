@@ -1447,6 +1447,7 @@
       "metricTitles": {
         "totalGuests": "Total de Invitados",
         "rsvpCompletion": "Completado de RSVP",
+        "rsvpBreakdown": "Desglose de RSVP",
         "attending": "Asistentes",
         "paymentsReceived": "Regalos Recibidos"
       },
@@ -1468,7 +1469,11 @@
       "rsvpProgress": "Progreso de RSVP",
       "daysUntilWedding": "días hasta la boda",
       "responded": "respondieron",
+      "totalRsvps": "total de RSVPs",
       "complete": "completo",
+      "rsvpAccepted": "Aceptado",
+      "rsvpDeclined": "Rechazado",
+      "rsvpPartial": "Parcial",
       "seatingPlan": "Plan de Asientos",
       "seatingPlanSubtitle": "Asignar invitados a mesas",
       "providers": "Proveedores y Regalos",

@@ -46,9 +46,13 @@ interface WeddingStats {
   location: string | null;
   itinerary: ItinerarySummaryItem[];
   guest_count: number;
+  total_families: number;
   rsvp_count: number;
   rsvp_completion_percentage: number;
   attending_count: number;
+  accepted_family_count: number;
+  rejected_family_count: number;
+  partial_family_count: number;
   payment_received_count: number;
   days_until_wedding: number;
 }
@@ -92,8 +96,16 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
     // used only to compute is_main on each itinerary item. The location data we need
     // (name, address, google_maps_url) is already fetched via itinerary_items → location,
     // so there is no need for an extra SELECT … FROM locations WHERE id = $1 query.
-    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedRows] =
-      await Promise.all([
+    const [
+      wedding,
+      totalGuests,
+      totalFamilies,
+      rsvpCount,
+      attendingCount,
+      acceptedFamilyCount,
+      rejectedFamilyCount,
+      paymentReceivedRows,
+    ] = await Promise.all([
         prisma.wedding.findUnique({
           where: { id: user.wedding_id },
           include: {
@@ -114,6 +126,20 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
         }),
+        // Fully accepted: every member of the family is attending (no nulls, no declines).
+        prisma.family.count({
+          where: {
+            wedding_id: user.wedding_id,
+            members: { every: { attending: true } },
+          },
+        }),
+        // Fully declined: at least one member declined and none are attending.
+        prisma.family.count({
+          where: {
+            wedding_id: user.wedding_id,
+            members: { some: { attending: false }, none: { attending: true } },
+          },
+        }),
         // COUNT(DISTINCT family_id) in one aggregate — uses the covering index
         // (wedding_id, status, family_id) for an index-only scan. Much cheaper
         // than findMany+distinct which streams every matching row to Node.
@@ -132,6 +158,10 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
     const paymentReceivedCount = Number(paymentReceivedRows[0]?.count ?? 0);
     const rsvpCompletionPercentage =
       totalFamilies > 0 ? Math.round((rsvpCount / totalFamilies) * 100) : 0;
+    // Partial = responded families that are neither fully accepted nor fully declined
+    // (mixed attendance within the family). Derived instead of queried separately since
+    // it's a simple subtraction of the two counts already fetched above.
+    const partialFamilyCount = rsvpCount - acceptedFamilyCount - rejectedFamilyCount;
 
     const today = new Date();
     const weddingDate = new Date(wedding.wedding_date);
@@ -156,9 +186,13 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
           is_main: item.location_id === wedding.main_event_location_id,
         })),
         guest_count: totalGuests,
+        total_families: totalFamilies,
         rsvp_count: rsvpCount,
         rsvp_completion_percentage: rsvpCompletionPercentage,
         attending_count: attendingCount,
+        accepted_family_count: acceptedFamilyCount,
+        rejected_family_count: rejectedFamilyCount,
+        partial_family_count: partialFamilyCount,
         payment_received_count: paymentReceivedCount,
         days_until_wedding: daysUntilWedding,
       },
@@ -298,21 +332,20 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <div className="flex items-start justify-between">
+            <p className="text-sm text-gray-500 mb-3">{t('admin.dashboard.metricTitles.rsvpBreakdown')}</p>
+            <div className="grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {stats.rsvp_completion_percentage}<span className="text-base font-semibold text-gray-400">%</span>
-                </p>
-                <p className="text-sm text-gray-500 mt-1">{t('admin.dashboard.metricTitles.rsvpCompletion')}</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.accepted_family_count.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.rsvpAccepted')}</p>
               </div>
-              <div className="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
-                <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div>
+                <p className="text-xl sm:text-2xl font-bold text-red-500">{stats.rejected_family_count.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.rsvpDeclined')}</p>
               </div>
-            </div>
-            <div className="mt-3 h-1 rounded-full bg-green-100">
-              <div className="h-full rounded-full bg-green-400 transition-all duration-700" style={{ width: `${stats.rsvp_completion_percentage}%` }} />
+              <div>
+                <p className="text-xl sm:text-2xl font-bold text-amber-500">{stats.partial_family_count.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.rsvpPartial')}</p>
+              </div>
             </div>
           </div>
 
@@ -365,7 +398,7 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="flex justify-between text-sm text-gray-500 mt-2">
             <span>{stats.rsvp_count} {t('admin.dashboard.responded')}</span>
-            <span>{stats.guest_count} {t('admin.dashboard.metricTitles.totalGuests')}</span>
+            <span>{stats.total_families} {t('admin.dashboard.totalRsvps')}</span>
           </div>
         </div>
 
