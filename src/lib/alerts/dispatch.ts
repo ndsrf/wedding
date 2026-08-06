@@ -9,8 +9,9 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { sendDynamicEmail } from '@/lib/email/resend';
+import { sendDynamicEmail, sendNightlySummaryEmail } from '@/lib/email/resend';
 import { sendDynamicMessage, MessageType } from '@/lib/sms/twilio';
+import type { NightlySummaryMetadata } from './nightly-summary';
 import type { AlertDelivery } from '@prisma/client';
 
 const RETRY_DELAYS_MINUTES = [5, 15, 60]; // backoff per attempt
@@ -44,7 +45,8 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
       throw new Error('Associated alert not found');
     }
 
-    const { planner_id: plannerId, wedding_id: weddingId } = deliveryWithAlert.alert;
+    const { planner_id: plannerId, wedding_id: weddingId, event_type: eventType, metadata } =
+      deliveryWithAlert.alert;
 
     switch (delivery.channel) {
       case 'EMAIL': {
@@ -52,12 +54,29 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
           errorMessage = 'No email address for recipient';
           break;
         }
+        const language = delivery.recipient_language.toLowerCase() as import('@/lib/i18n/config').Language;
+
+        if (eventType === 'NIGHTLY_SUMMARY') {
+          const result = await sendNightlySummaryEmail(
+            delivery.recipient_email,
+            delivery.subject ?? '(No subject)',
+            metadata as unknown as NightlySummaryMetadata,
+            language,
+            plannerId || undefined,
+            weddingId || undefined,
+          );
+          success = result.success;
+          externalId = result.messageId;
+          errorMessage = result.error;
+          break;
+        }
+
         const platformName = process.env.NEXT_PUBLIC_COMMERCIAL_NAME ?? 'Nupci';
         const result = await sendDynamicEmail(
           delivery.recipient_email,
           delivery.subject ?? '(No subject)',
           delivery.body,
-          delivery.recipient_language.toLowerCase() as import('@/lib/i18n/config').Language,
+          language,
           platformName,
           null,
           plannerId || undefined,

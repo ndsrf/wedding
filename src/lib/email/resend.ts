@@ -14,6 +14,8 @@ import { RSVPConfirmationEmail } from './templates/rsvp-confirmation';
 import { PaymentConfirmationEmail } from './templates/payment-confirmation';
 import { DynamicMessageEmail } from './templates/dynamic-message';
 import { EmailVerificationCodeEmail } from './templates/email-verification-code';
+import { NightlySummaryEmail } from './templates/nightly-summary';
+import type { NightlySummaryMetadata } from '@/lib/alerts/nightly-summary';
 import React from 'react';
 
 // Initialize Resend client lazily to avoid build-time API key requirement
@@ -611,6 +613,98 @@ export async function sendDynamicEmail(
 
   // All retries failed
   console.error(`Failed to send dynamic email to ${to} after ${retries} attempts:`, lastError);
+  return {
+    success: false,
+    error: lastError?.message || 'Unknown error',
+  };
+}
+
+/**
+ * Send the "Wedding nightly summary for couples" email — a rich HTML report
+ * with the planner's logo and an RSVP-changes table. Used by the alert
+ * dispatcher for NIGHTLY_SUMMARY deliveries instead of sendDynamicEmail,
+ * since the report needs real tabular content the generic template can't render.
+ */
+export async function sendNightlySummaryEmail(
+  to: string,
+  subject: string,
+  data: NightlySummaryMetadata,
+  language: Language = 'en',
+  plannerId?: string,
+  weddingId?: string,
+  retries = 3,
+): Promise<EmailResult> {
+  if (plannerId) {
+    const result = await checkResourceLimit({
+      plannerId,
+      weddingId,
+      type: ResourceType.EMAIL,
+    });
+
+    if (!result.allowed) {
+      const errorMessage = await formatLimitError({
+        resourceType: result.resourceType!,
+        limit: result.limit!,
+        used: result.used!,
+        role: 'wedding_admin',
+        language: (language.toUpperCase() as PrismaLanguage) || 'ES',
+      });
+
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  if (!isValidEmail(to)) {
+    console.error(`Invalid email address: ${to}`);
+    return { success: false, error: 'Invalid email address' };
+  }
+
+  if (!process.env.RESEND_API_KEY) {
+    console.error('RESEND_API_KEY is not configured');
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const react = NightlySummaryEmail({ language, ...data });
+
+      const client = getResendClient();
+      const fromName = formatFromName(undefined, data.weddingName);
+      const { data: sendData, error } = await client.emails.send({
+        from: `${fromName} <${FROM_EMAIL}>`,
+        to: [to],
+        subject,
+        react,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      console.log(`Nightly summary email sent successfully to ${to}`);
+
+      if (plannerId) {
+        void recordResourceUsage({
+          plannerId,
+          weddingId,
+          type: ResourceType.EMAIL,
+        });
+      }
+
+      return { success: true, messageId: sendData?.id };
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`Nightly summary email send attempt ${attempt}/${retries} failed:`, error);
+
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
+  }
+
+  console.error(`Failed to send nightly summary email to ${to} after ${retries} attempts:`, lastError);
   return {
     success: false,
     error: lastError?.message || 'Unknown error',

@@ -22,8 +22,14 @@ export interface AlertContext {
   wedding_id?: string;
   /** Planner owning the wedding (resolved automatically from wedding if omitted) */
   planner_id?: string;
-  /** Arbitrary key/value pairs rendered into the alert template */
-  metadata?: Record<string, string | number | boolean | null | undefined>;
+  /**
+   * Arbitrary payload stored on the Alert and rendered into the alert template.
+   * Top-level primitive values are flattened into {{variable}} template vars
+   * (see buildTemplateVars); nested objects/arrays pass through untouched for
+   * dispatchers that build richer content directly from Alert.metadata
+   * (e.g. the nightly summary email's RSVP change table).
+   */
+  metadata?: Record<string, unknown>;
   /**
    * When true, skip the immediate fire-and-forget dispatch after queuing deliveries.
    * Use this in batch callers (e.g. the cron) where a single processor run will

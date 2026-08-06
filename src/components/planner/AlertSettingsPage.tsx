@@ -112,12 +112,13 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
             event_type: def.event_type,
             subject,
             body,
-            notify_planner: true,
-            notify_master_admin: false,
-            notify_couple: false,
+            notify_planner: def.notifyPlanner ?? true,
+            notify_master_admin: def.notifyMasterAdmin ?? false,
+            notify_couple: def.notifyCouple ?? false,
             notify_guest_ids: [],
             channels: mergedChannels,
             enabled: mergedEnabled,
+            cooldown_minutes: def.cooldownMinutes ?? null,
           }),
         });
         if (!res.ok) throw new Error('Create failed');
@@ -317,6 +318,38 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
               def={BUILTIN_ALERTS.find((d) => d.builtinId === 'quote_expired')!}
               nameKey="quoteExpiredName"
               descKey="quoteExpiredDescription"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section: Para la pareja ──────────────────────────────────────── */}
+      <section>
+        <h2 className="text-base font-semibold text-gray-900 mb-1">{t('forCouple')}</h2>
+        <p className="text-sm text-gray-500 mb-4">{t('forCoupleSubtitle')}</p>
+
+        {/* Sub-section: Actividad de invitados */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-5 pt-4 pb-3 border-b border-gray-50">
+            <div className="flex items-center gap-2">
+              <div className="flex-shrink-0 w-7 h-7 bg-rose-50 rounded-lg flex items-center justify-center">
+                <svg className="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-8a4 4 0 110 8 4 4 0 010-8zm6 3a4 4 0 11-8 0" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800">{t('guestActivity')}</h3>
+                <p className="text-xs text-gray-400">{t('guestActivitySubtitle')}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Alert rows */}
+          <div className="divide-y divide-gray-50">
+            <AlertRow
+              def={BUILTIN_ALERTS.find((d) => d.builtinId === 'wedding_nightly_summary')!}
+              nameKey="nightlySummaryName"
+              descKey="nightlySummaryDescription"
             />
           </div>
         </div>
