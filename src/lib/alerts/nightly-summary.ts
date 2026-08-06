@@ -42,6 +42,13 @@ export interface NightlySummaryResult {
   errors: number;
 }
 
+export type ManualTriggerReason = 'wedding_not_found' | 'alert_not_enabled' | 'no_recipients';
+
+export interface ManualTriggerResult {
+  sent: boolean;
+  reason?: ManualTriggerReason;
+}
+
 /**
  * Scan every wedding covered by an enabled NIGHTLY_SUMMARY rule and fire the
  * alert for those that had RSVP activity in the last 24 hours.
@@ -84,11 +91,27 @@ export async function processNightlySummaries(): Promise<NightlySummaryResult> {
   return { checked, triggered, errors };
 }
 
+interface BuiltReport {
+  plannerId: string;
+  metadata: NightlySummaryMetadata;
+}
+
 /**
- * Compute the last-24h RSVP report for a single wedding and fire the alert
- * if there was any activity. Returns whether the alert was triggered.
+ * Fetch the last-24h RSVP tracking events and current guest stats for a
+ * wedding, and assemble them into a NightlySummaryMetadata report. Returns
+ * null if the wedding doesn't exist.
+ *
+ * When `alwaysBuild` is false (the default, used by the automatic daily
+ * job), the wedding/guest-stats query is skipped entirely and null is
+ * returned as soon as there are no events — this avoids a DB round trip
+ * per wedding on the (typical) days nothing happened. Manual/test triggers
+ * pass `alwaysBuild: true` to get a full report even with zero changes, so
+ * the planner can preview the email.
  */
-async function processWeddingSummary(weddingId: string): Promise<boolean> {
+async function buildNightlySummaryReport(
+  weddingId: string,
+  alwaysBuild = false,
+): Promise<BuiltReport | null> {
   const since = new Date(Date.now() - WINDOW_MS);
 
   const events = await prisma.trackingEvent.findMany({
@@ -105,8 +128,7 @@ async function processWeddingSummary(weddingId: string): Promise<boolean> {
     include: { family: { select: { name: true } } },
   });
 
-  // Nothing changed in the last 24h — do nothing.
-  if (events.length === 0) return false;
+  if (events.length === 0 && !alwaysBuild) return null;
 
   const wedding = await prisma.wedding.findUnique({
     where: { id: weddingId },
@@ -123,7 +145,7 @@ async function processWeddingSummary(weddingId: string): Promise<boolean> {
     },
   });
 
-  if (!wedding) return false;
+  if (!wedding) return null;
 
   const totalFamilies = wedding.families.length;
   const respondedFamilies = wedding.families.filter(
@@ -145,25 +167,75 @@ async function processWeddingSummary(weddingId: string): Promise<boolean> {
     };
   });
 
-  const metadata: NightlySummaryMetadata = {
-    weddingName: wedding.couple_names,
-    weddingDate: wedding.wedding_date?.toISOString() ?? null,
-    rsvpSent: totalFamilies,
-    rsvpReceived: respondedFamilies,
-    attendingGuests,
-    totalGuests,
-    confirmationsCount: changes.length,
-    plannerLogoUrl: wedding.planner?.logo_url ?? null,
-    changes,
+  return {
+    plannerId: wedding.planner_id,
+    metadata: {
+      weddingName: wedding.couple_names,
+      weddingDate: wedding.wedding_date?.toISOString() ?? null,
+      rsvpSent: totalFamilies,
+      rsvpReceived: respondedFamilies,
+      attendingGuests,
+      totalGuests,
+      confirmationsCount: changes.length,
+      plannerLogoUrl: wedding.planner?.logo_url ?? null,
+      changes,
+    },
   };
+}
+
+/**
+ * Compute the last-24h RSVP report for a single wedding and fire the alert
+ * if there was any activity. Returns whether the alert was triggered.
+ */
+async function processWeddingSummary(weddingId: string): Promise<boolean> {
+  const built = await buildNightlySummaryReport(weddingId);
+  if (!built || built.metadata.changes.length === 0) return false; // nothing changed — do nothing
 
   await triggerAlert({
     event_type: 'NIGHTLY_SUMMARY',
     wedding_id: weddingId,
-    planner_id: wedding.planner_id,
+    planner_id: built.plannerId,
     skipDispatch: true,
-    metadata: metadata as unknown as Record<string, unknown>,
+    metadata: built.metadata as unknown as Record<string, unknown>,
   });
 
   return true;
+}
+
+/**
+ * Manually fire the nightly summary for a single wedding, on demand —
+ * used by the "Send test now" button on the planner's alert-settings page.
+ * Unlike the automatic daily run, this sends immediately regardless of
+ * whether there was real RSVP activity (so the planner can preview the
+ * email), bypasses the AlertRule cooldown (so it can be retried freely),
+ * but still requires the alert to be enabled and the wedding to have at
+ * least one admin to notify — otherwise nothing would actually be sent.
+ */
+export async function triggerManualNightlySummary(weddingId: string): Promise<ManualTriggerResult> {
+  const built = await buildNightlySummaryReport(weddingId, true);
+  if (!built) return { sent: false, reason: 'wedding_not_found' };
+
+  const rule = await prisma.alertRule.findFirst({
+    where: {
+      event_type: 'NIGHTLY_SUMMARY',
+      enabled: true,
+      OR: [{ wedding_id: weddingId }, { wedding_id: null, planner_id: built.plannerId }],
+    },
+    select: { id: true },
+  });
+  if (!rule) return { sent: false, reason: 'alert_not_enabled' };
+
+  const recipientCount = await prisma.weddingAdmin.count({ where: { wedding_id: weddingId } });
+  if (recipientCount === 0) return { sent: false, reason: 'no_recipients' };
+
+  await triggerAlert({
+    event_type: 'NIGHTLY_SUMMARY',
+    wedding_id: weddingId,
+    planner_id: built.plannerId,
+    skipDispatch: false,
+    bypassCooldown: true,
+    metadata: built.metadata as unknown as Record<string, unknown>,
+  });
+
+  return { sent: true };
 }

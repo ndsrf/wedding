@@ -20,6 +20,13 @@ interface AlertRowState {
 
 type AlertStates = Record<string, AlertRowState>;
 
+interface WeddingOption {
+  id: string;
+  label: string;
+}
+
+type TestSendStatus = 'idle' | 'sending' | 'sent' | 'error';
+
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -77,6 +84,56 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
     }
     load();
   }, []);
+
+  // ── Nightly summary test send ──────────────────────────────────────────────
+
+  const [weddings, setWeddings] = useState<WeddingOption[]>([]);
+  const [selectedWeddingId, setSelectedWeddingId] = useState('');
+  const [testStatus, setTestStatus] = useState<TestSendStatus>('idle');
+  const [testReason, setTestReason] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadWeddings() {
+      try {
+        const res = await fetch('/api/planner/weddings?limit=100');
+        if (!res.ok) throw new Error('Failed to load weddings');
+        const { data } = await res.json() as {
+          data: { items: Array<{ id: string; couple_names: string; wedding_date: string }> };
+        };
+        const options = data.items.map((w) => ({
+          id: w.id,
+          label: `${w.couple_names} — ${new Date(w.wedding_date).toLocaleDateString()}`,
+        }));
+        setWeddings(options);
+        setSelectedWeddingId((prev) => prev || options[0]?.id || '');
+      } catch (err) {
+        console.error('[AlertSettings] Failed to load weddings', err);
+      }
+    }
+    loadWeddings();
+  }, []);
+
+  async function handleSendTest() {
+    if (!selectedWeddingId || testStatus === 'sending') return;
+    setTestStatus('sending');
+    setTestReason(null);
+    try {
+      const res = await fetch(`/api/planner/weddings/${selectedWeddingId}/nightly-summary/trigger`, {
+        method: 'POST',
+      });
+      const data = await res.json() as { sent: boolean; reason?: string };
+      if (res.ok && data.sent) {
+        setTestStatus('sent');
+      } else {
+        setTestStatus('error');
+        setTestReason(data.reason ?? null);
+      }
+    } catch (err) {
+      console.error('[AlertSettings] Test send failed', err);
+      setTestStatus('error');
+      setTestReason(null);
+    }
+  }
 
   // ── Save helpers ───────────────────────────────────────────────────────────
 
@@ -351,6 +408,50 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
               nameKey="nightlySummaryName"
               descKey="nightlySummaryDescription"
             />
+          </div>
+
+          {/* Manual test send */}
+          <div className="px-5 py-4 bg-gray-50/60 border-t border-gray-50">
+            <p className="text-xs font-medium text-gray-600 mb-2">{t('testSendTitle')}</p>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <select
+                value={selectedWeddingId}
+                onChange={(e) => {
+                  setSelectedWeddingId(e.target.value);
+                  setTestStatus('idle');
+                  setTestReason(null);
+                }}
+                disabled={weddings.length === 0 || testStatus === 'sending'}
+                className="text-sm rounded-lg border border-gray-200 px-3 py-1.5 bg-white text-gray-700 disabled:opacity-60 flex-1 min-w-0"
+              >
+                {weddings.length === 0 && <option value="">{t('testSendNoWeddings')}</option>}
+                {weddings.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleSendTest}
+                disabled={!selectedWeddingId || testStatus === 'sending'}
+                className="text-sm font-medium px-3 py-1.5 rounded-lg bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {testStatus === 'sending' ? t('testSendSending') : t('testSendButton')}
+              </button>
+            </div>
+            {testStatus === 'sent' && (
+              <p className="text-xs text-emerald-600 mt-2">{t('testSendSuccess')}</p>
+            )}
+            {testStatus === 'error' && (
+              <p className="text-xs text-red-500 mt-2">
+                {testReason === 'alert_not_enabled'
+                  ? t('testSendErrorNotEnabled')
+                  : testReason === 'no_recipients'
+                    ? t('testSendErrorNoRecipients')
+                    : t('testSendErrorGeneric')}
+              </p>
+            )}
           </div>
         </div>
       </section>

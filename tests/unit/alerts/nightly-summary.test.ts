@@ -5,15 +5,16 @@
  * per-wedding error isolation.
  */
 
-import { processNightlySummaries } from '@/lib/alerts/nightly-summary';
+import { processNightlySummaries, triggerManualNightlySummary } from '@/lib/alerts/nightly-summary';
 import { prisma } from '@/lib/db/prisma';
 import { triggerAlert } from '@/lib/alerts/trigger';
 
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
-    alertRule: { findMany: jest.fn() },
+    alertRule: { findMany: jest.fn(), findFirst: jest.fn() },
     wedding: { findMany: jest.fn(), findUnique: jest.fn() },
     trackingEvent: { findMany: jest.fn() },
+    weddingAdmin: { count: jest.fn() },
   },
 }));
 
@@ -22,9 +23,11 @@ jest.mock('@/lib/alerts/trigger', () => ({
 }));
 
 const mockRuleFindMany = prisma.alertRule.findMany as jest.Mock;
+const mockRuleFindFirst = prisma.alertRule.findFirst as jest.Mock;
 const mockWeddingFindMany = prisma.wedding.findMany as jest.Mock;
 const mockWeddingFindUnique = prisma.wedding.findUnique as jest.Mock;
 const mockEventFindMany = prisma.trackingEvent.findMany as jest.Mock;
+const mockAdminCount = prisma.weddingAdmin.count as jest.Mock;
 const mockTriggerAlert = triggerAlert as jest.Mock;
 
 function makePlannerRule(overrides: Partial<{ planner_id: string; wedding_id: string | null }> = {}) {
@@ -198,5 +201,60 @@ describe('processNightlySummaries', () => {
 
     expect(result.checked).toBe(1);
     expect(mockEventFindMany).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('triggerManualNightlySummary', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns wedding_not_found when the wedding does not exist', async () => {
+    mockEventFindMany.mockResolvedValue([]);
+    mockWeddingFindUnique.mockResolvedValue(null);
+
+    const result = await triggerManualNightlySummary('missing');
+
+    expect(result).toEqual({ sent: false, reason: 'wedding_not_found' });
+    expect(mockTriggerAlert).not.toHaveBeenCalled();
+  });
+
+  it('returns alert_not_enabled when no matching enabled rule exists', async () => {
+    mockEventFindMany.mockResolvedValue([]);
+    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies());
+    mockRuleFindFirst.mockResolvedValue(null);
+
+    const result = await triggerManualNightlySummary('wedding1');
+
+    expect(result).toEqual({ sent: false, reason: 'alert_not_enabled' });
+    expect(mockTriggerAlert).not.toHaveBeenCalled();
+  });
+
+  it('returns no_recipients when the wedding has no admins', async () => {
+    mockEventFindMany.mockResolvedValue([]);
+    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies());
+    mockRuleFindFirst.mockResolvedValue({ id: 'rule1' });
+    mockAdminCount.mockResolvedValue(0);
+
+    const result = await triggerManualNightlySummary('wedding1');
+
+    expect(result).toEqual({ sent: false, reason: 'no_recipients' });
+    expect(mockTriggerAlert).not.toHaveBeenCalled();
+  });
+
+  it('sends immediately, bypassing the cooldown, when the alert is enabled with recipients', async () => {
+    mockEventFindMany.mockResolvedValue([]); // no real activity — should still send (manual/test mode)
+    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies());
+    mockRuleFindFirst.mockResolvedValue({ id: 'rule1' });
+    mockAdminCount.mockResolvedValue(2);
+
+    const result = await triggerManualNightlySummary('wedding1');
+
+    expect(result).toEqual({ sent: true });
+    expect(mockTriggerAlert).toHaveBeenCalledTimes(1);
+    const call = mockTriggerAlert.mock.calls[0][0];
+    expect(call.skipDispatch).toBe(false);
+    expect(call.bypassCooldown).toBe(true);
+    expect(call.metadata.confirmationsCount).toBe(0);
   });
 });

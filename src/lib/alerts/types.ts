@@ -31,6 +31,12 @@ export interface AlertContext {
    */
   metadata?: Record<string, unknown>;
   /**
+   * Skip the rule's cooldown check for this firing. Used by manual/test
+   * triggers (e.g. the alert-settings "Send test now" button) so they aren't
+   * blocked by a recent automatic firing of the same rule.
+   */
+  bypassCooldown?: boolean;
+  /**
    * When true, skip the immediate fire-and-forget dispatch after queuing deliveries.
    * Use this in batch callers (e.g. the cron) where a single processor run will
    * follow and dispatch everything at once, avoiding N concurrent processor calls.
