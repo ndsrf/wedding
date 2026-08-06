@@ -58,6 +58,7 @@ const translations = {
     family: 'Familia',
     guest: 'Invitado',
     attendingColumn: 'Asistencia',
+    details: 'Detalles',
     when: 'Cuándo',
     yes: 'Sí',
     no: 'No',
@@ -81,6 +82,7 @@ const translations = {
     family: 'Family',
     guest: 'Guest',
     attendingColumn: 'Attending',
+    details: 'Details',
     when: 'When',
     yes: 'Yes',
     no: 'No',
@@ -104,6 +106,7 @@ const translations = {
     family: 'Famille',
     guest: 'Invité',
     attendingColumn: 'Présence',
+    details: 'Détails',
     when: 'Quand',
     yes: 'Oui',
     no: 'Non',
@@ -127,6 +130,7 @@ const translations = {
     family: 'Famiglia',
     guest: 'Ospite',
     attendingColumn: 'Presenza',
+    details: 'Dettagli',
     when: 'Quando',
     yes: 'Sì',
     no: 'No',
@@ -150,6 +154,7 @@ const translations = {
     family: 'Familie',
     guest: 'Gast',
     attendingColumn: 'Teilnahme',
+    details: 'Details',
     when: 'Wann',
     yes: 'Ja',
     no: 'Nein',
@@ -240,45 +245,56 @@ export const NightlySummaryEmail = ({
 
           <Text style={sectionTitle}>{t.changesTitle}</Text>
 
-          <div style={tableScroll}>
-            <table role="presentation" cellPadding={0} cellSpacing={0} style={changesTable}>
-              <thead>
-                <tr>
-                  <th style={th}>{t.family}</th>
-                  <th style={th}>{t.guest}</th>
-                  <th style={th}>{t.attendingColumn}</th>
-                  {columns.map((column) => (
-                    <th key={column.key} style={th}>{resolveColumnLabel(column, t, language)}</th>
-                  ))}
-                  <th style={thRight}>{t.when}</th>
+          {/*
+            Fixed columns only (Family/Guest/Attending/When) — a wedding can
+            have up to ~17 configurable questions enabled, which would make a
+            one-column-per-question table too wide for most email clients
+            (few support horizontal scroll on mobile). Instead every enabled
+            question's answer is listed as its own line inside the "Details"
+            cell, so the table always stays a fixed, narrow width.
+          */}
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={changesTable}>
+            <thead>
+              <tr>
+                <th style={th}>{t.family}</th>
+                <th style={th}>{t.guest}</th>
+                <th style={th}>{t.attendingColumn}</th>
+                <th style={th}>{t.details}</th>
+                <th style={thRight}>{t.when}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={`${row.familyName}-${row.memberName}-${index}`} style={index % 2 === 0 ? rowEven : rowOdd}>
+                  <td style={td}>{row.familyName}</td>
+                  <td style={td}>{row.memberName}</td>
+                  <td style={td}>
+                    {row.attending === null ? t.pending : row.attending ? t.yes : t.no}
+                  </td>
+                  <td style={td}>
+                    {columns.length === 0 ? (
+                      t.empty
+                    ) : (
+                      columns.map((column) => (
+                        <div key={column.key} style={detailLine}>
+                          <span style={detailLabel}>{resolveColumnLabel(column, t, language)}: </span>
+                          {formatValue(column, row.values[column.key], t)}
+                        </div>
+                      ))
+                    )}
+                  </td>
+                  <td style={tdRight}>
+                    {new Date(row.timestamp).toLocaleString(locale, {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, index) => (
-                  <tr key={`${row.familyName}-${row.memberName}-${index}`} style={index % 2 === 0 ? rowEven : rowOdd}>
-                    <td style={td}>{row.familyName}</td>
-                    <td style={td}>{row.memberName}</td>
-                    <td style={td}>
-                      {row.attending === null ? t.pending : row.attending ? t.yes : t.no}
-                    </td>
-                    {columns.map((column) => (
-                      <td key={column.key} style={td}>
-                        {formatValue(column, row.values[column.key], t)}
-                      </td>
-                    ))}
-                    <td style={tdRight}>
-                      {new Date(row.timestamp).toLocaleString(locale, {
-                        day: '2-digit',
-                        month: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
 
           <Section style={footer}>
             <Text style={footerText}>{t.footer}</Text>
@@ -410,16 +426,11 @@ const sectionTitle = {
   padding: '0',
 };
 
-const tableScroll = {
-  margin: '0 40px',
-  overflowX: 'auto' as const,
-  maxWidth: 'calc(100% - 80px)',
-};
-
 const changesTable = {
-  width: '100%',
-  minWidth: '480px',
+  margin: '0 40px',
+  width: 'calc(100% - 80px)',
   borderCollapse: 'collapse' as const,
+  tableLayout: 'fixed' as const,
 };
 
 const th = {
@@ -443,13 +454,23 @@ const td = {
   fontSize: '13px',
   padding: '8px 10px',
   borderBottom: '1px solid #f0f0f0',
-  whiteSpace: 'nowrap' as const,
+  verticalAlign: 'top' as const,
 };
 
 const tdRight = {
   ...td,
   color: '#888',
   textAlign: 'right' as const,
+  whiteSpace: 'nowrap' as const,
+};
+
+const detailLine = {
+  margin: '0 0 2px',
+  lineHeight: '18px',
+};
+
+const detailLabel = {
+  color: '#888',
 };
 
 const rowEven = {};
