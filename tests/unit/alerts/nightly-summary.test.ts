@@ -61,6 +61,8 @@ function makeWeddingWithFamilies(overrides: Partial<{
     couple_names: 'John & Jane',
     wedding_date: new Date('2026-09-01'),
     planner_id: 'planner1',
+    status: 'ACTIVE',
+    is_disabled: false,
     planner: { logo_url: overrides.logo_url ?? 'https://cdn.example.com/logo.png' },
     families: overrides.families ?? [
       { members: [{ attending: true }, { attending: true }] }, // fully responded, both attending
@@ -303,6 +305,25 @@ describe('triggerManualNightlySummary', () => {
     const result = await triggerManualNightlySummary('missing');
 
     expect(result).toEqual({ sent: false, reason: 'wedding_not_found' });
+    expect(mockTriggerAlert).not.toHaveBeenCalled();
+  });
+
+  it('returns wedding_inactive for an archived wedding, without building the report', async () => {
+    mockWeddingFindUnique.mockResolvedValue({ status: 'ARCHIVED', is_disabled: false });
+
+    const result = await triggerManualNightlySummary('wedding1');
+
+    expect(result).toEqual({ sent: false, reason: 'wedding_inactive' });
+    expect(mockTriggerAlert).not.toHaveBeenCalled();
+    expect(mockEventFindMany).not.toHaveBeenCalled(); // buildNightlySummaryReport never reached
+  });
+
+  it('returns wedding_inactive for a disabled (but status ACTIVE) wedding', async () => {
+    mockWeddingFindUnique.mockResolvedValue({ status: 'ACTIVE', is_disabled: true });
+
+    const result = await triggerManualNightlySummary('wedding1');
+
+    expect(result).toEqual({ sent: false, reason: 'wedding_inactive' });
     expect(mockTriggerAlert).not.toHaveBeenCalled();
   });
 

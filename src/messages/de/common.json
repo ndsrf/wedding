@@ -1359,6 +1359,7 @@
       "testSendSuccess": "Test-E-Mail an die Administratoren der Hochzeit gesendet.",
       "testSendErrorNotEnabled": "Aktivieren Sie oben die Benachrichtigung, bevor Sie einen Test senden.",
       "testSendErrorNoRecipients": "Diese Hochzeit hat keine Administratoren zum Benachrichtigen.",
+      "testSendErrorInactive": "Diese Hochzeit ist archiviert oder deaktiviert und kann daher keine Benachrichtigungen erhalten.",
       "testSendErrorGeneric": "Die Test-E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
       "channelEmail": "E-Mail",
       "channelSms": "SMS",

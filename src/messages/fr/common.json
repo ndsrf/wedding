@@ -1359,6 +1359,7 @@
       "testSendSuccess": "E-mail de test envoyé aux administrateurs du mariage.",
       "testSendErrorNotEnabled": "Activez l'alerte ci-dessus avant d'envoyer un test.",
       "testSendErrorNoRecipients": "Ce mariage n'a aucun administrateur à notifier.",
+      "testSendErrorInactive": "Ce mariage est archivé ou désactivé, il ne peut donc pas recevoir d'alertes.",
       "testSendErrorGeneric": "Impossible d'envoyer l'e-mail de test. Veuillez réessayer.",
       "channelEmail": "Email",
       "channelSms": "SMS",

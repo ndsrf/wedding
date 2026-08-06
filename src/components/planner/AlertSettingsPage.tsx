@@ -95,15 +95,20 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
   useEffect(() => {
     async function loadWeddings() {
       try {
-        const res = await fetch('/api/planner/weddings?limit=100');
+        // status=active narrows out archived/completed weddings server-side;
+        // is_disabled still needs filtering client-side since it's an
+        // independent flag from status.
+        const res = await fetch('/api/planner/weddings?limit=100&status=active');
         if (!res.ok) throw new Error('Failed to load weddings');
         const { data } = await res.json() as {
-          data: { items: Array<{ id: string; couple_names: string; wedding_date: string }> };
+          data: { items: Array<{ id: string; couple_names: string; wedding_date: string; is_disabled?: boolean }> };
         };
-        const options = data.items.map((w) => ({
-          id: w.id,
-          label: `${w.couple_names} — ${new Date(w.wedding_date).toLocaleDateString()}`,
-        }));
+        const options = data.items
+          .filter((w) => !w.is_disabled)
+          .map((w) => ({
+            id: w.id,
+            label: `${w.couple_names} — ${new Date(w.wedding_date).toLocaleDateString()}`,
+          }));
         setWeddings(options);
         setSelectedWeddingId((prev) => prev || options[0]?.id || '');
       } catch (err) {
@@ -449,7 +454,9 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
                   ? t('testSendErrorNotEnabled')
                   : testReason === 'no_recipients'
                     ? t('testSendErrorNoRecipients')
-                    : t('testSendErrorGeneric')}
+                    : testReason === 'wedding_inactive'
+                      ? t('testSendErrorInactive')
+                      : t('testSendErrorGeneric')}
               </p>
             )}
           </div>

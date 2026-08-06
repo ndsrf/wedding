@@ -1384,6 +1384,7 @@
       "testSendSuccess": "Correo de prueba enviado a los administradores de la boda.",
       "testSendErrorNotEnabled": "Activa la alerta de arriba antes de enviar una prueba.",
       "testSendErrorNoRecipients": "Esta boda no tiene administradores a los que notificar.",
+      "testSendErrorInactive": "Esta boda está archivada o deshabilitada, por lo que no puede recibir alertas.",
       "testSendErrorGeneric": "No se pudo enviar el correo de prueba. Inténtalo de nuevo.",
       "channelEmail": "Email",
       "channelSms": "SMS",

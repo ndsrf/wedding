@@ -1388,6 +1388,7 @@
       "testSendSuccess": "Test email sent to the wedding's admins.",
       "testSendErrorNotEnabled": "Enable the alert above before sending a test.",
       "testSendErrorNoRecipients": "This wedding has no admins to notify.",
+      "testSendErrorInactive": "This wedding is archived or disabled, so it can't receive alerts.",
       "testSendErrorGeneric": "Could not send the test email. Please try again.",
       "channelEmail": "Email",
       "channelSms": "SMS",

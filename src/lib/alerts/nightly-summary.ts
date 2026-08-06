@@ -70,7 +70,7 @@ export interface NightlySummaryResult {
   errors: number;
 }
 
-export type ManualTriggerReason = 'wedding_not_found' | 'alert_not_enabled' | 'no_recipients';
+export type ManualTriggerReason = 'wedding_not_found' | 'wedding_inactive' | 'alert_not_enabled' | 'no_recipients';
 
 export interface ManualTriggerResult {
   sent: boolean;
@@ -434,10 +434,22 @@ async function processWeddingSummary(weddingId: string): Promise<boolean> {
  * Unlike the automatic daily run, this sends immediately regardless of
  * whether there was real RSVP activity (so the planner can preview the
  * email), bypasses the AlertRule cooldown (so it can be retried freely),
- * but still requires the alert to be enabled and the wedding to have at
- * least one admin to notify — otherwise nothing would actually be sent.
+ * but still requires the wedding to be active (the automatic job already
+ * skips deleted/archived/disabled weddings via its own query — this check
+ * exists because a manual trigger can target any wedding id directly) and
+ * the alert to be enabled with at least one admin to notify — otherwise
+ * nothing would actually be sent.
  */
 export async function triggerManualNightlySummary(weddingId: string): Promise<ManualTriggerResult> {
+  const wedding = await prisma.wedding.findUnique({
+    where: { id: weddingId },
+    select: { status: true, is_disabled: true },
+  });
+  if (!wedding) return { sent: false, reason: 'wedding_not_found' };
+  if (wedding.status !== 'ACTIVE' || wedding.is_disabled) {
+    return { sent: false, reason: 'wedding_inactive' };
+  }
+
   const built = await buildNightlySummaryReport(weddingId, true);
   if (!built) return { sent: false, reason: 'wedding_not_found' };
 

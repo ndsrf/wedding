@@ -1359,6 +1359,7 @@
       "testSendSuccess": "Email di prova inviata agli amministratori del matrimonio.",
       "testSendErrorNotEnabled": "Attiva l'avviso qui sopra prima di inviare una prova.",
       "testSendErrorNoRecipients": "Questo matrimonio non ha amministratori da notificare.",
+      "testSendErrorInactive": "Questo matrimonio è archiviato o disabilitato, quindi non può ricevere avvisi.",
       "testSendErrorGeneric": "Impossibile inviare l'email di prova. Riprova.",
       "channelEmail": "Email",
       "channelSms": "SMS",
