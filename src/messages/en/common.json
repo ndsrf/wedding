@@ -638,7 +638,11 @@
         "example1": "How many total guests do I have across all weddings?",
         "example2": "What is my total invoiced amount?",
         "example3": "List all pending provider payments",
-        "example4": "Show me weddings with the lowest RSVP completion"
+        "example4": "Show me weddings with the lowest RSVP completion",
+        "weddingScopeLabel": "Scope to a wedding (optional)",
+        "weddingScopeAll": "All weddings",
+        "weddingScopeHint": "Questions about this wedding's custom RSVP questions (e.g. \"how many are coming to the pre-wedding party\") only work when a single wedding is selected.",
+        "weddingScopeBadge": "Scoped to {wedding}"
       }
     },
     "stats": {

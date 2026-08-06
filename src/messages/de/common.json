@@ -609,7 +609,11 @@
         "example1": "Wie viele Gäste habe ich insgesamt über alle Hochzeiten?",
         "example2": "Was ist mein gesamter Rechnungsbetrag?",
         "example3": "Alle ausstehenden Dienstleisterzahlungen auflisten",
-        "example4": "Hochzeiten mit der niedrigsten RSVP-Rate anzeigen"
+        "example4": "Hochzeiten mit der niedrigsten RSVP-Rate anzeigen",
+        "weddingScopeLabel": "Auf eine Hochzeit beschränken (optional)",
+        "weddingScopeAll": "Alle Hochzeiten",
+        "weddingScopeHint": "Fragen zu den individuellen RSVP-Fragen dieser Hochzeit (z. B. \"wie viele kommen zur Vorfeier\") funktionieren nur, wenn eine einzelne Hochzeit ausgewählt ist.",
+        "weddingScopeBadge": "Beschränkt auf {wedding}"
       }
     },
     "stats": {

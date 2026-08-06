@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import { useTranslations } from 'next-intl';
 import {
@@ -50,6 +50,13 @@ interface NLResult {
   sql: string;
   columns: string[];
   question: string;
+  weddingId?: string;
+}
+
+interface WeddingOption {
+  id: string;
+  coupleNames: string;
+  weddingDate: string;
 }
 
 // ─────────────────────────────────────────────────────���───────────────────────
@@ -134,6 +141,18 @@ export function PlannerReportsView() {
   const [nlExporting, setNlExporting] = useState<string | null>(null);
   const nlInputRef = useRef<HTMLTextAreaElement>(null);
 
+  // Wedding scope selector — needed so configurable-question labels (which
+  // are defined per wedding) can be resolved before generating SQL.
+  const [weddings, setWeddings] = useState<WeddingOption[]>([]);
+  const [selectedWeddingId, setSelectedWeddingId] = useState('');
+
+  useEffect(() => {
+    fetch('/api/planner/reports/weddings')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setWeddings(Array.isArray(data) ? data : []))
+      .catch(() => setWeddings([]));
+  }, []);
+
   const reports: ReportConfig[] = [
     {
       id: 'weddings-summary',
@@ -213,11 +232,11 @@ export function PlannerReportsView() {
       const res = await fetch(`${BASE_PATH}/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, format: 'json' }),
+        body: JSON.stringify({ question, format: 'json', weddingId: selectedWeddingId || undefined }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to run query');
-      setNlResult({ ...json, question });
+      setNlResult({ ...json, question, weddingId: selectedWeddingId || undefined });
     } catch (err) {
       setNlError(err instanceof Error ? err.message : t('admin.reports.nlQuery.error'));
     } finally {
@@ -232,7 +251,7 @@ export function PlannerReportsView() {
       const res = await fetch(`${BASE_PATH}/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sql: nlResult.sql, format }),
+        body: JSON.stringify({ sql: nlResult.sql, format, weddingId: nlResult.weddingId }),
       });
       if (!res.ok) throw new Error('Export failed');
       await downloadBlob(res, `planner-report.${format}`);
@@ -382,6 +401,13 @@ export function PlannerReportsView() {
                   {t('admin.reports.nlQuery.resultsTitle')}
                 </h3>
                 <p className="mt-1 text-sm text-gray-600 italic">&ldquo;{nlResult.question}&rdquo;</p>
+                {nlResult.weddingId && (
+                  <p className="mt-1 text-xs text-rose-600">
+                    {t('planner.reports.nlQuery.weddingScopeBadge', {
+                      wedding: weddings.find((w) => w.id === nlResult.weddingId)?.coupleNames ?? nlResult.weddingId,
+                    })}
+                  </p>
+                )}
               </div>
               <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
                 {nlResult.data.length} {t('admin.reports.nlQuery.rows')}
@@ -484,6 +510,28 @@ export function PlannerReportsView() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="nl-wedding-scope" className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {t('planner.reports.nlQuery.weddingScopeLabel')}
+            </label>
+            <select
+              id="nl-wedding-scope"
+              value={selectedWeddingId}
+              onChange={(e) => setSelectedWeddingId(e.target.value)}
+              className="block w-full sm:w-80 rounded-lg border border-gray-300 shadow-sm px-3 py-2 text-sm text-gray-900 focus:border-rose-400 focus:ring-rose-400 focus:outline-none focus:ring-2"
+            >
+              <option value="">{t('planner.reports.nlQuery.weddingScopeAll')}</option>
+              {weddings.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.coupleNames} ({w.weddingDate})
+                </option>
+              ))}
+            </select>
+            {selectedWeddingId && (
+              <p className="mt-1.5 text-xs text-gray-500">{t('planner.reports.nlQuery.weddingScopeHint')}</p>
+            )}
           </div>
 
           <div className="flex gap-3">

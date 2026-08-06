@@ -609,7 +609,11 @@
         "example1": "Combien d'invités au total parmi tous mes mariages ?",
         "example2": "Quel est mon montant total facturé ?",
         "example3": "Listez tous les paiements prestataires en attente",
-        "example4": "Montrez les mariages avec le taux RSVP le plus faible"
+        "example4": "Montrez les mariages avec le taux RSVP le plus faible",
+        "weddingScopeLabel": "Limiter à un mariage (optionnel)",
+        "weddingScopeAll": "Tous les mariages",
+        "weddingScopeHint": "Les questions sur les questions RSVP personnalisées de ce mariage (ex. \"combien de personnes viennent à la fête pré-mariage\") ne fonctionnent que si un seul mariage est sélectionné.",
+        "weddingScopeBadge": "Limité à {wedding}"
       }
     },
     "stats": {
