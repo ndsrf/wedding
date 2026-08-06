@@ -1,5 +1,5 @@
 /**
- * PATCH /api/auth/preferred-language
+ * PATCH /api/account/preferred-language
  *
  * Persists the current user's language choice (made via the header
  * LanguageSwitcher) to their account record, so backend processes that
@@ -9,6 +9,10 @@
  * instead of whatever was set once at account creation and never updated
  * since. The switcher itself only sets a NEXT_LOCALE cookie for the UI;
  * this keeps the DB record in sync with that choice.
+ *
+ * Deliberately not under /api/auth/* — middleware.ts treats that whole
+ * prefix as a public route reserved for NextAuth's own endpoints, and this
+ * one requires an authenticated session (enforced below via requireAuth()).
  */
 
 import { NextRequest, NextResponse } from 'next/server';

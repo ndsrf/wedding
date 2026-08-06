@@ -1,12 +1,12 @@
 /**
- * Unit tests for PATCH /api/auth/preferred-language.
+ * Unit tests for PATCH /api/account/preferred-language.
  * Covers: routing the update to the correct table per role (planner vs
  * planner sub-account vs wedding_admin vs master_admin), validation, and
  * auth failure handling.
  */
 
 import { NextRequest } from 'next/server';
-import { PATCH } from '@/app/(public)/api/auth/preferred-language/route';
+import { PATCH } from '@/app/(public)/api/account/preferred-language/route';
 import { prisma } from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/auth/middleware';
 
@@ -30,13 +30,13 @@ const mockWeddingAdminUpdate = prisma.weddingAdmin.update as jest.Mock;
 const mockMasterAdminUpdate = prisma.masterAdmin.update as jest.Mock;
 
 function makeRequest(body: unknown) {
-  return new NextRequest('http://localhost/api/auth/preferred-language', {
+  return new NextRequest('http://localhost/api/account/preferred-language', {
     method: 'PATCH',
     body: JSON.stringify(body),
   });
 }
 
-describe('PATCH /api/auth/preferred-language', () => {
+describe('PATCH /api/account/preferred-language', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

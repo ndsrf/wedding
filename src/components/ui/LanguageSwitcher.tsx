@@ -36,7 +36,7 @@ export function LanguageSwitcher() {
     // outside of a browser session. The UI switch itself only depends on
     // the cookie above, so a failure here must never block the reload.
     try {
-      await fetch('/api/auth/preferred-language', {
+      await fetch('/api/account/preferred-language', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ language: newLocale.toUpperCase() }),
