@@ -8,9 +8,10 @@
  *    $1 = wedding_id, $2 = admin_id (optional "my side" context).
  *  - Planner-level (planner_id scope): queries across all weddings the planner
  *    manages, plus the planner's own financials (quotes, invoices).
- *    $1 = planner_id. $2 = wedding_id, only when the caller has scoped the
- *    query to one wedding (required to resolve that wedding's configurable
- *    RSVP question labels — see "CONFIGURABLE RSVP QUESTIONS" below).
+ *    $1 = planner_id. When the caller scopes the query to a single wedding,
+ *    that's delegated entirely to the per-wedding path above instead (see
+ *    executeNaturalLanguagePlannerQuery) rather than juggling a second scope
+ *    parameter — simpler for the LLM and reuses the already-correct prompt.
  *
  * Security measures:
  * - Only SELECT statements are allowed (validated by node-sql-parser + keyword blocklist)
@@ -781,7 +782,7 @@ currency TEXT, payment_date TIMESTAMP, method TEXT, reference TEXT
 2. ALWAYS scope to the planner's data using $1 (planner_id).
 3. For tables without direct planner_id, ALWAYS JOIN via weddings: JOIN weddings w ON <table>.wedding_id = w.id WHERE w.planner_id = $1.
 4. For quotes and invoices, filter directly: WHERE planner_id = $1.
-5. By default you may ONLY use $1. If a "Single-wedding scope" section appears below, you MUST also use $2 exactly as instructed there.
+5. You may ONLY use $1. No other parameters.
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. couple_names, total_guests, invoice_total).
@@ -791,15 +792,8 @@ currency TEXT, payment_date TIMESTAMP, method TEXT, reference TEXT
 /**
  * Validate a planner-scoped SQL query.
  * Requires $1 and planner_id (or weddings table) to be present.
- *
- * @param opts.requireWeddingScope  When true (the query was generated with a
- *   single wedding selected), also require $2 to be present — guards against
- *   the LLM dropping the single-wedding filter and returning cross-wedding data.
  */
-export function validatePlannerSQL(
-  rawSql: string,
-  opts: { requireWeddingScope?: boolean } = {}
-): ValidationResult {
+export function validatePlannerSQL(rawSql: string): ValidationResult {
   const sql = cleanSQL(rawSql);
 
   if (!/^SELECT\b/i.test(sql)) {
@@ -812,10 +806,6 @@ export function validatePlannerSQL(
 
   if (!sql.includes('$1')) {
     return { valid: false, error: 'Query must use $1 to scope to planner data' };
-  }
-
-  if (opts.requireWeddingScope && !sql.includes('$2')) {
-    return { valid: false, error: 'Query must use $2 to scope to the selected wedding' };
   }
 
   // Must reference planner_id or weddings table for scoping
@@ -858,20 +848,14 @@ export function validatePlannerSQL(
 }
 
 /**
- * Fetch a single wedding's configured-questions context, but only if it
- * belongs to the given planner. Returns null if the wedding doesn't exist or
- * belongs to someone else, so callers can reject before ever calling the LLM.
+ * Verify a wedding belongs to the given planner. Throws if not found or
+ * owned by someone else, so callers reject before ever calling the LLM.
  */
-async function buildScopedWeddingQuestionsContext(
-  weddingId: string,
-  planner_id: string
-): Promise<string | null> {
-  const wedding = await prisma.wedding.findUnique({
-    where: { id: weddingId },
-    select: { planner_id: true, ...WEDDING_QUESTION_CONFIG_SELECT },
-  });
-  if (!wedding || wedding.planner_id !== planner_id) return null;
-  return renderQuestionsContext(wedding as WeddingQuestionsConfig);
+async function assertPlannerOwnsWedding(weddingId: string, planner_id: string): Promise<void> {
+  const wedding = await prisma.wedding.findUnique({ where: { id: weddingId }, select: { planner_id: true } });
+  if (!wedding || wedding.planner_id !== planner_id) {
+    throw new Error('Wedding not found or not accessible');
+  }
 }
 
 /**
@@ -880,36 +864,29 @@ async function buildScopedWeddingQuestionsContext(
  *
  * @param question    Natural-language question
  * @param planner_id  Bound to $1 — scopes every query to this planner's data
- * @param weddingId   Optional — when set, scopes the query to this single
- *   wedding (bound to $2) and exposes that wedding's configured RSVP
- *   questions with their real labels, the same way per-wedding reports do.
+ * @param weddingId   Optional — when set, the query is scoped to this single
+ *   wedding. Rather than asking the LLM to juggle two scope parameters
+ *   (planner_id AND wedding_id) in the same query, this delegates entirely
+ *   to executeNaturalLanguageQuery — the same single-parameter-scope path
+ *   used by admin and per-wedding planner reports, including its handling
+ *   of this wedding's configured RSVP questions.
  */
 export async function executeNaturalLanguagePlannerQuery(
   question: string,
   planner_id: string,
   weddingId?: string,
 ): Promise<NLQueryResult> {
-  let systemPrompt: string = SCHEMA_DESCRIPTION_PLANNER;
-
   if (weddingId) {
-    const questionsContext = await buildScopedWeddingQuestionsContext(weddingId, planner_id);
-    if (questionsContext === null) {
-      throw new Error('Wedding not found or not accessible');
-    }
-    systemPrompt +=
-      questionsContext +
-      `\n\n## Single-wedding scope\n$2 = the id of the wedding above (the user has selected it explicitly). ` +
-      `Every query MUST also filter to this one wedding: use "w.id = $2" when the starting table is weddings or ` +
-      `is joined to it, or "wedding_id = $2" for tables with a direct wedding_id column. Keep the planner_id = $1 ` +
-      `scoping as well — both filters are required.`;
+    await assertPlannerOwnsWedding(weddingId, planner_id);
+    return executeNaturalLanguageQuery(question, weddingId, planner_id);
   }
 
-  const rawSql = await generateSQL(question, systemPrompt);
+  const rawSql = await generateSQL(question, SCHEMA_DESCRIPTION_PLANNER);
   if (!rawSql) {
     throw new Error('AI service is unavailable or did not return a query');
   }
 
-  const validation = validatePlannerSQL(rawSql, { requireWeddingScope: !!weddingId });
+  const validation = validatePlannerSQL(rawSql);
   if (!validation.valid || !validation.cleanedSql) {
     throw new Error(validation.error ?? 'Generated query failed validation');
   }
@@ -917,8 +894,7 @@ export async function executeNaturalLanguagePlannerQuery(
   const sql = validation.cleanedSql;
   console.log('[NL-QUERY-PLANNER] Executing validated query:', sql);
 
-  const params = bindParams(sql, weddingId ? [planner_id, weddingId] : [planner_id]);
-  const raw = await runQuery(sql, params);
+  const raw = await runQuery(sql, bindParams(sql, [planner_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -929,21 +905,25 @@ export async function executeNaturalLanguagePlannerQuery(
  * Execute a previously-generated planner-scoped SQL string directly (for exports).
  *
  * @param weddingId  Must match whatever wedding scope (if any) the SQL was
- *   originally generated with, so $2 binds to the right value.
+ *   originally generated with — see executeNaturalLanguagePlannerQuery.
  */
 export async function executeValidatedPlannerSQL(
   sql: string,
   planner_id: string,
   weddingId?: string,
 ): Promise<NLQueryResult> {
-  const validation = validatePlannerSQL(sql, { requireWeddingScope: !!weddingId });
+  if (weddingId) {
+    await assertPlannerOwnsWedding(weddingId, planner_id);
+    return executeValidatedSQL(sql, weddingId, planner_id);
+  }
+
+  const validation = validatePlannerSQL(sql);
   if (!validation.valid || !validation.cleanedSql) {
     throw new Error(validation.error ?? 'SQL failed validation');
   }
 
   const cleanedSql = validation.cleanedSql;
-  const params = bindParams(cleanedSql, weddingId ? [planner_id, weddingId] : [planner_id]);
-  const raw = await runQuery(cleanedSql, params);
+  const raw = await runQuery(cleanedSql, bindParams(cleanedSql, [planner_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
