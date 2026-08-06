@@ -1451,7 +1451,7 @@
       "metricTitles": {
         "totalGuests": "Total Guests",
         "rsvpCompletion": "RSVP Completion",
-        "rsvpBreakdown": "RSVP Breakdown",
+        "rsvpBreakdown": "RSVPs Received Breakdown ({count})",
         "attending": "Attending",
         "paymentsReceived": "Gifts Received"
       },
@@ -1475,9 +1475,6 @@
       "responded": "responded",
       "totalRsvps": "total RSVPs",
       "complete": "complete",
-      "rsvpAccepted": "Accepted",
-      "rsvpDeclined": "Declined",
-      "rsvpPartial": "Partial",
       "seatingPlan": "Seating Plan",
       "seatingPlanSubtitle": "Assign guests to tables",
       "providers": "Providers & Gifts",

@@ -1420,7 +1420,7 @@
       "metricTitles": {
         "totalGuests": "Totale Ospiti",
         "rsvpCompletion": "Completamento RSVP",
-        "rsvpBreakdown": "Riepilogo RSVP",
+        "rsvpBreakdown": "Riepilogo RSVP ricevuti ({count})",
         "attending": "Presenti",
         "paymentsReceived": "Regali Ricevuti"
       },
@@ -1440,9 +1440,6 @@
       "responded": "risposto",
       "totalRsvps": "totale RSVP",
       "complete": "completo",
-      "rsvpAccepted": "Accettato",
-      "rsvpDeclined": "Rifiutato",
-      "rsvpPartial": "Parziale",
       "seatingPlan": "Piano dei Posti",
       "seatingPlanSubtitle": "Assegna gli ospiti ai tavoli",
       "providers": "Fornitori e Regali",

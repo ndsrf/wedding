@@ -334,19 +334,21 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <p className="text-sm text-gray-500 mb-3">{t('admin.dashboard.metricTitles.rsvpBreakdown')}</p>
+            <p className="text-sm text-gray-500 mb-3">
+              {t('admin.dashboard.metricTitles.rsvpBreakdown', { count: stats.rsvp_count })}
+            </p>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.accepted_family_count.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.rsvpAccepted')}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.guests.filters.attending')}</p>
               </div>
               <div>
                 <p className="text-xl sm:text-2xl font-bold text-red-500">{stats.rejected_family_count.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.rsvpDeclined')}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.guests.filters.notAttending')}</p>
               </div>
               <div>
                 <p className="text-xl sm:text-2xl font-bold text-amber-500">{stats.partial_family_count.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('admin.dashboard.rsvpPartial')}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.guests.filters.partial')}</p>
               </div>
             </div>
           </div>
