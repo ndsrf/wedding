@@ -6,7 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
-Last updated: 2026-07-25
+Last updated: 2026-08-06
 
 ### Current Vulnerabilities
 
@@ -330,6 +330,76 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Application is not a high-traffic public image service
   - Hosted on Vercel where resources are managed
 - **Future Plan**: Upgrade to Next.js 16.x (when available) to get updated sharp with patched libvips
+
+##### brace-expansion - DoS via Unbounded Intermediate Arrays (Additional variant)
+- **Package**: brace-expansion (various branches)
+- **CVE**: [GHSA-rgw5-rvv9-x895](https://github.com/advisories/GHSA-rgw5-rvv9-x895)
+- **Status**: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation; fix not yet available in affected branches
+- **Usage**: Dev toolchain only — transitive dependency of jest/glob/readdir-glob
+- **Risk Assessment**:
+  - High severity DoS vector
+  - Attack requires untrusted input to brace-expansion call in build process
+  - Jest and readdir-glob never receive untrusted input at runtime or in CI
+  - No production bundles include brace-expansion
+- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
+- **Future Plan**: Will be resolved when brace-expansion releases a patched version
+
+##### fast-uri - Host Confusion via Backslash Authority Introducer
+- **Package**: fast-uri 3.0.0 - 3.1.4
+- **CVE**: [GHSA-7p8r-x3mc-p8w7](https://github.com/advisories/GHSA-7p8r-x3mc-p8w7)
+- **Status**: Host confusion vulnerability; fix requires updating to >= 3.1.5 (when released) or awaiting dependency updates
+- **Usage**: URI parsing/validation in HTTP request handling
+- **Risk Assessment**:
+  - High severity, affects host validation in URI parsing
+  - Requires crafted URLs with backslash characters to exploit
+  - Next.js and related frameworks have additional URL validation layers
+  - Limited exposure: used internally by Next.js HTTP handling, not direct user input
+- **Mitigation**:
+  - URL validation occurs at multiple layers in Next.js
+  - Requests pass through Next.js request pipeline with additional validation
+  - Limited attack surface for direct exploitation
+- **Future Plan**: Will be resolved when fast-uri releases a patch (>=3.1.5) or dependencies update
+
+##### PostCSS - Incomplete Fix of Source Map Vulnerability
+- **Package**: postcss < 8.5.23 (via next@15.1.6)
+- **CVE**: [GHSA-fxqj-rqcc-2cmp](https://github.com/advisories/GHSA-fxqj-rqcc-2cmp)
+- **Status**: Incomplete fix of GHSA-6g55-p6wh-862q; fix requires breaking change (downgrading to next@9.3.3)
+- **Usage**: CSS processing in Next.js build step
+- **Risk Assessment**:
+  - High severity, affects source map URL handling
+  - Attack requires attacker-controlled sourceMappingURL in CSS when `from` option is unset
+  - CSS in this application is generated from trusted sources only:
+    - Tailwind CSS configuration (not user-controlled)
+    - Next.js internal CSS generation
+    - No dynamic CSS generation from user input
+  - Impact is limited to build-time CSS processing, not runtime application code
+- **Mitigation**:
+  - All CSS sources are trusted and non-user-controlled
+  - Next.js 15.x has many security improvements over older versions
+  - Fixing this would require downgrading to Next.js 9.x (introduces many older, more severe vulnerabilities)
+- **Future Plan**: Will be resolved when Next.js 16+ provides a fix without breaking changes
+
+##### undici - HTTP Client Vulnerabilities (Additional variants)
+- **Package**: undici < 6.28.0 (via @vercel/blob@0.27.3)
+- **CVEs**:
+  - [GHSA-8xcm-r25x-g524](https://github.com/advisories/GHSA-8xcm-r25x-g524) - Downstream response desynchronization via retry interceptor
+  - [GHSA-m8rv-5g2x-5cg5](https://github.com/advisories/GHSA-m8rv-5g2x-5cg5) - CRLF Injection via blob-like body 'type' property
+  - [GHSA-v3r7-h72x-cjcm](https://github.com/advisories/GHSA-v3r7-h72x-cjcm) - Cookie attribute injection via unsanitized domain and unparsed setCookie fields
+- **Status**: Fixes require major version updates to @vercel/blob@2.x or undici@6.28.0+; major version bumps have breaking changes
+- **Usage**: HTTP client for Vercel Blob Storage (optional file upload feature)
+- **Risk Assessment**:
+  - Moderate severity, multiple HTTP handling issues
+  - CRLF injection and cookie attribute injection require specific conditions in HTTP responses
+  - Vercel Blob Storage API is trusted first-party service with controlled response format
+  - Response desynchronization requires retry interceptor to mishandle responses
+  - Limited exposure: only used for file uploads by authenticated admins
+  - Blob storage is optional (can be disabled via BLOB_READ_WRITE_TOKEN)
+- **Mitigation**:
+  - Blob storage interactions limited to authenticated admin operations
+  - Vercel Blob API is a trusted first-party service
+  - Rate limiting and file size restrictions in place
+  - Application does not parse untrusted HTTP headers from blob responses
+- **Future Plan**: Upgrade to @vercel/blob@2.x or undici@6.28.0+ when stable and breaking changes are fully assessed
 
 ## Updating This Document
 
