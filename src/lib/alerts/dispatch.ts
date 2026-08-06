@@ -11,6 +11,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { sendDynamicEmail, sendNightlySummaryEmail } from '@/lib/email/resend';
 import { sendDynamicMessage, MessageType } from '@/lib/sms/twilio';
+import { resolveNightlySummarySubject } from './nightly-summary';
 import type { NightlySummaryMetadata } from './nightly-summary';
 import type { AlertDelivery } from '@prisma/client';
 
@@ -57,9 +58,15 @@ export async function dispatchDelivery(delivery: AlertDelivery): Promise<void> {
         const language = delivery.recipient_language.toLowerCase() as import('@/lib/i18n/config').Language;
 
         if (eventType === 'NIGHTLY_SUMMARY') {
+          // Subject is always in the wedding planner's language, regardless
+          // of which language this recipient's body is rendered in — resolved
+          // fresh here rather than trusting the (possibly stale) stored
+          // delivery.subject, which reflects the planner's language only at
+          // whichever moment the alert rule was last saved.
+          const subject = await resolveNightlySummarySubject(plannerId);
           const result = await sendNightlySummaryEmail(
             delivery.recipient_email,
-            delivery.subject ?? '(No subject)',
+            subject,
             metadata as unknown as NightlySummaryMetadata,
             language,
             plannerId || undefined,

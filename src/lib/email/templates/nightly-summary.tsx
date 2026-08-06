@@ -3,7 +3,8 @@
  * Sent to a wedding's admins once a day when there has been RSVP activity
  * in the previous 24 hours. Built from NightlySummaryMetadata (see
  * src/lib/alerts/nightly-summary.ts) rather than the generic dynamic-message
- * template, since it needs a real header logo and a data table.
+ * template, since it needs a real header logo and a data table covering
+ * every configurable RSVP question this wedding has enabled.
  */
 
 import {
@@ -13,13 +14,14 @@ import {
   Heading,
   Html as BaseEmailHtml,
   Img,
+  Link,
   Preview,
   Section,
   Text,
 } from '@react-email/components';
 import * as React from 'react';
 import { Language } from '../../i18n/config';
-import type { NightlySummaryChange } from '../../alerts/nightly-summary';
+import type { NightlySummaryColumn, NightlySummaryRow } from '../../alerts/nightly-summary';
 
 interface NightlySummaryEmailProps {
   language: Language;
@@ -31,7 +33,8 @@ interface NightlySummaryEmailProps {
   totalGuests: number;
   confirmationsCount: number;
   plannerLogoUrl?: string | null;
-  changes: NightlySummaryChange[];
+  columns: NightlySummaryColumn[];
+  rows: NightlySummaryRow[];
 }
 
 const LOCALE_MAP: Record<Language, string> = {
@@ -50,13 +53,21 @@ const translations = {
     familiesResponded: 'familias han respondido',
     attendees: 'Asistentes confirmados',
     guestsConfirmed: 'de los invitados totales',
-    confirmations: (n: number) => `${n} ${n === 1 ? 'confirmación nueva' : 'confirmaciones nuevas'} en las últimas 24 horas`,
+    confirmations: (n: number) => `${n} ${n === 1 ? 'familia ha' : 'familias han'} confirmado o actualizado su RSVP en las últimas 24 horas`,
     changesTitle: 'Detalle de los cambios',
     family: 'Familia',
-    response: 'Respuesta',
+    guest: 'Invitado',
+    attendingColumn: 'Asistencia',
     when: 'Cuándo',
-    confirmedLabel: 'confirman',
+    yes: 'Sí',
+    no: 'No',
+    pending: 'Pendiente',
+    empty: '—',
+    dietary: 'Restricciones alimentarias',
+    accessibility: 'Necesidades de accesibilidad',
     footer: 'Este es un resumen automático de la actividad de tu boda.',
+    unsubscribeNote: 'Si no quieres recibir estos correos, coméntaselo a tu wedding planner.',
+    poweredBy: 'Con la tecnología de',
   },
   en: {
     preview: 'There was some activity in the last 24 hours...',
@@ -65,13 +76,21 @@ const translations = {
     familiesResponded: 'families have responded',
     attendees: 'Confirmed attendees',
     guestsConfirmed: 'of total guests',
-    confirmations: (n: number) => `${n} new ${n === 1 ? 'confirmation' : 'confirmations'} in the last 24 hours`,
+    confirmations: (n: number) => `${n} ${n === 1 ? 'family' : 'families'} confirmed or updated their RSVP in the last 24 hours`,
     changesTitle: 'Change details',
     family: 'Family',
-    response: 'Response',
+    guest: 'Guest',
+    attendingColumn: 'Attending',
     when: 'When',
-    confirmedLabel: 'attending',
+    yes: 'Yes',
+    no: 'No',
+    pending: 'Pending',
+    empty: '—',
+    dietary: 'Dietary Restrictions',
+    accessibility: 'Accessibility Needs',
     footer: 'This is an automated summary of your wedding activity.',
+    unsubscribeNote: "If you don't want to receive these emails, check with your wedding planner.",
+    poweredBy: 'Powered by',
   },
   fr: {
     preview: "Il y a eu de l'activité au cours des dernières 24 heures...",
@@ -80,13 +99,21 @@ const translations = {
     familiesResponded: 'familles ont répondu',
     attendees: 'Invités confirmés',
     guestsConfirmed: 'du total des invités',
-    confirmations: (n: number) => `${n} ${n === 1 ? 'nouvelle confirmation' : 'nouvelles confirmations'} au cours des dernières 24 heures`,
+    confirmations: (n: number) => `${n} ${n === 1 ? 'famille a confirmé ou mis à jour' : 'familles ont confirmé ou mis à jour'} leur RSVP au cours des dernières 24 heures`,
     changesTitle: 'Détail des changements',
     family: 'Famille',
-    response: 'Réponse',
+    guest: 'Invité',
+    attendingColumn: 'Présence',
     when: 'Quand',
-    confirmedLabel: 'présents',
+    yes: 'Oui',
+    no: 'Non',
+    pending: 'En attente',
+    empty: '—',
+    dietary: 'Restrictions Alimentaires',
+    accessibility: "Besoins d'Accessibilité",
     footer: 'Ceci est un résumé automatique de l\'activité de votre mariage.',
+    unsubscribeNote: 'Si vous ne souhaitez plus recevoir ces e-mails, contactez votre wedding planner.',
+    poweredBy: 'Propulsé par',
   },
   it: {
     preview: "C'è stata attività nelle ultime 24 ore...",
@@ -95,13 +122,21 @@ const translations = {
     familiesResponded: 'famiglie hanno risposto',
     attendees: 'Ospiti confermati',
     guestsConfirmed: 'del totale ospiti',
-    confirmations: (n: number) => `${n} ${n === 1 ? 'nuova conferma' : 'nuove conferme'} nelle ultime 24 ore`,
+    confirmations: (n: number) => `${n} ${n === 1 ? 'famiglia ha confermato o aggiornato' : 'famiglie hanno confermato o aggiornato'} il proprio RSVP nelle ultime 24 ore`,
     changesTitle: 'Dettaglio delle modifiche',
     family: 'Famiglia',
-    response: 'Risposta',
+    guest: 'Ospite',
+    attendingColumn: 'Presenza',
     when: 'Quando',
-    confirmedLabel: 'presenti',
+    yes: 'Sì',
+    no: 'No',
+    pending: 'In sospeso',
+    empty: '—',
+    dietary: 'Restrizioni Alimentari',
+    accessibility: 'Esigenze di Accessibilità',
     footer: 'Questo è un riepilogo automatico dell\'attività del vostro matrimonio.',
+    unsubscribeNote: 'Se non desiderate ricevere queste email, parlatene con il vostro wedding planner.',
+    poweredBy: 'Offerto da',
   },
   de: {
     preview: 'In den letzten 24 Stunden gab es Aktivität...',
@@ -110,15 +145,41 @@ const translations = {
     familiesResponded: 'Familien haben geantwortet',
     attendees: 'Bestätigte Gäste',
     guestsConfirmed: 'von allen Gästen',
-    confirmations: (n: number) => `${n} ${n === 1 ? 'neue Bestätigung' : 'neue Bestätigungen'} in den letzten 24 Stunden`,
+    confirmations: (n: number) => `${n} ${n === 1 ? 'Familie hat' : 'Familien haben'} ihre RSVP in den letzten 24 Stunden bestätigt oder aktualisiert`,
     changesTitle: 'Details der Änderungen',
     family: 'Familie',
-    response: 'Antwort',
+    guest: 'Gast',
+    attendingColumn: 'Teilnahme',
     when: 'Wann',
-    confirmedLabel: 'teilnehmend',
+    yes: 'Ja',
+    no: 'Nein',
+    pending: 'Ausstehend',
+    empty: '—',
+    dietary: 'Ernährungseinschränkungen',
+    accessibility: 'Barrierefreiheitsbedürfnisse',
     footer: 'Dies ist eine automatische Zusammenfassung der Aktivität eurer Hochzeit.',
+    unsubscribeNote: 'Wenn ihr diese E-Mails nicht erhalten möchtet, wendet euch an euren Wedding Planner.',
+    poweredBy: 'Bereitgestellt von',
   },
 };
+
+type Translations = (typeof translations)['en'];
+
+function resolveColumnLabel(column: NightlySummaryColumn, t: Translations, language: Language): string {
+  if (column.builtinLabelKey === 'dietary') return t.dietary;
+  if (column.builtinLabelKey === 'accessibility') return t.accessibility;
+  const label = column.customLabel;
+  const resolved = label?.[language] || label?.['en'] || label?.['es'];
+  return resolved || column.fallbackLabel;
+}
+
+function formatValue(column: NightlySummaryColumn, value: string | boolean | null, t: Translations): string {
+  if (column.isBool) {
+    if (value === null || value === undefined) return t.empty;
+    return value ? t.yes : t.no;
+  }
+  return typeof value === 'string' && value.trim() ? value : t.empty;
+}
 
 export const NightlySummaryEmail = ({
   language = 'en',
@@ -130,7 +191,8 @@ export const NightlySummaryEmail = ({
   totalGuests = 0,
   confirmationsCount = 0,
   plannerLogoUrl = null,
-  changes = [],
+  columns = [],
+  rows = [],
 }: NightlySummaryEmailProps) => {
   const t = translations[language] ?? translations.en;
   const locale = LOCALE_MAP[language] ?? 'en-GB';
@@ -178,38 +240,53 @@ export const NightlySummaryEmail = ({
 
           <Text style={sectionTitle}>{t.changesTitle}</Text>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={changesTable}>
-            <thead>
-              <tr>
-                <th style={th}>{t.family}</th>
-                <th style={th}>{t.response}</th>
-                <th style={thRight}>{t.when}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {changes.map((change, index) => (
-                <tr key={index} style={index % 2 === 0 ? rowEven : rowOdd}>
-                  <td style={td}>{change.familyName}</td>
-                  <td style={td}>
-                    {change.attendingCount !== null && change.totalMembers !== null
-                      ? `${change.attendingCount}/${change.totalMembers} ${t.confirmedLabel}`
-                      : '—'}
-                  </td>
-                  <td style={tdRight}>
-                    {new Date(change.timestamp).toLocaleString(locale, {
-                      day: '2-digit',
-                      month: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </td>
+          <div style={tableScroll}>
+            <table role="presentation" cellPadding={0} cellSpacing={0} style={changesTable}>
+              <thead>
+                <tr>
+                  <th style={th}>{t.family}</th>
+                  <th style={th}>{t.guest}</th>
+                  <th style={th}>{t.attendingColumn}</th>
+                  {columns.map((column) => (
+                    <th key={column.key} style={th}>{resolveColumnLabel(column, t, language)}</th>
+                  ))}
+                  <th style={thRight}>{t.when}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rows.map((row, index) => (
+                  <tr key={`${row.familyName}-${row.memberName}-${index}`} style={index % 2 === 0 ? rowEven : rowOdd}>
+                    <td style={td}>{row.familyName}</td>
+                    <td style={td}>{row.memberName}</td>
+                    <td style={td}>
+                      {row.attending === null ? t.pending : row.attending ? t.yes : t.no}
+                    </td>
+                    {columns.map((column) => (
+                      <td key={column.key} style={td}>
+                        {formatValue(column, row.values[column.key], t)}
+                      </td>
+                    ))}
+                    <td style={tdRight}>
+                      {new Date(row.timestamp).toLocaleString(locale, {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <Section style={footer}>
             <Text style={footerText}>{t.footer}</Text>
+            <Text style={footerText}>{t.unsubscribeNote}</Text>
+            <Text style={poweredByText}>
+              {t.poweredBy}{' '}
+              <Link href="https://nupci.com" style={poweredByLink}>Nupci</Link>
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -230,7 +307,7 @@ const container = {
   margin: '0 auto',
   padding: '32px 0 48px',
   marginBottom: '64px',
-  maxWidth: '600px',
+  maxWidth: '680px',
 };
 
 const logoSection = {
@@ -333,20 +410,27 @@ const sectionTitle = {
   padding: '0',
 };
 
-const changesTable = {
+const tableScroll = {
   margin: '0 40px',
-  width: 'calc(100% - 80px)',
+  overflowX: 'auto' as const,
+  maxWidth: 'calc(100% - 80px)',
+};
+
+const changesTable = {
+  width: '100%',
+  minWidth: '480px',
   borderCollapse: 'collapse' as const,
 };
 
 const th = {
   color: '#888',
-  fontSize: '12px',
+  fontSize: '11px',
   fontWeight: 'bold',
   textTransform: 'uppercase' as const,
   textAlign: 'left' as const,
-  padding: '8px 8px',
+  padding: '8px 10px',
   borderBottom: '2px solid #eaeaea',
+  whiteSpace: 'nowrap' as const,
 };
 
 const thRight = {
@@ -356,9 +440,10 @@ const thRight = {
 
 const td = {
   color: '#333',
-  fontSize: '14px',
-  padding: '8px 8px',
+  fontSize: '13px',
+  padding: '8px 10px',
   borderBottom: '1px solid #f0f0f0',
+  whiteSpace: 'nowrap' as const,
 };
 
 const tdRight = {
@@ -380,6 +465,20 @@ const footerText = {
   color: '#999',
   fontSize: '13px',
   lineHeight: '20px',
-  margin: '0',
+  margin: '0 0 4px',
   textAlign: 'center' as const,
+};
+
+const poweredByText = {
+  color: '#bbb',
+  fontSize: '12px',
+  lineHeight: '20px',
+  margin: '12px 0 0',
+  textAlign: 'center' as const,
+};
+
+const poweredByLink = {
+  color: '#9b5b66',
+  fontWeight: 'bold' as const,
+  textDecoration: 'none' as const,
 };

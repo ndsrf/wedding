@@ -9,6 +9,7 @@ import { dispatchDelivery } from '@/lib/alerts/dispatch';
 import { prisma } from '@/lib/db/prisma';
 import { sendDynamicEmail, sendNightlySummaryEmail } from '@/lib/email/resend';
 import { sendDynamicMessage } from '@/lib/sms/twilio';
+import { resolveNightlySummarySubject } from '@/lib/alerts/nightly-summary';
 import type { AlertDelivery } from '@prisma/client';
 
 jest.mock('@/lib/db/prisma', () => ({
@@ -31,12 +32,17 @@ jest.mock('@/lib/sms/twilio', () => ({
   MessageType: { SMS: 'SMS', WHATSAPP: 'WHATSAPP' },
 }));
 
+jest.mock('@/lib/alerts/nightly-summary', () => ({
+  resolveNightlySummarySubject: jest.fn(),
+}));
+
 const mockUpdateMany = prisma.alertDelivery.updateMany as jest.Mock;
 const mockFindUnique = prisma.alertDelivery.findUnique as jest.Mock;
 const mockUpdate = prisma.alertDelivery.update as jest.Mock;
 const mockSendDynamicEmail = sendDynamicEmail as jest.Mock;
 const mockSendNightlySummaryEmail = sendNightlySummaryEmail as jest.Mock;
 const mockSendDynamicMessage = sendDynamicMessage as jest.Mock;
+const mockResolveNightlySummarySubject = resolveNightlySummarySubject as jest.Mock;
 
 function makeDelivery(overrides: Partial<AlertDelivery> = {}): AlertDelivery {
   return {
@@ -71,6 +77,7 @@ describe('dispatchDelivery', () => {
     jest.clearAllMocks();
     mockUpdateMany.mockResolvedValue({ count: 1 }); // claims the SENDING lock by default
     mockUpdate.mockResolvedValue({});
+    mockResolveNightlySummarySubject.mockResolvedValue('Ha habido actividad en las últimas 24 horas...');
   });
 
   it('does nothing if the delivery could not be claimed (already SENDING/terminal)', async () => {
@@ -83,22 +90,25 @@ describe('dispatchDelivery', () => {
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
-  it('sends a NIGHTLY_SUMMARY email via the dedicated rich template', async () => {
+  it('sends a NIGHTLY_SUMMARY email via the dedicated rich template, with the subject resolved for the planner', async () => {
     mockFindUnique.mockResolvedValue({
       alert: {
         event_type: 'NIGHTLY_SUMMARY',
         planner_id: 'planner1',
         wedding_id: 'wedding1',
-        metadata: { weddingName: 'John & Jane', changes: [] },
+        metadata: { weddingName: 'John & Jane', columns: [], rows: [] },
       },
     });
     mockSendNightlySummaryEmail.mockResolvedValue({ success: true, messageId: 'msg1' });
 
     await dispatchDelivery(makeDelivery());
 
+    // Subject comes from resolveNightlySummarySubject(plannerId), NOT delivery.subject —
+    // it must reflect the planner's language regardless of the recipient's.
+    expect(mockResolveNightlySummarySubject).toHaveBeenCalledWith('planner1');
     expect(mockSendNightlySummaryEmail).toHaveBeenCalledWith(
       'jane@example.com',
-      'Subject',
+      'Ha habido actividad en las últimas 24 horas...',
       expect.objectContaining({ weddingName: 'John & Jane' }),
       'en',
       'planner1',

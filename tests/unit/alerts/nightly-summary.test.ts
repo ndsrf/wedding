@@ -1,11 +1,16 @@
 /**
  * Unit tests for the "Wedding nightly summary for couples" report logic.
  * Covers: skip-when-no-rules, skip-when-no-24h-activity, correct stats/metadata
- * when there is activity, planner-wide vs single-wedding rule scoping, and
- * per-wedding error isolation.
+ * when there is activity (including configurable-question columns/rows),
+ * planner-wide vs single-wedding rule scoping, per-wedding error isolation,
+ * the manual/test trigger path, and the planner-language subject resolver.
  */
 
-import { processNightlySummaries, triggerManualNightlySummary } from '@/lib/alerts/nightly-summary';
+import {
+  processNightlySummaries,
+  triggerManualNightlySummary,
+  resolveNightlySummarySubject,
+} from '@/lib/alerts/nightly-summary';
 import { prisma } from '@/lib/db/prisma';
 import { triggerAlert } from '@/lib/alerts/trigger';
 
@@ -15,6 +20,8 @@ jest.mock('@/lib/db/prisma', () => ({
     wedding: { findMany: jest.fn(), findUnique: jest.fn() },
     trackingEvent: { findMany: jest.fn() },
     weddingAdmin: { count: jest.fn() },
+    family: { findMany: jest.fn() },
+    weddingPlanner: { findUnique: jest.fn() },
   },
 }));
 
@@ -28,9 +35,11 @@ const mockWeddingFindMany = prisma.wedding.findMany as jest.Mock;
 const mockWeddingFindUnique = prisma.wedding.findUnique as jest.Mock;
 const mockEventFindMany = prisma.trackingEvent.findMany as jest.Mock;
 const mockAdminCount = prisma.weddingAdmin.count as jest.Mock;
+const mockFamilyFindMany = prisma.family.findMany as jest.Mock;
+const mockPlannerFindUnique = prisma.weddingPlanner.findUnique as jest.Mock;
 const mockTriggerAlert = triggerAlert as jest.Mock;
 
-function makePlannerRule(overrides: Partial<{ planner_id: string; wedding_id: string | null }> = {}) {
+function makePlannerRule(overrides: Partial<{ id: string; planner_id: string; wedding_id: string | null }> = {}) {
   return {
     id: 'rule1',
     event_type: 'NIGHTLY_SUMMARY',
@@ -57,6 +66,43 @@ function makeWeddingWithFamilies(overrides: Partial<{
       { members: [{ attending: true }, { attending: true }] }, // fully responded, both attending
       { members: [{ attending: null }] }, // not responded
     ],
+    // Question config: all disabled by default — individual tests enable what they need
+    dietary_restrictions_enabled: false,
+    accessibility_needs_enabled: false,
+    transportation_question_enabled: false,
+    transportation_question_text: null,
+    extra_question_1_enabled: false,
+    extra_question_1_text: null,
+    extra_question_2_enabled: false,
+    extra_question_2_text: null,
+    extra_question_3_enabled: false,
+    extra_question_3_text: null,
+    extra_info_1_enabled: false,
+    extra_info_1_label: null,
+    extra_info_2_enabled: false,
+    extra_info_2_label: null,
+    extra_info_3_enabled: false,
+    extra_info_3_label: null,
+    family_dropdown_question_1_enabled: false,
+    family_dropdown_question_1_label: null,
+    guest_yn_question_1_enabled: false,
+    guest_yn_question_1_text: null,
+    guest_yn_question_2_enabled: false,
+    guest_yn_question_2_text: null,
+    guest_yn_question_3_enabled: false,
+    guest_yn_question_3_text: null,
+    guest_dropdown_question_1_enabled: false,
+    guest_dropdown_question_1_label: null,
+    guest_dropdown_question_2_enabled: false,
+    guest_dropdown_question_2_label: null,
+    guest_dropdown_question_3_enabled: false,
+    guest_dropdown_question_3_label: null,
+    guest_text_question_1_enabled: false,
+    guest_text_question_1_label: null,
+    guest_text_question_2_enabled: false,
+    guest_text_question_2_label: null,
+    guest_text_question_3_enabled: false,
+    guest_text_question_3_label: null,
     ...overrides,
   };
 }
@@ -103,18 +149,48 @@ describe('processNightlySummaries', () => {
     expect(mockTriggerAlert).not.toHaveBeenCalled();
   });
 
-  it('triggers the alert with correct stats when there was RSVP activity', async () => {
+  it('triggers the alert with correct stats, columns and rows when there was RSVP activity', async () => {
     mockRuleFindMany.mockResolvedValue([makePlannerRule()]);
     mockWeddingFindMany.mockResolvedValue([{ id: 'wedding1' }]);
     mockEventFindMany.mockResolvedValue([
+      { family_id: 'family1', timestamp: new Date('2026-08-06T10:00:00Z') },
+    ]);
+    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies({
+      dietary_restrictions_enabled: true,
+      guest_yn_question_1_enabled: true,
+      guest_yn_question_1_text: { en: 'Bringing a plus-one?', es: '¿Traes acompañante?' },
+    } as never));
+    mockFamilyFindMany.mockResolvedValue([
       {
-        family: { name: 'Smith Family' },
-        metadata: { attending_count: 2, total_members: 2 },
-        timestamp: new Date('2026-08-06T10:00:00Z'),
-        channel: 'EMAIL',
+        id: 'family1',
+        name: 'Smith Family',
+        transportation_answer: null,
+        extra_question_1_answer: null,
+        extra_question_2_answer: null,
+        extra_question_3_answer: null,
+        extra_info_1_value: null,
+        extra_info_2_value: null,
+        extra_info_3_value: null,
+        family_dropdown_question_1_answer: null,
+        members: [
+          {
+            name: 'Alice Smith',
+            attending: true,
+            dietary_restrictions: 'Vegetarian',
+            accessibility_needs: null,
+            guest_yn_question_1_answer: true,
+            guest_yn_question_2_answer: null,
+            guest_yn_question_3_answer: null,
+            guest_dropdown_question_1_answer: null,
+            guest_dropdown_question_2_answer: null,
+            guest_dropdown_question_3_answer: null,
+            guest_text_question_1_answer: null,
+            guest_text_question_2_answer: null,
+            guest_text_question_3_answer: null,
+          },
+        ],
       },
     ]);
-    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies());
 
     const result = await processNightlySummaries();
 
@@ -131,39 +207,50 @@ describe('processNightlySummaries', () => {
       rsvpReceived: 1, // only the fully-answered family counts
       attendingGuests: 2,
       totalGuests: 3,
-      confirmationsCount: 1,
+      confirmationsCount: 1, // 1 distinct family changed
       plannerLogoUrl: 'https://cdn.example.com/logo.png',
     });
-    expect(call.metadata.changes).toEqual([
+
+    // Only the two enabled questions become columns, in the expected order
+    expect(call.metadata.columns.map((c: { key: string }) => c.key)).toEqual([
+      'dietary_restrictions',
+      'guest_yn_question_1_answer',
+    ]);
+
+    expect(call.metadata.rows).toEqual([
       {
         familyName: 'Smith Family',
-        attendingCount: 2,
-        totalMembers: 2,
+        memberName: 'Alice Smith',
+        attending: true,
         timestamp: '2026-08-06T10:00:00.000Z',
-        channel: 'EMAIL',
+        values: expect.objectContaining({
+          dietary_restrictions: 'Vegetarian',
+          guest_yn_question_1_answer: true,
+        }),
       },
     ]);
   });
 
-  it('falls back to null when event metadata is missing expected fields', async () => {
+  it('deduplicates a family that submitted more than once, keeping the latest timestamp', async () => {
     mockRuleFindMany.mockResolvedValue([makePlannerRule()]);
     mockWeddingFindMany.mockResolvedValue([{ id: 'wedding1' }]);
     mockEventFindMany.mockResolvedValue([
-      {
-        family: null,
-        metadata: {},
-        timestamp: new Date('2026-08-06T10:00:00Z'),
-        channel: null,
-      },
+      { family_id: 'family1', timestamp: new Date('2026-08-06T12:00:00Z') }, // latest (events are desc-ordered)
+      { family_id: 'family1', timestamp: new Date('2026-08-06T09:00:00Z') },
     ]);
-    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies({ families: [] }));
+    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies({ families: [] } as never));
+    mockFamilyFindMany.mockResolvedValue([
+      { id: 'family1', name: 'Smith Family', members: [{ name: 'Alice', attending: true }] },
+    ]);
 
     await processNightlySummaries();
 
+    expect(mockFamilyFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: { in: ['family1'] } } }),
+    );
     const call = mockTriggerAlert.mock.calls[0][0];
-    expect(call.metadata.changes).toEqual([
-      { familyName: '—', attendingCount: null, totalMembers: null, timestamp: '2026-08-06T10:00:00.000Z', channel: null },
-    ]);
+    expect(call.metadata.confirmationsCount).toBe(1);
+    expect(call.metadata.rows[0].timestamp).toBe('2026-08-06T12:00:00.000Z');
   });
 
   it('scopes to a single wedding when the rule has wedding_id set', async () => {
@@ -193,7 +280,7 @@ describe('processNightlySummaries', () => {
   });
 
   it('does not double-process a wedding matched by more than one rule', async () => {
-    mockRuleFindMany.mockResolvedValue([makePlannerRule({ id: 'rule1' } as never), makePlannerRule({ id: 'rule2' } as never)]);
+    mockRuleFindMany.mockResolvedValue([makePlannerRule({ id: 'rule1' }), makePlannerRule({ id: 'rule2' })]);
     mockWeddingFindMany.mockResolvedValue([{ id: 'wedding1' }]);
     mockEventFindMany.mockResolvedValue([]);
 
@@ -256,5 +343,37 @@ describe('triggerManualNightlySummary', () => {
     expect(call.skipDispatch).toBe(false);
     expect(call.bypassCooldown).toBe(true);
     expect(call.metadata.confirmationsCount).toBe(0);
+    expect(call.metadata.rows).toEqual([]);
+  });
+});
+
+describe('resolveNightlySummarySubject', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns the English fallback when no plannerId is given', async () => {
+    const subject = await resolveNightlySummarySubject(null);
+    expect(subject).toBe('There was some activity in the last 24 hours...');
+    expect(mockPlannerFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("resolves the subject in the planner's current preferred language", async () => {
+    mockPlannerFindUnique.mockResolvedValue({ preferred_language: 'ES' });
+
+    const subject = await resolveNightlySummarySubject('planner1');
+
+    expect(subject).toBe('Ha habido actividad en las últimas 24 horas...');
+    expect(mockPlannerFindUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'planner1' } }),
+    );
+  });
+
+  it('falls back to English if the planner has no preferred_language on record', async () => {
+    mockPlannerFindUnique.mockResolvedValue(null);
+
+    const subject = await resolveNightlySummarySubject('planner1');
+
+    expect(subject).toBe('There was some activity in the last 24 hours...');
   });
 });
