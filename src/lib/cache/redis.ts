@@ -24,7 +24,7 @@ export const CACHE_KEYS = {
   /** Full wedding details + stats for the /admin/configure page */
   adminWedding: (weddingId: string) => `wedding:admin:${weddingId}`,
   /** Dashboard stats + wizard state for the /admin SSR page */
-  adminDashboard: (weddingId: string) => `wedding:admin:dashboard:${weddingId}`,
+  adminDashboard: (weddingId: string) => `wedding:admin:dashboard:v4:${weddingId}`,
   /** Full wedding details + stats for /planner/weddings/:id */
   plannerWeddingDetail: (weddingId: string) => `wedding:planner:detail:${weddingId}`,
   /** KPI stats for the /planner dashboard page + stats API */

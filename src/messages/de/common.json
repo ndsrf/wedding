@@ -1420,6 +1420,7 @@
       "metricTitles": {
         "totalGuests": "Gesamtzahl Gäste",
         "rsvpCompletion": "RSVP-Abschluss",
+        "rsvpBreakdown": "Aufschlüsselung erhaltener RSVPs ({count})",
         "attending": "Teilnehmend",
         "paymentsReceived": "Erhaltene Geschenke"
       },
@@ -1437,6 +1438,7 @@
       "rsvpProgress": "RSVP-Fortschritt",
       "daysUntilWedding": "Tage bis zur Hochzeit",
       "responded": "geantwortet",
+      "totalRsvps": "RSVPs gesamt",
       "complete": "abgeschlossen",
       "seatingPlan": "Sitzplan",
       "seatingPlanSubtitle": "Gäste den Tischen zuweisen",

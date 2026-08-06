@@ -46,9 +46,13 @@ interface WeddingStats {
   location: string | null;
   itinerary: ItinerarySummaryItem[];
   guest_count: number;
+  total_families: number;
   rsvp_count: number;
   rsvp_completion_percentage: number;
   attending_count: number;
+  accepted_family_count: number;
+  rejected_family_count: number;
+  partial_family_count: number;
   payment_received_count: number;
   days_until_wedding: number;
 }
@@ -92,7 +96,7 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
     // used only to compute is_main on each itinerary item. The location data we need
     // (name, address, google_maps_url) is already fetched via itinerary_items → location,
     // so there is no need for an extra SELECT … FROM locations WHERE id = $1 query.
-    const [wedding, totalGuests, totalFamilies, rsvpCount, attendingCount, paymentReceivedRows] =
+    const [wedding, totalGuests, totalFamilies, familyAttendance, attendingCount, paymentReceivedRows] =
       await Promise.all([
         prisma.wedding.findUnique({
           where: { id: user.wedding_id },
@@ -105,11 +109,14 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         }),
         prisma.familyMember.count({ where: { family: { wedding_id: user.wedding_id } } }),
         prisma.family.count({ where: { wedding_id: user.wedding_id } }),
-        prisma.family.count({
-          where: {
-            wedding_id: user.wedding_id,
-            members: { some: { attending: { not: null } } },
-          },
+        // One row per family with each member's attending flag. Classified below in a
+        // single pass so responded/accepted/declined/partial can never disagree with
+        // each other the way four independent COUNT queries could (each `every`/`some`
+        // combination is evaluated by Postgres as a separate subquery per family, so
+        // the four counts aren't guaranteed consistent with one another).
+        prisma.family.findMany({
+          where: { wedding_id: user.wedding_id },
+          select: { members: { select: { attending: true } } },
         }),
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
@@ -130,6 +137,30 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
     }
 
     const paymentReceivedCount = Number(paymentReceivedRows[0]?.count ?? 0);
+
+    let rsvpCount = 0;
+    let acceptedFamilyCount = 0;
+    let rejectedFamilyCount = 0;
+    for (const family of familyAttendance) {
+      let hasTrue = false;
+      let hasFalse = false;
+      let hasNull = false;
+      for (const member of family.members) {
+        if (member.attending === true) hasTrue = true;
+        else if (member.attending === false) hasFalse = true;
+        else hasNull = true;
+      }
+      if (!hasTrue && !hasFalse) continue; // no one in this family has responded yet
+      rsvpCount++;
+      if (hasTrue && !hasFalse && !hasNull) acceptedFamilyCount++;
+      else if (hasFalse && !hasTrue) rejectedFamilyCount++;
+    }
+    // Partial = responded families that are neither fully accepted nor fully declined
+    // (mixed attendance within the family). Always non-negative because it's the
+    // leftover of rsvpCount after the same loop assigned every responded family to
+    // at most one of the other two buckets.
+    const partialFamilyCount = rsvpCount - acceptedFamilyCount - rejectedFamilyCount;
+
     const rsvpCompletionPercentage =
       totalFamilies > 0 ? Math.round((rsvpCount / totalFamilies) * 100) : 0;
 
@@ -156,9 +187,13 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
           is_main: item.location_id === wedding.main_event_location_id,
         })),
         guest_count: totalGuests,
+        total_families: totalFamilies,
         rsvp_count: rsvpCount,
         rsvp_completion_percentage: rsvpCompletionPercentage,
         attending_count: attendingCount,
+        accepted_family_count: acceptedFamilyCount,
+        rejected_family_count: rejectedFamilyCount,
+        partial_family_count: partialFamilyCount,
         payment_received_count: paymentReceivedCount,
         days_until_wedding: daysUntilWedding,
       },
@@ -298,21 +333,22 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <div className="flex items-start justify-between">
+            <p className="text-sm text-gray-500 mb-3">
+              {t('admin.dashboard.metricTitles.rsvpBreakdown', { count: stats.rsvp_count })}
+            </p>
+            <div className="grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {stats.rsvp_completion_percentage}<span className="text-base font-semibold text-gray-400">%</span>
-                </p>
-                <p className="text-sm text-gray-500 mt-1">{t('admin.dashboard.metricTitles.rsvpCompletion')}</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.accepted_family_count.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.guests.filters.attending')}</p>
               </div>
-              <div className="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
-                <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div>
+                <p className="text-xl sm:text-2xl font-bold text-red-500">{stats.rejected_family_count.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.guests.filters.notAttending')}</p>
               </div>
-            </div>
-            <div className="mt-3 h-1 rounded-full bg-green-100">
-              <div className="h-full rounded-full bg-green-400 transition-all duration-700" style={{ width: `${stats.rsvp_completion_percentage}%` }} />
+              <div>
+                <p className="text-xl sm:text-2xl font-bold text-amber-500">{stats.partial_family_count.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin.guests.filters.partial')}</p>
+              </div>
             </div>
           </div>
 
@@ -365,7 +401,7 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="flex justify-between text-sm text-gray-500 mt-2">
             <span>{stats.rsvp_count} {t('admin.dashboard.responded')}</span>
-            <span>{stats.guest_count} {t('admin.dashboard.metricTitles.totalGuests')}</span>
+            <span>{stats.total_families} {t('admin.dashboard.totalRsvps')}</span>
           </div>
         </div>
 

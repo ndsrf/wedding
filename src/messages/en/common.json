@@ -1451,6 +1451,7 @@
       "metricTitles": {
         "totalGuests": "Total Guests",
         "rsvpCompletion": "RSVP Completion",
+        "rsvpBreakdown": "RSVPs Received Breakdown ({count})",
         "attending": "Attending",
         "paymentsReceived": "Gifts Received"
       },
@@ -1472,6 +1473,7 @@
       "rsvpProgress": "RSVP Progress",
       "daysUntilWedding": "days until the wedding",
       "responded": "responded",
+      "totalRsvps": "total RSVPs",
       "complete": "complete",
       "seatingPlan": "Seating Plan",
       "seatingPlanSubtitle": "Assign guests to tables",
