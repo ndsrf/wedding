@@ -95,6 +95,10 @@ async function processWeddingSummary(weddingId: string): Promise<boolean> {
     where: {
       wedding_id: weddingId,
       event_type: { in: ['RSVP_SUBMITTED', 'RSVP_UPDATED'] },
+      // Exclude admin-triggered edits — RSVP_UPDATED is also used by the guest
+      // CRUD audit log (src/lib/guests/audit.ts) for planner-made changes in
+      // the admin panel, which is not "guest activity" for this report.
+      admin_triggered: false,
       timestamp: { gte: since },
     },
     orderBy: { timestamp: 'desc' },

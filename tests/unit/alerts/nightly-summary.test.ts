@@ -85,6 +85,21 @@ describe('processNightlySummaries', () => {
     expect(mockTriggerAlert).not.toHaveBeenCalled();
   });
 
+  it('excludes admin-triggered edits (RSVP_UPDATED audit entries) from the activity check', async () => {
+    mockRuleFindMany.mockResolvedValue([makePlannerRule()]);
+    mockWeddingFindMany.mockResolvedValue([{ id: 'wedding1' }]);
+    mockEventFindMany.mockResolvedValue([]); // the real query filters admin_triggered:false, so it returns none
+
+    await processNightlySummaries();
+
+    expect(mockEventFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ admin_triggered: false }),
+      }),
+    );
+    expect(mockTriggerAlert).not.toHaveBeenCalled();
+  });
+
   it('triggers the alert with correct stats when there was RSVP activity', async () => {
     mockRuleFindMany.mockResolvedValue([makePlannerRule()]);
     mockWeddingFindMany.mockResolvedValue([{ id: 'wedding1' }]);
