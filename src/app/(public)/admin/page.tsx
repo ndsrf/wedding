@@ -126,11 +126,13 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
         }),
-        // Fully accepted: every member of the family is attending (no nulls, no declines).
+        // Fully accepted: at least one member exists and every member is attending.
+        // The `some: {}` guard matters because Prisma's `every` is vacuously true for
+        // families with zero members (e.g. a shell family with no guests added yet).
         prisma.family.count({
           where: {
             wedding_id: user.wedding_id,
-            members: { every: { attending: true } },
+            members: { some: {}, every: { attending: true } },
           },
         }),
         // Fully declined: at least one member declined and none are attending.
