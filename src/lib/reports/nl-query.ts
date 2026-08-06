@@ -173,7 +173,8 @@ score INTEGER (1–10), notes TEXT, created_at TIMESTAMP
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. family_name, guest_name, attending_status).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. NEVER compare a BOOLEAN column (attending, auto_matched, completed, is_selected, any *_answer column marked BOOLEAN) to a string literal like 'Sí'/'Yes'/'No'/'Oui' — always use TRUE/FALSE (or IS NULL for "pending"/unanswered).`;
 
 // ============================================================================
 // CONFIGURABLE RSVP QUESTIONS (dynamic per-wedding schema context)
@@ -266,6 +267,17 @@ const QUESTION_DESCRIPTORS: QuestionDescriptor[] = [
   { enabledField: 'guest_text_question_3_enabled', labelField: 'guest_text_question_3_label', column: 'family_members.guest_text_question_3_answer', kind: 'free text' },
 ];
 
+/**
+ * SQL-type hints shown inline for each question kind, so the LLM never
+ * compares a BOOLEAN column against a localized string like 'Sí' or 'Oui'
+ * (which Postgres rejects with "invalid input syntax for type boolean").
+ */
+const KIND_HINTS: Record<QuestionDescriptor['kind'], string> = {
+  'yes/no': 'BOOLEAN column — compare with TRUE or FALSE only, NEVER a string like \'Sí\'/\'No\'/\'Oui\'/\'Yes\'',
+  dropdown: 'TEXT column — compare with the exact stored string value(s) listed below',
+  'free text': 'TEXT column',
+};
+
 function extractLabel(json: unknown, preferredLang: string): string | null {
   if (!json || typeof json !== 'object') return null;
   const obj = json as Record<string, string>;
@@ -302,7 +314,7 @@ function renderQuestionsContext(config: WeddingQuestionsConfig): string {
     const label = extractLabel(config[q.labelField] as MultilangJson, lang);
     if (!label) continue;
 
-    let line = `- ${q.column} (${q.kind}) — "${label}"`;
+    let line = `- ${q.column} (${KIND_HINTS[q.kind]}) — "${label}"`;
     if (q.optionsField) {
       const allOptions = extractAllOptions(config[q.optionsField]);
       if (allOptions) {
@@ -509,6 +521,20 @@ function bindParams(sql: string, candidateParams: unknown[]): unknown[] {
   return candidateParams.slice(0, maxParam);
 }
 
+/**
+ * Run a validated query, translating raw Postgres/Prisma failures (e.g. the
+ * LLM comparing a BOOLEAN column to a localized string) into a message safe
+ * to show the user instead of leaking the internal query text/error.
+ */
+async function runQuery(sql: string, params: unknown[]): Promise<Record<string, unknown>[]> {
+  try {
+    return (await prisma.$queryRawUnsafe(sql, ...params)) as Record<string, unknown>[];
+  } catch (error) {
+    console.error('[NL-QUERY] Query execution failed:', sql, error);
+    throw new Error('The generated query could not be executed. Try rephrasing your question.');
+  }
+}
+
 // ============================================================================
 // PUBLIC API
 // ============================================================================
@@ -547,10 +573,7 @@ export async function executeNaturalLanguageQuery(
   console.log('[NL-QUERY] Executing validated query:', sql);
 
   // Pass only the parameters the SQL actually references ($1 always, $2 only if used).
-  const raw = (await prisma.$queryRawUnsafe(sql, ...bindParams(sql, [wedding_id, admin_id]))) as Record<
-    string,
-    unknown
-  >[];
+  const raw = await runQuery(sql, bindParams(sql, [wedding_id, admin_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -572,10 +595,7 @@ export async function executeValidatedSQL(
   }
 
   const cleanedSql = validation.cleanedSql;
-  const raw = (await prisma.$queryRawUnsafe(cleanedSql, ...bindParams(cleanedSql, [wedding_id, admin_id]))) as Record<
-    string,
-    unknown
-  >[];
+  const raw = await runQuery(cleanedSql, bindParams(cleanedSql, [wedding_id, admin_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -765,7 +785,8 @@ currency TEXT, payment_date TIMESTAMP, method TEXT, reference TEXT
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. couple_names, total_guests, invoice_total).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. NEVER compare a BOOLEAN column (attending, auto_matched, completed, is_selected, any *_answer column marked BOOLEAN) to a string literal like 'Sí'/'Yes'/'No'/'Oui' — always use TRUE/FALSE (or IS NULL for "pending"/unanswered).`;
 
 /**
  * Validate a planner-scoped SQL query.
@@ -897,7 +918,7 @@ export async function executeNaturalLanguagePlannerQuery(
   console.log('[NL-QUERY-PLANNER] Executing validated query:', sql);
 
   const params = bindParams(sql, weddingId ? [planner_id, weddingId] : [planner_id]);
-  const raw = (await prisma.$queryRawUnsafe(sql, ...params)) as Record<string, unknown>[];
+  const raw = await runQuery(sql, params);
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -922,7 +943,7 @@ export async function executeValidatedPlannerSQL(
 
   const cleanedSql = validation.cleanedSql;
   const params = bindParams(cleanedSql, weddingId ? [planner_id, weddingId] : [planner_id]);
-  const raw = (await prisma.$queryRawUnsafe(cleanedSql, ...params)) as Record<string, unknown>[];
+  const raw = await runQuery(cleanedSql, params);
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
