@@ -8,7 +8,10 @@
  *    $1 = wedding_id, $2 = admin_id (optional "my side" context).
  *  - Planner-level (planner_id scope): queries across all weddings the planner
  *    manages, plus the planner's own financials (quotes, invoices).
- *    $1 = planner_id.
+ *    $1 = planner_id. When the caller scopes the query to a single wedding,
+ *    that's delegated entirely to the per-wedding path above instead (see
+ *    executeNaturalLanguagePlannerQuery) rather than juggling a second scope
+ *    parameter — simpler for the LLM and reuses the already-correct prompt.
  *
  * Security measures:
  * - Only SELECT statements are allowed (validated by node-sql-parser + keyword blocklist)
@@ -171,7 +174,181 @@ score INTEGER (1–10), notes TEXT, created_at TIMESTAMP
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. family_name, guest_name, attending_status).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. NEVER compare a BOOLEAN column (attending, auto_matched, completed, is_selected, any *_answer column marked BOOLEAN) to a string literal like 'Sí'/'Yes'/'No'/'Oui' — always use TRUE/FALSE (or IS NULL for "pending"/unanswered).`;
+
+// ============================================================================
+// CONFIGURABLE RSVP QUESTIONS (dynamic per-wedding schema context)
+//
+// The wedding schema has generic "slots" for admin-configured questions
+// (guest_yn_question_1, guest_dropdown_question_2, extra_info_3, ...). Their
+// real-world meaning ("attending the pre-wedding party?", "meal choice") is
+// only known per-wedding, stored as multilingual JSON labels on `weddings`.
+// This section fetches a wedding's ENABLED questions and renders their real
+// labels into the LLM prompt so it can map natural language ("how many are
+// coming to the pre-wedding party") to the right generic column. Shared by
+// both the wedding-scoped path (admin + per-wedding planner reports) and the
+// planner cross-wedding path when scoped to a single wedding.
+// ============================================================================
+
+type MultilangJson = Record<string, string> | null;
+
+const WEDDING_QUESTION_CONFIG_SELECT = {
+  default_language: true,
+  transportation_question_enabled: true,
+  transportation_question_text: true,
+  extra_question_1_enabled: true,
+  extra_question_1_text: true,
+  extra_question_2_enabled: true,
+  extra_question_2_text: true,
+  extra_question_3_enabled: true,
+  extra_question_3_text: true,
+  extra_info_1_enabled: true,
+  extra_info_1_label: true,
+  extra_info_2_enabled: true,
+  extra_info_2_label: true,
+  extra_info_3_enabled: true,
+  extra_info_3_label: true,
+  family_dropdown_question_1_enabled: true,
+  family_dropdown_question_1_label: true,
+  family_dropdown_question_1_options: true,
+  guest_yn_question_1_enabled: true,
+  guest_yn_question_1_text: true,
+  guest_yn_question_2_enabled: true,
+  guest_yn_question_2_text: true,
+  guest_yn_question_3_enabled: true,
+  guest_yn_question_3_text: true,
+  guest_dropdown_question_1_enabled: true,
+  guest_dropdown_question_1_label: true,
+  guest_dropdown_question_1_options: true,
+  guest_dropdown_question_2_enabled: true,
+  guest_dropdown_question_2_label: true,
+  guest_dropdown_question_2_options: true,
+  guest_dropdown_question_3_enabled: true,
+  guest_dropdown_question_3_label: true,
+  guest_dropdown_question_3_options: true,
+  guest_text_question_1_enabled: true,
+  guest_text_question_1_label: true,
+  guest_text_question_2_enabled: true,
+  guest_text_question_2_label: true,
+  guest_text_question_3_enabled: true,
+  guest_text_question_3_label: true,
+} as const;
+
+type WeddingQuestionsConfig = {
+  default_language: string;
+} & Record<string, boolean | MultilangJson | unknown>;
+
+interface QuestionDescriptor {
+  enabledField: string;
+  labelField: string;
+  optionsField?: string;
+  column: string;
+  kind: 'yes/no' | 'dropdown' | 'free text';
+}
+
+/** One entry per configurable question slot in the schema. */
+const QUESTION_DESCRIPTORS: QuestionDescriptor[] = [
+  { enabledField: 'transportation_question_enabled', labelField: 'transportation_question_text', column: 'families.transportation_answer', kind: 'yes/no' },
+  { enabledField: 'extra_question_1_enabled', labelField: 'extra_question_1_text', column: 'families.extra_question_1_answer', kind: 'yes/no' },
+  { enabledField: 'extra_question_2_enabled', labelField: 'extra_question_2_text', column: 'families.extra_question_2_answer', kind: 'yes/no' },
+  { enabledField: 'extra_question_3_enabled', labelField: 'extra_question_3_text', column: 'families.extra_question_3_answer', kind: 'yes/no' },
+  { enabledField: 'extra_info_1_enabled', labelField: 'extra_info_1_label', column: 'families.extra_info_1_value', kind: 'free text' },
+  { enabledField: 'extra_info_2_enabled', labelField: 'extra_info_2_label', column: 'families.extra_info_2_value', kind: 'free text' },
+  { enabledField: 'extra_info_3_enabled', labelField: 'extra_info_3_label', column: 'families.extra_info_3_value', kind: 'free text' },
+  { enabledField: 'family_dropdown_question_1_enabled', labelField: 'family_dropdown_question_1_label', optionsField: 'family_dropdown_question_1_options', column: 'families.family_dropdown_question_1_answer', kind: 'dropdown' },
+  { enabledField: 'guest_yn_question_1_enabled', labelField: 'guest_yn_question_1_text', column: 'family_members.guest_yn_question_1_answer', kind: 'yes/no' },
+  { enabledField: 'guest_yn_question_2_enabled', labelField: 'guest_yn_question_2_text', column: 'family_members.guest_yn_question_2_answer', kind: 'yes/no' },
+  { enabledField: 'guest_yn_question_3_enabled', labelField: 'guest_yn_question_3_text', column: 'family_members.guest_yn_question_3_answer', kind: 'yes/no' },
+  { enabledField: 'guest_dropdown_question_1_enabled', labelField: 'guest_dropdown_question_1_label', optionsField: 'guest_dropdown_question_1_options', column: 'family_members.guest_dropdown_question_1_answer', kind: 'dropdown' },
+  { enabledField: 'guest_dropdown_question_2_enabled', labelField: 'guest_dropdown_question_2_label', optionsField: 'guest_dropdown_question_2_options', column: 'family_members.guest_dropdown_question_2_answer', kind: 'dropdown' },
+  { enabledField: 'guest_dropdown_question_3_enabled', labelField: 'guest_dropdown_question_3_label', optionsField: 'guest_dropdown_question_3_options', column: 'family_members.guest_dropdown_question_3_answer', kind: 'dropdown' },
+  { enabledField: 'guest_text_question_1_enabled', labelField: 'guest_text_question_1_label', column: 'family_members.guest_text_question_1_answer', kind: 'free text' },
+  { enabledField: 'guest_text_question_2_enabled', labelField: 'guest_text_question_2_label', column: 'family_members.guest_text_question_2_answer', kind: 'free text' },
+  { enabledField: 'guest_text_question_3_enabled', labelField: 'guest_text_question_3_label', column: 'family_members.guest_text_question_3_answer', kind: 'free text' },
+];
+
+/**
+ * SQL-type hints shown inline for each question kind, so the LLM never
+ * compares a BOOLEAN column against a localized string like 'Sí' or 'Oui'
+ * (which Postgres rejects with "invalid input syntax for type boolean").
+ */
+const KIND_HINTS: Record<QuestionDescriptor['kind'], string> = {
+  'yes/no': 'BOOLEAN column — compare with TRUE or FALSE only, NEVER a string like \'Sí\'/\'No\'/\'Oui\'/\'Yes\'',
+  dropdown: 'TEXT column — compare with the exact stored string value(s) listed below',
+  'free text': 'TEXT column',
+};
+
+function extractLabel(json: unknown, preferredLang: string): string | null {
+  if (!json || typeof json !== 'object') return null;
+  const obj = json as Record<string, string>;
+  return obj[preferredLang] || obj.en || Object.values(obj).find(Boolean) || null;
+}
+
+/**
+ * Dropdown options are stored multilingual, like labels: { en: [...], es: [...] }.
+ * A guest's stored answer is the literal option text in whatever language THEY
+ * saw the form in (not necessarily the wedding's default_language), so return
+ * every language's option list — the prompt tells the LLM to match any of them.
+ */
+function extractAllOptions(json: unknown): Record<string, string[]> | null {
+  if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
+  const result: Record<string, string[]> = {};
+  for (const [lang, arr] of Object.entries(json as Record<string, unknown>)) {
+    if (!Array.isArray(arr)) continue;
+    const options = arr.filter((v): v is string => typeof v === 'string');
+    if (options.length > 0) result[lang] = options;
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}
+
+/**
+ * Render a wedding's ENABLED configurable questions, with their real labels,
+ * as a schema-prompt fragment. Returns '' if the wedding has none enabled.
+ */
+function renderQuestionsContext(config: WeddingQuestionsConfig): string {
+  const lang = (config.default_language || 'en').toLowerCase();
+  const lines: string[] = [];
+
+  for (const q of QUESTION_DESCRIPTORS) {
+    if (!config[q.enabledField]) continue;
+    const label = extractLabel(config[q.labelField] as MultilangJson, lang);
+    if (!label) continue;
+
+    let line = `- ${q.column} (${KIND_HINTS[q.kind]}) — "${label}"`;
+    if (q.optionsField) {
+      const allOptions = extractAllOptions(config[q.optionsField]);
+      if (allOptions) {
+        const rendered = Object.entries(allOptions)
+          .map(([l, opts]) => `${l}: ${opts.map((o) => `"${o}"`).join(', ')}`)
+          .join('; ');
+        line += ` — stored values by language: ${rendered}`;
+      }
+    }
+    lines.push(line);
+  }
+
+  if (lines.length === 0) return '';
+
+  return (
+    `\n\n## This wedding's configured RSVP questions\n` +
+    `These generic columns have been given specific meaning by the wedding's admin. Match the user's intent to ` +
+    `these labels and use the EXACT column name shown. For dropdown questions, each guest's stored answer is in ` +
+    `whatever language THEY filled the form in, not necessarily the wedding's default language — when filtering ` +
+    `on a dropdown value, match against ALL listed language variants of that option (e.g. "= 'Chicken' OR = 'Poulet' ` +
+    `OR = 'Pollo'", or an IN (...) list), not just one:\n${lines.join('\n')}`
+  );
+}
+
+/** Fetch + render a single wedding's configured-questions context by id. */
+async function buildWeddingQuestionsContext(weddingId: string): Promise<string> {
+  const wedding = await prisma.wedding.findUnique({
+    where: { id: weddingId },
+    select: WEDDING_QUESTION_CONFIG_SELECT,
+  });
+  if (!wedding) return '';
+  return renderQuestionsContext(wedding as WeddingQuestionsConfig);
+}
 
 // ============================================================================
 // SQL GENERATION (LLM)
@@ -333,20 +510,30 @@ export function validateSQL(rawSql: string): ValidationResult {
 
 /**
  * PostgreSQL requires the number of bound parameters to match exactly the
- * number of $N placeholders in the query. Build the parameter array by
- * inspecting which placeholders are actually present in the SQL.
- *
- * $1 = wedding_id (always required)
- * $2 = admin_id   (only when the query references it)
+ * number of $N placeholders in the query. Trim the candidate parameter list
+ * down to however many placeholders the SQL actually references, in order
+ * ($1, $2, ...). Shared by both the wedding-scoped and planner-scoped paths.
  */
-function buildParams(sql: string, wedding_id: string, admin_id: string): unknown[] {
+function bindParams(sql: string, candidateParams: unknown[]): unknown[] {
   const maxParam = [...sql.matchAll(/\$(\d+)/g)].reduce(
     (max, m) => Math.max(max, parseInt(m[1], 10)),
     0
   );
-  const params: unknown[] = [wedding_id];
-  if (maxParam >= 2) params.push(admin_id);
-  return params;
+  return candidateParams.slice(0, maxParam);
+}
+
+/**
+ * Run a validated query, translating raw Postgres/Prisma failures (e.g. the
+ * LLM comparing a BOOLEAN column to a localized string) into a message safe
+ * to show the user instead of leaking the internal query text/error.
+ */
+async function runQuery(sql: string, params: unknown[]): Promise<Record<string, unknown>[]> {
+  try {
+    return (await prisma.$queryRawUnsafe(sql, ...params)) as Record<string, unknown>[];
+  } catch (error) {
+    console.error('[NL-QUERY] Query execution failed:', sql, error);
+    throw new Error('The generated query could not be executed. Try rephrasing your question.');
+  }
 }
 
 // ============================================================================
@@ -372,7 +559,8 @@ export async function executeNaturalLanguageQuery(
   wedding_id: string,
   admin_id: string
 ): Promise<NLQueryResult> {
-  const rawSql = await generateSQL(question);
+  const questionsContext = await buildWeddingQuestionsContext(wedding_id);
+  const rawSql = await generateSQL(question, SCHEMA_DESCRIPTION + questionsContext);
   if (!rawSql) {
     throw new Error('AI service is unavailable or did not return a query');
   }
@@ -386,10 +574,7 @@ export async function executeNaturalLanguageQuery(
   console.log('[NL-QUERY] Executing validated query:', sql);
 
   // Pass only the parameters the SQL actually references ($1 always, $2 only if used).
-  const raw = (await prisma.$queryRawUnsafe(sql, ...buildParams(sql, wedding_id, admin_id))) as Record<
-    string,
-    unknown
-  >[];
+  const raw = await runQuery(sql, bindParams(sql, [wedding_id, admin_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -411,10 +596,7 @@ export async function executeValidatedSQL(
   }
 
   const cleanedSql = validation.cleanedSql;
-  const raw = (await prisma.$queryRawUnsafe(cleanedSql, ...buildParams(cleanedSql, wedding_id, admin_id))) as Record<
-    string,
-    unknown
-  >[];
+  const raw = await runQuery(cleanedSql, bindParams(cleanedSql, [wedding_id, admin_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -604,7 +786,8 @@ currency TEXT, payment_date TIMESTAMP, method TEXT, reference TEXT
 6. Add LIMIT ${MAX_ROWS} at the end of every query.
 7. Return ONLY the SQL query — no markdown fences, no code blocks, no explanations.
 8. Use clear English column aliases (e.g. couple_names, total_guests, invoice_total).
-9. Only reference tables listed above.`;
+9. Only reference tables listed above.
+10. NEVER compare a BOOLEAN column (attending, auto_matched, completed, is_selected, any *_answer column marked BOOLEAN) to a string literal like 'Sí'/'Yes'/'No'/'Oui' — always use TRUE/FALSE (or IS NULL for "pending"/unanswered).`;
 
 /**
  * Validate a planner-scoped SQL query.
@@ -665,16 +848,39 @@ export function validatePlannerSQL(rawSql: string): ValidationResult {
 }
 
 /**
+ * Verify a wedding belongs to the given planner. Throws if not found or
+ * owned by someone else, so callers reject before ever calling the LLM.
+ */
+async function assertPlannerOwnsWedding(weddingId: string, planner_id: string): Promise<void> {
+  const wedding = await prisma.wedding.findUnique({ where: { id: weddingId }, select: { planner_id: true } });
+  if (!wedding || wedding.planner_id !== planner_id) {
+    throw new Error('Wedding not found or not accessible');
+  }
+}
+
+/**
  * Convert a natural-language question into a planner-scoped SQL query,
  * validate it, then execute it.
  *
  * @param question    Natural-language question
  * @param planner_id  Bound to $1 — scopes every query to this planner's data
+ * @param weddingId   Optional — when set, the query is scoped to this single
+ *   wedding. Rather than asking the LLM to juggle two scope parameters
+ *   (planner_id AND wedding_id) in the same query, this delegates entirely
+ *   to executeNaturalLanguageQuery — the same single-parameter-scope path
+ *   used by admin and per-wedding planner reports, including its handling
+ *   of this wedding's configured RSVP questions.
  */
 export async function executeNaturalLanguagePlannerQuery(
   question: string,
   planner_id: string,
+  weddingId?: string,
 ): Promise<NLQueryResult> {
+  if (weddingId) {
+    await assertPlannerOwnsWedding(weddingId, planner_id);
+    return executeNaturalLanguageQuery(question, weddingId, planner_id);
+  }
+
   const rawSql = await generateSQL(question, SCHEMA_DESCRIPTION_PLANNER);
   if (!rawSql) {
     throw new Error('AI service is unavailable or did not return a query');
@@ -688,7 +894,7 @@ export async function executeNaturalLanguagePlannerQuery(
   const sql = validation.cleanedSql;
   console.log('[NL-QUERY-PLANNER] Executing validated query:', sql);
 
-  const raw = (await prisma.$queryRawUnsafe(sql, planner_id)) as Record<string, unknown>[];
+  const raw = await runQuery(sql, bindParams(sql, [planner_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -697,18 +903,27 @@ export async function executeNaturalLanguagePlannerQuery(
 
 /**
  * Execute a previously-generated planner-scoped SQL string directly (for exports).
+ *
+ * @param weddingId  Must match whatever wedding scope (if any) the SQL was
+ *   originally generated with — see executeNaturalLanguagePlannerQuery.
  */
 export async function executeValidatedPlannerSQL(
   sql: string,
   planner_id: string,
+  weddingId?: string,
 ): Promise<NLQueryResult> {
+  if (weddingId) {
+    await assertPlannerOwnsWedding(weddingId, planner_id);
+    return executeValidatedSQL(sql, weddingId, planner_id);
+  }
+
   const validation = validatePlannerSQL(sql);
   if (!validation.valid || !validation.cleanedSql) {
     throw new Error(validation.error ?? 'SQL failed validation');
   }
 
   const cleanedSql = validation.cleanedSql;
-  const raw = (await prisma.$queryRawUnsafe(cleanedSql, planner_id)) as Record<string, unknown>[];
+  const raw = await runQuery(cleanedSql, bindParams(cleanedSql, [planner_id]));
   const data = raw.map(serializeRow);
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
 

@@ -481,7 +481,7 @@ describe('generateWeddingReply', () => {
       const wedding = {
         ...baseWedding,
         transportation_question_enabled: true,
-        transportation_question_text: 'Shuttle bus from Hotel Marbella at 15:00',
+        transportation_question_text: { en: 'Shuttle bus from Hotel Marbella at 15:00', es: 'Autobús desde el Hotel Marbella a las 15:00' },
       };
       await generateWeddingReply('How do I get there?', wedding, baseFamily, 'EN');
       expect(captureSystemPrompt()).toContain('Shuttle bus from Hotel Marbella at 15:00');
@@ -496,7 +496,7 @@ describe('generateWeddingReply', () => {
       const wedding = {
         ...baseWedding,
         extra_question_1_enabled: true,
-        extra_question_1_text: { EN: 'Will you need a parking space?', ES: '¿Necesitas aparcamiento?' },
+        extra_question_1_text: { en: 'Will you need a parking space?', es: '¿Necesitas aparcamiento?' },
       };
       await generateWeddingReply('Parking?', wedding, baseFamily, 'EN');
       expect(captureSystemPrompt()).toContain('Will you need a parking space?');

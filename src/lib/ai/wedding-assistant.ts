@@ -96,10 +96,16 @@ const CONTACT_COUPLE_SUFFIX: Record<string, string> = {
 // PROMPT BUILDER
 // ============================================================================
 
-function getLocalizedText(json: unknown, lang: string): string | null {
+/**
+ * Configurable RSVP question labels/options on the `weddings` table (extra_question_*,
+ * extra_info_*, *_dropdown_question_*, guest_text_question_*) are stored with lowercase
+ * language keys (en/es/fr/it/de) — unlike invitation template content elsewhere in this
+ * file, which uses uppercase.
+ */
+function getLocalizedRsvpText(json: unknown, lang: string): string | null {
   if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
   const record = json as Record<string, string>;
-  return (record[lang] || record['EN']) ?? null;
+  return (record[lang.toLowerCase()] || record.en) ?? null;
 }
 
 function stripHtml(html: string): string {
@@ -196,8 +202,9 @@ function buildSystemPrompt(
   if (wedding.additional_info) {
     prompt += `- Additional Information: ${wedding.additional_info}\n`;
   }
-  if (wedding.transportation_question_enabled && wedding.transportation_question_text) {
-    prompt += `- Transportation: ${wedding.transportation_question_text}\n`;
+  if (wedding.transportation_question_enabled) {
+    const text = getLocalizedRsvpText(wedding.transportation_question_text, lang);
+    if (text) prompt += `- Transportation: ${text}\n`;
   }
   if (wedding.dietary_restrictions_enabled) {
     prompt += `- Dietary restrictions can be specified when submitting the RSVP.\n`;
@@ -210,7 +217,7 @@ function buildSystemPrompt(
   for (let i = 1; i <= 3; i++) {
     const w = wedding as unknown as Record<string, unknown>;
     if (w[`extra_question_${i}_enabled`]) {
-      const text = getLocalizedText(w[`extra_question_${i}_text`], lang);
+      const text = getLocalizedRsvpText(w[`extra_question_${i}_text`], lang);
       if (text) prompt += `- RSVP yes/no question (family): ${text}\n`;
     }
   }
@@ -219,16 +226,16 @@ function buildSystemPrompt(
   for (let i = 1; i <= 3; i++) {
     const w = wedding as unknown as Record<string, unknown>;
     if (w[`extra_info_${i}_enabled`]) {
-      const label = getLocalizedText(w[`extra_info_${i}_label`], lang);
+      const label = getLocalizedRsvpText(w[`extra_info_${i}_label`], lang);
       if (label) prompt += `- RSVP text field (family): ${label}\n`;
     }
   }
 
   // Family-level dropdown
   if (wedding.family_dropdown_question_1_enabled) {
-    const label = getLocalizedText(wedding.family_dropdown_question_1_label, lang);
+    const label = getLocalizedRsvpText(wedding.family_dropdown_question_1_label, lang);
     const options = (wedding.family_dropdown_question_1_options as Record<string, string[]> | null);
-    const optList = options?.[lang] ?? options?.['EN'];
+    const optList = options?.[lang.toLowerCase()] ?? options?.en;
     if (label) prompt += `- RSVP dropdown (family): ${label}${optList ? ` (options: ${optList.join(', ')})` : ''}\n`;
   }
 
@@ -236,7 +243,7 @@ function buildSystemPrompt(
   for (let i = 1; i <= 3; i++) {
     const w = wedding as unknown as Record<string, unknown>;
     if (w[`guest_yn_question_${i}_enabled`]) {
-      const text = getLocalizedText(w[`guest_yn_question_${i}_text`], lang);
+      const text = getLocalizedRsvpText(w[`guest_yn_question_${i}_text`], lang);
       if (text) prompt += `- RSVP yes/no question (per guest): ${text}\n`;
     }
   }
@@ -245,9 +252,9 @@ function buildSystemPrompt(
   for (let i = 1; i <= 3; i++) {
     const w = wedding as unknown as Record<string, unknown>;
     if (w[`guest_dropdown_question_${i}_enabled`]) {
-      const label = getLocalizedText(w[`guest_dropdown_question_${i}_label`], lang);
+      const label = getLocalizedRsvpText(w[`guest_dropdown_question_${i}_label`], lang);
       const options = w[`guest_dropdown_question_${i}_options`] as Record<string, string[]> | null;
-      const optList = options?.[lang] ?? options?.['EN'];
+      const optList = options?.[lang.toLowerCase()] ?? options?.en;
       if (label) prompt += `- RSVP dropdown (per guest): ${label}${optList ? ` (options: ${optList.join(', ')})` : ''}\n`;
     }
   }
@@ -256,7 +263,7 @@ function buildSystemPrompt(
   for (let i = 1; i <= 3; i++) {
     const w = wedding as unknown as Record<string, unknown>;
     if (w[`guest_text_question_${i}_enabled`]) {
-      const label = getLocalizedText(w[`guest_text_question_${i}_label`], lang);
+      const label = getLocalizedRsvpText(w[`guest_text_question_${i}_label`], lang);
       if (label) prompt += `- RSVP text field (per guest): ${label}\n`;
     }
   }
@@ -287,20 +294,20 @@ function buildSystemPrompt(
     const f = family as unknown as Record<string, unknown>;
     for (let i = 1; i <= 3; i++) {
       if (w[`extra_question_${i}_enabled`]) {
-        const label = getLocalizedText(w[`extra_question_${i}_text`], lang);
+        const label = getLocalizedRsvpText(w[`extra_question_${i}_text`], lang);
         const answer = f[`extra_question_${i}_answer`];
         if (label && answer !== null && answer !== undefined) {
           prompt += `- ${label}: ${answer === true ? 'Yes' : 'No'}\n`;
         }
       }
       if (w[`extra_info_${i}_enabled`]) {
-        const label = getLocalizedText(w[`extra_info_${i}_label`], lang);
+        const label = getLocalizedRsvpText(w[`extra_info_${i}_label`], lang);
         const value = f[`extra_info_${i}_value`];
         if (label && value) prompt += `- ${label}: ${value}\n`;
       }
     }
     if (wedding.family_dropdown_question_1_enabled) {
-      const label = getLocalizedText(wedding.family_dropdown_question_1_label, lang);
+      const label = getLocalizedRsvpText(wedding.family_dropdown_question_1_label, lang);
       if (label && family.family_dropdown_question_1_answer) {
         prompt += `- ${label}: ${family.family_dropdown_question_1_answer}\n`;
       }
@@ -319,19 +326,19 @@ function buildSystemPrompt(
         const m = member as unknown as Record<string, unknown>;
         for (let i = 1; i <= 3; i++) {
           if (w[`guest_yn_question_${i}_enabled`]) {
-            const label = getLocalizedText(w[`guest_yn_question_${i}_text`], lang);
+            const label = getLocalizedRsvpText(w[`guest_yn_question_${i}_text`], lang);
             const ans = m[`guest_yn_question_${i}_answer`];
             if (label && ans !== null && ans !== undefined) {
               answers.push(`${label}: ${ans === true ? 'Yes' : 'No'}`);
             }
           }
           if (w[`guest_dropdown_question_${i}_enabled`]) {
-            const label = getLocalizedText(w[`guest_dropdown_question_${i}_label`], lang);
+            const label = getLocalizedRsvpText(w[`guest_dropdown_question_${i}_label`], lang);
             const ans = m[`guest_dropdown_question_${i}_answer`];
             if (label && ans) answers.push(`${label}: ${ans}`);
           }
           if (w[`guest_text_question_${i}_enabled`]) {
-            const label = getLocalizedText(w[`guest_text_question_${i}_label`], lang);
+            const label = getLocalizedRsvpText(w[`guest_text_question_${i}_label`], lang);
             const ans = m[`guest_text_question_${i}_answer`];
             if (label && ans) answers.push(`${label}: ${ans}`);
           }

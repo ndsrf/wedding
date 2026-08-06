@@ -634,7 +634,11 @@
         "example1": "¿Cuántos invitados tengo en total entre todas las bodas?",
         "example2": "¿Cuál es mi importe total facturado?",
         "example3": "Lista todos los pagos pendientes a proveedores",
-        "example4": "Muestra las bodas con menor tasa de respuesta"
+        "example4": "Muestra las bodas con menor tasa de respuesta",
+        "weddingScopeLabel": "Limitar a una boda (opcional)",
+        "weddingScopeAll": "Todas las bodas",
+        "weddingScopeHint": "Las preguntas sobre las preguntas RSVP personalizadas de esta boda (p.ej. \"cuántos vienen a la fiesta previa\") solo funcionan si seleccionas una única boda.",
+        "weddingScopeBadge": "Limitado a {wedding}"
       }
     },
     "stats": {

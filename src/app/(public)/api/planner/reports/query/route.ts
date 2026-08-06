@@ -22,10 +22,11 @@ export async function POST(req: NextRequest) {
     const user = await requireRole('planner');
 
     const body = await req.json();
-    const { question, sql: providedSql, format = 'json' } = body as {
+    const { question, sql: providedSql, format = 'json', weddingId } = body as {
       question?: string;
       sql?: string;
       format?: ExportFormat;
+      weddingId?: string;
     };
 
     if (!question && !providedSql) {
@@ -33,8 +34,8 @@ export async function POST(req: NextRequest) {
     }
 
     const result = providedSql
-      ? await executeValidatedPlannerSQL(providedSql, user.planner_id!)
-      : await executeNaturalLanguagePlannerQuery(question!, user.planner_id!);
+      ? await executeValidatedPlannerSQL(providedSql, user.planner_id!, weddingId)
+      : await executeNaturalLanguagePlannerQuery(question!, user.planner_id!, weddingId);
 
     if (format === 'json') {
       return NextResponse.json({ data: result.data, sql: result.sql, columns: result.columns });

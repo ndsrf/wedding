@@ -609,7 +609,11 @@
         "example1": "Quanti ospiti totali ho in tutti i matrimoni?",
         "example2": "Qual è il mio importo totale fatturato?",
         "example3": "Elenca tutti i pagamenti fornitore in sospeso",
-        "example4": "Mostra i matrimoni con il tasso RSVP più basso"
+        "example4": "Mostra i matrimoni con il tasso RSVP più basso",
+        "weddingScopeLabel": "Limita a un matrimonio (opzionale)",
+        "weddingScopeAll": "Tutti i matrimoni",
+        "weddingScopeHint": "Le domande sulle domande RSVP personalizzate di questo matrimonio (es. \"quante persone vengono alla festa pre-matrimonio\") funzionano solo se selezioni un singolo matrimonio.",
+        "weddingScopeBadge": "Limitato a {wedding}"
       }
     },
     "stats": {
