@@ -96,16 +96,8 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
     // used only to compute is_main on each itinerary item. The location data we need
     // (name, address, google_maps_url) is already fetched via itinerary_items → location,
     // so there is no need for an extra SELECT … FROM locations WHERE id = $1 query.
-    const [
-      wedding,
-      totalGuests,
-      totalFamilies,
-      rsvpCount,
-      attendingCount,
-      acceptedFamilyCount,
-      rejectedFamilyCount,
-      paymentReceivedRows,
-    ] = await Promise.all([
+    const [wedding, totalGuests, totalFamilies, familyAttendance, attendingCount, paymentReceivedRows] =
+      await Promise.all([
         prisma.wedding.findUnique({
           where: { id: user.wedding_id },
           include: {
@@ -117,30 +109,17 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
         }),
         prisma.familyMember.count({ where: { family: { wedding_id: user.wedding_id } } }),
         prisma.family.count({ where: { wedding_id: user.wedding_id } }),
-        prisma.family.count({
-          where: {
-            wedding_id: user.wedding_id,
-            members: { some: { attending: { not: null } } },
-          },
+        // One row per family with each member's attending flag. Classified below in a
+        // single pass so responded/accepted/declined/partial can never disagree with
+        // each other the way four independent COUNT queries could (each `every`/`some`
+        // combination is evaluated by Postgres as a separate subquery per family, so
+        // the four counts aren't guaranteed consistent with one another).
+        prisma.family.findMany({
+          where: { wedding_id: user.wedding_id },
+          select: { members: { select: { attending: true } } },
         }),
         prisma.familyMember.count({
           where: { family: { wedding_id: user.wedding_id }, attending: true },
-        }),
-        // Fully accepted: at least one member exists and every member is attending.
-        // The `some: {}` guard matters because Prisma's `every` is vacuously true for
-        // families with zero members (e.g. a shell family with no guests added yet).
-        prisma.family.count({
-          where: {
-            wedding_id: user.wedding_id,
-            members: { some: {}, every: { attending: true } },
-          },
-        }),
-        // Fully declined: at least one member declined and none are attending.
-        prisma.family.count({
-          where: {
-            wedding_id: user.wedding_id,
-            members: { some: { attending: false }, none: { attending: true } },
-          },
         }),
         // COUNT(DISTINCT family_id) in one aggregate — uses the covering index
         // (wedding_id, status, family_id) for an index-only scan. Much cheaper
@@ -158,12 +137,32 @@ async function getAdminPageData(user: AuthenticatedUser): Promise<AdminPageData 
     }
 
     const paymentReceivedCount = Number(paymentReceivedRows[0]?.count ?? 0);
+
+    let rsvpCount = 0;
+    let acceptedFamilyCount = 0;
+    let rejectedFamilyCount = 0;
+    for (const family of familyAttendance) {
+      let hasTrue = false;
+      let hasFalse = false;
+      let hasNull = false;
+      for (const member of family.members) {
+        if (member.attending === true) hasTrue = true;
+        else if (member.attending === false) hasFalse = true;
+        else hasNull = true;
+      }
+      if (!hasTrue && !hasFalse) continue; // no one in this family has responded yet
+      rsvpCount++;
+      if (hasTrue && !hasFalse && !hasNull) acceptedFamilyCount++;
+      else if (hasFalse && !hasTrue) rejectedFamilyCount++;
+    }
+    // Partial = responded families that are neither fully accepted nor fully declined
+    // (mixed attendance within the family). Always non-negative because it's the
+    // leftover of rsvpCount after the same loop assigned every responded family to
+    // at most one of the other two buckets.
+    const partialFamilyCount = rsvpCount - acceptedFamilyCount - rejectedFamilyCount;
+
     const rsvpCompletionPercentage =
       totalFamilies > 0 ? Math.round((rsvpCount / totalFamilies) * 100) : 0;
-    // Partial = responded families that are neither fully accepted nor fully declined
-    // (mixed attendance within the family). Derived instead of queried separately since
-    // it's a simple subtraction of the two counts already fetched above.
-    const partialFamilyCount = rsvpCount - acceptedFamilyCount - rejectedFamilyCount;
 
     const today = new Date();
     const weddingDate = new Date(wedding.wedding_date);
