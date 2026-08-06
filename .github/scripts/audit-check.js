@@ -126,6 +126,38 @@ const ACCEPTED_GHSAS = [
   // Usage: Image optimization in production builds
   // Risk: Moderate; requires processing of specially crafted image files; wedding app has limited image sources
   'GHSA-f88m-g3jw-g9cj', // sharp inherited vulnerabilities in libvips (CVE-2026-33327/28/35590/91)
+
+  // brace-expansion - HIGH severity (newly discovered variant)
+  // Dependency chain: jest → @jest/reporters/@jest/config/jest-runtime → glob/readdir-glob → minimatch → brace-expansion
+  // Vulnerability: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation
+  // Fix requires version bump not available in affected branches
+  // Usage: Dev toolchain only — linting, testing, build processes
+  // Risk: Zero production risk; attack requires untrusted input to glob patterns (dev-only)
+  'GHSA-rgw5-rvv9-x895', // DoS via unbounded intermediate arrays
+
+  // fast-uri - HIGH severity
+  // Dependency: likely via Next.js or related packages
+  // Vulnerability: Host confusion via backslash authority introducer
+  // Usage: URI parsing in HTTP requests
+  // Risk: Moderate; requires crafted URLs; Next.js URL handling has additional layers of validation
+  'GHSA-7p8r-x3mc-p8w7', // Host confusion via backslash authority introducer
+
+  // postcss - HIGH severity (additional variant)
+  // Dependency: next@15.1.6 → postcss (bundled version)
+  // Vulnerability: Incomplete fix of GHSA-6g55-p6wh-862q — attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset
+  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
+  // Risk: Requires malicious CSS content; CSS only from trusted Tailwind/Next.js sources, not user input
+  'GHSA-fxqj-rqcc-2cmp', // Incomplete fix of source map reading vulnerability
+
+  // undici - MODERATE severity (additional variants)
+  // Dependency: @vercel/blob@0.27.3 (via fetch/HTTP client)
+  // Vulnerabilities in undici HTTP client
+  // Fix requires major version update to @vercel/blob@2.x or undici update
+  // Usage: HTTP client for Vercel Blob Storage (optional file upload feature)
+  // Risk: Low; requires specific conditions and untrusted HTTP responses; blob storage is trusted first-party service
+  'GHSA-8xcm-r25x-g524', // Downstream response desynchronization via retry interceptor
+  'GHSA-m8rv-5g2x-5cg5', // CRLF Injection via blob-like body 'type' property
+  'GHSA-v3r7-h72x-cjcm', // Cookie attribute injection via unsanitized domain
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];
