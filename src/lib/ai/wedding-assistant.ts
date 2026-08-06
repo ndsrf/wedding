@@ -202,8 +202,9 @@ function buildSystemPrompt(
   if (wedding.additional_info) {
     prompt += `- Additional Information: ${wedding.additional_info}\n`;
   }
-  if (wedding.transportation_question_enabled && wedding.transportation_question_text) {
-    prompt += `- Transportation: ${wedding.transportation_question_text}\n`;
+  if (wedding.transportation_question_enabled) {
+    const text = getLocalizedRsvpText(wedding.transportation_question_text, lang);
+    if (text) prompt += `- Transportation: ${text}\n`;
   }
   if (wedding.dietary_restrictions_enabled) {
     prompt += `- Dietary restrictions can be specified when submitting the RSVP.\n`;
