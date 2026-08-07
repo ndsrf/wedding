@@ -17,6 +17,7 @@ import { triggerAlert } from '@/lib/alerts/trigger';
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     alertRule: { findMany: jest.fn(), findFirst: jest.fn() },
+    alert: { findFirst: jest.fn() },
     wedding: { findMany: jest.fn(), findUnique: jest.fn() },
     trackingEvent: { findMany: jest.fn() },
     weddingAdmin: { count: jest.fn() },
@@ -31,6 +32,7 @@ jest.mock('@/lib/alerts/trigger', () => ({
 
 const mockRuleFindMany = prisma.alertRule.findMany as jest.Mock;
 const mockRuleFindFirst = prisma.alertRule.findFirst as jest.Mock;
+const mockAlertFindFirst = prisma.alert.findFirst as jest.Mock;
 const mockWeddingFindMany = prisma.wedding.findMany as jest.Mock;
 const mockWeddingFindUnique = prisma.wedding.findUnique as jest.Mock;
 const mockEventFindMany = prisma.trackingEvent.findMany as jest.Mock;
@@ -112,6 +114,7 @@ function makeWeddingWithFamilies(overrides: Partial<{
 describe('processNightlySummaries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAlertFindFirst.mockResolvedValue(null); // default: not already sent today
   });
 
   it('does nothing when there are no enabled NIGHTLY_SUMMARY rules', async () => {
@@ -203,6 +206,7 @@ describe('processNightlySummaries', () => {
     expect(call.wedding_id).toBe('wedding1');
     expect(call.planner_id).toBe('planner1');
     expect(call.skipDispatch).toBe(true);
+    expect(call.bypassCooldown).toBe(true); // the "already sent today" check above replaces the generic cooldown
     expect(call.metadata).toMatchObject({
       weddingName: 'John & Jane',
       rsvpSent: 2, // 2 families total
@@ -231,6 +235,29 @@ describe('processNightlySummaries', () => {
         }),
       },
     ]);
+  });
+
+  it('does not re-trigger a wedding that already got its summary today (UTC)', async () => {
+    mockRuleFindMany.mockResolvedValue([makePlannerRule()]);
+    mockWeddingFindMany.mockResolvedValue([{ id: 'wedding1' }]);
+    mockEventFindMany.mockResolvedValue([
+      { family_id: 'family1', timestamp: new Date() },
+    ]);
+    mockWeddingFindUnique.mockResolvedValue(makeWeddingWithFamilies());
+    mockFamilyFindMany.mockResolvedValue([
+      { id: 'family1', name: 'Smith Family', members: [{ name: 'Alice', attending: true }] },
+    ]);
+    mockAlertFindFirst.mockResolvedValue({ id: 'already-sent-today' });
+
+    const result = await processNightlySummaries();
+
+    expect(result).toEqual({ checked: 1, triggered: 0, errors: 0 });
+    expect(mockTriggerAlert).not.toHaveBeenCalled();
+    expect(mockAlertFindFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ event_type: 'NIGHTLY_SUMMARY', wedding_id: 'wedding1' }),
+      }),
+    );
   });
 
   it('deduplicates a family that submitted more than once, keeping the latest timestamp', async () => {

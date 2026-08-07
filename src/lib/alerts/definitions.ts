@@ -60,13 +60,12 @@ export const BUILTIN_ALERTS: AlertDefinition[] = [
     defaultChannels: ['EMAIL'],
     notifyPlanner: false,
     notifyCouple: true,
-    // This is the only thing pacing sends to "roughly once a day" — the
-    // cron job itself has no time-of-day check, it just runs on every tick
-    // (once/day on Vercel via vercel.json's single 08:00 UTC cron entry;
-    // every ~60s on non-Vercel's in-process scheduler). Without this
-    // cooldown, non-Vercel deployments would re-check and potentially
-    // re-send continuously.
-    cooldownMinutes: 1200,
+    // No cooldown here — pacing is handled by an explicit "already sent
+    // today (UTC)" check in nightly-summary.ts's processWeddingSummary(),
+    // not this generic elapsed-time cooldown (both call sites pass
+    // bypassCooldown: true). A calendar-day gate keeps the send time stable
+    // instead of drifting the way a fixed cooldown shorter than 24h would
+    // on a continuously-ticking (non-Vercel) scheduler.
     subject: {
       ES: 'Ha habido actividad en las últimas 24 horas...',
       EN: 'There was some activity in the last 24 hours...',

@@ -410,18 +410,48 @@ async function buildNightlySummaryReport(
 }
 
 /**
+ * Has a NIGHTLY_SUMMARY alert already fired for this wedding today (UTC
+ * calendar day)? Used instead of an elapsed-time cooldown so the send time
+ * self-corrects to shortly after UTC midnight rather than drifting earlier
+ * each day — see processWeddingSummary for why.
+ */
+async function hasAlreadySentToday(weddingId: string): Promise<boolean> {
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  const existing = await prisma.alert.findFirst({
+    where: { event_type: 'NIGHTLY_SUMMARY', wedding_id: weddingId, created_at: { gte: todayStart } },
+    select: { id: true },
+  });
+
+  return existing !== null;
+}
+
+/**
  * Compute the last-24h RSVP report for a single wedding and fire the alert
- * if there was any activity. Returns whether the alert was triggered.
+ * if there was any activity and it hasn't already been sent today. Returns
+ * whether the alert was triggered.
+ *
+ * Gated by calendar day (UTC) rather than the generic AlertRule cooldown:
+ * this job has no time-of-day check and just runs on every tick (once/day
+ * on Vercel via its single cron entry; every ~60s on non-Vercel's in-process
+ * scheduler). A fixed elapsed-time cooldown shorter than 24h would cause the
+ * actual send time to drift earlier each day on a continuously-ticking
+ * platform; gating on "already sent today" instead means the send time
+ * self-corrects to shortly after UTC midnight and stays there.
  */
 async function processWeddingSummary(weddingId: string): Promise<boolean> {
   const built = await buildNightlySummaryReport(weddingId);
   if (!built || built.metadata.confirmationsCount === 0) return false; // nothing changed — do nothing
+
+  if (await hasAlreadySentToday(weddingId)) return false;
 
   await triggerAlert({
     event_type: 'NIGHTLY_SUMMARY',
     wedding_id: weddingId,
     planner_id: built.plannerId,
     skipDispatch: true,
+    bypassCooldown: true, // the day-check above replaces the generic cooldown for this call
     metadata: built.metadata as unknown as Record<string, unknown>,
   });
 

@@ -25,9 +25,8 @@ describe('wedding_nightly_summary builtin alert', () => {
     expect(def?.defaultChannels).toEqual(['EMAIL']);
   });
 
-  it('has a cooldown to prevent duplicate sends within the same day', () => {
-    expect(def?.cooldownMinutes).toBeGreaterThan(0);
-    expect(def?.cooldownMinutes).toBeLessThan(24 * 60);
+  it('has no generic cooldown — pacing is a calendar-day gate in nightly-summary.ts instead', () => {
+    expect(def?.cooldownMinutes).toBeUndefined();
   });
 
   it('has subject and body defined for every supported language', () => {
