@@ -454,7 +454,7 @@ export type UpdateTable = Partial<Omit<Table, 'id' | 'wedding_id' | 'created_at'
 // Filter types for queries
 export interface FamilyFilter {
   wedding_id: string;
-  rsvp_status?: 'pending' | 'submitted';
+  rsvp_status?: 'pending' | 'pending_not_opened' | 'pending_opened' | 'submitted';
   attendance?: 'yes' | 'no' | 'partial';
   channel?: Channel;
   payment_status?: GiftStatus;

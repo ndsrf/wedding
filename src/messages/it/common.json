@@ -1713,6 +1713,8 @@
       "filters": {
         "all": "Tutti",
         "pending": "In Attesa",
+        "pendingNotOpened": "In Attesa - Non Aperto",
+        "pendingOpened": "In Attesa - Aperto",
         "submitted": "Inviato",
         "confirmed": "Confermato",
         "attending": "Parteciperà",

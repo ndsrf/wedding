@@ -1713,6 +1713,8 @@
       "filters": {
         "all": "Tous",
         "pending": "En Attente",
+        "pendingNotOpened": "En Attente - Non Ouvert",
+        "pendingOpened": "En Attente - Ouvert",
         "submitted": "Soumis",
         "confirmed": "Confirmé",
         "attending": "Présent",
