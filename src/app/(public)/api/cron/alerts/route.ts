@@ -1,9 +1,7 @@
 /**
  * Vercel Cron — Main cron endpoint
  *
- * Schedule: twice daily (vercel.json: "0 8 * * *" and "0 5 * * *") —
- * the 05:00 run exists for the nightly-summary job; other jobs simply
- * run an extra, harmless time.
+ * Schedule: daily at 08:00 UTC (vercel.json: "0 8 * * *")
  *
  * Delegates to the cron runner which executes all registered jobs in sequence.
  * To add a new job, register it in src/lib/cron/registry.ts.

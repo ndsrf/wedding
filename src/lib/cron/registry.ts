@@ -12,6 +12,6 @@ import type { CronJob } from './types';
 
 export const CRON_JOBS: CronJob[] = [
   quoteExpiryJob,      // 1. Expire overdue quotes → queues QUOTE_EXPIRED alerts
-  nightlySummaryJob,   // 2. Wedding nightly summary (05:00 UTC) → queues NIGHTLY_SUMMARY alerts
+  nightlySummaryJob,   // 2. Wedding nightly summary → queues NIGHTLY_SUMMARY alerts (paced by AlertRule cooldown)
   alertDeliveriesJob,  // 3. Dispatch all pending alert deliveries (including above)
 ];

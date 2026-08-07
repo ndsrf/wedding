@@ -60,9 +60,12 @@ export const BUILTIN_ALERTS: AlertDefinition[] = [
     defaultChannels: ['EMAIL'],
     notifyPlanner: false,
     notifyCouple: true,
-    // Once fired for a wedding, wait ~20h before firing again — the report
-    // itself only runs once a day (05:00), this just guards against the
-    // in-process (non-Vercel) scheduler re-triggering within the same hour.
+    // This is the only thing pacing sends to "roughly once a day" — the
+    // cron job itself has no time-of-day check, it just runs on every tick
+    // (once/day on Vercel via vercel.json's single 08:00 UTC cron entry;
+    // every ~60s on non-Vercel's in-process scheduler). Without this
+    // cooldown, non-Vercel deployments would re-check and potentially
+    // re-send continuously.
     cooldownMinutes: 1200,
     subject: {
       ES: 'Ha habido actividad en las últimas 24 horas...',
