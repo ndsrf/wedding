@@ -6,10 +6,12 @@
  */
 
 import { quoteExpiryJob } from './jobs/quote-expiry';
+import { nightlySummaryJob } from './jobs/nightly-summary';
 import { alertDeliveriesJob } from './jobs/alert-deliveries';
 import type { CronJob } from './types';
 
 export const CRON_JOBS: CronJob[] = [
   quoteExpiryJob,      // 1. Expire overdue quotes → queues QUOTE_EXPIRED alerts
-  alertDeliveriesJob,  // 2. Dispatch all pending alert deliveries (including above)
+  nightlySummaryJob,   // 2. Wedding nightly summary → queues NIGHTLY_SUMMARY alerts (paced by AlertRule cooldown)
+  alertDeliveriesJob,  // 3. Dispatch all pending alert deliveries (including above)
 ];

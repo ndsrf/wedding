@@ -20,7 +20,7 @@ export function LanguageSwitcher() {
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === locale);
 
-  const handleLanguageChange = (newLocale: string) => {
+  const handleLanguageChange = async (newLocale: string) => {
     if (newLocale === locale) {
       setIsOpen(false);
       return;
@@ -30,6 +30,20 @@ export function LanguageSwitcher() {
 
     // Set the cookie for next-intl
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+
+    // Best-effort: persist the choice to the user's account record too, so
+    // backend processes (e.g. alert emails) know their language even
+    // outside of a browser session. The UI switch itself only depends on
+    // the cookie above, so a failure here must never block the reload.
+    try {
+      await fetch('/api/account/preferred-language', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: newLocale.toUpperCase() }),
+      });
+    } catch {
+      // Ignore — cookie-based UI switch still applies.
+    }
 
     // Force a full page reload to ensure the new locale is picked up by the server
     window.location.reload();

@@ -105,7 +105,7 @@ async function processRule(
   planner_id: string | undefined,
 ): Promise<void> {
   // Cooldown check: skip if the same rule fired too recently for this wedding
-  if (rule.cooldown_minutes && wedding_id) {
+  if (rule.cooldown_minutes && wedding_id && !context.bypassCooldown) {
     const cutoff = new Date(Date.now() - rule.cooldown_minutes * 60 * 1000);
     const recentAlert = await prisma.alert.findFirst({
       where: {

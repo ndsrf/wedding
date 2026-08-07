@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "AlertEventType" ADD VALUE 'NIGHTLY_SUMMARY';
