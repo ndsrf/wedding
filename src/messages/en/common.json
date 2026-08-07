@@ -2058,6 +2058,8 @@
       "filters": {
         "all": "All",
         "pending": "Pending",
+        "pendingNotOpened": "Pending - Not Opened",
+        "pendingOpened": "Pending - Opened",
         "submitted": "Submitted",
         "confirmed": "Confirmed",
         "attending": "Attending",

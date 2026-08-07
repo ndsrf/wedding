@@ -107,7 +107,7 @@ const listGuestsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(200).default(50),
   ids_only: z.coerce.boolean().default(false),
-  rsvp_status: z.enum(['pending', 'submitted']).optional(),
+  rsvp_status: z.enum(['pending', 'pending_not_opened', 'pending_opened', 'submitted']).optional(),
   attendance: z.enum(['yes', 'no', 'partial']).optional(),
   channel: z.enum(['WHATSAPP', 'EMAIL', 'SMS']).optional(),
   payment_status: z.enum(['PENDING', 'RECEIVED', 'CONFIRMED']).optional(),
@@ -242,13 +242,19 @@ export async function listGuestsHandler(
       }
     }
 
+    const andConditions: Prisma.FamilyWhereInput[] = [];
+
     if (rsvp_status === 'submitted') {
       whereClause.members = { some: { attending: { not: null } } };
     } else if (rsvp_status === 'pending') {
       whereClause.members = { every: { attending: null } };
+    } else if (rsvp_status === 'pending_not_opened') {
+      whereClause.members = { every: { attending: null } };
+      andConditions.push({ tracking_events: { none: { event_type: 'LINK_OPENED' } } });
+    } else if (rsvp_status === 'pending_opened') {
+      whereClause.members = { every: { attending: null } };
+      andConditions.push({ tracking_events: { some: { event_type: 'LINK_OPENED' } } });
     }
-
-    const andConditions: Prisma.FamilyWhereInput[] = [];
 
     if (attendance === 'yes') {
       whereClause.members = { some: { attending: true } };

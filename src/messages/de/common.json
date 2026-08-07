@@ -1713,6 +1713,8 @@
       "filters": {
         "all": "Alle",
         "pending": "Ausstehend",
+        "pendingNotOpened": "Ausstehend - Nicht Geöffnet",
+        "pendingOpened": "Ausstehend - Geöffnet",
         "submitted": "Eingereicht",
         "confirmed": "Bestätigt",
         "attending": "Nimmt teil",

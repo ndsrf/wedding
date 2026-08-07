@@ -2055,6 +2055,8 @@
       "filters": {
         "all": "Todos",
         "pending": "Pendiente",
+        "pendingNotOpened": "Pendiente - No abierto",
+        "pendingOpened": "Pendiente - Abierto",
         "submitted": "Enviado",
         "confirmed": "Confirmado",
         "attending": "Asistirá",
