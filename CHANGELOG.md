@@ -1,3 +1,46 @@
+# 1.5.0 (2026-08-09)
+
+
+### Bug Fixes
+
+* add more context to wedding assistant ([61cf61f](https://github.com/ndsrf/wedding/commit/61cf61f287d5ed78146112053351bc0301f9d5d4))
+* align test data format with question schema requirements ([0c4f30a](https://github.com/ndsrf/wedding/commit/0c4f30a2263198b2f3b0a0fc0e8e6e7fa70bcc78))
+* clear <title> for crawlers so whatsapp shows no title on invitation link ([c10eb7f](https://github.com/ndsrf/wedding/commit/c10eb7f576ab1904ed064be37009855aef3d7717))
+* convert Buffer to Uint8Array for Blob constructor compatibility ([e9f21d1](https://github.com/ndsrf/wedding/commit/e9f21d1dbe46670c5295c0feba3c5017e99c1157))
+* convert Buffer to Uint8Array for NextResponse ([2a078f0](https://github.com/ndsrf/wedding/commit/2a078f03867314e16da79e91780074e9f653bb32))
+* **deps:** update dependency @hyperdx/browser to ^0.25.0 ([#706](https://github.com/ndsrf/wedding/issues/706)) ([95d3d79](https://github.com/ndsrf/wedding/commit/95d3d796d65f5b9c7d2077362b8a9aa532fa760d))
+* drop hardcoded og:image dimensions that mismatch actual invitation image ([cee184f](https://github.com/ndsrf/wedding/commit/cee184f2fa1919c25f4504949b7b42505a061b4b))
+* fix title display and increase logo size in providers PDF ([65f2570](https://github.com/ndsrf/wedding/commit/65f2570f53ae3d307c35e2acfcf9aac14289c9a1))
+* **invitation:** last minute changes ([4150638](https://github.com/ndsrf/wedding/commit/4150638dd8525ff84c92922a1565a5b0712c0379))
+* **invitation:** pass lang parameter and update test invitation minisite ([8a69cef](https://github.com/ndsrf/wedding/commit/8a69cef467e6e094f44c82b2fa7c36e997f1e926))
+* **invitation:** small change ([dd2c672](https://github.com/ndsrf/wedding/commit/dd2c6722444372620dfa1ea576ce16e9bf40b35b))
+* **invitation:** update ([a674aa8](https://github.com/ndsrf/wedding/commit/a674aa84998870a042ac9195301ba611c7d55f76))
+* **invitation:** volume changes ([d63bfde](https://github.com/ndsrf/wedding/commit/d63bfde802ddb9e646772fe210fc29a62ca08344))
+* make guest labels mapping defensive for test mock safety ([64ce49f](https://github.com/ndsrf/wedding/commit/64ce49f23058674d51adeeb76fa604d4f0b9dd44))
+* multilanguage for miniblocks ([af484a7](https://github.com/ndsrf/wedding/commit/af484a763ed7151d3a7c003aab58e9038043ff24))
+* resolve TypeScript style type errors in PDF routes ([f46b7fd](https://github.com/ndsrf/wedding/commit/f46b7fdec41d8dc27a70b169700bd13fb64882ad))
+* restore guest labels and tagging functionality ([9172d9f](https://github.com/ndsrf/wedding/commit/9172d9fa8de4f4883918e2b60628508e91acb471))
+* **security:** resolve npm audit vulnerabilities ([0ce22ea](https://github.com/ndsrf/wedding/commit/0ce22ea3c3fd24656bc51d354a19d9c4b5f500bb))
+* show couple names as title in whatsapp invitation preview ([ea37b30](https://github.com/ndsrf/wedding/commit/ea37b30d0f9899a5b4ef189238867a688aa79adf))
+* show family-level rsvp section in both add and edit modes ([61db69f](https://github.com/ndsrf/wedding/commit/61db69f4f04a72f99aedabe8a8eede82ae3148a0))
+* suppress og:title on invitation link so whatsapp shows image only ([b84540c](https://github.com/ndsrf/wedding/commit/b84540c28af7f2951e6d10b94db2b172ab884c06))
+* update validation schema to ensure positive integers for pagination ([8ca8ab8](https://github.com/ndsrf/wedding/commit/8ca8ab8751a09d47f8ade258b588f05680073711))
+* use ESM imports for @react-pdf/renderer ([c756616](https://github.com/ndsrf/wedding/commit/c7566166e8e79ce828520b4bff4c3535c57b6e8e))
+* use toabsoluteurl for generating og image whatsapp url in invitation route ([3cbeb6a](https://github.com/ndsrf/wedding/commit/3cbeb6ac77a778452ffda52abad6760a50cb9098))
+* **weddings:** mark theme_id schema field optional for zod v4 ([fe81965](https://github.com/ndsrf/wedding/commit/fe81965b6715939ae951fb3f3be4c8d0dae9647d))
+
+
+### Features
+
+* add guest rsvp questions and answers to wedding configuration and forms ([896c1c7](https://github.com/ndsrf/wedding/commit/896c1c707f6b26b1f4cf45085301154f379e0379))
+* add minisite block support in invitation template editor ([210cfe3](https://github.com/ndsrf/wedding/commit/210cfe344bba556f99752c5057df7cda3ba13aae))
+* banner and  nupcibot links added to the invitation rsvp page. and iban checkbox ([d130876](https://github.com/ndsrf/wedding/commit/d130876e83278ac26ea14af49f68fd6e5b1f8529))
+* change song for invitation ([a1a0dee](https://github.com/ndsrf/wedding/commit/a1a0dee6065d12336050a021c4ff8b33b404e831))
+* enhance invitation routes with og image support for whatsapp ([377b700](https://github.com/ndsrf/wedding/commit/377b70043cfe38edcacdcc094123fbcfa95529f0))
+* enhance rsvp user experience with personalized messages and link interactions ([2b275e1](https://github.com/ndsrf/wedding/commit/2b275e13f975707b4d608bc939460c58b877430b))
+* **invitation:** add reset invitation status functionality in bulk edit ([7c68c96](https://github.com/ndsrf/wedding/commit/7c68c965389f60da3ba458b8e80dc1eefc7c7cf9))
+* **providers:** add export functionality for providers library and wedding providers ([14a7f85](https://github.com/ndsrf/wedding/commit/14a7f854abf5b1eeca87b9556c89edae0604c5a9))
+* use wedding planner logo and update title in providers PDF export ([ae4f8ee](https://github.com/ndsrf/wedding/commit/ae4f8ee77d3989c63352033e60bf4e9de8bd7313))
 # [1.4.0](https://github.com/ndsrf/wedding/compare/v1.3.0...v1.4.0) (2026-03-07)
 
 
