@@ -225,7 +225,7 @@ export async function getSchedulePdfHandler(
       blocks: blocksWithTimes,
       coupleNames: wedding?.couple_names ?? '',
       weddingDate: wedding?.wedding_date
-        ? new Date(wedding.wedding_date).toLocaleDateString('es-ES')
+        ? new Date(wedding.wedding_date).toLocaleDateString('es-ES', { timeZone: 'UTC' })
         : null,
       startTime: start_time,
       viewMode,

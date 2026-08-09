@@ -54,6 +54,7 @@ export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
                 {new Date(item.dateTime).toLocaleTimeString(locale, {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZone: 'UTC',
                 })}
               </p>
               <p

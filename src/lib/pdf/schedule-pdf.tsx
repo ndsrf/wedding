@@ -324,7 +324,7 @@ export function SchedulePDF({
             <View style={styles.weddingItinerary}>
               {itineraryItems.map((item) => {
                 const dt = new Date(item.dateTime);
-                const time = `${dt.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} ${dt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+                const time = `${dt.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', timeZone: 'UTC' })} ${dt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })}`;
                 return (
                   <View key={item.id} style={styles.wItineraryRow}>
                     <Text style={styles.wItineraryTime}>{time}</Text>

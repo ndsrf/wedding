@@ -118,6 +118,7 @@ function formatDate(date: Date, locale = 'en-GB'): string {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC',
   });
 }
 
@@ -390,7 +391,7 @@ function buildSystemPrompt(
     for (const item of itinerary) {
       const typeLabel = TYPE_LABELS[item.item_type] ?? item.item_type;
       const dt = formatDate(item.date_time);
-      const time = new Date(item.date_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const time = new Date(item.date_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
       prompt += `- [${typeLabel}] ${dt} at ${time} — ${item.location_name}`;
       if (item.location_address) prompt += `, ${item.location_address}`;
       if (item.location_google_maps_url) prompt += ` | Maps: ${item.location_google_maps_url}`;

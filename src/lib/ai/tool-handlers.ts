@@ -511,7 +511,8 @@ export async function handleGetWeddingItinerary(ctx: ToolContext) {
     itemCount: items.length,
     items: items.map((item) => ({
       type: item.item_type,
-      dateTime: item.date_time.toISOString(),
+      // Wedding-local wall-clock time (not UTC) — no "Z" suffix so it isn't mistaken for one.
+      dateTime: item.date_time.toISOString().slice(0, 16),
       notes: item.notes,
       location: {
         name: item.location.name,
