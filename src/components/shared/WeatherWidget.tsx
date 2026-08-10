@@ -150,6 +150,7 @@ interface CollapsedPillProps {
 
 function CollapsedPill({ data, onExpand, t }: CollapsedPillProps) {
   const { sunTimes, moonPhase, weather } = data;
+  const latestWeather = weather[0];
   const h   = Math.floor(sunTimes.dayLengthMinutes / 60);
   const m   = sunTimes.dayLengthMinutes % 60;
   const dayLen = m > 0 ? `${h}${t('hours')}${m}${t('minutes')}` : `${h}${t('hours')}`;
@@ -170,8 +171,8 @@ function CollapsedPill({ data, onExpand, t }: CollapsedPillProps) {
       <span className="text-base">{moonPhase.emoji}</span>
       <span className="text-xs text-gray-600">{moonPhase.illumination}%</span>
       <span className="text-gray-300">·</span>
-      <span className="text-base">{weather.conditionEmoji}</span>
-      <span className="text-xs text-gray-600">{weather.tempMin}–{weather.tempMax}{t('unitCelsius')}</span>
+      <span className="text-base">{latestWeather.conditionEmoji}</span>
+      <span className="text-xs text-gray-600">{latestWeather.tempMin}–{latestWeather.tempMax}{t('unitCelsius')}</span>
       <div className="flex-1" />
       <span className="text-xs text-gray-400 group-hover:text-amber-500 transition-colors flex items-center gap-1">
         {t('expand')}
@@ -240,7 +241,6 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
   );
 
   const moonPhaseName  = t(`moonPhases.${moonPhase.name}`);
-  const conditionLabel = t(`conditions.${weather.condition}`);
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
@@ -346,26 +346,22 @@ export function WeatherWidget({ data, fetchStatus, blocks }: WeatherWidgetProps)
             <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
               {t('historicalWeather')}
             </h3>
-            <span className="ml-auto text-[10px] text-gray-400">
-              {t('referenceYear', { year: weather.referenceYear })}
-            </span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-gray-50 rounded-xl px-3 py-2">
-              <p className="text-sm font-semibold text-gray-800">{weather.tempMin}–{weather.tempMax}{t('unitCelsius')}</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">{t('avgTemp')}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl px-3 py-2">
-              <p className="text-sm font-semibold text-gray-800">{weather.precipitationMm} {t('unitMm')}</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">{t('precipitation')}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl px-3 py-2 flex items-center gap-2">
-              <span className="text-xl">{weather.conditionEmoji}</span>
-              <div>
-                <p className="text-xs font-semibold text-gray-800 leading-tight">{conditionLabel}</p>
+          <div className="space-y-2">
+            {weather.map((yearWeather) => (
+              <div key={yearWeather.year} className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2">
+                <span className="text-xs font-semibold text-gray-500 w-10 flex-shrink-0">{yearWeather.year}</span>
+                <span className="text-sm font-semibold text-gray-800 w-20 flex-shrink-0">
+                  {yearWeather.tempMin}–{yearWeather.tempMax}{t('unitCelsius')}
+                </span>
+                <span className="text-xs text-gray-500">{yearWeather.precipitationMm} {t('unitMm')}</span>
+                <span className="ml-auto flex items-center gap-1.5">
+                  <span className="text-lg">{yearWeather.conditionEmoji}</span>
+                  <span className="text-xs text-gray-600">{t(`conditions.${yearWeather.condition}`)}</span>
+                </span>
               </div>
-            </div>
+            ))}
           </div>
         </section>
       </div>

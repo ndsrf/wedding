@@ -3413,11 +3413,8 @@
     "solarNoon": "Sonnenmittag",
     "unitCelsius": "°C",
     "unitMm": "mm",
-    "avgTemp": "Durchschnittstemperatur",
-    "precipitation": "Niederschlag",
     "illumination": "Beleuchtung",
     "historicalWeather": "Historisches Wetter",
-    "referenceYear": "Referenzjahr: {year}",
     "moonPhases": {
       "newMoon": "Neumond",
       "waxingCrescent": "Zunehmende Sichel",

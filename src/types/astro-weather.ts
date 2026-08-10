@@ -41,13 +41,13 @@ export interface HistoricalWeather {
   condition: WeatherConditionKey;
   conditionEmoji: string;
   wmoCode: number;
-  referenceYear: number;
+  year: number;
 }
 
 export interface WeatherWidgetData {
   sunTimes: SunTimes;
   moonPhase: MoonPhase;
-  weather: HistoricalWeather;
+  weather: HistoricalWeather[]; // one entry per historical year, most recent first
   locationName: string;
   weddingDate: string;  // ISO date "YYYY-MM-DD"
   timezone: string;
