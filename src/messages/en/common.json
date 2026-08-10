@@ -3513,11 +3513,8 @@
     "solarNoon": "Solar Noon",
     "unitCelsius": "°C",
     "unitMm": "mm",
-    "avgTemp": "Average Temperature",
-    "precipitation": "Precipitation",
     "illumination": "illumination",
     "historicalWeather": "Historical Weather",
-    "referenceYear": "Reference year: {year}",
     "moonPhases": {
       "newMoon": "New Moon",
       "waxingCrescent": "Waxing Crescent",

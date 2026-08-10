@@ -23,16 +23,14 @@ export function wmoToCondition(code: number): { condition: WeatherConditionKey; 
   return { condition: 'cloudy', emoji: '☁️' };
 }
 
-export async function getHistoricalWeather(
+async function getHistoricalWeatherForYear(
   lat: number,
   lon: number,
-  date: Date,
+  year: number,
+  month: string,
+  day: string,
 ): Promise<{ weather: HistoricalWeather; timezone: string } | null> {
-  // Use the same calendar date from the previous year for historical comparison
-  const referenceYear = date.getFullYear() - 1;
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const dateStr = `${referenceYear}-${month}-${day}`;
+  const dateStr = `${year}-${month}-${day}`;
 
   const url = [
     'https://archive-api.open-meteo.com/v1/archive',
@@ -59,8 +57,35 @@ export async function getHistoricalWeather(
       condition,
       conditionEmoji: emoji,
       wmoCode,
-      referenceYear,
+      year,
     },
     timezone: data.timezone,
+  };
+}
+
+const HISTORICAL_YEARS = 3;
+
+export async function getHistoricalWeather(
+  lat: number,
+  lon: number,
+  date: Date,
+): Promise<{ weather: HistoricalWeather[]; timezone: string } | null> {
+  // Use the same calendar date from each of the previous N years for historical comparison
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const currentYear = date.getFullYear();
+
+  const results = await Promise.all(
+    Array.from({ length: HISTORICAL_YEARS }, (_, i) => currentYear - 1 - i).map((year) =>
+      getHistoricalWeatherForYear(lat, lon, year, month, day),
+    ),
+  );
+
+  const years = results.filter((r): r is { weather: HistoricalWeather; timezone: string } => r !== null);
+  if (years.length === 0) return null;
+
+  return {
+    weather: years.map((r) => r.weather),
+    timezone: years[0].timezone,
   };
 }

@@ -3491,11 +3491,8 @@
     "solarNoon": "Mediodía Solar",
     "unitCelsius": "°C",
     "unitMm": "mm",
-    "avgTemp": "Temperatura Promedio",
-    "precipitation": "Precipitación",
     "illumination": "iluminación",
     "historicalWeather": "Clima Histórico",
-    "referenceYear": "Año de referencia: {year}",
     "moonPhases": {
       "newMoon": "Luna Nueva",
       "waxingCrescent": "Cuarto Creciente",

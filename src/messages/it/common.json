@@ -3413,11 +3413,8 @@
     "solarNoon": "Mezzogiorno Solare",
     "unitCelsius": "°C",
     "unitMm": "mm",
-    "avgTemp": "Temperatura Media",
-    "precipitation": "Precipitazioni",
     "illumination": "illuminazione",
     "historicalWeather": "Meteo Storico",
-    "referenceYear": "Anno di riferimento: {year}",
     "moonPhases": {
       "newMoon": "Luna Nuova",
       "waxingCrescent": "Luna Crescente",
