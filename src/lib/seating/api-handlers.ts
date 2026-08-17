@@ -450,16 +450,17 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       .filter((table) => table.guests.length > 0)
       .map((table) => {
         const startIndex = table.coupleAssigned ? 2 : 0;
+        // id/table_id are plain text columns (no @db.Uuid in the schema), so
+        // values must NOT be cast to ::uuid or Postgres rejects the
+        // comparison with "operator does not exist: text = uuid".
         const seatCases = Prisma.join(
-          table.guests.map(
-            (guestId, i) => Prisma.sql`WHEN ${guestId}::uuid THEN ${startIndex + i}`
-          ),
+          table.guests.map((guestId, i) => Prisma.sql`WHEN ${guestId} THEN ${startIndex + i}`),
           ' '
         );
-        const guestIds = Prisma.join(table.guests.map((id) => Prisma.sql`${id}::uuid`));
+        const guestIds = Prisma.join(table.guests.map((id) => Prisma.sql`${id}`));
         return prisma.$executeRaw`
           UPDATE family_members
-          SET table_id = ${table.id}::uuid, seat_index = CASE id ${seatCases} END
+          SET table_id = ${table.id}, seat_index = CASE id ${seatCases} END
           WHERE id IN (${guestIds})
         `;
       });
