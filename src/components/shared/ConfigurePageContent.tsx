@@ -187,6 +187,7 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
           <WeddingConfigForm
             wedding={wedding}
             themes={wedding.available_themes}
+            spotifyConfigured={wedding.spotify_configured}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             deleteCacheRsvpUrl={apiPaths.deleteCacheRsvp}

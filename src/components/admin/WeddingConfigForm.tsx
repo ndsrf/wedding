@@ -15,10 +15,13 @@ import type { Theme, Wedding } from '@/types/models';
 import { BasicSettingsForm } from './BasicSettingsForm';
 import { RsvpSettingsForm } from './RsvpSettingsForm';
 import { GooglePhotosSettings } from './GooglePhotosSettings';
+import { SpotifyPlaylistSettings } from './SpotifyPlaylistSettings';
 
 interface WeddingConfigFormProps {
   wedding: Wedding;
   themes: Theme[];
+  /** true only when SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN are all set */
+  spotifyConfigured: boolean;
   onSubmit: (data: UpdateWeddingConfigRequest) => Promise<void>;
   onCancel: () => void;
   deleteCacheRsvpUrl: string;
@@ -26,7 +29,7 @@ interface WeddingConfigFormProps {
 
 type Tab = 'basic' | 'rsvp' | 'gallery';
 
-export function WeddingConfigForm({ wedding, themes, onSubmit, onCancel, deleteCacheRsvpUrl }: WeddingConfigFormProps) {
+export function WeddingConfigForm({ wedding, themes, spotifyConfigured, onSubmit, onCancel, deleteCacheRsvpUrl }: WeddingConfigFormProps) {
   const t = useTranslations('admin.configure');
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>('basic');
@@ -74,6 +77,7 @@ export function WeddingConfigForm({ wedding, themes, onSubmit, onCancel, deleteC
       {activeTab === 'rsvp' && (
         <RsvpSettingsForm
           wedding={wedding}
+          spotifyConfigured={spotifyConfigured}
           onSubmit={onSubmit}
           onCancel={onCancel}
           deleteCacheUrl={deleteCacheRsvpUrl}
@@ -81,7 +85,13 @@ export function WeddingConfigForm({ wedding, themes, onSubmit, onCancel, deleteC
       )}
 
       {activeTab === 'gallery' && (
-        <GooglePhotosSettings />
+        <>
+          <GooglePhotosSettings />
+          <SpotifyPlaylistSettings
+            spotifyConfigured={spotifyConfigured}
+            playlistUrl={wedding.spotify_playlist_url}
+          />
+        </>
       )}
     </div>
   );

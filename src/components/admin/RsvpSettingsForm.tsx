@@ -101,10 +101,17 @@ interface RsvpFormState {
   // Branding
   show_nupcibot_whatsapp_link: boolean;
   show_nupci_banner: boolean;
+  // Song suggestion questions (Spotify integration)
+  song_question_family_enabled: boolean;
+  song_question_family_text: I18nField | null;
+  song_question_individual_enabled: boolean;
+  song_question_individual_text: I18nField | null;
 }
 
 interface RsvpSettingsFormProps {
   wedding: Wedding;
+  /** true only when SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN are all set */
+  spotifyConfigured: boolean;
   onSubmit: (data: UpdateWeddingConfigRequest) => Promise<void>;
   onCancel: () => void;
   deleteCacheUrl: string;
@@ -199,7 +206,7 @@ function I18nDropdownInput({
 }
 
 // ── component ──────────────────────────────────────────────────────────────
-export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }: RsvpSettingsFormProps) {
+export function RsvpSettingsForm({ wedding, spotifyConfigured, onSubmit, onCancel, deleteCacheUrl }: RsvpSettingsFormProps) {
   const t = useTranslations('admin.configure.form');
 
   const [activeLang, setActiveLang] = useState<RsvpLanguage>('en');
@@ -259,6 +266,10 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }
     family_dropdown_question_1_options: (wedding.family_dropdown_question_1_options as I18nOptions | null) ?? null,
     show_nupcibot_whatsapp_link: wedding.show_nupcibot_whatsapp_link ?? true,
     show_nupci_banner: wedding.show_nupci_banner ?? true,
+    song_question_family_enabled: wedding.song_question_family_enabled,
+    song_question_family_text: (wedding.song_question_family_text as I18nField | null) ?? null,
+    song_question_individual_enabled: wedding.song_question_individual_enabled,
+    song_question_individual_text: (wedding.song_question_individual_text as I18nField | null) ?? null,
   });
 
   const set = <K extends keyof RsvpFormState>(key: K, val: RsvpFormState[K]) =>
@@ -354,6 +365,11 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }
         // Branding
         show_nupcibot_whatsapp_link: f.show_nupcibot_whatsapp_link,
         show_nupci_banner: f.show_nupci_banner,
+        // Song suggestion questions
+        song_question_family_enabled: f.song_question_family_enabled,
+        song_question_family_text: f.song_question_family_enabled ? f.song_question_family_text : null,
+        song_question_individual_enabled: f.song_question_individual_enabled,
+        song_question_individual_text: f.song_question_individual_enabled ? f.song_question_individual_text : null,
       });
     } catch (err) {
       console.error('Form submission error:', err);
@@ -607,6 +623,60 @@ export function RsvpSettingsForm({ wedding, onSubmit, onCancel, deleteCacheUrl }
                 questionLabelPlaceholderText={t('questionLabelPlaceholder')}
                 dropdownOptionsText={t('dropdownOptions')}
                 dropdownOptionsPlaceholderText={t('dropdownOptionsPlaceholder')}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── SONG SUGGESTIONS (Spotify) ───────────────────────────────────── */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-1">{t('songSuggestions')}</h3>
+        <p className="text-sm text-gray-500 mb-6">{t('songSuggestionsDesc')}</p>
+
+        {!spotifyConfigured && (
+          <p className="mb-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+            {t('songSuggestionsNotConfigured')}
+          </p>
+        )}
+
+        <div className={`${cardCls} mb-3`} title={!spotifyConfigured ? t('songSuggestionsNotConfigured') : undefined}>
+          <label className="flex items-center">
+            <input type="checkbox" checked={f.song_question_family_enabled}
+              disabled={!spotifyConfigured}
+              onChange={e => set('song_question_family_enabled', e.target.checked)}
+              className={`${checkCls} disabled:opacity-50 disabled:cursor-not-allowed`} />
+            <span className="ml-2 text-sm text-gray-700">{t('songQuestionFamily')}</span>
+          </label>
+          {f.song_question_family_enabled && spotifyConfigured && (
+            <div className={subCls}>
+              <I18nTextInput
+                map={f.song_question_family_text}
+                onChange={m => set('song_question_family_text', m)}
+                placeholder={t('songQuestionFamilyPlaceholder')}
+                activeLang={activeLang}
+                onLangChange={setActiveLang}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className={cardCls} title={!spotifyConfigured ? t('songSuggestionsNotConfigured') : undefined}>
+          <label className="flex items-center">
+            <input type="checkbox" checked={f.song_question_individual_enabled}
+              disabled={!spotifyConfigured}
+              onChange={e => set('song_question_individual_enabled', e.target.checked)}
+              className={`${checkCls} disabled:opacity-50 disabled:cursor-not-allowed`} />
+            <span className="ml-2 text-sm text-gray-700">{t('songQuestionIndividual')}</span>
+          </label>
+          {f.song_question_individual_enabled && spotifyConfigured && (
+            <div className={subCls}>
+              <I18nTextInput
+                map={f.song_question_individual_text}
+                onChange={m => set('song_question_individual_text', m)}
+                placeholder={t('songQuestionIndividualPlaceholder')}
+                activeLang={activeLang}
+                onLangChange={setActiveLang}
               />
             </div>
           )}

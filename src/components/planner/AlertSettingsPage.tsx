@@ -87,6 +87,47 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
 
   // ── Nightly summary test send ──────────────────────────────────────────────
 
+  // ── Spotify playlist sync toggle ───────────────────────────────────────────
+
+  const [spotifyEnabled, setSpotifyEnabled] = useState(false);
+  const [spotifyConfigured, setSpotifyConfigured] = useState(true);
+  const [spotifySaving, setSpotifySaving] = useState(false);
+
+  useEffect(() => {
+    async function loadSpotify() {
+      try {
+        const res = await fetch('/api/planner/spotify-settings');
+        if (!res.ok) return;
+        const { data } = await res.json() as { data: { spotify_sync_enabled: boolean; spotify_configured: boolean } };
+        setSpotifyEnabled(data.spotify_sync_enabled);
+        setSpotifyConfigured(data.spotify_configured);
+      } catch (err) {
+        console.error('[AlertSettings] Failed to load Spotify settings', err);
+      }
+    }
+    loadSpotify();
+  }, []);
+
+  async function handleSpotifyToggle() {
+    if (spotifySaving || !spotifyConfigured) return;
+    const next = !spotifyEnabled;
+    setSpotifySaving(true);
+    setSpotifyEnabled(next);
+    try {
+      const res = await fetch('/api/planner/spotify-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ spotify_sync_enabled: next }),
+      });
+      if (!res.ok) throw new Error('Save failed');
+    } catch (err) {
+      console.error('[AlertSettings] Failed to save Spotify settings', err);
+      setSpotifyEnabled(!next);
+    } finally {
+      setSpotifySaving(false);
+    }
+  }
+
   const [weddings, setWeddings] = useState<WeddingOption[]>([]);
   const [selectedWeddingId, setSelectedWeddingId] = useState('');
   const [testStatus, setTestStatus] = useState<TestSendStatus>('idle');
@@ -459,6 +500,38 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
                       : t('testSendErrorGeneric')}
               </p>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section: Playlist de Spotify ─────────────────────────────────── */}
+      <section>
+        <h2 className="text-base font-semibold text-gray-900 mb-1">{t('spotifyTitle')}</h2>
+        <p className="text-sm text-gray-500 mb-4">{t('spotifySubtitle')}</p>
+
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-start gap-4 py-4 px-5">
+            <button
+              type="button"
+              onClick={handleSpotifyToggle}
+              disabled={spotifySaving || !spotifyConfigured}
+              title={!spotifyConfigured ? t('spotifyNotConfigured') : undefined}
+              className="mt-0.5 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-checked={spotifyEnabled}
+              role="switch"
+              aria-label={t('spotifySyncName')}
+            >
+              <Toggle enabled={spotifyEnabled} saving={spotifySaving} />
+            </button>
+            <div className="flex-1 min-w-0">
+              <span className={`text-sm font-medium ${spotifyEnabled ? 'text-gray-900' : 'text-gray-500'}`}>
+                {t('spotifySyncName')}
+              </span>
+              <p className="text-xs text-gray-400 mt-0.5">{t('spotifySyncDescription')}</p>
+              {!spotifyConfigured && (
+                <p className="text-xs text-amber-600 mt-1">{t('spotifyNotConfigured')}</p>
+              )}
+            </div>
           </div>
         </div>
       </section>
