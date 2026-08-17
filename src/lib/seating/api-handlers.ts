@@ -453,11 +453,18 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       }
     }
 
-    const updates = tableStates.flatMap((table) =>
-      table.guests.map((guestId) =>
-        prisma.familyMember.update({ where: { id: guestId }, data: { table_id: table.id } })
-      )
-    );
+    // Grouped per table (instead of one query per guest) to keep the number of
+    // round-trips low — with many guests, per-guest updates inside a single
+    // transaction can exceed Prisma's default 5s transaction timeout on
+    // higher-latency connections (e.g. Neon on Vercel).
+    const tableUpdates = tableStates
+      .filter((table) => table.guests.length > 0)
+      .map((table) =>
+        prisma.familyMember.updateMany({
+          where: { id: { in: table.guests } },
+          data: { table_id: table.id },
+        })
+      );
 
     const coupleTable = tableStates.find((t) => t.coupleAssigned);
     const coupleUpdate = prisma.wedding.update({
@@ -465,13 +472,23 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       data: { couple_table_id: coupleTable?.id || null },
     });
 
-    const clearUnassigned = unassigned
-      .filter((g) => !g.isCouple)
-      .map((guest) =>
-        prisma.familyMember.update({ where: { id: guest.id }, data: { table_id: null } })
-      );
+    const unassignedIds = unassigned.filter((g) => !g.isCouple).map((g) => g.id);
+    const clearUnassigned =
+      unassignedIds.length > 0
+        ? prisma.familyMember.updateMany({
+            where: { id: { in: unassignedIds } },
+            data: { table_id: null },
+          })
+        : null;
 
-    await prisma.$transaction([...updates, coupleUpdate, ...clearUnassigned]);
+    // Each table's guest set is disjoint, so these writes don't need
+    // cross-table atomicity and can run independently in parallel rather
+    // than inside a single all-or-nothing transaction.
+    await Promise.all([
+      ...tableUpdates,
+      coupleUpdate,
+      ...(clearUnassigned ? [clearUnassigned] : []),
+    ]);
 
     return NextResponse.json(
       {
