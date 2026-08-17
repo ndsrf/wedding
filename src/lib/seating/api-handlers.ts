@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import type { GetSeatingPlanResponse, TableWithGuests, APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
@@ -268,6 +269,18 @@ export async function upsertTablesHandler(
           where: { table_id: { in: delete_ids }, family: { wedding_id: weddingId } },
           data: { table_id: null },
         });
+
+        const wedding = await tx.wedding.findUnique({
+          where: { id: weddingId },
+          select: { couple_table_id: true },
+        });
+        if (wedding?.couple_table_id && delete_ids.includes(wedding.couple_table_id)) {
+          await tx.wedding.update({
+            where: { id: weddingId },
+            data: { couple_table_id: null },
+          });
+        }
+
         await tx.table.deleteMany({
           where: { id: { in: delete_ids }, wedding_id: weddingId },
         });
@@ -391,7 +404,12 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       ]);
     }
 
-    const groups = Array.from(groupsMap.values()).sort(() => Math.random() - 0.5);
+    // Larger groups first (first-fit decreasing) reduces fragmentation so more
+    // families find a table that fits them whole; order within the same size
+    // is randomized for variety.
+    const groups = Array.from(groupsMap.values())
+      .sort(() => Math.random() - 0.5)
+      .sort((a, b) => b.length - a.length);
 
     const tableStates = tables.map((t) => ({
       ...t,
@@ -403,49 +421,55 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
     const unassigned: GuestGroupMember[] = [];
 
     for (const group of groups) {
-      let assigned = false;
       const shuffledTables = [...tableStates].sort(() => Math.random() - 0.5);
+      const table = shuffledTables.find((t) => t.remaining >= group.length);
 
-      for (const table of shuffledTables) {
-        if (table.remaining >= group.length) {
-          table.remaining -= group.length;
-          group.forEach((g) => {
-            if (g.isCouple) {
-              table.coupleAssigned = true;
-            } else {
-              table.guests.push(g.id);
-            }
-          });
-          assigned = true;
-          break;
-        }
-      }
-
-      if (!assigned) {
-        for (const guest of group) {
-          let guestAssigned = false;
-          for (const table of tableStates) {
-            if (table.remaining >= 1) {
-              table.remaining -= 1;
-              if (guest.isCouple) {
-                table.coupleAssigned = true;
-              } else {
-                table.guests.push(guest.id);
-              }
-              guestAssigned = true;
-              break;
-            }
+      if (table) {
+        table.remaining -= group.length;
+        group.forEach((g) => {
+          if (g.isCouple) {
+            table.coupleAssigned = true;
+          } else {
+            table.guests.push(g.id);
           }
-          if (!guestAssigned) unassigned.push(guest);
-        }
+        });
+      } else {
+        // Never split a family/group across tables — if no single table has
+        // enough room for the whole group, leave every member unassigned
+        // together rather than scattering them individually.
+        unassigned.push(...group);
       }
     }
 
-    const updates = tableStates.flatMap((table) =>
-      table.guests.map((guestId) =>
-        prisma.familyMember.update({ where: { id: guestId }, data: { table_id: table.id } })
-      )
-    );
+    // One UPDATE per table (instead of one per guest) to keep round-trips low —
+    // important since the serverless pool only allows 2 concurrent connections.
+    // seat_index is set consecutively in group order (families were pushed into
+    // table.guests contiguously above) so families render together instead of
+    // interleaved with whoever previously had a lower seat_index at that table.
+    const tableUpdates = tableStates
+      .filter((table) => table.guests.length > 0)
+      .map((table) => {
+        const startIndex = table.coupleAssigned ? 2 : 0;
+        // id/table_id are plain text columns (no @db.Uuid in the schema), so
+        // bind them as ::text — casting to ::uuid makes Postgres reject the
+        // comparison ("operator does not exist: text = uuid"). Conversely,
+        // Postgres cannot infer a type for parameters inside a bare CASE...
+        // THEN branch and defaults them to text, so the seat_index branch
+        // needs an explicit ::int cast or the UPDATE fails with "column
+        // seat_index is of type integer but expression is of type text".
+        const seatCases = Prisma.join(
+          table.guests.map(
+            (guestId, i) => Prisma.sql`WHEN ${guestId}::text THEN ${startIndex + i}::int`
+          ),
+          ' '
+        );
+        const guestIds = Prisma.join(table.guests.map((id) => Prisma.sql`${id}::text`));
+        return prisma.$executeRaw`
+          UPDATE family_members
+          SET table_id = ${table.id}::text, seat_index = CASE id ${seatCases} END
+          WHERE id IN (${guestIds})
+        `;
+      });
 
     const coupleTable = tableStates.find((t) => t.coupleAssigned);
     const coupleUpdate = prisma.wedding.update({
@@ -453,13 +477,23 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       data: { couple_table_id: coupleTable?.id || null },
     });
 
-    const clearUnassigned = unassigned
-      .filter((g) => !g.isCouple)
-      .map((guest) =>
-        prisma.familyMember.update({ where: { id: guest.id }, data: { table_id: null } })
-      );
+    const unassignedIds = unassigned.filter((g) => !g.isCouple).map((g) => g.id);
+    const clearUnassigned =
+      unassignedIds.length > 0
+        ? prisma.familyMember.updateMany({
+            where: { id: { in: unassignedIds } },
+            data: { table_id: null, seat_index: null },
+          })
+        : null;
 
-    await prisma.$transaction([...updates, coupleUpdate, ...clearUnassigned]);
+    // Each table's guest set is disjoint, so these writes don't need
+    // cross-table atomicity and can run independently in parallel rather
+    // than inside a single all-or-nothing transaction.
+    await Promise.all([
+      ...tableUpdates,
+      coupleUpdate,
+      ...(clearUnassigned ? [clearUnassigned] : []),
+    ]);
 
     return NextResponse.json(
       {
