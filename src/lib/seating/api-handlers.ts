@@ -403,7 +403,12 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       ]);
     }
 
-    const groups = Array.from(groupsMap.values()).sort(() => Math.random() - 0.5);
+    // Larger groups first (first-fit decreasing) reduces fragmentation so more
+    // families find a table that fits them whole; order within the same size
+    // is randomized for variety.
+    const groups = Array.from(groupsMap.values())
+      .sort(() => Math.random() - 0.5)
+      .sort((a, b) => b.length - a.length);
 
     const tableStates = tables.map((t) => ({
       ...t,
@@ -415,41 +420,23 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
     const unassigned: GuestGroupMember[] = [];
 
     for (const group of groups) {
-      let assigned = false;
       const shuffledTables = [...tableStates].sort(() => Math.random() - 0.5);
+      const table = shuffledTables.find((t) => t.remaining >= group.length);
 
-      for (const table of shuffledTables) {
-        if (table.remaining >= group.length) {
-          table.remaining -= group.length;
-          group.forEach((g) => {
-            if (g.isCouple) {
-              table.coupleAssigned = true;
-            } else {
-              table.guests.push(g.id);
-            }
-          });
-          assigned = true;
-          break;
-        }
-      }
-
-      if (!assigned) {
-        for (const guest of group) {
-          let guestAssigned = false;
-          for (const table of tableStates) {
-            if (table.remaining >= 1) {
-              table.remaining -= 1;
-              if (guest.isCouple) {
-                table.coupleAssigned = true;
-              } else {
-                table.guests.push(guest.id);
-              }
-              guestAssigned = true;
-              break;
-            }
+      if (table) {
+        table.remaining -= group.length;
+        group.forEach((g) => {
+          if (g.isCouple) {
+            table.coupleAssigned = true;
+          } else {
+            table.guests.push(g.id);
           }
-          if (!guestAssigned) unassigned.push(guest);
-        }
+        });
+      } else {
+        // Never split a family/group across tables — if no single table has
+        // enough room for the whole group, leave every member unassigned
+        // together rather than scattering them individually.
+        unassigned.push(...group);
       }
     }
 
