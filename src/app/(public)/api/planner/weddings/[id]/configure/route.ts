@@ -18,6 +18,7 @@ import { reRenderWeddingTemplates } from '@/lib/invitation-template/re-render';
 import { revalidateWeddingRSVPPages } from '@/lib/cache/revalidate-rsvp';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache/redis';
 import { toInitials } from '@/lib/wedding-utils';
+import { isSpotifyConfigured } from '@/lib/spotify/client';
 import type { ThemeConfig } from '@/types/theme';
 import type { Theme, Wedding } from '@/types/models';
 import type { APIResponse, GetWeddingDetailsResponse, UpdateWeddingConfigResponse } from '@/types/api';
@@ -90,6 +91,11 @@ const updateWeddingConfigSchema = z.object({
   // RSVP Branding settings
   show_nupcibot_whatsapp_link: z.boolean().optional(),
   show_nupci_banner: z.boolean().optional(),
+  // RSVP Configuration - Song suggestion questions (Spotify integration)
+  song_question_family_enabled: z.boolean().optional(),
+  song_question_family_text: z.record(z.string(), z.string()).nullable().optional(),
+  song_question_individual_enabled: z.boolean().optional(),
+  song_question_individual_text: z.record(z.string(), z.string()).nullable().optional(),
 });
 
 /**
@@ -278,6 +284,13 @@ export async function GET(
       guest_text_question_2_label: wedding.guest_text_question_2_label,
       guest_text_question_3_enabled: wedding.guest_text_question_3_enabled,
       guest_text_question_3_label: wedding.guest_text_question_3_label,
+      song_question_family_enabled: wedding.song_question_family_enabled,
+      song_question_family_text: wedding.song_question_family_text,
+      song_question_individual_enabled: wedding.song_question_individual_enabled,
+      song_question_individual_text: wedding.song_question_individual_text,
+      spotify_playlist_id: wedding.spotify_playlist_id,
+      spotify_playlist_url: wedding.spotify_playlist_url,
+      spotify_configured: isSpotifyConfigured(),
       guest_count: totalGuests,
       rsvp_count: rsvpCount,
       rsvp_completion_percentage: rsvpCompletionPercentage,
@@ -378,6 +391,8 @@ export async function PATCH(
       'guest_text_question_2_enabled', 'guest_text_question_2_label',
       'guest_text_question_3_enabled', 'guest_text_question_3_label',
       'show_nupcibot_whatsapp_link', 'show_nupci_banner',
+      'song_question_family_enabled', 'song_question_family_text',
+      'song_question_individual_enabled', 'song_question_individual_text',
     ] as const;
 
     for (const field of fields) {

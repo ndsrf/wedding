@@ -36,6 +36,7 @@ export interface CachedWeddingPageData {
     additional_info: string | null;
     allow_guest_additions: boolean;
     default_language: Language;
+    wedding_country: string;
     payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
     show_iban_on_rsvp: boolean;
@@ -85,6 +86,11 @@ export interface CachedWeddingPageData {
     guest_text_question_2_label: Record<string, string> | null;
     guest_text_question_3_enabled: boolean;
     guest_text_question_3_label: Record<string, string> | null;
+    // Song suggestion questions (Spotify integration)
+    song_question_family_enabled: boolean;
+    song_question_family_text: Record<string, string> | null;
+    song_question_individual_enabled: boolean;
+    song_question_individual_text: Record<string, string> | null;
   };
   theme: {
     id: string;

@@ -318,6 +318,8 @@ export interface WeddingDetails extends WeddingWithStats {
   planner_logo_url: string | null;
   admin_count: number;
   available_themes: Theme[];
+  /** true only when SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN are all set */
+  spotify_configured: boolean;
 }
 
 export type GetWeddingDetailsResponse = APIResponse<WeddingDetails>;
@@ -398,6 +400,12 @@ export interface UpdateWeddingConfigRequest {
   // RSVP Branding settings
   show_nupcibot_whatsapp_link?: boolean;
   show_nupci_banner?: boolean;
+
+  // RSVP Configuration - Song suggestion questions (Spotify integration)
+  song_question_family_enabled?: boolean;
+  song_question_family_text?: Record<string, string> | null;
+  song_question_individual_enabled?: boolean;
+  song_question_individual_text?: Record<string, string> | null;
 }
 
 export type UpdateWeddingConfigResponse = APIResponse<Wedding>;
@@ -597,6 +605,7 @@ export interface GuestRSVPPageData {
     additional_info: string | null;
     allow_guest_additions: boolean;
     default_language: Language;
+    wedding_country: string;
     payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
     show_iban_on_rsvp: boolean;
@@ -658,6 +667,12 @@ export interface GuestRSVPPageData {
     guest_text_question_2_label: Record<string, string> | null;
     guest_text_question_3_enabled: boolean;
     guest_text_question_3_label: Record<string, string> | null;
+
+    // RSVP Configuration - Song suggestion questions (Spotify integration)
+    song_question_family_enabled: boolean;
+    song_question_family_text: Record<string, string> | null;
+    song_question_individual_enabled: boolean;
+    song_question_individual_text: Record<string, string> | null;
   };
   theme: Theme;
   invitation_template?: {
@@ -672,6 +687,17 @@ export interface GuestRSVPPageData {
 }
 
 export type GetGuestRSVPPageResponse = APIResponse<GuestRSVPPageData>;
+
+// A song suggestion submitted from the RSVP form — either a track picked
+// from the Spotify search dropdown, or free text typed without a selection.
+export interface SongSuggestionInput {
+  raw_input: string;
+  spotify_track_id?: string;
+  spotify_uri?: string;
+  track_title?: string;
+  artist_name?: string;
+  album_art_url?: string;
+}
 
 // POST /api/guest/:token/rsvp
 export interface SubmitRSVPRequest {
@@ -690,6 +716,8 @@ export interface SubmitRSVPRequest {
     guest_text_question_1_answer?: string;
     guest_text_question_2_answer?: string;
     guest_text_question_3_answer?: string;
+    // Individual song suggestion (null clears a previously saved one)
+    song?: SongSuggestionInput | null;
   }>;
   // RSVP Question Answers (family-level)
   transportation_answer?: boolean;
@@ -700,6 +728,8 @@ export interface SubmitRSVPRequest {
   extra_info_2_value?: string;
   extra_info_3_value?: string;
   family_dropdown_question_1_answer?: string;
+  // Family-level song suggestion (null clears a previously saved one)
+  family_song?: SongSuggestionInput | null;
 }
 
 export interface SubmitRSVPResult {

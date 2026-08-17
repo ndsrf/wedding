@@ -11,8 +11,51 @@ import { validateMagicLink } from '@/lib/auth/magic-link';
 import { trackRSVPSubmitted } from '@/lib/tracking/events';
 import { prisma } from '@/lib/db/prisma';
 import { sendConfirmation } from '@/lib/notifications/confirmation';
-import type { SubmitRSVPRequest, SubmitRSVPResponse } from '@/types/api';
+import type { SongSuggestionInput, SubmitRSVPRequest, SubmitRSVPResponse } from '@/types/api';
 import type { Channel } from '@prisma/client';
+
+/**
+ * Upserts (or clears) a single song suggestion for a family/guest.
+ * `undefined` means "not part of this submission" (leave untouched); an
+ * empty/missing `raw_input` clears a previously saved suggestion.
+ */
+async function upsertSongSuggestion(
+  weddingId: string,
+  scope: { family_id: string; family_member_id: string | null },
+  input: SongSuggestionInput | null | undefined
+) {
+  if (input === undefined) return;
+
+  const where = {
+    wedding_id: weddingId,
+    family_id: scope.family_id,
+    family_member_id: scope.family_member_id,
+  };
+  const existing = await prisma.songSuggestion.findFirst({ where });
+
+  if (!input || !input.raw_input?.trim()) {
+    if (existing) await prisma.songSuggestion.delete({ where: { id: existing.id } });
+    return;
+  }
+
+  const data = {
+    raw_input: input.raw_input.trim(),
+    spotify_track_id: input.spotify_track_id ?? null,
+    spotify_uri: input.spotify_uri ?? null,
+    track_title: input.track_title ?? null,
+    artist_name: input.artist_name ?? null,
+    album_art_url: input.album_art_url ?? null,
+    status: input.spotify_uri ? ('READY' as const) : ('PENDING_AI' as const),
+  };
+
+  if (existing) {
+    await prisma.songSuggestion.update({ where: { id: existing.id }, data });
+  } else {
+    await prisma.songSuggestion.create({
+      data: { wedding_id: weddingId, family_id: scope.family_id, family_member_id: scope.family_member_id, ...data },
+    });
+  }
+}
 
 export async function POST(
   request: NextRequest,
@@ -121,6 +164,15 @@ export async function POST(
 
     await Promise.all(updatePromises);
 
+    // Upsert per-guest song suggestions (only for members attending, when submitted)
+    await Promise.all(
+      body.members
+        .filter((m) => m.attending && m.song !== undefined)
+        .map((m) =>
+          upsertSongSuggestion(wedding.id, { family_id: family.id, family_member_id: m.id }, m.song)
+        )
+    );
+
     // Update family with question answers
     await prisma.family.update({
       where: { id: family.id },
@@ -135,6 +187,9 @@ export async function POST(
         family_dropdown_question_1_answer: body.family_dropdown_question_1_answer || null,
       },
     });
+
+    // Upsert the family-level song suggestion, when submitted
+    await upsertSongSuggestion(wedding.id, { family_id: family.id, family_member_id: null }, body.family_song);
 
     // Extract channel from URL query parameter
     const channel = request.nextUrl.searchParams.get('channel')?.toUpperCase() as Channel | null;

@@ -231,6 +231,15 @@ export interface Wedding {
   guest_text_question_2_label: Record<string, string> | null;
   guest_text_question_3_enabled: boolean;
   guest_text_question_3_label: Record<string, string> | null;
+
+  // RSVP Configuration - Song suggestion questions (Spotify integration)
+  song_question_family_enabled: boolean;
+  song_question_family_text: Record<string, string> | null;
+  song_question_individual_enabled: boolean;
+  song_question_individual_text: Record<string, string> | null;
+  spotify_playlist_id: string | null;
+  spotify_playlist_url: string | null;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   layout_elements?: any | null; // JSON value for canvas elements
 
@@ -320,6 +329,25 @@ export interface FamilyMember {
   guest_text_question_3_answer: string | null;
 }
 
+export type SongStatus = 'READY' | 'PENDING_AI' | 'SYNCED' | 'DISCARDED' | 'FAILED';
+
+export interface SongSuggestion {
+  id: string;
+  wedding_id: string;
+  family_id: string | null;
+  family_member_id: string | null;
+  raw_input: string;
+  spotify_track_id: string | null;
+  spotify_uri: string | null;
+  track_title: string | null;
+  artist_name: string | null;
+  album_art_url: string | null;
+  status: SongStatus;
+  ai_error: string | null;
+  created_at: Date;
+  synced_at: Date | null;
+}
+
 export interface Table {
   id: string;
   wedding_id: string;
@@ -401,6 +429,8 @@ export interface Translation {
 export interface FamilyWithMembers extends Family {
   members: FamilyMember[];
   labels?: GuestLabel[];
+  /** Song suggestions for this family — family-level + each member's (Spotify integration) */
+  songs?: SongSuggestion[];
 }
 
 export interface FamilyWithRelations extends Family {
