@@ -1423,6 +1423,93 @@ GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 APP_URL=https://your-domain.com
 ```
 
+### Spotify Integration
+
+Guests can suggest songs for the wedding playlist during RSVP. Nupci uses a **single Spotify account it owns** (a Free account works fine — creating and managing playlists via the API doesn't require Premium) to power this, rather than a per-wedding connection like Google Photos.
+
+#### How It Works
+
+1. When answering the RSVP song question, guests can search Spotify's public catalog (powered by a Client Credentials token — no login required) and pick a track, or just type free text.
+2. Picked tracks are stored ready to sync. Free-text answers are queued and resolved overnight by AI + a Spotify catalog search.
+3. A nightly cron job creates a public Spotify playlist per wedding (once, on first use) and adds newly-ready songs to it, using the one shared Nupci account's refresh token. It sends no notifications — only cron logs.
+4. Planners can turn the nightly sync job on/off for all their weddings from **Planner → Alert Settings**. Each wedding's admin can enable/disable the RSVP song questions from **Configure → RSVP**.
+5. The resulting playlist link/embed appears in **Configure → Gallery** once created.
+
+#### 1. Create a Spotify Developer App
+
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and log in with **the Spotify account you want Nupci to own the playlists with** (create a dedicated Free account for this if you don't want to use a personal one).
+2. Click **Create app**.
+3. Fill in the form:
+   - **App name** / **App description**: anything, e.g. "Nupci".
+   - **Redirect URI**: this is only used once, for the manual authorization step below — it does not need to be a real, reachable page. Enter `http://localhost:8888/callback` and click **Add**.
+   - **Which API/SDKs are you planning to use?**: check **Web API**.
+4. Accept the terms and click **Save**.
+5. Open the app you just created, click **Settings**, and note the **Client ID** and **Client secret** (click **View client secret** to reveal it).
+
+#### 2. Get a Refresh Token (one-time authorization)
+
+There is no login screen for this inside Nupci — you authorize the app **once**, manually, and the resulting refresh token is stored in `.env` from then on (Spotify refresh tokens don't expire unless access is revoked).
+
+1. Build the following URL, filling in the `Client ID` from step 1 and URL-encoding the redirect URI you registered:
+   ```
+   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8888%2Fcallback&scope=playlist-modify-public%20ugc-image-upload
+   ```
+2. Open it in a browser while logged in as the Spotify account from step 1, and click **Agree** to grant the requested permissions.
+3. You'll be redirected to `http://localhost:8888/callback?code=...` — the page itself will likely fail to load (nothing is listening on that port), which is fine. What matters is the `code` parameter in the browser's address bar. Copy its value.
+4. Exchange the code for tokens:
+   ```bash
+   curl -X POST https://accounts.spotify.com/api/token \
+     -H "Authorization: Basic $(printf '%s' 'YOUR_CLIENT_ID:YOUR_CLIENT_SECRET' | base64)" \
+     -d grant_type=authorization_code \
+     -d code=YOUR_CODE \
+     -d redirect_uri=http://localhost:8888/callback
+   ```
+5. The JSON response includes `access_token` and `refresh_token`. Copy the **`refresh_token`** — this is the value for `SPOTIFY_REFRESH_TOKEN`.
+
+> **Important:** Do this step logged in as the account that should own the wedding playlists, not your personal Spotify account (unless that's the one you want to use).
+
+#### 3. (Optional) Look Up the Spotify User ID
+
+Setting `SPOTIFY_USER_ID` skips one API call per nightly sync run. Using the `access_token` from step 2:
+
+```bash
+curl https://api.spotify.com/v1/me -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Copy the `id` field from the response.
+
+#### 4. Configure Environment Variables
+
+```bash
+SPOTIFY_CLIENT_ID=your-spotify-client-id
+SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
+SPOTIFY_REFRESH_TOKEN=your-spotify-refresh-token
+SPOTIFY_USER_ID=       # optional — see step 3 above
+```
+
+The integration is only considered active once all three required variables (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`) are set — otherwise the RSVP song question toggles in Configure stay disabled.
+
+#### Troubleshooting
+
+**Song question toggles are greyed out in Configure → RSVP:**
+- Spotify isn't configured system-wide — verify all three required env vars are set and restart the app.
+
+**Nightly sync fails with a 401/expired token error:**
+- The connected Spotify account revoked access, or the refresh token was regenerated elsewhere. Repeat step 2 to get a fresh `SPOTIFY_REFRESH_TOKEN`.
+
+**Playlist is created but has no cover image:**
+- The planner has no `logo_url` set, or the cover upload failed (non-fatal — check cron logs). The playlist and tracks are unaffected.
+
+**No playlist appears in Configure → Gallery:**
+- The playlist is only created once there's at least one `READY` song suggestion to add. It's created by the nightly cron job, not immediately after a guest submits a suggestion.
+
+#### Required OAuth Scopes
+
+```
+playlist-modify-public
+ugc-image-upload
+```
+
 ### Alert System
 
 The platform includes a robust asynchronous alert infrastructure to notify admins, planners, the couple, and specific guests when events occur (RSVP submissions, payments received, tasks overdue, etc.).
