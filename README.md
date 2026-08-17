@@ -1456,14 +1456,11 @@ There is no login screen for this inside Nupci — you authorize the app **once*
    ```
 2. Open it in a browser while logged in as the Spotify account from step 1, and click **Agree** to grant the requested permissions.
 3. You'll be redirected to `http://localhost:8888/callback?code=...` — the page itself will likely fail to load (nothing is listening on that port), which is fine. What matters is the `code` parameter in the browser's address bar. Copy its value.
-4. Exchange the code for tokens:
+4. Exchange the code for tokens. Run this as a **single line** — pasting a multi-line command with `\` continuations can silently break in some terminals, turning each `-d ...` into its own (failing) command:
    ```bash
-   curl -X POST https://accounts.spotify.com/api/token \
-     -H "Authorization: Basic $(printf '%s' 'YOUR_CLIENT_ID:YOUR_CLIENT_SECRET' | base64)" \
-     -d grant_type=authorization_code \
-     -d code=YOUR_CODE \
-     -d redirect_uri=http://localhost:8888/callback
+   curl -X POST https://accounts.spotify.com/api/token --http1.1 -H "Authorization: Basic $(printf '%s' 'YOUR_CLIENT_ID:YOUR_CLIENT_SECRET' | base64)" -d grant_type=authorization_code -d code=YOUR_CODE -d redirect_uri=http://localhost:8888/callback
    ```
+   > `--http1.1` avoids a `curl: (92) HTTP/2 stream 0 was not closed cleanly` error some networks/curl versions hit against Spotify's token endpoint.
 5. The JSON response includes `access_token` and `refresh_token`. Copy the **`refresh_token`** — this is the value for `SPOTIFY_REFRESH_TOKEN`.
 
 > **Important:** Do this step logged in as the account that should own the wedding playlists, not your personal Spotify account (unless that's the one you want to use).
