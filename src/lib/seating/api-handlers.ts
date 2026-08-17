@@ -451,16 +451,22 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       .map((table) => {
         const startIndex = table.coupleAssigned ? 2 : 0;
         // id/table_id are plain text columns (no @db.Uuid in the schema), so
-        // values must NOT be cast to ::uuid or Postgres rejects the
-        // comparison with "operator does not exist: text = uuid".
+        // bind them as ::text — casting to ::uuid makes Postgres reject the
+        // comparison ("operator does not exist: text = uuid"). Conversely,
+        // Postgres cannot infer a type for parameters inside a bare CASE...
+        // THEN branch and defaults them to text, so the seat_index branch
+        // needs an explicit ::int cast or the UPDATE fails with "column
+        // seat_index is of type integer but expression is of type text".
         const seatCases = Prisma.join(
-          table.guests.map((guestId, i) => Prisma.sql`WHEN ${guestId} THEN ${startIndex + i}`),
+          table.guests.map(
+            (guestId, i) => Prisma.sql`WHEN ${guestId}::text THEN ${startIndex + i}::int`
+          ),
           ' '
         );
-        const guestIds = Prisma.join(table.guests.map((id) => Prisma.sql`${id}`));
+        const guestIds = Prisma.join(table.guests.map((id) => Prisma.sql`${id}::text`));
         return prisma.$executeRaw`
           UPDATE family_members
-          SET table_id = ${table.id}, seat_index = CASE id ${seatCases} END
+          SET table_id = ${table.id}::text, seat_index = CASE id ${seatCases} END
           WHERE id IN (${guestIds})
         `;
       });
