@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import type { GetSeatingPlanResponse, TableWithGuests, APIResponse } from '@/types/api';
 import { API_ERROR_CODES } from '@/types/api';
@@ -440,18 +441,28 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       }
     }
 
-    // Grouped per table (instead of one query per guest) to keep the number of
-    // round-trips low — with many guests, per-guest updates inside a single
-    // transaction can exceed Prisma's default 5s transaction timeout on
-    // higher-latency connections (e.g. Neon on Vercel).
+    // One UPDATE per table (instead of one per guest) to keep round-trips low —
+    // important since the serverless pool only allows 2 concurrent connections.
+    // seat_index is set consecutively in group order (families were pushed into
+    // table.guests contiguously above) so families render together instead of
+    // interleaved with whoever previously had a lower seat_index at that table.
     const tableUpdates = tableStates
       .filter((table) => table.guests.length > 0)
-      .map((table) =>
-        prisma.familyMember.updateMany({
-          where: { id: { in: table.guests } },
-          data: { table_id: table.id },
-        })
-      );
+      .map((table) => {
+        const startIndex = table.coupleAssigned ? 2 : 0;
+        const seatCases = Prisma.join(
+          table.guests.map(
+            (guestId, i) => Prisma.sql`WHEN ${guestId}::uuid THEN ${startIndex + i}`
+          ),
+          ' '
+        );
+        const guestIds = Prisma.join(table.guests.map((id) => Prisma.sql`${id}::uuid`));
+        return prisma.$executeRaw`
+          UPDATE family_members
+          SET table_id = ${table.id}::uuid, seat_index = CASE id ${seatCases} END
+          WHERE id IN (${guestIds})
+        `;
+      });
 
     const coupleTable = tableStates.find((t) => t.coupleAssigned);
     const coupleUpdate = prisma.wedding.update({
@@ -464,7 +475,7 @@ export async function randomAssignHandler(weddingId: string): Promise<NextRespon
       unassignedIds.length > 0
         ? prisma.familyMember.updateMany({
             where: { id: { in: unassignedIds } },
-            data: { table_id: null },
+            data: { table_id: null, seat_index: null },
           })
         : null;
 
