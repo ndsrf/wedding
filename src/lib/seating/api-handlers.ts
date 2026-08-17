@@ -268,6 +268,18 @@ export async function upsertTablesHandler(
           where: { table_id: { in: delete_ids }, family: { wedding_id: weddingId } },
           data: { table_id: null },
         });
+
+        const wedding = await tx.wedding.findUnique({
+          where: { id: weddingId },
+          select: { couple_table_id: true },
+        });
+        if (wedding?.couple_table_id && delete_ids.includes(wedding.couple_table_id)) {
+          await tx.wedding.update({
+            where: { id: weddingId },
+            data: { couple_table_id: null },
+          });
+        }
+
         await tx.table.deleteMany({
           where: { id: { in: delete_ids }, wedding_id: weddingId },
         });
