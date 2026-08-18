@@ -45,6 +45,11 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Once results were shown and the guest keeps typing instead of picking
+  // one, assume they're writing their own answer (e.g. "lo que quieran los
+  // novios") and stop reopening the dropdown for the rest of it — avoids
+  // interrupting free-text answers with irrelevant search results.
+  const suppressedRef = useRef(false);
 
   const isTrackSelected = !!value?.spotify_uri;
 
@@ -59,11 +64,22 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
   }, []);
 
   function handleQueryChange(text: string) {
+    const dropdownWasOpen = showResults;
     setQuery(text);
     onChange(text.trim() ? { raw_input: text } : null);
+    setShowResults(false);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (text.trim().length < 2) {
+
+    if (!text.trim()) {
+      suppressedRef.current = false;
+      setResults([]);
+      return;
+    }
+
+    if (dropdownWasOpen) suppressedRef.current = true;
+
+    if (suppressedRef.current || text.trim().length < 2) {
       setResults([]);
       return;
     }
@@ -75,7 +91,7 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
         const data = await res.json();
         if (data.success) {
           setResults(data.data);
-          setShowResults(true);
+          if (!suppressedRef.current) setShowResults(true);
         }
       } catch {
         // Search is a convenience — guests can still submit free text.
@@ -83,6 +99,13 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
         setLoading(false);
       }
     }, 300);
+  }
+
+  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape' && showResults) {
+      setShowResults(false);
+      suppressedRef.current = true;
+    }
   }
 
   function handleSelect(track: SpotifyTrackResult) {
@@ -103,6 +126,7 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
   function handleClear() {
     setQuery('');
     setResults([]);
+    suppressedRef.current = false;
     onChange(null);
   }
 
@@ -140,7 +164,8 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
           type="text"
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
-          onFocus={() => results.length > 0 && setShowResults(true)}
+          onKeyDown={handleInputKeyDown}
+          onFocus={() => !suppressedRef.current && results.length > 0 && setShowResults(true)}
           placeholder={placeholder}
           className="w-full px-4 py-3 text-base border-2 rounded-lg focus:outline-none"
           style={inputStyle}
