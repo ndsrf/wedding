@@ -1,11 +1,15 @@
 /**
  * Spotify playlist nightly sync
  *
- * Runs once a day (via the cron job registry) for every wedding whose
- * planner has `spotify_sync_enabled`. For each such wedding:
+ * Runs once a day (via the cron job registry) across every wedding whose
+ * planner has `spotify_sync_enabled`:
+ *   0. Harvests song suggestions from a reused generic field, per wedding
+ *      (weddings configured for that instead of the dedicated widget).
  *   1. Resolves PENDING_AI song suggestions (free text typed by guests)
- *      into a real Spotify track via an LLM extraction step + catalog search.
- *   2. Adds all READY suggestions to the wedding's Spotify playlist,
+ *      into a real Spotify track via an LLM extraction step + catalog
+ *      search — batched up to BATCH_SIZE suggestions per LLM call
+ *      *across all weddings*, not one call per suggestion.
+ *   2. Adds all READY suggestions to each wedding's Spotify playlist,
  *      creating the playlist (with cover) on first use.
  *
  * Sends no notifications — metrics are only logged by the cron runner.
@@ -121,74 +125,128 @@ async function syncIndividualMappedSuggestions(weddingId: string, source: SongSo
 
 // ============================================================================
 // Step 1 — resolve PENDING_AI suggestions
+//
+// Batched: one LLM call per BATCH_SIZE suggestions rather than one per
+// suggestion — callers pass in every eligible suggestion across every
+// wedding they're processing (the cron entry point below batches across
+// ALL weddings in a single run; the manual per-wedding trigger batches
+// across just that wedding's suggestions).
 // ============================================================================
 
-const pendingAiSchema = z.object({
-  isValidTrack: z.boolean(),
-  artist: z.string().nullable(),
-  track: z.string().nullable(),
+const BATCH_SIZE = 50;
+
+const pendingAiBatchSchema = z.object({
+  results: z.array(
+    z.object({
+      id: z.string(),
+      isValidTrack: z.boolean(),
+      artist: z.string().nullable(),
+      track: z.string().nullable(),
+    })
+  ),
 });
 
-function buildPendingAiPrompt(rawInput: string): string {
-  return `A wedding guest was asked to suggest a song for the wedding playlist. They wrote (possibly in Spanish, English, French, Italian, German, or another language):
-
-"${rawInput}"
-
-Determine whether this text identifies a specific, real song. Return isValidTrack: false if the text is a joke, a non-answer, or too vague to identify one specific song (e.g. "cualquiera está bien", "la que quieran los novios", "sorpréndeme", "no sé"). Return isValidTrack: true only when you can extract (or confidently infer) both an artist and a track title.
-
-When isValidTrack is true, return the artist and track name normalized for a Spotify catalog search (fix obvious typos, expand abbreviations, translate nothing). When isValidTrack is false, return null for both artist and track.`;
+interface PendingSuggestion {
+  id: string;
+  wedding_id: string;
+  raw_input: string;
 }
 
-async function resolvePendingSuggestions(wedding: WeddingForSync, metrics: SpotifySyncMetrics): Promise<void> {
-  const pending = await prisma.songSuggestion.findMany({
-    where: { wedding_id: wedding.id, status: 'PENDING_AI' },
-  });
+function buildBatchPrompt(items: PendingSuggestion[]): string {
+  const list = items.map((it) => `- [id="${it.id}"] "${it.raw_input}"`).join('\n');
+  return `Wedding guests were each asked to suggest a song for their wedding's playlist. Below is a list of their answers (possibly in Spanish, English, French, Italian, German, or another language), each tagged with an id:
 
-  for (const suggestion of pending) {
+${list}
+
+For EACH item, determine whether the text identifies a specific, real song. Mark isValidTrack: false if the text is a joke, a non-answer, or too vague to identify one specific song (e.g. "cualquiera está bien", "la que quieran los novios", "sorpréndeme", "no sé"). Mark isValidTrack: true only when you can extract (or confidently infer) both an artist and a track title.
+
+When isValidTrack is true, return the artist and track name normalized for a Spotify catalog search (fix obvious typos, expand abbreviations, translate nothing). When isValidTrack is false, return null for both artist and track.
+
+Return exactly one result per item listed above, each carrying its original id unchanged.`;
+}
+
+async function applyPendingAiResult(
+  suggestionId: string,
+  result: { isValidTrack: boolean; artist: string | null; track: string | null },
+  market: string,
+  metrics: SpotifySyncMetrics
+): Promise<void> {
+  if (!result.isValidTrack || !result.artist || !result.track) {
+    await prisma.songSuggestion.update({ where: { id: suggestionId }, data: { status: 'DISCARDED' } });
+    metrics.discarded++;
+    return;
+  }
+
+  const match = await findTrack(result.artist, result.track, market);
+  if (!match) {
+    await prisma.songSuggestion.update({
+      where: { id: suggestionId },
+      data: { status: 'FAILED', ai_error: `No Spotify match for "${result.artist} - ${result.track}"` },
+    });
+    metrics.ai_failed++;
+    return;
+  }
+
+  await prisma.songSuggestion.update({
+    where: { id: suggestionId },
+    data: {
+      status: 'READY',
+      spotify_track_id: match.id,
+      spotify_uri: match.uri,
+      track_title: match.title,
+      artist_name: match.artist,
+      album_art_url: match.albumArtUrl,
+    },
+  });
+  metrics.processed_ai++;
+}
+
+/**
+ * Resolves every given PENDING_AI suggestion, batching up to BATCH_SIZE per
+ * LLM call regardless of which wedding each one belongs to. `marketFor`
+ * resolves the right Spotify catalog market per suggestion for the search
+ * step, since that part is still necessarily per-suggestion.
+ */
+async function resolvePendingSuggestionsBatch(
+  suggestions: PendingSuggestion[],
+  marketFor: (weddingId: string) => string,
+  metrics: SpotifySyncMetrics
+): Promise<void> {
+  for (let i = 0; i < suggestions.length; i += BATCH_SIZE) {
+    const chunk = suggestions.slice(i, i + BATCH_SIZE);
+
     try {
       const { object } = await generateObject({
         model: getChatModel(),
-        schema: pendingAiSchema,
-        prompt: buildPendingAiPrompt(suggestion.raw_input),
+        schema: pendingAiBatchSchema,
+        prompt: buildBatchPrompt(chunk),
       });
 
-      if (!object.isValidTrack || !object.artist || !object.track) {
-        await prisma.songSuggestion.update({ where: { id: suggestion.id }, data: { status: 'DISCARDED' } });
-        metrics.discarded++;
-        continue;
-      }
+      const resultsById = new Map(object.results.map((r) => [r.id, r]));
 
-      const match = await findTrack(object.artist, object.track, wedding.wedding_country);
-      if (!match) {
-        await prisma.songSuggestion.update({
-          where: { id: suggestion.id },
-          data: { status: 'FAILED', ai_error: `No Spotify match for "${object.artist} - ${object.track}"` },
-        });
-        metrics.ai_failed++;
-        continue;
+      for (const suggestion of chunk) {
+        const result = resultsById.get(suggestion.id);
+        if (!result) {
+          metrics.ai_failed++;
+          await prisma.songSuggestion
+            .update({
+              where: { id: suggestion.id },
+              data: { status: 'FAILED', ai_error: 'AI batch response did not include this suggestion' },
+            })
+            .catch(() => {});
+          continue;
+        }
+        await applyPendingAiResult(suggestion.id, result, marketFor(suggestion.wedding_id), metrics);
       }
-
-      await prisma.songSuggestion.update({
-        where: { id: suggestion.id },
-        data: {
-          status: 'READY',
-          spotify_track_id: match.id,
-          spotify_uri: match.uri,
-          track_title: match.title,
-          artist_name: match.artist,
-          album_art_url: match.albumArtUrl,
-        },
-      });
-      metrics.processed_ai++;
     } catch (error) {
-      console.error(`[SPOTIFY_SYNC] Suggestion ${suggestion.id} failed:`, error);
-      metrics.ai_failed++;
-      await prisma.songSuggestion
-        .update({
-          where: { id: suggestion.id },
-          data: { status: 'FAILED', ai_error: error instanceof Error ? error.message : String(error) },
-        })
-        .catch(() => {});
+      console.error(`[SPOTIFY_SYNC] Batch AI resolution failed (${chunk.length} suggestions):`, error);
+      const message = error instanceof Error ? error.message : String(error);
+      for (const suggestion of chunk) {
+        metrics.ai_failed++;
+        await prisma.songSuggestion
+          .update({ where: { id: suggestion.id }, data: { status: 'FAILED', ai_error: message } })
+          .catch(() => {});
+      }
     }
   }
 }
@@ -331,17 +389,36 @@ export async function processSpotifySync(): Promise<SpotifySyncMetrics> {
     },
   });
 
+  // Step 0: harvest suggestions from reused generic fields, per wedding (needs
+  // that wedding's family/member rows) — cheap, no LLM/API calls involved.
   for (const wedding of weddings) {
     try {
       const familySource = wedding.song_question_family_enabled ? normalizeFamilySource(wedding.song_question_family_source) : 'spotify';
       const individualSource = wedding.song_question_individual_enabled ? normalizeIndividualSource(wedding.song_question_individual_source) : 'spotify';
       await syncFamilyMappedSuggestions(wedding.id, familySource);
       await syncIndividualMappedSuggestions(wedding.id, individualSource);
-      await resolvePendingSuggestions(wedding, metrics);
+    } catch (error) {
+      console.error(`[SPOTIFY_SYNC] Wedding ${wedding.id} field harvest failed:`, error);
+      metrics.errors++;
+    }
+  }
+
+  // Step 1: resolve every wedding's PENDING_AI suggestions together, in as
+  // few LLM calls as possible (see resolvePendingSuggestionsBatch).
+  const marketByWedding = new Map(weddings.map((w) => [w.id, w.wedding_country]));
+  const pending = await prisma.songSuggestion.findMany({
+    where: { wedding_id: { in: weddings.map((w) => w.id) }, status: 'PENDING_AI' },
+    select: { id: true, wedding_id: true, raw_input: true },
+  });
+  await resolvePendingSuggestionsBatch(pending, (weddingId) => marketByWedding.get(weddingId) ?? 'ES', metrics);
+
+  // Step 2: sync each wedding's now-READY suggestions into its own playlist.
+  for (const wedding of weddings) {
+    try {
       await syncReadySongs(wedding, metrics);
       metrics.weddings_processed++;
     } catch (error) {
-      console.error(`[SPOTIFY_SYNC] Wedding ${wedding.id} failed:`, error);
+      console.error(`[SPOTIFY_SYNC] Wedding ${wedding.id} playlist sync failed:`, error);
       metrics.errors++;
     }
   }
@@ -402,7 +479,13 @@ export async function triggerManualSpotifySync(weddingId: string): Promise<Manua
   const individualSource = wedding.song_question_individual_enabled ? normalizeIndividualSource(wedding.song_question_individual_source) : 'spotify';
   await syncFamilyMappedSuggestions(wedding.id, familySource);
   await syncIndividualMappedSuggestions(wedding.id, individualSource);
-  await resolvePendingSuggestions(wedding, metrics);
+
+  const pending = await prisma.songSuggestion.findMany({
+    where: { wedding_id: wedding.id, status: 'PENDING_AI' },
+    select: { id: true, wedding_id: true, raw_input: true },
+  });
+  await resolvePendingSuggestionsBatch(pending, () => wedding.wedding_country, metrics);
+
   await syncReadySongs(wedding, metrics);
 
   return {
