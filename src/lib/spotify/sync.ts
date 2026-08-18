@@ -268,3 +268,64 @@ export async function processSpotifySync(): Promise<SpotifySyncMetrics> {
 
   return metrics;
 }
+
+// ============================================================================
+// Manual trigger — "Probar ahora" in /planner/alert-settings
+// ============================================================================
+
+export interface ManualSpotifySyncResult {
+  success: boolean;
+  reason?: 'wedding_not_found' | 'wedding_inactive' | 'not_configured' | 'sync_not_enabled';
+  metrics?: Omit<SpotifySyncMetrics, 'weddings_processed'>;
+}
+
+/** Runs the sync for a single wedding immediately, for the manual test-send button. */
+export async function triggerManualSpotifySync(weddingId: string): Promise<ManualSpotifySyncResult> {
+  if (!isSpotifyConfigured()) return { success: false, reason: 'not_configured' };
+
+  const wedding = await prisma.wedding.findUnique({
+    where: { id: weddingId },
+    select: {
+      id: true,
+      couple_names: true,
+      wedding_date: true,
+      wedding_country: true,
+      default_language: true,
+      spotify_playlist_id: true,
+      spotify_playlist_url: true,
+      status: true,
+      is_disabled: true,
+      planner: { select: { logo_url: true, spotify_sync_enabled: true } },
+    },
+  });
+  if (!wedding) return { success: false, reason: 'wedding_not_found' };
+  if (wedding.status !== 'ACTIVE' || wedding.is_disabled) {
+    return { success: false, reason: 'wedding_inactive' };
+  }
+  if (!wedding.planner.spotify_sync_enabled) return { success: false, reason: 'sync_not_enabled' };
+
+  const metrics: SpotifySyncMetrics = {
+    weddings_processed: 0,
+    processed_ai: 0,
+    discarded: 0,
+    ai_failed: 0,
+    added_to_playlist: 0,
+    playlists_created: 0,
+    errors: 0,
+  };
+
+  await resolvePendingSuggestions(wedding, metrics);
+  await syncReadySongs(wedding, metrics);
+
+  return {
+    success: true,
+    metrics: {
+      processed_ai: metrics.processed_ai,
+      discarded: metrics.discarded,
+      ai_failed: metrics.ai_failed,
+      added_to_playlist: metrics.added_to_playlist,
+      playlists_created: metrics.playlists_created,
+      errors: metrics.errors,
+    },
+  };
+}

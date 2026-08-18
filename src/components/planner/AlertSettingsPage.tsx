@@ -133,6 +133,11 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
   const [testStatus, setTestStatus] = useState<TestSendStatus>('idle');
   const [testReason, setTestReason] = useState<string | null>(null);
 
+  const [spotifyTestWeddingId, setSpotifyTestWeddingId] = useState('');
+  const [spotifyTestStatus, setSpotifyTestStatus] = useState<TestSendStatus>('idle');
+  const [spotifyTestReason, setSpotifyTestReason] = useState<string | null>(null);
+  const [spotifyTestMetrics, setSpotifyTestMetrics] = useState<{ processed_ai: number; added_to_playlist: number } | null>(null);
+
   useEffect(() => {
     async function loadWeddings() {
       try {
@@ -152,6 +157,7 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
           }));
         setWeddings(options);
         setSelectedWeddingId((prev) => prev || options[0]?.id || '');
+        setSpotifyTestWeddingId((prev) => prev || options[0]?.id || '');
       } catch (err) {
         console.error('[AlertSettings] Failed to load weddings', err);
       }
@@ -178,6 +184,34 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
       console.error('[AlertSettings] Test send failed', err);
       setTestStatus('error');
       setTestReason(null);
+    }
+  }
+
+  async function handleSendSpotifyTest() {
+    if (!spotifyTestWeddingId || spotifyTestStatus === 'sending') return;
+    setSpotifyTestStatus('sending');
+    setSpotifyTestReason(null);
+    setSpotifyTestMetrics(null);
+    try {
+      const res = await fetch(`/api/planner/weddings/${spotifyTestWeddingId}/spotify-sync/trigger`, {
+        method: 'POST',
+      });
+      const data = await res.json() as {
+        success: boolean;
+        reason?: string;
+        metrics?: { processed_ai: number; added_to_playlist: number };
+      };
+      if (res.ok && data.success) {
+        setSpotifyTestStatus('sent');
+        setSpotifyTestMetrics(data.metrics ?? null);
+      } else {
+        setSpotifyTestStatus('error');
+        setSpotifyTestReason(data.reason ?? null);
+      }
+    } catch (err) {
+      console.error('[AlertSettings] Spotify test sync failed', err);
+      setSpotifyTestStatus('error');
+      setSpotifyTestReason(null);
     }
   }
 
@@ -532,6 +566,64 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
                 <p className="text-xs text-amber-600 mt-1">{t('spotifyNotConfigured')}</p>
               )}
             </div>
+          </div>
+
+          {/* Manual test sync */}
+          <div className="px-5 py-4 bg-gray-50/60 border-t border-gray-50">
+            <p className="text-xs font-medium text-gray-600 mb-2">{t('testSendTitle')}</p>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <select
+                value={spotifyTestWeddingId}
+                onChange={(e) => {
+                  setSpotifyTestWeddingId(e.target.value);
+                  setSpotifyTestStatus('idle');
+                  setSpotifyTestReason(null);
+                  setSpotifyTestMetrics(null);
+                }}
+                disabled={weddings.length === 0 || spotifyTestStatus === 'sending'}
+                className="text-sm rounded-lg border border-gray-200 px-3 py-1.5 bg-white text-gray-700 disabled:opacity-60 flex-1 min-w-0"
+              >
+                {weddings.length === 0 && <option value="">{t('testSendNoWeddings')}</option>}
+                {weddings.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleSendSpotifyTest}
+                disabled={!spotifyTestWeddingId || !spotifyConfigured || spotifyTestStatus === 'sending'}
+                className="text-sm font-medium px-3 py-1.5 rounded-lg bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {spotifyTestStatus === 'sending' ? t('testSendSending') : t('testSendButton')}
+              </button>
+            </div>
+            {spotifyTestStatus === 'sent' && (
+              <p className="text-xs text-emerald-600 mt-2">
+                {t('spotifyTestSuccess')}
+                {spotifyTestMetrics && (
+                  <>
+                    {' '}
+                    {t('spotifyTestSuccessDetail', {
+                      added: spotifyTestMetrics.added_to_playlist,
+                      resolved: spotifyTestMetrics.processed_ai,
+                    })}
+                  </>
+                )}
+              </p>
+            )}
+            {spotifyTestStatus === 'error' && (
+              <p className="text-xs text-red-500 mt-2">
+                {spotifyTestReason === 'not_configured'
+                  ? t('spotifyTestErrorNotConfigured')
+                  : spotifyTestReason === 'sync_not_enabled'
+                    ? t('spotifyTestErrorNotEnabled')
+                    : spotifyTestReason === 'wedding_inactive'
+                      ? t('testSendErrorInactive')
+                      : t('testSendErrorGeneric')}
+              </p>
+            )}
           </div>
         </div>
       </section>
