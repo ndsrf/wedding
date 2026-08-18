@@ -203,14 +203,31 @@ export async function findTrack(artist: string, track: string, market: string): 
 // Playlist management (Nupci service-account token)
 // ============================================================================
 
+/**
+ * Creates a playlist, preferring public visibility. Some apps that haven't
+ * been through Spotify's Extended Quota review get a 403 when creating a
+ * PUBLIC playlist via the API even with a valid token and matching user id
+ * — in that case we transparently retry as private. A private playlist is
+ * still fully reachable via its direct open.spotify.com link (the "public"
+ * flag only affects whether it's listed on the owner's profile/search), so
+ * this doesn't break sharing the playlist with guests.
+ */
 export async function createPlaylist(name: string, description: string): Promise<SpotifyPlaylist> {
   const token = await getUserAccessToken();
   const userId = await getSpotifyUserId();
+  const path = `/users/${encodeURIComponent(userId)}/playlists`;
 
-  const res = await spotifyApiRequest(token, `/users/${encodeURIComponent(userId)}/playlists`, {
+  let res = await spotifyApiRequest(token, path, {
     method: 'POST',
     body: JSON.stringify({ name, description, public: true }),
   });
+
+  if (res.status === 403) {
+    res = await spotifyApiRequest(token, path, {
+      method: 'POST',
+      body: JSON.stringify({ name, description, public: false }),
+    });
+  }
 
   if (!res.ok) {
     const text = await res.text();
