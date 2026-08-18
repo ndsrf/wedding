@@ -234,8 +234,14 @@ model Wedding {
   // Song suggestion questions (Spotify integration)
   song_question_family_enabled          Boolean  @default(false)
   song_question_family_text             Json?
+  // null/"spotify" = dedicated search widget; or "extra_info_1"/"extra_info_2"/"extra_info_3"
+  // to reuse that generic family text field's answers as song suggestions instead.
+  song_question_family_source           String?
   song_question_individual_enabled      Boolean  @default(false)
   song_question_individual_text         Json?
+  // null/"spotify" = dedicated search widget; or "guest_text_question_1"/"_2"/"_3"
+  // to reuse that generic per-guest text field's answers as song suggestions instead.
+  song_question_individual_source       String?
   spotify_playlist_id                   String?
   spotify_playlist_url                  String?
   deleted_at                      DateTime?
@@ -619,6 +625,10 @@ model SongSuggestion {
   @@index([wedding_id, status])
   @@index([family_id])
   @@index([family_member_id])
+  // NOTE: one suggestion per family (family_member_id IS NULL) and one per
+  // guest (family_member_id IS NOT NULL) is also enforced by two partial
+  // unique indexes added in migration 20260818100000_song_suggestion_unique_scope —
+  // Prisma can't express a WHERE clause in @@unique, so they aren't declared here.
   @@map("song_suggestions")
 }
 

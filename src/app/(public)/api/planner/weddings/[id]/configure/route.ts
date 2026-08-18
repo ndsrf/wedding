@@ -94,8 +94,10 @@ const updateWeddingConfigSchema = z.object({
   // RSVP Configuration - Song suggestion questions (Spotify integration)
   song_question_family_enabled: z.boolean().optional(),
   song_question_family_text: z.record(z.string(), z.string()).nullable().optional(),
+  song_question_family_source: z.enum(['spotify', 'extra_info_1', 'extra_info_2', 'extra_info_3']).nullable().optional(),
   song_question_individual_enabled: z.boolean().optional(),
   song_question_individual_text: z.record(z.string(), z.string()).nullable().optional(),
+  song_question_individual_source: z.enum(['spotify', 'guest_text_question_1', 'guest_text_question_2', 'guest_text_question_3']).nullable().optional(),
 });
 
 /**
@@ -286,8 +288,10 @@ export async function GET(
       guest_text_question_3_label: wedding.guest_text_question_3_label,
       song_question_family_enabled: wedding.song_question_family_enabled,
       song_question_family_text: wedding.song_question_family_text,
+      song_question_family_source: wedding.song_question_family_source,
       song_question_individual_enabled: wedding.song_question_individual_enabled,
       song_question_individual_text: wedding.song_question_individual_text,
+      song_question_individual_source: wedding.song_question_individual_source,
       spotify_playlist_id: wedding.spotify_playlist_id,
       spotify_playlist_url: wedding.spotify_playlist_url,
       spotify_configured: isSpotifyConfigured(),
@@ -391,8 +395,8 @@ export async function PATCH(
       'guest_text_question_2_enabled', 'guest_text_question_2_label',
       'guest_text_question_3_enabled', 'guest_text_question_3_label',
       'show_nupcibot_whatsapp_link', 'show_nupci_banner',
-      'song_question_family_enabled', 'song_question_family_text',
-      'song_question_individual_enabled', 'song_question_individual_text',
+      'song_question_family_enabled', 'song_question_family_text', 'song_question_family_source',
+      'song_question_individual_enabled', 'song_question_individual_text', 'song_question_individual_source',
     ] as const;
 
     for (const field of fields) {

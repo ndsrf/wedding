@@ -37,6 +37,10 @@ function filledOptsLangs(map: Record<string, string[]> | null | undefined): stri
   if (!map) return [];
   return RSVP_LANGUAGES.filter(l => ((map as Record<string, string[]>)[l]?.length ?? 0) > 0);
 }
+function labelPreview(map: Record<string, string> | null | undefined): string {
+  if (!map) return '';
+  return map.es || map.en || Object.values(map).find(Boolean) || '';
+}
 
 // ── types ──────────────────────────────────────────────────────────────────
 interface I18nField { [lang: string]: string }
@@ -104,8 +108,10 @@ interface RsvpFormState {
   // Song suggestion questions (Spotify integration)
   song_question_family_enabled: boolean;
   song_question_family_text: I18nField | null;
+  song_question_family_source: string;
   song_question_individual_enabled: boolean;
   song_question_individual_text: I18nField | null;
+  song_question_individual_source: string;
 }
 
 interface RsvpSettingsFormProps {
@@ -205,6 +211,80 @@ function I18nDropdownInput({
   );
 }
 
+interface SongFieldOption {
+  value: string;
+  fieldName: string;
+  fieldLabel: string;
+  fieldEnabled: boolean;
+}
+
+function SongSourcePicker({
+  source,
+  onSourceChange,
+  fieldOptions,
+  spotifyOptionLabel,
+  genericOptionLabel,
+  fieldDisabledSuffix,
+  fieldDisabledWarning,
+  spotifySlot,
+}: {
+  source: string;
+  onSourceChange: (value: string) => void;
+  fieldOptions: SongFieldOption[];
+  spotifyOptionLabel: string;
+  genericOptionLabel: string;
+  fieldDisabledSuffix: string;
+  fieldDisabledWarning: string;
+  spotifySlot: React.ReactNode;
+}) {
+  const isSpotify = source === 'spotify';
+  // Remembers the last explicitly picked generic field so toggling the
+  // radio buttons back and forth (e.g. to peek at the Spotify option)
+  // doesn't silently reset the choice to fieldOptions[0].
+  const [lastGenericSource, setLastGenericSource] = useState(
+    fieldOptions.some(o => o.value === source) ? source : (fieldOptions[0]?.value ?? 'spotify')
+  );
+  const selectedField = fieldOptions.find(o => o.value === source);
+
+  function handleSelectChange(value: string) {
+    setLastGenericSource(value);
+    onSourceChange(value);
+  }
+
+  return (
+    <div className={subCls}>
+      <div className="flex flex-col gap-1.5 mb-3">
+        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+          <input type="radio" checked={isSpotify} onChange={() => onSourceChange('spotify')} />
+          {spotifyOptionLabel}
+        </label>
+        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+          <input type="radio" checked={!isSpotify} onChange={() => onSourceChange(lastGenericSource)} />
+          {genericOptionLabel}
+        </label>
+      </div>
+      {isSpotify ? spotifySlot : (
+        <>
+          <select
+            value={fieldOptions.some(o => o.value === source) ? source : lastGenericSource}
+            onChange={e => handleSelectChange(e.target.value)}
+            className={inputCls}
+          >
+            {fieldOptions.map(o => (
+              <option key={o.value} value={o.value}>
+                {o.fieldName}{o.fieldLabel ? ` — "${o.fieldLabel}"` : ''}{!o.fieldEnabled ? ` (${fieldDisabledSuffix})` : ''}
+              </option>
+            ))}
+          </select>
+          {selectedField && !selectedField.fieldEnabled && (
+            <p className="mt-1.5 text-xs text-amber-700">{fieldDisabledWarning}</p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── component ──────────────────────────────────────────────────────────────
 export function RsvpSettingsForm({ wedding, spotifyConfigured, onSubmit, onCancel, deleteCacheUrl }: RsvpSettingsFormProps) {
   const t = useTranslations('admin.configure.form');
@@ -268,8 +348,10 @@ export function RsvpSettingsForm({ wedding, spotifyConfigured, onSubmit, onCance
     show_nupci_banner: wedding.show_nupci_banner ?? true,
     song_question_family_enabled: wedding.song_question_family_enabled,
     song_question_family_text: (wedding.song_question_family_text as I18nField | null) ?? null,
+    song_question_family_source: wedding.song_question_family_source ?? 'spotify',
     song_question_individual_enabled: wedding.song_question_individual_enabled,
     song_question_individual_text: (wedding.song_question_individual_text as I18nField | null) ?? null,
+    song_question_individual_source: wedding.song_question_individual_source ?? 'spotify',
   });
 
   const set = <K extends keyof RsvpFormState>(key: K, val: RsvpFormState[K]) =>
@@ -367,9 +449,11 @@ export function RsvpSettingsForm({ wedding, spotifyConfigured, onSubmit, onCance
         show_nupci_banner: f.show_nupci_banner,
         // Song suggestion questions
         song_question_family_enabled: f.song_question_family_enabled,
-        song_question_family_text: f.song_question_family_enabled ? f.song_question_family_text : null,
+        song_question_family_text: f.song_question_family_enabled && f.song_question_family_source === 'spotify' ? f.song_question_family_text : null,
+        song_question_family_source: f.song_question_family_enabled ? f.song_question_family_source : null,
         song_question_individual_enabled: f.song_question_individual_enabled,
-        song_question_individual_text: f.song_question_individual_enabled ? f.song_question_individual_text : null,
+        song_question_individual_text: f.song_question_individual_enabled && f.song_question_individual_source === 'spotify' ? f.song_question_individual_text : null,
+        song_question_individual_source: f.song_question_individual_enabled ? f.song_question_individual_source : null,
       });
     } catch (err) {
       console.error('Form submission error:', err);
@@ -378,6 +462,19 @@ export function RsvpSettingsForm({ wedding, spotifyConfigured, onSubmit, onCance
       setIsSubmitting(false);
     }
   };
+
+  const familySongFieldOptions: SongFieldOption[] = ([1, 2, 3] as const).map(n => ({
+    value: `extra_info_${n}`,
+    fieldName: t('songSourceFamilyField', { number: n }),
+    fieldLabel: labelPreview(f[`extra_info_${n}_label` as keyof RsvpFormState] as I18nField | null),
+    fieldEnabled: f[`extra_info_${n}_enabled` as keyof RsvpFormState] as boolean,
+  }));
+  const individualSongFieldOptions: SongFieldOption[] = ([1, 2, 3] as const).map(n => ({
+    value: `guest_text_question_${n}`,
+    fieldName: t('songSourceIndividualField', { number: n }),
+    fieldLabel: labelPreview(f[`guest_text_question_${n}_label` as keyof RsvpFormState] as I18nField | null),
+    fieldEnabled: f[`guest_text_question_${n}_enabled` as keyof RsvpFormState] as boolean,
+  }));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -649,15 +746,24 @@ export function RsvpSettingsForm({ wedding, spotifyConfigured, onSubmit, onCance
             <span className="ml-2 text-sm text-gray-700">{t('songQuestionFamily')}</span>
           </label>
           {f.song_question_family_enabled && spotifyConfigured && (
-            <div className={subCls}>
-              <I18nTextInput
-                map={f.song_question_family_text}
-                onChange={m => set('song_question_family_text', m)}
-                placeholder={t('songQuestionFamilyPlaceholder')}
-                activeLang={activeLang}
-                onLangChange={setActiveLang}
-              />
-            </div>
+            <SongSourcePicker
+              source={f.song_question_family_source}
+              onSourceChange={v => set('song_question_family_source', v)}
+              fieldOptions={familySongFieldOptions}
+              spotifyOptionLabel={t('songSourceSpotify')}
+              genericOptionLabel={t('songSourceGenericField')}
+              fieldDisabledSuffix={t('songSourceFieldDisabled')}
+              fieldDisabledWarning={t('songSourceFieldDisabledWarning')}
+              spotifySlot={
+                <I18nTextInput
+                  map={f.song_question_family_text}
+                  onChange={m => set('song_question_family_text', m)}
+                  placeholder={t('songQuestionFamilyPlaceholder')}
+                  activeLang={activeLang}
+                  onLangChange={setActiveLang}
+                />
+              }
+            />
           )}
         </div>
 
@@ -670,15 +776,24 @@ export function RsvpSettingsForm({ wedding, spotifyConfigured, onSubmit, onCance
             <span className="ml-2 text-sm text-gray-700">{t('songQuestionIndividual')}</span>
           </label>
           {f.song_question_individual_enabled && spotifyConfigured && (
-            <div className={subCls}>
-              <I18nTextInput
-                map={f.song_question_individual_text}
-                onChange={m => set('song_question_individual_text', m)}
-                placeholder={t('songQuestionIndividualPlaceholder')}
-                activeLang={activeLang}
-                onLangChange={setActiveLang}
-              />
-            </div>
+            <SongSourcePicker
+              source={f.song_question_individual_source}
+              onSourceChange={v => set('song_question_individual_source', v)}
+              fieldOptions={individualSongFieldOptions}
+              spotifyOptionLabel={t('songSourceSpotify')}
+              genericOptionLabel={t('songSourceGenericField')}
+              fieldDisabledSuffix={t('songSourceFieldDisabled')}
+              fieldDisabledWarning={t('songSourceFieldDisabledWarning')}
+              spotifySlot={
+                <I18nTextInput
+                  map={f.song_question_individual_text}
+                  onChange={m => set('song_question_individual_text', m)}
+                  placeholder={t('songQuestionIndividualPlaceholder')}
+                  activeLang={activeLang}
+                  onLangChange={setActiveLang}
+                />
+              }
+            />
           )}
         </div>
       </div>

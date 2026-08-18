@@ -8,11 +8,15 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations, useLocale } from 'next-intl';
 import FamilyMemberCard, { type InvStyle, type GuestQuestionConfig } from './FamilyMemberCard';
-import { SongSearchInput } from './SongSearchInput';
 import type { FamilyWithMembers, SongSuggestion } from '@/types/models';
 import type { SongSuggestionInput } from '@/types/api';
+
+// Code-split: weddings that don't use the Spotify song question shouldn't
+// pay for this chunk (Spotify search UI + its fetch logic) in their RSVP bundle.
+const SongSearchInput = dynamic(() => import('./SongSearchInput').then(m => m.SongSearchInput), { ssr: false });
 
 interface RSVPFormProps {
   token: string;
@@ -69,8 +73,10 @@ interface RSVPFormProps {
     // Song suggestion questions (Spotify integration)
     song_question_family_enabled: boolean;
     song_question_family_text: Record<string, string> | null;
+    song_question_family_source: string | null;
     song_question_individual_enabled: boolean;
     song_question_individual_text: Record<string, string> | null;
+    song_question_individual_source: string | null;
   };
   rsvpCutoffPassed: boolean;
   onSuccess: () => void;
@@ -386,6 +392,16 @@ export default function RSVPForm({
     guest_text_question_3_label: resolveLabel(wedding.guest_text_question_3_label, locale),
   };
 
+  // The Spotify search widget only renders when the song question is enabled
+  // AND still sourced from it — weddings configured to reuse an existing
+  // generic text field instead collect the answer through that field alone.
+  const showFamilySongWidget =
+    wedding.song_question_family_enabled &&
+    (!wedding.song_question_family_source || wedding.song_question_family_source === 'spotify');
+  const showIndividualSongWidget =
+    wedding.song_question_individual_enabled &&
+    (!wedding.song_question_individual_source || wedding.song_question_individual_source === 'spotify');
+
   const hasFamilyQuestions =
     wedding.transportation_question_enabled ||
     wedding.extra_question_1_enabled ||
@@ -395,7 +411,7 @@ export default function RSVPForm({
     wedding.extra_info_2_enabled ||
     wedding.extra_info_3_enabled ||
     wedding.family_dropdown_question_1_enabled ||
-    wedding.song_question_family_enabled;
+    showFamilySongWidget;
 
   const songInputStyle = { textColor: tc, fontFamily: ff, borderColor: borderCol };
   const familySongLabel = resolveLabel(wedding.song_question_family_text, locale) || t('guest.rsvp.defaultSongQuestionFamily');
@@ -468,7 +484,7 @@ export default function RSVPForm({
               onGuestTextChange={(field, value) =>
                 handleMemberChange(member.id, field, value)
               }
-              songQuestionEnabled={wedding.song_question_individual_enabled}
+              songQuestionEnabled={showIndividualSongWidget}
               songQuestionLabel={individualSongLabel}
               song={memberUpdate.song ?? null}
               onSongChange={(song) => handleMemberSongChange(member.id, song)}
@@ -683,7 +699,7 @@ export default function RSVPForm({
           )}
 
           {/* Family Song Suggestion */}
-          {wedding.song_question_family_enabled && (
+          {showFamilySongWidget && (
             <div className="space-y-2">
               <p className="text-lg" style={{ color: tc }}>{familySongLabel}</p>
               <SongSearchInput

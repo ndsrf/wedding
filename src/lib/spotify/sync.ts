@@ -16,6 +16,7 @@ import { z } from 'zod';
 import sharp from 'sharp';
 import { prisma } from '@/lib/db/prisma';
 import { getChatModel } from '@/lib/ai/provider';
+import { syncSongSuggestionFromText } from './suggestions';
 import {
   isSpotifyConfigured,
   findTrack,
@@ -45,6 +46,77 @@ interface WeddingForSync {
   spotify_playlist_id: string | null;
   spotify_playlist_url: string | null;
   planner: { logo_url: string | null };
+}
+
+// ============================================================================
+// Step 0 — sync suggestions from a reused generic field (optional)
+// ============================================================================
+
+const FAMILY_SOURCES = ['extra_info_1', 'extra_info_2', 'extra_info_3'] as const;
+const INDIVIDUAL_SOURCES = ['guest_text_question_1', 'guest_text_question_2', 'guest_text_question_3'] as const;
+
+type SongSourceFamily = 'spotify' | (typeof FAMILY_SOURCES)[number];
+type SongSourceIndividual = 'spotify' | (typeof INDIVIDUAL_SOURCES)[number];
+
+function normalizeFamilySource(value: string | null): SongSourceFamily {
+  return (FAMILY_SOURCES as readonly string[]).includes(value ?? '') ? (value as SongSourceFamily) : 'spotify';
+}
+
+function normalizeIndividualSource(value: string | null): SongSourceIndividual {
+  return (INDIVIDUAL_SOURCES as readonly string[]).includes(value ?? '') ? (value as SongSourceIndividual) : 'spotify';
+}
+
+/**
+ * For weddings configured to reuse a generic family text field (instead of
+ * the dedicated Spotify search widget), copies each family's current answer
+ * for that field into a PENDING_AI song suggestion before AI resolution runs.
+ */
+async function syncFamilyMappedSuggestions(weddingId: string, source: SongSourceFamily): Promise<void> {
+  if (source === 'spotify') return;
+
+  const families = await prisma.family.findMany({
+    where: { wedding_id: weddingId },
+    select: { id: true, extra_info_1_value: true, extra_info_2_value: true, extra_info_3_value: true },
+  });
+
+  for (const family of families) {
+    const text = source === 'extra_info_1' ? family.extra_info_1_value
+      : source === 'extra_info_2' ? family.extra_info_2_value
+      : family.extra_info_3_value;
+    await syncSongSuggestionFromText(
+      { wedding_id: weddingId, family_id: family.id, family_member_id: null },
+      text
+    );
+  }
+}
+
+/**
+ * Same as above, for a generic per-guest text field reused as the
+ * individual song question source.
+ */
+async function syncIndividualMappedSuggestions(weddingId: string, source: SongSourceIndividual): Promise<void> {
+  if (source === 'spotify') return;
+
+  const members = await prisma.familyMember.findMany({
+    where: { family: { wedding_id: weddingId }, attending: true },
+    select: {
+      id: true,
+      family_id: true,
+      guest_text_question_1_answer: true,
+      guest_text_question_2_answer: true,
+      guest_text_question_3_answer: true,
+    },
+  });
+
+  for (const member of members) {
+    const text = source === 'guest_text_question_1' ? member.guest_text_question_1_answer
+      : source === 'guest_text_question_2' ? member.guest_text_question_2_answer
+      : member.guest_text_question_3_answer;
+    await syncSongSuggestionFromText(
+      { wedding_id: weddingId, family_id: member.family_id, family_member_id: member.id },
+      text
+    );
+  }
 }
 
 // ============================================================================
@@ -251,12 +323,20 @@ export async function processSpotifySync(): Promise<SpotifySyncMetrics> {
       default_language: true,
       spotify_playlist_id: true,
       spotify_playlist_url: true,
+      song_question_family_enabled: true,
+      song_question_family_source: true,
+      song_question_individual_enabled: true,
+      song_question_individual_source: true,
       planner: { select: { logo_url: true } },
     },
   });
 
   for (const wedding of weddings) {
     try {
+      const familySource = wedding.song_question_family_enabled ? normalizeFamilySource(wedding.song_question_family_source) : 'spotify';
+      const individualSource = wedding.song_question_individual_enabled ? normalizeIndividualSource(wedding.song_question_individual_source) : 'spotify';
+      await syncFamilyMappedSuggestions(wedding.id, familySource);
+      await syncIndividualMappedSuggestions(wedding.id, individualSource);
       await resolvePendingSuggestions(wedding, metrics);
       await syncReadySongs(wedding, metrics);
       metrics.weddings_processed++;
@@ -295,6 +375,10 @@ export async function triggerManualSpotifySync(weddingId: string): Promise<Manua
       spotify_playlist_url: true,
       status: true,
       is_disabled: true,
+      song_question_family_enabled: true,
+      song_question_family_source: true,
+      song_question_individual_enabled: true,
+      song_question_individual_source: true,
       planner: { select: { logo_url: true, spotify_sync_enabled: true } },
     },
   });
@@ -314,6 +398,10 @@ export async function triggerManualSpotifySync(weddingId: string): Promise<Manua
     errors: 0,
   };
 
+  const familySource = wedding.song_question_family_enabled ? normalizeFamilySource(wedding.song_question_family_source) : 'spotify';
+  const individualSource = wedding.song_question_individual_enabled ? normalizeIndividualSource(wedding.song_question_individual_source) : 'spotify';
+  await syncFamilyMappedSuggestions(wedding.id, familySource);
+  await syncIndividualMappedSuggestions(wedding.id, individualSource);
   await resolvePendingSuggestions(wedding, metrics);
   await syncReadySongs(wedding, metrics);
 

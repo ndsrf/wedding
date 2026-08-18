@@ -219,8 +219,10 @@ export const getRSVPPageData = cache(async (
           guest_text_question_3_label: wedding.guest_text_question_3_label,
           song_question_family_enabled: wedding.song_question_family_enabled,
           song_question_family_text: wedding.song_question_family_text,
+          song_question_family_source: wedding.song_question_family_source,
           song_question_individual_enabled: wedding.song_question_individual_enabled,
           song_question_individual_text: wedding.song_question_individual_text,
+          song_question_individual_source: wedding.song_question_individual_source,
         } as unknown as CachedWeddingPageData['wedding'],
         theme: themeData,
         ...(invitationTemplate && { 

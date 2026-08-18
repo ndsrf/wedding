@@ -9,11 +9,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { isSpotifyConfigured, searchTracks } from '@/lib/spotify/client';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 const searchQuerySchema = z.object({
   q: z.string().trim().min(1).max(100),
   market: z.string().trim().max(2).optional(),
 });
+
+// This proxy shares a single Nupci-wide Spotify app quota across every
+// wedding's guests — keep per-IP limits generous for real typing but tight
+// enough to blunt a scripted flood exhausting that shared quota.
+const RATE_LIMIT = 30;
+const RATE_LIMIT_WINDOW_SECONDS = 10;
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,6 +28,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: { code: 'NOT_CONFIGURED', message: 'Spotify integration is not configured' } },
         { status: 503 }
+      );
+    }
+
+    const withinLimit = await checkRateLimit(`spotify-search:${getClientIp(request)}`, RATE_LIMIT, RATE_LIMIT_WINDOW_SECONDS);
+    if (!withinLimit) {
+      return NextResponse.json(
+        { success: false, error: { code: 'RATE_LIMITED', message: 'Too many search requests, please slow down' } },
+        { status: 429 }
       );
     }
 

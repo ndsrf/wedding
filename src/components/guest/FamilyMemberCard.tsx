@@ -8,9 +8,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import type { FamilyMember } from '@/types/models';
 import type { SongSuggestionInput } from '@/types/api';
-import { SongSearchInput } from './SongSearchInput';
+
+// Code-split: weddings that don't use the Spotify song question shouldn't
+// pay for this chunk (Spotify search UI + its fetch logic) in their RSVP bundle.
+const SongSearchInput = dynamic(() => import('./SongSearchInput').then(m => m.SongSearchInput), { ssr: false });
 
 function parseOption(raw: string): { label: string; value: string } {
   const idx = raw.indexOf('||');

@@ -404,8 +404,10 @@ export interface UpdateWeddingConfigRequest {
   // RSVP Configuration - Song suggestion questions (Spotify integration)
   song_question_family_enabled?: boolean;
   song_question_family_text?: Record<string, string> | null;
+  song_question_family_source?: string | null;
   song_question_individual_enabled?: boolean;
   song_question_individual_text?: Record<string, string> | null;
+  song_question_individual_source?: string | null;
 }
 
 export type UpdateWeddingConfigResponse = APIResponse<Wedding>;
@@ -671,8 +673,10 @@ export interface GuestRSVPPageData {
     // RSVP Configuration - Song suggestion questions (Spotify integration)
     song_question_family_enabled: boolean;
     song_question_family_text: Record<string, string> | null;
+    song_question_family_source: string | null;
     song_question_individual_enabled: boolean;
     song_question_individual_text: Record<string, string> | null;
+    song_question_individual_source: string | null;
   };
   theme: Theme;
   invitation_template?: {
