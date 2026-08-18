@@ -1425,7 +1425,9 @@ APP_URL=https://your-domain.com
 
 ### Spotify Integration
 
-Guests can suggest songs for the wedding playlist during RSVP. Nupci uses a **single Spotify account it owns** (a Free account works fine — creating and managing playlists via the API doesn't require Premium) to power this, rather than a per-wedding connection like Google Photos.
+Guests can suggest songs for the wedding playlist during RSVP. Nupci uses a **single Spotify account it owns** to power this, rather than a per-wedding connection like Google Photos.
+
+> **The account needs an active Premium subscription.** Spotify gates catalog search (`/v1/search`, used for the RSVP song picker) behind the app owner's account having Premium — a Free account gets `403: Active premium subscription required for the owner of the app`. Playlist creation and adding tracks (used by the nightly sync) go through a separate, user-scoped auth flow and may work without Premium, but search will not. Use a Premium account for the app owner to avoid surprises.
 
 #### How It Works
 
@@ -1497,6 +1499,9 @@ SPOTIFY_USER_ID=       # optional — printed by the script above, or see step 6
 The integration is only considered active once all three required variables (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`) are set — otherwise the RSVP song question toggles in Configure stay disabled.
 
 #### Troubleshooting
+
+**Search returns `403: Active premium subscription required for the owner of the app`:**
+- The Spotify account that owns the Developer app (the one you authorized in step 2) doesn't have Premium. Upgrade that account to Premium — Spotify gates catalog search behind this regardless of which end-user is searching. See the note at the top of this section.
 
 **Song question toggles are greyed out in Configure → RSVP:**
 - Spotify isn't configured system-wide — verify all three required env vars are set and restart the app.

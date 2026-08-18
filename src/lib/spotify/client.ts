@@ -1,13 +1,18 @@
 /**
  * Spotify Web API client
  *
- * Nupci uses a single Spotify Free service account (its own account, not a
- * per-wedding OAuth connection like Google Photos). Two token flows:
+ * Nupci uses a single Spotify service account it owns (not a per-wedding
+ * OAuth connection like Google Photos). Two token flows:
  *   - Client Credentials: app-only token, used for public track search.
  *   - Refresh Token: exchanges SPOTIFY_REFRESH_TOKEN for a user token with
  *     playlist-modify-public + ugc-image-upload scopes, used to manage the
  *     per-wedding playlists.
  * Both tokens are cached in module memory for the life of the process.
+ *
+ * NOTE: Spotify requires the account that owns the Developer app to have an
+ * active Premium subscription for /v1/search (Client Credentials calls fail
+ * with 403 "Active premium subscription required for the owner of the app"
+ * otherwise). See README.md → "Spotify Integration".
  */
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
