@@ -5,7 +5,7 @@
  * OAuth connection like Google Photos). Two token flows:
  *   - Client Credentials: app-only token, used for public track search.
  *   - Refresh Token: exchanges SPOTIFY_REFRESH_TOKEN for a user token with
- *     playlist-modify-public + ugc-image-upload scopes, used to manage the
+ *     playlist-modify-public, playlist-modify-private + ugc-image-upload scopes, used to manage the
  *     per-wedding playlists.
  * Both tokens are cached in module memory for the life of the process.
  *

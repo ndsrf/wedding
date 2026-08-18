@@ -1465,7 +1465,7 @@ It will prompt you for the Client ID/Secret from step 1 and a redirect URI (must
 
 1. Build the following URL, filling in the `Client ID` from step 1 and URL-encoding the redirect URI you registered:
    ```
-   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8888%2Fcallback&scope=playlist-modify-public%20ugc-image-upload
+   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8888%2Fcallback&scope=playlist-modify-public%20playlist-modify-private%20ugc-image-upload
    ```
 2. Open it in a browser while logged in as the Spotify account from step 1, and click **Agree** to grant the requested permissions.
 3. You'll be redirected to `http://localhost:8888/callback?code=...` — the page itself will likely fail to load (nothing is listening on that port), which is fine. Copy **only** the `code` parameter's value from the browser's address bar — stop at the first `&` if the page appended anything else to the URL.
@@ -1504,7 +1504,9 @@ The integration is only considered active once all three required variables (`SP
 - The Spotify account that owns the Developer app (the one you authorized in step 2) doesn't have Premium. Upgrade that account to Premium — Spotify gates catalog search behind this regardless of which end-user is searching. See the note at the top of this section.
 
 **Playlist creation returns `403: Forbidden` (nightly sync / "probar ahora"), even though the user id is correct:**
-- Some apps that haven't been through Spotify's Extended Quota review get a 403 creating a *public* playlist via the API, even with valid credentials. The app automatically retries as a private playlist when this happens — private playlists are still fully reachable via their direct `open.spotify.com` link (the "public" flag only affects whether it shows on the owner's profile/search), so sharing with guests still works. If it's still failing after that retry, double-check `SPOTIFY_USER_ID` (if set) matches the `id` from `/v1/me` for the *same* account as `SPOTIFY_REFRESH_TOKEN` — a mismatched id 403s regardless of visibility. When in doubt, just remove `SPOTIFY_USER_ID` from `.env`; it's optional and the app resolves it from the token every time when unset.
+- Some apps that haven't been through Spotify's Extended Quota review get a 403 creating a *public* playlist via the API, even with valid credentials. The app automatically retries as a private playlist when this happens — private playlists are still fully reachable via their direct `open.spotify.com` link (the "public" flag only affects whether it shows on the owner's profile/search), so sharing with guests still works.
+- **If the private retry 403s too**, your refresh token is missing the `playlist-modify-private` scope (only requesting `playlist-modify-public` isn't enough once the fallback kicks in). Scopes can't be added to an existing token — re-run `node scripts/spotify-get-refresh-token.mjs` (or redo the manual authorize step) to get a fresh `SPOTIFY_REFRESH_TOKEN` covering all three required scopes, and update `.env`.
+- If both still fail, double-check `SPOTIFY_USER_ID` (if set) matches the `id` from `/v1/me` for the *same* account as `SPOTIFY_REFRESH_TOKEN` — a mismatched id 403s regardless of visibility. When in doubt, just remove `SPOTIFY_USER_ID` from `.env`; it's optional and the app resolves it from the token every time when unset.
 
 **Song question toggles are greyed out in Configure → RSVP:**
 - Spotify isn't configured system-wide — verify all three required env vars are set and restart the app.
@@ -1522,8 +1524,11 @@ The integration is only considered active once all three required variables (`SP
 
 ```
 playlist-modify-public
+playlist-modify-private
 ugc-image-upload
 ```
+
+`playlist-modify-private` covers the automatic fallback to a private playlist (see Troubleshooting above) — without it, that fallback also 403s.
 
 ### Alert System
 

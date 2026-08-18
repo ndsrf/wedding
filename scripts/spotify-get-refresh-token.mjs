@@ -16,7 +16,7 @@
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
-const SCOPES = 'playlist-modify-public ugc-image-upload';
+const SCOPES = 'playlist-modify-public playlist-modify-private ugc-image-upload';
 
 const rl = createInterface({ input: stdin, output: stdout });
 const ask = (question) => rl.question(question);
