@@ -166,18 +166,26 @@ export async function listSongSuggestions(weddingId: string): Promise<SongSugges
   return rows.map(toListItem);
 }
 
+function describeQuery(artistName: string | null, trackTitle: string | null): string {
+  if (artistName && trackTitle) return `"${artistName} - ${trackTitle}"`;
+  if (artistName) return `artist "${artistName}"`;
+  return `track "${trackTitle}"`;
+}
+
 /**
  * Re-searches Spotify's catalog with an admin-corrected artist/track pair
  * (e.g. fixing a typo the AI extraction step got wrong) and updates the
  * suggestion immediately — bypassing the AI step entirely, since the admin
- * has already supplied clean values. Returns null if the suggestion doesn't
- * belong to the given wedding.
+ * has already supplied clean values. Either value can be null/empty — an
+ * artist alone returns their top track, a track alone searches by title —
+ * but not both. Returns null if the suggestion doesn't belong to the given
+ * wedding.
  */
 export async function retrySongSuggestion(
   id: string,
   weddingId: string,
-  artistName: string,
-  trackTitle: string
+  artistName: string | null,
+  trackTitle: string | null
 ): Promise<SongSuggestionListItem | null> {
   const suggestion = await prisma.songSuggestion.findFirst({
     where: { id, wedding_id: weddingId },
@@ -210,7 +218,7 @@ export async function retrySongSuggestion(
           spotify_track_id: null,
           spotify_uri: null,
           album_art_url: null,
-          ai_error: `No Spotify match for "${artistName} - ${trackTitle}"`,
+          ai_error: `No Spotify match for ${describeQuery(artistName, trackTitle)}`,
         },
   });
 

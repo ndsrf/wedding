@@ -66,9 +66,9 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
   };
 
   const handleRetry = async (suggestion: SongSuggestionListItem) => {
-    const artist_name = suggestion.artist_name?.trim();
-    const track_title = suggestion.track_title?.trim();
-    if (!artist_name || !track_title) {
+    const artist_name = suggestion.artist_name?.trim() || null;
+    const track_title = suggestion.track_title?.trim() || null;
+    if (!artist_name && !track_title) {
       setRowState((prev) => ({ ...prev, [suggestion.id]: { retrying: false, error: t('spotifySuggestionsRetryMissing') } }));
       return;
     }
@@ -189,6 +189,7 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
                             type="text"
                             value={s.artist_name ?? ''}
                             onChange={(e) => updateDraft(s.id, 'artist_name', e.target.value)}
+                            placeholder={t('spotifySuggestionsFieldOptional')}
                             className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
                           />
                         </td>
@@ -197,6 +198,7 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
                             type="text"
                             value={s.track_title ?? ''}
                             onChange={(e) => updateDraft(s.id, 'track_title', e.target.value)}
+                            placeholder={t('spotifySuggestionsFieldOptional')}
                             className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
                           />
                         </td>

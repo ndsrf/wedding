@@ -760,9 +760,11 @@ export type GetSpotifySuggestionsResponse = APIResponse<{ suggestions: SongSugge
 
 // PATCH /api/admin/wedding/spotify-suggestions/:id, /api/planner/weddings/:id/spotify-suggestions/:suggestionId
 // Admin-corrected artist/track pair — re-searched against Spotify directly (no AI step).
+// At least one of the two must be non-empty — a lone artist returns their
+// top track, a lone track searches by title alone.
 export interface RetrySpotifySuggestionRequest {
-  artist_name: string;
-  track_title: string;
+  artist_name: string | null;
+  track_title: string | null;
 }
 
 export type RetrySpotifySuggestionResponse = APIResponse<{ suggestion: SongSuggestionListItem }>;

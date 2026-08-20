@@ -175,9 +175,20 @@ export async function searchTracks(query: string, market: string): Promise<Spoti
   return items.map(mapTrack);
 }
 
-/** Resolves the single best-match track for an AI-extracted artist/track pair. */
-export async function findTrack(artist: string, track: string, market: string): Promise<SpotifyTrack | null> {
-  const results = await searchTracks(`artist:${artist} track:${track}`, market);
+/**
+ * Resolves the single best-match track for an artist/track pair — either
+ * can be omitted (null), in which case the other alone drives the search:
+ * artist only returns their top result by Spotify's relevance ranking
+ * (roughly their most popular track), track only searches by title alone.
+ * Returns null if both are omitted.
+ */
+export async function findTrack(artist: string | null, track: string | null, market: string): Promise<SpotifyTrack | null> {
+  const filters: string[] = [];
+  if (artist) filters.push(`artist:${artist}`);
+  if (track) filters.push(`track:${track}`);
+  if (filters.length === 0) return null;
+
+  const results = await searchTracks(filters.join(' '), market);
   return results[0] ?? null;
 }
 

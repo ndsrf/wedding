@@ -20,10 +20,12 @@ import { retrySongSuggestion, deleteSongSuggestion } from '@/lib/spotify/suggest
 import { API_ERROR_CODES } from '@/types/api';
 import type { APIResponse, RetrySpotifySuggestionResponse, DeleteSpotifySuggestionResponse } from '@/types/api';
 
-const retrySchema = z.object({
-  artist_name: z.string().trim().min(1),
-  track_title: z.string().trim().min(1),
-});
+const retrySchema = z
+  .object({
+    artist_name: z.string().trim().nullable().optional(),
+    track_title: z.string().trim().nullable().optional(),
+  })
+  .refine((data) => !!data.artist_name || !!data.track_title, { message: 'Enter an artist or a track' });
 
 export async function PATCH(
   request: NextRequest,
@@ -58,7 +60,12 @@ export async function PATCH(
       return NextResponse.json(response, { status: 422 });
     }
 
-    const suggestion = await retrySongSuggestion(id, user.wedding_id, parsed.data.artist_name, parsed.data.track_title);
+    const suggestion = await retrySongSuggestion(
+      id,
+      user.wedding_id,
+      parsed.data.artist_name || null,
+      parsed.data.track_title || null
+    );
     if (!suggestion) {
       const response: APIResponse = {
         success: false,
