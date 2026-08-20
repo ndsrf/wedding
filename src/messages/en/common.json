@@ -2638,7 +2638,12 @@
       },
       "spotifySuggestionsRetryButton": "Retry",
       "spotifySuggestionsRetrying": "Searching…",
-      "spotifySuggestionsRetryMissing": "Enter an artist and track before retrying."
+      "spotifySuggestionsRetryMissing": "Enter an artist and track before retrying.",
+      "spotifySuggestionsAddRow": "Add row",
+      "spotifySuggestionsAdding": "Adding…",
+      "spotifySuggestionsManualPlaceholder": "(added manually)",
+      "spotifySuggestionsDeleteButton": "Delete",
+      "spotifySuggestionsDeleteConfirm": "Delete this song suggestion?"
     },
     "nupcibot": {
       "subtitle": "Your wedding assistant",

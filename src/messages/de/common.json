@@ -2559,7 +2559,12 @@
       },
       "spotifySuggestionsRetryButton": "Erneut versuchen",
       "spotifySuggestionsRetrying": "Suche…",
-      "spotifySuggestionsRetryMissing": "Bitte Interpret und Titel eingeben, bevor du es erneut versuchst."
+      "spotifySuggestionsRetryMissing": "Bitte Interpret und Titel eingeben, bevor du es erneut versuchst.",
+      "spotifySuggestionsAddRow": "Zeile hinzufügen",
+      "spotifySuggestionsAdding": "Wird hinzugefügt…",
+      "spotifySuggestionsManualPlaceholder": "(manuell hinzugefügt)",
+      "spotifySuggestionsDeleteButton": "Löschen",
+      "spotifySuggestionsDeleteConfirm": "Diesen Songvorschlag löschen?"
     },
     "nupcibot": {
       "subtitle": "Ihr Hochzeitsassistent",

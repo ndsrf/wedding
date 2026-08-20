@@ -1,7 +1,8 @@
 /**
- * Wedding Planner - Retry a single Spotify song suggestion
+ * Wedding Planner - Retry or delete a single Spotify song suggestion
  *
- * PATCH /api/planner/weddings/:id/spotify-suggestions/:suggestionId
+ * PATCH  /api/planner/weddings/:id/spotify-suggestions/:suggestionId
+ * DELETE /api/planner/weddings/:id/spotify-suggestions/:suggestionId
  *
  * Mirrors /api/admin/wedding/spotify-suggestions/:id but scoped to a
  * planner-owned wedding.
@@ -12,9 +13,9 @@ import { z } from 'zod';
 import { requireRole } from '@/lib/auth/middleware';
 import { validatePlannerAccess } from '@/lib/guests/planner-access';
 import { isSpotifyConfigured } from '@/lib/spotify/client';
-import { retrySongSuggestion } from '@/lib/spotify/suggestions';
+import { retrySongSuggestion, deleteSongSuggestion } from '@/lib/spotify/suggestions';
 import { API_ERROR_CODES } from '@/types/api';
-import type { APIResponse, RetrySpotifySuggestionResponse } from '@/types/api';
+import type { APIResponse, RetrySpotifySuggestionResponse, DeleteSpotifySuggestionResponse } from '@/types/api';
 
 const retrySchema = z.object({
   artist_name: z.string().trim().min(1),
@@ -72,6 +73,47 @@ export async function PATCH(
   } catch (err) {
     if (err instanceof Response) return err;
     console.error('[PATCH /api/planner/weddings/:id/spotify-suggestions/:suggestionId]', err);
+    const response: APIResponse = {
+      success: false,
+      error: { code: API_ERROR_CODES.INTERNAL_ERROR, message: 'Internal server error' },
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string; suggestionId: string }> }
+) {
+  try {
+    const user = await requireRole('planner');
+    if (!user.planner_id) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.FORBIDDEN, message: 'Planner ID not found in session' },
+      };
+      return NextResponse.json(response, { status: 403 });
+    }
+
+    const { id: weddingId, suggestionId } = await params;
+
+    const denied = await validatePlannerAccess(user.planner_id, weddingId);
+    if (denied) return denied;
+
+    const deleted = await deleteSongSuggestion(suggestionId, weddingId);
+    if (!deleted) {
+      const response: APIResponse = {
+        success: false,
+        error: { code: API_ERROR_CODES.NOT_FOUND, message: 'Suggestion not found' },
+      };
+      return NextResponse.json(response, { status: 404 });
+    }
+
+    const response: DeleteSpotifySuggestionResponse = { success: true, data: { deleted: true } };
+    return NextResponse.json(response, { status: 200 });
+  } catch (err) {
+    if (err instanceof Response) return err;
+    console.error('[DELETE /api/planner/weddings/:id/spotify-suggestions/:suggestionId]', err);
     const response: APIResponse = {
       success: false,
       error: { code: API_ERROR_CODES.INTERNAL_ERROR, message: 'Internal server error' },

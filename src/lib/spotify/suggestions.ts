@@ -216,3 +216,28 @@ export async function retrySongSuggestion(
 
   return toListItem({ ...updated, family: suggestion.family, family_member: suggestion.family_member });
 }
+
+/**
+ * Adds a blank, unscoped (no family/guest) song suggestion row — for songs a
+ * planner/admin heard about off-band (e.g. a guest who mentioned several
+ * songs in one RSVP text field, or a request that came in by phone) and
+ * wants added to the playlist by hand from the "Abrir listado" modal.
+ * `placeholderRawInput` is only ever shown back in the "Lo que escribió"
+ * column until the admin fills in artist/track and retries — it plays no
+ * role in resolution.
+ */
+export async function createManualSongSuggestion(
+  weddingId: string,
+  placeholderRawInput: string
+): Promise<SongSuggestionListItem> {
+  const created = await prisma.songSuggestion.create({
+    data: { wedding_id: weddingId, family_id: null, family_member_id: null, raw_input: placeholderRawInput, status: 'PENDING_AI' },
+  });
+  return toListItem({ ...created, family: null, family_member: null });
+}
+
+/** Deletes a song suggestion, e.g. a manually-added row created by mistake. */
+export async function deleteSongSuggestion(id: string, weddingId: string): Promise<boolean> {
+  const { count } = await prisma.songSuggestion.deleteMany({ where: { id, wedding_id: weddingId } });
+  return count > 0;
+}

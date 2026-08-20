@@ -767,6 +767,17 @@ export interface RetrySpotifySuggestionRequest {
 
 export type RetrySpotifySuggestionResponse = APIResponse<{ suggestion: SongSuggestionListItem }>;
 
+// POST /api/admin/wedding/spotify-suggestions, /api/planner/weddings/:id/spotify-suggestions
+// Adds a blank, unscoped song suggestion row for the admin to fill in and retry by hand.
+export interface CreateSpotifySuggestionRequest {
+  raw_input: string;
+}
+
+export type CreateSpotifySuggestionResponse = APIResponse<{ suggestion: SongSuggestionListItem }>;
+
+// DELETE /api/admin/wedding/spotify-suggestions/:id, /api/planner/weddings/:id/spotify-suggestions/:suggestionId
+export type DeleteSpotifySuggestionResponse = APIResponse<{ deleted: true }>;
+
 // POST /api/guest/:token/member
 export interface AddFamilyMemberRequest {
   name: string;

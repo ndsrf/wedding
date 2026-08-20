@@ -2559,7 +2559,12 @@
       },
       "spotifySuggestionsRetryButton": "Riprova",
       "spotifySuggestionsRetrying": "Ricerca…",
-      "spotifySuggestionsRetryMissing": "Inserisci artista e brano prima di riprovare."
+      "spotifySuggestionsRetryMissing": "Inserisci artista e brano prima di riprovare.",
+      "spotifySuggestionsAddRow": "Aggiungi riga",
+      "spotifySuggestionsAdding": "Aggiunta…",
+      "spotifySuggestionsManualPlaceholder": "(aggiunta manualmente)",
+      "spotifySuggestionsDeleteButton": "Elimina",
+      "spotifySuggestionsDeleteConfirm": "Eliminare questo suggerimento di canzone?"
     },
     "nupcibot": {
       "subtitle": "Il tuo assistente matrimoniale",

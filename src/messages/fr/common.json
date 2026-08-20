@@ -2559,7 +2559,12 @@
       },
       "spotifySuggestionsRetryButton": "Réessayer",
       "spotifySuggestionsRetrying": "Recherche…",
-      "spotifySuggestionsRetryMissing": "Indiquez un artiste et un titre avant de réessayer."
+      "spotifySuggestionsRetryMissing": "Indiquez un artiste et un titre avant de réessayer.",
+      "spotifySuggestionsAddRow": "Ajouter une ligne",
+      "spotifySuggestionsAdding": "Ajout…",
+      "spotifySuggestionsManualPlaceholder": "(ajoutée manuellement)",
+      "spotifySuggestionsDeleteButton": "Supprimer",
+      "spotifySuggestionsDeleteConfirm": "Supprimer cette suggestion de chanson ?"
     },
     "nupcibot": {
       "subtitle": "Votre assistant mariage",

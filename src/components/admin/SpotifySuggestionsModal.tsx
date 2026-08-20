@@ -41,6 +41,8 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
   const [suggestions, setSuggestions] = useState<SongSuggestionListItem[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [rowState, setRowState] = useState<Record<string, RowState>>({});
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,6 +92,40 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
     }
   };
 
+  const handleAddRow = async () => {
+    setAdding(true);
+    setAddError(null);
+    try {
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raw_input: t('spotifySuggestionsManualPlaceholder') }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message || 'Failed to add row');
+      setSuggestions((prev) => [data.data.suggestion, ...(prev ?? [])]);
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add row');
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(t('spotifySuggestionsDeleteConfirm'))) return;
+    try {
+      const res = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message || 'Failed to delete row');
+      setSuggestions((prev) => prev?.filter((s) => s.id !== id) ?? prev);
+    } catch (err) {
+      setRowState((prev) => ({
+        ...prev,
+        [id]: { retrying: false, error: err instanceof Error ? err.message : 'Failed to delete row' },
+      }));
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
@@ -105,6 +141,17 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
             </button>
           </div>
           <p className="text-sm text-gray-500 mb-4">{t('spotifySuggestionsDesc')}</p>
+
+          <div className="mb-3">
+            <button
+              onClick={handleAddRow}
+              disabled={adding || suggestions === null}
+              className="text-sm font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {adding ? t('spotifySuggestionsAdding') : `+ ${t('spotifySuggestionsAddRow')}`}
+            </button>
+            {addError && <p className="text-xs text-red-600 mt-1">{addError}</p>}
+          </div>
 
           {loadError ? (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -126,7 +173,8 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
                     <th className="py-2 pr-3">{t('spotifySuggestionsColArtist')}</th>
                     <th className="py-2 pr-3">{t('spotifySuggestionsColSong')}</th>
                     <th className="py-2 pr-3">{t('spotifySuggestionsColStatus')}</th>
-                    <th className="py-2">{t('spotifySuggestionsColError')}</th>
+                    <th className="py-2 pr-3">{t('spotifySuggestionsColError')}</th>
+                    <th className="py-2" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -157,7 +205,7 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
                             {t(`spotifySuggestionsStatus.${s.status}`)}
                           </span>
                         </td>
-                        <td className="py-2 align-top max-w-[12rem]">
+                        <td className="py-2 pr-3 align-top max-w-[12rem]">
                           {(state?.error || s.ai_error) && (
                             <p className="text-xs text-red-600 break-words mb-1">{state?.error || s.ai_error}</p>
                           )}
@@ -167,6 +215,17 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
                             className="text-xs font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {state?.retrying ? t('spotifySuggestionsRetrying') : t('spotifySuggestionsRetryButton')}
+                          </button>
+                        </td>
+                        <td className="py-2 align-top">
+                          <button
+                            onClick={() => handleDelete(s.id)}
+                            title={t('spotifySuggestionsDeleteButton')}
+                            className="text-gray-400 hover:text-red-600"
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                           </button>
                         </td>
                       </tr>
