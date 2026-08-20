@@ -150,11 +150,7 @@ export async function GET() {
     const cacheKey = CACHE_KEYS.adminWedding(user.wedding_id);
     const cached = await getCached<object>(cacheKey);
     if (cached) {
-      // spotify_configured reflects env vars, not wedding DB state — recompute on
-      // every read instead of trusting the cached snapshot, so enabling Spotify
-      // doesn't take up to CACHE_TTL.WEDDING_DETAILS to be reflected here.
-      const data = { ...cached, spotify_configured: isSpotifyConfigured() } as GetWeddingDetailsResponse['data'];
-      const response: GetWeddingDetailsResponse = { success: true, data };
+      const response: GetWeddingDetailsResponse = { success: true, data: cached as GetWeddingDetailsResponse['data'] };
       return NextResponse.json(response, {
         status: 200,
         headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-cache' },
