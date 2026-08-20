@@ -111,14 +111,6 @@ async function main() {
   console.log(`SPOTIFY_CLIENT_SECRET=${clientSecret}`);
   console.log(`SPOTIFY_REFRESH_TOKEN=${tokenBody.refresh_token}`);
 
-  const meRes = await fetch('https://api.spotify.com/v1/me', {
-    headers: { Authorization: `Bearer ${tokenBody.access_token}` },
-  });
-  const me = await meRes.json().catch(() => null);
-  if (meRes.ok && me?.id) {
-    console.log(`SPOTIFY_USER_ID=${me.id}  # optional, saves one API call per sync run`);
-  }
-
   console.log(
     '\nKeep the client secret and refresh token private — treat them like ' +
     'passwords, and rotate them in the Spotify Dashboard if they ever leak.'

@@ -54,7 +54,6 @@ interface CachedToken {
 
 let appToken: CachedToken | null = null;
 let userToken: CachedToken | null = null;
-let cachedUserId: string | null = null;
 
 function isFresh(token: CachedToken | null): token is CachedToken {
   return !!token && Date.now() < token.expiresAt - 60_000;
@@ -125,31 +124,6 @@ async function spotifyApiRequest(accessToken: string, path: string, options?: Re
 }
 
 // ============================================================================
-// User identity
-// ============================================================================
-
-/**
- * Resolves the Nupci Spotify account's user ID, required to create playlists
- * (`POST /v1/users/{id}/playlists` — there is no `/me/playlists` creation
- * endpoint). Set SPOTIFY_USER_ID to skip the `/v1/me` round-trip.
- */
-export async function getSpotifyUserId(): Promise<string> {
-  if (process.env.SPOTIFY_USER_ID) return process.env.SPOTIFY_USER_ID;
-  if (cachedUserId) return cachedUserId;
-
-  const token = await getUserAccessToken();
-  const res = await spotifyApiRequest(token, '/me');
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to resolve Spotify user id (HTTP ${res.status}): ${text}`);
-  }
-
-  const data = await res.json();
-  cachedUserId = data.id;
-  return cachedUserId!;
-}
-
-// ============================================================================
 // Search
 // ============================================================================
 
@@ -204,18 +178,24 @@ export async function findTrack(artist: string, track: string, market: string): 
 // ============================================================================
 
 /**
- * Creates a playlist, preferring public visibility. Some apps that haven't
- * been through Spotify's Extended Quota review get a 403 when creating a
- * PUBLIC playlist via the API even with a valid token and matching user id
- * — in that case we transparently retry as private. A private playlist is
- * still fully reachable via its direct open.spotify.com link (the "public"
- * flag only affects whether it's listed on the owner's profile/search), so
- * this doesn't break sharing the playlist with guests.
+ * Creates a playlist owned by the authenticated (Nupci) account, preferring
+ * public visibility.
+ *
+ * Uses `POST /v1/me/playlists` — Spotify's February 2026 Web API migration
+ * removed `POST /v1/users/{user_id}/playlists` for Development Mode apps
+ * (403 for every caller past the March 9 2026 deadline, regardless of token,
+ * scopes, or whether user_id was correct).
+ *
+ * Some apps that haven't been through Spotify's Extended Quota review still
+ * get a 403 creating a PUBLIC playlist even via this endpoint — in that case
+ * we transparently retry as private. A private playlist is still fully
+ * reachable via its direct open.spotify.com link (the "public" flag only
+ * affects whether it's listed on the owner's profile/search), so this
+ * doesn't break sharing the playlist with guests.
  */
 export async function createPlaylist(name: string, description: string): Promise<SpotifyPlaylist> {
   const token = await getUserAccessToken();
-  const userId = await getSpotifyUserId();
-  const path = `/users/${encodeURIComponent(userId)}/playlists`;
+  const path = '/me/playlists';
 
   let res = await spotifyApiRequest(token, path, {
     method: 'POST',

@@ -1458,7 +1458,7 @@ There is no login screen for this inside Nupci — you authorize the app **once*
 node scripts/spotify-get-refresh-token.mjs
 ```
 
-It will prompt you for the Client ID/Secret from step 1 and a redirect URI (must match one registered on the app), print the authorize URL to open in a browser (log in as the account that should own the playlists, click **Agree**), then ask you to paste back the **full URL** you land on — even if that page fails to load. The script only reads the `code` parameter from it and tolerates whatever other query params get appended along the way. It then exchanges the code and prints `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` / `SPOTIFY_REFRESH_TOKEN` / `SPOTIFY_USER_ID` ready to paste into `.env`.
+It will prompt you for the Client ID/Secret from step 1 and a redirect URI (must match one registered on the app), print the authorize URL to open in a browser (log in as the account that should own the playlists, click **Agree**), then ask you to paste back the **full URL** you land on — even if that page fails to load. The script only reads the `code` parameter from it and tolerates whatever other query params get appended along the way. It then exchanges the code and prints `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` / `SPOTIFY_REFRESH_TOKEN` ready to paste into `.env`.
 
 <details>
 <summary>Manual method (if you can't run Node locally)</summary>
@@ -1475,11 +1475,6 @@ It will prompt you for the Client ID/Secret from step 1 and a redirect URI (must
    ```
    > `--http1.1` avoids a `curl: (92) HTTP/2 stream 0 was not closed cleanly` error some networks/curl versions hit against Spotify's token endpoint.
 5. The JSON response includes `access_token` and `refresh_token`. Copy the **`refresh_token`** — this is the value for `SPOTIFY_REFRESH_TOKEN`.
-6. Optional — look up `SPOTIFY_USER_ID` (skips one API call per nightly sync run) using the `access_token` from the previous step:
-   ```bash
-   curl https://api.spotify.com/v1/me -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
-   ```
-   Copy the `id` field from the response.
 
 > **The `redirect_uri` must be byte-for-byte identical** across three places: the app's registered Redirect URIs, the `/authorize` URL you opened, and the `redirect_uri` in the token-exchange `curl` call. A mismatch anywhere causes a "Bad Request" / "malformed or illegal request" error. This is exactly why the script above is recommended — it only asks for the redirect URI once and reuses it everywhere.
 
@@ -1493,7 +1488,6 @@ It will prompt you for the Client ID/Secret from step 1 and a redirect URI (must
 SPOTIFY_CLIENT_ID=your-spotify-client-id
 SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
 SPOTIFY_REFRESH_TOKEN=your-spotify-refresh-token
-SPOTIFY_USER_ID=       # optional — printed by the script above, or see step 6 of the manual method
 ```
 
 The integration is only considered active once all three required variables (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`) are set — otherwise the RSVP song question toggles in Configure stay disabled.
@@ -1503,10 +1497,10 @@ The integration is only considered active once all three required variables (`SP
 **Search returns `403: Active premium subscription required for the owner of the app`:**
 - The Spotify account that owns the Developer app (the one you authorized in step 2) doesn't have Premium. Upgrade that account to Premium — Spotify gates catalog search behind this regardless of which end-user is searching. See the note at the top of this section.
 
-**Playlist creation returns `403: Forbidden` (nightly sync / "probar ahora"), even though the user id is correct:**
-- Some apps that haven't been through Spotify's Extended Quota review get a 403 creating a *public* playlist via the API, even with valid credentials. The app automatically retries as a private playlist when this happens — private playlists are still fully reachable via their direct `open.spotify.com` link (the "public" flag only affects whether it shows on the owner's profile/search), so sharing with guests still works.
-- **If the private retry 403s too**, your refresh token is missing the `playlist-modify-private` scope (only requesting `playlist-modify-public` isn't enough once the fallback kicks in). Scopes can't be added to an existing token — re-run `node scripts/spotify-get-refresh-token.mjs` (or redo the manual authorize step) to get a fresh `SPOTIFY_REFRESH_TOKEN` covering all three required scopes, and update `.env`.
-- If both still fail, double-check `SPOTIFY_USER_ID` (if set) matches the `id` from `/v1/me` for the *same* account as `SPOTIFY_REFRESH_TOKEN` — a mismatched id 403s regardless of visibility. When in doubt, just remove `SPOTIFY_USER_ID` from `.env`; it's optional and the app resolves it from the token every time when unset.
+**Playlist creation returns `403: Forbidden` (nightly sync / "probar ahora"), no matter what you try:**
+- Spotify's February 2026 Web API migration removed `POST /v1/users/{user_id}/playlists` for Development Mode apps — it 403s for every caller since the March 9 2026 deadline, regardless of token, scopes, or whether the user id was correct. The app now uses `POST /v1/me/playlists` (the replacement endpoint) — make sure you're running a version that includes this fix.
+- Separately, some apps that haven't been through Spotify's Extended Quota review still get a 403 creating a *public* playlist even via `/me/playlists`. The app automatically retries as a private playlist when this happens — private playlists are still fully reachable via their direct `open.spotify.com` link (the "public" flag only affects whether it shows on the owner's profile/search), so sharing with guests still works.
+- If the private retry 403s too, your refresh token is missing the `playlist-modify-private` scope (only requesting `playlist-modify-public` isn't enough once the fallback kicks in). Scopes can't be added to an existing token — re-run `node scripts/spotify-get-refresh-token.mjs` (or redo the manual authorize step) to get a fresh `SPOTIFY_REFRESH_TOKEN` covering all three required scopes, and update `.env`.
 
 **Song question toggles are greyed out in Configure → RSVP:**
 - Spotify isn't configured system-wide — verify all three required env vars are set and restart the app.
