@@ -26,6 +26,8 @@ export interface ConfigureApiPaths {
   deleteCacheRsvp: string;
   /** GET (list) + PATCH `${url}/:id` (retry) endpoint for song suggestions */
   spotifySuggestions: string;
+  /** POST endpoint to run the Spotify playlist sync immediately (same as the nightly cron job) */
+  spotifySyncTrigger: string;
 }
 
 export interface ConfigurePageContentProps {
@@ -191,6 +193,7 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
             themes={wedding.available_themes}
             spotifyConfigured={wedding.spotify_configured}
             spotifySuggestionsApiUrl={apiPaths.spotifySuggestions}
+            spotifySyncTriggerUrl={apiPaths.spotifySyncTrigger}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             deleteCacheRsvpUrl={apiPaths.deleteCacheRsvp}

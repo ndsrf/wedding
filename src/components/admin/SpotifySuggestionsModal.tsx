@@ -6,8 +6,11 @@
  * any), the suggestion's status, and any ai_error. Artist/track are
  * editable — "Reintentar" re-searches Spotify directly with the corrected
  * values (no AI step involved, since the admin already supplied clean
- * text) and updates the row in place. A row that becomes READY this way is
- * picked up by the next playlist sync, same as an AI-resolved one.
+ * text) and updates the row in place. "Descartar" marks a row DISCARDED
+ * without touching Spotify. "Actualizar playlist" runs the same sync the
+ * nightly cron job runs (resolve pending suggestions, sync READY ones into
+ * the playlist) immediately, so changes made here don't have to wait for
+ * the next cron tick.
  */
 
 'use client';
@@ -18,8 +21,10 @@ import WeddingSpinner from '@/components/shared/WeddingSpinner';
 import type { SongSuggestionListItem } from '@/types/api';
 
 interface SpotifySuggestionsModalProps {
-  /** GET endpoint for the list; PATCH `${apiUrl}/${id}` retries one suggestion. */
+  /** GET endpoint for the list; PATCH/DELETE `${apiUrl}/${id}` act on one suggestion. */
   apiUrl: string;
+  /** POST endpoint to run the Spotify playlist sync immediately. */
+  syncTriggerUrl: string;
   onClose: () => void;
 }
 
@@ -32,33 +37,37 @@ const STATUS_STYLES: Record<SongSuggestionListItem['status'], string> = {
 };
 
 interface RowState {
-  retrying: boolean;
+  busy: boolean;
   error: string | null;
 }
 
-export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsModalProps) {
+type SyncStatus = 'idle' | 'syncing' | 'done' | 'error';
+
+export function SpotifySuggestionsModal({ apiUrl, syncTriggerUrl, onClose }: SpotifySuggestionsModalProps) {
   const t = useTranslations('admin.gallery');
   const [suggestions, setSuggestions] = useState<SongSuggestionListItem[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [rowState, setRowState] = useState<Record<string, RowState>>({});
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [syncMetrics, setSyncMetrics] = useState<{ processed_ai: number; added_to_playlist: number } | null>(null);
+
+  const loadSuggestions = async () => {
+    try {
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message || 'Failed to load suggestions');
+      setSuggestions(data.data.suggestions);
+      setLoadError(null);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load suggestions');
+    }
+  };
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(apiUrl);
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error?.message || 'Failed to load suggestions');
-        if (!cancelled) setSuggestions(data.data.suggestions);
-      } catch (err) {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : 'Failed to load suggestions');
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    loadSuggestions();
   }, [apiUrl]);
 
   const updateDraft = (id: string, field: 'artist_name' | 'track_title', value: string) => {
@@ -69,25 +78,45 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
     const artist_name = suggestion.artist_name?.trim() || null;
     const track_title = suggestion.track_title?.trim() || null;
     if (!artist_name && !track_title) {
-      setRowState((prev) => ({ ...prev, [suggestion.id]: { retrying: false, error: t('spotifySuggestionsRetryMissing') } }));
+      setRowState((prev) => ({ ...prev, [suggestion.id]: { busy: false, error: t('spotifySuggestionsRetryMissing') } }));
       return;
     }
 
-    setRowState((prev) => ({ ...prev, [suggestion.id]: { retrying: true, error: null } }));
+    setRowState((prev) => ({ ...prev, [suggestion.id]: { busy: true, error: null } }));
     try {
       const res = await fetch(`${apiUrl}/${suggestion.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ artist_name, track_title }),
+        body: JSON.stringify({ action: 'retry', artist_name, track_title }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error?.message || 'Retry failed');
       setSuggestions((prev) => prev?.map((s) => (s.id === suggestion.id ? data.data.suggestion : s)) ?? prev);
-      setRowState((prev) => ({ ...prev, [suggestion.id]: { retrying: false, error: null } }));
+      setRowState((prev) => ({ ...prev, [suggestion.id]: { busy: false, error: null } }));
     } catch (err) {
       setRowState((prev) => ({
         ...prev,
-        [suggestion.id]: { retrying: false, error: err instanceof Error ? err.message : 'Retry failed' },
+        [suggestion.id]: { busy: false, error: err instanceof Error ? err.message : 'Retry failed' },
+      }));
+    }
+  };
+
+  const handleDiscard = async (id: string) => {
+    setRowState((prev) => ({ ...prev, [id]: { busy: true, error: null } }));
+    try {
+      const res = await fetch(`${apiUrl}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'discard' }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message || 'Discard failed');
+      setSuggestions((prev) => prev?.map((s) => (s.id === id ? data.data.suggestion : s)) ?? prev);
+      setRowState((prev) => ({ ...prev, [id]: { busy: false, error: null } }));
+    } catch (err) {
+      setRowState((prev) => ({
+        ...prev,
+        [id]: { busy: false, error: err instanceof Error ? err.message : 'Discard failed' },
       }));
     }
   };
@@ -121,8 +150,29 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
     } catch (err) {
       setRowState((prev) => ({
         ...prev,
-        [id]: { retrying: false, error: err instanceof Error ? err.message : 'Failed to delete row' },
+        [id]: { busy: false, error: err instanceof Error ? err.message : 'Failed to delete row' },
       }));
+    }
+  };
+
+  const handleUpdatePlaylist = async () => {
+    setSyncStatus('syncing');
+    setSyncError(null);
+    setSyncMetrics(null);
+    try {
+      const res = await fetch(syncTriggerUrl, { method: 'POST' });
+      const data = await res.json() as {
+        success: boolean;
+        reason?: string;
+        metrics?: { processed_ai: number; added_to_playlist: number };
+      };
+      if (!res.ok || !data.success) throw new Error(data.reason || 'Sync failed');
+      setSyncStatus('done');
+      setSyncMetrics(data.metrics ?? null);
+      await loadSuggestions();
+    } catch (err) {
+      setSyncStatus('error');
+      setSyncError(err instanceof Error ? err.message : 'Sync failed');
     }
   };
 
@@ -142,7 +192,7 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
           </div>
           <p className="text-sm text-gray-500 mb-4">{t('spotifySuggestionsDesc')}</p>
 
-          <div className="mb-3">
+          <div className="mb-3 flex flex-wrap items-center gap-4">
             <button
               onClick={handleAddRow}
               disabled={adding || suggestions === null}
@@ -150,8 +200,32 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
             >
               {adding ? t('spotifySuggestionsAdding') : `+ ${t('spotifySuggestionsAddRow')}`}
             </button>
-            {addError && <p className="text-xs text-red-600 mt-1">{addError}</p>}
+            <button
+              onClick={handleUpdatePlaylist}
+              disabled={syncStatus === 'syncing' || suggestions === null}
+              className="text-sm font-medium text-green-700 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {syncStatus === 'syncing' ? t('spotifySuggestionsSyncing') : `↻ ${t('spotifySuggestionsUpdatePlaylist')}`}
+            </button>
           </div>
+          {addError && <p className="text-xs text-red-600 -mt-2 mb-3">{addError}</p>}
+          {syncStatus === 'done' && (
+            <p className="text-xs text-emerald-600 -mt-2 mb-3">
+              {t('spotifySuggestionsSyncDone')}
+              {syncMetrics && ` ${t('spotifySuggestionsSyncDoneDetail', { added: syncMetrics.added_to_playlist, resolved: syncMetrics.processed_ai })}`}
+            </p>
+          )}
+          {syncStatus === 'error' && (
+            <p className="text-xs text-red-600 -mt-2 mb-3">
+              {syncError === 'not_configured'
+                ? t('spotifyNotConfigured')
+                : syncError === 'sync_not_enabled'
+                  ? t('spotifySuggestionsSyncNotEnabled')
+                  : syncError === 'wedding_inactive'
+                    ? t('spotifySuggestionsSyncInactive')
+                    : t('spotifySuggestionsSyncError')}
+            </p>
+          )}
 
           {loadError ? (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -211,13 +285,24 @@ export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsM
                           {(state?.error || s.ai_error) && (
                             <p className="text-xs text-red-600 break-words mb-1">{state?.error || s.ai_error}</p>
                           )}
-                          <button
-                            onClick={() => handleRetry(s)}
-                            disabled={state?.retrying}
-                            className="text-xs font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {state?.retrying ? t('spotifySuggestionsRetrying') : t('spotifySuggestionsRetryButton')}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleRetry(s)}
+                              disabled={state?.busy}
+                              className="text-xs font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {state?.busy ? t('spotifySuggestionsRetrying') : t('spotifySuggestionsRetryButton')}
+                            </button>
+                            {s.status !== 'DISCARDED' && (
+                              <button
+                                onClick={() => handleDiscard(s.id)}
+                                disabled={state?.busy}
+                                className="text-xs font-medium text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {t('spotifySuggestionsDiscardButton')}
+                              </button>
+                            )}
+                          </div>
                         </td>
                         <td className="py-2 align-top">
                           <button

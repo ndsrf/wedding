@@ -27,6 +27,7 @@ export default function ConfigureWeddingPage() {
         deleteAllGuests: '/api/admin/guests/delete-all',
         deleteCacheRsvp: '/api/admin/cache/rsvp',
         spotifySuggestions: '/api/admin/wedding/spotify-suggestions',
+        spotifySyncTrigger: '/api/admin/wedding/spotify-sync/trigger',
       }}
       backUrl="/admin"
       header={

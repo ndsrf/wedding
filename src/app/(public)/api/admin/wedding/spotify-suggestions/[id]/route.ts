@@ -1,31 +1,36 @@
 /**
- * Wedding Admin - Retry or delete a single Spotify song suggestion
+ * Wedding Admin - Retry, discard, or delete a single Spotify song suggestion
  *
  * PATCH  /api/admin/wedding/spotify-suggestions/:id
  * DELETE /api/admin/wedding/spotify-suggestions/:id
  *
- * PATCH lets an admin correct the artist/track pair for a FAILED (or any)
- * suggestion from the "Abrir listado" modal and re-searches Spotify's
- * catalog directly with the corrected values — no AI step, since the admin
- * already supplied clean text. A READY result is picked up by the next
- * playlist sync. DELETE removes a row outright (e.g. a manually-added one
- * created by mistake).
+ * PATCH { action: 'retry' } lets an admin correct the artist/track pair for
+ * a FAILED (or any) suggestion from the "Abrir listado" modal and
+ * re-searches Spotify's catalog directly with the corrected values — no AI
+ * step, since the admin already supplied clean text. A READY result is
+ * picked up by the next playlist sync.
+ * PATCH { action: 'discard' } marks it DISCARDED without touching Spotify —
+ * for a suggestion the admin simply doesn't want on the playlist.
+ * DELETE removes a row outright (e.g. a manually-added one created by
+ * mistake).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireRole } from '@/lib/auth/middleware';
 import { isSpotifyConfigured } from '@/lib/spotify/client';
-import { retrySongSuggestion, deleteSongSuggestion } from '@/lib/spotify/suggestions';
+import { retrySongSuggestion, discardSongSuggestion, deleteSongSuggestion } from '@/lib/spotify/suggestions';
 import { API_ERROR_CODES } from '@/types/api';
 import type { APIResponse, RetrySpotifySuggestionResponse, DeleteSpotifySuggestionResponse } from '@/types/api';
 
-const retrySchema = z
-  .object({
+const patchSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('discard') }),
+  z.object({
+    action: z.literal('retry'),
     artist_name: z.string().trim().nullable().optional(),
     track_title: z.string().trim().nullable().optional(),
-  })
-  .refine((data) => !!data.artist_name || !!data.track_title, { message: 'Enter an artist or a track' });
+  }),
+]);
 
 export async function PATCH(
   request: NextRequest,
@@ -41,17 +46,9 @@ export async function PATCH(
       return NextResponse.json(response, { status: 403 });
     }
 
-    if (!isSpotifyConfigured()) {
-      const response: APIResponse = {
-        success: false,
-        error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Spotify integration is not configured' },
-      };
-      return NextResponse.json(response, { status: 422 });
-    }
-
     const { id } = await params;
     const body = await request.json();
-    const parsed = retrySchema.safeParse(body);
+    const parsed = patchSchema.safeParse(body);
     if (!parsed.success) {
       const response: APIResponse = {
         success: false,
@@ -60,12 +57,27 @@ export async function PATCH(
       return NextResponse.json(response, { status: 422 });
     }
 
-    const suggestion = await retrySongSuggestion(
-      id,
-      user.wedding_id,
-      parsed.data.artist_name || null,
-      parsed.data.track_title || null
-    );
+    let suggestion;
+    if (parsed.data.action === 'discard') {
+      suggestion = await discardSongSuggestion(id, user.wedding_id);
+    } else {
+      if (!parsed.data.artist_name && !parsed.data.track_title) {
+        const response: APIResponse = {
+          success: false,
+          error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Enter an artist or a track' },
+        };
+        return NextResponse.json(response, { status: 422 });
+      }
+      if (!isSpotifyConfigured()) {
+        const response: APIResponse = {
+          success: false,
+          error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Spotify integration is not configured' },
+        };
+        return NextResponse.json(response, { status: 422 });
+      }
+      suggestion = await retrySongSuggestion(id, user.wedding_id, parsed.data.artist_name || null, parsed.data.track_title || null);
+    }
+
     if (!suggestion) {
       const response: APIResponse = {
         success: false,

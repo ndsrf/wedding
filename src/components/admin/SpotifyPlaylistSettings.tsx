@@ -15,6 +15,8 @@ interface SpotifyPlaylistSettingsProps {
   playlistUrl: string | null;
   /** GET endpoint for the song suggestions list (role-scoped) */
   suggestionsApiUrl: string;
+  /** POST endpoint to run the Spotify playlist sync immediately (role-scoped) */
+  syncTriggerUrl: string;
 }
 
 function extractPlaylistId(url: string): string | null {
@@ -27,7 +29,7 @@ function extractPlaylistId(url: string): string | null {
  * Read-only: the playlist is created and filled by the nightly cron job
  * (src/lib/spotify/sync.ts), not from this panel.
  */
-export function SpotifyPlaylistSettings({ spotifyConfigured, playlistUrl, suggestionsApiUrl }: SpotifyPlaylistSettingsProps) {
+export function SpotifyPlaylistSettings({ spotifyConfigured, playlistUrl, suggestionsApiUrl, syncTriggerUrl }: SpotifyPlaylistSettingsProps) {
   const t = useTranslations('admin.gallery');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -93,7 +95,11 @@ export function SpotifyPlaylistSettings({ spotifyConfigured, playlistUrl, sugges
       </button>
 
       {showSuggestions && (
-        <SpotifySuggestionsModal apiUrl={suggestionsApiUrl} onClose={() => setShowSuggestions(false)} />
+        <SpotifySuggestionsModal
+          apiUrl={suggestionsApiUrl}
+          syncTriggerUrl={syncTriggerUrl}
+          onClose={() => setShowSuggestions(false)}
+        />
       )}
     </div>
   );

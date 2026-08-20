@@ -226,6 +226,29 @@ export async function retrySongSuggestion(
 }
 
 /**
+ * Marks a suggestion DISCARDED without touching Spotify — for songs an
+ * admin/planner simply doesn't want on the playlist. Returns null if the
+ * suggestion doesn't belong to the given wedding.
+ */
+export async function discardSongSuggestion(id: string, weddingId: string): Promise<SongSuggestionListItem | null> {
+  const suggestion = await prisma.songSuggestion.findFirst({
+    where: { id, wedding_id: weddingId },
+    include: {
+      family: { select: { name: true } },
+      family_member: { select: { name: true } },
+    },
+  });
+  if (!suggestion) return null;
+
+  const updated = await prisma.songSuggestion.update({
+    where: { id },
+    data: { status: 'DISCARDED', ai_error: null },
+  });
+
+  return toListItem({ ...updated, family: suggestion.family, family_member: suggestion.family_member });
+}
+
+/**
  * Adds a blank, unscoped (no family/guest) song suggestion row — for songs a
  * planner/admin heard about off-band (e.g. a guest who mentioned several
  * songs in one RSVP text field, or a request that came in by phone) and

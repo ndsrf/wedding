@@ -2631,7 +2631,15 @@
       "spotifySuggestionsAdding": "Añadiendo…",
       "spotifySuggestionsManualPlaceholder": "(añadida a mano)",
       "spotifySuggestionsDeleteButton": "Eliminar",
-      "spotifySuggestionsDeleteConfirm": "¿Eliminar esta sugerencia de canción?"
+      "spotifySuggestionsDeleteConfirm": "¿Eliminar esta sugerencia de canción?",
+      "spotifySuggestionsDiscardButton": "Descartar",
+      "spotifySuggestionsUpdatePlaylist": "Actualizar playlist",
+      "spotifySuggestionsSyncing": "Actualizando…",
+      "spotifySuggestionsSyncDone": "Playlist actualizada.",
+      "spotifySuggestionsSyncDoneDetail": "{added} canción(es) añadida(s), {resolved} resueltas por IA.",
+      "spotifySuggestionsSyncNotEnabled": "Activa primero la sincronización de Spotify en los ajustes de alertas.",
+      "spotifySuggestionsSyncInactive": "Esta boda está archivada o desactivada, no se puede actualizar su playlist.",
+      "spotifySuggestionsSyncError": "No se pudo actualizar la playlist. Inténtalo de nuevo."
     },
     "nupcibot": {
       "subtitle": "Tu asistente de boda",

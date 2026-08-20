@@ -760,12 +760,13 @@ export type GetSpotifySuggestionsResponse = APIResponse<{ suggestions: SongSugge
 
 // PATCH /api/admin/wedding/spotify-suggestions/:id, /api/planner/weddings/:id/spotify-suggestions/:suggestionId
 // Admin-corrected artist/track pair — re-searched against Spotify directly (no AI step).
-// At least one of the two must be non-empty — a lone artist returns their
-// top track, a lone track searches by title alone.
-export interface RetrySpotifySuggestionRequest {
-  artist_name: string | null;
-  track_title: string | null;
-}
+// "retry" re-searches Spotify with the given artist/track (at least one of
+// the two must be non-empty — a lone artist returns their top track, a lone
+// track searches by title alone). "discard" marks the suggestion DISCARDED
+// without touching Spotify.
+export type RetrySpotifySuggestionRequest =
+  | { action: 'retry'; artist_name: string | null; track_title: string | null }
+  | { action: 'discard' };
 
 export type RetrySpotifySuggestionResponse = APIResponse<{ suggestion: SongSuggestionListItem }>;
 

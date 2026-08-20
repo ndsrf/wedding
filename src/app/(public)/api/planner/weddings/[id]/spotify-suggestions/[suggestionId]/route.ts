@@ -1,5 +1,5 @@
 /**
- * Wedding Planner - Retry or delete a single Spotify song suggestion
+ * Wedding Planner - Retry, discard, or delete a single Spotify song suggestion
  *
  * PATCH  /api/planner/weddings/:id/spotify-suggestions/:suggestionId
  * DELETE /api/planner/weddings/:id/spotify-suggestions/:suggestionId
@@ -13,16 +13,18 @@ import { z } from 'zod';
 import { requireRole } from '@/lib/auth/middleware';
 import { validatePlannerAccess } from '@/lib/guests/planner-access';
 import { isSpotifyConfigured } from '@/lib/spotify/client';
-import { retrySongSuggestion, deleteSongSuggestion } from '@/lib/spotify/suggestions';
+import { retrySongSuggestion, discardSongSuggestion, deleteSongSuggestion } from '@/lib/spotify/suggestions';
 import { API_ERROR_CODES } from '@/types/api';
 import type { APIResponse, RetrySpotifySuggestionResponse, DeleteSpotifySuggestionResponse } from '@/types/api';
 
-const retrySchema = z
-  .object({
+const patchSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('discard') }),
+  z.object({
+    action: z.literal('retry'),
     artist_name: z.string().trim().nullable().optional(),
     track_title: z.string().trim().nullable().optional(),
-  })
-  .refine((data) => !!data.artist_name || !!data.track_title, { message: 'Enter an artist or a track' });
+  }),
+]);
 
 export async function PATCH(
   request: NextRequest,
@@ -43,16 +45,8 @@ export async function PATCH(
     const denied = await validatePlannerAccess(user.planner_id, weddingId);
     if (denied) return denied;
 
-    if (!isSpotifyConfigured()) {
-      const response: APIResponse = {
-        success: false,
-        error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Spotify integration is not configured' },
-      };
-      return NextResponse.json(response, { status: 422 });
-    }
-
     const body = await request.json();
-    const parsed = retrySchema.safeParse(body);
+    const parsed = patchSchema.safeParse(body);
     if (!parsed.success) {
       const response: APIResponse = {
         success: false,
@@ -61,12 +55,27 @@ export async function PATCH(
       return NextResponse.json(response, { status: 422 });
     }
 
-    const suggestion = await retrySongSuggestion(
-      suggestionId,
-      weddingId,
-      parsed.data.artist_name || null,
-      parsed.data.track_title || null
-    );
+    let suggestion;
+    if (parsed.data.action === 'discard') {
+      suggestion = await discardSongSuggestion(suggestionId, weddingId);
+    } else {
+      if (!parsed.data.artist_name && !parsed.data.track_title) {
+        const response: APIResponse = {
+          success: false,
+          error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Enter an artist or a track' },
+        };
+        return NextResponse.json(response, { status: 422 });
+      }
+      if (!isSpotifyConfigured()) {
+        const response: APIResponse = {
+          success: false,
+          error: { code: API_ERROR_CODES.VALIDATION_ERROR, message: 'Spotify integration is not configured' },
+        };
+        return NextResponse.json(response, { status: 422 });
+      }
+      suggestion = await retrySongSuggestion(suggestionId, weddingId, parsed.data.artist_name || null, parsed.data.track_title || null);
+    }
+
     if (!suggestion) {
       const response: APIResponse = {
         success: false,

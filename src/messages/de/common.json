@@ -2565,7 +2565,15 @@
       "spotifySuggestionsAdding": "Wird hinzugefügt…",
       "spotifySuggestionsManualPlaceholder": "(manuell hinzugefügt)",
       "spotifySuggestionsDeleteButton": "Löschen",
-      "spotifySuggestionsDeleteConfirm": "Diesen Songvorschlag löschen?"
+      "spotifySuggestionsDeleteConfirm": "Diesen Songvorschlag löschen?",
+      "spotifySuggestionsDiscardButton": "Verwerfen",
+      "spotifySuggestionsUpdatePlaylist": "Playlist aktualisieren",
+      "spotifySuggestionsSyncing": "Wird aktualisiert…",
+      "spotifySuggestionsSyncDone": "Playlist aktualisiert.",
+      "spotifySuggestionsSyncDoneDetail": "{added} Song(s) hinzugefügt, {resolved} durch KI aufgelöst.",
+      "spotifySuggestionsSyncNotEnabled": "Aktiviere zuerst die Spotify-Synchronisierung in den Benachrichtigungseinstellungen.",
+      "spotifySuggestionsSyncInactive": "Diese Hochzeit ist archiviert oder deaktiviert, ihre Playlist kann nicht aktualisiert werden.",
+      "spotifySuggestionsSyncError": "Playlist konnte nicht aktualisiert werden. Bitte versuche es erneut."
     },
     "nupcibot": {
       "subtitle": "Ihr Hochzeitsassistent",

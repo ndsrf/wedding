@@ -2565,7 +2565,15 @@
       "spotifySuggestionsAdding": "Aggiunta…",
       "spotifySuggestionsManualPlaceholder": "(aggiunta manualmente)",
       "spotifySuggestionsDeleteButton": "Elimina",
-      "spotifySuggestionsDeleteConfirm": "Eliminare questo suggerimento di canzone?"
+      "spotifySuggestionsDeleteConfirm": "Eliminare questo suggerimento di canzone?",
+      "spotifySuggestionsDiscardButton": "Scarta",
+      "spotifySuggestionsUpdatePlaylist": "Aggiorna playlist",
+      "spotifySuggestionsSyncing": "Aggiornamento…",
+      "spotifySuggestionsSyncDone": "Playlist aggiornata.",
+      "spotifySuggestionsSyncDoneDetail": "{added} canzone/i aggiunta/e, {resolved} risolta/e dall'IA.",
+      "spotifySuggestionsSyncNotEnabled": "Attiva prima la sincronizzazione Spotify nelle impostazioni degli avvisi.",
+      "spotifySuggestionsSyncInactive": "Questo matrimonio è archiviato o disabilitato, la sua playlist non può essere aggiornata.",
+      "spotifySuggestionsSyncError": "Impossibile aggiornare la playlist. Riprova."
     },
     "nupcibot": {
       "subtitle": "Il tuo assistente matrimoniale",

@@ -2565,7 +2565,15 @@
       "spotifySuggestionsAdding": "Ajout…",
       "spotifySuggestionsManualPlaceholder": "(ajoutée manuellement)",
       "spotifySuggestionsDeleteButton": "Supprimer",
-      "spotifySuggestionsDeleteConfirm": "Supprimer cette suggestion de chanson ?"
+      "spotifySuggestionsDeleteConfirm": "Supprimer cette suggestion de chanson ?",
+      "spotifySuggestionsDiscardButton": "Ignorer",
+      "spotifySuggestionsUpdatePlaylist": "Mettre à jour la playlist",
+      "spotifySuggestionsSyncing": "Mise à jour…",
+      "spotifySuggestionsSyncDone": "Playlist mise à jour.",
+      "spotifySuggestionsSyncDoneDetail": "{added} chanson(s) ajoutée(s), {resolved} résolue(s) par l'IA.",
+      "spotifySuggestionsSyncNotEnabled": "Activez d'abord la synchronisation Spotify dans les paramètres d'alerte.",
+      "spotifySuggestionsSyncInactive": "Ce mariage est archivé ou désactivé, sa playlist ne peut pas être mise à jour.",
+      "spotifySuggestionsSyncError": "Impossible de mettre à jour la playlist. Veuillez réessayer."
     },
     "nupcibot": {
       "subtitle": "Votre assistant mariage",

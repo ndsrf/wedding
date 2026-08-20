@@ -2644,7 +2644,15 @@
       "spotifySuggestionsAdding": "Adding…",
       "spotifySuggestionsManualPlaceholder": "(added manually)",
       "spotifySuggestionsDeleteButton": "Delete",
-      "spotifySuggestionsDeleteConfirm": "Delete this song suggestion?"
+      "spotifySuggestionsDeleteConfirm": "Delete this song suggestion?",
+      "spotifySuggestionsDiscardButton": "Discard",
+      "spotifySuggestionsUpdatePlaylist": "Update playlist",
+      "spotifySuggestionsSyncing": "Updating…",
+      "spotifySuggestionsSyncDone": "Playlist updated.",
+      "spotifySuggestionsSyncDoneDetail": "{added} song(s) added, {resolved} resolved by AI.",
+      "spotifySuggestionsSyncNotEnabled": "Enable Spotify sync in alert settings first.",
+      "spotifySuggestionsSyncInactive": "This wedding is archived or disabled, its playlist can't be updated.",
+      "spotifySuggestionsSyncError": "Couldn't update the playlist. Please try again."
     },
     "nupcibot": {
       "subtitle": "Your wedding assistant",
