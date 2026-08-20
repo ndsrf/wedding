@@ -13,6 +13,14 @@
  * active Premium subscription for /v1/search (Client Credentials calls fail
  * with 403 "Active premium subscription required for the owner of the app"
  * otherwise). See README.md → "Spotify Integration".
+ *
+ * NOTE: Spotify's February 2026 Web API migration removed/renamed several
+ * playlist endpoints for Development Mode apps (403 for every caller past
+ * the March 9 2026 deadline, regardless of token/scopes): playlist creation
+ * moved from /users/{id}/playlists to /me/playlists, and the /tracks
+ * sub-resource was renamed to /items (GET, POST, DELETE alike). This client
+ * uses the new paths — if Spotify changes them again, check their current
+ * migration guide before assuming it's a token/scope/account problem.
  */
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
@@ -243,7 +251,9 @@ export async function uploadPlaylistCover(playlistId: string, jpegBase64: string
 export async function getPlaylistTrackUris(playlistId: string): Promise<Set<string>> {
   const token = await getUserAccessToken();
   const uris = new Set<string>();
-  let path: string | null = `/playlists/${playlistId}/tracks?fields=next,items(track(uri))&limit=100`;
+  // Spotify's February 2026 Web API migration renamed the /tracks sub-resource
+  // to /items for Development Mode apps (the old path 403s for every caller).
+  let path: string | null = `/playlists/${playlistId}/items?fields=next,items(track(uri))&limit=100`;
 
   while (path) {
     const res: Response = await spotifyApiRequest(token, path);
@@ -266,7 +276,7 @@ export async function addTracksToPlaylist(playlistId: string, uris: string[]): P
   const token = await getUserAccessToken();
   for (let i = 0; i < uris.length; i += 100) {
     const batch = uris.slice(i, i + 100);
-    const res = await spotifyApiRequest(token, `/playlists/${playlistId}/tracks`, {
+    const res = await spotifyApiRequest(token, `/playlists/${playlistId}/items`, {
       method: 'POST',
       body: JSON.stringify({ uris: batch }),
     });

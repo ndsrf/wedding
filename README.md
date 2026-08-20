@@ -1502,6 +1502,9 @@ The integration is only considered active once all three required variables (`SP
 - Separately, some apps that haven't been through Spotify's Extended Quota review still get a 403 creating a *public* playlist even via `/me/playlists`. The app automatically retries as a private playlist when this happens — private playlists are still fully reachable via their direct `open.spotify.com` link (the "public" flag only affects whether it shows on the owner's profile/search), so sharing with guests still works.
 - If the private retry 403s too, your refresh token is missing the `playlist-modify-private` scope (only requesting `playlist-modify-public` isn't enough once the fallback kicks in). Scopes can't be added to an existing token — re-run `node scripts/spotify-get-refresh-token.mjs` (or redo the manual authorize step) to get a fresh `SPOTIFY_REFRESH_TOKEN` covering all three required scopes, and update `.env`.
 
+**Adding songs / reading a playlist's current tracks returns `403: Forbidden`:**
+- Same February 2026 migration — Spotify renamed the `/playlists/{id}/tracks` sub-resource to `/playlists/{id}/items` for Development Mode apps (GET, POST, and DELETE alike); the old path 403s for every caller now. The app uses `/items` — make sure you're running a version that includes this fix. If Spotify changes their paths again in the future, check their current migration guide rather than assuming it's a credentials problem — this integration has hit two of these renames already.
+
 **Song question toggles are greyed out in Configure → RSVP:**
 - Spotify isn't configured system-wide — verify all three required env vars are set and restart the app.
 
