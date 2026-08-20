@@ -2539,7 +2539,27 @@
       "spotifyPlaylistDesc": "Les chansons suggérées par les invités sont synchronisées automatiquement avec la playlist Spotify officielle de ce mariage.",
       "spotifyNotConfigured": "L'intégration Spotify n'est pas active sur ce système.",
       "spotifyPlaylistPending": "La playlist sera créée automatiquement lors de la prochaine synchronisation nocturne, dès qu'il y aura des chansons suggérées à ajouter.",
-      "spotifyOpenButton": "Ouvrir dans Spotify"
+      "spotifyOpenButton": "Ouvrir dans Spotify",
+      "spotifySuggestionsButton": "Voir la liste",
+      "spotifySuggestionsTitle": "Suggestions de chansons",
+      "spotifySuggestionsDesc": "Ce que chaque invité a écrit, le morceau trouvé sur Spotify, son statut et la raison de l'échec le cas échéant. Vous pouvez corriger l'artiste ou le titre et relancer la recherche.",
+      "spotifySuggestionsEmpty": "Aucune suggestion de chanson pour l'instant.",
+      "spotifySuggestionsColWho": "Qui",
+      "spotifySuggestionsColInput": "Ce qui a été écrit",
+      "spotifySuggestionsColArtist": "Artiste",
+      "spotifySuggestionsColSong": "Titre",
+      "spotifySuggestionsColStatus": "Statut",
+      "spotifySuggestionsColError": "Erreur",
+      "spotifySuggestionsStatus": {
+        "READY": "Prêt à synchroniser",
+        "PENDING_AI": "En attente d'IA",
+        "SYNCED": "Dans la playlist",
+        "DISCARDED": "Ignorée",
+        "FAILED": "Introuvable"
+      },
+      "spotifySuggestionsRetryButton": "Réessayer",
+      "spotifySuggestionsRetrying": "Recherche…",
+      "spotifySuggestionsRetryMissing": "Indiquez un artiste et un titre avant de réessayer."
     },
     "nupcibot": {
       "subtitle": "Votre assistant mariage",

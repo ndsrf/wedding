@@ -2605,7 +2605,27 @@
       "spotifyPlaylistDesc": "Las canciones sugeridas por los invitados se sincronizan automáticamente con la playlist oficial de Spotify de esta boda.",
       "spotifyNotConfigured": "La integración de Spotify no está activa en este sistema.",
       "spotifyPlaylistPending": "La playlist se creará automáticamente en la próxima sincronización nocturna, en cuanto haya canciones sugeridas que añadir.",
-      "spotifyOpenButton": "Abrir en Spotify"
+      "spotifyOpenButton": "Abrir en Spotify",
+      "spotifySuggestionsButton": "Abrir listado",
+      "spotifySuggestionsTitle": "Sugerencias de canciones",
+      "spotifySuggestionsDesc": "Lo que cada invitado escribió, la canción encontrada en Spotify, su estado y el motivo si no se pudo resolver. Puedes corregir el artista o la canción y reintentar la búsqueda.",
+      "spotifySuggestionsEmpty": "Todavía no hay sugerencias de canciones.",
+      "spotifySuggestionsColWho": "Quién",
+      "spotifySuggestionsColInput": "Lo que escribió",
+      "spotifySuggestionsColArtist": "Artista",
+      "spotifySuggestionsColSong": "Canción",
+      "spotifySuggestionsColStatus": "Estado",
+      "spotifySuggestionsColError": "Error",
+      "spotifySuggestionsStatus": {
+        "READY": "Lista para sincronizar",
+        "PENDING_AI": "Pendiente de IA",
+        "SYNCED": "En la playlist",
+        "DISCARDED": "Descartada",
+        "FAILED": "Sin encontrar"
+      },
+      "spotifySuggestionsRetryButton": "Reintentar",
+      "spotifySuggestionsRetrying": "Buscando…",
+      "spotifySuggestionsRetryMissing": "Introduce artista y canción antes de reintentar."
     },
     "nupcibot": {
       "subtitle": "Tu asistente de boda",

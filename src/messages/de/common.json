@@ -2539,7 +2539,27 @@
       "spotifyPlaylistDesc": "Von Gästen vorgeschlagene Songs werden automatisch mit der offiziellen Spotify-Playlist dieser Hochzeit synchronisiert.",
       "spotifyNotConfigured": "Die Spotify-Integration ist auf diesem System nicht aktiv.",
       "spotifyPlaylistPending": "Die Playlist wird automatisch bei der nächsten nächtlichen Synchronisierung erstellt, sobald Songvorschläge zum Hinzufügen vorliegen.",
-      "spotifyOpenButton": "In Spotify öffnen"
+      "spotifyOpenButton": "In Spotify öffnen",
+      "spotifySuggestionsButton": "Liste öffnen",
+      "spotifySuggestionsTitle": "Songvorschläge",
+      "spotifySuggestionsDesc": "Was jeder Gast eingegeben hat, der auf Spotify gefundene Titel, sein Status und der Grund, falls er nicht gefunden wurde. Du kannst Interpret oder Titel korrigieren und die Suche erneut starten.",
+      "spotifySuggestionsEmpty": "Noch keine Songvorschläge.",
+      "spotifySuggestionsColWho": "Wer",
+      "spotifySuggestionsColInput": "Eingabe",
+      "spotifySuggestionsColArtist": "Interpret",
+      "spotifySuggestionsColSong": "Titel",
+      "spotifySuggestionsColStatus": "Status",
+      "spotifySuggestionsColError": "Fehler",
+      "spotifySuggestionsStatus": {
+        "READY": "Bereit zur Synchronisierung",
+        "PENDING_AI": "KI ausstehend",
+        "SYNCED": "In der Playlist",
+        "DISCARDED": "Verworfen",
+        "FAILED": "Nicht gefunden"
+      },
+      "spotifySuggestionsRetryButton": "Erneut versuchen",
+      "spotifySuggestionsRetrying": "Suche…",
+      "spotifySuggestionsRetryMissing": "Bitte Interpret und Titel eingeben, bevor du es erneut versuchst."
     },
     "nupcibot": {
       "subtitle": "Ihr Hochzeitsassistent",

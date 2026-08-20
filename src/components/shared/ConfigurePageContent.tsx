@@ -24,6 +24,8 @@ export interface ConfigureApiPaths {
   deleteAllGuests: string;
   /** DELETE endpoint to clear the RSVP page cache */
   deleteCacheRsvp: string;
+  /** GET (list) + PATCH `${url}/:id` (retry) endpoint for song suggestions */
+  spotifySuggestions: string;
 }
 
 export interface ConfigurePageContentProps {
@@ -188,6 +190,7 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
             wedding={wedding}
             themes={wedding.available_themes}
             spotifyConfigured={wedding.spotify_configured}
+            spotifySuggestionsApiUrl={apiPaths.spotifySuggestions}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             deleteCacheRsvpUrl={apiPaths.deleteCacheRsvp}

@@ -9,7 +9,8 @@
 
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import type { SongSuggestionInput } from '@/types/api';
+import { findTrack } from './client';
+import type { SongSuggestionInput, SongSuggestionListItem } from '@/types/api';
 
 export interface SongSuggestionScope {
   wedding_id: string;
@@ -116,4 +117,102 @@ export async function syncSongSuggestionFromText(
   }
 
   await createOrRecoverFromRace(scope, { raw_input: trimmed, status: 'PENDING_AI' });
+}
+
+function formatWho(family: { name: string } | null, familyMember: { name: string } | null): string {
+  if (!familyMember) return family?.name ?? '';
+  return family?.name ? `${family.name} — ${familyMember.name}` : familyMember.name;
+}
+
+function toListItem(row: {
+  id: string;
+  raw_input: string;
+  track_title: string | null;
+  artist_name: string | null;
+  status: SongSuggestionListItem['status'];
+  ai_error: string | null;
+  created_at: Date;
+  family: { name: string } | null;
+  family_member: { name: string } | null;
+}): SongSuggestionListItem {
+  return {
+    id: row.id,
+    who: formatWho(row.family, row.family_member),
+    raw_input: row.raw_input,
+    track_title: row.track_title,
+    artist_name: row.artist_name,
+    status: row.status,
+    ai_error: row.ai_error,
+    created_at: row.created_at.toISOString(),
+  };
+}
+
+/**
+ * Lists every song suggestion for a wedding, newest first — backs the
+ * read-only "Abrir listado" debug view on the Spotify Playlist gallery card
+ * (what each guest/family entered, the resolved track, status, and any
+ * ai_error, so a planner/admin can see why a song didn't reach the playlist).
+ */
+export async function listSongSuggestions(weddingId: string): Promise<SongSuggestionListItem[]> {
+  const rows = await prisma.songSuggestion.findMany({
+    where: { wedding_id: weddingId },
+    orderBy: { created_at: 'desc' },
+    include: {
+      family: { select: { name: true } },
+      family_member: { select: { name: true } },
+    },
+  });
+
+  return rows.map(toListItem);
+}
+
+/**
+ * Re-searches Spotify's catalog with an admin-corrected artist/track pair
+ * (e.g. fixing a typo the AI extraction step got wrong) and updates the
+ * suggestion immediately — bypassing the AI step entirely, since the admin
+ * has already supplied clean values. Returns null if the suggestion doesn't
+ * belong to the given wedding.
+ */
+export async function retrySongSuggestion(
+  id: string,
+  weddingId: string,
+  artistName: string,
+  trackTitle: string
+): Promise<SongSuggestionListItem | null> {
+  const suggestion = await prisma.songSuggestion.findFirst({
+    where: { id, wedding_id: weddingId },
+    include: {
+      wedding: { select: { wedding_country: true } },
+      family: { select: { name: true } },
+      family_member: { select: { name: true } },
+    },
+  });
+  if (!suggestion) return null;
+
+  const match = await findTrack(artistName, trackTitle, suggestion.wedding.wedding_country);
+
+  const updated = await prisma.songSuggestion.update({
+    where: { id },
+    data: match
+      ? {
+          status: 'READY',
+          spotify_track_id: match.id,
+          spotify_uri: match.uri,
+          track_title: match.title,
+          artist_name: match.artist,
+          album_art_url: match.albumArtUrl,
+          ai_error: null,
+        }
+      : {
+          status: 'FAILED',
+          track_title: trackTitle,
+          artist_name: artistName,
+          spotify_track_id: null,
+          spotify_uri: null,
+          album_art_url: null,
+          ai_error: `No Spotify match for "${artistName} - ${trackTitle}"`,
+        },
+  });
+
+  return toListItem({ ...updated, family: suggestion.family, family_member: suggestion.family_member });
 }

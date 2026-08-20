@@ -743,6 +743,30 @@ export interface SubmitRSVPResult {
 
 export type SubmitRSVPResponse = APIResponse<SubmitRSVPResult>;
 
+// GET /api/admin/wedding/spotify-suggestions, /api/planner/weddings/:id/spotify-suggestions
+// Read-only debug listing behind the "Abrir listado" link on the Spotify Playlist gallery card.
+export interface SongSuggestionListItem {
+  id: string;
+  who: string;
+  raw_input: string;
+  track_title: string | null;
+  artist_name: string | null;
+  status: 'READY' | 'PENDING_AI' | 'SYNCED' | 'DISCARDED' | 'FAILED';
+  ai_error: string | null;
+  created_at: string;
+}
+
+export type GetSpotifySuggestionsResponse = APIResponse<{ suggestions: SongSuggestionListItem[] }>;
+
+// PATCH /api/admin/wedding/spotify-suggestions/:id, /api/planner/weddings/:id/spotify-suggestions/:suggestionId
+// Admin-corrected artist/track pair — re-searched against Spotify directly (no AI step).
+export interface RetrySpotifySuggestionRequest {
+  artist_name: string;
+  track_title: string;
+}
+
+export type RetrySpotifySuggestionResponse = APIResponse<{ suggestion: SongSuggestionListItem }>;
+
 // POST /api/guest/:token/member
 export interface AddFamilyMemberRequest {
   name: string;

@@ -1,0 +1,183 @@
+/**
+ * Spotify Song Suggestions Modal
+ *
+ * Debug + fix-up listing behind "Abrir listado" on the Spotify Playlist
+ * gallery card: what each guest/family entered, the resolved track (if
+ * any), the suggestion's status, and any ai_error. Artist/track are
+ * editable — "Reintentar" re-searches Spotify directly with the corrected
+ * values (no AI step involved, since the admin already supplied clean
+ * text) and updates the row in place. A row that becomes READY this way is
+ * picked up by the next playlist sync, same as an AI-resolved one.
+ */
+
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import WeddingSpinner from '@/components/shared/WeddingSpinner';
+import type { SongSuggestionListItem } from '@/types/api';
+
+interface SpotifySuggestionsModalProps {
+  /** GET endpoint for the list; PATCH `${apiUrl}/${id}` retries one suggestion. */
+  apiUrl: string;
+  onClose: () => void;
+}
+
+const STATUS_STYLES: Record<SongSuggestionListItem['status'], string> = {
+  READY: 'bg-blue-50 text-blue-700',
+  PENDING_AI: 'bg-amber-50 text-amber-700',
+  SYNCED: 'bg-green-50 text-green-700',
+  DISCARDED: 'bg-gray-100 text-gray-500',
+  FAILED: 'bg-red-50 text-red-700',
+};
+
+interface RowState {
+  retrying: boolean;
+  error: string | null;
+}
+
+export function SpotifySuggestionsModal({ apiUrl, onClose }: SpotifySuggestionsModalProps) {
+  const t = useTranslations('admin.gallery');
+  const [suggestions, setSuggestions] = useState<SongSuggestionListItem[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [rowState, setRowState] = useState<Record<string, RowState>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error?.message || 'Failed to load suggestions');
+        if (!cancelled) setSuggestions(data.data.suggestions);
+      } catch (err) {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : 'Failed to load suggestions');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [apiUrl]);
+
+  const updateDraft = (id: string, field: 'artist_name' | 'track_title', value: string) => {
+    setSuggestions((prev) => prev?.map((s) => (s.id === id ? { ...s, [field]: value } : s)) ?? prev);
+  };
+
+  const handleRetry = async (suggestion: SongSuggestionListItem) => {
+    const artist_name = suggestion.artist_name?.trim();
+    const track_title = suggestion.track_title?.trim();
+    if (!artist_name || !track_title) {
+      setRowState((prev) => ({ ...prev, [suggestion.id]: { retrying: false, error: t('spotifySuggestionsRetryMissing') } }));
+      return;
+    }
+
+    setRowState((prev) => ({ ...prev, [suggestion.id]: { retrying: true, error: null } }));
+    try {
+      const res = await fetch(`${apiUrl}/${suggestion.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artist_name, track_title }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message || 'Retry failed');
+      setSuggestions((prev) => prev?.map((s) => (s.id === suggestion.id ? data.data.suggestion : s)) ?? prev);
+      setRowState((prev) => ({ ...prev, [suggestion.id]: { retrying: false, error: null } }));
+    } catch (err) {
+      setRowState((prev) => ({
+        ...prev,
+        [suggestion.id]: { retrying: false, error: err instanceof Error ? err.message : 'Retry failed' },
+      }));
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+
+        <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full p-6">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-lg font-medium text-gray-900">{t('spotifySuggestionsTitle')}</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">{t('spotifySuggestionsDesc')}</p>
+
+          {loadError ? (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{loadError}</p>
+            </div>
+          ) : suggestions === null ? (
+            <div className="py-8 text-center">
+              <WeddingSpinner size="md" className="mx-auto" />
+            </div>
+          ) : suggestions.length === 0 ? (
+            <p className="py-8 text-center text-sm text-gray-500">{t('spotifySuggestionsEmpty')}</p>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto -mx-6 px-6">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs font-medium text-gray-500 uppercase border-b border-gray-200">
+                    <th className="py-2 pr-3">{t('spotifySuggestionsColWho')}</th>
+                    <th className="py-2 pr-3">{t('spotifySuggestionsColInput')}</th>
+                    <th className="py-2 pr-3">{t('spotifySuggestionsColArtist')}</th>
+                    <th className="py-2 pr-3">{t('spotifySuggestionsColSong')}</th>
+                    <th className="py-2 pr-3">{t('spotifySuggestionsColStatus')}</th>
+                    <th className="py-2">{t('spotifySuggestionsColError')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {suggestions.map((s) => {
+                    const state = rowState[s.id];
+                    return (
+                      <tr key={s.id}>
+                        <td className="py-2 pr-3 align-top text-gray-700 whitespace-nowrap">{s.who || '—'}</td>
+                        <td className="py-2 pr-3 align-top text-gray-900 max-w-[16rem] break-words">{s.raw_input}</td>
+                        <td className="py-2 pr-3 align-top">
+                          <input
+                            type="text"
+                            value={s.artist_name ?? ''}
+                            onChange={(e) => updateDraft(s.id, 'artist_name', e.target.value)}
+                            className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </td>
+                        <td className="py-2 pr-3 align-top">
+                          <input
+                            type="text"
+                            value={s.track_title ?? ''}
+                            onChange={(e) => updateDraft(s.id, 'track_title', e.target.value)}
+                            className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </td>
+                        <td className="py-2 pr-3 align-top">
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[s.status]}`}>
+                            {t(`spotifySuggestionsStatus.${s.status}`)}
+                          </span>
+                        </td>
+                        <td className="py-2 align-top max-w-[12rem]">
+                          {(state?.error || s.ai_error) && (
+                            <p className="text-xs text-red-600 break-words mb-1">{state?.error || s.ai_error}</p>
+                          )}
+                          <button
+                            onClick={() => handleRetry(s)}
+                            disabled={state?.retrying}
+                            className="text-xs font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {state?.retrying ? t('spotifySuggestionsRetrying') : t('spotifySuggestionsRetryButton')}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

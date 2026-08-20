@@ -2618,7 +2618,27 @@
       "spotifyPlaylistDesc": "Guest song suggestions are synced automatically to this wedding's official Spotify playlist.",
       "spotifyNotConfigured": "The Spotify integration is not active on this system.",
       "spotifyPlaylistPending": "The playlist will be created automatically during the next nightly sync, once there are song suggestions to add.",
-      "spotifyOpenButton": "Open in Spotify"
+      "spotifyOpenButton": "Open in Spotify",
+      "spotifySuggestionsButton": "View list",
+      "spotifySuggestionsTitle": "Song suggestions",
+      "spotifySuggestionsDesc": "What each guest entered, the track found on Spotify, its status, and why it failed if it did. You can correct the artist or track and retry the search.",
+      "spotifySuggestionsEmpty": "No song suggestions yet.",
+      "spotifySuggestionsColWho": "Who",
+      "spotifySuggestionsColInput": "What they wrote",
+      "spotifySuggestionsColArtist": "Artist",
+      "spotifySuggestionsColSong": "Track",
+      "spotifySuggestionsColStatus": "Status",
+      "spotifySuggestionsColError": "Error",
+      "spotifySuggestionsStatus": {
+        "READY": "Ready to sync",
+        "PENDING_AI": "Pending AI",
+        "SYNCED": "In playlist",
+        "DISCARDED": "Discarded",
+        "FAILED": "Not found"
+      },
+      "spotifySuggestionsRetryButton": "Retry",
+      "spotifySuggestionsRetrying": "Searching…",
+      "spotifySuggestionsRetryMissing": "Enter an artist and track before retrying."
     },
     "nupcibot": {
       "subtitle": "Your wedding assistant",

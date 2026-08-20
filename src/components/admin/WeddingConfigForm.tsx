@@ -22,6 +22,8 @@ interface WeddingConfigFormProps {
   themes: Theme[];
   /** true only when SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN are all set */
   spotifyConfigured: boolean;
+  /** GET endpoint for the song suggestions list (role-scoped) */
+  spotifySuggestionsApiUrl: string;
   onSubmit: (data: UpdateWeddingConfigRequest) => Promise<void>;
   onCancel: () => void;
   deleteCacheRsvpUrl: string;
@@ -29,7 +31,7 @@ interface WeddingConfigFormProps {
 
 type Tab = 'basic' | 'rsvp' | 'gallery';
 
-export function WeddingConfigForm({ wedding, themes, spotifyConfigured, onSubmit, onCancel, deleteCacheRsvpUrl }: WeddingConfigFormProps) {
+export function WeddingConfigForm({ wedding, themes, spotifyConfigured, spotifySuggestionsApiUrl, onSubmit, onCancel, deleteCacheRsvpUrl }: WeddingConfigFormProps) {
   const t = useTranslations('admin.configure');
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>('basic');
@@ -90,6 +92,7 @@ export function WeddingConfigForm({ wedding, themes, spotifyConfigured, onSubmit
           <SpotifyPlaylistSettings
             spotifyConfigured={spotifyConfigured}
             playlistUrl={wedding.spotify_playlist_url}
+            suggestionsApiUrl={spotifySuggestionsApiUrl}
           />
         </>
       )}

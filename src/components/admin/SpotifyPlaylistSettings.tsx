@@ -1,11 +1,20 @@
 'use client';
 
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+
+const SpotifySuggestionsModal = dynamic(
+  () => import('./SpotifySuggestionsModal').then((m) => m.SpotifySuggestionsModal),
+  { ssr: false }
+);
 
 interface SpotifyPlaylistSettingsProps {
   /** true only when SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN are all set */
   spotifyConfigured: boolean;
   playlistUrl: string | null;
+  /** GET endpoint for the song suggestions list (role-scoped) */
+  suggestionsApiUrl: string;
 }
 
 function extractPlaylistId(url: string): string | null {
@@ -18,8 +27,9 @@ function extractPlaylistId(url: string): string | null {
  * Read-only: the playlist is created and filled by the nightly cron job
  * (src/lib/spotify/sync.ts), not from this panel.
  */
-export function SpotifyPlaylistSettings({ spotifyConfigured, playlistUrl }: SpotifyPlaylistSettingsProps) {
+export function SpotifyPlaylistSettings({ spotifyConfigured, playlistUrl, suggestionsApiUrl }: SpotifyPlaylistSettingsProps) {
   const t = useTranslations('admin.gallery');
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const playlistId = playlistUrl ? extractPlaylistId(playlistUrl) : null;
 
@@ -73,6 +83,17 @@ export function SpotifyPlaylistSettings({ spotifyConfigured, playlistUrl }: Spot
             />
           </div>
         </div>
+      )}
+
+      <button
+        onClick={() => setShowSuggestions(true)}
+        className="text-sm font-medium text-purple-600 hover:text-purple-800"
+      >
+        {t('spotifySuggestionsButton')}
+      </button>
+
+      {showSuggestions && (
+        <SpotifySuggestionsModal apiUrl={suggestionsApiUrl} onClose={() => setShowSuggestions(false)} />
       )}
     </div>
   );
