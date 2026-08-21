@@ -270,6 +270,10 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
         playlistId: b.playlistId ?? '',
         autoplay: b.autoplay ?? false,
         size: b.size ?? 'medium',
+        style: {
+          backgroundColor: b.style?.backgroundColor ?? 'transparent',
+          borderColor: b.style?.borderColor ?? 'transparent',
+        },
       };
     }
 

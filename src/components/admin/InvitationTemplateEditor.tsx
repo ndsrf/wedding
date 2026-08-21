@@ -238,6 +238,7 @@ export function InvitationTemplateEditor({
           playlistId: '',
           autoplay: false,
           size: 'medium',
+          style: { backgroundColor: 'transparent', borderColor: 'transparent' },
         };
       } else {
         return;
@@ -1110,6 +1111,7 @@ export function InvitationTemplateEditor({
                       autoplay={(block as SpotifyBlockType).autoplay}
                       size={(block as SpotifyBlockType).size}
                       weddingPlaylistId={weddingData.spotify_playlist_id}
+                      style={(block as SpotifyBlockType).style}
                     />
                   )}
                 </div>

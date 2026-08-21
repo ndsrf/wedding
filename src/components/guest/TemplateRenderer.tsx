@@ -431,6 +431,7 @@ function TemplateBlock({
         autoplay={spotifyBlock.autoplay}
         size={spotifyBlock.size}
         weddingPlaylistId={spotifyPlaylistId}
+        style={spotifyBlock.style}
       />
     );
   }

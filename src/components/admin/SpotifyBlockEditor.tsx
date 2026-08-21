@@ -23,6 +23,8 @@ const SIZE_OPTIONS = [
 export function SpotifyBlockEditor({ block, onUpdate }: SpotifyBlockEditorProps) {
   const t = useTranslations('admin.invitationBuilder');
   const update = (updates: Partial<SpotifyBlock>) => onUpdate(block.id, updates);
+  const updateStyle = (updates: Partial<NonNullable<SpotifyBlock['style']>>) =>
+    update({ style: { ...block.style, ...updates } });
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6 space-y-4">
@@ -77,6 +79,49 @@ export function SpotifyBlockEditor({ block, onUpdate }: SpotifyBlockEditorProps)
               {t(opt.labelKey)}
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-medium mb-1">{t('spotifyBackgroundColor')}</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="color"
+              value={block.style?.backgroundColor === 'transparent' ? '#ffffff' : (block.style?.backgroundColor ?? '#ffffff')}
+              onChange={(e) => updateStyle({ backgroundColor: e.target.value })}
+              className="flex-1 h-9 rounded cursor-pointer border border-gray-200"
+              disabled={block.style?.backgroundColor === 'transparent'}
+            />
+            <label className="flex items-center gap-1 text-[10px] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={(block.style?.backgroundColor ?? 'transparent') === 'transparent'}
+                onChange={(e) => updateStyle({ backgroundColor: e.target.checked ? 'transparent' : '#ffffff' })}
+              />
+              {t('spotifyTransparent')}
+            </label>
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1">{t('spotifyBorderColor')}</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="color"
+              value={block.style?.borderColor === 'transparent' ? '#ffffff' : (block.style?.borderColor ?? '#ffffff')}
+              onChange={(e) => updateStyle({ borderColor: e.target.value })}
+              className="flex-1 h-9 rounded cursor-pointer border border-gray-200"
+              disabled={block.style?.borderColor === 'transparent'}
+            />
+            <label className="flex items-center gap-1 text-[10px] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={(block.style?.borderColor ?? 'transparent') === 'transparent'}
+                onChange={(e) => updateStyle({ borderColor: e.target.checked ? 'transparent' : '#ffffff' })}
+              />
+              {t('spotifyTransparent')}
+            </label>
+          </div>
         </div>
       </div>
 

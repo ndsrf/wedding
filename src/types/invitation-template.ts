@@ -218,6 +218,15 @@ export interface SpotifyBlock {
   autoplay?: boolean;
   /** 'small' = compact height, no cover art. 'medium'/'large' = full player, differing only in block width. */
   size?: 'small' | 'medium' | 'large';
+  /**
+   * The Spotify iframe itself can't be re-themed (cross-origin), so these
+   * only affect the frame/card wrapping it — 'transparent' means no
+   * background/border is drawn.
+   */
+  style?: {
+    backgroundColor?: string; // hex, or 'transparent'
+    borderColor?: string; // hex, or 'transparent'
+  };
 }
 
 export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock | MinisiteBlock | SpotifyBlock;

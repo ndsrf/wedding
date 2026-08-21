@@ -21,9 +21,13 @@
  * sub-resource was renamed to /items (GET, POST, DELETE alike). This client
  * uses the new paths — if Spotify changes them again, check their current
  * migration guide before assuming it's a token/scope/account problem. The
- * migration also changed DELETE's request body: the old /tracks endpoint
- * took `{ tracks: [{ uri }] }`, the new /items endpoint takes `{ uris: [...] }`
- * (plain strings, matching POST) — the old shape 400s with "No uris provided".
+ * migration also renamed DELETE's request body key: the old /tracks endpoint
+ * took `{ tracks: [{ uri }] }`, the new /items endpoint takes `{ items: [{ uri }] }`
+ * — same object shape, just `tracks` → `items`. POST (adding tracks) is
+ * unrelated and unchanged: it still takes `{ uris: [...] }` (plain strings).
+ * Sending `{ uris: [...] }` or `{ tracks: [...] }` to DELETE both 400 with
+ * the same generic "No uris provided" message, which made a first attempted
+ * fix (guessing `uris` from POST's shape) look like it had no effect.
  */
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
@@ -307,11 +311,17 @@ export async function addTracksToPlaylist(playlistId: string, uris: string[]): P
  * every occurrence of each URI — fine here since the sync job already dedups
  * before adding, so a given URI never appears more than once in the playlist.
  *
- * NOTE: the old /tracks DELETE endpoint took `{ tracks: [{ uri }] }`, but the
- * renamed /items endpoint (see the Feb 2026 migration note at the top of this
- * file) unified DELETE's body with POST's — it's `{ uris: [...] }`, plain
- * strings, not `{ tracks: [{ uri }] }`. Sending the old shape gets a 400
- * "No uris provided".
+ * NOTE: per Spotify's current "Remove Playlist Items" reference
+ * (developer.spotify.com/documentation/web-api/reference/remove-items-playlist,
+ * confirmed via secondary sources — direct access is blocked from this
+ * environment's network), the request body key is `items` — an array of
+ * `{ uri }` objects, matching the old deprecated /tracks endpoint's object
+ * shape but with the outer key renamed from `tracks` to `items` to match the
+ * new URL. It is NOT `{ uris: [...] }` (plain strings) despite that being
+ * POST's shape for *adding* tracks — POST and DELETE use different shapes
+ * here. Both `{ tracks: [...] }` and `{ uris: [...] }` 400 with the same
+ * generic "No uris provided" message, which is why that error persisted
+ * across the first attempted fix.
  */
 export async function removeTracksFromPlaylist(playlistId: string, uris: string[]): Promise<void> {
   const token = await getUserAccessToken();
@@ -319,7 +329,7 @@ export async function removeTracksFromPlaylist(playlistId: string, uris: string[
     const batch = uris.slice(i, i + 100);
     const res = await spotifyApiRequest(token, `/playlists/${playlistId}/items`, {
       method: 'DELETE',
-      body: JSON.stringify({ uris: batch }),
+      body: JSON.stringify({ items: batch.map((uri) => ({ uri })) }),
     });
     if (!res.ok) {
       const text = await res.text();
