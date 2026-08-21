@@ -9,7 +9,7 @@
 
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { findTrack } from './client';
+import { findTrack, removeTracksFromPlaylist } from './client';
 import type { SongSuggestionInput, SongSuggestionListItem } from '@/types/api';
 
 export interface SongSuggestionScope {
@@ -226,19 +226,30 @@ export async function retrySongSuggestion(
 }
 
 /**
- * Marks a suggestion DISCARDED without touching Spotify — for songs an
- * admin/planner simply doesn't want on the playlist. Returns null if the
- * suggestion doesn't belong to the given wedding.
+ * Marks a suggestion DISCARDED — for songs an admin/planner simply doesn't
+ * want on the playlist. If it had already been synced (status SYNCED, with
+ * a spotify_uri and the wedding has a playlist), also removes that track
+ * from the real Spotify playlist first — discarding shouldn't leave a song
+ * playing that the admin just said they didn't want. If the Spotify removal
+ * fails, the suggestion is left untouched (still SYNCED) and the error
+ * propagates, so a retry doesn't silently leave it out of sync with the
+ * playlist. Returns null if the suggestion doesn't belong to the given
+ * wedding.
  */
 export async function discardSongSuggestion(id: string, weddingId: string): Promise<SongSuggestionListItem | null> {
   const suggestion = await prisma.songSuggestion.findFirst({
     where: { id, wedding_id: weddingId },
     include: {
+      wedding: { select: { spotify_playlist_id: true } },
       family: { select: { name: true } },
       family_member: { select: { name: true } },
     },
   });
   if (!suggestion) return null;
+
+  if (suggestion.status === 'SYNCED' && suggestion.spotify_uri && suggestion.wedding.spotify_playlist_id) {
+    await removeTracksFromPlaylist(suggestion.wedding.spotify_playlist_id, [suggestion.spotify_uri]);
+  }
 
   const updated = await prisma.songSuggestion.update({
     where: { id },

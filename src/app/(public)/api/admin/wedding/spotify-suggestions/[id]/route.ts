@@ -9,8 +9,9 @@
  * re-searches Spotify's catalog directly with the corrected values — no AI
  * step, since the admin already supplied clean text. A READY result is
  * picked up by the next playlist sync.
- * PATCH { action: 'discard' } marks it DISCARDED without touching Spotify —
- * for a suggestion the admin simply doesn't want on the playlist.
+ * PATCH { action: 'discard' } marks it DISCARDED — for a suggestion the
+ * admin simply doesn't want on the playlist. If it had already been synced,
+ * also removes the track from the real Spotify playlist.
  * DELETE removes a row outright (e.g. a manually-added one created by
  * mistake).
  */

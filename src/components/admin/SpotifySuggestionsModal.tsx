@@ -6,11 +6,12 @@
  * any), the suggestion's status, and any ai_error. Artist/track are
  * editable — "Reintentar" re-searches Spotify directly with the corrected
  * values (no AI step involved, since the admin already supplied clean
- * text) and updates the row in place. "Descartar" marks a row DISCARDED
- * without touching Spotify. "Actualizar playlist" runs the same sync the
- * nightly cron job runs (resolve pending suggestions, sync READY ones into
- * the playlist) immediately, so changes made here don't have to wait for
- * the next cron tick.
+ * text) and updates the row in place. "Descartar" marks a row DISCARDED —
+ * if it had already been synced to the playlist, the track is also removed
+ * from Spotify. "Actualizar playlist" runs the same sync the nightly cron
+ * job runs (resolve pending suggestions, sync READY ones into the playlist)
+ * immediately, so changes made here don't have to wait for the next cron
+ * tick.
  */
 
 'use client';

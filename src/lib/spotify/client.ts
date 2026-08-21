@@ -297,3 +297,24 @@ export async function addTracksToPlaylist(playlistId: string, uris: string[]): P
     }
   }
 }
+
+/**
+ * Removes tracks from a playlist in batches of 100 (Spotify's per-request
+ * limit), for a discarded suggestion that had already been synced. Removes
+ * every occurrence of each URI — fine here since the sync job already dedups
+ * before adding, so a given URI never appears more than once in the playlist.
+ */
+export async function removeTracksFromPlaylist(playlistId: string, uris: string[]): Promise<void> {
+  const token = await getUserAccessToken();
+  for (let i = 0; i < uris.length; i += 100) {
+    const batch = uris.slice(i, i + 100);
+    const res = await spotifyApiRequest(token, `/playlists/${playlistId}/items`, {
+      method: 'DELETE',
+      body: JSON.stringify({ tracks: batch.map((uri) => ({ uri })) }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to remove track from Spotify playlist (HTTP ${res.status}): ${text}`);
+    }
+  }
+}
