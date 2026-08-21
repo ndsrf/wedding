@@ -20,7 +20,10 @@
  * moved from /users/{id}/playlists to /me/playlists, and the /tracks
  * sub-resource was renamed to /items (GET, POST, DELETE alike). This client
  * uses the new paths — if Spotify changes them again, check their current
- * migration guide before assuming it's a token/scope/account problem.
+ * migration guide before assuming it's a token/scope/account problem. The
+ * migration also changed DELETE's request body: the old /tracks endpoint
+ * took `{ tracks: [{ uri }] }`, the new /items endpoint takes `{ uris: [...] }`
+ * (plain strings, matching POST) — the old shape 400s with "No uris provided".
  */
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
@@ -303,6 +306,12 @@ export async function addTracksToPlaylist(playlistId: string, uris: string[]): P
  * limit), for a discarded suggestion that had already been synced. Removes
  * every occurrence of each URI — fine here since the sync job already dedups
  * before adding, so a given URI never appears more than once in the playlist.
+ *
+ * NOTE: the old /tracks DELETE endpoint took `{ tracks: [{ uri }] }`, but the
+ * renamed /items endpoint (see the Feb 2026 migration note at the top of this
+ * file) unified DELETE's body with POST's — it's `{ uris: [...] }`, plain
+ * strings, not `{ tracks: [{ uri }] }`. Sending the old shape gets a 400
+ * "No uris provided".
  */
 export async function removeTracksFromPlaylist(playlistId: string, uris: string[]): Promise<void> {
   const token = await getUserAccessToken();
@@ -310,7 +319,7 @@ export async function removeTracksFromPlaylist(playlistId: string, uris: string[
     const batch = uris.slice(i, i + 100);
     const res = await spotifyApiRequest(token, `/playlists/${playlistId}/items`, {
       method: 'DELETE',
-      body: JSON.stringify({ tracks: batch.map((uri) => ({ uri })) }),
+      body: JSON.stringify({ uris: batch }),
     });
     if (!res.ok) {
       const text = await res.text();

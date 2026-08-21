@@ -1505,6 +1505,9 @@ The integration is only considered active once all three required variables (`SP
 **Adding songs / reading a playlist's current tracks returns `403: Forbidden`:**
 - Same February 2026 migration — Spotify renamed the `/playlists/{id}/tracks` sub-resource to `/playlists/{id}/items` for Development Mode apps (GET, POST, and DELETE alike); the old path 403s for every caller now. The app uses `/items` — make sure you're running a version that includes this fix. If Spotify changes their paths again in the future, check their current migration guide rather than assuming it's a credentials problem — this integration has hit two of these renames already.
 
+**Removing a discarded song from the playlist fails with `400: No uris provided`:**
+- Same migration, a different wrinkle: the old `/tracks` DELETE endpoint took a body of `{ tracks: [{ uri }] }`, but the new `/items` endpoint unified DELETE's body with POST's — it now takes `{ uris: [...] }` (plain strings). The app sends the new shape — make sure you're running a version that includes this fix.
+
 **Song question toggles are greyed out in Configure → RSVP:**
 - Spotify isn't configured system-wide — verify all three required env vars are set and restart the app.
 
