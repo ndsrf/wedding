@@ -8,9 +8,15 @@
  *   1. Resolves PENDING_AI song suggestions (free text typed by guests)
  *      into a real Spotify track via an LLM extraction step + catalog
  *      search — batched up to BATCH_SIZE suggestions per LLM call
- *      *across all weddings*, not one call per suggestion.
+ *      *across all weddings*, not one call per suggestion. Suggestions
+ *      belonging to a planner whose AI_STANDARD quota (PlannerLicense.
+ *      max_standard_ai_calls) is reached — including a limit of 0 — are
+ *      skipped entirely; no AI call is made for their weddings (see
+ *      filterAllowedByAiQuota). This applies to both this nightly job and
+ *      the manual triggerManualSpotifySync().
  *   2. Adds all READY suggestions to each wedding's Spotify playlist,
- *      creating the playlist (with cover) on first use.
+ *      creating the playlist (with cover) on first use. Not gated by AI
+ *      quota — no LLM call is involved in this step.
  *
  * Sends no notifications — metrics are only logged by the cron runner.
  */
@@ -18,8 +24,10 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import sharp from 'sharp';
+import { ResourceType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getChatModel } from '@/lib/ai/provider';
+import { checkResourceLimit, recordResourceUsage } from '@/lib/license/usage';
 import { syncSongSuggestionFromText } from './suggestions';
 import {
   isSpotifyConfigured,
@@ -202,14 +210,60 @@ async function applyPendingAiResult(
 }
 
 /**
+ * Filters out suggestions belonging to a planner whose AI_STANDARD monthly
+ * quota (PlannerLicense.max_standard_ai_calls) is already reached —
+ * including a planner with the limit set to 0, which blocks AI resolution
+ * for all of their weddings entirely. Applies to both the nightly batch
+ * job and the manual "Probar ahora"/"Actualizar playlist" triggers: no AI
+ * call is made for a wedding whose planner is over quota.
+ *
+ * Checked once per planner per run (not per-suggestion, not re-checked as
+ * usage accrues within the run) — the same check-before-call pattern every
+ * other AI call site in the app uses (see src/lib/license/usage.ts).
+ * Skipped suggestions are left untouched (still PENDING_AI) so they're
+ * picked up automatically once the planner's quota resets or is raised.
+ */
+async function filterAllowedByAiQuota(
+  suggestions: PendingSuggestion[],
+  plannerIdFor: (weddingId: string) => string | null
+): Promise<PendingSuggestion[]> {
+  const allowedByPlannerId = new Map<string, boolean>();
+  const allowed: PendingSuggestion[] = [];
+
+  for (const suggestion of suggestions) {
+    const plannerId = plannerIdFor(suggestion.wedding_id);
+    if (!plannerId) continue;
+
+    if (!allowedByPlannerId.has(plannerId)) {
+      const result = await checkResourceLimit({ plannerId, type: ResourceType.AI_STANDARD });
+      allowedByPlannerId.set(plannerId, result.allowed);
+      if (!result.allowed) {
+        console.log(
+          `[SPOTIFY_SYNC] Skipping AI resolution for planner ${plannerId}: AI_STANDARD quota reached (${result.used ?? 0}/${result.limit ?? 0}).`
+        );
+      }
+    }
+
+    if (allowedByPlannerId.get(plannerId)) allowed.push(suggestion);
+  }
+
+  return allowed;
+}
+
+/**
  * Resolves every given PENDING_AI suggestion, batching up to BATCH_SIZE per
  * LLM call regardless of which wedding each one belongs to. `marketFor`
  * resolves the right Spotify catalog market per suggestion for the search
- * step, since that part is still necessarily per-suggestion.
+ * step, since that part is still necessarily per-suggestion. `plannerIdFor`
+ * attributes AI_STANDARD usage back to each suggestion's planner — callers
+ * are expected to have already filtered the list via
+ * `filterAllowedByAiQuota`, so every suggestion reaching this function is
+ * cleared to make an AI call.
  */
 async function resolvePendingSuggestionsBatch(
   suggestions: PendingSuggestion[],
   marketFor: (weddingId: string) => string,
+  plannerIdFor: (weddingId: string) => string | null,
   metrics: SpotifySyncMetrics
 ): Promise<void> {
   for (let i = 0; i < suggestions.length; i += BATCH_SIZE) {
@@ -221,6 +275,15 @@ async function resolvePendingSuggestionsBatch(
         schema: pendingAiBatchSchema,
         prompt: buildBatchPrompt(chunk),
       });
+
+      // The AI call was made for the whole chunk regardless of each item's
+      // outcome below, so record usage for every suggestion in it now.
+      for (const suggestion of chunk) {
+        const plannerId = plannerIdFor(suggestion.wedding_id);
+        if (plannerId) {
+          await recordResourceUsage({ plannerId, weddingId: suggestion.wedding_id, type: ResourceType.AI_STANDARD });
+        }
+      }
 
       const resultsById = new Map(object.results.map((r) => [r.id, r]));
 
@@ -375,6 +438,7 @@ export async function processSpotifySync(): Promise<SpotifySyncMetrics> {
     },
     select: {
       id: true,
+      planner_id: true,
       couple_names: true,
       wedding_date: true,
       wedding_country: true,
@@ -404,13 +468,17 @@ export async function processSpotifySync(): Promise<SpotifySyncMetrics> {
   }
 
   // Step 1: resolve every wedding's PENDING_AI suggestions together, in as
-  // few LLM calls as possible (see resolvePendingSuggestionsBatch).
+  // few LLM calls as possible (see resolvePendingSuggestionsBatch) — after
+  // dropping suggestions whose planner is over their AI_STANDARD quota.
   const marketByWedding = new Map(weddings.map((w) => [w.id, w.wedding_country]));
+  const plannerIdByWedding = new Map(weddings.map((w) => [w.id, w.planner_id]));
+  const plannerIdFor = (weddingId: string) => plannerIdByWedding.get(weddingId) ?? null;
   const pending = await prisma.songSuggestion.findMany({
     where: { wedding_id: { in: weddings.map((w) => w.id) }, status: 'PENDING_AI' },
     select: { id: true, wedding_id: true, raw_input: true },
   });
-  await resolvePendingSuggestionsBatch(pending, (weddingId) => marketByWedding.get(weddingId) ?? 'ES', metrics);
+  const allowedPending = await filterAllowedByAiQuota(pending, plannerIdFor);
+  await resolvePendingSuggestionsBatch(allowedPending, (weddingId) => marketByWedding.get(weddingId) ?? 'ES', plannerIdFor, metrics);
 
   // Step 2: sync each wedding's now-READY suggestions into its own playlist.
   for (const wedding of weddings) {
@@ -444,6 +512,7 @@ export async function triggerManualSpotifySync(weddingId: string): Promise<Manua
     where: { id: weddingId },
     select: {
       id: true,
+      planner_id: true,
       couple_names: true,
       wedding_date: true,
       wedding_country: true,
@@ -484,7 +553,8 @@ export async function triggerManualSpotifySync(weddingId: string): Promise<Manua
     where: { wedding_id: wedding.id, status: 'PENDING_AI' },
     select: { id: true, wedding_id: true, raw_input: true },
   });
-  await resolvePendingSuggestionsBatch(pending, () => wedding.wedding_country, metrics);
+  const allowedPending = await filterAllowedByAiQuota(pending, () => wedding.planner_id);
+  await resolvePendingSuggestionsBatch(allowedPending, () => wedding.wedding_country, () => wedding.planner_id, metrics);
 
   await syncReadySongs(wedding, metrics);
 
