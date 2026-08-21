@@ -18,7 +18,8 @@ import type {
   ImageMapBlock as ImageMapBlockType, 
   PanelBlock as PanelBlockType,
   GiftBlock as GiftBlockType,
-  MinisiteBlock as MinisiteBlockType
+  MinisiteBlock as MinisiteBlockType,
+  SpotifyBlock as SpotifyBlockType
 } from '@/types/invitation-template';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
@@ -29,6 +30,7 @@ import { ImageMapBlock } from '@/components/invitation/ImageMapBlock';
 import { GiftBlock } from '@/components/invitation/GiftBlock';
 import { PanelModal } from '@/components/invitation/PanelBlock';
 import { MinisiteBlock } from '@/components/invitation/MinisiteBlock';
+import { SpotifyBlock } from '@/components/invitation/SpotifyBlock';
 import { loadFont } from '@/lib/fonts';
 
 interface TemplateRendererProps {
@@ -41,6 +43,7 @@ interface TemplateRendererProps {
   language: SupportedLanguage;
   weddingId?: string;
   iban?: string;
+  spotifyPlaylistId?: string | null;
   isTransparent?: boolean;
 }
 
@@ -78,6 +81,7 @@ export default function TemplateRenderer({
   language,
   weddingId,
   iban,
+  spotifyPlaylistId,
   isTransparent = false,
 }: TemplateRendererProps) {
   const templateDesign = useMemo(() => {
@@ -199,6 +203,7 @@ export default function TemplateRenderer({
               isPriorityImage={index === firstImageIndex}
               weddingId={weddingId}
               iban={iban}
+              spotifyPlaylistId={spotifyPlaylistId}
               onOpenPanel={handleOpenPanel}
               onScrollToRsvp={handleScrollToRsvp}
             />
@@ -228,6 +233,7 @@ interface TemplateBlockProps {
   isPriorityImage?: boolean;
   weddingId?: string;
   iban?: string;
+  spotifyPlaylistId?: string | null;
   onOpenPanel: (panelId: string) => void;
   onScrollToRsvp: () => void;
 }
@@ -242,6 +248,7 @@ function TemplateBlock({
   isPriorityImage = false,
   weddingId,
   iban,
+  spotifyPlaylistId,
   onOpenPanel,
   onScrollToRsvp,
 }: TemplateBlockProps) {
@@ -413,6 +420,19 @@ function TemplateBlock({
       minisiteBlock.folderNames?.['ES'] ||
       '';
     return <MinisiteBlock folderName={folderName} language={language} />;
+  }
+
+  if (block.type === 'spotify') {
+    const spotifyBlock = block as SpotifyBlockType;
+    return (
+      <SpotifyBlock
+        useWeddingPlaylist={spotifyBlock.useWeddingPlaylist}
+        playlistId={spotifyBlock.playlistId}
+        autoplay={spotifyBlock.autoplay}
+        size={spotifyBlock.size}
+        weddingPlaylistId={spotifyPlaylistId}
+      />
+    );
   }
 
   // panel blocks are rendered as modals at the TemplateRenderer level, not inline

@@ -35,6 +35,7 @@ interface PreviewData {
     wedding_time: string;
     location: string;
     gift_iban?: string;
+    spotify_playlist_id?: string | null;
   };
   language: string;
 }
@@ -136,6 +137,7 @@ export function InvitationBuilderPreviewContent() {
         language={activeLanguage}
         weddingId={weddingData.id}
         iban={weddingData.gift_iban}
+        spotifyPlaylistId={weddingData.spotify_playlist_id}
       />
     </div>
   );

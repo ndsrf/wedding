@@ -91,6 +91,7 @@ export default function RSVPPageClient({ token, initialData, channel }: RSVPPage
           language={templateLanguage}
           weddingId={wedding.id}
           iban={wedding.gift_iban ?? undefined}
+          spotifyPlaylistId={wedding.spotify_playlist_id}
           isTransparent={true}
         />
       ) : (

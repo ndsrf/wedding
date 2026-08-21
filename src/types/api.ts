@@ -677,6 +677,7 @@ export interface GuestRSVPPageData {
     song_question_individual_enabled: boolean;
     song_question_individual_text: Record<string, string> | null;
     song_question_individual_source: string | null;
+    spotify_playlist_id: string | null;
   };
   theme: Theme;
   invitation_template?: {

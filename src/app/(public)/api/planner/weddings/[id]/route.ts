@@ -180,6 +180,7 @@ export async function GET(
                 additional_info: wedding.additional_info,
                 payment_tracking_mode: wedding.payment_tracking_mode,
                 gift_iban: wedding.gift_iban,
+      spotify_playlist_id: wedding.spotify_playlist_id,
                 allow_guest_additions: wedding.allow_guest_additions,
       planned_guests: wedding.planned_guests,
       planned_gift_per_person: wedding.planned_gift_per_person ? Number(wedding.planned_gift_per_person) : null,

@@ -223,6 +223,7 @@ export const getRSVPPageData = cache(async (
           song_question_individual_enabled: wedding.song_question_individual_enabled,
           song_question_individual_text: wedding.song_question_individual_text,
           song_question_individual_source: wedding.song_question_individual_source,
+          spotify_playlist_id: wedding.spotify_playlist_id,
         } as unknown as CachedWeddingPageData['wedding'],
         theme: themeData,
         ...(invitationTemplate && { 
