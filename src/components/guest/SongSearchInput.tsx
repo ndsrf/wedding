@@ -45,6 +45,12 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Guards against out-of-order responses: clearing the debounce timer only
+  // cancels a still-pending timeout, not a fetch that already started, so a
+  // slower earlier search can otherwise resolve after (and overwrite) a
+  // faster later one. Each debounced search bumps this and only applies its
+  // response if it's still the most recent one in flight.
+  const requestIdRef = useRef(0);
   // Once results were shown and the guest keeps typing instead of picking
   // one, assume they're writing their own answer (e.g. "lo que quieran los
   // novios") and stop reopening the dropdown for the rest of it — avoids
@@ -70,6 +76,10 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
     setShowResults(false);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    // Invalidates any fetch already in flight from a previous keystroke,
+    // even on the early returns below — its response is ignored if it
+    // resolves after this point (see the requestId check further down).
+    const requestId = ++requestIdRef.current;
 
     if (!text.trim()) {
       suppressedRef.current = false;
@@ -89,6 +99,7 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
       try {
         const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(text.trim())}&market=${encodeURIComponent(market)}`);
         const data = await res.json();
+        if (requestId !== requestIdRef.current) return; // a newer search superseded this one
         if (data.success) {
           setResults(data.data);
           if (!suppressedRef.current) setShowResults(true);
@@ -96,7 +107,7 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
       } catch {
         // Search is a convenience — guests can still submit free text.
       } finally {
-        setLoading(false);
+        if (requestId === requestIdRef.current) setLoading(false);
       }
     }, 300);
   }
@@ -109,6 +120,8 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
   }
 
   function handleSelect(track: SpotifyTrackResult) {
+    requestIdRef.current++;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     const display = `${track.title} — ${track.artist}`;
     setQuery(display);
     setResults([]);
@@ -124,6 +137,8 @@ export function SongSearchInput({ value, onChange, market, placeholder, style }:
   }
 
   function handleClear() {
+    requestIdRef.current++;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setQuery('');
     setResults([]);
     suppressedRef.current = false;

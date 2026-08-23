@@ -398,17 +398,25 @@ async function syncReadySongs(wedding: WeddingForSync, metrics: SpotifySyncMetri
     metrics.playlists_created++;
   }
 
+  // A READY row without a spotify_uri is a data anomaly (READY is only ever
+  // set alongside a resolved uri) — excluded from both the playlist add and
+  // the SYNCED update below, so it's left as READY for inspection/retry
+  // instead of being silently marked as delivered when nothing was added.
+  const validReady = ready.filter((s) => s.spotify_uri);
+
   const existingUris = await getPlaylistTrackUris(playlistId);
-  const toAdd = ready.filter((s) => s.spotify_uri && !existingUris.has(s.spotify_uri));
+  const toAdd = validReady.filter((s) => !existingUris.has(s.spotify_uri!));
 
   if (toAdd.length > 0) {
     await addTracksToPlaylist(playlistId, toAdd.map((s) => s.spotify_uri!));
   }
 
-  await prisma.songSuggestion.updateMany({
-    where: { id: { in: ready.map((s) => s.id) } },
-    data: { status: 'SYNCED', synced_at: new Date() },
-  });
+  if (validReady.length > 0) {
+    await prisma.songSuggestion.updateMany({
+      where: { id: { in: validReady.map((s) => s.id) } },
+      data: { status: 'SYNCED', synced_at: new Date() },
+    });
+  }
   metrics.added_to_playlist += toAdd.length;
 }
 

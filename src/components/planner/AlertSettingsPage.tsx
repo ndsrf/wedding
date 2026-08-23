@@ -90,19 +90,25 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
   // ── Spotify playlist sync toggle ───────────────────────────────────────────
 
   const [spotifyEnabled, setSpotifyEnabled] = useState(false);
-  const [spotifyConfigured, setSpotifyConfigured] = useState(true);
+  // Starts false (not true) so a failed/slow load can't leave the toggle
+  // looking active before we actually know Spotify is configured.
+  const [spotifyConfigured, setSpotifyConfigured] = useState(false);
   const [spotifySaving, setSpotifySaving] = useState(false);
 
   useEffect(() => {
     async function loadSpotify() {
       try {
         const res = await fetch('/api/planner/spotify-settings');
-        if (!res.ok) return;
+        if (!res.ok) {
+          setSpotifyConfigured(false);
+          return;
+        }
         const { data } = await res.json() as { data: { spotify_sync_enabled: boolean; spotify_configured: boolean } };
         setSpotifyEnabled(data.spotify_sync_enabled);
         setSpotifyConfigured(data.spotify_configured);
       } catch (err) {
         console.error('[AlertSettings] Failed to load Spotify settings', err);
+        setSpotifyConfigured(false);
       }
     }
     loadSpotify();

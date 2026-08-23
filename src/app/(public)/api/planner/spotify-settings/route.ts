@@ -51,6 +51,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues }, { status: 422 });
     }
 
+    if (parsed.data.spotify_sync_enabled && !isSpotifyConfigured()) {
+      return NextResponse.json({ error: 'Spotify is not configured' }, { status: 400 });
+    }
+
     const updated = await prisma.weddingPlanner.update({
       where: { id: user.planner_id },
       data: { spotify_sync_enabled: parsed.data.spotify_sync_enabled },
