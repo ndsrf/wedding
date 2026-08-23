@@ -2561,6 +2561,7 @@
       "spotifySuggestionsDesc": "Was jeder Gast eingegeben hat, der auf Spotify gefundene Titel, sein Status und der Grund, falls er nicht gefunden wurde. Du kannst Interpret oder Titel korrigieren und die Suche erneut starten.",
       "spotifySuggestionsEmpty": "Noch keine Songvorschläge.",
       "spotifySuggestionsColWho": "Wer",
+      "spotifySuggestionsSourceWhatsapp": "WhatsApp",
       "spotifySuggestionsColInput": "Eingabe",
       "spotifySuggestionsColArtist": "Interpret",
       "spotifySuggestionsColSong": "Titel",

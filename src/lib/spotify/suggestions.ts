@@ -78,6 +78,34 @@ export async function upsertSongSuggestion(
 }
 
 /**
+ * Adds a WhatsApp-submitted song suggestion as a brand-new row, rather than
+ * replacing the family's existing suggestion like upsertSongSuggestion
+ * does — a family can request several songs over WhatsApp, one per
+ * message. Always resolved (spotify_uri set) since the WhatsApp assistant
+ * already searched Spotify before calling this. The family-scope partial
+ * unique index only applies to source = 'RSVP' rows (see migration
+ * 20260821090000), so this never collides with it.
+ */
+export async function addWhatsappSongSuggestion(
+  scope: SongSuggestionScope,
+  input: SongSuggestionInput
+): Promise<void> {
+  await prisma.songSuggestion.create({
+    data: {
+      ...scope,
+      raw_input: input.raw_input.trim(),
+      spotify_track_id: input.spotify_track_id ?? null,
+      spotify_uri: input.spotify_uri ?? null,
+      track_title: input.track_title ?? null,
+      artist_name: input.artist_name ?? null,
+      album_art_url: input.album_art_url ?? null,
+      status: 'READY',
+      source: 'WHATSAPP',
+    },
+  });
+}
+
+/**
  * Syncs a song suggestion's raw_input from a plain text field's current
  * value — used by the nightly job for weddings configured to reuse a
  * generic RSVP text field instead of the dedicated Spotify search widget.
@@ -130,6 +158,7 @@ function toListItem(row: {
   track_title: string | null;
   artist_name: string | null;
   status: SongSuggestionListItem['status'];
+  source: SongSuggestionListItem['source'];
   ai_error: string | null;
   created_at: Date;
   family: { name: string } | null;
@@ -142,6 +171,7 @@ function toListItem(row: {
     track_title: row.track_title,
     artist_name: row.artist_name,
     status: row.status,
+    source: row.source,
     ai_error: row.ai_error,
     created_at: row.created_at.toISOString(),
   };

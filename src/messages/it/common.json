@@ -2561,6 +2561,7 @@
       "spotifySuggestionsDesc": "Ciò che ogni invitato ha scritto, il brano trovato su Spotify, il suo stato e il motivo se non è stato trovato. Puoi correggere l'artista o il brano e riprovare la ricerca.",
       "spotifySuggestionsEmpty": "Ancora nessun suggerimento di canzone.",
       "spotifySuggestionsColWho": "Chi",
+      "spotifySuggestionsSourceWhatsapp": "WhatsApp",
       "spotifySuggestionsColInput": "Cosa ha scritto",
       "spotifySuggestionsColArtist": "Artista",
       "spotifySuggestionsColSong": "Brano",

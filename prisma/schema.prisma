@@ -614,6 +614,7 @@ model SongSuggestion {
   artist_name       String?
   album_art_url     String?
   status            SongStatus    @default(PENDING_AI)
+  source            SongSource    @default(RSVP)
   ai_error          String?
   created_at        DateTime      @default(now())
   synced_at         DateTime?
@@ -625,10 +626,14 @@ model SongSuggestion {
   @@index([wedding_id, status])
   @@index([family_id])
   @@index([family_member_id])
-  // NOTE: one suggestion per family (family_member_id IS NULL) and one per
-  // guest (family_member_id IS NOT NULL) is also enforced by two partial
-  // unique indexes added in migration 20260818100000_song_suggestion_unique_scope —
-  // Prisma can't express a WHERE clause in @@unique, so they aren't declared here.
+  // NOTE: one RSVP-sourced suggestion per family (family_member_id IS NULL,
+  // source = RSVP) and one per guest (family_member_id IS NOT NULL) is
+  // enforced by two partial unique indexes added in migration
+  // 20260818100000_song_suggestion_unique_scope (the family-scope one
+  // narrowed to `AND source = 'RSVP'` in 20260821..._song_suggestion_whatsapp_source
+  // so WhatsApp-submitted songs can add extra rows instead of replacing the
+  // RSVP one) — Prisma can't express a WHERE clause in @@unique, so they
+  // aren't declared here.
   @@map("song_suggestions")
 }
 
@@ -638,6 +643,15 @@ enum SongStatus {
   SYNCED
   DISCARDED
   FAILED
+}
+
+// Where a SongSuggestion came from — RSVP form submissions are limited to
+// one family-level suggestion (replaced on resubmit), while WhatsApp
+// requests can add multiple songs per family (see the partial unique index
+// note above).
+enum SongSource {
+  RSVP
+  WHATSAPP
 }
 
 model Translation {

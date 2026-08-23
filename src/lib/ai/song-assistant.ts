@@ -31,7 +31,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getChatModel } from './provider';
 import { checkResourceLimit, recordResourceUsage } from '@/lib/license/usage';
 import { isSpotifyConfigured, findTrack } from '@/lib/spotify/client';
-import { upsertSongSuggestion } from '@/lib/spotify/suggestions';
+import { addWhatsappSongSuggestion } from '@/lib/spotify/suggestions';
 
 const HISTORY_TURNS = 4;
 
@@ -171,12 +171,14 @@ export interface SongAssistantResult {
  * Detects and handles a WhatsApp song-suggestion request. Returns null when
  * the message isn't about adding a song, Spotify isn't configured, or the
  * wedding hasn't enabled song suggestions — the caller should fall through
- * to the general FAQ assistant in that case. On a match, upserts a
+ * to the general FAQ assistant in that case. On a match, adds a new
  * SongSuggestion (READY, immediately searched against Spotify's catalog —
  * no need to wait for the nightly AI batch since the guest already gave a
  * specific artist/track here) and returns the confirmation reply; if the
  * song is ambiguous or not found on Spotify, returns a clarifying reply
- * instead without writing anything.
+ * instead without writing anything. Unlike the RSVP form's single
+ * family-level slot, WhatsApp requests always add a new row, so a family
+ * can request several songs over separate messages.
  */
 export async function handleSongRequest(params: {
   wedding: Wedding;
@@ -237,7 +239,7 @@ export async function handleSongRequest(params: {
     return { replyText: notFoundText(lang, artist, track) };
   }
 
-  await upsertSongSuggestion(
+  await addWhatsappSongSuggestion(
     { wedding_id: wedding.id, family_id: familyId, family_member_id: null },
     {
       raw_input: `${artist} - ${track}`,

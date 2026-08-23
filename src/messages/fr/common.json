@@ -2561,6 +2561,7 @@
       "spotifySuggestionsDesc": "Ce que chaque invité a écrit, le morceau trouvé sur Spotify, son statut et la raison de l'échec le cas échéant. Vous pouvez corriger l'artiste ou le titre et relancer la recherche.",
       "spotifySuggestionsEmpty": "Aucune suggestion de chanson pour l'instant.",
       "spotifySuggestionsColWho": "Qui",
+      "spotifySuggestionsSourceWhatsapp": "WhatsApp",
       "spotifySuggestionsColInput": "Ce qui a été écrit",
       "spotifySuggestionsColArtist": "Artiste",
       "spotifySuggestionsColSong": "Titre",

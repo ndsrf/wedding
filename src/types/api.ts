@@ -753,6 +753,10 @@ export interface SongSuggestionListItem {
   track_title: string | null;
   artist_name: string | null;
   status: 'READY' | 'PENDING_AI' | 'SYNCED' | 'DISCARDED' | 'FAILED';
+  // Where the suggestion came from — 'WHATSAPP' rows can coexist alongside
+  // an 'RSVP' one for the same family (RSVP submissions replace each
+  // other; WhatsApp requests add new rows).
+  source: 'RSVP' | 'WHATSAPP';
   ai_error: string | null;
   created_at: string;
 }

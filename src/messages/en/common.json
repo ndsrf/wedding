@@ -2640,6 +2640,7 @@
       "spotifySuggestionsDesc": "What each guest entered, the track found on Spotify, its status, and why it failed if it did. You can correct the artist or track and retry the search.",
       "spotifySuggestionsEmpty": "No song suggestions yet.",
       "spotifySuggestionsColWho": "Who",
+      "spotifySuggestionsSourceWhatsapp": "WhatsApp",
       "spotifySuggestionsColInput": "What they wrote",
       "spotifySuggestionsColArtist": "Artist",
       "spotifySuggestionsColSong": "Track",
