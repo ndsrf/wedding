@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply, type InvitationTemplateContext, type LocationContext, type MenuContext, type ItineraryItemContext } from '@/lib/ai/wedding-assistant';
+import { handleSongRequest } from '@/lib/ai/song-assistant';
 import { generateNupciBotReply } from '@/lib/ai/nupcibot';
 import { generateRagReply } from '@/lib/ai/rag-chat';
 import { isVectorEnabled } from '@/lib/db/vector-prisma';
@@ -438,129 +439,153 @@ export async function POST(request: NextRequest) {
 
     const language = String(family.preferred_language ?? family.wedding.default_language ?? 'EN');
 
-    // Generate short URL for RSVP link in AI response
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
-    let shortRsvpUrl: string | null = null;
+    // --- Song suggestion handling (add a song via WhatsApp) ---------------
+    // Runs ahead of the general FAQ assistant: if this message (or a reply
+    // continuing a song conversation from a prior turn) is about suggesting
+    // a song, it's handled entirely here and the FAQ assistant is skipped
+    // for this turn.
+    let songReply: string | null = null;
     try {
-      const shortPath = await getShortUrlPath(family.id);
-      shortRsvpUrl = `${appUrl}${shortPath}`;
+      const songResult = await handleSongRequest({
+        wedding: family.wedding,
+        familyId: family.id,
+        message: body,
+        language,
+      });
+      songReply = songResult?.replyText ?? null;
     } catch (err) {
-      console.warn('[TWILIO_INBOUND] Failed to generate short URL, will use long URL:', err);
+      console.error('[TWILIO_INBOUND] Song assistant failed, falling back to FAQ assistant:', err);
     }
 
-    // --- Fetch the active invitation template ----------------------------
-    // Use the wedding-day template override on the day of the wedding,
-    // otherwise use the standard invitation template.
-    let invitationTemplate: InvitationTemplateContext | null = null;
-    const activeTemplateId =
-      isWeddingDay(family.wedding.wedding_date) && family.wedding.wedding_day_invitation_template_id
-        ? family.wedding.wedding_day_invitation_template_id
-        : family.wedding.invitation_template_id;
+    let aiReply: string | null = songReply;
 
-    if (activeTemplateId) {
+    // The song assistant already produced a reply for this turn — skip the
+    // FAQ assistant (and the context fetches it needs) entirely.
+    if (!aiReply) {
+      // Generate short URL for RSVP link in AI response
+      const appUrl = process.env.APP_URL || 'http://localhost:3000';
+      let shortRsvpUrl: string | null = null;
       try {
-        const template = await prisma.invitationTemplate.findUnique({
-          where: { id: activeTemplateId },
-          select: { design: true },
-        });
-        if (template) {
-          invitationTemplate = { design: template.design as unknown as TemplateDesign };
-        }
+        const shortPath = await getShortUrlPath(family.id);
+        shortRsvpUrl = `${appUrl}${shortPath}`;
       } catch (err) {
-        console.warn('[TWILIO_INBOUND] Failed to fetch invitation template, proceeding without it:', err);
+        console.warn('[TWILIO_INBOUND] Failed to generate short URL, will use long URL:', err);
       }
-    }
 
-    // --- Fetch selected wedding menu dishes ------------------------------
-    let menuContext: MenuContext | null = null;
-    try {
-      const tastingMenus = await prisma.tastingMenu.findMany({
-        where: { wedding_id: family.wedding_id },
-        select: {
-          sections: {
-            orderBy: { order: 'asc' },
-            select: {
-              name: true,
-              dishes: {
-                where: { is_selected: true },
-                orderBy: { order: 'asc' },
-                select: { name: true, description: true },
+      // --- Fetch the active invitation template ----------------------------
+      // Use the wedding-day template override on the day of the wedding,
+      // otherwise use the standard invitation template.
+      let invitationTemplate: InvitationTemplateContext | null = null;
+      const activeTemplateId =
+        isWeddingDay(family.wedding.wedding_date) && family.wedding.wedding_day_invitation_template_id
+          ? family.wedding.wedding_day_invitation_template_id
+          : family.wedding.invitation_template_id;
+
+      if (activeTemplateId) {
+        try {
+          const template = await prisma.invitationTemplate.findUnique({
+            where: { id: activeTemplateId },
+            select: { design: true },
+          });
+          if (template) {
+            invitationTemplate = { design: template.design as unknown as TemplateDesign };
+          }
+        } catch (err) {
+          console.warn('[TWILIO_INBOUND] Failed to fetch invitation template, proceeding without it:', err);
+        }
+      }
+
+      // --- Fetch selected wedding menu dishes ------------------------------
+      let menuContext: MenuContext | null = null;
+      try {
+        const tastingMenus = await prisma.tastingMenu.findMany({
+          where: { wedding_id: family.wedding_id },
+          select: {
+            sections: {
+              orderBy: { order: 'asc' },
+              select: {
+                name: true,
+                dishes: {
+                  where: { is_selected: true },
+                  orderBy: { order: 'asc' },
+                  select: { name: true, description: true },
+                },
               },
             },
           },
-        },
-      });
-      if (tastingMenus.length > 0) {
-        // Consolidate selected dishes across all rounds
-        const sectionMap = new Map<string, { name: string; dishes: typeof tastingMenus[0]['sections'][0]['dishes'] }>();
-        const sectionOrder: string[] = [];
-        for (const menu of tastingMenus) {
-          for (const section of menu.sections) {
-            const key = section.name.trim().toLowerCase();
-            if (!sectionMap.has(key)) {
-              sectionMap.set(key, { name: section.name.trim(), dishes: [] });
-              sectionOrder.push(key);
+        });
+        if (tastingMenus.length > 0) {
+          // Consolidate selected dishes across all rounds
+          const sectionMap = new Map<string, { name: string; dishes: typeof tastingMenus[0]['sections'][0]['dishes'] }>();
+          const sectionOrder: string[] = [];
+          for (const menu of tastingMenus) {
+            for (const section of menu.sections) {
+              const key = section.name.trim().toLowerCase();
+              if (!sectionMap.has(key)) {
+                sectionMap.set(key, { name: section.name.trim(), dishes: [] });
+                sectionOrder.push(key);
+              }
+              sectionMap.get(key)!.dishes.push(...section.dishes);
             }
-            sectionMap.get(key)!.dishes.push(...section.dishes);
           }
+          menuContext = {
+            sections: sectionOrder.map(k => sectionMap.get(k)!),
+          };
         }
-        menuContext = {
-          sections: sectionOrder.map(k => sectionMap.get(k)!),
-        };
+      } catch (err) {
+        console.warn('[TWILIO_INBOUND] Failed to fetch tasting menu, proceeding without it:', err);
       }
-    } catch (err) {
-      console.warn('[TWILIO_INBOUND] Failed to fetch tasting menu, proceeding without it:', err);
-    }
 
-    // --- Fetch wedding itinerary -----------------------------------------
-    let itineraryContext: ItineraryItemContext[] | null = null;
-    try {
-      const items = await prisma.itineraryItem.findMany({
-        where: { wedding_id: family.wedding_id },
-        orderBy: { order: 'asc' },
-        include: {
-          location: {
-            select: { name: true, address: true, google_maps_url: true },
+      // --- Fetch wedding itinerary -----------------------------------------
+      let itineraryContext: ItineraryItemContext[] | null = null;
+      try {
+        const items = await prisma.itineraryItem.findMany({
+          where: { wedding_id: family.wedding_id },
+          orderBy: { order: 'asc' },
+          include: {
+            location: {
+              select: { name: true, address: true, google_maps_url: true },
+            },
           },
-        },
-      });
-      if (items.length > 0) {
-        itineraryContext = items.map(item => ({
-          item_type: item.item_type,
-          date_time: item.date_time,
-          location_name: item.location.name,
-          location_address: item.location.address,
-          location_google_maps_url: item.location.google_maps_url,
-          notes: item.notes,
-        }));
+        });
+        if (items.length > 0) {
+          itineraryContext = items.map(item => ({
+            item_type: item.item_type,
+            date_time: item.date_time,
+            location_name: item.location.name,
+            location_address: item.location.address,
+            location_google_maps_url: item.location.google_maps_url,
+            notes: item.notes,
+          }));
+        }
+      } catch (err) {
+        console.warn('[TWILIO_INBOUND] Failed to fetch itinerary, proceeding without it:', err);
       }
-    } catch (err) {
-      console.warn('[TWILIO_INBOUND] Failed to fetch itinerary, proceeding without it:', err);
-    }
 
-    const aiReply = await generateWeddingReply(
-      body,
-      family.wedding,
-      {
-        name: family.name,
-        magic_token: family.magic_token,
-        preferred_language: family.preferred_language,
-        extra_question_1_answer: family.extra_question_1_answer,
-        extra_question_2_answer: family.extra_question_2_answer,
-        extra_question_3_answer: family.extra_question_3_answer,
-        extra_info_1_value: family.extra_info_1_value,
-        extra_info_2_value: family.extra_info_2_value,
-        extra_info_3_value: family.extra_info_3_value,
-        family_dropdown_question_1_answer: family.family_dropdown_question_1_answer,
-        members: family.members,
-      },
-      language,
-      shortRsvpUrl,
-      invitationTemplate,
-      family.wedding.main_event_location as LocationContext | null,
-      menuContext,
-      itineraryContext
-    );
+      aiReply = await generateWeddingReply(
+        body,
+        family.wedding,
+        {
+          name: family.name,
+          magic_token: family.magic_token,
+          preferred_language: family.preferred_language,
+          extra_question_1_answer: family.extra_question_1_answer,
+          extra_question_2_answer: family.extra_question_2_answer,
+          extra_question_3_answer: family.extra_question_3_answer,
+          extra_info_1_value: family.extra_info_1_value,
+          extra_info_2_value: family.extra_info_2_value,
+          extra_info_3_value: family.extra_info_3_value,
+          family_dropdown_question_1_answer: family.family_dropdown_question_1_answer,
+          members: family.members,
+        },
+        language,
+        shortRsvpUrl,
+        invitationTemplate,
+        family.wedding.main_event_location as LocationContext | null,
+        menuContext,
+        itineraryContext
+      );
+    }
 
     if (!aiReply) {
       console.warn('[TWILIO_INBOUND] AI returned no reply for family', family.id);
@@ -580,6 +605,10 @@ export async function POST(request: NextRequest) {
                 from: fromPhone,
                 body: body.substring(0, 1000),
                 ai_reply: aiReply,
+                // Lets the song assistant's cheap pre-filter recognize the
+                // next message as continuing a clarification it just asked,
+                // without needing another AI call to detect that.
+                assistant_source: songReply ? 'song' : 'faq',
               },
             },
           })
