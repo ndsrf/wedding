@@ -332,6 +332,7 @@ export interface FamilyMember {
 }
 
 export type SongStatus = 'READY' | 'PENDING_AI' | 'SYNCED' | 'DISCARDED' | 'FAILED';
+export type SongSource = 'RSVP' | 'WHATSAPP';
 
 export interface SongSuggestion {
   id: string;
@@ -345,6 +346,7 @@ export interface SongSuggestion {
   artist_name: string | null;
   album_art_url: string | null;
   status: SongStatus;
+  source: SongSource;
   ai_error: string | null;
   created_at: Date;
   synced_at: Date | null;

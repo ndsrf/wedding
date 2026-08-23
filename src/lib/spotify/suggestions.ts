@@ -30,10 +30,10 @@ async function createOrRecoverFromRace(
   data: Omit<Prisma.SongSuggestionUncheckedCreateInput, keyof SongSuggestionScope>
 ): Promise<void> {
   try {
-    await prisma.songSuggestion.create({ data: { ...scope, ...data } });
+    await prisma.songSuggestion.create({ data: { ...scope, source: 'RSVP', ...data } });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      const existing = await prisma.songSuggestion.findFirst({ where: scope });
+      const existing = await prisma.songSuggestion.findFirst({ where: { ...scope, source: 'RSVP' } });
       if (existing) await prisma.songSuggestion.update({ where: { id: existing.id }, data });
       return;
     }
@@ -53,7 +53,11 @@ export async function upsertSongSuggestion(
 ): Promise<void> {
   if (input === undefined) return;
 
-  const existing = await prisma.songSuggestion.findFirst({ where: scope });
+  // Scoped to source: 'RSVP' — a WhatsApp-submitted suggestion (see
+  // addWhatsappSongSuggestion) can share this exact scope now that the
+  // family-level slot isn't unique across sources, and must never be
+  // matched/overwritten/deleted by an RSVP form submission.
+  const existing = await prisma.songSuggestion.findFirst({ where: { ...scope, source: 'RSVP' } });
 
   if (!input || !input.raw_input?.trim()) {
     if (existing) await prisma.songSuggestion.delete({ where: { id: existing.id } });
@@ -123,7 +127,9 @@ export async function syncSongSuggestionFromText(
   const trimmed = rawText?.trim();
   if (!trimmed) return;
 
-  const existing = await prisma.songSuggestion.findFirst({ where: scope });
+  // Same source-scoping as upsertSongSuggestion above — this only ever
+  // touches the RSVP-sourced row for this scope.
+  const existing = await prisma.songSuggestion.findFirst({ where: { ...scope, source: 'RSVP' } });
 
   if (existing) {
     if (existing.raw_input === trimmed) return;

@@ -149,13 +149,17 @@ export default function RSVPForm({
       guest_text_question_2_answer: m.guest_text_question_2_answer || '',
       guest_text_question_3_answer: m.guest_text_question_3_answer || '',
       song: (() => {
-        const existing = family.songs?.find((s) => s.family_member_id === m.id);
+        const existing = family.songs?.find((s) => s.family_member_id === m.id && s.status !== 'DISCARDED');
         return existing ? songToInput(existing) : null;
       })(),
     }))
   );
   const [familySong, setFamilySong] = useState<SongSuggestionInput | null>(() => {
-    const existing = family.songs?.find((s) => !s.family_member_id);
+    // Only the RSVP-sourced row is this field's own state — a WhatsApp-
+    // submitted song is a separate, additional suggestion (see
+    // addWhatsappSongSuggestion) and must not be pulled into (and
+    // overwritten by) the RSVP form's single family-level song box.
+    const existing = family.songs?.find((s) => !s.family_member_id && s.source === 'RSVP' && s.status !== 'DISCARDED');
     return existing ? songToInput(existing) : null;
   });
   const [submitting, setSubmitting] = useState(false);
