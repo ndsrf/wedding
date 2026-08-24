@@ -429,6 +429,8 @@ function buildSystemPrompt(
   userName?: string,
   weddingDate?: string,
   coupleNames?: string,
+  spotifyPlaylistUrl?: string | null,
+  songQuestionsEnabled?: boolean,
 ): string {
   const languageInstructions: Record<string, string> = {
     EN: 'Respond in English.',
@@ -447,13 +449,28 @@ function buildSystemPrompt(
       ? `The wedding for ${coupleNames} is on ${weddingDate}. `
       : '';
 
+  // Same fact the guest-facing assistant exposes (wedding-assistant.ts) —
+  // reused here so the admin/couple can also ask NupciBot for their own
+  // playlist link, and can be told to add songs by chatting (handled
+  // upstream in the Twilio webhook / NupciBot chat routes via
+  // handleCoupleSongRequest, which short-circuits before this prompt is
+  // even used).
+  let spotifyLine = '';
+  if (role === 'admin') {
+    if (spotifyPlaylistUrl) {
+      spotifyLine = `- Wedding Spotify Playlist: ${spotifyPlaylistUrl}\n`;
+    } else if (songQuestionsEnabled) {
+      spotifyLine = '- Wedding Spotify Playlist: not created yet — it will appear automatically once guests start requesting songs.\n';
+    }
+  }
+
   const roleDescription = role === 'planner'
     ? 'You help wedding planners navigate their CRM, client management, finances, and wedding operations tools.'
     : 'You help wedding admins (couples) understand how to use the platform, navigate its features, and get the most out of it.';
 
   return `You are NupciBot, a friendly and helpful AI assistant for the Nupci wedding management platform. ${roleDescription}
 Today's date is ${today}. ${weddingLine}
-${userLine}
+${spotifyLine}${userLine}
 ${langInstruction}
 
 
@@ -596,23 +613,33 @@ export async function generateNupciBotReply(
   // Fetch wedding info if available
   let weddingDate: string | undefined;
   let coupleNames: string | undefined;
+  let spotifyPlaylistUrl: string | null | undefined;
+  let songQuestionsEnabled: boolean | undefined;
 
   if (weddingId) {
     try {
       const wedding = await prisma.wedding.findUnique({
         where: { id: weddingId },
-        select: { wedding_date: true, couple_names: true },
+        select: {
+          wedding_date: true,
+          couple_names: true,
+          spotify_playlist_url: true,
+          song_question_family_enabled: true,
+          song_question_individual_enabled: true,
+        },
       });
       if (wedding) {
         weddingDate = wedding.wedding_date.toISOString().split('T')[0];
         coupleNames = wedding.couple_names;
+        spotifyPlaylistUrl = wedding.spotify_playlist_url;
+        songQuestionsEnabled = wedding.song_question_family_enabled || wedding.song_question_individual_enabled;
       }
     } catch (err) {
       console.warn('[NUPCIBOT] Failed to fetch wedding info:', err);
     }
   }
 
-  const systemPrompt = buildSystemPrompt(language, role, userName, weddingDate, coupleNames);
+  const systemPrompt = buildSystemPrompt(language, role, userName, weddingDate, coupleNames, spotifyPlaylistUrl, songQuestionsEnabled);
 
   const provider =
     process.env.AI_PROVIDER ||

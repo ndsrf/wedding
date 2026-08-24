@@ -19,7 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply, type InvitationTemplateContext, type LocationContext, type MenuContext, type ItineraryItemContext } from '@/lib/ai/wedding-assistant';
-import { handleSongRequest } from '@/lib/ai/song-assistant';
+import { handleSongRequest, handleCoupleSongRequest } from '@/lib/ai/song-assistant';
 import { generateNupciBotReply } from '@/lib/ai/nupcibot';
 import { generateRagReply } from '@/lib/ai/rag-chat';
 import { isVectorEnabled } from '@/lib/db/vector-prisma';
@@ -254,25 +254,48 @@ export async function POST(request: NextRequest) {
         });
 
         const language = String(matchingAdmin.wedding?.default_language ?? 'EN');
-        let nupcibotReply: string | null;
 
-        if (isVectorEnabled()) {
-          nupcibotReply = await generateRagReply({
-            userMessage: body,
-            history: [],
-            language,
-            userName: matchingAdmin.name,
-            weddingId: matchingAdmin.wedding_id,
-            role: 'wedding_admin',
-          });
-        } else {
-          nupcibotReply = await generateNupciBotReply(
-            body,
-            [],
-            language,
-            matchingAdmin.name,
-            matchingAdmin.wedding_id,
-          );
+        // Give the couple's own song requests the same shortcut guests get
+        // (see handleSongRequest below) — if this message looks like a song
+        // suggestion, handle it directly and skip NupciBot for this turn.
+        // No persisted chat history for the admin's own WhatsApp number
+        // (NupciBot doesn't have one either here), so multi-turn
+        // clarification isn't available on this channel — same limitation
+        // NupciBot already has for everything else.
+        let nupcibotReply: string | null = null;
+        if (matchingAdmin.wedding) {
+          try {
+            const songResult = await handleCoupleSongRequest({
+              wedding: matchingAdmin.wedding,
+              message: body,
+              history: [],
+              language,
+            });
+            nupcibotReply = songResult?.replyText ?? null;
+          } catch (err) {
+            console.error('[TWILIO_INBOUND] Couple song assistant failed, falling back to NupciBot:', err);
+          }
+        }
+
+        if (!nupcibotReply) {
+          if (isVectorEnabled()) {
+            nupcibotReply = await generateRagReply({
+              userMessage: body,
+              history: [],
+              language,
+              userName: matchingAdmin.name,
+              weddingId: matchingAdmin.wedding_id,
+              role: 'wedding_admin',
+            });
+          } else {
+            nupcibotReply = await generateNupciBotReply(
+              body,
+              [],
+              language,
+              matchingAdmin.name,
+              matchingAdmin.wedding_id,
+            );
+          }
         }
 
         if (!nupcibotReply) {
