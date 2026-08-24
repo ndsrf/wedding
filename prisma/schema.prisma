@@ -646,12 +646,15 @@ enum SongStatus {
 }
 
 // Where a SongSuggestion came from — RSVP form submissions are limited to
-// one family-level suggestion (replaced on resubmit), while WhatsApp
-// requests can add multiple songs per family (see the partial unique index
-// note above).
+// one family-level suggestion (replaced on resubmit), while WhatsApp/COUPLE
+// requests can add multiple songs (see the partial unique index note
+// above). COUPLE is the wedding admin (the couple) adding a song themselves
+// by chatting with NupciBot (web widget or their own WhatsApp) — never tied
+// to a guest family, so family_id is null on these rows.
 enum SongSource {
   RSVP
   WHATSAPP
+  COUPLE
 }
 
 model Translation {

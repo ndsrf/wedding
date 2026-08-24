@@ -332,7 +332,7 @@ export interface FamilyMember {
 }
 
 export type SongStatus = 'READY' | 'PENDING_AI' | 'SYNCED' | 'DISCARDED' | 'FAILED';
-export type SongSource = 'RSVP' | 'WHATSAPP';
+export type SongSource = 'RSVP' | 'WHATSAPP' | 'COUPLE';
 
 export interface SongSuggestion {
   id: string;

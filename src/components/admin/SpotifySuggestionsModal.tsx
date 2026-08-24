@@ -258,7 +258,7 @@ export function SpotifySuggestionsModal({ apiUrl, syncTriggerUrl, onClose }: Spo
                     return (
                       <tr key={s.id}>
                         <td className="py-2 pr-3 align-top text-gray-700 whitespace-nowrap">
-                          {s.who || '—'}
+                          {s.source === 'COUPLE' ? t('spotifySuggestionsSourceCouple') : s.who || '—'}
                           {s.source === 'WHATSAPP' && (
                             <span className="ml-1 inline-block px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-50 text-green-700">
                               {t('spotifySuggestionsSourceWhatsapp')}

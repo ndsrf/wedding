@@ -14,7 +14,9 @@ import type { SongSuggestionInput, SongSuggestionListItem } from '@/types/api';
 
 export interface SongSuggestionScope {
   wedding_id: string;
-  family_id: string;
+  // Null for a suggestion added by the couple themselves via chat (NupciBot
+  // / their own WhatsApp), which isn't tied to any guest family.
+  family_id: string | null;
   family_member_id: string | null;
 }
 
@@ -53,8 +55,8 @@ export async function upsertSongSuggestion(
 ): Promise<void> {
   if (input === undefined) return;
 
-  // Scoped to source: 'RSVP' — a WhatsApp-submitted suggestion (see
-  // addWhatsappSongSuggestion) can share this exact scope now that the
+  // Scoped to source: 'RSVP' — a chat-submitted suggestion (see
+  // addSongSuggestionFromChat) can share this exact scope now that the
   // family-level slot isn't unique across sources, and must never be
   // matched/overwritten/deleted by an RSVP form submission.
   const existing = await prisma.songSuggestion.findFirst({ where: { ...scope, source: 'RSVP' } });
@@ -82,17 +84,19 @@ export async function upsertSongSuggestion(
 }
 
 /**
- * Adds a WhatsApp-submitted song suggestion as a brand-new row, rather than
- * replacing the family's existing suggestion like upsertSongSuggestion
- * does — a family can request several songs over WhatsApp, one per
- * message. Always resolved (spotify_uri set) since the WhatsApp assistant
- * already searched Spotify before calling this. The family-scope partial
- * unique index only applies to source = 'RSVP' rows (see migration
- * 20260821090000), so this never collides with it.
+ * Adds a song suggestion added via chat (a guest over WhatsApp, or the
+ * couple themselves over WhatsApp/NupciBot) as a brand-new row, rather than
+ * replacing an existing suggestion like upsertSongSuggestion does — several
+ * songs can be requested this way, one per message. Always resolved
+ * (spotify_uri set) since the chat assistant already searched Spotify
+ * before calling this. The family-scope partial unique index only applies
+ * to source = 'RSVP' rows (see migrations 20260821090000/20260824090000),
+ * so this never collides with it.
  */
-export async function addWhatsappSongSuggestion(
+export async function addSongSuggestionFromChat(
   scope: SongSuggestionScope,
-  input: SongSuggestionInput
+  input: SongSuggestionInput,
+  source: 'WHATSAPP' | 'COUPLE'
 ): Promise<void> {
   await prisma.songSuggestion.create({
     data: {
@@ -104,7 +108,7 @@ export async function addWhatsappSongSuggestion(
       artist_name: input.artist_name ?? null,
       album_art_url: input.album_art_url ?? null,
       status: 'READY',
-      source: 'WHATSAPP',
+      source,
     },
   });
 }

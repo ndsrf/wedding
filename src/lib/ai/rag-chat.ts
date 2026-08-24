@@ -61,6 +61,8 @@ function buildSystemPrompt(
   userName?: string,
   weddingDate?: string,
   coupleNames?: string,
+  spotifyPlaylistUrl?: string | null,
+  songQuestionsEnabled?: boolean,
 ): string {
   const langInstruction = LANGUAGE_INSTRUCTIONS[language] ?? LANGUAGE_INSTRUCTIONS['EN'];
   const userLine = userName ? `You are talking to ${userName}. Address them by name when appropriate.\n` : '';
@@ -138,8 +140,20 @@ ${commonInstructions}
       ? `The wedding for ${coupleNames} is on ${weddingDate}. `
       : '';
 
+  // Same fact wording as the guest-facing assistant (wedding-assistant.ts)
+  // and the non-RAG NupciBot prompt (nupcibot.ts) — lets the admin/couple
+  // ask NupciBot for their own playlist link. Adding songs by chatting is
+  // handled upstream (handleCoupleSongRequest short-circuits before this
+  // prompt is used), so no tool is needed here for that part.
+  let spotifyLine = '';
+  if (spotifyPlaylistUrl) {
+    spotifyLine = `The wedding Spotify Playlist (built from songs guests have requested) is: ${spotifyPlaylistUrl}. `;
+  } else if (songQuestionsEnabled) {
+    spotifyLine = 'The wedding Spotify Playlist has not been created yet — it will appear automatically once guests start requesting songs. ';
+  }
+
   return `You are NupciBot, a professional wedding assistant for the Nupci platform.
-Today's date is ${today}. ${weddingLine}
+Today's date is ${today}. ${weddingLine}${spotifyLine}
 ${userLine}
 ${langInstruction}
 
@@ -192,16 +206,26 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
   // Fetch wedding info if available
   let weddingDate: string | undefined;
   let coupleNames: string | undefined;
+  let spotifyPlaylistUrl: string | null | undefined;
+  let songQuestionsEnabled: boolean | undefined;
 
   if (weddingId) {
     try {
       const wedding = await prisma.wedding.findUnique({
         where: { id: weddingId },
-        select: { wedding_date: true, couple_names: true },
+        select: {
+          wedding_date: true,
+          couple_names: true,
+          spotify_playlist_url: true,
+          song_question_family_enabled: true,
+          song_question_individual_enabled: true,
+        },
       });
       if (wedding) {
         weddingDate = wedding.wedding_date.toISOString().split('T')[0];
         coupleNames = wedding.couple_names;
+        spotifyPlaylistUrl = wedding.spotify_playlist_url;
+        songQuestionsEnabled = wedding.song_question_family_enabled || wedding.song_question_individual_enabled;
       }
     } catch (err) {
       console.warn('[RAG-CHAT] Failed to fetch wedding info:', err);
@@ -209,7 +233,7 @@ export async function streamRagChat(params: RagChatParams): Promise<Response> {
   }
 
   const sanitizedMessage = sanitizeMessage(userMessage);
-  const system = buildSystemPrompt(language, role, userName, weddingDate, coupleNames);
+  const system = buildSystemPrompt(language, role, userName, weddingDate, coupleNames, spotifyPlaylistUrl, songQuestionsEnabled);
 
   // Cap history to last 20 messages
   const cappedHistory = history.slice(-20);
@@ -294,16 +318,26 @@ export async function generateRagReply(params: RagChatParams): Promise<string | 
 
   let weddingDate: string | undefined;
   let coupleNames: string | undefined;
+  let spotifyPlaylistUrl: string | null | undefined;
+  let songQuestionsEnabled: boolean | undefined;
 
   if (weddingId) {
     try {
       const wedding = await prisma.wedding.findUnique({
         where: { id: weddingId },
-        select: { wedding_date: true, couple_names: true },
+        select: {
+          wedding_date: true,
+          couple_names: true,
+          spotify_playlist_url: true,
+          song_question_family_enabled: true,
+          song_question_individual_enabled: true,
+        },
       });
       if (wedding) {
         weddingDate = wedding.wedding_date.toISOString().split('T')[0];
         coupleNames = wedding.couple_names;
+        spotifyPlaylistUrl = wedding.spotify_playlist_url;
+        songQuestionsEnabled = wedding.song_question_family_enabled || wedding.song_question_individual_enabled;
       }
     } catch (err) {
       console.warn('[RAG-CHAT] Failed to fetch wedding info:', err);
@@ -311,7 +345,7 @@ export async function generateRagReply(params: RagChatParams): Promise<string | 
   }
 
   const sanitizedMessage = sanitizeMessage(userMessage);
-  const system = buildSystemPrompt(language, role, userName, weddingDate, coupleNames);
+  const system = buildSystemPrompt(language, role, userName, weddingDate, coupleNames, spotifyPlaylistUrl, songQuestionsEnabled);
   const cappedHistory = history.slice(-20);
 
   const messages = [
