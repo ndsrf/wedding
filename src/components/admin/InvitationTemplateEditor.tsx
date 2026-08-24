@@ -18,6 +18,7 @@ import type {
   PanelBlock as PanelBlockType,
   GiftBlock as GiftBlockType,
   MinisiteBlock as MinisiteBlockType,
+  SpotifyBlock as SpotifyBlockType,
   SupportedLanguage,
 } from '@/types/invitation-template';
 import { TextBlockEditor } from './TextBlockEditor';
@@ -32,6 +33,7 @@ import { ImageMapBlockEditor } from './ImageMapBlockEditor';
 import { PanelBlockEditor } from './PanelBlockEditor';
 import { GiftBlockEditor } from './GiftBlockEditor';
 import { MinisiteBlockEditor } from './MinisiteBlockEditor';
+import { SpotifyBlockEditor } from './SpotifyBlockEditor';
 import { CountdownBlock } from '@/components/invitation/CountdownBlock';
 import { LocationBlock } from '@/components/invitation/LocationBlock';
 import { AddToCalendarBlock } from '@/components/invitation/AddToCalendarBlock';
@@ -39,6 +41,7 @@ import { ButtonBlock } from '@/components/invitation/ButtonBlock';
 import { GalleryBlock } from '@/components/invitation/GalleryBlock';
 import { GiftBlock } from '@/components/invitation/GiftBlock';
 import { MinisiteBlock } from '@/components/invitation/MinisiteBlock';
+import { SpotifyBlock } from '@/components/invitation/SpotifyBlock';
 import { ImagePickerModal } from './ImagePickerModal';
 
 interface InvitationTemplateEditorProps {
@@ -54,6 +57,7 @@ interface InvitationTemplateEditorProps {
     wedding_time: string;
     location: string;
     gift_iban?: string | null;
+    spotify_playlist_id?: string | null;
   };
   onSave: (design: TemplateDesign) => Promise<void>;
   apiBase?: string;
@@ -103,6 +107,7 @@ export function InvitationTemplateEditor({
   const isSelectedBlockPanel = selectedBlock?.type === 'panel';
   const isSelectedBlockGift = selectedBlock?.type === 'gift';
   const isSelectedBlockMinisite = selectedBlock?.type === 'minisite';
+  const isSelectedBlockSpotify = selectedBlock?.type === 'spotify';
 
   // Handle add block
   const handleAddBlock = useCallback(
@@ -224,6 +229,16 @@ export function InvitationTemplateEditor({
           id: crypto.randomUUID(),
           type: 'minisite',
           folderNames: { ES: '', EN: '', FR: '', IT: '', DE: '' },
+        };
+      } else if (type === 'spotify') {
+        newBlock = {
+          id: crypto.randomUUID(),
+          type: 'spotify',
+          useWeddingPlaylist: true,
+          playlistId: '',
+          autoplay: false,
+          size: 'medium',
+          style: { backgroundColor: 'transparent', borderColor: 'transparent' },
         };
       } else {
         return;
@@ -366,6 +381,15 @@ export function InvitationTemplateEditor({
       ...prev,
       blocks: prev.blocks.map((b) =>
         b.id === blockId && b.type === 'panel' ? ({ ...b, ...updates } as PanelBlockType) : b
+      ),
+    }));
+  }, []);
+
+  const handleUpdateSpotifyBlock = useCallback((blockId: string, updates: Partial<SpotifyBlockType>) => {
+    setDesign((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) =>
+        b.id === blockId && b.type === 'spotify' ? ({ ...b, ...updates } as SpotifyBlockType) : b
       ),
     }));
   }, []);
@@ -574,6 +598,12 @@ export function InvitationTemplateEditor({
             >
               + {t('blockMinisite')}
             </button>
+            <button
+              onClick={() => handleAddBlock('spotify')}
+              className="w-full px-4 py-2 border border-green-300 rounded hover:bg-green-50 transition text-green-700 font-medium"
+            >
+              + {t('blockSpotify')}
+            </button>
           </div>
         </div>
 
@@ -672,6 +702,13 @@ export function InvitationTemplateEditor({
             activeLanguage={activeLanguage}
             onLanguageChange={setActiveLanguage}
             onUpdate={handleUpdateMinisiteBlock}
+          />
+        )}
+
+        {isSelectedBlockSpotify && selectedBlock && selectedBlock.type === 'spotify' && (
+          <SpotifyBlockEditor
+            block={selectedBlock}
+            onUpdate={handleUpdateSpotifyBlock}
           />
         )}
 
@@ -1064,6 +1101,17 @@ export function InvitationTemplateEditor({
                         ''
                       }
                       language={activeLanguage}
+                    />
+                  )}
+
+                  {block.type === 'spotify' && (
+                    <SpotifyBlock
+                      useWeddingPlaylist={(block as SpotifyBlockType).useWeddingPlaylist}
+                      playlistId={(block as SpotifyBlockType).playlistId}
+                      autoplay={(block as SpotifyBlockType).autoplay}
+                      size={(block as SpotifyBlockType).size}
+                      weddingPlaylistId={weddingData.spotify_playlist_id}
+                      style={(block as SpotifyBlockType).style}
                     />
                   )}
                 </div>

@@ -203,6 +203,11 @@ function buildSystemPrompt(
   if (wedding.additional_info) {
     prompt += `- Additional Information: ${wedding.additional_info}\n`;
   }
+  if (wedding.spotify_playlist_url) {
+    prompt += `- Wedding Spotify Playlist (built only from songs guests have requested, not a general playlist): ${wedding.spotify_playlist_url}\n`;
+  } else if (wedding.song_question_family_enabled || wedding.song_question_individual_enabled) {
+    prompt += `- Wedding Spotify Playlist: not created yet — it will appear automatically once guests start requesting songs.\n`;
+  }
   if (wedding.transportation_question_enabled) {
     const text = getLocalizedRsvpText(wedding.transportation_question_text, lang);
     if (text) prompt += `- Transportation: ${text}\n`;

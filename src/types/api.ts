@@ -318,6 +318,8 @@ export interface WeddingDetails extends WeddingWithStats {
   planner_logo_url: string | null;
   admin_count: number;
   available_themes: Theme[];
+  /** true only when SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN are all set */
+  spotify_configured: boolean;
 }
 
 export type GetWeddingDetailsResponse = APIResponse<WeddingDetails>;
@@ -398,6 +400,14 @@ export interface UpdateWeddingConfigRequest {
   // RSVP Branding settings
   show_nupcibot_whatsapp_link?: boolean;
   show_nupci_banner?: boolean;
+
+  // RSVP Configuration - Song suggestion questions (Spotify integration)
+  song_question_family_enabled?: boolean;
+  song_question_family_text?: Record<string, string> | null;
+  song_question_family_source?: string | null;
+  song_question_individual_enabled?: boolean;
+  song_question_individual_text?: Record<string, string> | null;
+  song_question_individual_source?: string | null;
 }
 
 export type UpdateWeddingConfigResponse = APIResponse<Wedding>;
@@ -597,6 +607,7 @@ export interface GuestRSVPPageData {
     additional_info: string | null;
     allow_guest_additions: boolean;
     default_language: Language;
+    wedding_country: string;
     payment_tracking_mode: PaymentMode;
     gift_iban: string | null;
     show_iban_on_rsvp: boolean;
@@ -658,6 +669,15 @@ export interface GuestRSVPPageData {
     guest_text_question_2_label: Record<string, string> | null;
     guest_text_question_3_enabled: boolean;
     guest_text_question_3_label: Record<string, string> | null;
+
+    // RSVP Configuration - Song suggestion questions (Spotify integration)
+    song_question_family_enabled: boolean;
+    song_question_family_text: Record<string, string> | null;
+    song_question_family_source: string | null;
+    song_question_individual_enabled: boolean;
+    song_question_individual_text: Record<string, string> | null;
+    song_question_individual_source: string | null;
+    spotify_playlist_id: string | null;
   };
   theme: Theme;
   invitation_template?: {
@@ -672,6 +692,17 @@ export interface GuestRSVPPageData {
 }
 
 export type GetGuestRSVPPageResponse = APIResponse<GuestRSVPPageData>;
+
+// A song suggestion submitted from the RSVP form — either a track picked
+// from the Spotify search dropdown, or free text typed without a selection.
+export interface SongSuggestionInput {
+  raw_input: string;
+  spotify_track_id?: string;
+  spotify_uri?: string;
+  track_title?: string;
+  artist_name?: string;
+  album_art_url?: string;
+}
 
 // POST /api/guest/:token/rsvp
 export interface SubmitRSVPRequest {
@@ -690,6 +721,8 @@ export interface SubmitRSVPRequest {
     guest_text_question_1_answer?: string;
     guest_text_question_2_answer?: string;
     guest_text_question_3_answer?: string;
+    // Individual song suggestion (null clears a previously saved one)
+    song?: SongSuggestionInput | null;
   }>;
   // RSVP Question Answers (family-level)
   transportation_answer?: boolean;
@@ -700,6 +733,8 @@ export interface SubmitRSVPRequest {
   extra_info_2_value?: string;
   extra_info_3_value?: string;
   family_dropdown_question_1_answer?: string;
+  // Family-level song suggestion (null clears a previously saved one)
+  family_song?: SongSuggestionInput | null;
 }
 
 export interface SubmitRSVPResult {
@@ -708,6 +743,48 @@ export interface SubmitRSVPResult {
 }
 
 export type SubmitRSVPResponse = APIResponse<SubmitRSVPResult>;
+
+// GET /api/admin/wedding/spotify-suggestions, /api/planner/weddings/:id/spotify-suggestions
+// Read-only debug listing behind the "Abrir listado" link on the Spotify Playlist gallery card.
+export interface SongSuggestionListItem {
+  id: string;
+  who: string;
+  raw_input: string;
+  track_title: string | null;
+  artist_name: string | null;
+  status: 'READY' | 'PENDING_AI' | 'SYNCED' | 'DISCARDED' | 'FAILED';
+  // Where the suggestion came from — 'WHATSAPP' rows can coexist alongside
+  // an 'RSVP' one for the same family (RSVP submissions replace each
+  // other; WhatsApp requests add new rows).
+  source: 'RSVP' | 'WHATSAPP';
+  ai_error: string | null;
+  created_at: string;
+}
+
+export type GetSpotifySuggestionsResponse = APIResponse<{ suggestions: SongSuggestionListItem[] }>;
+
+// PATCH /api/admin/wedding/spotify-suggestions/:id, /api/planner/weddings/:id/spotify-suggestions/:suggestionId
+// Admin-corrected artist/track pair — re-searched against Spotify directly (no AI step).
+// "retry" re-searches Spotify with the given artist/track (at least one of
+// the two must be non-empty — a lone artist returns their top track, a lone
+// track searches by title alone). "discard" marks the suggestion DISCARDED
+// without touching Spotify.
+export type RetrySpotifySuggestionRequest =
+  | { action: 'retry'; artist_name: string | null; track_title: string | null }
+  | { action: 'discard' };
+
+export type RetrySpotifySuggestionResponse = APIResponse<{ suggestion: SongSuggestionListItem }>;
+
+// POST /api/admin/wedding/spotify-suggestions, /api/planner/weddings/:id/spotify-suggestions
+// Adds a blank, unscoped song suggestion row for the admin to fill in and retry by hand.
+export interface CreateSpotifySuggestionRequest {
+  raw_input: string;
+}
+
+export type CreateSpotifySuggestionResponse = APIResponse<{ suggestion: SongSuggestionListItem }>;
+
+// DELETE /api/admin/wedding/spotify-suggestions/:id, /api/planner/weddings/:id/spotify-suggestions/:suggestionId
+export type DeleteSpotifySuggestionResponse = APIResponse<{ deleted: true }>;
 
 // POST /api/guest/:token/member
 export interface AddFamilyMemberRequest {

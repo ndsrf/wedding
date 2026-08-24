@@ -8,7 +8,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import type { FamilyMember } from '@/types/models';
+import type { SongSuggestionInput } from '@/types/api';
+
+// Code-split: weddings that don't use the Spotify song question shouldn't
+// pay for this chunk (Spotify search UI + its fetch logic) in their RSVP bundle.
+const SongSearchInput = dynamic(() => import('./SongSearchInput').then(m => m.SongSearchInput), { ssr: false });
 
 function parseOption(raw: string): { label: string; value: string } {
   const idx = raw.indexOf('||');
@@ -74,6 +80,11 @@ interface FamilyMemberCardProps {
   onGuestYnChange: (field: 'guest_yn_question_1_answer' | 'guest_yn_question_2_answer' | 'guest_yn_question_3_answer', value: boolean | null) => void;
   onGuestDropdownChange: (field: 'guest_dropdown_question_1_answer' | 'guest_dropdown_question_2_answer' | 'guest_dropdown_question_3_answer', value: string) => void;
   onGuestTextChange: (field: 'guest_text_question_1_answer' | 'guest_text_question_2_answer' | 'guest_text_question_3_answer', value: string) => void;
+  songQuestionEnabled: boolean;
+  songQuestionLabel: string;
+  song: SongSuggestionInput | null;
+  onSongChange: (song: SongSuggestionInput | null) => void;
+  market: string;
   invStyle?: InvStyle;
 }
 
@@ -100,6 +111,11 @@ export default function FamilyMemberCard({
   onGuestYnChange,
   onGuestDropdownChange,
   onGuestTextChange,
+  songQuestionEnabled,
+  songQuestionLabel,
+  song,
+  onSongChange,
+  market,
   invStyle,
 }: FamilyMemberCardProps) {
   const t = useTranslations();
@@ -129,7 +145,8 @@ export default function FamilyMemberCard({
     guestQuestions.guest_dropdown_question_3_enabled ||
     guestQuestions.guest_text_question_1_enabled ||
     guestQuestions.guest_text_question_2_enabled ||
-    guestQuestions.guest_text_question_3_enabled;
+    guestQuestions.guest_text_question_3_enabled ||
+    songQuestionEnabled;
 
   function renderYnQuestion(
     enabled: boolean,
@@ -282,6 +299,18 @@ export default function FamilyMemberCard({
           {renderTextQuestion(guestQuestions.guest_text_question_1_enabled, guestQuestions.guest_text_question_1_label, guest_text_question_1_answer, 'guest_text_question_1_answer')}
           {renderTextQuestion(guestQuestions.guest_text_question_2_enabled, guestQuestions.guest_text_question_2_label, guest_text_question_2_answer, 'guest_text_question_2_answer')}
           {renderTextQuestion(guestQuestions.guest_text_question_3_enabled, guestQuestions.guest_text_question_3_label, guest_text_question_3_answer, 'guest_text_question_3_answer')}
+          {songQuestionEnabled && (
+            <div>
+              <label className="block text-base font-semibold mb-1" style={{ color: tc }}>{songQuestionLabel}</label>
+              <SongSearchInput
+                value={song}
+                onChange={onSongChange}
+                market={market}
+                placeholder={t('guest.rsvp.songSearchPlaceholder')}
+                style={{ textColor: tc, fontFamily: invStyle?.fontFamily, borderColor: borderCol }}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1423,6 +1423,113 @@ GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 APP_URL=https://your-domain.com
 ```
 
+### Spotify Integration
+
+Guests can suggest songs for the wedding playlist during RSVP. Nupci uses a **single Spotify account it owns** to power this, rather than a per-wedding connection like Google Photos.
+
+> **The account needs an active Premium subscription.** Spotify gates catalog search (`/v1/search`, used for the RSVP song picker) behind the app owner's account having Premium — a Free account gets `403: Active premium subscription required for the owner of the app`. Playlist creation and adding tracks (used by the nightly sync) go through a separate, user-scoped auth flow and may work without Premium, but search will not. Use a Premium account for the app owner to avoid surprises.
+
+#### How It Works
+
+1. When answering the RSVP song question, guests can search Spotify's public catalog (powered by a Client Credentials token — no login required) and pick a track, or just type free text.
+2. Picked tracks are stored ready to sync. Free-text answers are queued and resolved overnight by AI + a Spotify catalog search.
+3. A nightly cron job creates a public Spotify playlist per wedding (once, on first use) and adds newly-ready songs to it, using the one shared Nupci account's refresh token. It sends no notifications — only cron logs.
+4. Planners can turn the nightly sync job on/off for all their weddings from **Planner → Alert Settings**. Each wedding's admin can enable/disable the RSVP song questions from **Configure → RSVP**.
+5. The resulting playlist link/embed appears in **Configure → Gallery** once created.
+
+#### 1. Create a Spotify Developer App
+
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and log in with **the Spotify account you want Nupci to own the playlists with** (create a dedicated Free account for this if you don't want to use a personal one).
+2. Click **Create app**.
+3. Fill in the form:
+   - **App name** / **App description**: anything, e.g. "Nupci".
+   - **Redirect URI**: this is only used once, for the manual authorization step below — it does not need to be a real, reachable page. Enter `http://localhost:8888/callback` and click **Add**.
+   - **Which API/SDKs are you planning to use?**: check **Web API**.
+4. Accept the terms and click **Save**.
+5. Open the app you just created, click **Settings**, and note the **Client ID** and **Client secret** (click **View client secret** to reveal it).
+
+#### 2. Get a Refresh Token (one-time authorization)
+
+There is no login screen for this inside Nupci — you authorize the app **once**, and the resulting refresh token is stored in `.env` from then on (Spotify refresh tokens don't expire unless access is revoked).
+
+**Recommended — use the helper script**, it avoids every pitfall of building the authorize URL and running the `curl` exchange by hand (URL-encoding mistakes, shell line-continuation breaking, extra query params a redirect page might inject):
+
+```bash
+node scripts/spotify-get-refresh-token.mjs
+```
+
+It will prompt you for the Client ID/Secret from step 1 and a redirect URI (must match one registered on the app), print the authorize URL to open in a browser (log in as the account that should own the playlists, click **Agree**), then ask you to paste back the **full URL** you land on — even if that page fails to load. The script only reads the `code` parameter from it and tolerates whatever other query params get appended along the way. It then exchanges the code and prints `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` / `SPOTIFY_REFRESH_TOKEN` ready to paste into `.env`.
+
+<details>
+<summary>Manual method (if you can't run Node locally)</summary>
+
+1. Build the following URL, filling in the `Client ID` from step 1 and URL-encoding the redirect URI you registered:
+   ```
+   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8888%2Fcallback&scope=playlist-modify-public%20playlist-modify-private%20ugc-image-upload
+   ```
+2. Open it in a browser while logged in as the Spotify account from step 1, and click **Agree** to grant the requested permissions.
+3. You'll be redirected to `http://localhost:8888/callback?code=...` — the page itself will likely fail to load (nothing is listening on that port), which is fine. Copy **only** the `code` parameter's value from the browser's address bar — stop at the first `&` if the page appended anything else to the URL.
+4. Exchange the code for tokens. Run this as a **single line** — pasting a multi-line command with `\` continuations can silently break in some terminals, turning each `-d ...` into its own (failing) command:
+   ```bash
+   curl -X POST https://accounts.spotify.com/api/token --http1.1 -H "Authorization: Basic $(printf '%s' 'YOUR_CLIENT_ID:YOUR_CLIENT_SECRET' | base64)" -d grant_type=authorization_code -d code=YOUR_CODE -d redirect_uri=http://localhost:8888/callback
+   ```
+   > `--http1.1` avoids a `curl: (92) HTTP/2 stream 0 was not closed cleanly` error some networks/curl versions hit against Spotify's token endpoint.
+5. The JSON response includes `access_token` and `refresh_token`. Copy the **`refresh_token`** — this is the value for `SPOTIFY_REFRESH_TOKEN`.
+
+> **The `redirect_uri` must be byte-for-byte identical** across three places: the app's registered Redirect URIs, the `/authorize` URL you opened, and the `redirect_uri` in the token-exchange `curl` call. A mismatch anywhere causes a "Bad Request" / "malformed or illegal request" error. This is exactly why the script above is recommended — it only asks for the redirect URI once and reuses it everywhere.
+
+</details>
+
+> **Important:** Do this step logged in as the account that should own the wedding playlists, not your personal Spotify account (unless that's the one you want to use). Codes from the authorize step are single-use and expire after ~10 minutes — if a token exchange fails, get a fresh code rather than retrying the same one.
+
+#### 3. Configure Environment Variables
+
+```bash
+SPOTIFY_CLIENT_ID=your-spotify-client-id
+SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
+SPOTIFY_REFRESH_TOKEN=your-spotify-refresh-token
+```
+
+The integration is only considered active once all three required variables (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`) are set — otherwise the RSVP song question toggles in Configure stay disabled.
+
+#### Troubleshooting
+
+**Search returns `403: Active premium subscription required for the owner of the app`:**
+- The Spotify account that owns the Developer app (the one you authorized in step 2) doesn't have Premium. Upgrade that account to Premium — Spotify gates catalog search behind this regardless of which end-user is searching. See the note at the top of this section.
+
+**Playlist creation returns `403: Forbidden` (nightly sync / "probar ahora"), no matter what you try:**
+- Spotify's February 2026 Web API migration removed `POST /v1/users/{user_id}/playlists` for Development Mode apps — it 403s for every caller since the March 9 2026 deadline, regardless of token, scopes, or whether the user id was correct. The app now uses `POST /v1/me/playlists` (the replacement endpoint) — make sure you're running a version that includes this fix.
+- Separately, some apps that haven't been through Spotify's Extended Quota review still get a 403 creating a *public* playlist even via `/me/playlists`. The app automatically retries as a private playlist when this happens — private playlists are still fully reachable via their direct `open.spotify.com` link (the "public" flag only affects whether it shows on the owner's profile/search), so sharing with guests still works.
+- If the private retry 403s too, your refresh token is missing the `playlist-modify-private` scope (only requesting `playlist-modify-public` isn't enough once the fallback kicks in). Scopes can't be added to an existing token — re-run `node scripts/spotify-get-refresh-token.mjs` (or redo the manual authorize step) to get a fresh `SPOTIFY_REFRESH_TOKEN` covering all three required scopes, and update `.env`.
+
+**Adding songs / reading a playlist's current tracks returns `403: Forbidden`:**
+- Same February 2026 migration — Spotify renamed the `/playlists/{id}/tracks` sub-resource to `/playlists/{id}/items` for Development Mode apps (GET, POST, and DELETE alike); the old path 403s for every caller now. The app uses `/items` — make sure you're running a version that includes this fix. If Spotify changes their paths again in the future, check their current migration guide rather than assuming it's a credentials problem — this integration has hit two of these renames already.
+
+**Removing a discarded song from the playlist fails with `400: No uris provided`:**
+- Same migration, a different wrinkle: the old `/tracks` DELETE endpoint took a body of `{ tracks: [{ uri }] }`; the new `/items` endpoint renamed that key to `{ items: [{ uri }] }` (same object shape, just `tracks` → `items` — it's *not* `{ uris: [...] }` like POST's add-tracks body, those are two different shapes for two different verbs on the same URL). The app sends the correct `items` shape — make sure you're running a version that includes this fix. Both wrong shapes 400 with the identical generic "No uris provided" message, so if you're debugging this yourself, don't assume the error text tells you which field name is missing.
+
+**Song question toggles are greyed out in Configure → RSVP:**
+- Spotify isn't configured system-wide — verify all three required env vars are set and restart the app.
+
+**Nightly sync fails with a 401/expired token error:**
+- The connected Spotify account revoked access, or the refresh token was regenerated elsewhere. Repeat step 2 to get a fresh `SPOTIFY_REFRESH_TOKEN`.
+
+**Playlist is created but has no cover image:**
+- The planner has no `logo_url` set, or the cover upload failed (non-fatal — check cron logs). The playlist and tracks are unaffected.
+
+**No playlist appears in Configure → Gallery:**
+- The playlist is only created once there's at least one `READY` song suggestion to add. It's created by the nightly cron job, not immediately after a guest submits a suggestion.
+
+#### Required OAuth Scopes
+
+```
+playlist-modify-public
+playlist-modify-private
+ugc-image-upload
+```
+
+`playlist-modify-private` covers the automatic fallback to a private playlist (see Troubleshooting above) — without it, that fallback also 403s.
+
 ### Alert System
 
 The platform includes a robust asynchronous alert infrastructure to notify admins, planners, the couple, and specific guests when events occur (RSVP submissions, payments received, tasks overdue, etc.).

@@ -46,6 +46,7 @@ model WeddingPlanner {
   rectification_start_number  Int     @default(1)
   proforma_start_number       Int     @default(1)
   last_external_hash          String? // Verifactu chain continuity from previous software
+  spotify_sync_enabled Boolean                    @default(true)
   enabled             Boolean                    @default(true)
   subscription_status SubscriptionStatus         @default(ACTIVE)
   created_at          DateTime                   @default(now())
@@ -230,6 +231,19 @@ model Wedding {
   guest_text_question_2_label           Json?
   guest_text_question_3_enabled         Boolean  @default(false)
   guest_text_question_3_label           Json?
+  // Song suggestion questions (Spotify integration)
+  song_question_family_enabled          Boolean  @default(false)
+  song_question_family_text             Json?
+  // null/"spotify" = dedicated search widget; or "extra_info_1"/"extra_info_2"/"extra_info_3"
+  // to reuse that generic family text field's answers as song suggestions instead.
+  song_question_family_source           String?
+  song_question_individual_enabled      Boolean  @default(false)
+  song_question_individual_text         Json?
+  // null/"spotify" = dedicated search widget; or "guest_text_question_1"/"_2"/"_3"
+  // to reuse that generic per-guest text field's answers as song suggestions instead.
+  song_question_individual_source       String?
+  spotify_playlist_id                   String?
+  spotify_playlist_url                  String?
   deleted_at                      DateTime?
   deleted_by                      String?
   license_deleted                 Boolean            @default(false)  // Deleted due to license downgrade; cannot be restored
@@ -276,6 +290,7 @@ model Wedding {
   itinerary_items                 ItineraryItem[]
   photos                          WeddingPhoto[]
   tasting_menus                   TastingMenu[]
+  songs                            SongSuggestion[]
   planner                         WeddingPlanner     @relation(fields: [planner_id], references: [id], onDelete: Cascade)
   customer                        Customer?          @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   contract                        Contract?          @relation("WeddingContract", fields: [contract_id], references: [id], onDelete: SetNull)
@@ -464,6 +479,7 @@ model Family {
   labels                  FamilyLabelAssignment[]
   notifications           Notification[]
   tracking_events         TrackingEvent[]
+  songs                   SongSuggestion[]
 
   @@unique([wedding_id, short_url_code])
   @@index([wedding_id])
@@ -502,6 +518,7 @@ model FamilyMember {
   created_at           DateTime   @default(now())
   family               Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)
   table                Table?     @relation(fields: [table_id], references: [id], onDelete: SetNull)
+  songs                SongSuggestion[]
 
   @@index([family_id])
   @@index([table_id])
@@ -579,6 +596,62 @@ model Gift {
   @@index([wedding_id, status])
   @@index([wedding_id, status, family_id])
   @@map("gifts")
+}
+
+// -----------------------------------------------------------------------------
+// SPOTIFY INTEGRATION — song suggestions for the wedding playlist
+// -----------------------------------------------------------------------------
+
+model SongSuggestion {
+  id                String        @id @default(uuid())
+  wedding_id        String
+  family_id         String?       // Set for family-level suggestions
+  family_member_id  String?       // Set for individual (per-guest) suggestions
+  raw_input         String        @db.Text
+  spotify_track_id  String?
+  spotify_uri       String?
+  track_title       String?
+  artist_name       String?
+  album_art_url     String?
+  status            SongStatus    @default(PENDING_AI)
+  source            SongSource    @default(RSVP)
+  ai_error          String?
+  created_at        DateTime      @default(now())
+  synced_at         DateTime?
+  wedding           Wedding       @relation(fields: [wedding_id], references: [id], onDelete: Cascade)
+  family            Family?       @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  family_member     FamilyMember? @relation(fields: [family_member_id], references: [id], onDelete: Cascade)
+
+  @@index([wedding_id])
+  @@index([wedding_id, status])
+  @@index([family_id])
+  @@index([family_member_id])
+  // NOTE: one RSVP-sourced suggestion per family (family_member_id IS NULL,
+  // source = RSVP) and one per guest (family_member_id IS NOT NULL) is
+  // enforced by two partial unique indexes added in migration
+  // 20260818100000_song_suggestion_unique_scope (the family-scope one
+  // narrowed to `AND source = 'RSVP'` in 20260821..._song_suggestion_whatsapp_source
+  // so WhatsApp-submitted songs can add extra rows instead of replacing the
+  // RSVP one) — Prisma can't express a WHERE clause in @@unique, so they
+  // aren't declared here.
+  @@map("song_suggestions")
+}
+
+enum SongStatus {
+  READY
+  PENDING_AI
+  SYNCED
+  DISCARDED
+  FAILED
+}
+
+// Where a SongSuggestion came from — RSVP form submissions are limited to
+// one family-level suggestion (replaced on resubmit), while WhatsApp
+// requests can add multiple songs per family (see the partial unique index
+// note above).
+enum SongSource {
+  RSVP
+  WHATSAPP
 }
 
 model Translation {

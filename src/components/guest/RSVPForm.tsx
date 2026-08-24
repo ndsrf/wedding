@@ -8,9 +8,15 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations, useLocale } from 'next-intl';
 import FamilyMemberCard, { type InvStyle, type GuestQuestionConfig } from './FamilyMemberCard';
-import type { FamilyWithMembers } from '@/types/models';
+import type { FamilyWithMembers, SongSuggestion } from '@/types/models';
+import type { SongSuggestionInput } from '@/types/api';
+
+// Code-split: weddings that don't use the Spotify song question shouldn't
+// pay for this chunk (Spotify search UI + its fetch logic) in their RSVP bundle.
+const SongSearchInput = dynamic(() => import('./SongSearchInput').then(m => m.SongSearchInput), { ssr: false });
 
 interface RSVPFormProps {
   token: string;
@@ -18,6 +24,7 @@ interface RSVPFormProps {
   wedding: {
     allow_guest_additions: boolean;
     rsvp_cutoff_date: string;
+    wedding_country: string;
     // RSVP Question Configuration
     transportation_question_enabled: boolean;
     transportation_question_text: Record<string, string> | null;
@@ -63,6 +70,13 @@ interface RSVPFormProps {
     guest_text_question_2_label: Record<string, string> | null;
     guest_text_question_3_enabled: boolean;
     guest_text_question_3_label: Record<string, string> | null;
+    // Song suggestion questions (Spotify integration)
+    song_question_family_enabled: boolean;
+    song_question_family_text: Record<string, string> | null;
+    song_question_family_source: string | null;
+    song_question_individual_enabled: boolean;
+    song_question_individual_text: Record<string, string> | null;
+    song_question_individual_source: string | null;
   };
   rsvpCutoffPassed: boolean;
   onSuccess: () => void;
@@ -83,6 +97,7 @@ interface MemberUpdate {
   guest_text_question_1_answer?: string;
   guest_text_question_2_answer?: string;
   guest_text_question_3_answer?: string;
+  song?: SongSuggestionInput | null;
 }
 
 function resolveLabel(map: Record<string, string> | null, locale: string): string {
@@ -95,6 +110,17 @@ function resolveOptions(map: Record<string, string[]> | null, locale: string): s
 function parseOption(raw: string): { label: string; value: string } {
   const idx = raw.indexOf('||');
   return idx === -1 ? { label: raw, value: raw } : { label: raw.slice(0, idx), value: raw.slice(idx + 2) };
+}
+
+function songToInput(song: SongSuggestion): SongSuggestionInput {
+  return {
+    raw_input: song.raw_input,
+    spotify_track_id: song.spotify_track_id ?? undefined,
+    spotify_uri: song.spotify_uri ?? undefined,
+    track_title: song.track_title ?? undefined,
+    artist_name: song.artist_name ?? undefined,
+    album_art_url: song.album_art_url ?? undefined,
+  };
 }
 
 export default function RSVPForm({
@@ -122,8 +148,20 @@ export default function RSVPForm({
       guest_text_question_1_answer: m.guest_text_question_1_answer || '',
       guest_text_question_2_answer: m.guest_text_question_2_answer || '',
       guest_text_question_3_answer: m.guest_text_question_3_answer || '',
+      song: (() => {
+        const existing = family.songs?.find((s) => s.family_member_id === m.id && s.status !== 'DISCARDED');
+        return existing ? songToInput(existing) : null;
+      })(),
     }))
   );
+  const [familySong, setFamilySong] = useState<SongSuggestionInput | null>(() => {
+    // Only the RSVP-sourced row is this field's own state — a WhatsApp-
+    // submitted song is a separate, additional suggestion (see
+    // addWhatsappSongSuggestion) and must not be pulled into (and
+    // overwritten by) the RSVP form's single family-level song box.
+    const existing = family.songs?.find((s) => !s.family_member_id && s.source === 'RSVP' && s.status !== 'DISCARDED');
+    return existing ? songToInput(existing) : null;
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAddMember, setShowAddMember] = useState(false);
@@ -207,12 +245,17 @@ export default function RSVPForm({
                     guest_text_question_1_answer: '',
                     guest_text_question_2_answer: '',
                     guest_text_question_3_answer: '',
+                    song: null,
                   }
                 : {}),
             }
           : m
       )
     );
+  }
+
+  function handleMemberSongChange(id: string, song: SongSuggestionInput | null) {
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, song } : m)));
   }
 
   async function handleAddMember() {
@@ -293,6 +336,7 @@ export default function RSVPForm({
           extra_info_2_value: extraInfo2Value || null,
           extra_info_3_value: extraInfo3Value || null,
           family_dropdown_question_1_answer: familyDropdown1Answer || null,
+          family_song: familySong,
         }),
       });
 
@@ -352,6 +396,16 @@ export default function RSVPForm({
     guest_text_question_3_label: resolveLabel(wedding.guest_text_question_3_label, locale),
   };
 
+  // The Spotify search widget only renders when the song question is enabled
+  // AND still sourced from it — weddings configured to reuse an existing
+  // generic text field instead collect the answer through that field alone.
+  const showFamilySongWidget =
+    wedding.song_question_family_enabled &&
+    (!wedding.song_question_family_source || wedding.song_question_family_source === 'spotify');
+  const showIndividualSongWidget =
+    wedding.song_question_individual_enabled &&
+    (!wedding.song_question_individual_source || wedding.song_question_individual_source === 'spotify');
+
   const hasFamilyQuestions =
     wedding.transportation_question_enabled ||
     wedding.extra_question_1_enabled ||
@@ -360,7 +414,12 @@ export default function RSVPForm({
     wedding.extra_info_1_enabled ||
     wedding.extra_info_2_enabled ||
     wedding.extra_info_3_enabled ||
-    wedding.family_dropdown_question_1_enabled;
+    wedding.family_dropdown_question_1_enabled ||
+    showFamilySongWidget;
+
+  const songInputStyle = { textColor: tc, fontFamily: ff, borderColor: borderCol };
+  const familySongLabel = resolveLabel(wedding.song_question_family_text, locale) || t('guest.rsvp.defaultSongQuestionFamily');
+  const individualSongLabel = resolveLabel(wedding.song_question_individual_text, locale) || t('guest.rsvp.defaultSongQuestionIndividual');
 
   const familyDropdown1Options = resolveOptions(wedding.family_dropdown_question_1_options, locale);
   const familyDropdown1Label = resolveLabel(wedding.family_dropdown_question_1_label, locale);
@@ -429,6 +488,11 @@ export default function RSVPForm({
               onGuestTextChange={(field, value) =>
                 handleMemberChange(member.id, field, value)
               }
+              songQuestionEnabled={showIndividualSongWidget}
+              songQuestionLabel={individualSongLabel}
+              song={memberUpdate.song ?? null}
+              onSongChange={(song) => handleMemberSongChange(member.id, song)}
+              market={wedding.wedding_country}
               invStyle={invStyle}
             />
           );
@@ -635,6 +699,20 @@ export default function RSVPForm({
                 <option value="">—</option>
                 {familyDropdown1Options.map((raw) => { const { label, value } = parseOption(raw); return <option key={value} value={value}>{label}</option>; })}
               </select>
+            </div>
+          )}
+
+          {/* Family Song Suggestion */}
+          {showFamilySongWidget && (
+            <div className="space-y-2">
+              <p className="text-lg" style={{ color: tc }}>{familySongLabel}</p>
+              <SongSearchInput
+                value={familySong}
+                onChange={setFamilySong}
+                market={wedding.wedding_country}
+                placeholder={t('guest.rsvp.songSearchPlaceholder')}
+                style={songInputStyle}
+              />
             </div>
           )}
         </div>

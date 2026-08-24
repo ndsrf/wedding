@@ -24,6 +24,10 @@ export interface ConfigureApiPaths {
   deleteAllGuests: string;
   /** DELETE endpoint to clear the RSVP page cache */
   deleteCacheRsvp: string;
+  /** GET (list) + PATCH `${url}/:id` (retry) endpoint for song suggestions */
+  spotifySuggestions: string;
+  /** POST endpoint to run the Spotify playlist sync immediately (same as the nightly cron job) */
+  spotifySyncTrigger: string;
 }
 
 export interface ConfigurePageContentProps {
@@ -117,6 +121,23 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
     }
   };
 
+  const dangerZoneContent = (
+    <div className="border-2 border-red-300 rounded-lg p-6 bg-red-50">
+      <h3 className="text-lg font-semibold text-red-900 mb-2">
+        {t('dangerZone.title')}
+      </h3>
+      <p className="text-sm text-red-700 mb-4">
+        {t('dangerZone.description')}
+      </p>
+      <button
+        onClick={() => setShowDeleteAllDialog(true)}
+        className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+      >
+        {t('dangerZone.deleteAllGuests')}
+      </button>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -187,27 +208,15 @@ export function ConfigurePageContent({ apiPaths, backUrl, header }: ConfigurePag
           <WeddingConfigForm
             wedding={wedding}
             themes={wedding.available_themes}
+            spotifyConfigured={wedding.spotify_configured}
+            spotifySuggestionsApiUrl={apiPaths.spotifySuggestions}
+            spotifySyncTriggerUrl={apiPaths.spotifySyncTrigger}
+            dangerZone={dangerZoneContent}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             deleteCacheRsvpUrl={apiPaths.deleteCacheRsvp}
           />
         </Suspense>
-
-        {/* Danger Zone */}
-        <div className="mt-8 border-2 border-red-300 rounded-lg p-6 bg-red-50">
-          <h3 className="text-lg font-semibold text-red-900 mb-2">
-            {t('dangerZone.title')}
-          </h3>
-          <p className="text-sm text-red-700 mb-4">
-            {t('dangerZone.description')}
-          </p>
-          <button
-            onClick={() => setShowDeleteAllDialog(true)}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-          >
-            {t('dangerZone.deleteAllGuests')}
-          </button>
-        </div>
       </main>
 
       {/* Delete All Guests Confirmation Dialog */}

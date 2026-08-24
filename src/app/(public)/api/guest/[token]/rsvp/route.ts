@@ -11,6 +11,7 @@ import { validateMagicLink } from '@/lib/auth/magic-link';
 import { trackRSVPSubmitted } from '@/lib/tracking/events';
 import { prisma } from '@/lib/db/prisma';
 import { sendConfirmation } from '@/lib/notifications/confirmation';
+import { upsertSongSuggestion } from '@/lib/spotify/suggestions';
 import type { SubmitRSVPRequest, SubmitRSVPResponse } from '@/types/api';
 import type { Channel } from '@prisma/client';
 
@@ -121,6 +122,15 @@ export async function POST(
 
     await Promise.all(updatePromises);
 
+    // Upsert per-guest song suggestions (only for members attending, when submitted)
+    await Promise.all(
+      body.members
+        .filter((m) => m.attending && m.song !== undefined)
+        .map((m) =>
+          upsertSongSuggestion({ wedding_id: wedding.id, family_id: family.id, family_member_id: m.id }, m.song)
+        )
+    );
+
     // Update family with question answers
     await prisma.family.update({
       where: { id: family.id },
@@ -135,6 +145,9 @@ export async function POST(
         family_dropdown_question_1_answer: body.family_dropdown_question_1_answer || null,
       },
     });
+
+    // Upsert the family-level song suggestion, when submitted
+    await upsertSongSuggestion({ wedding_id: wedding.id, family_id: family.id, family_member_id: null }, body.family_song);
 
     // Extract channel from URL query parameter
     const channel = request.nextUrl.searchParams.get('channel')?.toUpperCase() as Channel | null;

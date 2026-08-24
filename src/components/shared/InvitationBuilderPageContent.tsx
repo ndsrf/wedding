@@ -48,6 +48,7 @@ interface WeddingData {
   wedding_time: string;
   location: string;
   gift_iban?: string | null;
+  spotify_playlist_id?: string | null;
 }
 
 type ViewType = 'list' | 'picker' | 'editor';
@@ -162,6 +163,7 @@ export function InvitationBuilderPageContent({
         wedding_time: wedding.wedding_time,
         location: wedding.location,
         gift_iban: wedding.gift_iban,
+        spotify_playlist_id: wedding.spotify_playlist_id,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');

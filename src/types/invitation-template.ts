@@ -208,7 +208,28 @@ export interface MinisiteBlock {
   folderNames: LocalizedContent;
 }
 
-export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock | MinisiteBlock;
+export interface SpotifyBlock {
+  id: string;
+  type: 'spotify';
+  /** When true, embeds the wedding's own Spotify playlist (wedding.spotify_playlist_id) instead of `playlistId`. */
+  useWeddingPlaylist: boolean;
+  /** Public Spotify playlist ID (or URL — extracted client-side), used when useWeddingPlaylist is false. */
+  playlistId?: string;
+  autoplay?: boolean;
+  /** 'small' = compact height, no cover art. 'medium'/'large' = full player, differing only in block width. */
+  size?: 'small' | 'medium' | 'large';
+  /**
+   * The Spotify iframe itself can't be re-themed (cross-origin), so these
+   * only affect the frame/card wrapping it — 'transparent' means no
+   * background/border is drawn.
+   */
+  style?: {
+    backgroundColor?: string; // hex, or 'transparent'
+    borderColor?: string; // hex, or 'transparent'
+  };
+}
+
+export type TemplateBlock = TextBlock | ImageBlock | LocationBlock | CountdownBlock | AddToCalendarBlock | ButtonBlock | GalleryBlock | SpacerBlock | EmbedBlock | ImageMapBlock | PanelBlock | GiftBlock | MinisiteBlock | SpotifyBlock;
 
 // ============================================================================
 // SYSTEM TEMPLATE SEED

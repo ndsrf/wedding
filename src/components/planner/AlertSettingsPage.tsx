@@ -87,10 +87,62 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
 
   // ── Nightly summary test send ──────────────────────────────────────────────
 
+  // ── Spotify playlist sync toggle ───────────────────────────────────────────
+
+  const [spotifyEnabled, setSpotifyEnabled] = useState(false);
+  // Starts false (not true) so a failed/slow load can't leave the toggle
+  // looking active before we actually know Spotify is configured.
+  const [spotifyConfigured, setSpotifyConfigured] = useState(false);
+  const [spotifySaving, setSpotifySaving] = useState(false);
+
+  useEffect(() => {
+    async function loadSpotify() {
+      try {
+        const res = await fetch('/api/planner/spotify-settings');
+        if (!res.ok) {
+          setSpotifyConfigured(false);
+          return;
+        }
+        const { data } = await res.json() as { data: { spotify_sync_enabled: boolean; spotify_configured: boolean } };
+        setSpotifyEnabled(data.spotify_sync_enabled);
+        setSpotifyConfigured(data.spotify_configured);
+      } catch (err) {
+        console.error('[AlertSettings] Failed to load Spotify settings', err);
+        setSpotifyConfigured(false);
+      }
+    }
+    loadSpotify();
+  }, []);
+
+  async function handleSpotifyToggle() {
+    if (spotifySaving || !spotifyConfigured) return;
+    const next = !spotifyEnabled;
+    setSpotifySaving(true);
+    setSpotifyEnabled(next);
+    try {
+      const res = await fetch('/api/planner/spotify-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ spotify_sync_enabled: next }),
+      });
+      if (!res.ok) throw new Error('Save failed');
+    } catch (err) {
+      console.error('[AlertSettings] Failed to save Spotify settings', err);
+      setSpotifyEnabled(!next);
+    } finally {
+      setSpotifySaving(false);
+    }
+  }
+
   const [weddings, setWeddings] = useState<WeddingOption[]>([]);
   const [selectedWeddingId, setSelectedWeddingId] = useState('');
   const [testStatus, setTestStatus] = useState<TestSendStatus>('idle');
   const [testReason, setTestReason] = useState<string | null>(null);
+
+  const [spotifyTestWeddingId, setSpotifyTestWeddingId] = useState('');
+  const [spotifyTestStatus, setSpotifyTestStatus] = useState<TestSendStatus>('idle');
+  const [spotifyTestReason, setSpotifyTestReason] = useState<string | null>(null);
+  const [spotifyTestMetrics, setSpotifyTestMetrics] = useState<{ processed_ai: number; added_to_playlist: number } | null>(null);
 
   useEffect(() => {
     async function loadWeddings() {
@@ -111,6 +163,7 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
           }));
         setWeddings(options);
         setSelectedWeddingId((prev) => prev || options[0]?.id || '');
+        setSpotifyTestWeddingId((prev) => prev || options[0]?.id || '');
       } catch (err) {
         console.error('[AlertSettings] Failed to load weddings', err);
       }
@@ -137,6 +190,34 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
       console.error('[AlertSettings] Test send failed', err);
       setTestStatus('error');
       setTestReason(null);
+    }
+  }
+
+  async function handleSendSpotifyTest() {
+    if (!spotifyTestWeddingId || spotifyTestStatus === 'sending') return;
+    setSpotifyTestStatus('sending');
+    setSpotifyTestReason(null);
+    setSpotifyTestMetrics(null);
+    try {
+      const res = await fetch(`/api/planner/weddings/${spotifyTestWeddingId}/spotify-sync/trigger`, {
+        method: 'POST',
+      });
+      const data = await res.json() as {
+        success: boolean;
+        reason?: string;
+        metrics?: { processed_ai: number; added_to_playlist: number };
+      };
+      if (res.ok && data.success) {
+        setSpotifyTestStatus('sent');
+        setSpotifyTestMetrics(data.metrics ?? null);
+      } else {
+        setSpotifyTestStatus('error');
+        setSpotifyTestReason(data.reason ?? null);
+      }
+    } catch (err) {
+      console.error('[AlertSettings] Spotify test sync failed', err);
+      setSpotifyTestStatus('error');
+      setSpotifyTestReason(null);
     }
   }
 
@@ -455,6 +536,96 @@ export function AlertSettingsPage({ plannerLanguage }: Props) {
                   : testReason === 'no_recipients'
                     ? t('testSendErrorNoRecipients')
                     : testReason === 'wedding_inactive'
+                      ? t('testSendErrorInactive')
+                      : t('testSendErrorGeneric')}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section: Playlist de Spotify ─────────────────────────────────── */}
+      <section>
+        <h2 className="text-base font-semibold text-gray-900 mb-1">{t('spotifyTitle')}</h2>
+        <p className="text-sm text-gray-500 mb-4">{t('spotifySubtitle')}</p>
+
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-start gap-4 py-4 px-5">
+            <button
+              type="button"
+              onClick={handleSpotifyToggle}
+              disabled={spotifySaving || !spotifyConfigured}
+              title={!spotifyConfigured ? t('spotifyNotConfigured') : undefined}
+              className="mt-0.5 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-checked={spotifyEnabled}
+              role="switch"
+              aria-label={t('spotifySyncName')}
+            >
+              <Toggle enabled={spotifyEnabled} saving={spotifySaving} />
+            </button>
+            <div className="flex-1 min-w-0">
+              <span className={`text-sm font-medium ${spotifyEnabled ? 'text-gray-900' : 'text-gray-500'}`}>
+                {t('spotifySyncName')}
+              </span>
+              <p className="text-xs text-gray-400 mt-0.5">{t('spotifySyncDescription')}</p>
+              {!spotifyConfigured && (
+                <p className="text-xs text-amber-600 mt-1">{t('spotifyNotConfigured')}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Manual test sync */}
+          <div className="px-5 py-4 bg-gray-50/60 border-t border-gray-50">
+            <p className="text-xs font-medium text-gray-600 mb-2">{t('testSendTitle')}</p>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <select
+                value={spotifyTestWeddingId}
+                onChange={(e) => {
+                  setSpotifyTestWeddingId(e.target.value);
+                  setSpotifyTestStatus('idle');
+                  setSpotifyTestReason(null);
+                  setSpotifyTestMetrics(null);
+                }}
+                disabled={weddings.length === 0 || spotifyTestStatus === 'sending'}
+                className="text-sm rounded-lg border border-gray-200 px-3 py-1.5 bg-white text-gray-700 disabled:opacity-60 flex-1 min-w-0"
+              >
+                {weddings.length === 0 && <option value="">{t('testSendNoWeddings')}</option>}
+                {weddings.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleSendSpotifyTest}
+                disabled={!spotifyTestWeddingId || !spotifyConfigured || spotifyTestStatus === 'sending'}
+                className="text-sm font-medium px-3 py-1.5 rounded-lg bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {spotifyTestStatus === 'sending' ? t('testSendSending') : t('testSendButton')}
+              </button>
+            </div>
+            {spotifyTestStatus === 'sent' && (
+              <p className="text-xs text-emerald-600 mt-2">
+                {t('spotifyTestSuccess')}
+                {spotifyTestMetrics && (
+                  <>
+                    {' '}
+                    {t('spotifyTestSuccessDetail', {
+                      added: spotifyTestMetrics.added_to_playlist,
+                      resolved: spotifyTestMetrics.processed_ai,
+                    })}
+                  </>
+                )}
+              </p>
+            )}
+            {spotifyTestStatus === 'error' && (
+              <p className="text-xs text-red-500 mt-2">
+                {spotifyTestReason === 'not_configured'
+                  ? t('spotifyTestErrorNotConfigured')
+                  : spotifyTestReason === 'sync_not_enabled'
+                    ? t('spotifyTestErrorNotEnabled')
+                    : spotifyTestReason === 'wedding_inactive'
                       ? t('testSendErrorInactive')
                       : t('testSendErrorGeneric')}
               </p>

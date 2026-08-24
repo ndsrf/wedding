@@ -37,6 +37,7 @@ import type {
   LocalizedContent,
   SupportedLanguage,
   MinisiteBlock,
+  SpotifyBlock,
 } from '@/types/invitation-template';
 
 // ============================================================================
@@ -62,6 +63,7 @@ export const BLOCK_VERSIONS: Record<TemplateBlock['type'], number> = {
   panel: 2,
   gift: 1,
   minisite: 1,
+  spotify: 1,
 } as const;
 
 /** Current format version for the .nupcinv manifest */
@@ -256,6 +258,22 @@ export function migrateBlock(raw: Record<string, unknown>): TemplateBlock {
         id: b.id ?? randomUUID(),
         type: 'minisite',
         folderNames,
+      };
+    }
+
+    case 'spotify': {
+      const b = block as Partial<SpotifyBlock>;
+      return {
+        id: b.id ?? randomUUID(),
+        type: 'spotify',
+        useWeddingPlaylist: b.useWeddingPlaylist ?? true,
+        playlistId: b.playlistId ?? '',
+        autoplay: b.autoplay ?? false,
+        size: b.size ?? 'medium',
+        style: {
+          backgroundColor: b.style?.backgroundColor ?? 'transparent',
+          borderColor: b.style?.borderColor ?? 'transparent',
+        },
       };
     }
 

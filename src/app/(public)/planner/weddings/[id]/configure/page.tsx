@@ -30,6 +30,8 @@ export default function PlannerConfigurePage() {
         weddingApi: `${plannerBase}/configure`,
         deleteAllGuests: `${plannerBase}/guests/delete-all`,
         deleteCacheRsvp: `${plannerBase}/cache/rsvp`,
+        spotifySuggestions: `${plannerBase}/spotify-suggestions`,
+        spotifySyncTrigger: `${plannerBase}/spotify-sync/trigger`,
       }}
       backUrl={`/planner/weddings/${weddingId}`}
       header={

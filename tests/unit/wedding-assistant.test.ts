@@ -109,6 +109,14 @@ const baseWedding = {
   guest_text_question_2_label: null,
   guest_text_question_3_enabled: false,
   guest_text_question_3_label: null,
+  song_question_family_enabled: false,
+  song_question_family_text: null,
+  song_question_family_source: null,
+  song_question_individual_enabled: false,
+  song_question_individual_text: null,
+  song_question_individual_source: null,
+  spotify_playlist_id: null,
+  spotify_playlist_url: null,
   layout_elements: null,
   deleted_at: null,
   deleted_by: null,
@@ -559,6 +567,25 @@ describe('generateWeddingReply', () => {
       expect(prompt).not.toContain('Venue Website:');
       expect(prompt).not.toContain('Google Maps:');
       expect(prompt).not.toContain('Location Notes:');
+    });
+
+    it('includes the Spotify playlist link when the playlist exists', async () => {
+      const wedding = { ...baseWedding, spotify_playlist_url: 'https://open.spotify.com/playlist/abc123' };
+      await generateWeddingReply('Is there a playlist?', wedding, baseFamily, 'EN');
+      const prompt = captureSystemPrompt();
+      expect(prompt).toContain('https://open.spotify.com/playlist/abc123');
+      expect(prompt).toContain('built only from songs guests have requested');
+    });
+
+    it('mentions the playlist is not created yet when song suggestions are enabled but no playlist exists', async () => {
+      const wedding = { ...baseWedding, spotify_playlist_url: null, song_question_family_enabled: true };
+      await generateWeddingReply('Is there a playlist?', wedding, baseFamily, 'EN');
+      expect(captureSystemPrompt()).toContain('not created yet');
+    });
+
+    it('omits any Spotify playlist mention when song suggestions are disabled and no playlist exists', async () => {
+      await generateWeddingReply('Is there a playlist?', baseWedding, baseFamily, 'EN');
+      expect(captureSystemPrompt()).not.toContain('Spotify');
     });
   });
 });

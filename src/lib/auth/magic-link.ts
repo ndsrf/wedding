@@ -8,7 +8,7 @@
 import { randomUUID } from 'crypto';
 import { cache } from 'react';
 import { prisma } from '@/lib/db/prisma';
-import type { Family, FamilyMember, Wedding, Theme } from '@prisma/client';
+import type { Family, FamilyMember, SongSuggestion, Wedding, Theme } from '@prisma/client';
 import type { Channel } from '@/types/models';
 import { getShortUrlPath } from '@/lib/short-url';
 
@@ -20,6 +20,7 @@ import { getShortUrlPath } from '@/lib/short-url';
 
 export interface FamilyWithMembers extends Family {
   members: FamilyMember[];
+  songs?: SongSuggestion[];
 }
 
 export interface MagicLinkValidationResult {
@@ -150,6 +151,7 @@ export const validateMagicLink = cache(async (token: string): Promise<MagicLinkV
             created_at: 'asc',
           },
         },
+        songs: true,
         wedding: {
           include: {
             theme: true,
@@ -222,6 +224,7 @@ export const validateMagicLinkLite = cache(async (token: string): Promise<MagicL
       where: { magic_token: token },
       include: {
         members: { orderBy: { created_at: 'asc' } },
+        songs: true,
         wedding: {
           select: {
             id: true,
