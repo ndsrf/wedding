@@ -20,6 +20,7 @@ import { prisma } from '@/lib/db/prisma';
 import { validateTwilioSignature } from '@/lib/webhooks/twilio-validator';
 import { generateWeddingReply, type InvitationTemplateContext, type LocationContext, type MenuContext, type ItineraryItemContext } from '@/lib/ai/wedding-assistant';
 import { handleSongRequest, handleCoupleSongRequest } from '@/lib/ai/song-assistant';
+import { getAdminWhatsappHistory, appendAdminWhatsappTurn } from '@/lib/ai/admin-chat-history';
 import { generateNupciBotReply } from '@/lib/ai/nupcibot';
 import { generateRagReply } from '@/lib/ai/rag-chat';
 import { isVectorEnabled } from '@/lib/db/vector-prisma';
@@ -255,20 +256,23 @@ export async function POST(request: NextRequest) {
 
         const language = String(matchingAdmin.wedding?.default_language ?? 'EN');
 
+        // Admin WhatsApp messages aren't logged as TrackingEvent (that model
+        // requires a family_id, which an admin message doesn't have), so
+        // reconstruct short-lived history from Redis instead — without it,
+        // a clarifying "which song?" and the guest's next message ("Bohemian
+        // Rhapsody by Queen") would look like two disconnected messages.
+        const chatHistory = await getAdminWhatsappHistory(matchingAdmin.id);
+
         // Give the couple's own song requests the same shortcut guests get
         // (see handleSongRequest below) — if this message looks like a song
         // suggestion, handle it directly and skip NupciBot for this turn.
-        // No persisted chat history for the admin's own WhatsApp number
-        // (NupciBot doesn't have one either here), so multi-turn
-        // clarification isn't available on this channel — same limitation
-        // NupciBot already has for everything else.
         let nupcibotReply: string | null = null;
         if (matchingAdmin.wedding) {
           try {
             const songResult = await handleCoupleSongRequest({
               wedding: matchingAdmin.wedding,
               message: body,
-              history: [],
+              history: chatHistory,
               language,
             });
             nupcibotReply = songResult?.replyText ?? null;
@@ -281,7 +285,7 @@ export async function POST(request: NextRequest) {
           if (isVectorEnabled()) {
             nupcibotReply = await generateRagReply({
               userMessage: body,
-              history: [],
+              history: chatHistory,
               language,
               userName: matchingAdmin.name,
               weddingId: matchingAdmin.wedding_id,
@@ -290,7 +294,7 @@ export async function POST(request: NextRequest) {
           } else {
             nupcibotReply = await generateNupciBotReply(
               body,
-              [],
+              chatHistory,
               language,
               matchingAdmin.name,
               matchingAdmin.wedding_id,
@@ -302,6 +306,8 @@ export async function POST(request: NextRequest) {
           console.warn('[TWILIO_INBOUND] NupciBot returned no reply for admin', matchingAdmin.id);
           return emptyTwiML();
         }
+
+        void appendAdminWhatsappTurn(matchingAdmin.id, body, nupcibotReply);
 
         const whatsappReply = await formatNupcibotReplyForWhatsApp(nupcibotReply, language);
         return messageTwiML(whatsappReply);

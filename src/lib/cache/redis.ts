@@ -53,6 +53,8 @@ export const CACHE_KEYS = {
   guestListPattern: (weddingId: string) => `wedding:guests:list:${weddingId}:*`,
   /** Glob pattern for bulk-invalidating all guest ID sets for a wedding */
   guestIdsPattern: (weddingId: string) => `wedding:guests:ids:${weddingId}:*`,
+  /** Short-lived WhatsApp chat history for a wedding admin talking to NupciBot */
+  adminWhatsappChat: (adminId: string) => `admin:whatsapp:chat:${adminId}`,
 } as const;
 
 // ============================================================================
@@ -72,6 +74,8 @@ export const CACHE_TTL = {
   GUEST_LIST: 300, // 5 minutes
   /** Guest ID lists for "select all" — invalidated explicitly on mutations */
   GUEST_IDS: 300, // 5 minutes
+  /** Admin WhatsApp <-> NupciBot chat history — enough for a natural back-and-forth pause, not a transcript */
+  ADMIN_WHATSAPP_CHAT: 900, // 15 minutes
 } as const;
 
 // ============================================================================
