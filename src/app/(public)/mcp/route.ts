@@ -73,8 +73,12 @@ const FAMILY_ID_DESC =
   'Exact family id to target, bypassing the fuzzy familyName search. Only use this after a previous call ' +
   'returned status "ambiguous" — pass the "id" of the intended family from that response\'s "families" list, ' +
   'together with the same familyName. Omit on the first attempt.';
+const CONFIRM_DESC =
+  'Set to true ONLY after the user has explicitly confirmed the change you previewed to them. Omit or leave false ' +
+  'on the first call — the tool validates the request and returns a preview (status "confirmation_required") ' +
+  'instead of writing anything. Re-call with identical other arguments plus confirm: true to actually apply it.';
 
-const ADMIN_TOOL_DEFS = [
+export const ADMIN_TOOL_DEFS = [
   {
     name: 'search_knowledge_base',
     description:
@@ -103,10 +107,11 @@ const ADMIN_TOOL_DEFS = [
   {
     name: 'update_family_rsvp',
     description:
-      'Update RSVP attendance for a family or individual members of this wedding. Writes immediately — only call for an ' +
-      'explicit RSVP report or change. Use memberUpdates for named individuals; use attending only for a whole-family ' +
-      'default with no members named. If familyName matches multiple families, returns status "ambiguous" with candidate ' +
-      'ids instead of updating anything — re-call with familyId set.',
+      'Update RSVP attendance for a family or individual members of this wedding. Confirm-gated: the first call ' +
+      '(confirm omitted/false) validates the request and returns a preview (status "confirmation_required") without ' +
+      'writing; only re-call with confirm: true after the user agrees. Use memberUpdates for named individuals; use ' +
+      'attending only for a whole-family default with no members named. If familyName matches multiple families, ' +
+      'returns status "ambiguous" with candidate ids instead — re-call with familyId set.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -125,6 +130,7 @@ const ADMIN_TOOL_DEFS = [
             required: ['memberName', 'attending'],
           },
         },
+        confirm: { type: 'boolean', description: CONFIRM_DESC },
       },
       required: ['familyName'],
     },
@@ -132,10 +138,12 @@ const ADMIN_TOOL_DEFS = [
   {
     name: 'assign_family_to_table',
     description:
-      'Seat the attending members of a family at a numbered table, writing immediately. Only members with attending ' +
-      'RSVP status are eligible. Clears any previous table assignment for those members first, so this also works to ' +
-      'move a family. Fails if the table lacks capacity. If familyName is ambiguous, returns candidate ids — re-call ' +
-      'with familyId set.',
+      'Seat the attending members of a family at a numbered table. Confirm-gated: the first call (confirm ' +
+      'omitted/false) validates the family, table, and capacity, and returns a preview (status ' +
+      '"confirmation_required") without writing; only re-call with confirm: true after the user agrees. Only members ' +
+      'with attending RSVP status are eligible. Clears any previous table assignment for those members first, so ' +
+      'this also works to move a family. Fails if the table lacks capacity. If familyName is ambiguous, returns ' +
+      'candidate ids — re-call with familyId set.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -147,6 +155,7 @@ const ADMIN_TOOL_DEFS = [
           items: { type: 'string' },
           description: 'Specific attending members to assign (omit to assign all attending members of the family).',
         },
+        confirm: { type: 'boolean', description: CONFIRM_DESC },
       },
       required: ['familyName', 'tableNumber'],
     },
@@ -187,7 +196,7 @@ const ADMIN_TOOL_DEFS = [
   },
   {
     name: 'get_wedding_invoices',
-    description: 'Get invoices linked to this wedding (via quote or contract): status, total, amount paid, and outstanding balance for each. Read-only — cannot record payments.',
+    description: 'Get invoices linked to this wedding (via quote or contract): status, total, amount paid, and outstanding balance for each. Read-only — cannot record payments; planners can use record_invoice_payment for that.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
   {
@@ -195,17 +204,121 @@ const ADMIN_TOOL_DEFS = [
     description: 'Get the service providers (vendors) assigned to this wedding with category, agreed price, amount paid, outstanding balance, and contact info. Read-only.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
+  {
+    name: 'get_wedding_itinerary',
+    description: 'Get this wedding\'s public-facing itinerary: ordered items (ceremony, reception, etc.) with type, local date/time, notes, and location. Read-only. Returns status "no_itinerary" if none is set up yet.',
+    inputSchema: { type: 'object', properties: {}, required: [] },
+  },
+  {
+    name: 'get_wedding_schedule',
+    description: 'Get this wedding\'s detailed run-of-show schedule: time blocks (possibly parallel) with ordered stages, calculated times, durations, notes, and assigned provider. More granular than get_wedding_itinerary. Read-only. Returns status "no_schedule" if none exists yet.',
+    inputSchema: { type: 'object', properties: {}, required: [] },
+  },
+  {
+    name: 'get_tasting_menu',
+    description: 'Get this wedding\'s tasting menu round(s): title, description, tasting date, status, participant count, and each section\'s dishes. Does not include participant scores — use get_tasting_scores for that. Read-only. Returns status "no_menu" if none exists yet.',
+    inputSchema: { type: 'object', properties: {}, required: [] },
+  },
+  {
+    name: 'get_tasting_scores',
+    description: 'Get this wedding\'s tasting results: per-dish average score, response count, and every participant\'s individual score/notes, plus an overall average per round. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        roundNumber: { type: 'number', description: 'Restrict to a specific tasting round number (optional; omit for all rounds).' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'get_guests_by_label',
+    description: 'Get guest families for this wedding carrying a specific admin-defined label/tag (e.g. "VIP"), with per-family and aggregate attending/not-attending/pending breakdowns. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        labelName: { type: 'string', description: 'The exact label name to filter by (case-insensitive).' },
+      },
+      required: ['labelName'],
+    },
+  },
 ];
 
-const PLANNER_TOOL_DEFS = [
+export const PLANNER_TOOL_DEFS = [
   {
     name: 'get_planner_weddings',
     description: 'Get every wedding managed by this planner with couple names, date, family count, and RSVP completion percentage. Does not filter by date range or status.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
+  {
+    name: 'list_quotes',
+    description: 'List quotes across the planner\'s whole business: couple names, customer, status, event date, total, currency, expiry date. Follow up with get_quote_detail for line items. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED'], description: 'Filter to this exact status (optional).' },
+        search: { type: 'string', description: 'Case-insensitive substring filter on couple names or customer name (optional).' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'get_quote_detail',
+    description: 'Get full detail for one quote by id (from list_quotes): customer contact, status, event date/location, financials, and line items. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        quoteId: { type: 'string', description: 'The exact quote id, from list_quotes.' },
+      },
+      required: ['quoteId'],
+    },
+  },
+  {
+    name: 'list_contracts',
+    description: 'List contracts across the planner\'s whole business: title, customer, linked quote total, status, signer, signed date. Does not include the contract\'s full text. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'SHARED', 'SIGNING', 'SIGNED', 'CANCELLED'], description: 'Filter to this exact status (optional).' },
+        search: { type: 'string', description: 'Case-insensitive substring filter on title, customer name, or signer name (optional).' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'list_invoices',
+    description: 'List invoices across the planner\'s ENTIRE business (all weddings), with a totalCollected summary. For just the current wedding, use get_wedding_invoices instead. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['DRAFT', 'ISSUED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'], description: 'Filter to this exact status (optional).' },
+        search: { type: 'string', description: 'Case-insensitive substring filter on invoice number, customer name, or couple names (optional).' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'record_invoice_payment',
+    description:
+      'Record a real, non-reversible payment against one invoice and update its status. Confirm-gated: the first ' +
+      'call (confirm omitted/false) validates the invoice and returns a preview (status "confirmation_required") ' +
+      'with the current outstanding balance, without writing; only re-call with confirm: true after the user ' +
+      'explicitly confirms amount and date.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        invoiceId: { type: 'string', description: 'The exact invoice id to record the payment against.' },
+        amount: { type: 'number', description: 'The payment amount, in the invoice\'s own currency, as a positive number.' },
+        paymentDate: { type: 'string', description: 'The date the payment was made/received, in YYYY-MM-DD format.' },
+        method: { type: 'string', enum: ['CASH', 'BANK_TRANSFER', 'PAYPAL', 'BIZUM', 'REVOLUT', 'OTHER'], description: 'How the payment was made (optional, defaults to BANK_TRANSFER).' },
+        reference: { type: 'string', description: 'Optional free-text payment reference/note.' },
+        confirm: { type: 'boolean', description: CONFIRM_DESC },
+      },
+      required: ['invoiceId', 'amount', 'paymentDate'],
+    },
+  },
 ];
 
-function getToolDefs(ctx: ApiKeyContext) {
+export function getToolDefs(ctx: ApiKeyContext) {
   return ctx.role === 'planner'
     ? [...PLANNER_TOOL_DEFS, ...ADMIN_TOOL_DEFS]
     : ADMIN_TOOL_DEFS;
