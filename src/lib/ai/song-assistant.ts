@@ -48,11 +48,29 @@ import { addSongSuggestionFromChat } from '@/lib/spotify/suggestions';
 const HISTORY_TURNS = 4;
 
 const songIntentSchema = z.object({
-  isSongRequest: z.boolean(),
-  isConfident: z.boolean(),
-  artist: z.string().nullable(),
-  track: z.string().nullable(),
-  clarifyingQuestion: z.string().nullable(),
+  isSongRequest: z
+    .boolean()
+    .describe(
+      'True if the user is currently trying to add/suggest a song for the wedding playlist — either in this ' +
+      'message, or by answering a clarifying question the assistant just asked. False for anything unrelated ' +
+      '(RSVP, venue, platform/admin questions, small talk, thanks, etc).',
+    ),
+  isConfident: z
+    .boolean()
+    .describe(
+      'True only when both artist and track can be identified with reasonable certainty from the message plus ' +
+      'recent conversation history. Meaningless when isSongRequest is false. When false, artist/track may still be ' +
+      'partially filled in — clarifyingQuestion should be used to ask for whatever is missing.',
+    ),
+  artist: z.string().nullable().describe('The extracted artist name, typo-corrected; null if not yet known or isSongRequest is false. Never invent a value that was not given.'),
+  track: z.string().nullable().describe('The extracted track title, typo-corrected; null if not yet known or isSongRequest is false. Never invent a value that was not given.'),
+  clarifyingQuestion: z
+    .string()
+    .nullable()
+    .describe(
+      'A single short, friendly follow-up question in the user\'s own language, asking specifically for whatever ' +
+      'is missing (artist and/or track). Required when isSongRequest is true and isConfident is false; null otherwise.',
+    ),
 });
 
 // ============================================================================

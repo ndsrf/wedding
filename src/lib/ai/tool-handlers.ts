@@ -103,21 +103,25 @@ interface MemberUpdate { memberName: string; attending: boolean }
 
 export async function handleUpdateFamilyRsvp(
   ctx: ToolContext,
-  args: { familyName: string; attending?: boolean; memberUpdates?: MemberUpdate[] },
+  args: { familyName: string; familyId?: string; attending?: boolean; memberUpdates?: MemberUpdate[] },
 ) {
   if (!ctx.weddingId) return { error: 'No wedding context available' };
-  const { familyName, attending, memberUpdates } = args;
+  const { familyName, familyId, attending, memberUpdates } = args;
 
   const families = await prisma.family.findMany({
-    where: { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
+    where: familyId
+      ? { wedding_id: ctx.weddingId, id: familyId }
+      : { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
     include: { members: { select: { id: true, name: true, attending: true } } },
   });
 
-  if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+  if (families.length === 0) {
+    return { error: familyId ? `No family found with id "${familyId}"` : `No family found matching "${familyName}"` };
+  }
   if (families.length > 1) {
     return {
       status: 'ambiguous',
-      message: `Multiple families found matching "${familyName}". Please clarify which one you mean.`,
+      message: `Multiple families found matching "${familyName}". Call this tool again with the same familyName and the "familyId" of the intended family from the list below.`,
       families: families.map((f) => ({ id: f.id, name: f.name, members: f.members.map((m) => m.name) })),
     };
   }
@@ -186,20 +190,24 @@ export async function handleUpdateFamilyRsvp(
 
 export async function handleAssignFamilyToTable(
   ctx: ToolContext,
-  args: { familyName: string; tableNumber: number; memberNames?: string[] },
+  args: { familyName: string; familyId?: string; tableNumber: number; memberNames?: string[] },
 ) {
   if (!ctx.weddingId) return { error: 'No wedding context available' };
-  const { familyName, tableNumber, memberNames } = args;
+  const { familyName, familyId, tableNumber, memberNames } = args;
 
   const families = await prisma.family.findMany({
-    where: { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
+    where: familyId
+      ? { wedding_id: ctx.weddingId, id: familyId }
+      : { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
     include: { members: { select: { id: true, name: true, attending: true } } },
   });
-  if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+  if (families.length === 0) {
+    return { error: familyId ? `No family found with id "${familyId}"` : `No family found matching "${familyName}"` };
+  }
   if (families.length > 1) {
     return {
       status: 'ambiguous',
-      message: `Multiple families found matching "${familyName}". Please clarify.`,
+      message: `Multiple families found matching "${familyName}". Call this tool again with the same familyName and the "familyId" of the intended family from the list below.`,
       families: families.map((f) => ({ id: f.id, name: f.name })),
     };
   }
@@ -243,20 +251,24 @@ export async function handleAssignFamilyToTable(
 
 export async function handleSuggestTablesForFamily(
   ctx: ToolContext,
-  args: { familyName: string; topN?: number },
+  args: { familyName: string; familyId?: string; topN?: number },
 ) {
   if (!ctx.weddingId) return { error: 'No wedding context available' };
-  const { familyName, topN = 3 } = args;
+  const { familyName, familyId, topN = 3 } = args;
 
   const families = await prisma.family.findMany({
-    where: { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
+    where: familyId
+      ? { wedding_id: ctx.weddingId, id: familyId }
+      : { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
     include: { members: { where: { attending: true }, select: { id: true, name: true, age: true } } },
   });
-  if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+  if (families.length === 0) {
+    return { error: familyId ? `No family found with id "${familyId}"` : `No family found matching "${familyName}"` };
+  }
   if (families.length > 1) {
     return {
       status: 'ambiguous',
-      message: `Multiple families found matching "${familyName}". Please clarify.`,
+      message: `Multiple families found matching "${familyName}". Call this tool again with the same familyName and the "familyId" of the intended family from the list below.`,
       families: families.map((f) => ({ id: f.id, name: f.name })),
     };
   }

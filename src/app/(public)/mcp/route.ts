@@ -63,33 +63,64 @@ const ERR = {
 
 // ── Tool definitions ──────────────────────────────────────────────────────────
 
+// Kept in sync by hand with the tool() definitions in tools.ts, since MCP's
+// tools/list needs plain JSON Schema while the Vercel AI SDK side uses Zod.
+// If a tool's description or schema changes in tools.ts, mirror it here too
+// — otherwise external MCP clients (e.g. Claude Desktop) see a stale or
+// missing definition even though executeTool() (which calls buildTools()
+// directly) would still run it correctly.
+const FAMILY_ID_DESC =
+  'Exact family id to target, bypassing the fuzzy familyName search. Only use this after a previous call ' +
+  'returned status "ambiguous" — pass the "id" of the intended family from that response\'s "families" list, ' +
+  'together with the same familyName. Omit on the first attempt.';
+
 const ADMIN_TOOL_DEFS = [
   {
+    name: 'search_knowledge_base',
+    description:
+      'Searches the Nupci platform documentation and this wedding\'s knowledge base (uploaded wedding documents, ' +
+      'planner notes, platform user-manual articles) by semantic similarity and returns up to 5 relevant passages. ' +
+      'Use for "how do I / how does X work" questions about the platform; do NOT use it for live data such as the ' +
+      'actual guest list, RSVP counts, invoices, or providers — use the dedicated tools for those instead.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'A focused search query, in English or Spanish, describing the feature or topic to look up.' },
+      },
+      required: ['query'],
+    },
+  },
+  {
     name: 'get_guest_list',
-    description: 'Get a summary of the wedding guest list including family names, contact info, and RSVP status.',
+    description: 'Get every guest family for this wedding: family name, contact channel, member count, and attending/not-attending/pending breakdown. Does not include per-member names or table assignments.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
   {
     name: 'get_rsvp_status',
-    description: 'Get aggregate RSVP statistics: total families, submitted RSVPs, pending, and completion percentage.',
+    description: 'Get aggregate RSVP statistics for this wedding: total families, submitted RSVPs, pending, and completion percentage.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
   {
     name: 'update_family_rsvp',
-    description: 'Update the RSVP attendance for a family or individual members. Use memberUpdates for named individuals; use attending for a whole-family default.',
+    description:
+      'Update RSVP attendance for a family or individual members of this wedding. Writes immediately — only call for an ' +
+      'explicit RSVP report or change. Use memberUpdates for named individuals; use attending only for a whole-family ' +
+      'default with no members named. If familyName matches multiple families, returns status "ambiguous" with candidate ' +
+      'ids instead of updating anything — re-call with familyId set.',
     inputSchema: {
       type: 'object',
       properties: {
-        familyName: { type: 'string', description: 'The name of the family to update' },
-        attending: { type: 'boolean', description: 'Whole-family attendance (optional)' },
+        familyName: { type: 'string', description: 'The name of the family to update (case-insensitive substring match).' },
+        familyId: { type: 'string', description: FAMILY_ID_DESC },
+        attending: { type: 'boolean', description: 'Whole-family attendance default; set only when no member names are mentioned.' },
         memberUpdates: {
           type: 'array',
-          description: 'Per-member attendance updates',
+          description: 'Per-member attendance updates. Required whenever specific member names are mentioned.',
           items: {
             type: 'object',
             properties: {
-              memberName: { type: 'string' },
-              attending: { type: 'boolean' },
+              memberName: { type: 'string', description: 'Exact member name as stored in the guest list.' },
+              attending: { type: 'boolean', description: 'Whether this member is attending.' },
             },
             required: ['memberName', 'attending'],
           },
@@ -100,16 +131,21 @@ const ADMIN_TOOL_DEFS = [
   },
   {
     name: 'assign_family_to_table',
-    description: 'Assign the attending members of a family to a seating table. Clears any previous assignment first.',
+    description:
+      'Seat the attending members of a family at a numbered table, writing immediately. Only members with attending ' +
+      'RSVP status are eligible. Clears any previous table assignment for those members first, so this also works to ' +
+      'move a family. Fails if the table lacks capacity. If familyName is ambiguous, returns candidate ids — re-call ' +
+      'with familyId set.',
     inputSchema: {
       type: 'object',
       properties: {
-        familyName: { type: 'string', description: 'The name of the family to seat' },
-        tableNumber: { type: 'number', description: 'Table number to assign the family to' },
+        familyName: { type: 'string', description: 'The name of the family to seat (case-insensitive substring match).' },
+        familyId: { type: 'string', description: FAMILY_ID_DESC },
+        tableNumber: { type: 'number', description: 'Table number to assign the family to, as shown in the seating plan.' },
         memberNames: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Specific members to assign (omit to assign all attending members)',
+          description: 'Specific attending members to assign (omit to assign all attending members of the family).',
         },
       },
       required: ['familyName', 'tableNumber'],
@@ -117,38 +153,46 @@ const ADMIN_TOOL_DEFS = [
   },
   {
     name: 'suggest_tables_for_family',
-    description: 'Find the best table(s) for a family based on available seats, shared admin group, and average age similarity.',
+    description:
+      'Read-only: rank the best available table(s) for an already-attending family, without assigning anyone. Only ' +
+      'tables with enough free seats are considered, ranked by shared inviter, then age similarity, then free seats. ' +
+      'Returns "no_space" if nothing fits, or "ambiguous" with candidate ids if familyName matches multiple families.',
     inputSchema: {
       type: 'object',
       properties: {
-        familyName: { type: 'string', description: 'The name of the family' },
-        topN: { type: 'number', description: 'How many suggestions to return (default 3)' },
+        familyName: { type: 'string', description: 'The name of the family (case-insensitive substring match).' },
+        familyId: { type: 'string', description: FAMILY_ID_DESC },
+        topN: { type: 'number', description: 'How many ranked suggestions to return, best first (default 3).' },
       },
       required: ['familyName'],
     },
   },
   {
     name: 'add_reminder',
-    description: "Add a reminder or task to the wedding checklist. Supports absolute dates (YYYY-MM-DD) or relative dates (e.g. 'WEDDING_DATE-60').",
+    description:
+      "Add a task to this wedding's checklist Reminders section (created automatically if missing). Provide EITHER " +
+      "dueDate (an absolute YYYY-MM-DD date) OR dueDateRelative (format 'WEDDING_DATE[+-]<days>', e.g. 'WEDDING_DATE-60' " +
+      'for 2 months before the wedding) — never both; dueDate takes precedence if both are given. Always creates a new ' +
+      'task; cannot edit or complete an existing one.',
     inputSchema: {
       type: 'object',
       properties: {
-        title: { type: 'string', description: 'The reminder title' },
+        title: { type: 'string', description: 'A short, actionable title for the reminder or task.' },
         description: { type: 'string', description: 'Additional details (optional)' },
-        dueDate: { type: 'string', description: 'Absolute due date in YYYY-MM-DD format (optional)' },
-        dueDateRelative: { type: 'string', description: "Relative due date e.g. 'WEDDING_DATE-60' (optional)" },
+        dueDate: { type: 'string', description: 'Absolute due date in YYYY-MM-DD format (optional). Takes precedence over dueDateRelative.' },
+        dueDateRelative: { type: 'string', description: "Relative due date, format 'WEDDING_DATE[+-]<days>' e.g. 'WEDDING_DATE-60' (optional)." },
       },
       required: ['title'],
     },
   },
   {
     name: 'get_wedding_invoices',
-    description: 'Get a summary of invoices and payments for this wedding.',
+    description: 'Get invoices linked to this wedding (via quote or contract): status, total, amount paid, and outstanding balance for each. Read-only — cannot record payments.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
   {
     name: 'get_wedding_providers',
-    description: 'Get the list of service providers (vendors) assigned to this wedding with payment status.',
+    description: 'Get the service providers (vendors) assigned to this wedding with category, agreed price, amount paid, outstanding balance, and contact info. Read-only.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
 ];
@@ -156,7 +200,7 @@ const ADMIN_TOOL_DEFS = [
 const PLANNER_TOOL_DEFS = [
   {
     name: 'get_planner_weddings',
-    description: 'Get a list of all weddings managed by this planner with dates, guest counts, and RSVP completion.',
+    description: 'Get every wedding managed by this planner with couple names, date, family count, and RSVP completion percentage. Does not filter by date range or status.',
     inputSchema: { type: 'object', properties: {}, required: [] },
   },
 ];
