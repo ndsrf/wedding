@@ -24,9 +24,10 @@
  * table — turns are reconstructed from TrackingEvent (MESSAGE_RECEIVED
  * rows, which already carry both the guest's message and the reply sent
  * for it), the same record the FAQ assistant's conversation is logged to.
- * For the couple, the caller already has real chat history (either the
- * browser's in-memory NupciBot widget state, or none for their own
- * WhatsApp, same limitation NupciBot already has there).
+ * For the couple, the caller supplies real chat history too — either the
+ * browser's in-memory NupciBot widget state, or a short-lived Redis-backed
+ * store for their own WhatsApp (see admin-chat-history.ts, since
+ * TrackingEvent can't be reused for admin messages).
  *
  * A cheap keyword pre-filter guards the actual AI classification call
  * (generateObject, one AI_STANDARD unit) so an unrelated message ("what
@@ -331,12 +332,14 @@ export async function handleSongRequest(params: {
 /**
  * Detects and handles a song-suggestion request from the wedding admin
  * (the couple) themselves, chatting with NupciBot — either the web widget
- * (real chat history supplied by the caller) or their own WhatsApp number
- * (no persisted history, same limitation NupciBot already has there for
- * everything else). Returns null when the message isn't about adding a
- * song or Spotify isn't configured, so the caller falls through to
- * NupciBot's normal reply generation. Unlike handleSongRequest, this isn't
- * gated on the wedding's guest-facing song_question_*_enabled toggles —
+ * or their own WhatsApp number. Either way the caller supplies real recent
+ * chat history (the widget's in-memory state, or Redis-backed short-term
+ * history for WhatsApp — see admin-chat-history.ts), so multi-turn
+ * clarification works the same as it does for guests. Returns null when
+ * the message isn't about adding a song or Spotify isn't configured, so
+ * the caller falls through to NupciBot's normal reply generation. Unlike
+ * handleSongRequest, this isn't gated on the wedding's guest-facing
+ * song_question_*_enabled toggles —
  * the couple can add songs to their own playlist regardless of whether
  * they've turned that question on for guests. Suggestions are stored with
  * source COUPLE and no family_id, so they never collide with a guest's.
