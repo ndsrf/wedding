@@ -18,6 +18,8 @@ import { ResourceType, Language } from '@prisma/client';
 import type { Wedding, Family, FamilyMember } from '@prisma/client';
 import type { TemplateDesign, SupportedLanguage, TemplateBlock } from '@/types/invitation-template';
 import { checkResourceLimit, recordResourceUsage, formatLimitError } from '@/lib/license/usage';
+import { t as translate } from '@/lib/i18n/server';
+import type { Language as I18nLanguage } from '@/lib/i18n/config';
 
 // ============================================================================
 // TYPES
@@ -83,14 +85,13 @@ const LANGUAGE_NAMES: Record<string, string> = {
   DE: 'German',
 };
 
-// "Contact the couple" suffix in each supported language
-const CONTACT_COUPLE_SUFFIX: Record<string, string> = {
-  ES: 'Para una respuesta más personal, puedes contactar directamente con los novios.',
-  EN: 'For a more personal answer, feel free to contact the couple directly.',
-  FR: "Pour une réponse plus personnalisée, n'hésitez pas à contacter les mariés directement.",
-  IT: 'Per una risposta più personale, non esitare a contattare direttamente gli sposi.',
-  DE: 'Für eine persönlichere Antwort kannst du die Brautleute gerne direkt kontaktieren.',
-};
+// "Contact the couple" suffix in each supported language — sourced from
+// src/messages/*/common.json (weddingAssistant.contactCoupleSuffix) via the
+// same t() helper used for other backend-generated strings (e.g.
+// formatLimitError in license/usage.ts), rather than a hardcoded record.
+function contactCoupleSuffix(lang: string): Promise<string> {
+  return translate('weddingAssistant.contactCoupleSuffix', lang.toLowerCase() as I18nLanguage);
+}
 
 // ============================================================================
 // PROMPT BUILDER
@@ -154,7 +155,7 @@ function extractInvitationText(design: TemplateDesign, language: string): string
   return texts;
 }
 
-function buildSystemPrompt(
+async function buildSystemPrompt(
   wedding: Wedding,
   family: FamilyContext | null,
   language: string,
@@ -164,10 +165,10 @@ function buildSystemPrompt(
   location?: LocationContext | null,
   menu?: MenuContext | null,
   itinerary?: ItineraryItemContext[] | null
-): string {
+): Promise<string> {
   const lang = language in LANGUAGE_NAMES ? language : 'EN';
   const languageName = LANGUAGE_NAMES[lang];
-  const contactSuffix = CONTACT_COUPLE_SUFFIX[lang] ?? CONTACT_COUPLE_SUFFIX['EN'];
+  const contactSuffix = await contactCoupleSuffix(lang);
 
   const weddingDate = formatDate(wedding.wedding_date);
   const cutoffDate = formatDate(wedding.rsvp_cutoff_date);
@@ -513,7 +514,7 @@ export async function generateWeddingReply(
   }
 
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const systemPrompt = buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location, menu, itinerary);
+  const systemPrompt = await buildSystemPrompt(wedding, family, language, appUrl, rsvpUrl, invitationTemplate, location, menu, itinerary);
 
   // Determine provider: explicit env var → fallback to whichever key is present
   const provider =

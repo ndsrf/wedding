@@ -3620,5 +3620,8 @@
     "clarifyFallback": "Certo, quale canzone e di quale artista vuoi aggiungere alla playlist?",
     "notFound": "Non ho trovato \"{track}\" di {artist} su Spotify. Puoi verificare il titolo o l'artista?",
     "confirm": "Aggiunta! 🎵 \"{track}\" di {artist} alla playlist del matrimonio."
+  },
+  "weddingAssistant": {
+    "contactCoupleSuffix": "Per una risposta più personale, non esitare a contattare direttamente gli sposi."
   }
 }
