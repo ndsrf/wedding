@@ -3615,5 +3615,10 @@
       "button": "Apply via Contact Form",
       "description": "If the idea of working in a high-performance team where your impact is visible every day motivates you, send us a message detailing your journey and why you fit our philosophy."
     }
+  },
+  "songAssistant": {
+    "clarifyFallback": "Klar, welchen Song und welchen Künstler möchtest du zur Playlist hinzufügen?",
+    "notFound": "Ich konnte \"{track}\" von {artist} nicht auf Spotify finden. Kannst du Titel oder Künstler prüfen?",
+    "confirm": "Hinzugefügt! 🎵 \"{track}\" von {artist} zur Hochzeits-Playlist."
   }
 }

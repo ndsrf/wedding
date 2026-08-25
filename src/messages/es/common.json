@@ -3693,5 +3693,10 @@
       "button": "Aplicar a través de Contacto",
       "description": "Si te motiva la idea de trabajar en un equipo de alto rendimiento donde tu impacto es visible cada día, envíanos un mensaje detallando tu trayectoria y por qué encajas con nuestra filosofía."
     }
+  },
+  "songAssistant": {
+    "clarifyFallback": "Claro, ¿qué canción y de qué artista quieres añadir a la playlist?",
+    "notFound": "No he encontrado \"{track}\" de {artist} en Spotify. ¿Puedes comprobar el título o el artista?",
+    "confirm": "¡Añadida! 🎵 \"{track}\" de {artist} a la playlist de la boda."
   }
 }
