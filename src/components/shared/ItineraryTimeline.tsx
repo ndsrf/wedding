@@ -28,7 +28,7 @@ export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
   if (sorted.length === 0) return null;
 
   return (
-    <div className="flex justify-center-safe overflow-x-auto pb-1 gap-0">
+    <div className="flex overflow-x-auto pb-1 gap-0">
       {sorted.map((item, idx) => {
         const isLast = idx === sorted.length - 1;
 
@@ -36,7 +36,7 @@ export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
           <div
             key={item.id}
             className="flex-1"
-            style={{ minWidth: '90px', maxWidth: '140px' }}
+            style={{ minWidth: '90px' }}
           >
             {/* Dot + connector line */}
             <div className="flex items-center h-3 mb-1.5">
