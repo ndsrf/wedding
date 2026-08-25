@@ -35,8 +35,8 @@ export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
         return (
           <div
             key={item.id}
-            className="flex-shrink-0"
-            style={{ minWidth: 'calc(25vw - 8px)', maxWidth: '140px' }}
+            className="flex-1"
+            style={{ minWidth: '90px', maxWidth: '140px' }}
           >
             {/* Dot + connector line */}
             <div className="flex items-center h-3 mb-1.5">
