@@ -298,7 +298,7 @@ export default async function AdminDashboardPage() {
       {/* Itinerary Timeline */}
       {stats.itinerary.length > 0 && (
         <div className="bg-white border-b border-gray-100">
-          <div className="px-4 sm:px-6 lg:px-8 py-3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <ItineraryTimeline
               items={stats.itinerary.map((item, idx) => ({
                 id: idx,
