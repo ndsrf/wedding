@@ -1,9 +1,12 @@
 /**
  * Regression test for the "search_knowledge_base missing from /mcp's
- * tools/list" bug: the /mcp route (src/app/(public)/mcp/route.ts) hand-maintains
- * a JSON-Schema copy of the tool definitions built by buildTools() (src/lib/ai/tools.ts)
- * so that Claude Desktop / other MCP clients can discover them via tools/list.
- * That hand-maintained copy can silently drift from the real tool set.
+ * tools/list" bug: the /mcp route (src/app/(public)/mcp/route.ts) advertises
+ * tools via getToolDefs() (src/lib/ai/mcp-tool-defs.ts) — a hand-maintained
+ * JSON-Schema copy of the tool() definitions built by buildTools()
+ * (src/lib/ai/tools.ts) for external MCP clients like Claude Desktop, kept
+ * in a separate module because Next.js route files may only export the
+ * whitelisted route handlers/config. That hand-maintained copy can silently
+ * drift from the real tool set.
  *
  * This asserts, for both roles, that the set of tool names advertised by
  * getToolDefs() exactly matches the set of tool names actually returned by
@@ -11,10 +14,10 @@
  */
 
 // Neither getToolDefs() nor buildTools() touches the database at construction
-// time (prisma is only called inside a tool's execute()), but api-key.ts and
-// tool-handlers.ts import the real prisma singleton, which throws at import
-// time without DATABASE_URL. Mock it out so this pure "do the two tool lists
-// agree" check doesn't need a real database.
+// time (prisma is only called inside a tool's execute()), but tool-handlers.ts
+// imports the real prisma singleton, which throws at import time without
+// DATABASE_URL. Mock it out so this pure "do the two tool lists agree" check
+// doesn't need a real database.
 jest.mock('@/lib/db/prisma', () => ({ prisma: {} }));
 
 // The 'ai' package ships an ESM-only dist that Jest's CJS runner can't parse.
@@ -29,7 +32,7 @@ jest.mock('ai', () => ({
 // @ai-sdk/* packages, which are ESM-only for the same reason as 'ai' above.
 jest.mock('@/lib/ai/retrieval', () => ({ retrieveChunks: jest.fn() }));
 
-import { getToolDefs } from '@/app/(public)/mcp/route';
+import { getToolDefs } from '@/lib/ai/mcp-tool-defs';
 import { buildTools } from '@/lib/ai/tools';
 import type { ApiKeyContext } from '@/lib/auth/api-key';
 
