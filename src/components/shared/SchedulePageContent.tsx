@@ -1199,46 +1199,45 @@ export function SchedulePageContent({
   return (
     <div className="min-h-screen">
       {header}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
-          {/* Itinerary (collapsible) */}
-          {itineraryItems && itineraryItems.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <button
-                type="button"
-                aria-expanded={itineraryOpen}
-                aria-controls="itinerary-section-content"
-                onClick={() => setItineraryOpen((v) => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-              >
-                <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  {t('planner.weddings.itinerary.title')} ({itineraryItems.length})
-                </span>
-                <svg
-                  className={`h-4 w-4 text-gray-400 transition-transform ${itineraryOpen ? 'rotate-180' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {itineraryOpen && (
-                <div id="itinerary-section-content" className="px-4 pb-4 border-t border-gray-50">
-                  <div className="pt-3">
-                    <ItineraryTimeline
-                      items={itineraryItems}
-                      showReadOnlyToast={!isPlanner}
-                    />
-                  </div>
-                </div>
-              )}
+      {/* Itinerary (collapsible, full-width band) */}
+      {itineraryItems && itineraryItems.length > 0 && (
+        <div className="bg-white border-b border-gray-100">
+          <button
+            type="button"
+            aria-expanded={itineraryOpen}
+            aria-controls="itinerary-section-content"
+            onClick={() => setItineraryOpen((v) => !v)}
+            className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 text-left hover:bg-gray-50 transition-colors"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              {t('planner.weddings.itinerary.title')} ({itineraryItems.length})
+            </span>
+            <svg
+              className={`h-4 w-4 text-gray-400 transition-transform ${itineraryOpen ? 'rotate-180' : ''}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {itineraryOpen && (
+            <div id="itinerary-section-content" className="px-4 sm:px-6 lg:px-8 pb-4 border-t border-gray-50">
+              <div className="pt-3">
+                <ItineraryTimeline
+                  items={itineraryItems}
+                  showReadOnlyToast={!isPlanner}
+                />
+              </div>
             </div>
           )}
-
+        </div>
+      )}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
           {/* Weather & daylight widget */}
           {apiPaths.weatherUrl && (
             <WeatherWidget
