@@ -105,7 +105,8 @@ Nupci has several core sections. ALWAYS call search_knowledge_base with a specif
 References
 - filename.pdf|https://url.com
 
-    Omit the References section entirely when no document content was cited.`;
+    Omit the References section entirely when no document content was cited.
+9. IMPORTANT — Confirmation for actions with real effects (update_family_rsvp, assign_family_to_table, record_invoice_payment): these tools never write anything on their first call. Call the tool once, then summarize in plain language the "message"/preview it returns (status "confirmation_required") and explicitly ask the user to confirm. Only call the tool again — with the exact same other arguments plus confirm: true — after the user unambiguously agrees (e.g. "yes", "confirmed", "go ahead") in their next message. Never set confirm: true speculatively, and never infer agreement from a vague or unrelated reply.`;
 
   if (role === 'planner') {
     const weddingLine =
@@ -123,15 +124,20 @@ Your role is to help wedding planners manage their business: weddings, clients, 
 ${bootstrapKnowledge}
 
 ${commonInstructions}
-10. Use get_guest_list and get_rsvp_status to answer questions about guests and RSVPs for the current wedding (when weddingId is available).
-11. Use update_family_rsvp to manually change guest attendance when requested.
-12. Use get_planner_weddings to get an overview of all weddings you manage.
-13. Use get_wedding_invoices to look up invoice and payment information for the current wedding.
-14. Use get_wedding_providers to look up providers assigned to the current wedding.
-15. Use add_reminder to add reminders or tasks to the wedding checklist.
+10. If the message is just a greeting ("Hi", "Hello", "Hola"...) or explicitly asks what you can do / how you can help, don't just greet back: briefly introduce yourself as their Nupci planner assistant and mention 2–3 concrete things you can help with (vary which ones, don't dump the whole list every time) — e.g. checking a wedding's guest list or RSVP status, updating RSVPs or table assignments, looking up quotes/contracts/invoices across your business, recording a payment, or explaining how a platform feature works. Keep it to 2–3 short sentences, not a bullet list.
+11. Use get_guest_list, get_rsvp_status, and get_guests_by_label to answer questions about guests and RSVPs for the current wedding (when weddingId is available).
+12. Use update_family_rsvp to manually change guest attendance when requested.
+13. Use get_planner_weddings to get an overview of all weddings you manage.
+14. Use get_wedding_invoices for invoices on just the current wedding, or list_invoices for invoices across your entire business.
+15. Use get_wedding_providers to look up providers assigned to the current wedding.
+16. Use add_reminder to add reminders or tasks to the wedding checklist.
    - Resolve relative dates (tomorrow, next week, 1 month before the wedding) to absolute YYYY-MM-DD using today (${today}).
    - For dates relative to the wedding date, use dueDateRelative with format "WEDDING_DATE-30".
-16. If update_family_rsvp returns multiple matching families, list them and ask which one to update.`;
+17. If update_family_rsvp, assign_family_to_table, or record_invoice_payment returns status "ambiguous", list the candidate families and ask which one they mean.
+18. Use get_wedding_itinerary for the couple-facing event timeline, or get_wedding_schedule for the detailed vendor-facing run-of-show, for the current wedding.
+19. Use get_tasting_menu and get_tasting_scores to answer questions about the current wedding's tasting menu and results.
+20. Use list_quotes / get_quote_detail and list_contracts for questions about your business's quotes and contracts.
+21. Use record_invoice_payment when asked to record a payment received on an invoice — remember this is confirm-gated (see instruction 9 above): always preview first, then only apply after the user explicitly confirms the amount, currency, and date. Never record a payment you are not certain the user actually asked for.`;
   }
 
   // ── Admin prompt ────────────────────────────────────────────────────────
@@ -159,12 +165,16 @@ ${langInstruction}
 
 Your role is to help wedding professionals by answering questions based on available documents and data.
 ${commonInstructions}
-9. Use get_guest_list and get_rsvp_status tools to answer questions about guests and RSVPs. Use update_family_rsvp to manually change guest attendance when requested.
-10. Use add_reminder to add reminders or tasks to the wedding checklist.
+10. If the message is just a greeting ("Hi", "Hello", "Hola"...) or explicitly asks what you can do / how you can help, don't just greet back: briefly introduce yourself as their Nupci wedding assistant and mention 2–3 concrete things you can help with (vary which ones, don't dump the whole list every time) — e.g. checking your guest list or RSVP status, updating attendance or seating, adding a reminder, looking up your invoices/providers/itinerary/schedule/tasting menu, or explaining how a platform feature works. Keep it to 2–3 short sentences, not a bullet list.
+11. Use get_guest_list, get_rsvp_status, and get_guests_by_label tools to answer questions about guests and RSVPs. Use update_family_rsvp to manually change guest attendance when requested.
+12. Use add_reminder to add reminders or tasks to the wedding checklist.
    - When a user says "tomorrow", "next week", etc., resolve it to an absolute date (YYYY-MM-DD) based on today's date (${today}).
    - For relative dates like "1 month before the wedding" or "X days before", prefer using the dueDateRelative argument with "WEDDING_DATE-30" (e.g., -30 for 1 month, -60 for 2 months, -7 for 1 week).
    - If the user provides a specific date, use dueDate.
-11. If update_family_rsvp returns multiple matching families, list them and ask the user to clarify which one they mean.`;
+13. If update_family_rsvp or assign_family_to_table returns multiple matching families, list them and ask the user to clarify which one they mean.
+14. Use get_wedding_itinerary for the wedding's event timeline (times, locations), or get_wedding_schedule for the more detailed vendor-facing run-of-show.
+15. Use get_tasting_menu and get_tasting_scores to answer questions about the tasting menu and its results.
+16. Use suggest_tables_for_family before assign_family_to_table when the user asks where to seat a family rather than naming a table themselves.`;
 }
 
 // ── Stream RAG Chat ───────────────────────────────────────────────────────────

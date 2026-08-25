@@ -405,13 +405,34 @@ function buildSystemPrompt(
     }
   }
 
+  // Capabilities this assistant actually has, so it can explain itself on a
+  // bare greeting or a "what can you do" question instead of just saying hi
+  // back. Photo sharing has no per-wedding toggle (the Twilio webhook always
+  // saves any photo a recognized family sends), so it's listed unconditionally;
+  // song suggestions are listed only when the wedding has that question enabled,
+  // matching the Spotify Playlist line above.
+  const songRequestsEnabled = wedding.song_question_family_enabled || wedding.song_question_individual_enabled;
+  prompt += `\n## What You Can Help With\n`;
+  prompt += `Besides answering questions about the details above, guests messaging this WhatsApp number can:\n`;
+  prompt += `- Get their personal RSVP link to confirm/edit attendance, dietary needs, or other RSVP questions.\n`;
+  prompt += `- Share photos: any photo sent in this chat is automatically added to the wedding's shared photo gallery.\n`;
+  if (songRequestsEnabled) {
+    prompt += `- Suggest a song for the wedding playlist by naming the track and artist (e.g. "Add Perfect by Ed Sheeran") — it gets added automatically.\n`;
+  }
+
   prompt += `\n## Instructions\n`;
   prompt += `1. Respond ONLY in ${languageName}. Do not use any other language.\n`;
   prompt += `2. Be warm, friendly, and concise (2–3 short paragraphs maximum).\n`;
   prompt += `3. Only answer questions relevant to the wedding using the information above.\n`;
   prompt += `4. If you cannot answer a question from the available information, say so politely.\n`;
   prompt += `5. If the guest's message involves anything that may require updating their RSVP (e.g. attendance, dietary restrictions, extra guests, transportation, or any other RSVP field), always include the RSVP link in your response.\n`;
-  prompt += `6. Always end your response with this exact sentence: "${contactSuffix}"\n`;
+  prompt += `6. If the message is just a greeting ("Hello", "Hi", "Hola"...) or explicitly asks what you can do / how you can help, don't just greet back: briefly introduce yourself as ${wedding.couple_names}'s wedding assistant and naturally mention 2–3 things from "What You Can Help With" above (vary which ones, don't dump the whole list every time) so the guest knows what's possible. Keep it to 2–3 short sentences, not a bullet list.\n`;
+  if (family) {
+    prompt += `7. You know who you're talking to (see the guest family name under "Guest Information" above) — greet them by that name at the start of your reply (e.g. "Hi, ${family.name}! 👋") so they know they're recognized, especially the first time they write or when greeting.\n`;
+  } else {
+    prompt += `7. You do not know who this guest is. Do not guess or claim to recognize them.\n`;
+  }
+  prompt += `8. Always end your response with this exact sentence: "${contactSuffix}"\n`;
 
   return prompt;
 }

@@ -103,73 +103,89 @@ interface MemberUpdate { memberName: string; attending: boolean }
 
 export async function handleUpdateFamilyRsvp(
   ctx: ToolContext,
-  args: { familyName: string; attending?: boolean; memberUpdates?: MemberUpdate[] },
+  args: { familyName: string; familyId?: string; attending?: boolean; memberUpdates?: MemberUpdate[]; confirm?: boolean },
 ) {
   if (!ctx.weddingId) return { error: 'No wedding context available' };
-  const { familyName, attending, memberUpdates } = args;
+  const { familyName, familyId, attending, memberUpdates, confirm } = args;
 
   const families = await prisma.family.findMany({
-    where: { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
+    where: familyId
+      ? { wedding_id: ctx.weddingId, id: familyId }
+      : { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
     include: { members: { select: { id: true, name: true, attending: true } } },
   });
 
-  if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+  if (families.length === 0) {
+    return { error: familyId ? `No family found with id "${familyId}"` : `No family found matching "${familyName}"` };
+  }
   if (families.length > 1) {
     return {
       status: 'ambiguous',
-      message: `Multiple families found matching "${familyName}". Please clarify which one you mean.`,
+      message: `Multiple families found matching "${familyName}". Call this tool again with the same familyName and the "familyId" of the intended family from the list below.`,
       families: families.map((f) => ({ id: f.id, name: f.name, members: f.members.map((m) => m.name) })),
     };
   }
 
   const family = families[0];
-  const results: Array<{ member: string; attending: boolean }> = [];
+  const planned: Array<{ id: string; name: string; attending: boolean }> = [];
   const notFound: string[] = [];
 
   if (memberUpdates && memberUpdates.length > 0) {
     const memberMap = new Map(family.members.map((m) => [m.name.toLowerCase(), m]));
     const updatedIds: string[] = [];
-    const toUpdate: Array<{ id: string; attending: boolean; name: string }> = [];
 
     for (const update of memberUpdates) {
       const member = memberMap.get(update.memberName.toLowerCase());
       if (!member) { notFound.push(update.memberName); continue; }
-      toUpdate.push({ id: member.id, attending: update.attending, name: member.name });
+      planned.push({ id: member.id, name: member.name, attending: update.attending });
       updatedIds.push(member.id);
     }
 
-    if (toUpdate.length > 0) {
-      const groups = toUpdate.reduce((acc, u) => {
-        const key = String(u.attending);
-        if (!acc[key]) acc[key] = { attending: u.attending, ids: [] };
-        acc[key].ids.push(u.id);
-        return acc;
-      }, {} as Record<string, { attending: boolean; ids: string[] }>);
-
-      await prisma.$transaction(
-        Object.values(groups).map(({ attending: a, ids }) =>
-          prisma.familyMember.updateMany({ where: { id: { in: ids } }, data: { attending: a } }),
-        ),
-      );
-      for (const u of toUpdate) results.push({ member: u.name, attending: u.attending });
-    }
-
     if (attending !== undefined) {
-      await prisma.familyMember.updateMany({
-        where: { family_id: family.id, id: { notIn: updatedIds } },
-        data: { attending },
-      });
       for (const m of family.members.filter((m) => !updatedIds.includes(m.id))) {
-        results.push({ member: m.name, attending });
+        planned.push({ id: m.id, name: m.name, attending });
       }
     }
   } else if (attending !== undefined) {
-    await prisma.familyMember.updateMany({ where: { family_id: family.id }, data: { attending } });
-    for (const m of family.members) results.push({ member: m.name, attending });
+    for (const m of family.members) planned.push({ id: m.id, name: m.name, attending });
   } else {
     return { error: 'Provide either attending or memberUpdates (or both).' };
   }
 
+  if (planned.length === 0) {
+    return { error: `None of the named member(s) were found in "${family.name}": ${notFound.join(', ')}.` };
+  }
+
+  // ── Preview mode (confirm !== true): validate everything above but do not write. ──
+  if (confirm !== true) {
+    return {
+      status: 'confirmation_required',
+      family: family.name,
+      familyId: family.id,
+      plannedChanges: planned.map((p) => ({ member: p.name, attending: p.attending })),
+      notFound: notFound.length > 0 ? notFound : undefined,
+      message:
+        `This will set: ${planned.map((p) => `${p.name} → ${p.attending ? 'attending' : 'not attending'}`).join(', ')}. ` +
+        'Show this to the user and get their explicit confirmation, then call update_family_rsvp again with the exact ' +
+        'same arguments plus confirm: true to actually apply it. Do not set confirm: true without the user having confirmed.',
+    };
+  }
+
+  // ── Confirmed: perform the write. ──
+  const groups = planned.reduce((acc, p) => {
+    const key = String(p.attending);
+    if (!acc[key]) acc[key] = { attending: p.attending, ids: [] };
+    acc[key].ids.push(p.id);
+    return acc;
+  }, {} as Record<string, { attending: boolean; ids: string[] }>);
+
+  await prisma.$transaction(
+    Object.values(groups).map(({ attending: a, ids }) =>
+      prisma.familyMember.updateMany({ where: { id: { in: ids } }, data: { attending: a } }),
+    ),
+  );
+
+  const results = planned.map((p) => ({ member: p.name, attending: p.attending }));
   return {
     status: notFound.length > 0 ? 'partial' : 'success',
     family: family.name,
@@ -186,20 +202,24 @@ export async function handleUpdateFamilyRsvp(
 
 export async function handleAssignFamilyToTable(
   ctx: ToolContext,
-  args: { familyName: string; tableNumber: number; memberNames?: string[] },
+  args: { familyName: string; familyId?: string; tableNumber: number; memberNames?: string[]; confirm?: boolean },
 ) {
   if (!ctx.weddingId) return { error: 'No wedding context available' };
-  const { familyName, tableNumber, memberNames } = args;
+  const { familyName, familyId, tableNumber, memberNames, confirm } = args;
 
   const families = await prisma.family.findMany({
-    where: { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
+    where: familyId
+      ? { wedding_id: ctx.weddingId, id: familyId }
+      : { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
     include: { members: { select: { id: true, name: true, attending: true } } },
   });
-  if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+  if (families.length === 0) {
+    return { error: familyId ? `No family found with id "${familyId}"` : `No family found matching "${familyName}"` };
+  }
   if (families.length > 1) {
     return {
       status: 'ambiguous',
-      message: `Multiple families found matching "${familyName}". Please clarify.`,
+      message: `Multiple families found matching "${familyName}". Call this tool again with the same familyName and the "familyId" of the intended family from the list below.`,
       families: families.map((f) => ({ id: f.id, name: f.name })),
     };
   }
@@ -225,6 +245,23 @@ export async function handleAssignFamilyToTable(
     };
   }
 
+  // ── Preview mode (confirm !== true): validate everything above but do not write. ──
+  if (confirm !== true) {
+    return {
+      status: 'confirmation_required',
+      family: family.name,
+      familyId: family.id,
+      table: tableNumber,
+      plannedAssignedMembers: targets.map((m) => m.name),
+      message:
+        `This will seat ${targets.map((m) => m.name).join(', ')} at table ${tableNumber} (clearing any previous ` +
+        'assignment for them first). Show this to the user and get their explicit confirmation, then call ' +
+        'assign_family_to_table again with the exact same arguments plus confirm: true to actually apply it. ' +
+        'Do not set confirm: true without the user having confirmed.',
+    };
+  }
+
+  // ── Confirmed: perform the write. ──
   await prisma.familyMember.updateMany({
     where: { id: { in: targets.map((m) => m.id) } },
     data: { table_id: table.id },
@@ -243,20 +280,24 @@ export async function handleAssignFamilyToTable(
 
 export async function handleSuggestTablesForFamily(
   ctx: ToolContext,
-  args: { familyName: string; topN?: number },
+  args: { familyName: string; familyId?: string; topN?: number },
 ) {
   if (!ctx.weddingId) return { error: 'No wedding context available' };
-  const { familyName, topN = 3 } = args;
+  const { familyName, familyId, topN = 3 } = args;
 
   const families = await prisma.family.findMany({
-    where: { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
+    where: familyId
+      ? { wedding_id: ctx.weddingId, id: familyId }
+      : { wedding_id: ctx.weddingId, name: { contains: familyName, mode: 'insensitive' } },
     include: { members: { where: { attending: true }, select: { id: true, name: true, age: true } } },
   });
-  if (families.length === 0) return { error: `No family found matching "${familyName}"` };
+  if (families.length === 0) {
+    return { error: familyId ? `No family found with id "${familyId}"` : `No family found matching "${familyName}"` };
+  }
   if (families.length > 1) {
     return {
       status: 'ambiguous',
-      message: `Multiple families found matching "${familyName}". Please clarify.`,
+      message: `Multiple families found matching "${familyName}". Call this tool again with the same familyName and the "familyId" of the intended family from the list below.`,
       families: families.map((f) => ({ id: f.id, name: f.name })),
     };
   }
@@ -845,14 +886,42 @@ export async function handleListInvoices(
 
 export async function handleRecordInvoicePayment(
   ctx: ToolContext,
-  args: { invoiceId: string; amount: number; paymentDate: string; method?: string; reference?: string },
+  args: { invoiceId: string; amount: number; paymentDate: string; method?: string; reference?: string; confirm?: boolean },
 ) {
   if (!ctx.plannerId) return { error: 'No planner context available' };
-  const { invoiceId, amount, paymentDate, method, reference } = args;
+  const { invoiceId, amount, paymentDate, method, reference, confirm } = args;
 
   const parsedDate = new Date(paymentDate);
   if (isNaN(parsedDate.getTime())) {
     return { error: `Invalid payment date: "${paymentDate}". Use YYYY-MM-DD format.` };
+  }
+  if (!(amount > 0)) {
+    return { error: 'amount must be a positive number.' };
+  }
+
+  // ── Preview mode (confirm !== true): validate the invoice but do not write. ──
+  if (confirm !== true) {
+    const invoice = await prisma.invoice.findFirst({
+      where: { id: invoiceId, planner_id: ctx.plannerId },
+      select: { invoice_number: true, currency: true, status: true, total: true, amount_paid: true },
+    });
+    if (!invoice) return { error: `Invoice ${invoiceId} not found` };
+    if (invoice.status === 'CANCELLED') return { error: 'Cannot record payment on a cancelled invoice' };
+
+    const currentPaid = Number(invoice.amount_paid);
+    const total = Number(invoice.total);
+    return {
+      status: 'confirmation_required',
+      invoiceNumber: invoice.invoice_number,
+      currentOutstanding: Math.round((total - currentPaid) * 100) / 100,
+      plannedPayment: { amount, currency: invoice.currency, paymentDate, method: method ?? 'BANK_TRANSFER', reference: reference ?? null },
+      message:
+        `This will record a payment of ${amount} ${invoice.currency} on invoice ${invoice.invoice_number} ` +
+        `(currently ${Math.round((total - currentPaid) * 100) / 100} ${invoice.currency} outstanding). ` +
+        'Show this to the user and get their explicit confirmation, then call record_invoice_payment again with the ' +
+        'exact same arguments plus confirm: true to actually record it. Do not set confirm: true without the user ' +
+        'having confirmed — this writes a real financial transaction that cannot be undone through this tool.',
+    };
   }
 
   try {

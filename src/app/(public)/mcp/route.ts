@@ -20,6 +20,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey, type ApiKeyContext } from '@/lib/auth/api-key';
 import { buildTools } from '@/lib/ai/tools';
+import { getToolDefs } from '@/lib/ai/mcp-tool-defs';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -60,112 +61,6 @@ const ERR = {
   INTERNAL: -32603,
   UNAUTHORIZED: -32001,
 };
-
-// ── Tool definitions ──────────────────────────────────────────────────────────
-
-const ADMIN_TOOL_DEFS = [
-  {
-    name: 'get_guest_list',
-    description: 'Get a summary of the wedding guest list including family names, contact info, and RSVP status.',
-    inputSchema: { type: 'object', properties: {}, required: [] },
-  },
-  {
-    name: 'get_rsvp_status',
-    description: 'Get aggregate RSVP statistics: total families, submitted RSVPs, pending, and completion percentage.',
-    inputSchema: { type: 'object', properties: {}, required: [] },
-  },
-  {
-    name: 'update_family_rsvp',
-    description: 'Update the RSVP attendance for a family or individual members. Use memberUpdates for named individuals; use attending for a whole-family default.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        familyName: { type: 'string', description: 'The name of the family to update' },
-        attending: { type: 'boolean', description: 'Whole-family attendance (optional)' },
-        memberUpdates: {
-          type: 'array',
-          description: 'Per-member attendance updates',
-          items: {
-            type: 'object',
-            properties: {
-              memberName: { type: 'string' },
-              attending: { type: 'boolean' },
-            },
-            required: ['memberName', 'attending'],
-          },
-        },
-      },
-      required: ['familyName'],
-    },
-  },
-  {
-    name: 'assign_family_to_table',
-    description: 'Assign the attending members of a family to a seating table. Clears any previous assignment first.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        familyName: { type: 'string', description: 'The name of the family to seat' },
-        tableNumber: { type: 'number', description: 'Table number to assign the family to' },
-        memberNames: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Specific members to assign (omit to assign all attending members)',
-        },
-      },
-      required: ['familyName', 'tableNumber'],
-    },
-  },
-  {
-    name: 'suggest_tables_for_family',
-    description: 'Find the best table(s) for a family based on available seats, shared admin group, and average age similarity.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        familyName: { type: 'string', description: 'The name of the family' },
-        topN: { type: 'number', description: 'How many suggestions to return (default 3)' },
-      },
-      required: ['familyName'],
-    },
-  },
-  {
-    name: 'add_reminder',
-    description: "Add a reminder or task to the wedding checklist. Supports absolute dates (YYYY-MM-DD) or relative dates (e.g. 'WEDDING_DATE-60').",
-    inputSchema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', description: 'The reminder title' },
-        description: { type: 'string', description: 'Additional details (optional)' },
-        dueDate: { type: 'string', description: 'Absolute due date in YYYY-MM-DD format (optional)' },
-        dueDateRelative: { type: 'string', description: "Relative due date e.g. 'WEDDING_DATE-60' (optional)" },
-      },
-      required: ['title'],
-    },
-  },
-  {
-    name: 'get_wedding_invoices',
-    description: 'Get a summary of invoices and payments for this wedding.',
-    inputSchema: { type: 'object', properties: {}, required: [] },
-  },
-  {
-    name: 'get_wedding_providers',
-    description: 'Get the list of service providers (vendors) assigned to this wedding with payment status.',
-    inputSchema: { type: 'object', properties: {}, required: [] },
-  },
-];
-
-const PLANNER_TOOL_DEFS = [
-  {
-    name: 'get_planner_weddings',
-    description: 'Get a list of all weddings managed by this planner with dates, guest counts, and RSVP completion.',
-    inputSchema: { type: 'object', properties: {}, required: [] },
-  },
-];
-
-function getToolDefs(ctx: ApiKeyContext) {
-  return ctx.role === 'planner'
-    ? [...PLANNER_TOOL_DEFS, ...ADMIN_TOOL_DEFS]
-    : ADMIN_TOOL_DEFS;
-}
 
 // ── Platform docs ─────────────────────────────────────────────────────────────
 

@@ -34,12 +34,15 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 const alertsSchema = z.object({
-  alerts: z.array(
-    z.object({
-      title: z.string(),
-      description: z.string(),
-    })
-  ).length(3),
+  alerts: z
+    .array(
+      z.object({
+        title: z.string().describe('Short, specific risk name (e.g. "Local Public Holiday Traffic"), under ~195 characters.'),
+        description: z.string().describe('1-3 sentence explanation of the risk and a concrete, actionable mitigation the couple/planner can take.'),
+      })
+    )
+    .length(3)
+    .describe('Exactly 3 alerts, ordered from most to least important for this specific wedding.'),
 });
 
 // The stored title is "[AI] " + title, which must fit within the 200-char DB limit.
