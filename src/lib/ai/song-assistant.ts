@@ -44,6 +44,8 @@ import { getChatModel } from './provider';
 import { checkResourceLimit, recordResourceUsage } from '@/lib/license/usage';
 import { isSpotifyConfigured, findTrack, type SpotifyTrack } from '@/lib/spotify/client';
 import { addSongSuggestionFromChat } from '@/lib/spotify/suggestions';
+import { t as translate } from '@/lib/i18n/server';
+import type { Language } from '@/lib/i18n/config';
 
 const HISTORY_TURNS = 4;
 
@@ -74,39 +76,22 @@ const songIntentSchema = z.object({
 });
 
 // ============================================================================
-// LOCALIZED REPLY TEMPLATES (mirrors the small Record<string,string> pattern
-// already used in wedding-assistant.ts for CONTACT_COUPLE_SUFFIX, rather than
-// next-intl — these are backend WhatsApp reply strings, not app UI).
+// LOCALIZED REPLY TEMPLATES — sourced from src/messages/*/common.json under
+// the "songAssistant" key (same t() helper used for backend-generated
+// strings elsewhere, e.g. formatLimitError in license/usage.ts), rather than
+// next-intl — these are backend WhatsApp reply strings, not app UI.
 // ============================================================================
 
-const CLARIFY_FALLBACK: Record<string, string> = {
-  ES: 'Claro, ¿qué canción y de qué artista quieres añadir a la playlist?',
-  EN: 'Sure — which song and artist would you like to add to the playlist?',
-  FR: 'Bien sûr, quelle chanson et quel artiste souhaitez-vous ajouter à la playlist ?',
-  IT: 'Certo, quale canzone e di quale artista vuoi aggiungere alla playlist?',
-  DE: 'Klar, welchen Song und welchen Künstler möchtest du zur Playlist hinzufügen?',
-};
-
-function notFoundText(lang: string, artist: string, track: string): string {
-  const templates: Record<string, string> = {
-    ES: `No he encontrado "${track}" de ${artist} en Spotify. ¿Puedes comprobar el título o el artista?`,
-    EN: `I couldn't find "${track}" by ${artist} on Spotify. Could you double-check the title or artist?`,
-    FR: `Je n'ai pas trouvé "${track}" de ${artist} sur Spotify. Peux-tu vérifier le titre ou l'artiste ?`,
-    IT: `Non ho trovato "${track}" di ${artist} su Spotify. Puoi verificare il titolo o l'artista?`,
-    DE: `Ich konnte "${track}" von ${artist} nicht auf Spotify finden. Kannst du Titel oder Künstler prüfen?`,
-  };
-  return templates[lang] ?? templates.EN;
+function clarifyFallbackText(lang: string): Promise<string> {
+  return translate('songAssistant.clarifyFallback', lang.toLowerCase() as Language);
 }
 
-function confirmText(lang: string, artist: string, track: string): string {
-  const templates: Record<string, string> = {
-    ES: `¡Añadida! 🎵 "${track}" de ${artist} a la playlist de la boda.`,
-    EN: `Added! 🎵 "${track}" by ${artist} to the wedding playlist.`,
-    FR: `Ajoutée ! 🎵 "${track}" de ${artist} à la playlist du mariage.`,
-    IT: `Aggiunta! 🎵 "${track}" di ${artist} alla playlist del matrimonio.`,
-    DE: `Hinzugefügt! 🎵 "${track}" von ${artist} zur Hochzeits-Playlist.`,
-  };
-  return templates[lang] ?? templates.EN;
+function notFoundText(lang: string, artist: string, track: string): Promise<string> {
+  return translate('songAssistant.notFound', lang.toLowerCase() as Language, { artist, track });
+}
+
+function confirmText(lang: string, artist: string, track: string): Promise<string> {
+  return translate('songAssistant.confirm', lang.toLowerCase() as Language, { artist, track });
 }
 
 // ============================================================================
@@ -239,7 +224,6 @@ async function classifySongMessage(params: {
   language: string;
 }): Promise<SongClassification> {
   const { wedding, message, history, language } = params;
-  const lang = language.toUpperCase();
 
   const limitCheck = await checkResourceLimit({
     plannerId: wedding.planner_id,
@@ -271,17 +255,17 @@ async function classifySongMessage(params: {
   if (!classification.isConfident || !classification.artist || !classification.track) {
     return {
       kind: 'clarify',
-      replyText: classification.clarifyingQuestion || CLARIFY_FALLBACK[lang] || CLARIFY_FALLBACK.EN,
+      replyText: classification.clarifyingQuestion || (await clarifyFallbackText(language)),
     };
   }
 
   const { artist, track } = classification;
   const match = await findTrack(artist, track, wedding.wedding_country);
   if (!match) {
-    return { kind: 'not_found', replyText: notFoundText(lang, artist, track) };
+    return { kind: 'not_found', replyText: await notFoundText(language, artist, track) };
   }
 
-  return { kind: 'resolved', replyText: confirmText(lang, match.artist, match.title), artist, track, match };
+  return { kind: 'resolved', replyText: await confirmText(language, match.artist, match.title), artist, track, match };
 }
 
 function songSuggestionInput(classification: Extract<SongClassification, { kind: 'resolved' }>) {
