@@ -29,7 +29,7 @@
     "migrate:reset": "prisma migrate reset",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "postinstall": "node -r dotenv/config node_modules/prisma/build/index.js generate && node -r dotenv/config node_modules/prisma/build/index.js generate --schema=prisma/vector/schema.prisma"
+    "postinstall": "node -r dotenv/config node_modules/.bin/prisma generate && node -r dotenv/config node_modules/.bin/prisma generate --schema=prisma/vector/schema.prisma"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -131,7 +131,7 @@
     "husky": "^9.0.0",
     "jest": "^30.2.0",
     "postcss": "^8.4.49",
-    "prisma": "^8.0.0-rc.10",
+    "prisma": "^7.10.0",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5.7.3"
@@ -147,6 +147,7 @@
     "follow-redirects": "^1.16.0",
     "protobufjs": ">=7.5.5",
     "serialize-javascript": "^7.0.4",
-    "test-exclude": "^8.0.0"
+    "test-exclude": "^8.0.0",
+    "deepmerge-ts": "^8.0.0"
   }
 }
