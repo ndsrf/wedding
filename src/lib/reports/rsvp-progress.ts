@@ -89,17 +89,31 @@ function downsample<T>(series: T[], max: number): T[] {
   return result;
 }
 
-/** Least-squares slope of y over evenly-spaced integer x (0..n-1). */
-function leastSquaresSlope(values: number[]): number {
+/**
+ * Recency weights for a same-length series, oldest to newest, halving every
+ * `halfLifeDays`. Used so the projection follows the *current* pace rather
+ * than getting dragged up by an initial burst of activity (invites are
+ * typically opened/confirmed in a rush right after sending, then taper off).
+ */
+function recencyWeights(n: number, halfLifeDays = 4): number[] {
+  const decay = Math.pow(0.5, 1 / halfLifeDays);
+  return Array.from({ length: n }, (_, i) => Math.pow(decay, n - 1 - i));
+}
+
+/** Weighted least-squares slope of y over evenly-spaced integer x (0..n-1). */
+function leastSquaresSlope(values: number[], weights?: number[]): number {
   const n = values.length;
   if (n < 2) return 0;
-  const xMean = (n - 1) / 2;
-  const yMean = values.reduce((a, b) => a + b, 0) / n;
+  const w = weights ?? values.map(() => 1);
+  const wSum = w.reduce((a, b) => a + b, 0);
+  if (wSum === 0) return 0;
+  const xMean = w.reduce((acc, wi, i) => acc + wi * i, 0) / wSum;
+  const yMean = w.reduce((acc, wi, i) => acc + wi * values[i], 0) / wSum;
   let num = 0;
   let den = 0;
   for (let i = 0; i < n; i++) {
-    num += (i - xMean) * (values[i] - yMean);
-    den += (i - xMean) * (i - xMean);
+    num += w[i] * (i - xMean) * (values[i] - yMean);
+    den += w[i] * (i - xMean) * (i - xMean);
   }
   return den === 0 ? 0 : num / den;
 }
@@ -169,8 +183,9 @@ function buildStatusBreakdown(
   const totalTracked = familyIds.size;
   const last = dailyPoints[dailyPoints.length - 1];
   const recentWindow = dailyPoints.slice(-30);
-  const submittedRate = leastSquaresSlope(recentWindow.map((p) => p.submitted));
-  const openedRate = leastSquaresSlope(recentWindow.map((p) => p.opened));
+  const weights = recencyWeights(recentWindow.length);
+  const submittedRate = leastSquaresSlope(recentWindow.map((p) => p.submitted), weights);
+  const openedRate = leastSquaresSlope(recentWindow.map((p) => p.opened), weights);
 
   const remaining = totalTracked - last.submitted;
   let projection: RsvpStatusBreakdown['projection'] = null;
@@ -288,11 +303,12 @@ export async function fetchRsvpProgress(weddingId: string): Promise<RsvpProgress
   const totalPending = Math.max(totalSent - totalConfirmed, 0);
 
   // Projection: linear regression over the confirmed-cumulative trend,
-  // using up to the most recent 30 days of data (more representative of
-  // current momentum than the full history for weddings sent long ago).
+  // using up to the most recent 30 days of data, weighted toward the most
+  // recent days so an initial burst right after sending invites (which
+  // typically tapers off) doesn't inflate the projected pace.
   let projection: RsvpProgressData['projection'] = null;
   const recentWindow = dailyPoints.slice(-30);
-  const ratePerDay = leastSquaresSlope(recentWindow.map((p) => p.confirmed));
+  const ratePerDay = leastSquaresSlope(recentWindow.map((p) => p.confirmed), recencyWeights(recentWindow.length));
 
   if (totalPending > 0 && ratePerDay > 0.01) {
     const daysNeeded = Math.ceil(totalPending / ratePerDay);
