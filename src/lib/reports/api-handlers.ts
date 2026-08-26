@@ -25,6 +25,7 @@ import {
   executeNaturalLanguageQuery,
   executeValidatedSQL,
 } from '@/lib/reports/nl-query';
+import { fetchRsvpProgress, exportRsvpProgress } from '@/lib/reports/rsvp-progress';
 import type { ExportFormat } from '@/lib/excel/export';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -100,6 +101,19 @@ export async function ageAverageReportHandler(
     return NextResponse.json(data);
   }
   const result = await exportAgeAverage(weddingId, format as ExportFormat);
+  return fileResponse(result.buffer, result.mimeType, result.filename);
+}
+
+export async function rsvpProgressReportHandler(
+  req: NextRequest,
+  weddingId: string,
+): Promise<NextResponse> {
+  const format = getFormat(req);
+  if (!format || format === 'json') {
+    const data = await fetchRsvpProgress(weddingId);
+    return NextResponse.json(data);
+  }
+  const result = await exportRsvpProgress(weddingId, format as ExportFormat);
   return fileResponse(result.buffer, result.mimeType, result.filename);
 }
 
