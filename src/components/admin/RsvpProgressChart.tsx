@@ -10,6 +10,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import type { RsvpStatusBreakdown } from '@/components/admin/RsvpStatusChart';
 
 export interface RsvpProgressPoint {
   date: string;
@@ -38,6 +39,7 @@ export interface RsvpProgressData {
     afterCutoff: boolean;
     points: RsvpProgressProjectionPoint[];
   } | null;
+  statusBreakdown: RsvpStatusBreakdown | null;
 }
 
 // Fixed categorical color order (not reused elsewhere in the chart).

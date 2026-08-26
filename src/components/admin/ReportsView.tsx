@@ -30,6 +30,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { RsvpProgressChart, type RsvpProgressData } from '@/components/admin/RsvpProgressChart';
+import { RsvpStatusChart } from '@/components/admin/RsvpStatusChart';
 
 type ReportType = 'attendees' | 'guests-per-admin' | 'seating-plan' | 'age-average' | 'rsvp-progress';
 type ExportFormat = 'xlsx' | 'csv' | 'json';
@@ -465,6 +466,28 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
                 ) : (
                   <p className="mt-1">
                     {progress.totalPending === 0
+                      ? t('admin.reports.rsvpProgress.projectionAllConfirmed')
+                      : t('admin.reports.rsvpProgress.projectionNoRate')}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {progress.hasData && (
+              <div className="border-t border-gray-200 pt-6">
+                <h4 className="text-base font-semibold text-gray-900">
+                  {t('admin.reports.rsvpProgress.statusChartTitle')}
+                </h4>
+                <p className="mt-1 text-sm text-gray-500">
+                  {t('admin.reports.rsvpProgress.statusChartDescription')}
+                </p>
+                <div className="mt-4">
+                  <RsvpStatusChart data={progress.statusBreakdown} />
+                </div>
+                {progress.statusBreakdown && !progress.statusBreakdown.projection && progress.statusBreakdown.totalTracked > 0 && (
+                  <p className="mt-3 text-sm text-gray-500">
+                    {progress.statusBreakdown.points[progress.statusBreakdown.points.length - 1]?.notOpened === 0 &&
+                    progress.statusBreakdown.points[progress.statusBreakdown.points.length - 1]?.opened === 0
                       ? t('admin.reports.rsvpProgress.projectionAllConfirmed')
                       : t('admin.reports.rsvpProgress.projectionNoRate')}
                   </p>

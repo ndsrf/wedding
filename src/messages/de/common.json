@@ -1544,7 +1544,12 @@
         "projectionNoRate": "Noch nicht genügend aktuelle Bestätigungen, um ein Abschlussdatum zu prognostizieren.",
         "projectionAllConfirmed": "Alle Einladungen wurden bestätigt!",
         "cutoffLabel": "RSVP-Frist",
-        "weddingDateLabel": "Hochzeitstag"
+        "weddingDateLabel": "Hochzeitstag",
+        "statusChartTitle": "RSVP-Status-Aufschlüsselung",
+        "statusChartDescription": "Wie sich Einladungen von nicht geöffnet über geöffnet bis gesendet entwickeln — mit einer Prognose für jede Phase",
+        "statusNotOpened": "Nicht Geöffnet",
+        "statusOpened": "Geöffnet, Noch Keine RSVP",
+        "statusSubmitted": "Gesendet"
       },
       "nlQuery": {
         "title": "Ihre Hochzeitsdaten abfragen",

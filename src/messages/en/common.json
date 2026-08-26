@@ -1862,7 +1862,12 @@
         "projectionNoRate": "Not enough recent confirmations to project a completion date yet.",
         "projectionAllConfirmed": "All invites have been confirmed!",
         "cutoffLabel": "RSVP deadline",
-        "weddingDateLabel": "Wedding day"
+        "weddingDateLabel": "Wedding day",
+        "statusChartTitle": "RSVP Status Breakdown",
+        "statusChartDescription": "How invites move from not opened, to opened, to submitted — with a projection for each stage",
+        "statusNotOpened": "Not Opened",
+        "statusOpened": "Opened, No RSVP Yet",
+        "statusSubmitted": "Submitted"
       },
       "nlQuery": {
         "title": "Ask About Your Wedding Data",

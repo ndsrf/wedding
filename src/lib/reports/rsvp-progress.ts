@@ -28,6 +28,24 @@ export interface RsvpProgressProjectionPoint {
   pending: number;
 }
 
+export type RsvpStatusBucket = 'notOpened' | 'opened' | 'submitted';
+
+export interface RsvpStatusPoint {
+  date: string;
+  notOpened: number; // invited, link never opened, no RSVP yet
+  opened: number; // link opened (or RSVP started), no RSVP submitted yet
+  submitted: number; // RSVP submitted
+}
+
+export interface RsvpStatusBreakdown {
+  totalTracked: number;
+  points: RsvpStatusPoint[];
+  projection: {
+    projectedCompletionDate: string;
+    points: RsvpStatusPoint[];
+  } | null;
+}
+
 export interface RsvpProgressData {
   hasData: boolean;
   totalSent: number;
@@ -42,6 +60,7 @@ export interface RsvpProgressData {
     afterCutoff: boolean;
     points: RsvpProgressProjectionPoint[];
   } | null;
+  statusBreakdown: RsvpStatusBreakdown | null;
 }
 
 // ============================================================================
@@ -84,6 +103,105 @@ function leastSquaresSlope(values: number[]): number {
   return den === 0 ? 0 : num / den;
 }
 
+/**
+ * Builds the notOpened -> opened -> submitted funnel timeline from the
+ * per-family first-seen timestamps for each stage, plus a projection that
+ * extrapolates each bucket's own recent trend (submitted grows, and the
+ * two pending buckets are derived so the three always sum to the total
+ * tracked families).
+ */
+function buildStatusBreakdown(
+  firstSent: Map<string, number>,
+  firstOpened: Map<string, number>,
+  firstConfirmed: Map<string, number>,
+  todayDay: number,
+): RsvpStatusBreakdown | null {
+  const familyIds = new Set<string>([...firstSent.keys(), ...firstOpened.keys(), ...firstConfirmed.keys()]);
+  if (familyIds.size === 0) return null;
+
+  type Delta = { day: number; bucket: RsvpStatusBucket; sign: 1 | -1 };
+  const deltas: Delta[] = [];
+  let minDay = Infinity;
+
+  for (const familyId of familyIds) {
+    const sent = firstSent.get(familyId);
+    const submitted = firstConfirmed.get(familyId);
+    let opened = firstOpened.get(familyId);
+    // If "opened" happens at/after "submitted", it's not part of the
+    // pre-submission funnel (e.g. they re-open the confirmation page).
+    if (opened !== undefined && submitted !== undefined && opened >= submitted) {
+      opened = undefined;
+    }
+
+    const stages: { day: number; bucket: RsvpStatusBucket }[] = [];
+    if (sent !== undefined) stages.push({ day: sent, bucket: 'notOpened' });
+    if (opened !== undefined) stages.push({ day: opened, bucket: 'opened' });
+    if (submitted !== undefined) stages.push({ day: submitted, bucket: 'submitted' });
+    stages.sort((a, b) => a.day - b.day);
+    if (stages.length === 0) continue;
+
+    minDay = Math.min(minDay, stages[0].day);
+
+    let prevBucket: RsvpStatusBucket | null = null;
+    for (const stage of stages) {
+      if (prevBucket) deltas.push({ day: stage.day, bucket: prevBucket, sign: -1 });
+      deltas.push({ day: stage.day, bucket: stage.bucket, sign: 1 });
+      prevBucket = stage.bucket;
+    }
+  }
+
+  if (!Number.isFinite(minDay)) return null;
+  deltas.sort((a, b) => a.day - b.day);
+  const maxDay = Math.max(minDay, todayDay);
+
+  const dailyPoints: RsvpStatusPoint[] = [];
+  const counts: Record<RsvpStatusBucket, number> = { notOpened: 0, opened: 0, submitted: 0 };
+  let deltaIdx = 0;
+  for (let day = minDay; day <= maxDay; day += DAY_MS) {
+    while (deltaIdx < deltas.length && deltas[deltaIdx].day <= day) {
+      counts[deltas[deltaIdx].bucket] += deltas[deltaIdx].sign;
+      deltaIdx++;
+    }
+    dailyPoints.push({ date: fmtDay(day), notOpened: counts.notOpened, opened: counts.opened, submitted: counts.submitted });
+  }
+
+  const totalTracked = familyIds.size;
+  const last = dailyPoints[dailyPoints.length - 1];
+  const recentWindow = dailyPoints.slice(-30);
+  const submittedRate = leastSquaresSlope(recentWindow.map((p) => p.submitted));
+  const openedRate = leastSquaresSlope(recentWindow.map((p) => p.opened));
+
+  const remaining = totalTracked - last.submitted;
+  let projection: RsvpStatusBreakdown['projection'] = null;
+
+  if (remaining > 0 && submittedRate > 0.01) {
+    const daysNeeded = Math.ceil(remaining / submittedRate);
+    const projectedCompletionDate = fmtDay(maxDay + daysNeeded * DAY_MS);
+    const projPoints: RsvpStatusPoint[] = [];
+    const step = Math.max(1, Math.ceil(daysNeeded / 40));
+
+    for (let elapsed = 0; elapsed <= daysNeeded; elapsed += step) {
+      const submitted = Math.min(totalTracked, Math.max(0, last.submitted + submittedRate * elapsed));
+      const openedRaw = last.opened + openedRate * elapsed;
+      const opened = Math.min(Math.max(0, openedRaw), Math.max(0, totalTracked - submitted));
+      const notOpened = Math.max(0, totalTracked - submitted - opened);
+      projPoints.push({
+        date: fmtDay(maxDay + elapsed * DAY_MS),
+        notOpened: Math.round(notOpened),
+        opened: Math.round(opened),
+        submitted: Math.round(submitted),
+      });
+    }
+    if (projPoints[projPoints.length - 1]?.date !== projectedCompletionDate) {
+      projPoints.push({ date: projectedCompletionDate, notOpened: 0, opened: 0, submitted: totalTracked });
+    }
+
+    projection = { projectedCompletionDate, points: projPoints };
+  }
+
+  return { totalTracked, points: downsample(dailyPoints, 120), projection };
+}
+
 // ============================================================================
 // MAIN
 // ============================================================================
@@ -91,7 +209,10 @@ function leastSquaresSlope(values: number[]): number {
 export async function fetchRsvpProgress(weddingId: string): Promise<RsvpProgressData> {
   const [events, wedding] = await Promise.all([
     prisma.trackingEvent.findMany({
-      where: { wedding_id: weddingId, event_type: { in: ['INVITATION_SENT', 'RSVP_SUBMITTED'] } },
+      where: {
+        wedding_id: weddingId,
+        event_type: { in: ['INVITATION_SENT', 'LINK_OPENED', 'RSVP_STARTED', 'RSVP_SUBMITTED'] },
+      },
       select: { family_id: true, event_type: true, timestamp: true },
       orderBy: { timestamp: 'asc' },
     }),
@@ -102,12 +223,15 @@ export async function fetchRsvpProgress(weddingId: string): Promise<RsvpProgress
   ]);
 
   const firstSent = new Map<string, number>();
+  const firstOpened = new Map<string, number>();
   const firstConfirmed = new Map<string, number>();
 
   for (const e of events) {
     const day = startOfDayUTC(e.timestamp);
     if (e.event_type === 'INVITATION_SENT' && !firstSent.has(e.family_id)) {
       firstSent.set(e.family_id, day);
+    } else if ((e.event_type === 'LINK_OPENED' || e.event_type === 'RSVP_STARTED') && !firstOpened.has(e.family_id)) {
+      firstOpened.set(e.family_id, day);
     } else if (e.event_type === 'RSVP_SUBMITTED' && !firstConfirmed.has(e.family_id)) {
       firstConfirmed.set(e.family_id, day);
     }
@@ -129,6 +253,7 @@ export async function fetchRsvpProgress(weddingId: string): Promise<RsvpProgress
       rsvpCutoffDate,
       points: [],
       projection: null,
+      statusBreakdown: null,
     };
   }
 
@@ -200,6 +325,7 @@ export async function fetchRsvpProgress(weddingId: string): Promise<RsvpProgress
     rsvpCutoffDate,
     points: downsample(dailyPoints, 120),
     projection,
+    statusBreakdown: buildStatusBreakdown(firstSent, firstOpened, firstConfirmed, todayDay),
   };
 }
 
@@ -230,6 +356,19 @@ export async function exportRsvpProgress(
     return { wch: Math.min(Math.max(maxLen + 2, 10), 40) };
   });
   XLSX.utils.book_append_sheet(workbook, worksheet, 'RSVP Progress');
+
+  if (data.statusBreakdown && format !== 'csv') {
+    const statusRows: (string | number)[][] = [['Date', 'Not Opened', 'Opened (no RSVP yet)', 'Submitted']];
+    data.statusBreakdown.points.forEach((p) => {
+      statusRows.push([p.date, p.notOpened, p.opened, p.submitted]);
+    });
+    const statusSheet = XLSX.utils.aoa_to_sheet(statusRows);
+    statusSheet['!cols'] = statusRows[0].map((_, colIdx) => {
+      const maxLen = Math.max(...statusRows.map((row) => String(row[colIdx] ?? '').length));
+      return { wch: Math.min(Math.max(maxLen + 2, 10), 40) };
+    });
+    XLSX.utils.book_append_sheet(workbook, statusSheet, 'RSVP Status');
+  }
 
   const timestamp = new Date().toISOString().split('T')[0];
 

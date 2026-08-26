@@ -1859,7 +1859,12 @@
         "projectionNoRate": "Aún no hay suficientes confirmaciones recientes para proyectar una fecha de finalización.",
         "projectionAllConfirmed": "¡Todas las invitaciones han sido confirmadas!",
         "cutoffLabel": "Fecha límite de RSVP",
-        "weddingDateLabel": "Día de la boda"
+        "weddingDateLabel": "Día de la boda",
+        "statusChartTitle": "Desglose de Estados de RSVP",
+        "statusChartDescription": "Cómo avanzan las invitaciones de no abiertas, a abiertas, a enviadas — con una proyección para cada etapa",
+        "statusNotOpened": "No Abierta",
+        "statusOpened": "Abierta, Sin RSVP Aún",
+        "statusSubmitted": "Enviada"
       },
       "nlQuery": {
         "title": "Consulta tus Datos de Boda",

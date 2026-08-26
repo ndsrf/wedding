@@ -1544,7 +1544,12 @@
         "projectionNoRate": "Non ci sono ancora abbastanza conferme recenti per proiettare una data di completamento.",
         "projectionAllConfirmed": "Tutti gli inviti sono stati confermati!",
         "cutoffLabel": "Scadenza RSVP",
-        "weddingDateLabel": "Giorno del matrimonio"
+        "weddingDateLabel": "Giorno del matrimonio",
+        "statusChartTitle": "Ripartizione degli Stati RSVP",
+        "statusChartDescription": "Come avanzano gli inviti da non aperti, ad aperti, a inviati — con una proiezione per ogni fase",
+        "statusNotOpened": "Non Aperto",
+        "statusOpened": "Aperto, Nessun RSVP Ancora",
+        "statusSubmitted": "Inviato"
       },
       "nlQuery": {
         "title": "Interroga i Tuoi Dati di Matrimonio",
