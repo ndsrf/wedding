@@ -115,6 +115,7 @@ export function RsvpProgressChart({ data }: { data: RsvpProgressData }) {
     const yMax = Math.max(
       1,
       ...data.points.map((p) => p.sent),
+      ...data.points.map((p) => p.confirmed),
       ...projPoints.map((p) => p.confirmed),
     ) * 1.12;
 

@@ -80,6 +80,7 @@ function fmtDay(dayMs: number): string {
 /** Evenly downsample a series to at most `max` points, always keeping the first and last. */
 function downsample<T>(series: T[], max: number): T[] {
   if (series.length <= max) return series;
+  if (max <= 1) return series.length ? [series[series.length - 1]] : [];
   const step = (series.length - 1) / (max - 1);
   const result: T[] = [];
   for (let i = 0; i < max; i++) {
@@ -184,12 +185,17 @@ function buildStatusBreakdown(
       const submitted = Math.min(totalTracked, Math.max(0, last.submitted + submittedRate * elapsed));
       const openedRaw = last.opened + openedRate * elapsed;
       const opened = Math.min(Math.max(0, openedRaw), Math.max(0, totalTracked - submitted));
-      const notOpened = Math.max(0, totalTracked - submitted - opened);
+      // Round submitted/opened first, then derive notOpened by subtraction so
+      // the three buckets always sum to exactly totalTracked (independent
+      // rounding of all three could otherwise drift by ±1).
+      const submittedRounded = Math.round(submitted);
+      const openedRounded = Math.round(opened);
+      const notOpenedRounded = Math.max(0, totalTracked - submittedRounded - openedRounded);
       projPoints.push({
         date: fmtDay(maxDay + elapsed * DAY_MS),
-        notOpened: Math.round(notOpened),
-        opened: Math.round(opened),
-        submitted: Math.round(submitted),
+        notOpened: notOpenedRounded,
+        opened: openedRounded,
+        submitted: submittedRounded,
       });
     }
     if (projPoints[projPoints.length - 1]?.date !== projectedCompletionDate) {
