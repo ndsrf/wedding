@@ -27,9 +27,11 @@ import {
   ChevronDown,
   ChevronUp,
   ShieldCheck,
+  TrendingUp,
 } from 'lucide-react';
+import { RsvpProgressChart, type RsvpProgressData } from '@/components/admin/RsvpProgressChart';
 
-type ReportType = 'attendees' | 'guests-per-admin' | 'seating-plan' | 'age-average';
+type ReportType = 'attendees' | 'guests-per-admin' | 'seating-plan' | 'age-average' | 'rsvp-progress';
 type ExportFormat = 'xlsx' | 'csv' | 'json';
 
 interface ReportConfig {
@@ -126,6 +128,14 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
       colorClass: 'orange',
       endpoint: `${apiBasePath}/guest-age-average`,
     },
+    {
+      id: 'rsvp-progress',
+      title: t('admin.reports.rsvpProgress.title'),
+      description: t('admin.reports.rsvpProgress.description'),
+      icon: <TrendingUp className="h-6 w-6" />,
+      colorClass: 'rose',
+      endpoint: `${apiBasePath}/rsvp-progress`,
+    },
   ];
 
   // ── Color helpers ────────────────────────────────────────────────────────
@@ -161,6 +171,13 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
         border: 'border-orange-200',
         hover: 'hover:bg-orange-100',
         ring: 'focus:ring-orange-500',
+      },
+      rose: {
+        bg: 'bg-rose-100',
+        text: 'text-rose-600',
+        border: 'border-rose-200',
+        hover: 'hover:bg-rose-100',
+        ring: 'focus:ring-rose-500',
       },
     };
     return colorMap[colorClass] || colorMap.purple;
@@ -393,6 +410,70 @@ export function ReportsView({ apiBasePath = '/api/admin/reports' }: ReportsViewP
             </table>
           </div>
         );
+      case 'rsvp-progress': {
+        const progress = reportData as RsvpProgressData;
+        if (!progress) return null;
+        return (
+          <div className="p-6 space-y-6">
+            {progress.hasData && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    {t('admin.reports.rsvpProgress.statSent')}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900">{progress.totalSent}</p>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    {t('admin.reports.rsvpProgress.statConfirmed')}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900">{progress.totalConfirmed}</p>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    {t('admin.reports.rsvpProgress.statPending')}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900">{progress.totalPending}</p>
+                </div>
+              </div>
+            )}
+
+            <RsvpProgressChart data={progress} />
+
+            {progress.hasData && (
+              <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+                <p className="font-medium">{t('admin.reports.rsvpProgress.projectionTitle')}</p>
+                {progress.projection ? (
+                  <div className="mt-1 space-y-1">
+                    <p>
+                      {t('admin.reports.rsvpProgress.projectionRate', {
+                        rate: progress.projection.ratePerDay,
+                        date: progress.projection.projectedCompletionDate,
+                      })}
+                    </p>
+                    {progress.rsvpCutoffDate && (
+                      <p>
+                        {t(
+                          progress.projection.afterCutoff
+                            ? 'admin.reports.rsvpProgress.projectionAfterCutoff'
+                            : 'admin.reports.rsvpProgress.projectionBeforeCutoff',
+                          { date: progress.rsvpCutoffDate },
+                        )}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="mt-1">
+                    {progress.totalPending === 0
+                      ? t('admin.reports.rsvpProgress.projectionAllConfirmed')
+                      : t('admin.reports.rsvpProgress.projectionNoRate')}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      }
       default:
         return null;
     }

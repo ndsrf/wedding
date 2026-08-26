@@ -1842,6 +1842,28 @@
         "minAge": "Min Age",
         "maxAge": "Max Age"
       },
+      "rsvpProgress": {
+        "title": "RSVP Progress",
+        "description": "Timeline of invites sent vs. confirmed, with a projection for when everyone will have replied",
+        "chartTitle": "Confirmations Over Time",
+        "noData": "No invitations have been sent yet, so there's no timeline to show.",
+        "legendSent": "Invites Sent",
+        "legendConfirmed": "Confirmed",
+        "legendPending": "Pending",
+        "legendProjected": "Projected",
+        "statSent": "Invites Sent",
+        "statConfirmed": "Confirmed",
+        "statPending": "Still Pending",
+        "todayMarker": "Today",
+        "projectionTitle": "Projection",
+        "projectionRate": "At the current pace of about {rate} confirmations/day, all invites should be confirmed by {date}.",
+        "projectionAfterCutoff": "That's after your RSVP deadline of {date} — consider sending a reminder.",
+        "projectionBeforeCutoff": "That's before your RSVP deadline of {date}.",
+        "projectionNoRate": "Not enough recent confirmations to project a completion date yet.",
+        "projectionAllConfirmed": "All invites have been confirmed!",
+        "cutoffLabel": "RSVP deadline",
+        "weddingDateLabel": "Wedding day"
+      },
       "nlQuery": {
         "title": "Ask About Your Wedding Data",
         "subtitle": "Type a question in plain English to query your wedding data",

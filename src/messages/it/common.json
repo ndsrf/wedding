@@ -1524,6 +1524,28 @@
         "minAge": "Età Min",
         "maxAge": "Età Max"
       },
+      "rsvpProgress": {
+        "title": "Andamento RSVP",
+        "description": "Cronologia degli inviti inviati rispetto a quelli confermati, con una proiezione di quando tutti avranno risposto",
+        "chartTitle": "Conferme nel Tempo",
+        "noData": "Non è stato ancora inviato alcun invito, quindi non c'è ancora una cronologia da mostrare.",
+        "legendSent": "Inviti Inviati",
+        "legendConfirmed": "Confermati",
+        "legendPending": "In Sospeso",
+        "legendProjected": "Proiettato",
+        "statSent": "Inviti Inviati",
+        "statConfirmed": "Confermati",
+        "statPending": "Ancora in Sospeso",
+        "todayMarker": "Oggi",
+        "projectionTitle": "Proiezione",
+        "projectionRate": "Al ritmo attuale di circa {rate} conferme/giorno, tutti gli inviti dovrebbero essere confermati entro il {date}.",
+        "projectionAfterCutoff": "Questo è dopo la tua scadenza RSVP del {date} — valuta di inviare un promemoria.",
+        "projectionBeforeCutoff": "Questo è prima della tua scadenza RSVP del {date}.",
+        "projectionNoRate": "Non ci sono ancora abbastanza conferme recenti per proiettare una data di completamento.",
+        "projectionAllConfirmed": "Tutti gli inviti sono stati confermati!",
+        "cutoffLabel": "Scadenza RSVP",
+        "weddingDateLabel": "Giorno del matrimonio"
+      },
       "nlQuery": {
         "title": "Interroga i Tuoi Dati di Matrimonio",
         "subtitle": "Scrivi una domanda in italiano per consultare i tuoi dati",

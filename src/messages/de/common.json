@@ -1524,6 +1524,28 @@
         "minAge": "Min. Alter",
         "maxAge": "Max. Alter"
       },
+      "rsvpProgress": {
+        "title": "RSVP-Fortschritt",
+        "description": "Zeitverlauf der gesendeten gegenüber den bestätigten Einladungen, mit einer Prognose, wann alle geantwortet haben werden",
+        "chartTitle": "Bestätigungen im Zeitverlauf",
+        "noData": "Es wurden noch keine Einladungen versendet, daher gibt es noch keinen Zeitverlauf anzuzeigen.",
+        "legendSent": "Gesendete Einladungen",
+        "legendConfirmed": "Bestätigt",
+        "legendPending": "Ausstehend",
+        "legendProjected": "Prognostiziert",
+        "statSent": "Gesendete Einladungen",
+        "statConfirmed": "Bestätigt",
+        "statPending": "Noch Ausstehend",
+        "todayMarker": "Heute",
+        "projectionTitle": "Prognose",
+        "projectionRate": "Beim aktuellen Tempo von etwa {rate} Bestätigungen/Tag sollten alle Einladungen bis zum {date} bestätigt sein.",
+        "projectionAfterCutoff": "Das liegt nach Ihrer RSVP-Frist am {date} — erwägen Sie, eine Erinnerung zu senden.",
+        "projectionBeforeCutoff": "Das liegt vor Ihrer RSVP-Frist am {date}.",
+        "projectionNoRate": "Noch nicht genügend aktuelle Bestätigungen, um ein Abschlussdatum zu prognostizieren.",
+        "projectionAllConfirmed": "Alle Einladungen wurden bestätigt!",
+        "cutoffLabel": "RSVP-Frist",
+        "weddingDateLabel": "Hochzeitstag"
+      },
       "nlQuery": {
         "title": "Ihre Hochzeitsdaten abfragen",
         "subtitle": "Stellen Sie eine Frage auf Deutsch, um Ihre Hochzeitsdaten abzufragen",
