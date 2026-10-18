@@ -317,6 +317,7 @@ export interface FamilyMember {
   added_by_guest: boolean;
   table_id: string | null;
   seat_index?: number | null;
+  seat_angle?: number | null;
   seating_group: string | null;
   created_at: Date;
   // Per-guest question answers
