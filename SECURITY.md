@@ -6,7 +6,7 @@ If you discover a security vulnerability in this project, please report it by em
 
 ## Security Audit Status
 
-Last updated: 2026-08-06
+Last updated: 2026-09-28
 
 ### Current Vulnerabilities
 
@@ -31,126 +31,17 @@ This document tracks known security vulnerabilities that have been assessed and 
   - File size limits enforced
 - **Future Plan**: Consider migrating to `exceljs` or similar maintained alternative in a future release
 
-##### minimatch - ReDoS via Repeated Wildcards
-- **Package**: minimatch < 10.2.1 (via eslint, jest, and related dev dependencies)
-- **CVE**: [GHSA-3ppc-4f35-3m26](https://github.com/advisories/GHSA-3ppc-4f35-3m26)
-- **Status**: Fix requires breaking changes to eslint ecosystem
-- **Usage**: Development dependencies only (linting, testing)
-- **Risk Assessment**:
-  - Development-only dependency, not included in production builds
-  - ReDoS vulnerability only affects pattern matching in dev tools
-  - Cannot be exploited in production environment
-  - Attack would only affect local development linting/testing
-- **Mitigation**:
-  - Development-only dependency, not in production bundles
-  - No untrusted input to glob patterns in development workflow
-  - Developers use trusted source code only
-- **Future Plan**: Will be resolved when eslint ecosystem updates to minimatch@10.2.1+
-
-#### MODERATE Severity - Accepted Risks
-
-##### prismjs - DOM Clobbering
-- **Package**: prismjs < 1.30.0 (via @react-email/components@0.0.29)
-- **CVE**: [GHSA-x7hr-w5r2-h6wg](https://github.com/advisories/GHSA-x7hr-w5r2-h6wg)
-- **Status**: Fix requires breaking change to @react-email/components@1.0.7
-- **Usage**: Code syntax highlighting in email templates
-- **Risk Assessment**:
-  - Limited to email template generation (server-side only)
-  - No user-controlled code rendering
-  - Low attack surface
-- **Mitigation**:
-  - Server-side rendering only
-  - No user-generated content in code blocks
-- **Future Plan**: Update @react-email/components during next major version bump
-
-##### hono - Multiple Vulnerabilities
-- **Package**: hono <=4.11.6 (via @prisma/dev → prisma@7.3.0)
+##### PostCSS - Arbitrary File Read, Path Traversal & Source Map Disclosure
+- **Package**: postcss <= 8.5.22 (via next@15.1.6 bundled version)
 - **CVEs**:
-  - [GHSA-9r54-q6cx-xmh5](https://github.com/advisories/GHSA-9r54-q6cx-xmh5) - XSS through ErrorBoundary
-  - [GHSA-6wqw-2p9w-4vw4](https://github.com/advisories/GHSA-6wqw-2p9w-4vw4) - Cache middleware issues
-  - [GHSA-r354-f388-2fhh](https://github.com/advisories/GHSA-r354-f388-2fhh) - IPv4 validation bypass
-  - [GHSA-w332-q679-j88p](https://github.com/advisories/GHSA-w332-q679-j88p) - Arbitrary key read
-- **Status**: Fix requires downgrading Prisma to 6.x (breaking change)
-- **Usage**: Development dependency only (Prisma Studio)
-- **Risk Assessment**:
-  - Not used in production builds
-  - Only affects local development environment
-  - Low risk as it's not exposed in the running application
-- **Mitigation**: Development-only dependency, not included in production bundles
-
-##### lodash - Prototype Pollution
-- **Package**: lodash 4.0.0 - 4.17.21 (via @prisma/dev)
-- **CVE**: [GHSA-xxjr-mmjv-4gpg](https://github.com/advisories/GHSA-xxjr-mmjv-4gpg)
-- **Status**: Fix requires downgrading Prisma to 6.x (breaking change)
-- **Usage**: Development dependency (Prisma tooling)
-- **Risk Assessment**:
-  - Development-only dependency
-  - Not included in production builds
-  - Low risk
-- **Mitigation**: Development-only dependency, not included in production bundles
-
-##### brace-expansion - Process Hang & Memory Exhaustion
-- **Package**: brace-expansion 1.1.12 (needs ≥1.1.13) and 2.0.2 (needs ≥2.0.3)
-- **CVE**: [GHSA-f886-m6hf-6m8v](https://github.com/advisories/GHSA-f886-m6hf-6m8v)
-- **Status**: Fix exists (1.1.13 / 2.0.3) but npm overrides cannot apply both semver branches simultaneously without running `npm install` — 1.x and 2.x have incompatible APIs so a single override value would break one of the two consumers
-- **Usage**: Dev toolchain only — transitive dependency of `jest` (reporters, config, runtime) and `readdir-glob`
-- **Risk Assessment**:
-  - DoS via zero-step sequence (`{0..0}`), causing an infinite loop in the parser
-  - Only reachable if untrusted input is passed to a brace-expansion call in the build process
-  - Jest and readdir-glob never receive untrusted input at runtime or in CI
-  - No production bundles include brace-expansion
-- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
-- **Future Plan**: Will be resolved automatically when jest or readdir-glob update their minimatch dependency
-
-##### handlebars - Prototype Pollution via Partial Template Injection
-- **Package**: handlebars 4.7.8 (last released 4.x version; no patched version available)
-- **CVE**: [GHSA-2qvq-rjwj-gvw9](https://github.com/advisories/GHSA-2qvq-rjwj-gvw9)
-- **Status**: No patched handlebars@4.x version released by the maintainer
-- **Usage**: Dev toolchain only — transitive dependency of `conventional-changelog-cli` (changelog generation) via `conventional-changelog-writer`
-- **Risk Assessment**:
-  - Attack requires a malicious partial template to be injected during changelog rendering
-  - `conventional-changelog-cli` is invoked only in controlled CI/CD pipelines with trusted commit messages and templates
-  - handlebars is never loaded in the Next.js application or any production bundle
-  - XSS impact would be limited to the CI log output, not the running application
-- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
-- **Future Plan**: Will be resolved when conventional-changelog-writer migrates away from handlebars or a patched handlebars@4.x is released
-
-##### ajv - ReDoS via $data Option
-- **Package**: ajv < 8.18.0 (via eslint@9.x → @eslint/eslintrc)
-- **CVE**: [GHSA-2g4f-4pwh-qvx6](https://github.com/advisories/GHSA-2g4f-4pwh-qvx6)
-- **Status**: Fix requires downgrading eslint from v9 to v4.1.1 (breaking change)
-- **Usage**: Development dependency only (ESLint validation tooling)
-- **Risk Assessment**:
-  - ReDoS only triggered by ajv's `$data` option, which eslint does not expose to user input
-  - Dev-only dependency, not included in production bundles
-  - Worst case impact: slow linting in CI, not a production security issue
-- **Mitigation**: Development-only dependency, not included in production bundles
-
-##### next.js - Unbounded next/image Disk Cache Growth
-- **Package**: next 10.0.0 - 16.1.6 (current: ^15.1.6)
-- **CVE**: [GHSA-3x4c-7xq6-9pq8](https://github.com/advisories/GHSA-3x4c-7xq6-9pq8)
-- **Status**: Fix requires major version upgrade to next@16.1.7+ (breaking change from 15.x)
-- **Usage**: Core application framework
-- **Risk Assessment**:
-  - Moderate severity, CWE-400 (Uncontrolled Resource Consumption)
-  - Affects `next/image` disk cache only — attacker must trigger many distinct image requests
-  - Wedding app has limited, known image assets; not a high-volume image service
-  - Disk exhaustion would cause service degradation, not data breach or code execution
-  - Deployed on Vercel where ephemeral file system resets mitigate persistent cache growth
-- **Mitigation**:
-  - Hosted on Vercel (ephemeral filesystem limits persistent cache accumulation)
-  - Limited image variants in use (fixed sizes, controlled sources)
-  - Application is not a high-traffic public image service
-- **Future Plan**: Upgrade to Next.js 16.x after evaluating breaking changes and compatibility with next-auth, next-intl, and other dependencies
-
-##### PostCSS - XSS via Unescaped </style>
-- **Package**: postcss < 8.5.10 (via next@15.1.6)
-- **CVE**: [GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93)
-- **Status**: Fix available but requires breaking change (downgrading to next@9.3.3 is not viable)
+  - [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-6g55-p6wh-862q) - Arbitrary file read via sourceMappingURL
+  - [GHSA-r28c-9q8g-f849](https://github.com/advisories/GHSA-r28c-9q8g-f849) - Path traversal in source map auto-loading
+  - [GHSA-fxqj-rqcc-2cmp](https://github.com/advisories/GHSA-fxqj-rqcc-2cmp) - Incomplete fix of source map reading vulnerability
+- **Status**: Fix available in upstream PostCSS but bundled with Next.js; requires major version upgrade to Next.js 16.x (breaking change)
 - **Usage**: CSS processing in Next.js build step
 - **Risk Assessment**:
-  - Moderate severity, affects CSS stringify output
-  - Vulnerability requires malicious CSS content with unescaped `</style>` tags
+  - High severity, affects source map URL handling
+  - Attack requires attacker-controlled sourceMappingURL in CSS when `from` option is unset
   - CSS in this application is generated from trusted sources only:
     - Tailwind CSS configuration (not user-controlled)
     - Next.js internal CSS generation
@@ -159,13 +50,30 @@ This document tracks known security vulnerabilities that have been assessed and 
 - **Mitigation**:
   - All CSS sources are trusted and non-user-controlled
   - Next.js 15.x has many security improvements over older versions
-  - Fixing this would require downgrading to Next.js 9.x (introduces many older, more severe vulnerabilities)
-- **Future Plan**: Will be resolved when Next.js 16+ provides a fix without breaking changes
+  - Downgrading Next.js to 9.x would introduce many older, more severe vulnerabilities
+- **Future Plan**: Will be resolved when Next.js 16+ is evaluated and adopted
+
+#### MODERATE Severity - Accepted Risks
+
+##### PostCSS - XSS via Unescaped </style>
+- **Package**: postcss <= 8.5.22 (via next@15.1.6 bundled version)
+- **CVE**: [GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93)
+- **Status**: Fix available in upstream PostCSS but bundled with Next.js; requires major version upgrade to Next.js 16.x (breaking change)
+- **Usage**: CSS processing in Next.js build step
+- **Risk Assessment**:
+  - Moderate severity, affects CSS stringify output
+  - Vulnerability requires malicious CSS content with unescaped `</style>` tags
+  - CSS in this application is generated from trusted sources only (Tailwind CSS config, Next.js internal CSS)
+  - Impact is limited to build-time CSS processing, not runtime application code
+- **Mitigation**:
+  - All CSS sources are trusted and non-user-controlled
+  - Next.js 15.x is more secure overall
+- **Future Plan**: Will be resolved when Next.js 16+ is evaluated and adopted
 
 ##### uuid - Missing Buffer Bounds Check
 - **Package**: uuid < 11.1.1 (via exceljs@4.4.0)
 - **CVE**: [GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq)
-- **Status**: Fix available but requires breaking change (downgrading exceljs to 3.4.0)
+- **Status**: Fix available in uuid@11.1.1+, but exceljs has not yet updated its dependency; fix via npm audit would downgrade exceljs to 3.4.0 (breaking change)
 - **Usage**: Excel import/export for authenticated admins
 - **Risk Assessment**:
   - Moderate severity, affects uuid v3/v5/v6 hash functions when `buf` parameter is provided
@@ -179,27 +87,47 @@ This document tracks known security vulnerabilities that have been assessed and 
   - Excel functionality restricted to authenticated administrators
   - File uploads have size restrictions
   - Downgrading exceljs would introduce other compatibility issues
-- **Future Plan**: Update to uuid@11.1.1+ when it's stable and all dependents support it
+- **Future Plan**: Update to an updated exceljs release supporting uuid@11.1.1+ when available
 
-##### undici - Unbounded Decompression Chain
-- **Package**: undici < 6.23.0 (via @vercel/blob@0.27.3)
-- **CVE**: [GHSA-g9mf-h72j-4rw9](https://github.com/advisories/GHSA-g9mf-h72j-4rw9)
-- **Status**: Fix requires major version update to @vercel/blob@2.x (breaking changes)
-- **Usage**: HTTP client for Vercel Blob Storage (optional file upload feature)
+##### braces, postcss-selector-parser, sprintf-js - Transitive Dev/Build Dependencies
+- **Packages**:
+  - braces@3.0.3 (via eslint-config-next → fast-glob → micromatch) - [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) - Stack exhaustion DoS via deeply nested patterns (HIGH)
+  - postcss-selector-parser@6.0.10 (via @tailwindcss/typography) - [GHSA-rj75-hqrm-r3gf](https://github.com/advisories/GHSA-rj75-hqrm-r3gf) - Quadratic complexity CPU exhaustion (MODERATE)
+  - sprintf-js@1.0.3 (via argparse → js-yaml, mammoth, gray-matter) - [GHSA-hp3w-g68c-fv3c](https://github.com/advisories/GHSA-hp3w-g68c-fv3c) - DoS via unbounded precision specifiers (MODERATE)
+- **Status**: No non-breaking fix. For braces and sprintf-js the advisory lists no patched version. The postcss-selector-parser fix is 7.x, which `@tailwindcss/typography` does not support. npm overrides were tested and do not clear the advisories.
+- **Usage**: Build-time tooling (ESLint, Tailwind CSS) and argparse's internal CLI/error formatting. None of these process user-supplied input at runtime.
 - **Risk Assessment**:
-  - Attack requires high complexity (CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H)
-  - Only affects applications that process untrusted HTTP responses with Content-Encoding
-  - Vercel Blob Storage API is trusted first-party service
-  - Limited exposure: only used for file uploads by authenticated admins
-  - Severity: Moderate (CVSS 5.9)
-- **Mitigation**:
-  - Blob storage is optional (can be disabled via BLOB_READ_WRITE_TOKEN)
-  - Only used by authenticated admins for trusted file uploads
-  - Vercel Blob API is a trusted first-party service
-  - Rate limiting and file size restrictions in place
-- **Future Plan**: Upgrade to @vercel/blob@2.x when stable and breaking changes are assessed
+  - Not shipped to the browser. Exposure is limited to developer machines and CI builds that process trusted repository content.
+  - Denial-of-service advisories only; no code execution or data disclosure.
+- **Future Plan**: Re-evaluate when eslint-config-next, @tailwindcss/typography or the argparse chain publish fixed releases
 
 ### Recently Fixed
+
+#### 2026-09-28
+- Ran security audit and remediated 26+ vulnerabilities across dependencies:
+  - **sharp** updated to 0.35.5 (along with `@img/sharp-linux-x64@0.35.5` and `@img/sharp-libvips-linux-x64@1.3.4`): resolves [GHSA-rgj7-g3m4-5g8c](https://github.com/advisories/GHSA-rgj7-g3m4-5g8c) and [GHSA-f88m-g3jw-g9cj](https://github.com/advisories/GHSA-f88m-g3jw-g9cj) (libvips and libheif vulnerabilities)
+  - **@hyperdx/browser** updated to ^0.26.0: resolves [GHSA-8988-4f7v-96qf](https://github.com/advisories/GHSA-8988-4f7v-96qf) (`@opentelemetry/core` unbounded memory allocation in W3C Baggage propagation)
+  - **mysql2** override added (`>=3.24.4`): resolves [GHSA-3f6p-5ww8-9rcr](https://github.com/advisories/GHSA-3f6p-5ww8-9rcr) and [GHSA-rgwj-5xj2-c3m3](https://github.com/advisories/GHSA-rgwj-5xj2-c3m3) in Prisma CLI tooling
+  - **fflate** override added for `@hyperdx/otel-web-session-recorder` (`>=0.7.5`): resolves [GHSA-px8p-9vwx-vf98](https://github.com/advisories/GHSA-px8p-9vwx-vf98) (infinite loop in ZIP64 parsing)
+  - **next** (CRITICAL & HIGH): resolved [GHSA-p293-qw3h-jr36](https://github.com/advisories/GHSA-p293-qw3h-jr36) (RCE on Windows servers) and [GHSA-2xp9-vwfh-vxw4](https://github.com/advisories/GHSA-2xp9-vwfh-vxw4) (RCE in Image Optimization API with AVIF)
+  - **@tiptap/core** (HIGH): resolved [GHSA-cp6q-959q-f8rh](https://github.com/advisories/GHSA-cp6q-959q-f8rh) (mergeAttributes prototype pollution) and [GHSA-j95f-988m-3j2f](https://github.com/advisories/GHSA-j95f-988m-3j2f) (ReDoS in attribute parsing)
+  - **@xmldom/xmldom** (HIGH): resolved 10 advisories ([GHSA-6gmq-8vp8-gcm6](https://github.com/advisories/GHSA-6gmq-8vp8-gcm6), [GHSA-w2rr-34g9-rvrj](https://github.com/advisories/GHSA-w2rr-34g9-rvrj), [GHSA-4w3w-2rp5-g8jm](https://github.com/advisories/GHSA-4w3w-2rp5-g8jm), [GHSA-c7q8-3ch8-vqpv](https://github.com/advisories/GHSA-c7q8-3ch8-vqpv), [GHSA-27p8-2357-5qqv](https://github.com/advisories/GHSA-27p8-2357-5qqv), [GHSA-6h8r-xr42-gp59](https://github.com/advisories/GHSA-6h8r-xr42-gp59), [GHSA-8344-3jmq-59r6](https://github.com/advisories/GHSA-8344-3jmq-59r6), [GHSA-x4fp-j954-r2f4](https://github.com/advisories/GHSA-x4fp-j954-r2f4), [GHSA-965w-775f-mr7g](https://github.com/advisories/GHSA-965w-775f-mr7g), [GHSA-93r5-fhx6-vmg9](https://github.com/advisories/GHSA-93r5-fhx6-vmg9))
+  - **browserslist** (HIGH): resolved [GHSA-c83g-rgw3-j3cx](https://github.com/advisories/GHSA-c83g-rgw3-j3cx) and [GHSA-73wf-gq98-2v4g](https://github.com/advisories/GHSA-73wf-gq98-2v4g)
+  - **fast-uri** (HIGH): resolved [GHSA-5jgf-p345-68v8](https://github.com/advisories/GHSA-5jgf-p345-68v8), [GHSA-f65p-4m7j-42xc](https://github.com/advisories/GHSA-f65p-4m7j-42xc), [GHSA-fph4-wmhf-6fwf](https://github.com/advisories/GHSA-fph4-wmhf-6fwf), [GHSA-jqff-g426-hqxp](https://github.com/advisories/GHSA-jqff-g426-hqxp), [GHSA-7p8r-x3mc-p8w7](https://github.com/advisories/GHSA-7p8r-x3mc-p8w7)
+  - **js-yaml** (HIGH & MODERATE): resolved [GHSA-2883-xcg3-v3hh](https://github.com/advisories/GHSA-2883-xcg3-v3hh) and [GHSA-h67p-54hq-rp68](https://github.com/advisories/GHSA-h67p-54hq-rp68)
+  - **@humanfs/node** (MODERATE): resolved [GHSA-p498-v437-472g](https://github.com/advisories/GHSA-p498-v437-472g)
+  - **baseline-browser-mapping** (MODERATE): resolved [GHSA-w5vr-8v7q-w6rv](https://github.com/advisories/GHSA-w5vr-8v7q-w6rv)
+  - **qs** (MODERATE): resolved [GHSA-x5fp-wj9c-mxmx](https://github.com/advisories/GHSA-x5fp-wj9c-mxmx) and [GHSA-4mjr-xmp4-gh2g](https://github.com/advisories/GHSA-4mjr-xmp4-gh2g)
+  - **undici** (MODERATE): resolved [GHSA-g9mf-h72j-4rw9](https://github.com/advisories/GHSA-g9mf-h72j-4rw9), [GHSA-8xcm-r25x-g524](https://github.com/advisories/GHSA-8xcm-r25x-g524), [GHSA-m8rv-5g2x-5cg5](https://github.com/advisories/GHSA-m8rv-5g2x-5cg5), [GHSA-v3r7-h72x-cjcm](https://github.com/advisories/GHSA-v3r7-h72x-cjcm)
+  - **brace-expansion** (HIGH & MODERATE): resolved [GHSA-f886-m6hf-6m8v](https://github.com/advisories/GHSA-f886-m6hf-6m8v), [GHSA-3jxr-9vmj-r5cp](https://github.com/advisories/GHSA-3jxr-9vmj-r5cp), [GHSA-mh99-v99m-4gvg](https://github.com/advisories/GHSA-mh99-v99m-4gvg), [GHSA-rgw5-rvv9-x895](https://github.com/advisories/GHSA-rgw5-rvv9-x895)
+  - **minimatch** (HIGH): resolved [GHSA-3ppc-4f35-3m26](https://github.com/advisories/GHSA-3ppc-4f35-3m26)
+  - **ajv** (MODERATE): resolved [GHSA-2g4f-4pwh-qvx6](https://github.com/advisories/GHSA-2g4f-4pwh-qvx6)
+  - **handlebars** (MODERATE): resolved [GHSA-2qvq-rjwj-gvw9](https://github.com/advisories/GHSA-2qvq-rjwj-gvw9)
+  - **prismjs** (MODERATE): resolved [GHSA-x7hr-w5r2-h6wg](https://github.com/advisories/GHSA-x7hr-w5r2-h6wg)
+  - **hono** & **@hono/node-server** (MODERATE & HIGH): resolved [GHSA-9r54-q6cx-xmh5](https://github.com/advisories/GHSA-9r54-q6cx-xmh5), [GHSA-6wqw-2p9w-4vw4](https://github.com/advisories/GHSA-6wqw-2p9w-4vw4), [GHSA-r354-f388-2fhh](https://github.com/advisories/GHSA-r354-f388-2fhh), [GHSA-w332-q679-j88p](https://github.com/advisories/GHSA-w332-q679-j88p), [GHSA-wc8c-qw6v-h7f6](https://github.com/advisories/GHSA-wc8c-qw6v-h7f6)
+  - **lodash** (MODERATE): resolved [GHSA-xxjr-mmjv-4gpg](https://github.com/advisories/GHSA-xxjr-mmjv-4gpg)
+  - **valibot** (MODERATE): resolved [GHSA-5qjj-4xww-7phc](https://github.com/advisories/GHSA-5qjj-4xww-7phc)
+  - **find-my-way** (HIGH): resolved [GHSA-c96f-x56v-gq3h](https://github.com/advisories/GHSA-c96f-x56v-gq3h)
 
 #### 2026-05-31
 - Ran `npm audit fix` to resolve multiple vulnerabilities across the dependency tree:
@@ -251,155 +179,6 @@ This document tracks known security vulnerabilities that have been assessed and 
 - Server-side validation using Zod schemas
 - DOMPurify for HTML sanitization
 - File upload restrictions (size, type)
-
-##### brace-expansion - Process Hang & Memory Exhaustion (Additional variants)
-- **Package**: brace-expansion 1.1.12 (needs ≥1.1.13) and 2.0.2 (needs ≥2.0.3), and 5.0.x branch
-- **CVEs**:
-  - [GHSA-3jxr-9vmj-r5cp](https://github.com/advisories/GHSA-3jxr-9vmj-r5cp) - DoS via exponential-time expansion
-  - [GHSA-mh99-v99m-4gvg](https://github.com/advisories/GHSA-mh99-v99m-4gvg) - DoS via unbounded expansion length
-- **Status**: No fix available for 5.0.x branch; would require breaking change to eslint-config-next
-- **Usage**: Dev toolchain only — transitive dependency of jest/glob/readdir-glob
-- **Risk Assessment**:
-  - Multiple DoS vectors causing process hang and memory exhaustion
-  - Only reachable if untrusted input is passed to brace-expansion in build process
-  - Jest and related tools never receive untrusted input at runtime or in CI
-  - No production bundles include brace-expansion
-- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
-- **Future Plan**: Will be resolved when eslint ecosystem updates or dependencies upgrade brace-expansion branches
-
-##### PostCSS - XSS & Path Traversal (Additional vulnerabilities)
-- **Package**: postcss < 8.5.10 (via next@15.1.6)
-- **CVEs**:
-  - [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-6g55-p6wh-862q) - Arbitrary file read via sourceMappingURL
-  - [GHSA-r28c-9q8g-f849](https://github.com/advisories/GHSA-r28c-9q8g-f849) - Path traversal in source map auto-loading
-- **Status**: Fix available but requires breaking change (downgrading to next@9.3.3 is not viable)
-- **Usage**: CSS processing in Next.js build step
-- **Risk Assessment**:
-  - High severity, affects CSS processing with source map handling
-  - Vulnerabilities require malicious CSS content with crafted sourceMappingURL
-  - CSS in this application is generated from trusted sources only:
-    - Tailwind CSS configuration (not user-controlled)
-    - Next.js internal CSS generation
-    - No dynamic CSS generation from user input
-  - Impact is limited to build-time CSS processing, not runtime application code
-- **Mitigation**:
-  - All CSS sources are trusted and non-user-controlled
-  - Next.js 15.x has many security improvements over older versions
-  - Fixing these would require downgrading to Next.js 9.x (introduces many older, more severe vulnerabilities)
-- **Future Plan**: Will be resolved when Next.js 16+ provides fixes without breaking changes
-
-##### valibot - record() Issue Path Handling
-- **Package**: valibot <= 1.4.1 (via @prisma/dev)
-- **CVE**: [GHSA-5qjj-4xww-7phc](https://github.com/advisories/GHSA-5qjj-4xww-7phc)
-- **Status**: Fix available in valibot >= 1.5.0, but requires @prisma/dev update
-- **Usage**: Development dependency only (Prisma Studio in local dev environment)
-- **Risk Assessment**:
-  - Moderate severity, affects record() validation with inherited Object property names
-  - Requires specific conditions in form validation path to trigger
-  - Prisma Studio is used only in local development, never exposed to production
-  - Impact would be limited to development environment
-- **Mitigation**: Development-only dependency, not included in production bundles
-- **Future Plan**: Will be resolved when Prisma updates @prisma/dev with valibot >= 1.5.0
-
-##### find-my-way - HTTP/2 DDoS
-- **Package**: find-my-way <= 9.6.0 (via @prisma/dev)
-- **CVE**: [GHSA-c96f-x56v-gq3h](https://github.com/advisories/GHSA-c96f-x56v-gq3h)
-- **Status**: Fix available in find-my-way >= 9.6.1, but requires @prisma/dev version bump
-- **Usage**: Development dependency only (Prisma Studio HTTP routing)
-- **Risk Assessment**:
-  - High severity, DDoS via HTTP/2 stream manipulation
-  - Prisma Studio is accessed only locally by developers
-  - Not exposed to internet or production traffic
-  - Attack requires attacker access to local development server
-- **Mitigation**: Development-only dependency, not included in production bundles or exposed to internet
-- **Future Plan**: Will be resolved when Prisma updates @prisma/dev with find-my-way >= 9.6.1
-
-##### sharp - libvips Inherited Vulnerabilities
-- **Package**: sharp < 0.35.0 (via next@15.1.6)
-- **CVE**: [GHSA-f88m-g3jw-g9cj](https://github.com/advisories/GHSA-f88m-g3jw-g9cj)
-- **Status**: Fix available (sharp >= 0.35.0 with updated libvips), but requires downgrading Next.js to 9.3.3
-- **Usage**: Image optimization in production builds
-- **Risk Assessment**:
-  - High severity, multiple CVEs in underlying libvips library (CVE-2026-33327/33328/35590/35591)
-  - Requires processing of specially crafted image files to trigger
-  - Wedding app has limited, known image assets (not a high-volume image service)
-  - Image sources are mostly controlled by admins or CDN providers
-  - Disk exhaustion or memory issues from malicious images would cause service degradation, not data breach
-- **Mitigation**:
-  - Limited image variants in use (fixed sizes, controlled sources)
-  - Application is not a high-traffic public image service
-  - Hosted on Vercel where resources are managed
-- **Future Plan**: Upgrade to Next.js 16.x (when available) to get updated sharp with patched libvips
-
-##### brace-expansion - DoS via Unbounded Intermediate Arrays (Additional variant)
-- **Package**: brace-expansion (various branches)
-- **CVE**: [GHSA-rgw5-rvv9-x895](https://github.com/advisories/GHSA-rgw5-rvv9-x895)
-- **Status**: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation; fix not yet available in affected branches
-- **Usage**: Dev toolchain only — transitive dependency of jest/glob/readdir-glob
-- **Risk Assessment**:
-  - High severity DoS vector
-  - Attack requires untrusted input to brace-expansion call in build process
-  - Jest and readdir-glob never receive untrusted input at runtime or in CI
-  - No production bundles include brace-expansion
-- **Mitigation**: Dev-only dependency, not present in any production build or server bundle
-- **Future Plan**: Will be resolved when brace-expansion releases a patched version
-
-##### fast-uri - Host Confusion via Backslash Authority Introducer
-- **Package**: fast-uri 3.0.0 - 3.1.4
-- **CVE**: [GHSA-7p8r-x3mc-p8w7](https://github.com/advisories/GHSA-7p8r-x3mc-p8w7)
-- **Status**: Host confusion vulnerability; fix requires updating to >= 3.1.5 (when released) or awaiting dependency updates
-- **Usage**: URI parsing/validation in HTTP request handling
-- **Risk Assessment**:
-  - High severity, affects host validation in URI parsing
-  - Requires crafted URLs with backslash characters to exploit
-  - Next.js and related frameworks have additional URL validation layers
-  - Limited exposure: used internally by Next.js HTTP handling, not direct user input
-- **Mitigation**:
-  - URL validation occurs at multiple layers in Next.js
-  - Requests pass through Next.js request pipeline with additional validation
-  - Limited attack surface for direct exploitation
-- **Future Plan**: Will be resolved when fast-uri releases a patch (>=3.1.5) or dependencies update
-
-##### PostCSS - Incomplete Fix of Source Map Vulnerability
-- **Package**: postcss < 8.5.23 (via next@15.1.6)
-- **CVE**: [GHSA-fxqj-rqcc-2cmp](https://github.com/advisories/GHSA-fxqj-rqcc-2cmp)
-- **Status**: Incomplete fix of GHSA-6g55-p6wh-862q; fix requires breaking change (downgrading to next@9.3.3)
-- **Usage**: CSS processing in Next.js build step
-- **Risk Assessment**:
-  - High severity, affects source map URL handling
-  - Attack requires attacker-controlled sourceMappingURL in CSS when `from` option is unset
-  - CSS in this application is generated from trusted sources only:
-    - Tailwind CSS configuration (not user-controlled)
-    - Next.js internal CSS generation
-    - No dynamic CSS generation from user input
-  - Impact is limited to build-time CSS processing, not runtime application code
-- **Mitigation**:
-  - All CSS sources are trusted and non-user-controlled
-  - Next.js 15.x has many security improvements over older versions
-  - Fixing this would require downgrading to Next.js 9.x (introduces many older, more severe vulnerabilities)
-- **Future Plan**: Will be resolved when Next.js 16+ provides a fix without breaking changes
-
-##### undici - HTTP Client Vulnerabilities (Additional variants)
-- **Package**: undici < 6.28.0 (via @vercel/blob@0.27.3)
-- **CVEs**:
-  - [GHSA-8xcm-r25x-g524](https://github.com/advisories/GHSA-8xcm-r25x-g524) - Downstream response desynchronization via retry interceptor
-  - [GHSA-m8rv-5g2x-5cg5](https://github.com/advisories/GHSA-m8rv-5g2x-5cg5) - CRLF Injection via blob-like body 'type' property
-  - [GHSA-v3r7-h72x-cjcm](https://github.com/advisories/GHSA-v3r7-h72x-cjcm) - Cookie attribute injection via unsanitized domain and unparsed setCookie fields
-- **Status**: Fixes require major version updates to @vercel/blob@2.x or undici@6.28.0+; major version bumps have breaking changes
-- **Usage**: HTTP client for Vercel Blob Storage (optional file upload feature)
-- **Risk Assessment**:
-  - Moderate severity, multiple HTTP handling issues
-  - CRLF injection and cookie attribute injection require specific conditions in HTTP responses
-  - Vercel Blob Storage API is trusted first-party service with controlled response format
-  - Response desynchronization requires retry interceptor to mishandle responses
-  - Limited exposure: only used for file uploads by authenticated admins
-  - Blob storage is optional (can be disabled via BLOB_READ_WRITE_TOKEN)
-- **Mitigation**:
-  - Blob storage interactions limited to authenticated admin operations
-  - Vercel Blob API is a trusted first-party service
-  - Rate limiting and file size restrictions in place
-  - Application does not parse untrusted HTTP headers from blob responses
-- **Future Plan**: Upgrade to @vercel/blob@2.x or undici@6.28.0+ when stable and breaking changes are fully assessed
 
 ## Updating This Document
 

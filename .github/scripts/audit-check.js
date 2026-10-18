@@ -15,149 +15,21 @@ const ACCEPTED_GHSAS = [
   'GHSA-4r6h-8v6p-xvw6', // Prototype Pollution
   'GHSA-5pgg-2g8v-p4x9', // ReDoS
 
-  // prismjs - MODERATE severity
-  'GHSA-x7hr-w5r2-h6wg', // DOM Clobbering
-
-  // hono - MODERATE severity
-  'GHSA-9r54-q6cx-xmh5', // XSS through ErrorBoundary
-  'GHSA-6wqw-2p9w-4vw4', // Cache middleware issues
-  'GHSA-r354-f388-2fhh', // IPv4 validation bypass
-  'GHSA-w332-q679-j88p', // Arbitrary key read
-
-  // next.js - MODERATE severity
-  'GHSA-3x4c-7xq6-9pq8', // Unbounded next/image disk cache growth (fix requires Next.js 16.x major upgrade)
-
-  // lodash - MODERATE severity
-  'GHSA-xxjr-mmjv-4gpg', // Prototype Pollution
-
-  // undici - MODERATE severity
-  'GHSA-g9mf-h72j-4rw9', // Unbounded decompression chain
-
-  // @hono/node-server - HIGH severity (transitive dep via @prisma/dev only, not used directly)
-  // Fix requires prisma downgrade to 6.19.2 (breaking change). Risk accepted: not in app runtime path.
-  'GHSA-wc8c-qw6v-h7f6', // Authorization bypass via encoded slashes in Serve Static Middleware
-
-  // minimatch - HIGH severity (dev dependencies only)
-  'GHSA-3ppc-4f35-3m26', // ReDoS via repeated wildcards
-  // ajv - MODERATE severity
-  'GHSA-2g4f-4pwh-qvx6', // ReDoS when using $data option (via eslint dev dependency)
-
-  // brace-expansion - MODERATE severity (dev toolchain only)
-  // Affected paths: jest reporters/config/runtime and readdir-glob, all dev dependencies.
-  // Fix requires 1.1.13 (1.x branch) and 2.0.3 (2.x branch); npm overrides would require
-  // separate handling of both semver branches and can't be applied without npm install.
-  // Zero production risk: this vulnerability (process hang / memory exhaustion) can only
-  // be triggered in the local build toolchain, never at runtime.
-  'GHSA-f886-m6hf-6m8v', // Zero-step sequence causes process hang and memory exhaustion
-
-  // handlebars - MODERATE severity (dev toolchain only)
-  // Affected path: conventional-changelog-cli → conventional-changelog-writer → handlebars@4.7.8
-  // conventional-changelog-cli is a direct dev dependency used for changelog generation only.
-  // No patched handlebars version is available for the 4.x branch.
-  // Zero production risk: handlebars is never loaded in the Next.js application bundle.
-  'GHSA-2qvq-rjwj-gvw9', // Prototype Pollution Leading to XSS through Partial Template Injection
-
-  // postcss - MODERATE severity
-  // Vulnerability in Next.js bundled version (via next@15.1.6)
-  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
-  // CSS is generated from trusted sources only (Tailwind CSS config, not user input)
-  // Risk: Requires malicious CSS content to be processed; Next.js 15.x is more secure overall
+  // postcss - MODERATE & HIGH severity (bundled with Next.js)
+  // Fix requires major version upgrade to Next.js 16.x (breaking change)
   'GHSA-qx2v-qp2m-jg93', // XSS via Unescaped </style> in CSS Stringify Output
-
-  // uuid - MODERATE severity
-  // Dependency of exceljs (Excel import/export for admins)
-  // Fix available but requires breaking change: downgrading exceljs to 3.4.0
-  // Vulnerability only affects edge case: missing buffer bounds check when buf is provided
-  // Risk: Low impact because (1) only authenticated admins use Excel upload (2) vulnerability requires specific conditions
-  'GHSA-w5hq-g745-h8pq', // Missing buffer bounds check in v3/v5/v6 when buf is provided
-
-  // @opentelemetry/core - MODERATE severity
-  // Dependency of @hyperdx/browser (observability/telemetry)
-  // No fix available; chain: @hyperdx/browser → @hyperdx/otel-web → @opentelemetry/exporter-trace-otlp-http → @opentelemetry/core
-  // Vulnerability: unbounded memory allocation in W3C Baggage propagation (DoS vector)
-  // Risk: Low in practice; requires malicious W3C Baggage headers; not critical path for wedding app
-  'GHSA-8988-4f7v-96qf', // Unbounded memory allocation in W3C Baggage propagation
-
-  // js-yaml - MODERATE severity
-  // Dependency chain: jest (dev) → babel-plugin-istanbul → @istanbuljs/load-nyc-config → js-yaml
-  // Also: gray-matter → js-yaml
-  // Fix available but requires breaking change: downgrading gray-matter to 2.0.1
-  // Vulnerability: quadratic-complexity DoS via repeated aliases in merge keys
-  // Risk: Zero production risk; only affects build/test toolchain; never loaded at runtime
-  'GHSA-h67p-54hq-rp68', // Quadratic-complexity DoS in merge key handling via repeated aliases
-
-  // brace-expansion - HIGH severity
-  // Dependency chain: jest → @jest/reporters/@jest/config/jest-runtime → glob/readdir-glob → minimatch → brace-expansion
-  // Multiple DoS vulnerabilities affecting the 5.0.x branch
-  // Fix requires version bump (not available in 5.x branch) or breaking change to eslint-config-next
-  // Usage: Dev toolchain only — linting, testing, build processes
-  // Risk: Zero production risk; attack requires untrusted input to glob patterns (dev-only)
-  'GHSA-3jxr-9vmj-r5cp', // DoS via exponential-time expansion of consecutive non-expanding {} groups
-  'GHSA-mh99-v99m-4gvg', // DoS via unbounded expansion length causing process hang/memory exhaustion
-
-  // postcss - HIGH severity (additional vulnerabilities)
-  // Dependency: next@15.1.6 → postcss (bundled version)
-  // Related to GHSA-qx2v-qp2m-jg93 but with different attack vectors
-  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
-  // Risk: Requires malicious CSS content; CSS only from trusted Tailwind/Next.js sources, not user input
   'GHSA-6g55-p6wh-862q', // Arbitrary file read via attacker-controlled sourceMappingURL
   'GHSA-r28c-9q8g-f849', // Path traversal in sourceMappingURL auto-loading
-
-  // valibot - MODERATE severity
-  // Dependency: @prisma/dev → valibot (used in Prisma Studio only)
-  // Vulnerability: record() issue paths can throw for inherited Object property names
-  // Fix requires updating @prisma/dev to version with valibot >= 1.5.0
-  // Usage: Development dependency only (Prisma Studio in local dev)
-  // Risk: Low; only affects development, requires specific conditions in form validation path
-  'GHSA-5qjj-4xww-7phc', // record() issue paths can make flatten() throw for inherited Object property names
-
-  // find-my-way - HIGH severity
-  // Dependency: @prisma/dev → find-my-way (used in Prisma Studio HTTP routing)
-  // Vulnerability: DDoS with HTTP/2 via stream manipulation
-  // Fix available but requires @prisma/dev version bump to support find-my-way@9.6.1+
-  // Usage: Development dependency only (Prisma Studio)
-  // Risk: Zero production risk; Prisma Studio is local dev tool, not exposed to internet
-  'GHSA-c96f-x56v-gq3h', // DDoS with HTTP/2
-
-  // sharp - HIGH severity
-  // Dependency: next@15.1.6 → sharp (image optimization)
-  // Vulnerability: Inherited vulnerabilities from libvips (CVE-2026-33327/33328/35590/35591)
-  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
-  // Usage: Image optimization in production builds
-  // Risk: Moderate; requires processing of specially crafted image files; wedding app has limited image sources
-  'GHSA-f88m-g3jw-g9cj', // sharp inherited vulnerabilities in libvips (CVE-2026-33327/28/35590/91)
-
-  // brace-expansion - HIGH severity (newly discovered variant)
-  // Dependency chain: jest → @jest/reporters/@jest/config/jest-runtime → glob/readdir-glob → minimatch → brace-expansion
-  // Vulnerability: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation
-  // Fix requires version bump not available in affected branches
-  // Usage: Dev toolchain only — linting, testing, build processes
-  // Risk: Zero production risk; attack requires untrusted input to glob patterns (dev-only)
-  'GHSA-rgw5-rvv9-x895', // DoS via unbounded intermediate arrays
-
-  // fast-uri - HIGH severity
-  // Dependency: likely via Next.js or related packages
-  // Vulnerability: Host confusion via backslash authority introducer
-  // Usage: URI parsing in HTTP requests
-  // Risk: Moderate; requires crafted URLs; Next.js URL handling has additional layers of validation
-  'GHSA-7p8r-x3mc-p8w7', // Host confusion via backslash authority introducer
-
-  // postcss - HIGH severity (additional variant)
-  // Dependency: next@15.1.6 → postcss (bundled version)
-  // Vulnerability: Incomplete fix of GHSA-6g55-p6wh-862q — attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset
-  // Fix available but requires breaking change: downgrading to next@9.3.3 (major version downgrade)
-  // Risk: Requires malicious CSS content; CSS only from trusted Tailwind/Next.js sources, not user input
   'GHSA-fxqj-rqcc-2cmp', // Incomplete fix of source map reading vulnerability
 
-  // undici - MODERATE severity (additional variants)
-  // Dependency: @vercel/blob@0.27.3 (via fetch/HTTP client)
-  // Vulnerabilities in undici HTTP client
-  // Fix requires major version update to @vercel/blob@2.x or undici update
-  // Usage: HTTP client for Vercel Blob Storage (optional file upload feature)
-  // Risk: Low; requires specific conditions and untrusted HTTP responses; blob storage is trusted first-party service
-  'GHSA-8xcm-r25x-g524', // Downstream response desynchronization via retry interceptor
-  'GHSA-m8rv-5g2x-5cg5', // CRLF Injection via blob-like body 'type' property
-  'GHSA-v3r7-h72x-cjcm', // Cookie attribute injection via unsanitized domain
+  // uuid - MODERATE severity (via exceljs)
+  // Fix requires downgrading exceljs to 3.4.0 (breaking change)
+  'GHSA-w5hq-g745-h8pq', // Missing buffer bounds check in v3/v5/v6 when buf is provided
+
+  // braces, postcss-selector-parser, sprintf-js - transitive dev/build deps, no non-breaking fix
+  'GHSA-vfj7-8cjw-p6xm', // braces: stack exhaustion via deeply nested patterns
+  'GHSA-rj75-hqrm-r3gf', // postcss-selector-parser: quadratic complexity CPU exhaustion
+  'GHSA-hp3w-g68c-fv3c', // sprintf-js: DoS via unbounded precision specifiers
 ];
 
 const SEVERITY_LEVELS = ['moderate', 'high', 'critical'];
