@@ -13,6 +13,121 @@ interface SeatingLayoutProps {
   apiBase?: string;
 }
 
+// Distance from the table edge to a guest's dot, and from the dot to its label.
+const GUEST_DOT_GAP = 12;
+const GUEST_LABEL_GAP = 15;
+
+type GuestPos = { gx: number; gy: number; tx: number; ty: number; textAnchor: 'start' | 'middle' | 'end' };
+
+/** Point on a table's perimeter (circle/rectangle/square) along the ray at `angleDeg`, pushed out by `gap`. */
+function getPerimeterPoint(table: TableWithGuests, angleDeg: number, gap: number) {
+  const theta = (angleDeg * Math.PI) / 180;
+  const dx = Math.cos(theta);
+  const dy = Math.sin(theta);
+  const type = table.type || 'circle';
+  const width = table.width || (type === 'rectangle' ? 120 : 80);
+  const height = table.height || (type === 'rectangle' ? 60 : 80);
+
+  if (type === 'circle') {
+    const r = width / 2;
+    return { x: dx * (r + gap), y: dy * (r + gap), dx, dy };
+  }
+
+  // Rectangle/square: scale the ray until it hits the box boundary, then push out by `gap`.
+  const hw = width / 2;
+  const hh = height / 2;
+  let t: number;
+  if (Math.abs(dx) < 1e-6) {
+    t = hh / Math.abs(dy);
+  } else if (Math.abs(dy) < 1e-6) {
+    t = hw / Math.abs(dx);
+  } else {
+    t = Math.min(hw / Math.abs(dx), hh / Math.abs(dy));
+  }
+  return { x: dx * t + dx * gap, y: dy * t + dy * gap, dx, dy };
+}
+
+/** Default evenly-spaced position for guest `i` of `guestCount` around the table (used when no custom seat_angle is set). */
+function getDefaultGuestPos(table: TableWithGuests, i: number, guestCount: number): GuestPos {
+  const type = table.type || 'circle';
+  const width = table.width || (type === 'rectangle' ? 120 : 80);
+  const height = table.height || (type === 'rectangle' ? 60 : 80);
+
+  let gx = 0, gy = 0, tx = 0, ty = 0;
+  let textAnchor: 'start' | 'middle' | 'end' = 'middle';
+
+  if (type === 'circle') {
+    const angle = (i / guestCount) * 2 * Math.PI - Math.PI / 2;
+    gx = Math.cos(angle) * (width / 2 + 10);
+    gy = Math.sin(angle) * (width / 2 + 10);
+    tx = Math.cos(angle) * (width / 2 + 25);
+    ty = Math.sin(angle) * (width / 2 + 25);
+    textAnchor = Math.abs(angle) < Math.PI / 2 ? 'start' : 'end';
+  } else if (type === 'rectangle') {
+    if (i === 0) { // Left short side
+      gx = -width / 2 - 12; gy = 0;
+      tx = gx - 8; ty = gy + 4; textAnchor = 'end';
+    } else if (i === 1) { // Right short side
+      gx = width / 2 + 12; gy = 0;
+      tx = gx + 8; ty = gy + 4; textAnchor = 'start';
+    } else {
+      // The rest on top and bottom
+      const remaining = guestCount - 2;
+      const onTop = Math.ceil(remaining / 2);
+      const idx = i - 2;
+      if (idx < onTop) { // Top long side
+        const spacing = (width - 20) / (onTop > 1 ? onTop - 1 : 1);
+        gx = (onTop > 1) ? (-width / 2 + 10 + idx * spacing) : 0;
+        gy = -height / 2 - 12;
+        tx = gx; ty = gy - 10; textAnchor = 'middle';
+      } else { // Bottom long side
+        const onBottom = remaining - onTop;
+        const bIdx = idx - onTop;
+        const spacing = (width - 20) / (onBottom > 1 ? onBottom - 1 : 1);
+        gx = (onBottom > 1) ? (-width / 2 + 10 + bIdx * spacing) : 0;
+        gy = height / 2 + 12;
+        tx = gx; ty = gy + 18; textAnchor = 'middle';
+      }
+    }
+  } else { // Square
+    const perSide = Math.ceil(guestCount / 4);
+    const side = Math.floor(i / perSide);
+    const sIdx = i % perSide;
+    const spacing = (width - 20) / (perSide > 1 ? perSide - 1 : 1);
+    const offset = (perSide > 1) ? (-width / 2 + 10 + sIdx * spacing) : 0;
+
+    if (side === 0) { gx = offset; gy = -height / 2 - 12; tx = gx; ty = gy - 10; textAnchor = 'middle'; }
+    else if (side === 1) { gx = width / 2 + 12; gy = offset; tx = gx + 8; ty = gy + 4; textAnchor = 'start'; }
+    else if (side === 2) { gx = offset; gy = height / 2 + 12; tx = gx; ty = gy + 18; textAnchor = 'middle'; }
+    else { gx = -width / 2 - 12; gy = offset; tx = gx - 8; ty = gy + 4; textAnchor = 'end'; }
+  }
+
+  return { gx, gy, tx, ty, textAnchor };
+}
+
+/** Effective position of a guest: their custom seat_angle if set, otherwise the default evenly-spaced slot. */
+function getGuestPos(table: TableWithGuests, guest: { seat_angle?: number | null }, i: number, guestCount: number): GuestPos {
+  if (guest.seat_angle === null || guest.seat_angle === undefined) {
+    return getDefaultGuestPos(table, i, guestCount);
+  }
+  const dot = getPerimeterPoint(table, guest.seat_angle, GUEST_DOT_GAP);
+  const label = getPerimeterPoint(table, guest.seat_angle, GUEST_DOT_GAP + GUEST_LABEL_GAP);
+  let textAnchor: 'start' | 'middle' | 'end' = 'middle';
+  if (dot.dx > 0.3) textAnchor = 'start';
+  else if (dot.dx < -0.3) textAnchor = 'end';
+  const tyNudge = dot.dy < -0.3 ? -4 : dot.dy > 0.3 ? 8 : 4;
+  return { gx: dot.x, gy: dot.y, tx: label.x, ty: label.y + tyNudge, textAnchor };
+}
+
+/** Converts a global SVG point to a table's local (unrotated, centered-on-table) coordinates. */
+function globalToLocal(table: TableWithGuests, gx: number, gy: number) {
+  const rot = ((table.rotation || 0) * Math.PI) / 180;
+  const cos = Math.cos(rot), sin = Math.sin(rot);
+  const dx = gx - (table.x ?? 0);
+  const dy = gy - (table.y ?? 0);
+  return { x: dx * cos + dy * sin, y: -dx * sin + dy * cos };
+}
+
 export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }: SeatingLayoutProps) {
   const t = useTranslations();
   const [tables, setTables] = useState<TableWithGuests[]>(data.tables);
@@ -20,6 +135,7 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragMode, setDragMode] = useState<'none' | 'table' | 'element' | 'draw' | 'text' | 'guest'>('none');
   const [draggedGuest, setDraggedGuest] = useState<{ tableId: string; guestId: string } | null>(null);
+  const [dragGuestAngle, setDragGuestAngle] = useState<number | null>(null);
   const [showNames, setShowNames] = useState(true);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [currentLine, setCurrentLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
@@ -121,9 +237,16 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
         t.id === selectedId ? { ...t, x: coords.x - dragStart.x, y: coords.y - dragStart.y } : t
       ));
     } else if (dragMode === 'element' && selectedId && dragStart) {
-      setElements(elements.map(el => 
+      setElements(elements.map(el =>
         el.id === selectedId ? { ...el, x: coords.x - dragStart.x, y: coords.y - dragStart.y } : el
       ));
+    } else if (dragMode === 'guest' && draggedGuest) {
+      const table = tables.find(t => t.id === draggedGuest.tableId);
+      if (table) {
+        const local = globalToLocal(table, coords.x, coords.y);
+        const angle = ((Math.atan2(local.y, local.x) * 180) / Math.PI + 360) % 360;
+        setDragGuestAngle(angle);
+      }
     }
   };
 
@@ -135,94 +258,42 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
       // Find if we dropped over another guest in the same table
       const targetTable = tables.find(t => t.id === draggedGuest.tableId);
       if (targetTable) {
-        // Find which guest we dropped on
-        // We need to re-calculate their positions or use a hit-test
-        // For simplicity, we'll check proximity to all guests in that table
-        const width = targetTable.width || (targetTable.type === 'rectangle' ? 120 : 80);
-        const height = targetTable.height || (targetTable.type === 'rectangle' ? 60 : 80);
-        
+        const local = globalToLocal(targetTable, coords.x, coords.y);
+        const guestCount = targetTable.assigned_guests.length;
+
+        // Hit-test against every other guest's current (custom or default) position
         let targetGuestId: string | null = null;
-        
         targetTable.assigned_guests.forEach((g, i) => {
           if (g.id === draggedGuest.guestId) return;
-          
-          // Calculate this guest's position relative to table center
-          let gx = 0, gy = 0;
-          const guestCount = targetTable.assigned_guests.length;
-          const type = targetTable.type || 'circle';
-
-          if (type === 'circle') {
-            const angle = (i / guestCount) * 2 * Math.PI - Math.PI / 2;
-            gx = Math.cos(angle) * (width/2 + 10);
-            gy = Math.sin(angle) * (width/2 + 10);
-          } else if (type === 'rectangle') {
-            if (i === 0) { gx = -width/2 - 12; gy = 0; }
-            else if (i === 1) { gx = width/2 + 12; gy = 0; }
-            else {
-              const remaining = guestCount - 2;
-              const onTop = Math.ceil(remaining / 2);
-              const idx = i - 2;
-              if (idx < onTop) {
-                const spacing = (width - 20) / (onTop > 1 ? onTop - 1 : 1);
-                gx = (onTop > 1) ? (-width/2 + 10 + idx * spacing) : 0;
-                gy = -height/2 - 12;
-              } else {
-                const onBottom = remaining - onTop;
-                const bIdx = idx - onTop;
-                const spacing = (width - 20) / (onBottom > 1 ? onBottom - 1 : 1);
-                gx = (onBottom > 1) ? (-width/2 + 10 + bIdx * spacing) : 0;
-                gy = height/2 + 12;
-              }
-            }
-          } else { // Square
-            const perSide = Math.ceil(guestCount / 4);
-            const side = Math.floor(i / perSide);
-            const sIdx = i % perSide;
-            const spacing = (width - 20) / (perSide > 1 ? perSide - 1 : 1);
-            const offset = (perSide > 1) ? (-width/2 + 10 + sIdx * spacing) : 0;
-            if (side === 0) { gx = offset; gy = -height/2 - 12; }
-            else if (side === 1) { gx = width/2 + 12; gy = offset; }
-            else if (side === 2) { gx = offset; gy = height/2 + 12; }
-            else { gx = -width/2 - 12; gy = offset; }
-          }
-
-          // Transform back to global SVG space
-          // This is a simplified hit test
-          const tableX = targetTable.x ?? 0;
-          const tableY = targetTable.y ?? 0;
-          const dist = Math.sqrt(Math.pow(coords.x - (tableX + gx), 2) + Math.pow(coords.y - (tableY + gy), 2));
+          const { gx, gy } = getGuestPos(targetTable, g, i, guestCount);
+          const dist = Math.sqrt(Math.pow(local.x - gx, 2) + Math.pow(local.y - gy, 2));
           if (dist < 20) {
             targetGuestId = g.id;
           }
         });
 
         if (targetGuestId) {
-          // Swap them
+          // Dropped on another guest: swap their order
           const newGuests = [...targetTable.assigned_guests];
           const idx1 = newGuests.findIndex(g => g.id === draggedGuest.guestId);
           const idx2 = newGuests.findIndex(g => g.id === targetGuestId);
           if (idx1 !== -1 && idx2 !== -1) {
             [newGuests[idx1], newGuests[idx2]] = [newGuests[idx2], newGuests[idx1]];
             setTables(tables.map(t => t.id === targetTable.id ? { ...t, assigned_guests: newGuests } : t));
-            
-            // Save to DB
-            try {
-              await fetch(apiBase, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  assignments: newGuests.map((g, i) => ({
-                    guest_id: g.id,
-                    table_id: targetTable.id,
-                    seat_index: i
-                  }))
-                })
-              });
-            } catch (err) { console.error(err); }
+            await saveGuestOrder(targetTable.id, newGuests);
           }
+        } else {
+          // Dropped on empty space: snap this guest to that angle around the table perimeter
+          const angle = ((Math.atan2(local.y, local.x) * 180) / Math.PI + 360) % 360;
+          const newGuests = targetTable.assigned_guests.map(g =>
+            g.id === draggedGuest.guestId ? { ...g, seat_angle: angle } : g
+          );
+          setTables(tables.map(t => t.id === targetTable.id ? { ...t, assigned_guests: newGuests } : t));
+          await saveGuestOrder(targetTable.id, newGuests);
         }
       }
       setDraggedGuest(null);
+      setDragGuestAngle(null);
     }
 
     if (dragMode === 'draw' && currentLine) {
@@ -345,6 +416,26 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
     [elements, selectedId]
   );
 
+  // Persists a table's current guest order (seat_index) and custom angles (seat_angle) to the API.
+  const saveGuestOrder = async (tableId: string, guests: TableWithGuests['assigned_guests']) => {
+    try {
+      await fetch(apiBase, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assignments: guests.map((g, i) => ({
+            guest_id: g.id,
+            table_id: tableId,
+            seat_index: i,
+            seat_angle: g.seat_angle ?? null
+          }))
+        })
+      });
+    } catch (error) {
+      console.error('Error updating guest positions:', error);
+    }
+  };
+
   const moveGuest = async (tableId: string, guestId: string, direction: 'up' | 'down') => {
     const table = tables.find(t => t.id === tableId);
     if (!table) return;
@@ -361,27 +452,18 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
       return;
     }
 
-    // Update local state
     setTables(tables.map(t => t.id === tableId ? { ...t, assigned_guests: guests } : t));
+    await saveGuestOrder(tableId, guests);
+  };
 
-    // Save assignments immediately or wait for explicit save? 
-    // The requirement says "individuals seating in that table can be positioned in the table as you wish"
-    // We'll update the seat_index via API
-    try {
-      await fetch(apiBase, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assignments: guests.map((g, i) => ({
-            guest_id: g.id,
-            table_id: tableId,
-            seat_index: i
-          }))
-        })
-      });
-    } catch (error) {
-      console.error('Error updating guest positions:', error);
-    }
+  // Clears custom seat_angle for every guest at a table, returning them to the automatic evenly-spaced arrangement.
+  const resetTableGuestPositions = async (tableId: string) => {
+    const table = tables.find(t => t.id === tableId);
+    if (!table) return;
+
+    const guests = table.assigned_guests.map(g => ({ ...g, seat_angle: null }));
+    setTables(tables.map(t => t.id === tableId ? { ...t, assigned_guests: guests } : t));
+    await saveGuestOrder(tableId, guests);
   };
 
   const renderTable = (table: TableWithGuests) => {
@@ -435,74 +517,31 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
         
         {/* Render small dots for guests around the table */}
         {guests.map((g, i) => {
-          let gx = 0, gy = 0;
-          let textAnchor: 'start' | 'middle' | 'end' = 'middle';
-          let tx = 0, ty = 0;
+          const { gx, gy, tx, ty, textAnchor } = getGuestPos(table, g, i, guestCount);
+          const canDrag = isSelected;
 
-          if (type === 'circle') {
-            const angle = (i / guestCount) * 2 * Math.PI - Math.PI / 2;
-            gx = Math.cos(angle) * (width/2 + 10);
-            gy = Math.sin(angle) * (width/2 + 10);
-            tx = Math.cos(angle) * (width/2 + 25);
-            ty = Math.sin(angle) * (width/2 + 25);
-            textAnchor = Math.abs(angle) < Math.PI/2 ? 'start' : 'end';
-          } else if (type === 'rectangle') {
-            // Logic: 1 on each short side (left/right), the rest distributed on long sides (top/bottom)
-            // We assume short sides are indices 0 and 1, or we split them
-            if (i === 0) { // Left short side
-              gx = -width/2 - 12; gy = 0;
-              tx = gx - 8; ty = gy + 4; textAnchor = 'end';
-            } else if (i === 1) { // Right short side
-              gx = width/2 + 12; gy = 0;
-              tx = gx + 8; ty = gy + 4; textAnchor = 'start';
-            } else {
-              // The rest on top and bottom
-              const remaining = guestCount - 2;
-              const onTop = Math.ceil(remaining / 2);
-              const idx = i - 2;
-              if (idx < onTop) { // Top long side
-                const spacing = (width - 20) / (onTop > 1 ? onTop - 1 : 1);
-                gx = (onTop > 1) ? (-width/2 + 10 + idx * spacing) : 0;
-                gy = -height/2 - 12;
-                tx = gx; ty = gy - 10; textAnchor = 'middle';
-              } else { // Bottom long side
-                const onBottom = remaining - onTop;
-                const bIdx = idx - onTop;
-                const spacing = (width - 20) / (onBottom > 1 ? onBottom - 1 : 1);
-                gx = (onBottom > 1) ? (-width/2 + 10 + bIdx * spacing) : 0;
-                gy = height/2 + 12;
-                tx = gx; ty = gy + 18; textAnchor = 'middle';
-              }
-            }
-          } else { // Square
-            const perSide = Math.ceil(guestCount / 4);
-            const side = Math.floor(i / perSide);
-            const sIdx = i % perSide;
-            const spacing = (width - 20) / (perSide > 1 ? perSide - 1 : 1);
-            const offset = (perSide > 1) ? (-width/2 + 10 + sIdx * spacing) : 0;
-            
-            if (side === 0) { gx = offset; gy = -height/2 - 12; tx = gx; ty = gy - 10; textAnchor = 'middle'; }
-            else if (side === 1) { gx = width/2 + 12; gy = offset; tx = gx + 8; ty = gy + 4; textAnchor = 'start'; }
-            else if (side === 2) { gx = offset; gy = height/2 + 12; tx = gx; ty = gy + 18; textAnchor = 'middle'; }
-            else { gx = -width/2 - 12; gy = offset; tx = gx - 8; ty = gy + 4; textAnchor = 'end'; }
-          }
-          
           return (
-            <g 
-              key={g.id} 
-              className="cursor-pointer"
+            <g
+              key={g.id}
+              className={canDrag ? 'cursor-move' : 'cursor-pointer'}
               onPointerDown={(e) => {
                 e.stopPropagation();
+                if (!canDrag) {
+                  // Select the table first; dragging becomes available on the next press.
+                  setSelectedId(table.id);
+                  return;
+                }
                 setDraggedGuest({ tableId: table.id, guestId: g.id });
+                setDragGuestAngle(((Math.atan2(gy, gx) * 180) / Math.PI + 360) % 360);
                 setDragMode('guest');
                 (e.target as Element).setPointerCapture(e.pointerId);
               }}
             >
               <circle cx={gx} cy={gy} r={8} fill={draggedGuest?.guestId === g.id ? '#4F46E5' : '#8B5CF6'} />
               {showNames && (
-                <text 
-                  x={tx} y={ty} 
-                  fontSize="10" 
+                <text
+                  x={tx} y={ty}
+                  fontSize="10"
                   textAnchor={textAnchor}
                   className="pointer-events-none select-none fill-gray-600"
                   transform={`rotate(${- (table.rotation || 0)}, ${tx}, ${ty})`}
@@ -513,6 +552,18 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
             </g>
           );
         })}
+
+        {/* Ghost preview of where the dragged guest will land */}
+        {draggedGuest?.tableId === table.id && dragGuestAngle !== null && (() => {
+          const preview = getPerimeterPoint(table, dragGuestAngle, GUEST_DOT_GAP);
+          return (
+            <circle
+              cx={preview.x} cy={preview.y} r={10}
+              fill="none" stroke="#4F46E5" strokeWidth={2} strokeDasharray="3,2"
+              className="pointer-events-none"
+            />
+          );
+        })()}
       </g>
     );
   };
@@ -648,7 +699,21 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
                 </div>
               </div>
             </div>
-            
+
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[10px] uppercase text-gray-500 font-bold">
+                {t('admin.seating.layout.guestSeats' as never) || 'Guest Seats'}
+              </label>
+              <button
+                onClick={() => resetTableGuestPositions(selectedTable.id)}
+                className="flex items-center gap-1 text-[11px] font-medium text-purple-600 hover:text-purple-800"
+                title={t('admin.seating.layout.canvasActions.resetGuestPositions' as never) || 'Reset to automatic arrangement'}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                {t('admin.seating.layout.canvasActions.reset' as never) || 'Reset'}
+              </button>
+            </div>
+
             <div className="space-y-2">
               {selectedTable.assigned_guests.map((guest, idx) => (
                 <div key={guest.id} className="flex items-center justify-between text-sm p-1 hover:bg-gray-50 rounded">
@@ -774,7 +839,7 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
 
         {/* Legend / Tooltips */}
         <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded border border-gray-200 text-xs text-gray-500 pointer-events-none">
-          Drag tables to position • Double-click text to edit • Select and press delete to remove
+          Drag tables to position • Select a table, then drag its guests around it • Double-click text to edit • Select and press delete to remove
         </div>
       </div>
     </div>

@@ -25,7 +25,13 @@ export async function getSeatingPlanHandler(weddingId: string): Promise<NextResp
   try {
     const wedding = await prisma.wedding.findUnique({
       where: { id: weddingId },
-      select: { couple_names: true, couple_table_id: true, layout_elements: true },
+      select: {
+        couple_names: true,
+        couple_table_id: true,
+        layout_elements: true,
+        couple_member_1_seat_angle: true,
+        couple_member_2_seat_angle: true,
+      },
     });
 
     if (!wedding) {
@@ -47,6 +53,7 @@ export async function getSeatingPlanHandler(weddingId: string): Promise<NextResp
         attending: true,
         table_id: wedding.couple_table_id,
         seat_index: 0,
+        seat_angle: wedding.couple_member_1_seat_angle,
       },
       {
         id: 'couple-member-2',
@@ -57,6 +64,7 @@ export async function getSeatingPlanHandler(weddingId: string): Promise<NextResp
         attending: true,
         table_id: wedding.couple_table_id,
         seat_index: 1,
+        seat_angle: wedding.couple_member_2_seat_angle,
       },
     ];
 
@@ -143,6 +151,7 @@ const assignSchema = z.object({
       guest_id: z.string(),
       table_id: z.string().uuid().nullable(),
       seat_index: z.number().int().min(0).nullable().optional(),
+      seat_angle: z.number().min(0).max(360).nullable().optional(),
     })
   ),
 });
@@ -155,17 +164,24 @@ export async function updateSeatingAssignmentsHandler(
     const body = await request.json();
     const { assignments } = assignSchema.parse(body);
 
-    const coupleAssignment = assignments.find(
+    const coupleAssignments = assignments.filter(
       (a) => a.guest_id === 'couple-member-1' || a.guest_id === 'couple-member-2'
     );
     const guestAssignments = assignments.filter(
       (a) => a.guest_id !== 'couple-member-1' && a.guest_id !== 'couple-member-2'
     );
 
-    if (coupleAssignment) {
+    if (coupleAssignments.length > 0) {
+      // Both synthetic couple seats always share the couple's table; seat_angle is per-member.
+      const member1 = coupleAssignments.find((a) => a.guest_id === 'couple-member-1');
+      const member2 = coupleAssignments.find((a) => a.guest_id === 'couple-member-2');
       await prisma.wedding.update({
         where: { id: weddingId },
-        data: { couple_table_id: coupleAssignment.table_id },
+        data: {
+          couple_table_id: coupleAssignments[0].table_id,
+          ...(member1?.seat_angle !== undefined ? { couple_member_1_seat_angle: member1.seat_angle } : {}),
+          ...(member2?.seat_angle !== undefined ? { couple_member_2_seat_angle: member2.seat_angle } : {}),
+        },
       });
     }
 
@@ -183,7 +199,7 @@ export async function updateSeatingAssignmentsHandler(
         for (const a of unassignments) {
           await tx.familyMember.update({
             where: { id: a.guest_id, family: { wedding_id: weddingId } },
-            data: { table_id: null, seat_index: null },
+            data: { table_id: null, seat_index: null, seat_angle: null },
           });
         }
 
@@ -202,6 +218,7 @@ export async function updateSeatingAssignmentsHandler(
                 table_id: tableId,
                 seat_index:
                   assignment?.seat_index !== undefined ? assignment.seat_index : nextIndex++,
+                ...(assignment?.seat_angle !== undefined ? { seat_angle: assignment.seat_angle } : {}),
               },
             });
           }

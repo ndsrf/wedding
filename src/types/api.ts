@@ -963,6 +963,7 @@ export interface AssignGuestsRequest {
     guest_id: string;
     table_id: string | null;
     seat_index?: number | null;
+    seat_angle?: number | null;
   }>;
 }
 
