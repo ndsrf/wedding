@@ -128,12 +128,35 @@ function globalToLocal(table: TableWithGuests, gx: number, gy: number) {
   return { x: dx * cos + dy * sin, y: -dx * sin + dy * cos };
 }
 
+const BASE_VIEW = { x: 0, y: 0, w: 1200, h: 800 };
+const MIN_VIEW_W = 240;
+
+type View = typeof BASE_VIEW;
+
+/** Keeps the 3:2 aspect ratio, limits zoom, and keeps the view inside the canvas. */
+function clampView(v: View): View {
+  const w = Math.min(BASE_VIEW.w, Math.max(MIN_VIEW_W, v.w));
+  const h = (w * BASE_VIEW.h) / BASE_VIEW.w;
+  return {
+    w,
+    h,
+    x: Math.min(BASE_VIEW.w - w, Math.max(0, v.x)),
+    y: Math.min(BASE_VIEW.h - h, Math.max(0, v.y)),
+  };
+}
+
+/** SVG units per screen pixel plus the letterbox offsets (preserveAspectRatio="meet"). */
+function viewMetrics(v: View, rect: DOMRect) {
+  const upp = 1 / Math.min(rect.width / v.w, rect.height / v.h);
+  return { upp, ox: (rect.width - v.w / upp) / 2, oy: (rect.height - v.h / upp) / 2 };
+}
+
 export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }: SeatingLayoutProps) {
   const t = useTranslations();
   const [tables, setTables] = useState<TableWithGuests[]>(data.tables);
   const [elements, setElements] = useState<LayoutElement[]>(data.layout_elements || []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [dragMode, setDragMode] = useState<'none' | 'table' | 'element' | 'draw' | 'text' | 'guest'>('none');
+  const [dragMode, setDragMode] = useState<'none' | 'table' | 'element' | 'draw' | 'text' | 'guest' | 'pan'>('none');
   const [draggedGuest, setDraggedGuest] = useState<{ tableId: string; guestId: string } | null>(null);
   const [dragGuestAngle, setDragGuestAngle] = useState<number | null>(null);
   const [showNames, setShowNames] = useState(true);
@@ -143,7 +166,11 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
   const svgRef = useRef<SVGSVGElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
-  const viewBox = { x: 0, y: 0, w: 1200, h: 800 };
+  const viewBox = BASE_VIEW;
+  const [view, setView] = useState<View>(BASE_VIEW);
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const panRef = useRef<{ clientX: number; clientY: number; view0: View } | null>(null);
+  const pinchRef = useRef<{ d0: number; view0: View; anchor: { x: number; y: number } } | null>(null);
 
   useEffect(() => {
     setTables(data.tables);
@@ -157,6 +184,51 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
     pt.y = e.clientY;
     const transformed = pt.matrixTransform(svgRef.current.getScreenCTM()?.inverse());
     return { x: transformed.x, y: transformed.y };
+  };
+
+  // Two-finger pinch/pan: registered in the capture phase so it also sees presses on tables and guests.
+  const handlePointerDownCapture = (e: React.PointerEvent) => {
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointersRef.current.size !== 2 || !svgRef.current) return;
+
+    e.stopPropagation();
+    // A second finger cancels whatever the first one started
+    if (dragMode === 'table' || dragMode === 'element' || dragMode === 'guest' || dragMode === 'pan') setDragMode('none');
+    panRef.current = null;
+    setDraggedGuest(null);
+    setDragGuestAngle(null);
+    setDragStart(null);
+    setCurrentLine(null);
+
+    const [a, b] = Array.from(pointersRef.current.values());
+    const rect = svgRef.current.getBoundingClientRect();
+    const m = viewMetrics(view, rect);
+    const mx = (a.x + b.x) / 2 - rect.left;
+    const my = (a.y + b.y) / 2 - rect.top;
+    pinchRef.current = {
+      d0: Math.hypot(a.x - b.x, a.y - b.y) || 1,
+      view0: view,
+      anchor: { x: view.x + (mx - m.ox) * m.upp, y: view.y + (my - m.oy) * m.upp },
+    };
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent) => {
+    pointersRef.current.delete(e.pointerId);
+    if (pointersRef.current.size < 2) pinchRef.current = null;
+    setDragMode('none');
+    setDraggedGuest(null);
+    setDragGuestAngle(null);
+    setDragStart(null);
+    setCurrentLine(null);
+  };
+
+  const zoomBy = (factor: number) => {
+    setView(v => clampView({
+      w: v.w * factor,
+      h: v.h * factor,
+      x: v.x + (v.w - v.w * factor) / 2,
+      y: v.y + (v.h - v.h * factor) / 2,
+    }));
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -224,10 +296,36 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
     }
 
     setSelectedId(null);
+    // Empty space: drag to pan the (zoomed) view
+    panRef.current = { clientX: e.clientX, clientY: e.clientY, view0: view };
+    setDragMode('pan');
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+    if (pinchRef.current && pointersRef.current.size >= 2 && svgRef.current) {
+      const { d0, view0, anchor } = pinchRef.current;
+      const [a, b] = Array.from(pointersRef.current.values());
+      const scale = d0 / (Math.hypot(a.x - b.x, a.y - b.y) || 1);
+      const rect = svgRef.current.getBoundingClientRect();
+      const w = Math.min(BASE_VIEW.w, Math.max(MIN_VIEW_W, view0.w * scale));
+      const next: View = { x: 0, y: 0, w, h: (w * BASE_VIEW.h) / BASE_VIEW.w };
+      const m = viewMetrics(next, rect);
+      const mx = (a.x + b.x) / 2 - rect.left;
+      const my = (a.y + b.y) / 2 - rect.top;
+      // Keep the point that was under the fingers at gesture start under them now (zoom + pan)
+      setView(clampView({ ...next, x: anchor.x - (mx - m.ox) * m.upp, y: anchor.y - (my - m.oy) * m.upp }));
+      return;
+    }
     if (dragMode === 'none') return;
+    if (dragMode === 'pan' && panRef.current && svgRef.current) {
+      const { clientX, clientY, view0 } = panRef.current;
+      const { upp } = viewMetrics(view0, svgRef.current.getBoundingClientRect());
+      setView(clampView({ ...view0, x: view0.x - (e.clientX - clientX) * upp, y: view0.y - (e.clientY - clientY) * upp }));
+      return;
+    }
     const coords = getSvgCoords(e);
 
     if (dragMode === 'draw' && currentLine) {
@@ -251,7 +349,12 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
   };
 
   const handlePointerUp = async (e: React.PointerEvent) => {
-    (e.target as Element).releasePointerCapture(e.pointerId);
+    pointersRef.current.delete(e.pointerId);
+    if (pinchRef.current) {
+      if (pointersRef.current.size < 2) pinchRef.current = null;
+      return;
+    }
+    try { (e.target as Element).releasePointerCapture(e.pointerId); } catch { /* already released */ }
     const coords = getSvgCoords(e);
 
     if (dragMode === 'guest' && draggedGuest) {
@@ -280,7 +383,7 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
           if (idx1 !== -1 && idx2 !== -1) {
             [newGuests[idx1], newGuests[idx2]] = [newGuests[idx2], newGuests[idx1]];
             setTables(tables.map(t => t.id === targetTable.id ? { ...t, assigned_guests: newGuests } : t));
-            await saveGuestOrder(targetTable.id, newGuests);
+            void saveGuestOrder(targetTable.id, newGuests);
           }
         } else {
           // Dropped on empty space: snap this guest to that angle around the table perimeter
@@ -289,11 +392,15 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
             g.id === draggedGuest.guestId ? { ...g, seat_angle: angle } : g
           );
           setTables(tables.map(t => t.id === targetTable.id ? { ...t, assigned_guests: newGuests } : t));
-          await saveGuestOrder(targetTable.id, newGuests);
+          void saveGuestOrder(targetTable.id, newGuests);
         }
       }
+      // Reset drag state synchronously (don't wait for the save) so the ghost stops following the mouse
       setDraggedGuest(null);
       setDragGuestAngle(null);
+      setDragMode('none');
+      setDragStart(null);
+      return;
     }
 
     if (dragMode === 'draw' && currentLine) {
@@ -314,6 +421,7 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
       setDragMode('none');
     }
     setDragStart(null);
+    panRef.current = null;
   };
 
   const deleteSelected = () => {
@@ -787,12 +895,14 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
       >
         <svg
           ref={svgRef}
-          viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+          viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
           className="w-full h-full touch-none"
+          onPointerDownCapture={handlePointerDownCapture}
           onPointerDown={handlePointerDown}
+          onPointerCancel={handlePointerCancel}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
+          onPointerLeave={(e) => { if (dragMode !== 'guest') handlePointerUp(e); }}
         >
           {/* Elements (Lines, Text) */}
           {elements.map(el => (
@@ -836,6 +946,13 @@ export function SeatingLayout({ data, onUpdate, apiBase = '/api/admin/seating' }
           {/* Tables */}
           {tables.filter(t => t.x !== null && t.y !== null).map(renderTable)}
         </svg>
+
+        {/* Zoom controls (two-finger pinch also works on touch screens) */}
+        <div className="absolute top-3 right-3 flex flex-col gap-1">
+          <button onClick={() => zoomBy(0.8)} className="h-9 w-9 rounded border border-gray-300 bg-white/90 text-lg font-bold text-gray-700 hover:bg-gray-50" aria-label="Zoom in">+</button>
+          <button onClick={() => zoomBy(1.25)} className="h-9 w-9 rounded border border-gray-300 bg-white/90 text-lg font-bold text-gray-700 hover:bg-gray-50" aria-label="Zoom out">−</button>
+          <button onClick={() => setView(BASE_VIEW)} className="h-9 w-9 rounded border border-gray-300 bg-white/90 text-xs font-bold text-gray-700 hover:bg-gray-50" aria-label="Reset zoom">1:1</button>
+        </div>
 
         {/* Legend / Tooltips */}
         <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded border border-gray-200 text-xs text-gray-500 pointer-events-none">
