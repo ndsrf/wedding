@@ -129,6 +129,8 @@ const baseWedding = {
   show_nupcibot_whatsapp_link: true,
   show_nupci_banner: true,
   couple_table_id: null,
+  couple_member_1_seat_angle: null,
+  couple_member_2_seat_angle: null,
   main_event_location_id: null,
   wizard_completed: false,
   wizard_current_step: null,

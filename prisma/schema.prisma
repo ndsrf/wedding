@@ -257,6 +257,8 @@ model Wedding {
   planned_guests                  Int?
   planned_gift_per_person         Decimal?           @db.Decimal(10, 2)
   couple_table_id                 String?
+  couple_member_1_seat_angle      Float?
+  couple_member_2_seat_angle      Float?
   customer_id                     String?
   contract_id                     String?            // Originating contract for traceability / billing
   wizard_completed                Boolean            @default(false)
@@ -514,6 +516,7 @@ model FamilyMember {
   guest_text_question_3_answer      String?
   table_id             String?
   seat_index           Int?       // Position within the table
+  seat_angle           Float?     // Custom angle (degrees, 0-360) around the table perimeter; null = auto-arranged
   seating_group        String?
   created_at           DateTime   @default(now())
   family               Family     @relation(fields: [family_id], references: [id], onDelete: Cascade)

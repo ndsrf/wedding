@@ -2004,9 +2004,12 @@
           "delete": "Delete Selected",
           "save": "Save Layout",
           "export": "Export to Excel",
-          "rotate": "Rotate 90°"
+          "rotate": "Rotate 90°",
+          "reset": "Reset",
+          "resetGuestPositions": "Reset to automatic arrangement"
         },
         "showNames": "Show Guest Names",
+        "guestSeats": "Guest Seats",
         "textPlaceholder": "Double click to edit text",
         "familySeating": "Family Seating",
         "familyTogether": "Keep families together",

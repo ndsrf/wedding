@@ -2001,9 +2001,12 @@
           "delete": "Eliminar Seleccionado",
           "save": "Guardar Diseño",
           "export": "Exportar a Excel",
-          "rotate": "Rotar 90°"
+          "rotate": "Rotar 90°",
+          "reset": "Restablecer",
+          "resetGuestPositions": "Restablecer a la disposición automática"
         },
         "showNames": "Mostrar nombres de invitados",
+        "guestSeats": "Asientos de Invitados",
         "textPlaceholder": "Doble clic para editar texto",
         "familySeating": "Asientos por Familia",
         "familyTogether": "Mantener familias juntas",
