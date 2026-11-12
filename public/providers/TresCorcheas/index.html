@@ -1,0 +1,1273 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Audición TresCorcheas (local)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<style>
+:root{
+  --bg:#FBF7F0; --surface:#FFFFFF; --ink:#241A2B; --muted:#6B5F6E; --line:#E6DED5;
+  --accent:#7A2E3A; --accent-ink:#FFFFFF;
+  --cat-ES:#A9802E; --cat-CL:#3E6E6B; --cat-VO:#B5677A; --cat-CO:#5F6099; --cat-BS:#AA5C3F; --cat-PO:#6C8A5E;
+  --match-full:#3E7A4F; --match-close:#C08A2E; --match-far:#B5503F;
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --font-body:'Work Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#1B1420; --surface:#251B2C; --ink:#F3ECF2; --muted:#B7A9BB; --line:#3A2E40;
+    --accent:#E4A3AD; --accent-ink:#2A1319;
+    --cat-ES:#D9AE5C; --cat-CL:#6FA6A2; --cat-VO:#DD93A3; --cat-CO:#9496D6; --cat-BS:#D98A68; --cat-PO:#9BBF87;
+    --match-full:#7FC98D; --match-close:#E0B463; --match-far:#E08A7A;
+  }
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--font-body); margin:0; padding:0 16px;}
+.app{max-width:640px; margin:0 auto; padding:20px 0 40px; display:flex; flex-direction:column; gap:14px;}
+header h1{font-family:var(--font-display); font-weight:700; font-size:1.7rem; margin:0;}
+header p{margin:4px 0 0; color:var(--muted); font-size:.85rem;}
+.pill-btn{font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:7px 13px; cursor:pointer;}
+.pill-btn.active{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+header{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.filters{display:flex; flex-direction:column; gap:10px;}
+.filters-block{display:flex; flex-direction:column; gap:7px;}
+.filters-label{font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.03em; color:var(--muted);}
+.chip-row{display:flex; flex-wrap:wrap; gap:7px;}
+.chip{font-family:var(--font-mono); font-size:.72rem; border:1px solid var(--line); border-radius:999px; padding:6px 11px; cursor:pointer; background:var(--surface); color:var(--muted); display:flex; align-items:center; gap:6px;}
+.chip .dot{width:7px; height:7px; border-radius:50%; background:var(--c);}
+.chip.active{color:var(--ink); border-color:var(--c);}
+.chip.instr{border-color:var(--line);}
+.chip.instr.active{color:var(--accent-ink); background:var(--accent); border-color:var(--accent);}
+.toggle-row{display:flex; align-items:center; gap:8px; font-size:.85rem; color:var(--muted); cursor:pointer;}
+.import-panel{display:flex; flex-direction:column; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px;}
+.import-panel[hidden]{display:none;}
+.import-panel textarea{width:100%; font-family:var(--font-mono); font-size:.82rem; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); resize:vertical;}
+.import-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.import-result{font-family:var(--font-mono); font-size:.78rem; color:var(--muted);}
+.toggle-row input{accent-color:var(--accent); width:16px; height:16px; cursor:pointer;}
+select#sectionSelect{width:100%; font-family:var(--font-body); font-size:.92rem; padding:10px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath fill='%236B5F6E' d='M7 9 0 2l1.4-1.4L7 6.2 12.6.6 14 2z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:34px;}
+input[type="search"]{width:100%; font-family:var(--font-body); font-size:.95rem; padding:10px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink);}
+.jump-row{display:flex; gap:8px; align-items:center;}
+.jump-row input[type="number"]{width:110px; font-family:var(--font-mono); font-size:.9rem; padding:9px 12px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink);}
+.jump-row input[type="number"]::-webkit-inner-spin-button,.jump-row input[type="number"]::-webkit-outer-spin-button{opacity:.6;}
+.stage{display:flex; align-items:center; gap:8px;}
+.nav{flex:0 0 auto; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:1.3rem; cursor:pointer;}
+.nav:disabled{opacity:.35;}
+.card{flex:1; min-width:0; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:12px; border-left:4px solid var(--line); transition:border-color .15s;}
+.card.match-full{border-left-color:var(--match-full);}
+.card.match-close{border-left-color:var(--match-close);}
+.card.match-far{border-left-color:var(--match-far);}
+.match-badge{align-self:flex-start; font-family:var(--font-mono); font-size:.72rem; border-radius:999px; padding:4px 11px; font-weight:600;}
+.match-badge.match-full{background:color-mix(in srgb, var(--match-full) 20%, transparent); color:var(--match-full);}
+.match-badge.match-close{background:color-mix(in srgb, var(--match-close) 20%, transparent); color:var(--match-close);}
+.match-badge.match-far{background:color-mix(in srgb, var(--match-far) 20%, transparent); color:var(--match-far);}
+.meta-row{display:flex; align-items:center; justify-content:space-between;}
+.counter{font-family:var(--font-mono); font-size:.78rem; color:var(--muted);}
+.fav-btn{background:none; border:none; font-size:1.35rem; cursor:pointer; color:var(--muted);}
+.fav-btn.on{color:var(--accent);}
+.cat-badge{align-self:flex-start; font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; color:var(--c); border:1px solid var(--c); border-radius:999px; padding:4px 10px;}
+.title{font-family:var(--font-display); font-weight:600; font-size:1.8rem; line-height:1.15; margin:0;}
+.artist{margin:0; color:var(--muted); font-size:1rem;}
+.form-badge{font-family:var(--font-mono); font-size:.76rem; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:6px 10px; align-self:flex-start;}
+.players{display:flex; flex-direction:column; gap:10px; margin-top:4px;}
+.sp-wrap iframe{width:100%; height:152px; border:0; border-radius:12px;}
+.sp-fallback{display:inline-flex; align-items:center; gap:7px; font-family:var(--font-body); font-weight:600; font-size:.88rem; text-decoration:none; padding:10px 16px; border-radius:10px; border:1px solid var(--line); color:var(--ink); background:var(--bg);}
+.yt-btn{display:inline-flex; align-items:center; justify-content:center; gap:7px; font-family:var(--font-body); font-weight:600; font-size:.88rem; text-decoration:none; padding:10px 16px; border-radius:10px; border:1px solid var(--line); color:var(--ink); background:var(--bg);}
+.yt-btn:hover{color:var(--accent); border-color:var(--accent);}
+.empty{padding:40px 22px; text-align:center; color:var(--muted);}
+footer{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+.hint{font-family:var(--font-mono); font-size:.68rem; color:var(--muted); text-align:center;}
+@media (max-width:420px){ .title{font-size:1.5rem;} .card{padding:16px;} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Audición TresCorcheas (local)</h1>
+      <p>352 piezas · reproductor de Spotify incrustado cuando está disponible · enlace directo a YouTube</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="pill-btn" id="favViewBtn">♡ Favoritas (0)</button>
+      <button class="pill-btn" id="copyFavBtn">📋 Copiar lista</button>
+      <button class="pill-btn" id="importFavBtn">📥 Importar favoritos</button>
+      <button class="pill-btn" id="clearFavBtn">🗑 Borrar favoritas</button>
+    </div>
+  </header>
+
+  <div class="import-panel" id="importPanel" hidden>
+    <span class="filters-label">Pega aquí la lista copiada (una canción por línea)</span>
+    <textarea id="importText" rows="6" placeholder="Título — Artista: https://open.spotify.com/track/…"></textarea>
+    <div class="import-actions">
+      <button class="pill-btn active" id="importConfirmBtn">Añadir a favoritas</button>
+      <button class="pill-btn" id="importCancelBtn">Cancelar</button>
+      <span class="import-result" id="importResult"></span>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filters-block">
+      <span class="filters-label">Instrumentos de los que dispones</span>
+      <div class="chip-row" id="instrRow"></div>
+      <label class="toggle-row"><input type="checkbox" id="onlyPlayableChk"> Mostrar solo lo que puedo tocar con esto</label>
+    </div>
+    <select id="sectionSelect"></select>
+    <input type="search" id="searchInput" placeholder="Buscar título o artista/compositor…">
+    <div class="jump-row">
+      <input type="number" id="jumpInput" min="1" placeholder="Ir al nº…">
+      <button class="pill-btn" id="jumpBtn">Ir</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <button class="nav" id="prevBtn" aria-label="Anterior">‹</button>
+    <div class="card" id="card"></div>
+    <button class="nav" id="nextBtn" aria-label="Siguiente">›</button>
+  </div>
+
+  <footer>
+    <button class="pill-btn" id="randomBtn">🎲 Aleatoria</button>
+    <span class="hint">Espacio reproduce/pausa · ← → navega · F favorita</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var FORM_LABELS = {
+  solo:"Piano / Órgano solo", solo_t:"Piano/Órgano solo (o Trío de cuerda)",
+  duo:"Piano/Órgano + 1 instrumento", duo_t:"Piano/Órgano + 1 instr. (o Trío/Cuarteto de cuerda)",
+  trio:"Trío de cuerda", cuarteto:"Cuarteto de cuerda",
+  voz:"+ Solista (voz)", voz1:"+ Solista + 1 instrumento", coro:"+ Coro"
+};
+var CAT_LABELS = { ES:"Entrada y salida", CL:"Clásico instrumental", VO:"Vocal", CO:"Coral", BS:"Banda sonora", PO:"Pop / Ligera" };
+var CAT_ORDER = ["ES","CL","VO","CO","BS","PO"];
+
+// [titulo, artista/compositor, formCode, catCode]
+var DATA = [
+["Marcha del Príncipe de Dinamarca","J. Clarke","duo_t","ES"],
+["Pompa y circunstancia","E. Elgar","duo_t","ES"],
+["La Réjouissance (Music for the Royal Fireworks)","G.F. Haendel","trio","ES"],
+["Sarabande (Suite en Re menor)","G.F. Haendel","trio","ES"],
+["Marcha nupcial (Las bodas de Fígaro)","W.A. Mozart","duo_t","ES"],
+["Canon en Re Mayor","J. Pachelbel","solo_t","ES"],
+["Trumpet tune (The Indian Queen)","H. Purcell","duo_t","ES"],
+["Marcha triunfal (Aida)","G. Verdi","cuarteto","ES"],
+["Canticorum Iubilo","G.F. Haendel","voz","ES"],
+["Arrival of the Queen of Sabah (Salomon)","G.F. Haendel","trio","ES"],
+["Alla Hornpipe (Water Music)","G.F. Haendel","trio","ES"],
+["Marcha nupcial (Sueño de una noche de verano)","F. Mendelssohn","solo_t","ES"],
+["Marcha nupcial (Lohengrin)","R. Wagner","voz","ES"],
+["Pequeña serenata nocturna en Sol Mayor","W.A. Mozart","duo_t","ES"],
+["Hallelujah (El Mesías)","G.F. Haendel","coro","ES"],
+["Nessun dorma (Turandot)","G. Puccini","voz","ES"],
+["O mio babbino caro (Gianni Schicchi)","G. Puccini","voz","ES"],
+
+["Adagio en Sol menor","T. Albinoni","duo","CL"],
+["Preludio nº1","J.S. Bach","solo","CL"],
+["Minuetto en Sol M","J.S. Bach","solo","CL"],
+["Gavota (Suite francesa nº5)","J.S. Bach","solo","CL"],
+["Aria (Suite nº3 en Re Mayor)","J.S. Bach","duo_t","CL"],
+["Arioso","J.S. Bach","duo","CL"],
+["Adagio for strings","S. Barber","cuarteto","CL"],
+["Minuetto","L. Boccherini","duo_t","CL"],
+["Musica notturna delle strade di Madrid","L. Boccherini","cuarteto","CL"],
+["Cant des ocells","P. Casals","duo_t","CL"],
+["Claire de lune","C. Debussy","solo","CL"],
+["Humoresque","A. Dvorak","solo","CL"],
+["Adagio (Concierto para oboe)","A. Marcello","duo","CL"],
+["Cantabile","N. Paganini","duo","CL"],
+["Siciliana (Antiche danze ed arie)","O. Respighi","solo","CL"],
+["Concierto de Aranjuez","J. Rodrigo","solo","CL"],
+["1er Gymnopédie","E. Satie","solo","CL"],
+["Reverie","R. Schumann","solo","CL"],
+["Serenata","E. Toselli","duo","CL"],
+["Largo \"Invierno\" (Las cuatro estaciones)","A. Vivaldi","duo_t","CL"],
+["Allegro \"Primavera\" (Las cuatro estaciones)","A. Vivaldi","duo_t","CL"],
+["Concerto grosso per la notte di Natale","A. Corelli","trio","CL"],
+["Intermezzo (Cavalleria rusticana)","P. Mascagni","duo_t","CL"],
+["Meditación (Thaïs)","J. Massenet","duo_t","CL"],
+["El cisne (El carnaval de los animales)","C. Saint-Saëns","duo","CL"],
+["Novena Sinfonía (pequeño fragmento)","L. van Beethoven","duo_t","CL"],
+["Salve rociera","M. Pareja-Obregón","duo","CL"],
+
+["Cantata nº147","J.S. Bach","voz","VO"],
+["Ständchen (Schwanengesang)","F. Schubert","voz","VO"],
+["Barcarola (Los cuentos de Hoffmann)","J. Offenbach","voz1","VO"],
+["À Chloris","R. Hahn","voz","VO"],
+["Plaisir d'amour","J.P.E. Martini","voz","VO"],
+["Ave Maria","G. Caccini","voz","VO"],
+["Ave Maria","C. Gounod","voz1","VO"],
+["Ave Maria","F. Schubert","voz","VO"],
+["Lascia ch'io pianga (Rinaldo)","G.F. Haendel","voz","VO"],
+["Ombra mai fu (Serse)","G.F. Haendel","voz","VO"],
+["How beautiful are the feet (El Mesías)","G.F. Haendel","voz","VO"],
+["Stella sole clarior (BSO La Misión)","E. Morricone","voz","VO"],
+["Pie Jesu (Requiem Mass)","A.L. Webber","voz","VO"],
+["Salve Regina","Anónimo","voz","VO"],
+["Gloria sei dir gesungen (BWV140)","J.S. Bach","voz","VO"],
+["Dúo de las flores (Lakmé)","L. Délibes","voz1","VO"],
+["Salve marinera","C. Oudrid","voz","VO"],
+["Caruso","L. Dalla","voz","VO"],
+["Von deiner güt (Dúo Adán y Eva, La Creación)","J. Haydn","voz1","VO"],
+["Con te partirò","Sartori-Quarantotto","voz","VO"],
+["Hasta mi final","Il Divo","voz","VO"],
+["La vie en rose","Edith Piaf","voz","VO"],
+["Hallelujah","Leonard Cohen","voz","VO"],
+
+["Ave Maria","J. Arcadelt","coro","CO"],
+["A gaelic blessing","J. Rutter","coro","CO"],
+["The Lord bless you and keep you","J. Rutter","coro","CO"],
+["Va pensiero (Nabucco)","G. Verdi","coro","CO"],
+["Gloria in excelsis deo (Gloria)","A. Vivaldi","coro","CO"],
+
+["Over the rainbow (BSO El mago de Oz)","H. Arlen","duo","BS"],
+["Fly","L. Einaudi","solo","BS"],
+["Nuvole bianche","L. Einaudi","solo","BS"],
+["Una mattina (BSO Intocables)","L. Einaudi","solo","BS"],
+["Primavera","L. Einaudi","solo","BS"],
+["Married life (BSO Up)","M. Giacchino","solo","BS"],
+["For the love of a princess (BSO Braveheart)","J. Horner","duo","BS"],
+["The ludlows (BSO Leyendas de pasión)","J. Horner","duo","BS"],
+["As time goes by (BSO Casablanca)","H. Hupfeld","duo_t","BS"],
+["Flightless bird, American mouth (BSO Crepúsculo)","Iron & Wine","solo","BS"],
+["Moon river (BSO Desayuno con diamantes)","H. Mancini","duo","BS"],
+["La vida es bella (BSO La vida es bella)","N. Piovani","solo_t","BS"],
+["A time for us (BSO Romeo and Juliet)","N. Rota","duo","BS"],
+["Main title (BSO Forrest Gump)","A. Silvestre","solo","BS"],
+["Comptine d'une autre été (BSO Amélie)","Y. Tiersen","solo","BS"],
+["River flows in you (BSO Crepúsculo)","Yiruma","solo","BS"],
+["Caresse sur l'océan (BSO Los chicos del coro)","B. Coulais","duo_t","BS"],
+["Gabriel's oboe (BSO La Misión)","E. Morricone","duo_t","BS"],
+["Love theme (BSO Cinema Paradiso)","A. Morricone","duo","BS"],
+["Skye boat (BSO Outlander)","Anónimo","duo","BS"],
+["Far longer than forever (BSO The Swan Princess)","L. de Azevedo","duo","BS"],
+["All for love (BSO Los 3 mosqueteros)","B. Adams","duo","BS"],
+["Tuyo (BSO Narcos)","R. Amarante","duo","BS"],
+["Glasgow love Theme (BSO Love Actually)","C. Armstrong","duo","BS"],
+["Come what may (BSO Moulin Rouge)","D. Baerwald","duo","BS"],
+["I had a farm in Africa","J. Barry","duo","BS"],
+["The John Dunbar theme (BSO Bailando con lobos)","J. Barry","duo","BS"],
+["Tema de Sira (BSO El tiempo entre costuras)","C. Benito","duo","BS"],
+["Life and death (BSO Lost)","R. Cameron","duo","BS"],
+["We go together (BSO Grease)","W. Casey & J. Jacobs","duo","BS"],
+["Red right hand (BSO Peaky Blinders)","N. Cave & the Bad Seeds","duo","BS"],
+["Son of a man (BSO Tarzan)","P. Collins","duo","BS"],
+["Gonna fly now (BSO Rocky)","B. Conti","duo","BS"],
+["Vois sur ton chemin (BSO Los chicos del coro)","B. Coulais","duo","BS"],
+["Variedad de BSO","Disney","duo","BS"],
+["Main theme (BSO Juego de tronos)","R. Djawadi","duo","BS"],
+["Blood of my blood (BSO Juego de tronos)","R. Djawadi","duo","BS"],
+["The rains of Castamere (BSO Juego de tronos)","R. Djawadi","duo","BS"],
+["Only hope (BSO Un paseo para recordar)","J. Foreman","duo","BS"],
+["Proud corazón (BSO Coco)","G. Franco","duo","BS"],
+["My heart will go on (BSO Titanic)","J. Horner","duo","BS"],
+["Another day of sun (BSO La La Land)","J. Hurwitz","duo","BS"],
+["City of stars (BSO La La Land)","J. Hurwitz","duo","BS"],
+["Building a family (BSO Life as a House)","M. Isham","duo","BS"],
+["Clara's theme (BSO Doctor Zhivago)","M. Jarre","duo","BS"],
+["La chica de Ipanema","A.C. Jobim","duo","BS"],
+["Main theme (BSO El último mohicano)","T. Jones","duo","BS"],
+["Love story (BSO Love Story)","F. Lai","duo","BS"],
+["Unchained melody (BSO Ghost)","A. North","duo_t","BS"],
+["Let me be your wings (BSO Pulgarcita)","B. Manilow","duo","BS"],
+["Beauty and the Beast (BSO La bella y la bestia)","A. Menken","duo","BS"],
+["True love kiss (BSO Encantada)","A. Menken","duo","BS"],
+["You've got a friend in me (BSO Toy Story)","R. Newman","duo","BS"],
+["That next place (BSO Conoces a Joe Black)","T. Newman","duo","BS"],
+["The ecstasy of gold (BSO El bueno, el feo y el malo)","E. Morricone","duo_t","BS"],
+["Five for fighting (BSO Superman)","J. Ondrasik","duo","BS"],
+["Rewrite the stars (BSO The Greatest Showman)","J. Pasek","duo","BS"],
+["For you (BSO 50 sombras de Grey)","L. Payne","duo","BS"],
+["Buongiorno principessa (BSO La vida es bella)","N. Piovani","duo","BS"],
+["Theology / Civilization (BSO Conan el bárbaro)","B. Poledouris","duo","BS"],
+["Edelweiss (BSO The Sound of Music)","R. Rodgers","duo","BS"],
+["Love theme (BSO El Padrino)","N. Rota","duo","BS"],
+["Once upon a time (BSO La bella durmiente)","M. Shoenfeld","duo","BS"],
+["I dreamed a dream (BSO Los miserables)","C.M. Schönberg","duo","BS"],
+["One day more (BSO Los miserables)","C.M. Schönberg","duo","BS"],
+["The night we met (BSO 13 Reasons Why)","B. Schneider","duo","BS"],
+["Concerning hobbits (BSO El señor de los anillos)","H. Shore","duo","BS"],
+["Sound of the shire (BSO El señor de los anillos)","H. Shore","duo","BS"],
+["Many meetings (BSO El señor de los anillos)","H. Shore","duo","BS"],
+["La comarca (BSO El Hobbit)","H. Shore","duo","BS"],
+["Shape of my heart (BSO Leon)","Sting","duo","BS"],
+["Eye of the tiger (BSO Rocky III)","F. Sullivan","duo","BS"],
+["Memory (BSO Cats)","A.L. Webber","duo","BS"],
+["Carros de fuego (BSO Carros de fuego)","Vangelis","duo","BS"],
+["Across the stars (BSO Star Wars)","J. Williams","duo","BS"],
+["Princess Leia's theme (BSO Star Wars)","J. Williams","duo","BS"],
+["The throne room (BSO Star Wars)","J. Williams","duo","BS"],
+["The force theme (BSO Star Wars)","J. Williams","duo","BS"],
+["Hedwig's theme (BSO Harry Potter)","J. Williams","duo","BS"],
+["Main theme (BSO La lista de Schindler)","J. Williams","duo","BS"],
+["Raiders March (BSO Indiana Jones)","J. Williams","duo","BS"],
+["I remember (BSO Hook)","J. Williams","duo","BS"],
+["Somewhere in my memory (BSO Solo en casa)","J. Williams","duo","BS"],
+["Main theme (BSO El diario de Noa)","A. Zigman","duo","BS"],
+["He's a pirate (BSO Piratas del Caribe)","H. Zimmer","duo","BS"],
+["Chevaliers de Sangreal (BSO El código Da Vinci)","H. Zimmer","duo","BS"],
+["Honor him (BSO Gladiator)","H. Zimmer","duo","BS"],
+["Now we are free (BSO Gladiator)","H. Zimmer","duo","BS"],
+["Tennessee (BSO Pearl Harbor)","H. Zimmer","duo","BS"],
+["Main theme (BSO Interstellar)","H. Zimmer","duo","BS"],
+["Main theme (BSO The Rock)","H. Zimmer","duo","BS"],
+
+["Ballade pour Adeline","R. Clayderman","solo","PO"],
+["Only time","Enya","duo","PO"],
+["May it be","Enya","duo","PO"],
+["Imagine","John Lennon","duo","PO"],
+["Moonlight Serenade","Glenn Miller","duo","PO"],
+["All you need is love","The Beatles","duo","PO"],
+["All of me","John Legend","duo","PO"],
+["A thousand years","Christina Perri","duo","PO"],
+["Say something","A Great Big World","duo","PO"],
+["Highway to hell","ACDC","duo","PO"],
+["Mamma Mia","ABBA","duo","PO"],
+["The winner takes it all","ABBA","duo","PO"],
+["Someone like you","Adele","duo","PO"],
+["Hello","Adele","duo","PO"],
+["Make you feel my love","Adele","duo_t","PO"],
+["Rolling in the deep","Adele","duo_t","PO"],
+["Million years ago","Adele","duo","PO"],
+["Water under the bridge","Adele","duo_t","PO"],
+["I don't want to miss a thing","Aerosmith","duo","PO"],
+["If I ain't got you","Alicia Keys","duo","PO"],
+["I will show you","Ailee","duo","PO"],
+["Forever young","Alphaville","duo","PO"],
+["Vivo per lei","Andrea Bocelli","duo","PO"],
+["Entre sobras y sobras me faltas","Antonio Orozco","duo","PO"],
+["Eu sei que vou te amar","Antonio Carlos Jobim","duo","PO"],
+["The rose","Amanda McBroom","duo","PO"],
+["Back to black","Amy Winehouse","duo_t","PO"],
+["Thank you, next","Ariana Grande","duo","PO"],
+["Waiting for love","Avicii","duo_t","PO"],
+["Stand by me","Ben E. King","duo","PO"],
+["Hallo","Beyoncé","duo_t","PO"],
+["Ain't no sunshine","Bill Withers","duo_t","PO"],
+["The middle east","Blood","duo","PO"],
+["Always","Bon Jovi","duo","PO"],
+["I'll be there for you","Bon Jovi","duo","PO"],
+["It's my life","Bon Jovi","duo","PO"],
+["The river","Bruce Springsteen","duo","PO"],
+["Streets of Philadelphia","Bruce Springsteen","duo","PO"],
+["When I was your man","Bruno Mars","duo_t","PO"],
+["Marry you","Bruno Mars","duo","PO"],
+["Just the way you are","Bruno Mars","duo","PO"],
+["All for love","Bryan Adams","duo","PO"],
+["Heaven","Bryan Adams","duo","PO"],
+["Everything I do","Bryan Adams","duo","PO"],
+["Dancing on my own","Calum Scott","duo","PO"],
+["Havana","Camila Cabello","duo_t","PO"],
+["Señorita","Camila Cabello","duo","PO"],
+["Amén","Camilo","duo","PO"],
+["Disfruto","Carla Morrison","duo","PO"],
+["Hurt","Christina Aguilera","duo","PO"],
+["Johnny B. Goode","Chuck Berry","duo","PO"],
+["Arrival of the birds","Cinematic Orchestra","duo","PO"],
+["A sky full of stars","Coldplay","duo_t","PO"],
+["Fix you","Coldplay","duo_t","PO"],
+["Paradise","Coldplay","duo","PO"],
+["Clocks","Coldplay","duo_t","PO"],
+["The scientist","Coldplay","duo_t","PO"],
+["Viva la Vida","Coldplay","duo_t","PO"],
+["Yellow","Coldplay","duo","PO"],
+["Hymn for the weekend","Coldplay","duo","PO"],
+["The blower's daughter","Damien Rice","duo","PO"],
+["Space Oddity","David Bowie","duo","PO"],
+["She wolf","David Guetta & Sia","duo","PO"],
+["Titanium","David Guetta & Sia","duo_t","PO"],
+["Unbreak my heart","Diane Warren","duo","PO"],
+["Perfect","Ed Sheeran","duo","PO"],
+["Shape of you","Ed Sheeran","duo","PO"],
+["I see fire","Ed Sheeran","duo","PO"],
+["Supermarket flowers","Ed Sheeran","duo","PO"],
+["Thinking out loud","Ed Sheeran","duo","PO"],
+["Alegría","El Circo del Sol","duo","PO"],
+["La rosa de los vientos","El Mago de Oz","duo","PO"],
+["Love me like you do","Ellie Goulding","duo","PO"],
+["On my mind","Ellie Goulding","duo","PO"],
+["How long will I love you","Ellie Goulding","duo","PO"],
+["One day like this","Elbow","duo","PO"],
+["Can you feel the love tonight","Elton John","duo","PO"],
+["Circle of life","Elton John","duo","PO"],
+["Your song","Elton John","duo","PO"],
+["She","Elvis Costello","duo","PO"],
+["Always on my mind","Elvis Presley","duo","PO"],
+["Can't help falling in love","Elvis Presley","duo","PO"],
+["Read all about it","Emeli Sandé","duo","PO"],
+["At last","Etta James","duo","PO"],
+["Bring me to life","Evanescence","duo","PO"],
+["My immortal","Evanescence","duo","PO"],
+["The final countdown","Europe","duo","PO"],
+["Fly me to the moon","Frank Sinatra","duo_t","PO"],
+["My way","Frank Sinatra","duo_t","PO"],
+["Strangers in the night","Frank Sinatra","duo_t","PO"],
+["Something stupid","Frank & Nancy Sinatra","duo","PO"],
+["Can't take my eyes off you","Frankie Valli","duo","PO"],
+["Por una cabeza","Carlos Gardel","duo","PO"],
+["Meravigliosa creatura","Gianna Nannini","duo","PO"],
+["L'amour toujours","Gigi D'Agostino","duo","PO"],
+["Iris","Goo Goo Dolls","duo","PO"],
+["November rain","Guns N' Roses","duo","PO"],
+["Unbreak my heart","Il Divo","duo","PO"],
+["Demons","Imagine Dragons","duo","PO"],
+["Impossible","James Arthur","duo","PO"],
+["Il mondo","Jimmy Fontana","duo","PO"],
+["You raise me up","Josh Groban","duo","PO"],
+["Sorry","Justin Bieber","duo_t","PO"],
+["Love yourself","Justin Bieber","duo_t","PO"],
+["Mirrors","Justin Timberlake","duo","PO"],
+["Everybody's changing","Keane","duo","PO"],
+["Quand on n'a que l'amour","Jacques Brel","duo","PO"],
+["Amapola","JM Lacalle","duo","PO"],
+["La playa","La Oreja de Van Gogh","duo","PO"],
+["Young and beautiful","Lana del Rey","duo","PO"],
+["Stairway to heaven","Led Zeppelin","duo","PO"],
+["Better in time","Leona Lewis","duo","PO"],
+["Perfect day","Lou Reed","duo","PO"],
+["What a wonderful world","Louis Armstrong","duo_t","PO"],
+["Experience","Ludovico Einaudi","solo","PO"],
+["I giorni","Ludovico Einaudi","solo","PO"],
+["All I've ever wanted","Mariah Carey","duo","PO"],
+["Girls like you","Maroon 5","duo","PO"],
+["She will be loved","Maroon 5","duo","PO"],
+["Gracias a la vida","Mercedes Sosa","duo","PO"],
+["Ain't no mountain high enough","Marvin Gaye","duo_t","PO"],
+["Nothing else matters","Metallica","duo","PO"],
+["Billie Jean","Michael Jackson","duo","PO"],
+["I'll be there","Michael Jackson","duo","PO"],
+["Resistance","Muse","duo","PO"],
+["Uprising","Muse","duo","PO"],
+["Whatever","Oasis","duo","PO"],
+["Wonderwall","Oasis","duo","PO"],
+["Cheerleader","Omi","duo","PO"],
+["Counting stars","OneRepublic","duo_t","PO"],
+["Palmeras en la nieve","Pablo Alborán","duo_t","PO"],
+["Let her go","Passenger","duo_t","PO"],
+["My love","Paul McCartney","duo","PO"],
+["The book of love","Peter Gabriel","duo","PO"],
+["Downtown","Petula Clark","duo","PO"],
+["Happy","Pharrell Williams","duo","PO"],
+["Just give me a reason","Pink","duo","PO"],
+["Flying free","Pont Aeri","duo","PO"],
+["Love of my life","Queen","duo","PO"],
+["Bohemian Rhapsody","Queen","duo","PO"],
+["Don't stop me now","Queen","duo","PO"],
+["Love is all around","Wet Wet Wet","duo","PO"],
+["Georgia on my mind","Ray Charles","duo_t","PO"],
+["Otherside","Red Hot Chili Peppers","duo","PO"],
+["Losing my religion","R.E.M.","duo","PO"],
+["Stay","Rihanna","duo_t","PO"],
+["Diamonds","Rihanna","duo","PO"],
+["Right here waiting for you","Richard Marx","duo","PO"],
+["She is the one","Robbie Williams","duo","PO"],
+["Stay with me","Sam Smith","duo_t","PO"],
+["Kiss from a rose","Seal","duo","PO"],
+["For this moment on","Shania Twain","duo","PO"],
+["You're still the one","Shania Twain","duo","PO"],
+["Impossible","Shontelle","duo","PO"],
+["The entertainer","Scott Joplin","duo_t","PO"],
+["Chandelier","Sia","duo","PO"],
+["Elastic heart","Sia","duo","PO"],
+["The sound of silence","Simon & Garfunkel","duo","PO"],
+["Turning page","Sleeping At Last","duo","PO"],
+["Chasing cars","Snow Patrol","duo","PO"],
+["Ribbon in the sky","Stevie Wonder","duo","PO"],
+["Fields of gold","Sting","duo_t","PO"],
+["Englishman in New York","Sting","duo","PO"],
+["Greatest day","Take That","duo","PO"],
+["Wildest dreams","Taylor Swift","duo","PO"],
+["And I love her","The Beatles","duo","PO"],
+["Here comes the sun","The Beatles","duo","PO"],
+["Let it be","The Beatles","duo_t","PO"],
+["I want to hold your hand","The Beatles","duo","PO"],
+["I will","The Beatles","duo","PO"],
+["Hey Jude","The Beatles","duo_t","PO"],
+["Yesterday","The Beatles","duo_t","PO"],
+["Michelle","The Beatles","duo_t","PO"],
+["Eleanor Rigby","The Beatles","duo_t","PO"],
+["Hello, Goodbye","The Beatles","duo_t","PO"],
+["Every breath you take","The Police","duo_t","PO"],
+["You can't always get what you want","The Rolling Stones","duo","PO"],
+["My girl","The Temptations","duo","PO"],
+["Happy together","The Turtles","duo","PO"],
+["Bittersweet Symphony","The Verve","duo","PO"],
+["With or without you","U2","duo","PO"],
+["I still haven't found what I'm looking for","U2","duo","PO"],
+["Beautiful day","U2","duo","PO"],
+["Hymne","Vangelis","duo","PO"],
+["Have I told you lately","Van Morrison","duo","PO"],
+["Gracias a la vida","Violeta Parra","duo","PO"],
+["You raise me up","Westlife","duo","PO"],
+["I will always love you","Whitney Houston","duo","PO"],
+["See you again","Wiz Khalifa","duo","PO"]
+];
+
+// Spotify track IDs, resueltos por bloques. Key = "titulo|artista" (igual que keyOf).
+// Bloque 1: Entrada/Salida, Coral, Vocal (45 canciones).
+var SPOTIFY_IDS = {
+"Marcha del Príncipe de Dinamarca|J. Clarke": "0kRMgUtzEgzz2wNKV8dm7B",
+"Pompa y circunstancia|E. Elgar": "7FVTPrzbUiVrAB81vAsvIG",
+"La Réjouissance (Music for the Royal Fireworks)|G.F. Haendel": "5W64cVLFJDdWlDLeNohOjL",
+"Sarabande (Suite en Re menor)|G.F. Haendel": "0FjnJPF8c6dDDHqmBWm48p",
+"Marcha nupcial (Las bodas de Fígaro)|W.A. Mozart": "4EyDM6x1xqckQ1axAyzlcB",
+"Canon en Re Mayor|J. Pachelbel": "2nZq4B0GSH9XeO1k8teJ9z",
+"Trumpet tune (The Indian Queen)|H. Purcell": "0N9jWYRLM8v7azAVNUJK5C",
+"Marcha triunfal (Aida)|G. Verdi": "60lARxZbzWOfvKPDSubnzP",
+"Canticorum Iubilo|G.F. Haendel": "56mKMDzCJvt6QAGgfT5hyt",
+"Arrival of the Queen of Sabah (Salomon)|G.F. Haendel": "5vyWQwilAxKmiqEzjysjBZ",
+"Alla Hornpipe (Water Music)|G.F. Haendel": "5pjbdjby5FdI4rsBOFHFWE",
+"Marcha nupcial (Sueño de una noche de verano)|F. Mendelssohn": "3rm1AylFV8X1Xeyc21Wn4B",
+"Marcha nupcial (Lohengrin)|R. Wagner": "0FGmVOBDjWtP3UFkvtssew",
+"Pequeña serenata nocturna en Sol Mayor|W.A. Mozart": "4KLVPRo0f6XUJa4t4dnRW6",
+"Hallelujah (El Mesías)|G.F. Haendel": "3IpRbLPTEMXrGa2yxZWfpF",
+"Nessun dorma (Turandot)|G. Puccini": "1ntATsEazvDV1jw3iiZlID",
+"O mio babbino caro (Gianni Schicchi)|G. Puccini": "78k57V2uo6Sm72j1H7Ih14",
+"Ave Maria|J. Arcadelt": "3EU0S9fcNAZM2Db2tOYHbP",
+"A gaelic blessing|J. Rutter": "4UIKcx7KHWA6mnbABdCfdH",
+"The Lord bless you and keep you|J. Rutter": "4rS28veDpsN7GJN55SpB9W",
+"Va pensiero (Nabucco)|G. Verdi": "6zkFkOBs8k64qDnbmb2k7X",
+"Gloria in excelsis deo (Gloria)|A. Vivaldi": "5Txwlv081K39njx353jh7r",
+"Cantata nº147|J.S. Bach": "7mmFGUzqvXdGMKMREx19jy",
+"Ständchen (Schwanengesang)|F. Schubert": "4b59u2E74KcDuyHCRBkf5v",
+"Barcarola (Los cuentos de Hoffmann)|J. Offenbach": "1n9741DApqn5gvuxhgerCt",
+"À Chloris|R. Hahn": "1r54crxcfLK2js5We4RnU3",
+"Plaisir d'amour|J.P.E. Martini": "5pQpGmQvyL8R4vRZ0qbm5S",
+"Ave Maria|G. Caccini": "6vig9Jtx8FDC7YsPuqmcFw",
+"Ave Maria|C. Gounod": "2IqNKNLD080DP7pNSsHlwz",
+"Ave Maria|F. Schubert": "46DZCruzZuDWYinEI25UPo",
+"Lascia ch'io pianga (Rinaldo)|G.F. Haendel": "3K3qY6Jzlod9ZKE3PiSdvA",
+"Ombra mai fu (Serse)|G.F. Haendel": "5kYBmIMvSLqfdcj3wH4YDx",
+"How beautiful are the feet (El Mesías)|G.F. Haendel": "40iWYKlTSpWEBvNUblLAGe",
+"Stella sole clarior (BSO La Misión)|E. Morricone": "1It5iCRFtZpXSOoyx4RTVM",
+"Pie Jesu (Requiem Mass)|A.L. Webber": "0Xm46GVlQM2SMK4hsZYk04",
+"Salve Regina|Anónimo": "604butrDWIu9DrzklTHbGF",
+"Gloria sei dir gesungen (BWV140)|J.S. Bach": "4YU76FSpAd0CEJ74NLw7et",
+"Dúo de las flores (Lakmé)|L. Délibes": "4TfKlT7X7VF89hh6glVqma",
+"Salve marinera|C. Oudrid": "7f5XxoX7aquVi9WQWjXSJ5",
+"Caruso|L. Dalla": "6HYm04mKq02OtLMf6sGEFR",
+"Von deiner güt (Dúo Adán y Eva, La Creación)|J. Haydn": "5N4Tjg4etn3093evg6UYsf",
+"Con te partirò|Sartori-Quarantotto": "3y0g1B3qJ2qY6stVBGzp90",
+"Hasta mi final|Il Divo": "5bEn5VKDd0sD1uL2ZRCM05",
+"La vie en rose|Edith Piaf": "3lAun9V0YdTlCSIEXPvfsY",
+"Hallelujah|Leonard Cohen": "7yzbimr8WVyAtBX3Eg6UL9",
+
+// Bloque 2: Clásico instrumental (27 canciones).
+"Adagio en Sol menor|T. Albinoni": "2AjyreHCD6PKAtRGV2qsK5",
+"Preludio nº1|J.S. Bach": "5c6y4aheXNZewQoJH90bjW",
+"Minuetto en Sol M|J.S. Bach": "0tRgVjrANBVei9B3XBivo0",
+"Gavota (Suite francesa nº5)|J.S. Bach": "6Z7H5rNhCoyBYYykopkTfn",
+"Aria (Suite nº3 en Re Mayor)|J.S. Bach": "26S8gE1LPCqAj8YV4ENWWF",
+"Arioso|J.S. Bach": "0A4X1TCraX4eZeYfvQKBzv",
+"Adagio for strings|S. Barber": "7nHvS6UUhz2gJhj8TIROLX",
+"Minuetto|L. Boccherini": "7t0gCuCRvPh5DAKr6XNeD4",
+"Musica notturna delle strade di Madrid|L. Boccherini": "0k7cvxLLeXTyOelzyl9FvW",
+"Cant des ocells|P. Casals": "27JQ7r2lY79rsLn5BJtpNc",
+"Claire de lune|C. Debussy": "6Er8Fz6fuZNi5cvwQjv1ya",
+"Humoresque|A. Dvorak": "4vyjvtzigLyf1TV06fdfEL",
+"Adagio (Concierto para oboe)|A. Marcello": "3O9M1ve67Oj5GUckaQlz2g",
+"Cantabile|N. Paganini": "6Akj1ZgGAMdsxFyjXnr5FT",
+"Siciliana (Antiche danze ed arie)|O. Respighi": "6ahxksakZUSZ1FKhWKFjNe",
+"Concierto de Aranjuez|J. Rodrigo": "0k6P9cdEA9K3k0ASde2Kof",
+"1er Gymnopédie|E. Satie": "5NGtFXVpXSvwunEIGeviY3",
+"Reverie|R. Schumann": "09TW4n0avALTSmPsnmFoxc",
+"Serenata|E. Toselli": "59H2jZy2Euizkb9EYcKsfU",
+"Largo \"Invierno\" (Las cuatro estaciones)|A. Vivaldi": "7njAZhca4o80qQdCgyEWya",
+"Allegro \"Primavera\" (Las cuatro estaciones)|A. Vivaldi": "2qLKK0wOOEvkXqxu7X3WTn",
+"Concerto grosso per la notte di Natale|A. Corelli": "2SFZX6NKmZNbWidFCLc3jv",
+"Intermezzo (Cavalleria rusticana)|P. Mascagni": "6wKkWFhgOPKgiE360T6NNs",
+"Meditación (Thaïs)|J. Massenet": "6dwlheHtHfPoo25veZtifV",
+"El cisne (El carnaval de los animales)|C. Saint-Saëns": "4IOnjcj0Gf1IkJ60SEMa4r",
+"Novena Sinfonía (pequeño fragmento)|L. van Beethoven": "4Nd5HJn4EExnLmHtClk4QV",
+"Salve rociera|M. Pareja-Obregón": "16zUROgzMP6rC8j41toSGN",
+
+// Bloque 3: Banda sonora (83 de 91 canciones; 8 sin ID exacto, usan el enlace de búsqueda).
+"Over the rainbow (BSO El mago de Oz)|H. Arlen": "568SEFtDjKr7N2PytpA6D5",
+"Fly|L. Einaudi": "6tEUwvi32UumWJhE96UWGu",
+"Nuvole bianche|L. Einaudi": "2UYdHJybcCaN4XwW9pC7er",
+"Una mattina (BSO Intocables)|L. Einaudi": "00rqn6AwrjutUlHGUJVVg9",
+"Primavera|L. Einaudi": "172IXAfp2yyzidX6ils5lP",
+"Married life (BSO Up)|M. Giacchino": "2FcIkhwW4Uv6I0WtxD1yWd",
+"For the love of a princess (BSO Braveheart)|J. Horner": "6PDRXdHNz6Oup5bKwgDjAx",
+"The ludlows (BSO Leyendas de pasión)|J. Horner": "6vtY2LUeXJ7KISwgiTu0Ph",
+"As time goes by (BSO Casablanca)|H. Hupfeld": "5X0M16GjlZYN1WjPNzerb5",
+"Flightless bird, American mouth (BSO Crepúsculo)|Iron & Wine": "1fEGtTZjrjJW8eUeewnNJR",
+"Moon river (BSO Desayuno con diamantes)|H. Mancini": "0gljCof9FFOHKvxznqNR23",
+"La vida es bella (BSO La vida es bella)|N. Piovani": "7ob7mrVX7FEQIT2gSClVtA",
+"A time for us (BSO Romeo and Juliet)|N. Rota": "0za6HhjZw6LwCIDdBl92Vm",
+"Main title (BSO Forrest Gump)|A. Silvestre": "0FeMuafoRq1ZjweRztVjXI",
+"Comptine d'une autre été (BSO Amélie)|Y. Tiersen": "14rZjW3RioG7WesZhYESso",
+"River flows in you (BSO Crepúsculo)|Yiruma": "2agBDIr9MYDUducQPC1sFU",
+"Caresse sur l'océan (BSO Los chicos del coro)|B. Coulais": "4QEBlHReI6QGudTs2o7pZx",
+"Gabriel's oboe (BSO La Misión)|E. Morricone": "6g9G5pKSJpFntHuQ6BN2wR",
+"Love theme (BSO Cinema Paradiso)|A. Morricone": "1Du8m1mfyn9y80IZC5pJUq",
+"Skye boat (BSO Outlander)|Anónimo": "10VIsMEvM4K2xgFvh9plJi",
+"Far longer than forever (BSO The Swan Princess)|L. de Azevedo": "6bcCrByBZgx8FYwuKE4Jgu",
+"All for love (BSO Los 3 mosqueteros)|B. Adams": "4lsEHglVsLzILTDQ3CNESV",
+"Tuyo (BSO Narcos)|R. Amarante": "4F6bP95ULviRgg17IPaox6",
+"Glasgow love Theme (BSO Love Actually)|C. Armstrong": "2dz5fCXiNZk4W5Qptpmfgm",
+"I had a farm in Africa|J. Barry": "3aUjcrx6BklHMnr733Ehh5",
+"The John Dunbar theme (BSO Bailando con lobos)|J. Barry": "1ghqlcFUP85h1Gxn4Oa2Kt",
+"Tema de Sira (BSO El tiempo entre costuras)|C. Benito": "2W604l1pH4O88YVsxJgenH",
+"Life and death (BSO Lost)|R. Cameron": "4dZHQwfBPkjFBOQNKcJ3yh",
+"We go together (BSO Grease)|W. Casey & J. Jacobs": "0CcrU8S7N8JWT4a1xnnfNA",
+"Red right hand (BSO Peaky Blinders)|N. Cave & the Bad Seeds": "2m00UKm7wLk8SxHQTyBRFj",
+"Gonna fly now (BSO Rocky)|B. Conti": "04NTgfyFFx8FRm0vZszMF7",
+"Vois sur ton chemin (BSO Los chicos del coro)|B. Coulais": "351GNhLMwBwzQsENirhFZN",
+"Main theme (BSO Juego de tronos)|R. Djawadi": "2tW6d2VBwUpVK5HONPbEST",
+"Blood of my blood (BSO Juego de tronos)|R. Djawadi": "7kMr7gQm5lzvwlc5VZHgMO",
+"The rains of Castamere (BSO Juego de tronos)|R. Djawadi": "0CHvs1UmxA90B2apIpbWCC",
+"Only hope (BSO Un paseo para recordar)|J. Foreman": "3XpgLBx3TGuDIFV5gUaR0w",
+"Proud corazón (BSO Coco)|G. Franco": "6zsaKp5mcIXBlsOrWSSTa8",
+"My heart will go on (BSO Titanic)|J. Horner": "33LC84JgLvK2KuW43MfaNq",
+"Another day of sun (BSO La La Land)|J. Hurwitz": "67eyCYAutQeM3TXAH21YoN",
+"Building a family (BSO Life as a House)|M. Isham": "50CByCPK6dSNmBfUdxJWGm",
+"Clara's theme (BSO Doctor Zhivago)|M. Jarre": "64DF980QUr0onW8r9TWZtZ",
+"La chica de Ipanema|A.C. Jobim": "2p8MjixODPaAolBiJcgsHs",
+"Main theme (BSO El último mohicano)|T. Jones": "010zZfqsh3WFVlsIpwA2HI",
+"Love story (BSO Love Story)|F. Lai": "45FLu3nL1iMYXYPzhqLdko",
+"Unchained melody (BSO Ghost)|A. North": "1cjYVx6CSgs2IHstSPRFpB",
+"Let me be your wings (BSO Pulgarcita)|B. Manilow": "2TbdshhkuIhwusebdvGliO",
+"Beauty and the Beast (BSO La bella y la bestia)|A. Menken": "7B3UAPLYAbwXVgbHSKEaTw",
+"True love kiss (BSO Encantada)|A. Menken": "5lHlnXyAz1LJb45L5zKEh8",
+"The ecstasy of gold (BSO El bueno, el feo y el malo)|E. Morricone": "6m4HWTYMRSJkaUuvXTaNmE",
+"Five for fighting (BSO Superman)|J. Ondrasik": "3TwtrR1yNLY1PMPsrGQpOp",
+"Rewrite the stars (BSO The Greatest Showman)|J. Pasek": "65fpYBrI8o2cfrwf2US4gq",
+"Buongiorno principessa (BSO La vida es bella)|N. Piovani": "45zxRp4Xz2X1CHq39D2csb",
+"Theology / Civilization (BSO Conan el bárbaro)|B. Poledouris": "5IFV6IpaVJexh1suQRvrqt",
+"Edelweiss (BSO The Sound of Music)|R. Rodgers": "61IS3kU69RoPuz2iarIzbk",
+"Love theme (BSO El Padrino)|N. Rota": "0WIpbIcekFyPObOlq7DkP8",
+"Once upon a time (BSO La bella durmiente)|M. Shoenfeld": "30gLNTpkJ4cq3jGGyjcC9j",
+"I dreamed a dream (BSO Los miserables)|C.M. Schönberg": "02SO3ikjtfG1avKhU3jQdw",
+"One day more (BSO Los miserables)|C.M. Schönberg": "6cdcZzuQzUhspZo2aJfKaH",
+"Concerning hobbits (BSO El señor de los anillos)|H. Shore": "644es5aYPJghtZLjM1rmSP",
+"Sound of the shire (BSO El señor de los anillos)|H. Shore": "6zW80jVqLtgSF1yCtGHiiD",
+"Many meetings (BSO El señor de los anillos)|H. Shore": "0VfcYOujgf9JDAgwlgu1qm",
+"La comarca (BSO El Hobbit)|H. Shore": "6zW80jVqLtgSF1yCtGHiiD",
+"Shape of my heart (BSO Leon)|Sting": "3NPIKVySb6S4vkNDcvpmKw",
+"Eye of the tiger (BSO Rocky III)|F. Sullivan": "2HHtWyy5CgaQbC7XSoOb0e",
+"Memory (BSO Cats)|A.L. Webber": "697kFTt1wZeJglXxS57Dms",
+"Carros de fuego (BSO Carros de fuego)|Vangelis": "040obLemwuMK65xG55cnOz",
+"Across the stars (BSO Star Wars)|J. Williams": "0hFAV2aMp79a8ew4O5sv2X",
+"Princess Leia's theme (BSO Star Wars)|J. Williams": "3m8k8j3JvQn4Ex9RRyjvSm",
+"The throne room (BSO Star Wars)|J. Williams": "0YGPxxFKlNde0V2nSq6FJi",
+"The force theme (BSO Star Wars)|J. Williams": "6pZulJG7dfNrI1IOFl0wDI",
+"Hedwig's theme (BSO Harry Potter)|J. Williams": "1n8NKQRg8LVHy7oUhUgbFF",
+"Main theme (BSO La lista de Schindler)|J. Williams": "4PmHTFandvWNTkgd0NLPbn",
+"Raiders March (BSO Indiana Jones)|J. Williams": "0ebtEuBGvMBTHvShTzmuAA",
+"I remember (BSO Hook)|J. Williams": "13Rly0yBd4WBhV9yBaKSW3",
+"Somewhere in my memory (BSO Solo en casa)|J. Williams": "1FlxqJmoZWS2q1uRlyZVur",
+"Main theme (BSO El diario de Noa)|A. Zigman": "06xNkl12TrxwGYrwTGlUUd",
+"He's a pirate (BSO Piratas del Caribe)|H. Zimmer": "49UbQsLLtYcucSkFmQ38JW",
+"Chevaliers de Sangreal (BSO El código Da Vinci)|H. Zimmer": "3TOlhTeLMsB2UCgBqzODDU",
+"Honor him (BSO Gladiator)|H. Zimmer": "5jNQpzJNgE3Kcd6CS2TgOH",
+"Now we are free (BSO Gladiator)|H. Zimmer": "0DENhwLXDNvKf9g1oe85Ue",
+"Tennessee (BSO Pearl Harbor)|H. Zimmer": "2O0UWIMFeMtFR0LJMuIPjJ",
+"Main theme (BSO Interstellar)|H. Zimmer": "5DlD6B3snLsSQv9FvLhGRE",
+"Main theme (BSO The Rock)|H. Zimmer": "14n5tNZclULhHLBo0l1sEB",
+
+// Bloque 4: Pop / Ligera (113 de 189 canciones; 76 sin ID exacto, usan el enlace de búsqueda).
+"Ballade pour Adeline|R. Clayderman": "0Ep9uYqDWeVvhhqe124p9E",
+"Only time|Enya": "6FLwmdmW77N1Pxb1aWsZmO",
+"May it be|Enya": "1wIQ2Nm0raqOapHK4bCD3J",
+"Moonlight Serenade|Glenn Miller": "3XiFWZoHQtGUYIdtShPwPD",
+"All of me|John Legend": "3U4isOIWM3VvDubwSI3y7a",
+"A thousand years|Christina Perri": "6z5Yh7kOKeLjqIsNdokIpU",
+"Say something|A Great Big World": "2fPb58e6f8KxejYDCaARwS",
+"Highway to hell|ACDC": "2zYzyRzz6pRmhPzyfMEC8s",
+"Someone like you|Adele": "3bNv3VuUOKgrf5hu3YcuRo",
+"Hello|Adele": "1Yk0cQdMLx5RzzFTYwmuld",
+"Make you feel my love|Adele": "273QnyCvJB65rScHJ1nPZb",
+"Rolling in the deep|Adele": "4OSBTYWVwsQhGLF9NHvIbR",
+"Million years ago|Adele": "2qBmtZnPSQouvADmqaHKxk",
+"Water under the bridge|Adele": "2DRMuw0U0QbkVQxWxdJV3M",
+"I don't want to miss a thing|Aerosmith": "225xvV8r1yKMHErSWivnow",
+"If I ain't got you|Alicia Keys": "3XVBdLihbNbxUwZosxcGuJ",
+"Forever young|Alphaville": "4S1VYqwfkLit9mKVY3MXoo",
+"Eu sei que vou te amar|Antonio Carlos Jobim": "7CRIoOb5ViF1CBFLcyTfMw",
+"The rose|Amanda McBroom": "0FO00pUD7QCzOeQxqYwFBe",
+"Stand by me|Ben E. King": "6OzAkuRDmEpd52RF1g1WvU",
+"Ain't no sunshine|Bill Withers": "1k1Bqnv2R0uJXQN4u6LKYt",
+"The river|Bruce Springsteen": "7HrzErXq3TsKOY1gmdIShB",
+"Streets of Philadelphia|Bruce Springsteen": "6jX84DZBIBRRUnZ4kju4Mt",
+"When I was your man|Bruno Mars": "0nJW01T7XtvILxQgC5J7Wh",
+"Marry you|Bruno Mars": "6SKwQghsR8AISlxhcwyA9R",
+"Just the way you are|Bruno Mars": "47Slg6LuqLaX0VodpSCvPt",
+"All for love|Bryan Adams": "4lsEHglVsLzILTDQ3CNESV",
+"Heaven|Bryan Adams": "74D8Z8W3LR8z3HRvL25nrh",
+"Everything I do|Bryan Adams": "3WLDFghI7qZodymjoYDDd2",
+"Havana|Camila Cabello": "1rfofaqEpACxVEHIZBJe6W",
+"Señorita|Camila Cabello": "3BVgrFWuH01GmCUy9Y2EE8",
+"Amén|Camilo": "7AjcJrynzHWlawo87kafY2",
+"Hurt|Christina Aguilera": "6gDXbcILAyBa2skSdbUYq7",
+"Hallo|Beyoncé": "4JehYebiI9JE8sR8MisGVb",
+"The middle east|Blood": "13yuX1iqobZtQtq5lr8UoC",
+"Johnny B. Goode|Chuck Berry": "4PYYiCHTAiqKfxnEND4N5Z",
+"A sky full of stars|Coldplay": "0FDzzruyVECATHXKHFs9eJ",
+"Fix you|Coldplay": "7LVHVU3tWfcxj5aiPFEW4Q",
+"Paradise|Coldplay": "6nek1Nin9q48AVZcWs9e9D",
+"Clocks|Coldplay": "0BCPKOYdS2jbQ8iyB56Zns",
+"The scientist|Coldplay": "75JFxkI2RXiU7L9VXzMkle",
+"Viva la Vida|Coldplay": "1mea3bSkSGXuIRvnydlB5b",
+"Yellow|Coldplay": "3AJwUDP919kvQ9QcozQPxg",
+"Hymn for the weekend|Coldplay": "3RiPr603aXAoi4GHyXx0uy",
+"The blower's daughter|Damien Rice": "5yyRH93h4Pm6tXXYTxt7ea",
+"Space Oddity|David Bowie": "72Z17vmmeQKAg8bptWvpVG",
+"She wolf|David Guetta & Sia": "1SgdUjvppHnIp6L7DZSnwc",
+"Titanium|David Guetta & Sia": "0TDLuuLlV54CkRRUOahJb4",
+"Unbreak my heart|Diane Warren": "5Z0NcyPUkoI0uRi6A6z6u1",
+"Perfect|Ed Sheeran": "0tgVpDi06FyKpA1z0VMD4v",
+"Shape of you|Ed Sheeran": "7qiZfU4dY1lWllzX7mPBI3",
+"I see fire|Ed Sheeran": "1fu5IQSRgPxJL2OTP7FVLW",
+"Supermarket flowers|Ed Sheeran": "4VuS959DSpr82t3qBqCrWG",
+"Thinking out loud|Ed Sheeran": "34gCuhDGsG4bRPIf9bb02f",
+"Alegría|El Circo del Sol": "5FShU0lw09zw9Fc25OxGde",
+"La rosa de los vientos|El Mago de Oz": "1h4wbNA48HRxyoziXujCyR",
+"Circle of life|Elton John": "4Nw5MSSUG8tUh5rjkaHd6K",
+"Always on my mind|Elvis Presley": "1B5Tp2Ml9nLlmTSJx8xVfI",
+"Can't help falling in love|Elvis Presley": "44AyOl4qVkzS48vBsbNXaC",
+"At last|Etta James": "4DiGcf7Gi5A2cFE8FB1l4B",
+"The final countdown|Europe": "3MrRksHupTVEQ7YbA0FsZK",
+"Can't take my eyes off you|Frankie Valli": "6ft9PAgNOjmZ2kFVP7LGqb",
+"Por una cabeza|Carlos Gardel": "4kjvZ1uizpvwjjJZIu2gnK",
+"L'amour toujours|Gigi D'Agostino": "52LJ3hyknOijCrE5gCD0rE",
+"Iris|Goo Goo Dolls": "6Qyc6fS4DsZjB2mRW9DsQs",
+"Unbreak my heart|Il Divo": "2v7WRMWiFcWuUhyFFGfuxH",
+"Impossible|James Arthur": "5yVIlYEHZxQVLyInCdldoS",
+"Il mondo|Jimmy Fontana": "1ZCNdktzp1jXQtuQdS0yek",
+"You raise me up|Josh Groban": "1xugsCboIm1yILqpLvH9aD",
+"Mirrors|Justin Timberlake": "4rHZZAmHpZrA3iH5zx8frV",
+"Everybody's changing|Keane": "6qRfox98MxG58sqoPPn8QY",
+"Quand on n'a que l'amour|Jacques Brel": "1tvk2e5SORX6sYVgK4XpFo",
+"Amapola|JM Lacalle": "57KuXvKfOlojyHuXBQblmT",
+"La playa|La Oreja de Van Gogh": "2DNyZP4Py6f4zMASLBnIu6",
+"Stairway to heaven|Led Zeppelin": "5CQ30WqJwcep0pYcV4AMNc",
+"Better in time|Leona Lewis": "2iXBZ32Fz5VDCLeE0JIdX5",
+"Perfect day|Lou Reed": "4TOMI010Sd4ZAX4aZ5TS85",
+"All I've ever wanted|Mariah Carey": "30g1ETXoxRMrLoIF3OibqG",
+"Gracias a la vida|Mercedes Sosa": "0Y7LvRJWXhUDASLmiugH1z",
+"Billie Jean|Michael Jackson": "7J1uxwnxfQLu4APicE5Rnj",
+"Resistance|Muse": "1C2QJNTmsTxCDBuIgai8QV",
+"Uprising|Muse": "4VqPOruhp5EdPBeR92t6lQ",
+"Whatever|Oasis": "425UymJA8FJCGz7JZEkEFA",
+"Wonderwall|Oasis": "1qPbGZqppFwLwcBC1JQ6Vr",
+"Cheerleader|Omi": "5ByIHT8s38diBQf6dkEWbt",
+"Palmeras en la nieve|Pablo Alborán": "1Med8xugwbRYxM61UYyNf2",
+"Let her go|Passenger": "5kWcIgj5CszKQBB0Lg7sGY",
+"Downtown|Petula Clark": "6S55C80YzjhSrCRRd1p80b",
+"Happy|Pharrell Williams": "60nZcImufyMA1MKQY3dcCH",
+"Just give me a reason|Pink": "1mKXFLRA179hdOWQBwUk9e",
+"Flying free|Pont Aeri": "1cpIInDCM09St4ajfPvPPZ",
+"Love of my life|Queen": "0xcWxI1fUxfD6LrrljUH7L",
+"Bohemian Rhapsody|Queen": "2JiDi0qAXsPwhPqA2qaKGt",
+"Don't stop me now|Queen": "0jDae6m8gNlaeKJ3HTsQ1k",
+"Love is all around|Wet Wet Wet": "5vCQBUIWzPj0MnRcqhHJfs",
+"Georgia on my mind|Ray Charles": "4DEAiNBvq5yBy7NzpVc02h",
+"Otherside|Red Hot Chili Peppers": "64BbK9SFKH2jk86U3dGj2P",
+"Right here waiting for you|Richard Marx": "2z8Fra4oOpOOLzYedOPY4I",
+"She is the one|Robbie Williams": "4F9fv546vGr8cxEwbsiYxB",
+"Kiss from a rose|Seal": "3YKptz29AsOlm7WAVnztBh",
+"The entertainer|Scott Joplin": "6JrFlbV1Ehnigcp71vtiI1",
+"Chandelier|Sia": "4VrWlk8IQxevMvERoX08iC",
+"Elastic heart|Sia": "6kwAbEjseqBob48jCus7Sz",
+"The sound of silence|Simon & Garfunkel": "3YfS47QufnLDFA71FUsgCM",
+"Turning page|Sleeping At Last": "2kfGoV9a5dbSKCNmUWH2ZF",
+"My girl|The Temptations": "2CRZZ5FrIusqko73HiVw08",
+"Happy together|The Turtles": "1JO1xLtVc8mWhIoE3YaCL0",
+"Hymne|Vangelis": "07ysiJrgBjQld3tgxNF8bp",
+"Have I told you lately|Van Morrison": "5RazRlwXthSWjvU2NI8rC1",
+"Gracias a la vida|Violeta Parra": "0Y2KDdZ3l381puDPueBSPw",
+"You raise me up|Westlife": "5XQavlXrNHBBvlN4IJqhqW",
+"I will always love you|Whitney Houston": "4eHbdreAnSOrDDsFfc4Fpm",
+"See you again|Wiz Khalifa": "2JzZzZUQj3Qff7wapcbKjc",
+
+// Bloque 5: resueltos tras aceptar covers/versiones alternativas (Pop/Ligera + Banda sonora pendientes).
+"Imagine|John Lennon": "1rbbNpCaeoHsjV5m82g5Jm",
+"All you need is love|The Beatles": "2tofR3wLvqqsrgB8dcH8I9",
+"Mamma Mia|ABBA": "0GbPiena0PGCTGkDNUu0ns",
+"The winner takes it all|ABBA": "3T92SVDK8PjRjz8MXyo1tM",
+"I will show you|Ailee": "0urNSBykSnns6h5SRCYoIC",
+"Vivo per lei|Andrea Bocelli": "1sf4IN8fVshYZJtBQOmJ9y",
+"Entre sobras y sobras me faltas|Antonio Orozco": "4UFH7la2qLjUHr8Dv1OGcx",
+"Back to black|Amy Winehouse": "6QcQuilQFb5sWkUXSOFVaY",
+"Thank you, next|Ariana Grande": "6Ht0bTP1WFU4ZQXVOEj48v",
+"Waiting for love|Avicii": "5Y6Geoa0RxTo5X5e2IZcY0",
+"Always|Bon Jovi": "3mb2ixPM54drHk6CLdwxIG",
+"I'll be there for you|Bon Jovi": "65sSjJeHHjqksMGt7XMorI",
+"It's my life|Bon Jovi": "6FDXhH3UVcTHf7U5l2EaBl",
+"Dancing on my own|Calum Scott": "5GQ59OECGUPeC8zMnwVpqk",
+"Disfruto|Carla Morrison": "50WkRwFR0BAo6If7GtXnA8",
+"Arrival of the birds|Cinematic Orchestra": "60N04mynu8dcQ34ebC33GO",
+"Love me like you do|Ellie Goulding": "6isw78Hsuv8IJEaqU4cepb",
+"On my mind|Ellie Goulding": "5ZOpbd3R8aCFQZUN7PUsRN",
+"How long will I love you|Ellie Goulding": "6DpuJ7cFoozBEZse2Ze30w",
+"One day like this|Elbow": "1f1IBK7e56paF27MCdBAxC",
+"Can you feel the love tonight|Elton John": "0N3dyeET5adXRe2YSQMy0F",
+"Your song|Elton John": "3gXnjtCOXwuwrVz4NyR1LG",
+"She|Elvis Costello": "7KYuDuCpWqtpswtYdMtcrD",
+"Read all about it|Emeli Sandé": "5jMqcBah1xVUnElPmaprGd",
+"Bring me to life|Evanescence": "6FgnijNsXV0eGxt9IQLx6r",
+"My immortal|Evanescence": "4alAWALodvpUomAA0mRgSw",
+"Fly me to the moon|Frank Sinatra": "5O3ckQMKa7EGmtgfwP9ye4",
+"My way|Frank Sinatra": "0DWdmzKeNTDAlmY7PPzYnK",
+"Strangers in the night|Frank Sinatra": "4mdpgVIiDgDn1YH117ZlVV",
+"Something stupid|Frank & Nancy Sinatra": "1aLVcBSSR3hfw48dn1H82t",
+"Meravigliosa creatura|Gianna Nannini": "6rvjus9JdQA1LAxv0s2ne5",
+"November rain|Guns N' Roses": "1DStRycebm5YIdbGrHHrWJ",
+"Demons|Imagine Dragons": "1nsERf7T3XLcmzThNEYrZ7",
+"Sorry|Justin Bieber": "3MSc2wwpeG38R2pa6cjE6X",
+"Love yourself|Justin Bieber": "4RC7Q5C7MfVyRmQIca98Je",
+"Young and beautiful|Lana del Rey": "1ef5wG0EeqVkbItELAcpKi",
+"What a wonderful world|Louis Armstrong": "1wynmqjzQoUuNCJWzmzRwt",
+"Experience|Ludovico Einaudi": "6pUz6IbeA9jsgpbn2WD1BJ",
+"I giorni|Ludovico Einaudi": "3x4qreswd5oITerGZ0JLTZ",
+"Girls like you|Maroon 5": "1F0dfCdJFVlL68QqhrNElb",
+"She will be loved|Maroon 5": "4MsP4SgzrG9wweYVFb5nAX",
+"Ain't no mountain high enough|Marvin Gaye": "2wVZz1fS8xvAL8AiTo75aD",
+"Nothing else matters|Metallica": "4jKGgzxGomzrZBWPjkxNWT",
+"I'll be there|Michael Jackson": "3e0KYnEgGuofCCkDiq0yyD",
+"Counting stars|OneRepublic": "1cpl7tkqZJ0oVo2TKwV1fk",
+"My love|Paul McCartney": "3k8bxzbpne14z7Jjau5rpy",
+"The book of love|Peter Gabriel": "1ClQlXIRT4jpsspW8qYGk7",
+"Losing my religion|R.E.M.": "1rYYOms7d4BXXWG9cKnJD0",
+"Stay|Rihanna": "2caLhToh04V4rZslPNu3qC",
+"Diamonds|Rihanna": "39QE5m4IJf1B1jVjl38oZ9",
+"Stay with me|Sam Smith": "7KE6ubttqFt2bdDR3n0vpj",
+"For this moment on|Shania Twain": "5WbPjaP5p8SOAFTHz3m4T1",
+"You're still the one|Shania Twain": "11MWUEfv7d9BcUWRW3OUxG",
+"Impossible|Shontelle": "7iM5FW2FAXsGzoxwR3onjy",
+"Chasing cars|Snow Patrol": "1SwyFxlcdxkHckG8YFnQLF",
+"Ribbon in the sky|Stevie Wonder": "4ShowIgYsMMQQi9kqAacn6",
+"Fields of gold|Sting": "3AbRRDurTL8qf49dhKEQHn",
+"Englishman in New York|Sting": "58Q3fk2fUYHqzDxMaicguo",
+"Greatest day|Take That": "0S7iDwTubNRk6eLu69BT93",
+"Wildest dreams|Taylor Swift": "0IuaAAiwBtcMTtfctQL9Tz",
+"And I love her|The Beatles": "13fhApqyKklSXC4fjBNmcc",
+"Here comes the sun|The Beatles": "66AdsR6hDPlQxkASDqtRvK",
+"Let it be|The Beatles": "1Jv20Q5sooOh3SwqjI1WBP",
+"I want to hold your hand|The Beatles": "6Aa4GLqqwCps47XoUDvV8o",
+"I will|The Beatles": "36ZNLNobo8fQhcbmRqntGL",
+"Hey Jude|The Beatles": "1nOkpVZY8S6vE1XRxoaxbK",
+"Yesterday|The Beatles": "1gyU7otgL6RDDfAWMBt1rU",
+"Michelle|The Beatles": "35tIHHyoVjdFkY8imnGzQq",
+"Eleanor Rigby|The Beatles": "2UAMkXXU1PP0WJtwDy5SGD",
+"Hello, Goodbye|The Beatles": "0MIKoP6VIHY5DIgvNePAcF",
+"Every breath you take|The Police": "0ytXZxwa235WGxWc50UUUz",
+"You can't always get what you want|The Rolling Stones": "4qkoP0XQHNMh4eHVbGp119",
+"Bittersweet Symphony|The Verve": "6WXy9L6BCtCOcgUQX5eSTX",
+"With or without you|U2": "4puLNIVIDi3C0u45QufcAZ",
+"I still haven't found what I'm looking for|U2": "6dJEBpxNcVa9j2uDCxp4sq",
+"Beautiful day|U2": "5Lc0YRW9B6llY1846JYKo3",
+"Come what may (BSO Moulin Rouge)|D. Baerwald": "6iGgy83UlNtlVD44IIxZPa",
+"Son of a man (BSO Tarzan)|P. Collins": "27jNZloPgsgIsur7mhi6mr",
+"City of stars (BSO La La Land)|J. Hurwitz": "3rYIqLgHaEZeDe2kPn1nDR",
+"You've got a friend in me (BSO Toy Story)|R. Newman": "7bMtGjq1i6BbaFq07AsCTW",
+"For you (BSO 50 sombras de Grey)|L. Payne": "7sBl7GHUbobodWka02aq5O",
+"The night we met (BSO 13 Reasons Why)|B. Schneider": "7pm4XDCmZGGXfCXAd5iLVM"
+};
+
+var STORE_KEY = "tc_favs_v1";
+function loadFavs(){ try{ return new Set(JSON.parse(localStorage.getItem(STORE_KEY)||"[]")); }catch(e){ return new Set(); } }
+function saveFavs(s){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(Array.from(s))); }catch(e){} }
+function keyOf(i){ return DATA[i][0] + "|" + DATA[i][1]; }
+
+// Instrumentos: roles genéricos usados para estimar si una pieza es tocable
+// con lo que tienes. "inst" = cualquier instrumento melódico adicional
+// (violín, cello, flauta, guitarra…); no distinguimos cuál exactamente
+// porque la guía original tampoco lo especifica por canción.
+var INSTRUMENT_LABELS = {
+  kb:"Piano / Órgano", inst:"Otro instrumento (violín, cello, flauta…)",
+  trio:"Trío de cuerda", cuarteto:"Cuarteto de cuerda", voz:"Solista vocal", coro:"Coro"
+};
+var INSTRUMENT_ORDER = ["kb","inst","trio","cuarteto","voz","coro"];
+
+// Cada formCode admite una o varias alternativas de formación (reflejando los
+// "o" en FORM_LABELS). match = nº de alternativas cubiertas al 100%; si
+// ninguna se cubre del todo, se usa la que menos te falte.
+var FORM_REQUIREMENTS = {
+  solo:    [["kb"]],
+  solo_t:  [["kb"], ["trio"]],
+  duo:     [["kb","inst"]],
+  duo_t:   [["kb","inst"], ["trio"], ["cuarteto"]],
+  trio:    [["trio"]],
+  cuarteto:[["cuarteto"]],
+  voz:     [["kb","voz"]],
+  voz1:    [["kb","inst","voz"]],
+  coro:    [["coro"]]
+};
+
+var INSTR_STORE_KEY = "tc_instr_v1";
+function loadInstr(){ try{ return new Set(JSON.parse(localStorage.getItem(INSTR_STORE_KEY)||"[]")); }catch(e){ return new Set(); } }
+function saveInstr(s){ try{ localStorage.setItem(INSTR_STORE_KEY, JSON.stringify(Array.from(s))); }catch(e){} }
+
+function matchLevel(formCode){
+  if(!selectedInstr.size) return null;
+  var alts = FORM_REQUIREMENTS[formCode] || [[]];
+  var best = Infinity;
+  alts.forEach(function(req){
+    var missing = req.filter(function(r){ return !selectedInstr.has(r); }).length;
+    if(missing < best) best = missing;
+  });
+  if(best === 0) return "full";
+  if(best === 1) return "close";
+  return "far";
+}
+function matchText(level){
+  if(level === "full") return "✓ Lo tienes";
+  if(level === "close") return "△ Casi — te falta 1";
+  return "✕ Te falta bastante";
+}
+
+var favs = loadFavs();
+var selectedInstr = loadInstr();
+var onlyPlayable = false;
+var sectionFilter = "ALL";
+var query = "";
+var onlyFavs = false;
+var view = [];
+var pos = 0;
+
+// --- YouTube: el truco de "listType=search" (embed sin ID de vídeo) ya no
+// funciona — YouTube lo rechaza con Error 153 también fuera de esta página
+// (comprobado embebiéndolo solo, sin ningún JS nuestro de por medio). No hay
+// forma de arreglarlo con código: haría falta el ID real de cada vídeo. Por
+// eso aquí solo se ofrece un botón que abre la búsqueda en YouTube.
+
+// --- Spotify: usamos la IFrame API oficial (open.spotify.com/embed/iframe-api/v1)
+// en vez de un <iframe> suelto, para poder llamar a togglePlay() desde la
+// página sin que el usuario tenga que hacer clic dentro del iframe. Así la
+// tecla Espacio funciona sin robar el foco de la página (a diferencia del
+// truco de YouTube, esta es la API oficial y documentada de Spotify).
+var SpotifyIFrameAPI = null;
+var spotifyApiReady = false;
+var pendingSpotifyUri = null;
+var currentSpController = null;
+
+window.onSpotifyIframeApiReady = function(IFrameAPI){
+  SpotifyIFrameAPI = IFrameAPI;
+  spotifyApiReady = true;
+  if(pendingSpotifyUri){
+    var uri = pendingSpotifyUri;
+    pendingSpotifyUri = null;
+    createSpotifyController(uri);
+  }
+};
+
+function createSpotifyController(uri){
+  if(currentSpController){
+    try{ currentSpController.destroy(); }catch(e){}
+    currentSpController = null;
+  }
+  var target = document.getElementById("spEmbedTarget");
+  if(!target) return;
+  if(!spotifyApiReady || !SpotifyIFrameAPI){ pendingSpotifyUri = uri; return; }
+  SpotifyIFrameAPI.createController(target, { uri: uri, width: "100%", height: "152" }, function(EmbedController){
+    currentSpController = EmbedController;
+  });
+}
+
+var sectionSelect = document.getElementById("sectionSelect");
+var instrRow = document.getElementById("instrRow");
+var onlyPlayableChk = document.getElementById("onlyPlayableChk");
+var searchInput = document.getElementById("searchInput");
+var card = document.getElementById("card");
+var prevBtn = document.getElementById("prevBtn");
+var nextBtn = document.getElementById("nextBtn");
+var randomBtn = document.getElementById("randomBtn");
+var favViewBtn = document.getElementById("favViewBtn");
+var jumpInput = document.getElementById("jumpInput");
+var jumpBtn = document.getElementById("jumpBtn");
+
+var allOpt = document.createElement("option");
+allOpt.value = "ALL";
+allOpt.textContent = "Todas las secciones";
+sectionSelect.appendChild(allOpt);
+CAT_ORDER.forEach(function(cat){
+  var opt = document.createElement("option");
+  opt.value = cat;
+  opt.textContent = CAT_LABELS[cat];
+  sectionSelect.appendChild(opt);
+});
+sectionSelect.addEventListener("change", function(){
+  sectionFilter = sectionSelect.value;
+  recompute(true);
+});
+
+INSTRUMENT_ORDER.forEach(function(code){
+  var chip = document.createElement("button");
+  chip.className = "chip instr" + (selectedInstr.has(code) ? " active" : "");
+  chip.textContent = INSTRUMENT_LABELS[code];
+  chip.addEventListener("click", function(){
+    if(selectedInstr.has(code)){ selectedInstr.delete(code); chip.classList.remove("active"); }
+    else { selectedInstr.add(code); chip.classList.add("active"); }
+    saveInstr(selectedInstr);
+    if(onlyPlayable) recompute(true); else render();
+  });
+  instrRow.appendChild(chip);
+});
+
+onlyPlayableChk.addEventListener("change", function(){
+  onlyPlayable = onlyPlayableChk.checked;
+  recompute(true);
+});
+
+searchInput.addEventListener("input", function(){
+  query = searchInput.value.trim().toLowerCase();
+  recompute(true);
+});
+
+function recompute(resetPos){
+  var keep = view.length && !resetPos ? view[pos] : null;
+  view = [];
+  for(var i=0;i<DATA.length;i++){
+    var row = DATA[i];
+    if(sectionFilter !== "ALL" && row[3] !== sectionFilter) continue;
+    if(onlyFavs && !favs.has(keyOf(i))) continue;
+    if(onlyPlayable && matchLevel(row[2]) !== "full") continue;
+    if(query){
+      var hay = (row[0] + " " + row[1]).toLowerCase();
+      if(hay.indexOf(query) === -1) continue;
+    }
+    view.push(i);
+  }
+  if(keep !== null){
+    var idx = view.indexOf(keep);
+    pos = idx >= 0 ? idx : 0;
+  } else {
+    pos = 0;
+  }
+  render();
+}
+
+function render(){
+  favViewBtn.textContent = (favs.size ? "♥ " : "♡ ") + "Favoritas (" + favs.size + ")";
+  favViewBtn.classList.toggle("active", onlyFavs);
+
+  if(!view.length){
+    card.innerHTML = '<div class="empty">No hay canciones con estos filtros.<br>Prueba a quitar alguno.</div>';
+    card.className = "card";
+    prevBtn.disabled = true; nextBtn.disabled = true;
+    jumpInput.disabled = true; jumpBtn.disabled = true;
+    return;
+  }
+  prevBtn.disabled = false; nextBtn.disabled = false;
+  jumpInput.disabled = false; jumpBtn.disabled = false;
+  jumpInput.max = view.length;
+  jumpInput.placeholder = "Ir al nº (1-" + view.length + ")";
+
+  var i = view[pos];
+  var row = DATA[i];
+  var key = keyOf(i);
+  var isFav = favs.has(key);
+  var q = encodeURIComponent(row[0] + " " + row[1]);
+  var level = matchLevel(row[2]);
+
+  var spotifyHtml;
+  var spotifyId = SPOTIFY_IDS[key];
+  if(spotifyId){
+    spotifyHtml = '<div class="sp-wrap"><div id="spEmbedTarget"></div></div>';
+  } else {
+    spotifyHtml = '<a class="sp-fallback" target="_blank" rel="noopener" href="https://open.spotify.com/search/' + q + '">♫ Buscar en Spotify (ID aún no resuelto)</a>';
+  }
+
+  card.className = "card" + (level ? " match-" + level : "");
+  card.innerHTML =
+    '<div class="meta-row">' +
+      '<span class="counter">' + (pos+1) + ' / ' + view.length + '</span>' +
+      '<button class="fav-btn' + (isFav ? ' on' : '') + '" id="favBtn" aria-label="Favorita">' + (isFav ? '♥' : '♡') + '</button>' +
+    '</div>' +
+    '<span class="cat-badge" style="--c:var(--cat-' + row[3] + ')">' + CAT_LABELS[row[3]] + '</span>' +
+    '<h2 class="title">' + escapeHtml(row[0]) + '</h2>' +
+    '<p class="artist">' + escapeHtml(row[1]) + '</p>' +
+    '<span class="form-badge">' + FORM_LABELS[row[2]] + '</span>' +
+    (level ? '<span class="match-badge match-' + level + '">' + matchText(level) + '</span>' : '') +
+    '<div class="players">' +
+      spotifyHtml +
+      '<a class="yt-btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=' + q + '">▶ Escuchar en YouTube ↗</a>' +
+    '</div>';
+
+  document.getElementById("favBtn").addEventListener("click", function(){
+    if(favs.has(key)) favs.delete(key); else favs.add(key);
+    saveFavs(favs);
+    render();
+  });
+
+  if(spotifyId){
+    createSpotifyController("spotify:track:" + spotifyId);
+  } else if(currentSpController){
+    try{ currentSpController.destroy(); }catch(e){}
+    currentSpController = null;
+  }
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function go(delta){
+  if(!view.length) return;
+  pos = (pos + delta + view.length) % view.length;
+  render();
+}
+
+prevBtn.addEventListener("click", function(){ go(-1); });
+nextBtn.addEventListener("click", function(){ go(1); });
+randomBtn.addEventListener("click", function(){
+  if(view.length < 2){ go(0); return; }
+  var r;
+  do { r = Math.floor(Math.random()*view.length); } while(r === pos);
+  pos = r; render();
+});
+favViewBtn.addEventListener("click", function(){
+  onlyFavs = !onlyFavs;
+  recompute(true);
+});
+
+var copyFavBtn = document.getElementById("copyFavBtn");
+function buildFavText(){
+  var lines = [];
+  for(var i=0;i<DATA.length;i++){
+    var k = keyOf(i);
+    if(!favs.has(k)) continue;
+    var row = DATA[i];
+    var id = SPOTIFY_IDS[k];
+    var link = id
+      ? ("https://open.spotify.com/track/" + id)
+      : ("https://open.spotify.com/search/" + encodeURIComponent(row[0] + " " + row[1]));
+    lines.push(row[0] + " — " + row[1] + ": " + link);
+  }
+  return lines.join("\n");
+}
+function copyFavFeedback(label){
+  var old = copyFavBtn.textContent;
+  copyFavBtn.textContent = label;
+  setTimeout(function(){ copyFavBtn.textContent = old; }, 1700);
+}
+copyFavBtn.addEventListener("click", function(){
+  var text = buildFavText();
+  if(!text){ copyFavFeedback("Sin favoritas aún"); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(
+      function(){ copyFavFeedback("✅ Copiado (" + favs.size + ")"); },
+      function(){ copyFavFeedback("⚠ No se pudo copiar"); }
+    );
+  } else {
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.left = "-9999px";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      copyFavFeedback("✅ Copiado (" + favs.size + ")");
+    }catch(e){ copyFavFeedback("⚠ No se pudo copiar"); }
+  }
+});
+
+// Importar favoritos: acepta exactamente el formato que genera buildFavText(),
+// "Título — Artista: https://…", una canción por línea — así se puede copiar
+// y pegar la lista entre el archivo local y la versión publicada, o entre dos
+// navegadores/dispositivos distintos (las favoritas se guardan por origen).
+var DATA_KEYS = new Set();
+for(var __di=0; __di<DATA.length; __di++){ DATA_KEYS.add(keyOf(__di)); }
+
+var importFavBtn = document.getElementById("importFavBtn");
+var importPanel = document.getElementById("importPanel");
+var importText = document.getElementById("importText");
+var importConfirmBtn = document.getElementById("importConfirmBtn");
+var importCancelBtn = document.getElementById("importCancelBtn");
+var importResult = document.getElementById("importResult");
+
+importFavBtn.addEventListener("click", function(){
+  importPanel.hidden = !importPanel.hidden;
+  importResult.textContent = "";
+  if(!importPanel.hidden) importText.focus();
+});
+importCancelBtn.addEventListener("click", function(){
+  importPanel.hidden = true;
+  importText.value = "";
+  importResult.textContent = "";
+});
+importConfirmBtn.addEventListener("click", function(){
+  var lines = importText.value.split("\n");
+  var added = 0, unknown = 0;
+  lines.forEach(function(line){
+    line = line.trim();
+    if(!line) return;
+    var m = line.match(/^(.*?)\s+—\s+(.*?):\s+(https?:\/\/\S+)\s*$/);
+    if(!m){ unknown++; return; }
+    var key = m[1] + "|" + m[2];
+    if(DATA_KEYS.has(key)){
+      if(!favs.has(key)) added++;
+      favs.add(key);
+    } else {
+      unknown++;
+    }
+  });
+  saveFavs(favs);
+  importResult.textContent = added + " añadidas" + (unknown ? ", " + unknown + " no reconocidas" : "") + (added ? " — favoritas: " + favs.size : "");
+  recompute(true);
+});
+
+// Borrar favoritas: pide confirmación con un segundo clic (en vez de un
+// diálogo nativo) para que no se borren por accidente.
+var clearFavBtn = document.getElementById("clearFavBtn");
+var clearFavArmed = false;
+var clearFavTimer = null;
+clearFavBtn.addEventListener("click", function(){
+  if(!favs.size){ return; }
+  if(!clearFavArmed){
+    clearFavArmed = true;
+    clearFavBtn.textContent = "¿Seguro? Pulsa de nuevo";
+    clearFavTimer = setTimeout(function(){
+      clearFavArmed = false;
+      clearFavBtn.textContent = "🗑 Borrar favoritas";
+    }, 3000);
+    return;
+  }
+  clearTimeout(clearFavTimer);
+  clearFavArmed = false;
+  favs.clear();
+  saveFavs(favs);
+  clearFavBtn.textContent = "🗑 Borrar favoritas";
+  onlyFavs = false;
+  recompute(true);
+});
+
+function jumpTo(){
+  if(!view.length) return;
+  var n = parseInt(jumpInput.value, 10);
+  if(!n || isNaN(n)) return;
+  n = Math.max(1, Math.min(n, view.length));
+  pos = n - 1;
+  jumpInput.value = "";
+  render();
+}
+jumpBtn.addEventListener("click", jumpTo);
+jumpInput.addEventListener("keydown", function(e){
+  if(e.key === "Enter") jumpTo();
+});
+
+document.addEventListener("keydown", function(e){
+  if(e.target === searchInput || e.target === jumpInput || e.target === sectionSelect || e.target === onlyPlayableChk || e.target === importText) return;
+  if(e.key === "ArrowRight"){ go(1); }
+  else if(e.key === "ArrowLeft"){ go(-1); }
+  else if(e.key === "f" || e.key === "F"){
+    var btn = document.getElementById("favBtn");
+    if(btn) btn.click();
+  } else if(e.key === " " || e.code === "Space" || e.key === "Spacebar"){
+    e.preventDefault();
+    if(currentSpController) currentSpController.togglePlay();
+  }
+});
+
+recompute(true);
+})();
+</script>
+</body>
+</html>
