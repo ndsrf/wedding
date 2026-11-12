@@ -72,6 +72,8 @@ const nextConfig = {
       'https://f.vimeocdn.com',
       // Crisp live chat
       'https://client.crisp.chat',
+      // Spotify embed iframe API
+      'https://open.spotify.com',
     ];
     if (process.env.NODE_ENV !== 'production') {
       scriptSrcDirectives.push("'unsafe-eval'");
