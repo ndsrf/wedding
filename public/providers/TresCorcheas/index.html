@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Audición TresCorcheas (local)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 <style>
 :root{
@@ -79,12 +79,37 @@ input[type="search"]{width:100%; font-family:var(--font-body); font-size:.95rem;
 .yt-btn{display:inline-flex; align-items:center; justify-content:center; gap:7px; font-family:var(--font-body); font-weight:600; font-size:.88rem; text-decoration:none; padding:10px 16px; border-radius:10px; border:1px solid var(--line); color:var(--ink); background:var(--bg);}
 .yt-btn:hover{color:var(--accent); border-color:var(--accent);}
 .empty{padding:40px 22px; text-align:center; color:var(--muted);}
-footer{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+.app footer{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
 .hint{font-family:var(--font-mono); font-size:.68rem; color:var(--muted); text-align:center;}
 @media (max-width:420px){ .title{font-size:1.5rem;} .card{padding:16px;} }
+
+/* --- Cabecera y pie del sitio (réplica de /es/about) --- */
+.site-header{position:sticky; top:0; z-index:50; margin:0 -16px; background:rgba(255,255,255,.85); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border-bottom:1px solid #FFE4E6;}
+.site-header-inner{max-width:1280px; margin:0 auto; padding:0 16px; height:64px; display:flex; align-items:center; justify-content:space-between;}
+.site-header-inner img{height:48px; width:auto; display:block;}
+.site-login{padding:8px 24px; background:linear-gradient(to right,#F43F5E,#EC4899); color:#fff; border-radius:999px; text-decoration:none; font-family:var(--font-body); font-size:.95rem; box-shadow:0 4px 6px -1px rgba(0,0,0,.15); transition:filter .2s;}
+.site-login:hover{filter:brightness(.92);}
+.site-footer{margin:0 -16px; padding:48px 16px 32px; background:#111827; color:#fff; font-family:var(--font-body);}
+.site-footer-inner{max-width:1280px; margin:0 auto;}
+.site-footer-grid{display:grid; grid-template-columns:1fr; gap:32px; margin-bottom:32px; text-align:left;}
+@media (min-width:768px){.site-footer-grid{grid-template-columns:repeat(4,1fr);}}
+.site-footer h3{font-family:'Playfair Display',Georgia,serif; font-size:1.25rem; font-weight:700; margin:0 0 16px;}
+.site-footer h4{font-size:1rem; font-weight:600; margin:0 0 16px;}
+.site-footer p{color:#9CA3AF; margin:0;}
+.site-footer ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+.site-footer a{color:#9CA3AF; text-decoration:none; transition:color .2s;}
+.site-footer a:hover{color:#fff;}
+.site-footer-bottom{border-top:1px solid #1F2937; padding-top:32px; text-align:center; color:#9CA3AF;}
+.site-footer-bottom p{margin:0;}
 </style>
 </head>
 <body>
+<div class="site-header" role="banner">
+  <div class="site-header-inner">
+    <a href="/es"><img src="/images/nupci.webp" alt="Nupci" width="668" height="374"></a>
+    <a class="site-login" href="/es/auth/signin">Iniciar Sesión</a>
+  </div>
+</div>
 <div class="app">
   <header>
     <div>
@@ -134,6 +159,45 @@ footer{display:flex; justify-content:space-between; align-items:center; gap:10px
     <span class="hint">Espacio reproduce/pausa · ← → navega · F favorita</span>
   </footer>
 </div>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-grid">
+      <div>
+        <h3>Nupci</h3>
+        <p>Empoderando a wedding planners para crear celebraciones inolvidables.</p>
+      </div>
+      <div>
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="/es#features">Características</a></li>
+          <li><a href="/es#pricing">Precios</a></li>
+          <li><a href="/es#testimonials">Testimonios</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="/es/about">Acerca de</a></li>
+          <li><a href="/es/careers">Trabaja con nosotros</a></li>
+          <li><a href="/es/news">Noticias y Recursos</a></li>
+          <li><a href="/es/contact">Contacto</a></li>
+          <li><a href="/es/privacy">Política de Privacidad</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Soporte</h4>
+        <ul>
+          <li><a href="/es/help-center">Centro de Ayuda</a></li>
+          <li><a href="https://status.nupci.com/" target="_blank" rel="noopener noreferrer">Estado del Sistema</a></li>
+          <li><a href="/es/docs">Documentación</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer-bottom">
+      <p>© 2026 Nupci. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>
 
 <script>
 (function(){
