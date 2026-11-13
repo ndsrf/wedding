@@ -74,6 +74,7 @@ const nextConfig = {
       'https://client.crisp.chat',
       // Spotify embed iframe API
       'https://open.spotify.com',
+      'https://embed-cdn.spotifycdn.com',
     ];
     if (process.env.NODE_ENV !== 'production') {
       scriptSrcDirectives.push("'unsafe-eval'");
