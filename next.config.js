@@ -98,7 +98,8 @@ const nextConfig = {
 
     const headers = [
       {
-        source: '/:path*',
+        // Every route except the TresCorcheas provider page (see below)
+        source: '/:path((?!providers/TresCorcheas(?:/|$)).*)',
         headers: [
           {
             key: 'Content-Security-Policy',
@@ -174,6 +175,20 @@ const nextConfig = {
         ],
       });
     }
+
+    // The TresCorcheas provider page embeds Spotify's IFrame API, whose script
+    // (embed-cdn.spotifycdn.com) calls eval(). Allow 'unsafe-eval' on that
+    // single static page only; every other route keeps the strict policy.
+    const evalCspDirectives = cspDirectives.replace(
+      /script-src [^;]*/,
+      (m) => (m.includes("'unsafe-eval'") ? m : `${m} 'unsafe-eval'`),
+    );
+    headers.push({
+      source: '/providers/TresCorcheas/:path*',
+      headers: headers[0].headers.map((h) =>
+        h.key === 'Content-Security-Policy' ? { ...h, value: evalCspDirectives } : h,
+      ),
+    });
 
     return headers;
   },
